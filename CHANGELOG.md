@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.45 (14 Oct 2026)
+- **Added:** in a shared league, the commissioner can settle a match a player hasn't played. Each unplayed match in the current round that involves another player's team has a **Resolve…** button on the commissioner's device. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+  - **Against a computer team:** after a warning, **Sim it now** quick-sims the match, with the computer coaching the player's team. The sim's SPP, injuries and winnings go on both teams.
+  - **Between two players:** the commissioner decides who is holding it up. Either **Sim it**, or one side forfeits: "Bob didn't play: Cara Dwarfs win" records a 2–0 win (3 points) for the other team, with no SPP, injuries or winnings for either.
+  - **The player's money is safe:** in a commissioner's sim, the computer doesn't spend a player's treasury on inducements.
+  - **Shown in the results:** results show "quick sim by the commissioner" or "forfeit: Bob Orcs didn't play", and they sync to everyone like any other result. If the match had in fact been played and just hadn't synced yet, the result that was played first counts.
+
 ## v2.44 (14 Oct 2026)
 - **Added:** shared leagues for any number of players, each on their own device. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
   - **Creating one:** when creating a league, choose **Players: Several players, each on their own device** and how many places to leave for other players. You become the commissioner.

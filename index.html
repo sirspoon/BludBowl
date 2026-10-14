@@ -856,6 +856,8 @@
 @media (max-height: 520px) { #form-slots { gap: 3px; padding: 4px; } #form-slots button { min-height: 26px; min-width: 38px; font-size: 12px; } #form-slots .fs-cap { display: none; } }
 @keyframes fsPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(20,184,166,.0); } 50% { box-shadow: 0 0 0 3px rgba(20,184,166,.6); } }
 .net-theirs { opacity: .35 !important; filter: grayscale(1) !important; cursor: not-allowed !important; }
+#league-hub .lg-resolve { grid-column: 1 / -1; margin-top: 6px; padding: 8px 10px; border-radius: 8px; border: 1px solid #b45309; background: rgba(66,32,6,.45); font-size: 13px; color: #fde68a; line-height: 1.35; }
+#league-hub .lg-resolve b { color: #fef3c7; } #league-hub .lg-resolve .lg-cta { justify-content: flex-start; flex-wrap: wrap; margin-top: 8px; }
 #net-league { position: fixed; inset: 0; z-index: 330; background: #0b1220; overflow-y: auto; color: #e2e8f0; }
 #net-league.hidden, #nl-league.hidden, #net-league-btn.hidden { display: none; }
 #net-league .pg-head h2 { margin: 0; } #net-league [data-play], #net-league [data-watch], #net-league [data-sim], #net-league [data-act], #net-league .lg-who, #net-league [data-tb] { display: none !important; }
@@ -883,7 +885,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.44</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.45</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -3556,7 +3558,7 @@
         const LEAGUE = (function () {
             const KEY = 'bb-leagues';
             setTimeout(() => { try { load(); leagues.forEach(leagueTrophies); save(); } catch (e) { console.error('trophies', e); } }, 0);
-            let leagues = [], cur = null, mode = 'list', tab = 'round', draft = null, open1 = null, armed = 0, prevAI = null, pm = null, rd = null, fr = null;   // fr: the friendly being arranged
+            let leagues = [], cur = null, mode = 'list', tab = 'round', draft = null, open1 = null, armed = 0, prevAI = null, pm = null, rd = null, fr = null, resolveKey = null;   // fr: the friendly being arranged
             const $ = id => document.getElementById(id);
             const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
             const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -3821,7 +3823,9 @@
                 const f = byKey(lg, key); if (!f || f.r || f.bye) return;
                 const th = teamOf(f.h), ta = teamOf(f.a);
                 if (!th || !ta) { f.r = { s: th ? [2, 0] : [0, 2], cas: [0, 0], sim: true, forfeit: true }; return; }
-                pmSetup(lg, key, true); const ind = pmApply(); pm = null;
+                pmSetup(lg, key, true);
+                if (lg.shared && (isPerson(lg, f.h) || isPerson(lg, f.a))) { pm.noTre = [isPerson(lg, f.h), isPerson(lg, f.a)]; pm.ind = [{}, {}]; cpuPicks(); }
+                const ind = pmApply(); pm = null;
                 const tm = [liveTeam(f.h), liveTeam(f.a)];
                 tm.forEach((t, i) => {   // this copy only: the trophy's extra re-roll and what was induced
                     const d = ind[i];
@@ -3909,8 +3913,9 @@
             function budget(i) {   // what side i may spend: { petty, tre (treasury it may use), total }
                 if (pm.fav < 0) return { petty: 0, tre: 0, total: 0 };
                 const fr = String(pm.key || '').startsWith('fr:');   // a friendly: petty cash only, the treasuries aren't touched
-                if (i === pm.fav) return fr ? { petty: 0, tre: 0, total: 0 } : { petty: 0, tre: pm.T[i].treasury, total: pm.T[i].treasury };
-                const petty = pm.diff + spent(pm.fav), tre = fr ? 0 : Math.min(50, pm.T[i].treasury);
+                const keep = fr || !!(pm.noTre && pm.noTre[i]);   // (a player's team in a commissioner's sim: their treasury isn't touched)
+                if (i === pm.fav) return keep ? { petty: 0, tre: 0, total: 0 } : { petty: 0, tre: pm.T[i].treasury, total: pm.T[i].treasury };
+                const petty = pm.diff + spent(pm.fav), tre = keep ? 0 : Math.min(50, pm.T[i].treasury);
                 return { petty, tre, total: petty + tre };
             }
             function trim(i) {   // spending more than is now allowed (the favourite changed its mind): drop the dearest first
@@ -4073,6 +4078,21 @@
                         : isComm(lg) ? `<button type="button" class="pg-btn" data-watch="${key}">Watch</button><button type="button" class="pg-btn pg-btn-go" data-sim="${key}">Quick sim</button>` : '<span class="pg-dim">the commissioner plays it</span>';
                     else acts = you ? `<button type="button" class="pg-primary" data-play="${key}">${lg.shared && (isOther(lg, f.h) || isOther(lg, f.a)) ? 'Play (two devices)' : 'Play'}</button>`
                         : `<button type="button" class="pg-btn" data-watch="${key}">Watch</button><button type="button" class="pg-btn pg-btn-go" data-sim="${key}">Quick sim</button>`;
+                    // a shared league: the commissioner can settle a match a player hasn't played (a sim, or a forfeit)
+                    if (lg.shared && isComm(lg) && (isOther(lg, f.h) || isOther(lg, f.a))) acts += ` <button type="button" class="pg-btn" data-resolve="${resolveKey === key ? '' : key}">${resolveKey === key ? 'Cancel' : 'Resolve…'}</button>`;
+                }
+                let resolve = '';
+                if (live && !r && lg.shared && isComm(lg) && resolveKey === key) {
+                    const people = [f.h, f.a].filter(id => isPerson(lg, id)), cpu = [f.h, f.a].find(id => !isPerson(lg, id));
+                    const who = people.filter(id => isOther(lg, id)).map(id => coachName(lg, id)).join(' and ');
+                    const note = "If it has already been played and the result just hasn't reached you yet, that result counts instead once it syncs.";
+                    resolve = cpu
+                        ? `<div class="lg-resolve"><b>${esc(who)} hasn't played this yet.</b> As commissioner you can quick-sim it, with the computer coaching ${esc(nameOf(people[0]))}. The sim's SPP, injuries and winnings go on both teams. ${note}
+                            <div class="lg-cta"><button type="button" class="pg-primary" data-rsim="${key}">Sim it now</button></div></div>`
+                        : `<div class="lg-resolve"><b>Which player is holding this match up?</b> Either sim it (the computer coaches both teams; SPP, injuries and winnings go on both) or award it to one side: the team that didn't play forfeits and the other wins 2–0 (no SPP, injuries or winnings for either). ${note}
+                            <div class="lg-cta"><button type="button" class="pg-btn pg-btn-go" data-rsim="${key}">Sim it</button>
+                            <button type="button" class="pg-btn" data-rff="${key}|${f.h}">${esc(coachName(lg, f.h))} didn't play: ${esc(nameOf(f.a))} win</button>
+                            <button type="button" class="pg-btn" data-rff="${key}|${f.a}">${esc(coachName(lg, f.a))} didn't play: ${esc(nameOf(f.h))} win</button></div></div>`;
                 }
                 const sub = r ? [
                     r.td && (r.td[0].length || r.td[1].length) ? `TD: ${esc([...r.td[0].map(n => n), ...r.td[1].map(n => n)].join(', '))}` : '',
@@ -4081,7 +4101,7 @@
                     r.pen ? `penalties ${r.pen.h}–${r.pen.a}: ${esc(nameOf(r.pen.w))} go through` : '',
                     r.ind && (r.ind[0] || r.ind[1]) ? `induced: ${esc([r.ind[0] && nameOf(f.h) + ' ' + r.ind[0], r.ind[1] && nameOf(f.a) + ' ' + r.ind[1]].filter(Boolean).join('; '))}` : '',
                     r.dead && r.dead.length ? `<span class="th-bad">✝ ${esc(r.dead.join(', '))}</span>` : '',
-                    r.forfeit ? 'forfeit' : r.sim ? 'quick sim' : 'played'
+                    r.forfeit ? (r.fby ? `forfeit: ${esc(nameOf(r.fby))} didn't play` : 'forfeit') : r.cs ? 'quick sim by the commissioner' : r.sim ? 'quick sim' : 'played'
                 ].filter(Boolean).join(' · ') : '';
                 return `<div class="lg-fx${r ? ' done' : ''}">
                     ${label ? `<div class="lg-lab pg-dim">${esc(label)}</div>` : ''}
@@ -4089,7 +4109,7 @@
                     <div class="lg-sc">${r ? `${r.s[0]}<span class="pg-dim">–</span>${r.s[1]}` : '<span class="pg-dim">v</span>'}</div>
                     <div class="lg-side away${w === f.a ? ' won' : ''}">${tok(f.a)}<span class="lg-tn">${esc(nameOf(f.a))}</span>${coachTag(lg, f.a)}</div>
                     <div class="lg-acts">${acts}</div>
-                    ${sub ? `<div class="lg-sub pg-dim">${sub}</div>` : ''}</div>`;
+                    ${sub ? `<div class="lg-sub pg-dim">${sub}</div>` : ''}${resolve}</div>`;
             }
             function tableHtml(lg, compact) {
                 const tb = table(lg), cut = lg.po === 'top4' ? 4 : lg.po === 'top2' ? 2 : 1;
@@ -4571,6 +4591,18 @@
                     else if (lg && ['advance', 'nextseason', 'beginseason', 'startseason'].includes(d.act) && !isComm(lg)) { msg('Only the commissioner can do that.'); }
                     else if (lg && d.act === 'startseason' && lg.stage === 'setup') { startSeason(lg); save(); tab = 'round'; msg(`${lg.name}: the season begins.`); }
                     else if (lg && d.act === 'sync') { NET.hostLeagueSync(lg.id); return; }
+                    else if (lg && d.resolve != null) { resolveKey = d.resolve || null; }
+                    else if (lg && d.rsim && isComm(lg)) {
+                        const f = byKey(lg, d.rsim);
+                        if (f && !f.r) { simFixture(lg, d.rsim); if (f.r) f.r.cs = true; resolveKey = null; save(); sfx('menuClick'); msg(`${nameOf(f.h)} ${f.r.s[0]}–${f.r.s[1]} ${nameOf(f.a)} (quick sim by the commissioner).`); }
+                    }
+                    else if (lg && d.rff && isComm(lg)) {
+                        const [key, loser] = d.rff.split('|'), f = byKey(lg, key);
+                        if (f && !f.r && (loser === f.h || loser === f.a)) {
+                            f.r = { s: loser === f.h ? [0, 2] : [2, 0], cas: [0, 0], sim: false, forfeit: true, fby: loser, td: [[], []], at: Date.now(), by: DEV.id };
+                            resolveKey = null; save(); sfx('menuClick'); msg(`${nameOf(loser)} forfeit: ${nameOf(loser === f.h ? f.a : f.h)} win 2–0.`);
+                        }
+                    }
                     else if (lg && d.act === 'advance') { advance(lg); save(); msg(lg.stage === 'done' ? `${nameOf(lg.champ)} are the champions!` : ''); if (lg.stage === 'done') sfx('crowdHuge'); }
                     else if (lg && d.act === 'nextseason' && lg.stage === 'done') { offseason(lg); save(); tab = 'round'; msg('The off-season: rest, then re-draft.'); }
                     else if (lg && d.act === 'beginseason' && lg.stage === 'offseason') { beginSeason(lg); save(); tab = 'round'; msg(`Season ${lg.season} begins.`); }
