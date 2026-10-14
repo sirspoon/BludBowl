@@ -855,7 +855,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.36</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.37</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -13687,6 +13687,11 @@
         function frameLoop() { try { actBannerPaint(); } catch (e) {} try { if (state.players) finishFades(); } catch (e) {} try { drawFrame(); } catch (e) { console.error(e); } try { SIMSPEED.paint(); } catch (e) {} requestAnimationFrame(frameLoop); }
         function startFrameLoop() { if (frameLoopOn) return; frameLoopOn = true; requestAnimationFrame(frameLoop); }
         function render() { drawFrame(); }
+        // While the kicking team sets up, the receiving team isn't shown: they set up afterwards, as in a real game
+        function hiddenInSetup(p) {
+            return state.mode === MODES.SETUP && !state.setup.eventSetup && !state.setup.kickingSetupDone
+                && state.setup.currentSettingTeam === state.kickoff.kickingTeam && p.team !== state.setup.currentSettingTeam;
+        }
         function drawFrame() {
             ctx.clearRect(0,0, canvas.width, canvas.height);
             ctx.save(); ctx.translate(state.camera.x, state.camera.y); ctx.scale(state.camera.zoom, state.camera.zoom);
@@ -13965,6 +13970,7 @@
             (state.players.some(q => q.foulAnim) ? [...state.players].sort((a, b) => (a.foulAnim ? 1 : 0) - (b.foulAnim ? 1 : 0)) : state.players).forEach(p => {
                 if(p.isCasualty || p.isEjected || p.isReserve) return;
                 if (p.x < 0 || p.x >= CFG.cols || p.y < 0 || p.y >= CFG.rows) return;
+                if (hiddenInSetup(p)) return;
                 if (state.flightAnimation.active && state.flightAnimation.player && state.flightAnimation.player.id === p.id) return; // Drawn in flight layer
 
                 let fadeAlpha = 1.0;
@@ -14322,7 +14328,7 @@
         canvas.addEventListener('mousemove', e => {
             if (state.drag.active && Math.hypot(e.clientX - state.drag.startX, e.clientY - state.drag.startY) > 3) { starCardHide(); return; }
             const w = screenToWorld(e.clientX, e.clientY), q = getPlayer(w.gridX, w.gridY);
-            if (q && q.star) starCardShow(q, e.clientX, e.clientY); else starCardHide();
+            if (q && q.star && !hiddenInSetup(q)) starCardShow(q, e.clientX, e.clientY); else starCardHide();
         });
         canvas.addEventListener('mouseleave', starCardHide);
         {   // ...and on a tap, for a few seconds
@@ -14332,7 +14338,7 @@
                 const c = e.changedTouches && e.changedTouches[0]; if (!t0 || !c || Math.hypot(c.clientX - t0.x, c.clientY - t0.y) > 8) return;
                 const w = screenToWorld(c.clientX, c.clientY), q = getPlayer(w.gridX, w.gridY);
                 clearTimeout(hideT);
-                if (q && q.star) { starCardShow(q, c.clientX, c.clientY - 40); hideT = setTimeout(starCardHide, 4000); } else starCardHide();
+                if (q && q.star && !hiddenInSetup(q)) { starCardShow(q, c.clientX, c.clientY - 40); hideT = setTimeout(starCardHide, 4000); } else starCardHide();
             });
         }
         window.addEventListener('mousemove', e => {

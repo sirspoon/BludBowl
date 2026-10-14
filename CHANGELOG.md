@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.37 (14 Oct 2026)
+- **Changed:** while the kicking team sets up, the receiving team's players are hidden. They appear when the receiving team starts its own set-up, as in a real game, so the kicking team can't set up against a formation that isn't there yet. This applies to every match, including two-device matches. Set-ups during kick-off events (such as Solid Defence or Dwarven Wisdom) still show both teams.
+
 ## v2.36 (14 Oct 2026)
 - **Added:** in a two-device match, each player now makes their own pre-match choices on their own device. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
   - **Inducements:** when either team has gold to spend, both devices show the inducements screen, each opening on its own team. You can look at the other team's tab but only buy for your own. The host sets the gold option. When you're done, tap **Ready**; the match starts once both players are ready.
