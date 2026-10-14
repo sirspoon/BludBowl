@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.10 (14 Oct 2026)
+- **Fixed:** tapping the Sure Feet skill tag now shows its description. It was the only skill missing one.
+
 ## v2.09 (14 Oct 2026)
 - **Changed:** the "Roll Required" and "Roll Failed" (team re-roll) panels, and the team re-roll question for skill rolls, are now a smaller panel at the bottom of the screen that no longer darkens or blurs the pitch. If the player making the roll would be hidden behind the panel or near the edge of the screen, the camera glides them into the middle of the pitch above it. ([#3](https://github.com/sirspoon/BludBowl/issues/3))
 
