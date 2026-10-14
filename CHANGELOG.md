@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.12 (14 Oct 2026)
+- **Changed:** after a league or career match, Expensive Mistakes is no longer rolled as soon as you finish. The post-game screen now lets you spend your treasury first (Open Team Builder), then roll for Expensive Mistakes on what's left. If you leave without rolling, it's rolled before that team's next match. The computer team spends and rolls on its own as before. ([#27](https://github.com/sirspoon/BludBowl/issues/27))
+
 ## v2.11 (14 Oct 2026)
 - **Fixed:** skill descriptions are now found even when a skill was saved with different capitals, spacing or punctuation (for example by an older version of the game), so learned skills such as Sure Feet show their description.
 - **Changed:** tapping a skill that has no description now says so, showing the exact skill name, instead of doing nothing.

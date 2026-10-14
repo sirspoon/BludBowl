@@ -794,7 +794,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.11</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.12</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1920,6 +1920,13 @@
             }
             // Expensive Mistakes (treasury of 100k or more): C crisis averted, m minor, M major, X catastrophe
             const EM_TABLE = [[600, 'XXMMmm'], [500, 'XMMmmC'], [400, 'MMmmCC'], [300, 'MmmCCC'], [200, 'mmCCCC'], [100, 'mCCCCC']];
+            function settleEM(t) {
+                if (!t || !t.emPending) return null;
+                delete t.emPending;
+                const em = expensiveMistakes(t) || { none: true, text: `Treasury under 100k (${k(t.treasury)}): no Expensive Mistakes roll.` };
+                TB.put(t);
+                return em;
+            }
             function expensiveMistakes(t) {
                 if (t.treasury < 100) return null;
                 const row = EM_TABLE.find(([m]) => t.treasury >= m), r = d6(), res = row[1][r - 1], before = t.treasury;
@@ -2150,7 +2157,8 @@
                     if (rep.sev && !rep.sev.done) sevAuto(rep);
                     if (!rep.mvp) rollMVP(rep);
                     const t = rep.t;
-                    rep.em = expensiveMistakes(t);
+                    // Expensive Mistakes comes after hiring and spending: the computer has already spent, the coach goes to the Team Builder first
+                    if (rep.ai) rep.em = expensiveMistakes(t); else t.emPending = true;
                     t.bribes = 0;   // inducements are used up
                     t.played++;
                     const rc = t.record; rc[{ W: 'w', D: 'd', L: 'l' }[rep.res]]++; rc.tdf += rep.sc; rc.tda += rep.so; rc.casf += rep.casf; rc.casa += rep.casa;
@@ -2240,7 +2248,8 @@
                        <div class="pg-chips"><button type="button" class="pg-btn pg-btn-go" data-mvp="1" ${rep.nominees.length === mvpNeed(rep) ? '' : 'disabled'}>Roll for MVP (${rep.nominees.length} of ${mvpNeed(rep)} ticked)</button>
                        <button type="button" class="pg-btn" data-nomrand="1">${rep.nominees.length ? 'Clear the ticks' : mvpNeed(rep) < 6 ? 'Tick them all' : 'Tick six at random'}</button></div>`;
                 const rows = rep.rows.slice().sort((a, b) => (b.spp - a.spp) || (+b.played - +a.played)).map(r => rowHtml(rep, r)).join('');
-                const emText = rep.em ? `Expensive Mistakes (treasury ${k(rep.em.before)}, rolled ${rep.em.r}): ${rep.em.text}` : (finished ? 'Treasury under 100k: no Expensive Mistakes roll.' : '');
+                const emText = rep.em ? (rep.em.none ? rep.em.text : `Expensive Mistakes (treasury ${k(rep.em.before)}, rolled ${rep.em.r}): ${rep.em.text}`) : (finished ? 'Treasury under 100k: no Expensive Mistakes roll.' : '');
+                const emWait = finished && !rep.ai && t.emPending;
                 el.innerHTML = `
                     <section class="pg-card pg-result pg-${rep.res}">
                         <div class="pg-word">${word}</div>
@@ -2258,7 +2267,10 @@
                             ${rep.hired.length ? `<h3>Hired</h3><div class="pg-dim">${esc(rep.hired.join(', '))}</div>` : ''}
                         </section>
                         <section class="pg-card">${rep.sev ? sevHtml(rep) : `<h3>Most Valuable Player</h3>${mvp}`}
-                            ${finished ? `<h3>After the game</h3><div>${esc(emText)}</div><div class="pg-dim">Team value ${k(tv(t))} · current team value ${k(ctv(t))} · treasury ${k(t.treasury)}</div>` : ''}
+                            ${emWait ? `<h3>Hiring, firing and spending</h3><div>You have ${k(t.treasury)} in the treasury. Spend it now on players, re-rolls and staff in the Team Builder, then roll for Expensive Mistakes on what's left${t.treasury < 100 ? ' (under 100k, so nothing can go wrong)' : ' (100k or more is at risk)'}.</div>
+                                <div class="pg-chips"><button type="button" class="pg-btn" data-pgtb="1">Open Team Builder</button><button type="button" class="pg-btn pg-btn-go" data-pgem="1">Done spending: roll Expensive Mistakes</button></div>
+                                <div class="pg-dim">Team value ${k(tv(t))} · current team value ${k(ctv(t))}</div>`
+                            : finished ? `<h3>After the game</h3><div>${esc(emText)}</div><div class="pg-dim">Team value ${k(tv(t))} · current team value ${k(ctv(t))} · treasury ${k(t.treasury)}</div>` : ''}
                         </section>
                     </div>
                     <section class="pg-card"><h3>Players</h3>${rows || '<div class="pg-dim">No players.</div>'}</section>`;
@@ -2271,7 +2283,7 @@
                 $('pg-finish').textContent = needMvp ? 'Roll for MVP first' : rolled ? 'Take your rolled advancement first' : needSev ? 'Finish the advancement first' : 'Finish & save';
                 $('pg-after').classList.toggle('hidden', !finished);
                 $('pg-again').textContent = state.league ? 'Back to the league' : 'Main Menu';
-                $('pg-note').textContent = finished ? 'Saved. Use the Team Builder to hire and fire, buy re-rolls (double cost after the first match) and staff.' : 'Advance players now, or keep their SPP for later. Finishing saves everything.';
+                $('pg-note').textContent = finished ? (reports.some(r => !r.ai && r.t.emPending) ? 'Saved. Next: spend your treasury, then roll for Expensive Mistakes. If you leave now, it is rolled before this team\'s next match.' : 'Saved. Use the Team Builder to hire and fire, buy re-rolls (double cost after the first match) and staff.') : 'Advance players now, or keep their SPP for later. Finishing saves everything.';
             }
             function wire() {
                 const root = $('post-game');
@@ -2336,7 +2348,12 @@
                         }
                     }
                     else if (b.id === 'pg-finish') { if (!Object.keys(pend).length) finish(); }
-                    else if (b.id === 'pg-builder') { $('post-game').classList.add('hidden'); TB.open(() => backToMenu(), reports[0] && reports[0].t.id); return; }
+                    else if (b.id === 'pg-builder' || d.pgtb) {   // spend in the Team Builder, then come back here
+                        const r0 = rep || reports[0]; if (!r0) return;
+                        $('post-game').classList.add('hidden');
+                        TB.open(() => { r0.t = TB.get(r0.t.id) || r0.t; $('post-game').classList.remove('hidden'); render(); }, r0.t.id); return;
+                    }
+                    else if (d.pgem && rep && finished) { rep.t = TB.get(rep.t.id) || rep.t; rep.em = settleEM(rep.t); }
                     else if (b.id === 'pg-again') { backToMenu(); return; }
                     else return;
                     render();
@@ -2344,7 +2361,7 @@
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
 
-            return { reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS,
+            return { reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS,
                 started: t => (t.played || 0) > 0, statLine };
         })();
 
@@ -17125,6 +17142,9 @@
                 ss.style.display = ''; ss.style.transition = 'none'; ss.style.background = '#000';
                 [...ss.children].forEach(c => { c.style.visibility = 'hidden'; });
                 setFormat(opts.fmt === 'sevens' ? 'sevens' : 'std');
+                const kk = n => Math.round(n).toLocaleString('en-GB') + 'k';
+                const emLeft = opts.career ? [k0, k1].map(key => { const id = String(key).startsWith('custom:') ? String(key).slice(7) : null, t = id && TB.get(id); const em = t && CAREER.settleEM(t); return em ? `${t.name}: ${em.none ? em.text : `Expensive Mistakes left over from the last match (treasury ${kk(em.before)}, rolled ${em.r}): ${em.text}`}` : null; }).filter(Boolean) : [];
+                if (emLeft.length) setTimeout(() => emLeft.forEach(m => log(`  ${m}`, 'text-amber-300')), 2500);
                 setTeams(k0, k1);
                 try { resizeCanvas(); buildPitchTexture(); } catch (e) { console.error(e); }
                 {   // a career match records SPP, injuries and winnings for saved teams (not when a team plays itself)
