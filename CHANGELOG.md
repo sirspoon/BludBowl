@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.16 (14 Oct 2026)
+- **Changed:** the weather in the top bar now shows just its symbol, so it no longer gets cut off on narrow screens. Tap it to see the weather's name and what it does.
+
 ## v2.15 (14 Oct 2026)
 - **Changed:** the camera now follows the action when it's off screen: the ball in the air (so a kick-off is followed to where it lands, as are passes and bounces), a player setting off on a move, both players in a block, and the ball at the start of each turn. It only moves when something is actually out of view, never zooms in, and leaves the camera alone for a few seconds after you've dragged or zoomed it yourself. ([#24](https://github.com/sirspoon/BludBowl/issues/24))
 
