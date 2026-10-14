@@ -461,9 +461,14 @@
         #team-builder .tb-hire:hover:not(:disabled) { background: #a16207; color: #fff; }
         #team-builder .tb-h3row { display: flex; align-items: center; justify-content: space-between; }
         #team-builder .tb-hint { margin: 0 0 6px; }
-        #team-builder .tb-pl { display: grid; grid-template-columns: 20px 30px minmax(0, 1fr) auto auto 26px; align-items: start; gap: 6px; padding: 4px 0; border-bottom: 1px solid #1c263a; }
+        #team-builder .tb-ord { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+        #team-builder .tb-mv { width: 22px; height: 18px; padding: 0; border: 1px solid #263247; border-radius: 4px; background: transparent; color: var(--tb-dim); font-size: 9px; line-height: 1; cursor: pointer; }
+        #team-builder .tb-mv:hover:not(:disabled), #team-builder .tb-mv:focus-visible { color: #fbbf24; border-color: #a16207; outline: none; }
+        #team-builder .tb-mv:disabled { opacity: .25; cursor: default; }
+        #team-builder .tb-h3btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        #team-builder .tb-pl { display: grid; grid-template-columns: 24px 30px minmax(0, 1fr) auto auto 26px; align-items: start; gap: 6px; padding: 4px 0; border-bottom: 1px solid #1c263a; }
         #team-builder .tb-pl:nth-child(11) { border-bottom: 2px dashed #a16207; }
-        #team-builder .tb-no { color: var(--tb-dim); font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
+        #team-builder .tb-no { color: var(--tb-dim); font-size: 11px; text-align: center; font-variant-numeric: tabular-nums; }
         #team-builder .tb-tok { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 800; border: 1.5px solid rgba(0,0,0,.5); }
         #team-builder .tb-pname { padding: 4px 6px; width: 100%; }
         #team-builder .tb-pnwrap { min-width: 0; } #team-builder .tb-pl > :not(.tb-pnwrap) { margin-top: 4px; } #team-builder .tb-pl { padding: 6px 0; } #team-builder .tb-plx { font-size: 10.5px; color: var(--tb-dim); margin-top: 2px; line-height: 1.3; }
@@ -490,7 +495,7 @@
             #team-builder .tb-sum { grid-template-columns: 1fr 1fr; } #team-builder .tb-sum-spent { grid-column: 1 / -1; order: 3; }
             #team-builder .tb-pt { display: none; }
             #team-builder .tb-big { font-size: 24px; } #team-builder .tb-sum { padding: 8px 12px; gap: 6px; }
-            #team-builder .tb-pl { grid-template-columns: 18px 28px minmax(0, 1fr) auto 26px; }
+            #team-builder .tb-pl { grid-template-columns: 24px 28px minmax(0, 1fr) auto 26px; }
             #team-builder .tb-mpcols { grid-template-columns: minmax(0, 1fr); }
         }
         /* change-of-turn banner: a strip across the pitch in the new team's colours (does not block play) */
@@ -782,7 +787,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.06</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.07</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -980,7 +985,7 @@
             <div id="tb-hire"></div>
           </section>
           <section class="tb-card">
-            <div class="tb-h3row"><h3>Roster</h3><button id="tb-names" type="button" class="tb-ghost tb-small">Random names</button></div>
+            <div class="tb-h3row"><h3>Roster</h3><span class="tb-h3btns"><button id="tb-sortpos" type="button" class="tb-ghost tb-small" data-sortpos="1">Positionals first</button><button id="tb-names" type="button" class="tb-ghost tb-small">Random names</button></span></div>
             <p id="tb-rosterhint" class="tb-dim tb-hint">The first 11 start the match; you can still change the starting eleven before kick-off.</p>
             <div id="tb-roster"></div>
           </section>
@@ -2829,7 +2834,7 @@
                     const vet = sev && sevLineman(t.race, p.pos) ? (car ? (p.vet ? '<div class="tb-vetrow"><span class="tb-vet on">★ Veteran</span></div>' : '')
                         : `<div class="tb-vetrow"><button type="button" class="tb-vet ${p.vet ? 'on' : ''}" data-vet="${i}" aria-pressed="${!!p.vet}">${p.vet ? '★ Veteran' : 'Make Veteran'}</button></div>`) : '';
                     const noFire = sev && car;   // Sevens leagues: no firing players
-                    return `<div class="tb-pl"><span class="tb-no">${i + 1}</span><span class="tb-tok" style="background:${t.primary};color:${t.secondary}">${sev && p.vet ? 'V' : ty.label}</span>
+                    return `<div class="tb-pl"><span class="tb-ord"><button type="button" class="tb-mv" data-up="${i}" ${i ? '' : 'disabled'} aria-label="Move ${esc(p.name)} up">▲</button><span class="tb-no">${i + 1}</span><button type="button" class="tb-mv" data-dn="${i}" ${i < n - 1 ? '' : 'disabled'} aria-label="Move ${esc(p.name)} down">▼</button></span><span class="tb-tok" style="background:${t.primary};color:${t.secondary}">${sev && p.vet ? 'V' : ty.label}</span>
                         <div class="tb-pnwrap"><input id="tb-pn-${i}" class="tb-in tb-pname" data-pn="${i}" value="${esc(p.name)}" maxlength="24" aria-label="Name of player ${i + 1}">${statSkillHtml(t.race, p, isMP(t) && p.mp ? p.mp.skill : null)}${vet}${extra}</div>
                         <span class="tb-dim tb-pt">${esc(ty.type)}${i >= MINP ? ' · reserve' : ''}</span>
                         <span class="tb-dim">${k(CAREER.value(t.race, p))}</span>
@@ -2965,6 +2970,17 @@
                     const d = b.dataset;
                     if (b.closest('#tb-picker')) return;   // the colour picker handles its own buttons
                     if (d.trophy != null) { HONOURS.show(cur, 'trophy', +d.trophy); return; }
+                    if (d.up != null || d.dn != null) {   // move a player up or down the roster
+                        const i = +(d.up != null ? d.up : d.dn), j = d.up != null ? i - 1 : i + 1;
+                        if (j >= 0 && j < cur.players.length) change(() => { const a = cur.players; [a[i], a[j]] = [a[j], a[i]]; });
+                        setTimeout(() => { const nb = document.querySelector(`#tb-roster [data-${d.up != null ? 'up' : 'dn'}="${j}"]`); if (nb && !nb.disabled) nb.focus(); }, 0);
+                        return;
+                    }
+                    if (d.sortpos) {   // the dearest positions first (Blitzers, Catchers, big guys...), Linemen last; otherwise keep the order
+                        const R2 = RACES[cur.race], cost = q => (R2.positions[q.pos] || {}).cost || 0;
+                        change(() => { cur.players = cur.players.map((q, i) => [q, i]).sort((x, y) => (cost(y[0]) - cost(x[0])) || (x[1] - y[1])).map(x => x[0]); });
+                        return;
+                    }
                     if (d.fallen != null) { HONOURS.show(cur, 'fallen', +d.fallen); return; }
                     if (d.colour) { openPicker(d.colour); return; }
                     const car = CAREER.started(cur), R = RACES[cur.race];
@@ -8861,8 +8877,8 @@
             const go = () => { const ts = gazeTargets(p); if (!ts.length) return;
                 if (ts.length === 1 || AI.isAI(p.team)) { doGaze(p, ts.sort((a, b) => (b.id === state.ball.carrierId) - (a.id === state.ball.carrierId))[0]); return; }
                 askOptions('HYPNOTIC GAZE', `Who does ${p.name || p.type} stare down? On a 3+ they are Distracted.`, ts.map(q => ({ label: `${q.name || q.type} (${q.type})${q.id === state.ball.carrierId ? ' · has the ball' : ''}`, fn: () => doGaze(p, q) })), { team: p.team, ai: 0 }); };
-            if (state.mode === MODES.IDLE) { p.actionTaken = 'gaze'; if (!activationTest(p)) return; }
-            else if (p.pendingAct && (!commitAction(p) || p.hasActed)) { render(); return; }
+            if (state.mode === MODES.IDLE) { p.actionTaken = 'gaze'; activationTest(p, ok => { if (ok) go(); }); return; }
+            if (p.pendingAct) { commitAction(p, ok => { if (ok && !p.hasActed) go(); else render(); }); return; }
             go();
         }; }
         // Grak carries Crumbleberry: put him down next to Grak once Grak's activation is over
@@ -8949,9 +8965,9 @@
                 if (!starFree(p, 'vines' + state.half) || !ts.length || p.isDown) return null;
                 return { label: 'Vicious Vines', fn: () => pickPlayer(p, 'VICIOUS VINES', 'Block an opponent 2 squares away (no follow-up).', ts, q => {
                     starSpend(p, 'vines' + state.half, 'Vicious Vines'); p.actionTaken = 'block';
-                    if (!activationTest(p)) return;
+                    activationTest(p, ok => { if (!ok) return;
                     log(`  VICIOUS VINES! Maple lashes out at ${q.name || q.type} two squares away.`, 'text-yellow-300 font-bold');
-                    state.vinesBlock = true; startBlock(p.id, q.id); }) };
+                    state.vinesBlock = true; startBlock(p.id, q.id); }); }) };
             },
             rodney: p => {
                 const b = state.ball;
@@ -9038,7 +9054,7 @@
         // one-off costs of an action (a star's once-a-half ability, a Desperate Measure) are only paid once the player commits
         const onCommitFor = (p, fn) => ({ fn, act: p.actionTaken, at: actStamp() });   // only for this action, this turn
         function payOnCommit(p) { const f = p.onCommit; p.onCommit = null; if (f && f.act === p.actionTaken && f.at === actStamp()) f.fn(); }
-        function commitAction(p) { p.pendingAct = false; p.activatedAt = actStamp(); payOnCommit(p); return activationTest(p); }
+        function commitAction(p, cont) { p.pendingAct = false; p.activatedAt = actStamp(); payOnCommit(p); return activationTest(p, cont); }
         // would this tap actually do something for the selected player (a step or a target), rather than just look around?
         function tapCommits(p, x, y) {
             if (x < 0 || x >= CFG.cols || y < 0 || y >= CFG.rows || (x === p.x && y === p.y)) return false;
@@ -9048,23 +9064,65 @@
             if (state.targets.some(t => (c && (t === c.id || (t && t.id === c.id))) || (t && typeof t === 'object' && t.x === x && t.y === y))) return true;
             return !c && state.moves.some(m => m.x === x && m.y === y);
         }
-        function activationTest(p) {
+        // A skill roll the coach may re-roll with a team re-roll if it fails (Dauntless, Bone Head and the like).
+        // pass(r) says whether a roll succeeds; done(r) gets the roll that stands. The computer doesn't stop to ask.
+        function teamRerollable(p, label, pass, done, first) {
+            const r = first != null ? first : d6();
+            if (pass(r) || p.team !== state.activeTeam || !(state.rr[p.team] > 0) || AI.isAI(p.team)) { done(r); return; }
+            const was = state.mode; state.mode = MODES.LOCKED;
+            askChoice('TEAM RE-ROLL?', `${p.name || p.type}'s ${label} roll failed (rolled ${r}). Use a team re-roll? (${state.rr[p.team]} left)`, 'Re-roll', 'Accept it',
+                () => {
+                    state.mode = was; spendTeamReroll(p.team); updateTopBar(); sfx('teamReroll');
+                    log(`  TEAM RE-ROLL used on the ${label} roll!`, 'text-amber-400 font-bold');
+                    if (lonerBlocks(p)) { done(r); return; }
+                    done(d6());
+                },
+                () => { state.mode = was; done(r); }, { team: p.team, ai: 'no' });
+        }
+        // the activation rolls are made first (so a failed one can be re-rolled), then played out by activationTest0 in the same order
+        let actDice = null;
+        const actD6 = () => (actDice && actDice.length ? actDice.shift() : d6());
+        function rollActivationDice(p, done) {
+            const blk = p.actionTaken === 'block' || p.actionTaken === 'blitz', checks = [];
+            const bl = bloodlustNeed(p);
+            if (bl) checks.push({ label: 'Bloodlust', pass: r => r !== 1 && r + (blk ? 1 : 0) >= bl, goOn: true });
+            if (p.skills.includes('Take Root') && !p.isDown && !p.rooted) checks.push({ label: 'Take Root', pass: r => r !== 1, goOn: true });
+            if (p.skills.includes('Animal Savagery')) checks.push({ label: 'Animal Savagery', pass: r => r + (blk ? 2 : 0) >= 4 });
+            if (p.skills.includes('Unchannelled Fury')) checks.push({ label: 'Unchannelled Fury', pass: r => r + (blk ? 2 : 0) >= 4 });
+            if (p.skills.includes('Bone Head')) checks.push({ label: 'Bone Head', pass: r => r >= 2 });
+            else if (p.skills.includes('Really Stupid')) {
+                const mate = state.players.some(m => m.team === p.team && m.id !== p.id && cheb1(m, p) === 1 && !m.isDown && !m.isStunned && !m.isDistracted && !m.isReserve && !m.skills.includes('Really Stupid'));
+                checks.push({ label: 'Really Stupid', pass: r => r + (mate ? 2 : 0) >= 4 });
+            }
+            const out = [];
+            const next = i => {
+                if (i >= checks.length) { done(out); return; }
+                const c = checks[i];
+                teamRerollable(p, c.label, c.pass, r => { out.push(r); if (c.pass(r) || c.goOn) next(i + 1); else done(out); });
+            };
+            next(0);
+        }
+        function activationTest(p, cont) {
             starCarryDrop();
-            if (p.hexHold) { log(`  ${p.name || p.type} is still under Estelle's hex and can't act this turn.`, 'text-violet-300'); p.hasActed = true; state.mode = MODES.IDLE; refreshSelection(p); return false; }
+            if (p.hexHold) { log(`  ${p.name || p.type} is still under Estelle's hex and can't act this turn.`, 'text-violet-300'); p.hasActed = true; state.mode = MODES.IDLE; refreshSelection(p); if (cont) cont(false); return false; }
             state.turnActed = true;   // (a Weather Mage can only be used before anyone acts)
             p.eyeGouged = false;   // Eye Gouge lasts until the player is next activated
             p.incorporeal = false;
-            if (resolveStalls(p.id)) return false;   // the last player's activation is over: were they stalling?
-            if (resolveHunger(p.id)) return false;   // ...or still thirsty?
+            if (resolveStalls(p.id)) { if (cont) cont(false); return false; }   // the last player's activation is over: were they stalling?
+            if (resolveHunger(p.id)) { if (cont) cont(false); return false; }   // ...or still thirsty?
             p.stallWatch = canScoreNoDice(p);
-            const ok = activationTest0(p);
-            if (!ok) p.stallWatch = false;
-            return ok;
+            let result;
+            rollActivationDice(p, dice => {
+                actDice = dice; const ok = activationTest0(p); actDice = null;
+                if (!ok) p.stallWatch = false;
+                result = ok; if (cont) cont(ok);
+            });
+            return result;
         }
         const bloodlustNeed = p => { const s = (p.skills || []).find(x => x.startsWith('Bloodlust')); const m = s && s.match(/\((\d)\+\)/); return m ? +m[1] : 0; };
         function bloodlustTest(p) {
             const need = bloodlustNeed(p); if (!need) return;
-            const r = d6(), mod = (p.actionTaken === 'block' || p.actionTaken === 'blitz') ? 1 : 0;
+            const r = actD6(), mod = (p.actionTaken === 'block' || p.actionTaken === 'blitz') ? 1 : 0;
             if (r !== 1 && r + mod >= need) { log(`  Bloodlust roll: ${r}${mod ? ' +1' : ''} - ${p.name || p.type} keeps the thirst in check.`, 'text-green-400'); return; }
             p.hungry = true;
             log(`  Bloodlust roll: ${r}${mod ? ' +1' : ''} - ${p.name || p.type} is THIRSTY! At the end of the activation she must feed, or it's a Turnover.`, 'text-red-400 font-bold');
@@ -9099,7 +9157,7 @@
         function activationTest0(p) {
             bloodlustTest(p);
             if (p.skills.includes('Take Root') && !p.isDown && !p.rooted) {
-                const r = d6();
+                const r = actD6();
                 if (r === 1) {
                     p.rooted = true;
                     log(`  Take Root roll: 1 - ${p.type} puts down roots! It can't move, follow up or be pushed until the end of the Drive (or until it goes down).`, 'text-lime-300 font-bold');
@@ -9107,7 +9165,7 @@
                 } else log(`  Take Root roll: ${r} - ${p.type} stays limber.`, 'text-green-400');
             }
             if (p.skills.includes('Animal Savagery')) {
-                const r = d6(), mod = (p.actionTaken === 'block' || p.actionTaken === 'blitz') ? 2 : 0;
+                const r = actD6(), mod = (p.actionTaken === 'block' || p.actionTaken === 'blitz') ? 2 : 0;
                 if (r + mod >= 4) { log(`  Animal Savagery roll: ${r}${mod ? ' +2' : ''} - ${p.type} keeps its temper.`, 'text-green-400'); return true; }
                 if (starIs(p, 'glotl') && starFree(p, 'primal')) {   // Primal Savagery: lash out at an opponent instead
                     const foes = state.players.filter(q => q.team !== p.team && !q.isDown && !q.isStunned && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected && Math.max(Math.abs(q.x - p.x), Math.abs(q.y - p.y)) === 1);
@@ -9145,7 +9203,7 @@
                 return false;
             }
             if (p.skills.includes('Unchannelled Fury')) {   // like Animal Savagery, but a failure simply ends the activation
-                const r = d6(), mod = (p.actionTaken === 'block' || p.actionTaken === 'blitz') ? 2 : 0;
+                const r = actD6(), mod = (p.actionTaken === 'block' || p.actionTaken === 'blitz') ? 2 : 0;
                 if (r + mod >= 4) log(`  Unchannelled Fury roll: ${r}${mod ? ' +2' : ''} - ${p.type} gets on with it.`, 'text-green-400');
                 else {
                     log(`  Unchannelled Fury roll: ${r}${mod ? ' +2' : ''} - ${p.type} bellows and stamps about. The activation ends!`, 'text-orange-400 font-bold');
@@ -9158,7 +9216,7 @@
             }
             const bh = p.skills.includes('Bone Head'), rs = p.skills.includes('Really Stupid');
             if (!bh && !rs) return true;
-            const roll = d6();
+            const roll = actD6();
             let passed, txt;
             if (bh) {
                 passed = roll >= 2; txt = `Bone Head roll: ${roll} (needs 2+)`;
@@ -10195,7 +10253,7 @@
                 if (ok) helpPops(pData, rr);
                 if (ok) pData.onPass(rr); else pData.onFail(rr, pData);
             };
-            const trrOk = !skillRerolled && state.rr[state.activeTeam] > 0 && !state.teamRRUsedThisTurn && pl.team === state.activeTeam;   // (not for the other side's rolls)
+            const trrOk = !skillRerolled && state.rr[state.activeTeam] > 0 && (!state.teamRRUsedThisTurn || !AI.isAI(pl.team)) && pl.team === state.activeTeam;   // (not for the other side's rolls)
             // Thinking Man's Troll: once per half, a free re-roll of the dice
             const freeRR = !passed && !skillRerolled && pl.team === state.activeTeam ? starTestReroll(pl) : null, tmtOk = !!freeRR;
             const useTmt = () => {
@@ -11130,7 +11188,19 @@
         // Defensive: opponents this player marks can't use Guard or Put the Boot In
         function defensiveOn(p) { return state.players.some(q => q.team !== p.team && q.team !== state.activeTeam && q.skills.includes('Defensive') && !q.isDown && !q.isStunned && !q.isDistracted && !q.isReserve && !q.isCasualty && !q.isKO && q.x >= 0 && Math.max(Math.abs(q.x - p.x), Math.abs(q.y - p.y)) === 1); }
         function canAssist(p, enemyTeam) { return !p.isDown && !p.isDistracted && !p.eyeGouged && ((p.skills.includes('Guard') && !defensiveOn(p)) || getTackleZones(p.x, p.y, enemyTeam) <= 1); }
-        function startBlock(atkId, defId) {
+        function startBlock(atkId, defId, dauntR) {
+            {   // Dauntless is rolled first (Akhorne's Blind Rage, then a team re-roll may be used on a fail)
+                const a = getPlayerById(atkId), d = getPlayerById(defId);
+                if (dauntR == null && a && d && a.skills.includes('Dauntless') && d.team !== a.team && d.st > a.st && !state.bncBlock) {
+                    state.mode = MODES.LOCKED;
+                    let r = d6(), blind = null;
+                    if (r + a.st <= d.st && starIs(a, 'akhorne')) { blind = r; r = d6(); }
+                    const go = rr => startBlock(atkId, defId, { r: rr, blind });
+                    if (blind != null) go(r);   // (a re-rolled dice can't be re-rolled again)
+                    else teamRerollable(a, 'Dauntless', x => x + a.st > d.st, go, r);
+                    return;
+                }
+            }
             { const a = getPlayerById(atkId); if (a) MATCH.note('blocks', a.team); }
             const atk = getPlayerById(atkId), def = getPlayerById(defId);
             state.mode = MODES.LOCKED;
@@ -11158,8 +11228,8 @@
             const mb = !!(state.mbQueue && state.mbQueue.atkId === atk.id);
             let atkSt = atk.st; const stNotes = [];
             if (atk.skills.includes('Dauntless') && def.team !== atk.team && def.st > atk.st && !state.bncBlock) {
-                let r = d6();
-                if (r + atk.st <= def.st && starIs(atk, 'akhorne')) { const was = r; r = d6(); log(`  BLIND RAGE! Akhorne re-rolls the Dauntless dice: ${was} becomes ${r}.`, 'text-yellow-300 font-bold'); skillPop('Blind Rage'); }
+                let r = dauntR && dauntR.r != null ? dauntR.r : d6();
+                if (dauntR && dauntR.blind != null) { log(`  BLIND RAGE! Akhorne re-rolls the Dauntless dice: ${dauntR.blind} becomes ${r}.`, 'text-yellow-300 font-bold'); skillPop('Blind Rage'); }
                 if (r + atk.st > def.st) { atkSt = def.st; stNotes.push('Dauntless'); log(`  Dauntless! ${atk.type} rolls ${r} + ST ${atk.st} = ${r + atk.st}, beating ST ${def.st}: Strength raised to ${def.st}.`, 'text-sky-300 font-bold'); skillPop('Dauntless');
                     if (starIs(atk, 'karla') && starFree(atk, 'indom')) { starSpend(atk, 'indom', 'Indomitable'); atkSt = def.st * 2; stNotes.push('Indomitable'); log(`  INDOMITABLE! Karla's Strength goes up to ${atkSt}, double ${def.type}'s.`, 'text-yellow-300 font-bold'); } }
                 else log(`  Dauntless: ${atk.type} rolls ${r} + ST ${atk.st} = ${r + atk.st}, not enough to beat ST ${def.st}.`, 'text-slate-400');
@@ -11320,7 +11390,7 @@
 
             document.getElementById('btn-combat-keep').classList.add('hidden');
             const trrBtn = document.getElementById('btn-combat-trr');
-            if (state.rr[state.activeTeam] > 0 && !state.teamRRUsedThisTurn && !state.combat.brawlerUsed && !state.combat.proUsed) {
+            if (state.rr[state.activeTeam] > 0 && (!state.teamRRUsedThisTurn || !AI.isAI(state.activeTeam)) && !state.combat.brawlerUsed && !state.combat.proUsed) {
                 trrBtn.classList.remove('hidden');
                 trrBtn.onclick = () => {
                     trrBtn.classList.add('hidden');
@@ -13756,10 +13826,13 @@
             {   // the first real step or target: now roll for Bone Head and the like, then carry on with the tap
                 const sp = getPlayerById(state.selectedId);
                 if (sp && sp.pendingAct && sp.team === state.activeTeam && tapCommits(sp, x, y)) {
-                    const mode = state.mode;
-                    if (!commitAction(sp) || sp.hasActed || state.pendingRoll || state.mode === MODES.LOCKED || state.mode === MODES.IDLE) { render(); return; }
-                    state.mode = mode; updateValidActions(sp);
-                    return handleGridClick(x, y);
+                    const mode = state.mode; state.mode = MODES.LOCKED;
+                    commitAction(sp, ok => {
+                        if (!ok || sp.hasActed || state.pendingRoll || state.mode === MODES.IDLE) { if (state.mode === MODES.LOCKED && !state.pendingRoll) state.mode = MODES.IDLE; render(); return; }
+                        state.mode = mode; updateValidActions(sp);
+                        handleGridClick(x, y);
+                    });
+                    return;
                 }
             }
             if (state.mode === MODES.BOMB_RETHROW) { bombRethrowClick(x, y); return; }
@@ -14251,12 +14324,12 @@
             state.mode = MODES.LOCKED;
             p.actionTaken = 'block';
             log(`  ${p.type} tries to Jump Up into a block!`, 'text-sky-300 font-bold');
-            if (!activationTest(p)) return;
+            activationTest(p, ok => { if (!ok) return;
             setupRoll('JUMP UP', p, Math.max(2, Math.min(6, p.ag - 1)), 'None',
                 () => { p.isDown = false; p.jumpedUp = true; skillPop('Jump Up'); log(`  ${p.type} springs up and blocks!`, 'text-sky-300'); state.mode = MODES.ACTION_BLOCK; updateValidActions(p); },
                 () => { log(`  ${p.type} can't get up: the activation ends.`, 'text-slate-400'); p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null; state.mode = MODES.IDLE; refreshSelection(p); },
                 { desc: 'Jump Up: an Agility test with +1 to stand up and block. Fail and the player stays Prone and their activation ends (no Turnover).', prevMode: MODES.LOCKED, skillAllowed: false,
-                  explainFail: () => ({ title: 'Stays Down', text: 'The player stays Prone and their activation ends. It is not a Turnover.' }) });
+                  explainFail: () => ({ title: 'Stays Down', text: 'The player stays Prone and their activation ends. It is not a Turnover.' }) }); });
         }
 
         document.getElementById('btn-action-move').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='move'; if (p.skills.includes('Sprint') && p.rushes === 2) p.rushes = 3; state.mode=MODES.ACTION_MOVE; if(!declareAction(p)) return; updateValidActions(p); };
@@ -14316,7 +14389,7 @@
         };
         document.getElementById('btn-execute-punt').onclick = () => {
             const p = getPlayerById(state.selectedId);
-            if (p.pendingAct && (!commitAction(p) || p.hasActed)) { render(); return; }
+            if (p.pendingAct) { state.mode = MODES.LOCKED; commitAction(p, ok => { if (ok && !p.hasActed) { state.mode = MODES.ACTION_MOVE; document.getElementById('btn-execute-punt').onclick(); } else { if (state.mode === MODES.LOCKED) state.mode = MODES.IDLE; render(); } }); return; }
             state.mode = MODES.LOCKED;
             const fwd = p.team === TEAMS.HUMAN ? 1 : -1;
             const dirs = [{ label: 'Downfield (towards their end zone)', d: [fwd, 0] }, { label: 'Towards the top sideline', d: [0, -1] }, { label: 'Towards the bottom sideline', d: [0, 1] }, { label: 'Back towards your own end zone', d: [-fwd, 0] }];
@@ -14755,10 +14828,10 @@
             p.actionTaken = 'bnc'; p.bncSteps = 0; p.wdUsed = false;
             log(`  ${p.type} starts swinging the BALL & CHAIN!`, 'text-yellow-300 font-bold');
             skillPop('Ball & Chain'); sfx('clank');
-            if (!activationTest(p)) return;
+            activationTest(p, ok => { if (!ok) return;
             state.mode = MODES.BALL_CHAIN;
             updateUI(p);
-            bncNext(p);
+            bncNext(p); });
         };
         function bncDone(p) {
             state.bncAwait = false; state.bncPreview = null; hideEventPanel();
