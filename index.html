@@ -886,7 +886,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.47</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.48</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10703,8 +10703,32 @@
             else { dur = n > 8 ? 75 : 90; ease = t => t; }
             player.walkAnim = { fx: player.x, fy: player.y, t0: performance.now(), dur, ease };
         }
-        // where to draw a player: part-way between squares while walking
-        function drawPos(p) {
+        // ---- blocks on the pitch: the attacker lunges in, the defender rocks back, then a pushed player slides to their new square
+        // and an attacker following up slides after them (the pictures only: the rules have already moved them) ----
+        function pitchBump(p, tx, ty, amp, delay = 0, dur = 300) {
+            if (window.FAST_ANIM || !p || (tx === p.x && ty === p.y)) return;
+            p.bumpAnim = { tx, ty, amp, t0: performance.now() + delay, dur };
+        }
+        function blockClashOnPitch(atk, def) {
+            pitchBump(atk, def.x, def.y, 0.32);                                         // in at them…
+            pitchBump(def, def.x + (def.x - atk.x), def.y + (def.y - atk.y), 0.16, 110);   // …and they rock back
+        }
+        function slideTo(p, fx, fy, ms = 300) {   // p has already been moved: draw them sliding there from (fx, fy)
+            if (window.FAST_ANIM || !p || fx == null || (fx === p.x && fy === p.y)) return;
+            if (p.x < 0 || p.x >= CFG.cols || p.y < 0 || p.y >= CFG.rows) return;
+            p.walkAnim = { fx, fy, t0: performance.now(), dur: ms, ease: k => 1 - (1 - k) * (1 - k), keep: true };
+        }
+        function withBump(p, pos) {
+            const b = p.bumpAnim; if (!b) return pos;
+            const k = (performance.now() - b.t0) / b.dur;
+            if (k < 0) return pos;
+            if (k >= 1) { p.bumpAnim = null; return pos; }
+            const dx = b.tx - p.x, dy = b.ty - p.y, L = Math.hypot(dx, dy) || 1, d = Math.sin(Math.PI * k) * b.amp;
+            return { x: pos.x + dx / L * d, y: pos.y + dy / L * d };
+        }
+        // where to draw a player: part-way between squares while walking (or sliding after a push)
+        function drawPos(p) { return withBump(p, drawPos0(p)); }
+        function drawPos0(p) {
             const f = p.foulAnim;
             if (f) {
                 const t = performance.now() - f.t0, ease = k => k < 0.5 ? 2 * k * k : 1 - 2 * (1 - k) * (1 - k), top = 0.28;
@@ -10716,8 +10740,8 @@
             const a = p.walkAnim;
             if (!a) return { x: p.x, y: p.y };
             const t = (performance.now() - a.t0) / a.dur;
-            if (t >= 1 || p.isDown) { p.walkAnim = null; return { x: p.x, y: p.y }; }
-            const k = a.ease(Math.max(0, t));
+            if (t >= 1 || (p.isDown && !a.keep)) { p.walkAnim = null; return { x: p.x, y: p.y }; }
+            const k = (typeof a.ease === 'function' ? a.ease : (e => e))(Math.max(0, t));
             return { x: a.fx + (p.x - a.fx) * k, y: a.fy + (p.y - a.fy) * k };
         }
         function executeStep(player, nx, ny) {
@@ -12757,6 +12781,7 @@
                     break;
             }
             state.combat.atkDown = atkDown; state.combat.defDown = defDown;
+            blockClashOnPitch(atk, def);
 
             if(push) {
                 state.combat.vacatedSquare = { x: def.x, y: def.y };
@@ -14903,7 +14928,7 @@
                     let occupant = isCrowd ? null : getPlayer(s.x, s.y);
 
                     if (occupant) {
-                        pushed.x = s.x; pushed.y = s.y;
+                        pushed.x = s.x; pushed.y = s.y; slideTo(pushed, fromX, fromY);
                         if (state.ball.carrierId === pushed.id) { state.ball.x = s.x; state.ball.y = s.y; }
                         log(`   ${pushed.type} chain-pushes ${occupant.type}!`, 'text-yellow-300 font-bold');
                         startPush(fromX, fromY, occupant);
@@ -14918,7 +14943,7 @@
                         if (state.ball.carrierId === pushed.id) { throwIn(s.x, s.y); }
                         harm({ kind: 'crowd', by: state.combat && state.combat.atk }, () => rollInjury(pushed, true)); 
                     } else {
-                        pushed.x = s.x; pushed.y = s.y;
+                        pushed.x = s.x; pushed.y = s.y; slideTo(pushed, fromX, fromY);
                         if (state.ball.carrierId === pushed.id) { state.ball.x = s.x; state.ball.y = s.y; }
                         log(`  ${pushed.type} pushed to [${s.x}, ${s.y}].`);
 
@@ -14943,7 +14968,7 @@
                         if (a.rooted && !a.isDown) { log(`  ${a.type} is rooted to the spot and can't follow up.`, 'text-lime-300'); state.combat.vacatedSquare = null; finalizeBlock(); return; }
                         if ((a.skills.includes('Frenzy') || state.combat.bnc) && v && !getPlayer(v.x, v.y)) {   // Frenzy or Ball & Chain: must follow up
                             log(state.combat.bnc ? `  The chain drags ${a.type} on into [${v.x}, ${v.y}].` : `  Frenzy! ${a.type} follows up into [${v.x}, ${v.y}].`, 'text-red-300 font-bold');
-                            a.x = v.x; a.y = v.y;
+                            { const ox = a.x, oy = a.y; a.x = v.x; a.y = v.y; slideTo(a, ox, oy, 260); }
                             if (state.ball.carrierId === a.id) { state.ball.x = v.x; state.ball.y = v.y; }
                             state.combat.vacatedSquare = null;
                             if (checkTouchdown()) return;
@@ -14957,8 +14982,7 @@
                             () => {
                                 let v = state.combat.vacatedSquare;
                                 log(`   Taunt forces ${state.combat.atk.type} to follow up!`, 'text-green-400 font-bold');
-                                state.combat.atk.x = v.x;
-                                state.combat.atk.y = v.y;
+                                { const A = state.combat.atk, ox = A.x, oy = A.y; A.x = v.x; A.y = v.y; slideTo(A, ox, oy, 260); }
                                 if (state.ball.carrierId === state.combat.atk.id) { state.ball.x = v.x; state.ball.y = v.y; }
                                 state.combat.vacatedSquare = null;
                                 if(checkTouchdown()) return;
@@ -14974,7 +14998,7 @@
             if(state.mode === MODES.FOLLOWUP_CHOICE) {
                 let v = state.combat.vacatedSquare;
                 if(v && x===v.x && y===v.y) { 
-                    state.combat.atk.x = v.x; state.combat.atk.y = v.y; 
+                    { const A = state.combat.atk, ox = A.x, oy = A.y; A.x = v.x; A.y = v.y; slideTo(A, ox, oy, 260); }
                     if (state.ball.carrierId === state.combat.atk.id) {
                         state.ball.x = v.x; state.ball.y = v.y;
                     }

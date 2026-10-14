@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.48 (14 Oct 2026)
+- **Added:** blocks and blitzes now play out on the pitch too, instead of the players just appearing in their new squares.
+  - **The clash:** once the block dice are decided, the attacker lunges into the defender and the defender rocks back.
+  - **The push:** a pushed player slides to the square chosen for them (a knocked-down player slides, then lies there).
+  - **The follow-up:** an attacker who follows up slides into the empty square, including a Frenzy, Ball & Chain or Taunt follow-up.
+  - **Turning it off:** with Animations set to Quick in Settings, the players move straight away as before.
+
 ## v2.47 (14 Oct 2026)
 - **Fixed:** the version number no longer sits on top of the buttons in Settings or on the exhibition team screen. It now shows only on the title screen and the main menu.
 
