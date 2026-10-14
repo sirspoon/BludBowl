@@ -866,7 +866,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.38</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.39</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -15828,14 +15828,16 @@
                     else if (canField(p)) { p.inSquad = false; p.sub = false; }
                 });
             });
+            // two devices: each device shows only its own team, and its own Ready button (the match goes on when both are ready)
+            const net = NET.on() || NET.guest(), mine = net ? NET.myTeam() : null;
             const refresh = () => {
                 let ok = true;
                 [0, 1].forEach(t => {
                     const squad = pool(t), n = squad.filter(p => p.inSquad).length, need = Math.min(MAX_ON_PITCH, squad.length);
                     document.getElementById('lineup-count' + t).innerHTML = `<span class="${n === need ? 'text-green-400' : 'text-red-400'}">${n}/${need}</span>`;
-                    if (n !== need) ok = false;
+                    if (n !== need && (!net || t === mine)) ok = false;
                 });
-                btn.disabled = !ok;
+                btn.disabled = !ok || (net && NET.lineupReady(mine));
             };
             // one tab per team, like the roster screen
             const TAB_ON = ['border-blue-500 text-blue-400 bg-blue-950/30', 'border-emerald-500 text-emerald-400 bg-emerald-950/30'];
@@ -15844,15 +15846,15 @@
                 [0, 1].forEach(k => {
                     document.getElementById('lineup-pane' + k).classList.toggle('hidden', k !== t);
                     const b = document.getElementById('lineup-tab' + k);
-                    b.className = 'flex-1 py-2 text-center text-xs font-bold uppercase transition border-b-2 ' + (k === t ? TAB_ON[k] : TAB_OFF[k]) + (drive && AI.isOn(k) ? ' hidden' : '');
+                    b.className = 'flex-1 py-2 text-center text-xs font-bold uppercase transition border-b-2 ' + (k === t ? TAB_ON[k] : TAB_OFF[k]) + ((drive && AI.isOn(k)) || (net && k !== mine) ? ' hidden' : '');
                     b.setAttribute('aria-selected', k === t ? 'true' : 'false');
                 });
             };
             [0, 1].forEach(k => { document.getElementById('lineup-tab' + k).onclick = () => setTab(k); });
             [0, 1].forEach(t => {
-                const cpu = AI.isOn(t);
+                const cpu = !net && AI.isOn(t);
                 // the computer fields its usual line-up (between drives it has already picked)
-                if (cpu && !drive) aiOpeningSquad(t);
+                if (cpu && !drive && !NET.guest()) aiOpeningSquad(t);
                 const note = document.getElementById('lineup-ai' + t);
                 note.classList.toggle('hidden', !cpu);
                 note.textContent = cpu ? `The computer coaches ${ROSTERS[t].name} and has picked its ${drive ? 'team for this drive' : 'starting eleven'}.` : '';
@@ -15867,21 +15869,27 @@
                         <span class="font-bold ${t === 0 ? 'text-blue-300' : 'text-green-300'} w-28 shrink-0 leading-tight">${p.name ? `${p.name}<div class="text-[9px] font-normal text-slate-400">${p.type}</div>` : p.type}${out ? `<div class="text-[9px] font-bold text-red-400">${whyOut(p)}</div>` : drive && p.inSquad && !p.isReserve ? '<div class="text-[9px] font-normal text-emerald-400">on the pitch</div>' : ''}</span>
                         <span class="text-slate-300 font-mono text-[10px] shrink-0">${p.ma} ${p.st} ${p.ag}+ ${p.pa !== null ? p.pa + '+' : '-'} ${p.av}+</span>
                         <span class="text-slate-400 text-[10px] leading-tight">${skillTags(p.skills, undefined, p.baseSkills)}</span>`;
-                    row.querySelector('input').onchange = e => { p.inSquad = e.target.checked; p.sub = false; refresh(); };
+                    row.querySelector('input').onchange = e => { p.inSquad = e.target.checked; p.sub = false; if (NET.guest()) NET.sendSquad(p.id, p.inSquad); refresh(); };
                     list.appendChild(row);
                 });
             });
             refresh();
             // (between drives the computer's choice stays secret: its tab is hidden, see setTab)
             setTab(NET.on() ? NET.myTeam() : !AI.isOn(0) || AI.isOn(1) ? 0 : 1);   // open on the team a person picks for
-            btn.textContent = drive ? 'Confirm Teams' : AI.isOn(0) && AI.isOn(1) ? 'Start Match' : 'Confirm Lineups';
+            btn.textContent = net ? 'Ready' : drive ? 'Confirm Teams' : AI.isOn(0) && AI.isOn(1) ? 'Start Match' : 'Confirm Lineups';
+            if (net) NET.lineupOpen(drive, refresh);
             const finish = () => {
+                NET.lineupClosed();
                 if (!drive) arrangeSquads();   // between drives the caller arranges the squads
                 modal.classList.add('hidden');
                 render();
                 onDone();
             };
-            btn.onclick = () => { if (NET.on()) NET.gate('lineup', finish); else finish(); };   // two devices: once both players have confirmed
+            btn.onclick = () => {
+                if (NET.guest()) { NET.lineupDone(); refresh(); return; }   // the guest's device: tell the host
+                if (NET.on()) { NET.gate('lineup', finish); refresh(); return; }   // the host: on once both players are ready
+                finish();
+            };
             modal.classList.remove('hidden');
         }
 
@@ -15910,7 +15918,7 @@
             const TEST = /[?&]nettest\b/.test(location.search);
             const WORDS = ['ORC', 'ELF', 'OGR', 'RAT', 'GOB', 'TRL', 'IMP', 'HOB', 'DWF', 'LIZ', 'MUM', 'SKV', 'NUF', 'BOK'];
             // panels copied from the host's screen to the guest's (the ones marked * are made by the game as needed)
-            const MIRROR = ['modal-roll', 'modal-team-reroll', 'modal-dice', 'modal-choice', 'event-panel', 'setup-controls-container', 'modal-announce', 'modal-lineup',
+            const MIRROR = ['modal-roll', 'modal-team-reroll', 'modal-dice', 'modal-choice', 'event-panel', 'setup-controls-container', 'modal-announce',
                 '*modal-ind-intro', '*pick-banner', 'panel-unit-container', 'turn-banner', 'removal-toast', 'pitch-curtain', 'match-summary'];
             const INNER_ONLY = new Set(['panel-unit-container']);   // keep the guest's own layout for these, just copy what's inside
             let role = null, live = false, link = null, peer = null, code = '', rtt = null, lastSeen = 0, version = '';
@@ -16027,6 +16035,12 @@
                 if (m.t === 'team') { guestRace = m.race; guestName = m.name; paintLobby(); return; }
                 if (m.t === 'resync') { resetSent(); return; }
                 if (m.t === 'in' && m.k === 'exind') { EXIND.remote(m.d); return; }
+                if (m.t === 'in' && m.k === 'squad' && live) {
+                    const p = state.netLineup && state.players.find(q => q.id === m.id);
+                    if (p && p.team === remote() && (!state.netLineup.drive || canField(p))) { p.inSquad = !!m.on; p.sub = false; if (lineupRefresh) lineupRefresh(); }
+                    return;
+                }
+                if (m.t === 'in' && m.k === 'ready' && live) { if (m.name === 'lineup' && state.netLineup) { fromGuest = true; try { gate('lineup'); } finally { fromGuest = false; } if (lineupRefresh) lineupRefresh(); } return; }
                 if (m.t === 'in' && m.k === 'form' && live) { if (state.mode === MODES.SETUP && AI.decider() === remote()) FORMS.apply(remote(), m.sq); return; }
                 if (m.t === 'in' && live) { fromGuest = true; try { guestInput(m); } finally { fromGuest = false; } }
             }
@@ -16054,10 +16068,19 @@
             // a ready gate (both players confirm, e.g. their starting eleven): the host's own tap, or the guest's passed on
             let fromGuest = false;
             function gate(name, go) {
+                if (go) gates[name] = go;
                 const r = state.netReady = state.netReady || {}, g = r[name] = r[name] || [false, false];
                 g[fromGuest ? 1 : 0] = true;
-                if (g[0] && g[1]) { delete r[name]; go(); }
+                if (g[0] && g[1]) { delete r[name]; const f = gates[name]; delete gates[name]; if (f) f(); }
             }
+            const gates = {};
+            // the starting eleven: the host's screen says so in the match state, and each device draws its own
+            let lineupRefresh = null, lineupN = 0;
+            function lineupOpen(drive, refresh) {
+                lineupRefresh = refresh;
+                if (role === 'host') { lineupN++; state.netLineup = { drive: !!drive, n: lineupN }; if (state.netReady) delete state.netReady.lineup; }
+            }
+            function lineupClosed() { lineupRefresh = null; if (role === 'host') delete state.netLineup; }
             // what has been sent already, so only the changes go each time
             let sent = null;
             function resetSent() { sent = { keys: {}, pl: new Map(), order: '', ui: {}, cv: {}, meta: '' }; logSent = -1; }
@@ -16137,7 +16160,7 @@
 
             // ---- the guest's side ----
             const raw = { keys: {}, pl: new Map(), order: [] };
-            let shown = false, followKey = '', shopping = false, lineTab = 1;
+            let shown = false, followKey = '', shopping = false;
             function guestMsg(m) {
                 if (common(m)) return;
                 if (m.t === 'shop') { shopping = true; $('net-lobby').classList.add('hidden'); $('ex-body').innerHTML = '<p class="pg-dim">Opening the inducements…</p>'; $('ex-back').hidden = true; $('ex-ind').classList.remove('hidden'); return; }
@@ -16215,16 +16238,22 @@
             }
             // the guest's copy of the block dice panel is red only when the host is choosing
             // the starting eleven: the guest looks at its own team's tab unless it picks the other; both see who's confirmed
+            let guestLineup = 0, guestSaid = false;
             function lineupView() {
+                if (role === 'guest' && live) {
+                    const L = state.netLineup;
+                    if (L && L.n !== guestLineup) { guestLineup = L.n; guestSaid = false; try { showLineupModal(() => {}, L.drive); } catch (e) { console.error('lineup', e); } }
+                    else if (!L && guestLineup) { guestLineup = 0; lineupRefresh = null; const md = $('modal-lineup'); if (md) md.classList.add('hidden'); }
+                }
                 const md = $('modal-lineup'); if (!md || md.classList.contains('hidden')) return;
-                if (role === 'guest') [0, 1].forEach(k => {
-                    const pane = $('lineup-pane' + k), b = $('lineup-tab' + k); if (!pane || !b) return;
-                    pane.classList.toggle('hidden', k !== lineTab);
-                    const on = ['border-blue-500 text-blue-400 bg-blue-950/30', 'border-emerald-500 text-emerald-400 bg-emerald-950/30'][k], off = 'border-transparent text-slate-400';
-                    b.className = 'flex-1 py-2 text-center text-xs font-bold uppercase transition border-b-2 ' + (k === lineTab ? on : off);
-                });
+                if (role === 'guest' && lineupRefresh) { try { lineupRefresh(); } catch (e) {} }   // the counts, from the host's latest state
                 const g = (state.netReady && state.netReady.lineup) || [false, false], btn = $('btn-lineup-confirm');
-                if (btn) { const txt = g[myTeam()] ? 'Waiting for the other player…' : g[1 - myTeam()] ? 'Confirm (the other player is ready)' : 'Confirm My Team'; if (btn.textContent !== txt) btn.textContent = txt; }
+                const me = g[myTeam()] || (role === 'guest' && guestSaid);
+                if (btn) {
+                    const txt = me ? 'Ready ✓ Waiting for the other player…' : g[1 - myTeam()] ? 'Ready (the other player is ready)' : 'Ready';
+                    if (btn.textContent !== txt) btn.textContent = txt;
+                    if (me && !btn.disabled) btn.disabled = true;
+                }
             }
             function ownView() {
                 lineupView();
@@ -16293,8 +16322,7 @@
                     return;
                 }
                 if (!live) return;
-                const tab = t.closest('#lineup-tab0, #lineup-tab1');
-                if (tab) { e.stopImmediatePropagation(); e.preventDefault(); lineTab = +tab.id.slice(-1); lineupView(); return; }
+                if (t.closest('#modal-lineup')) return;   // the guest's own starting-eleven screen
                 if (t.closest('#net-chip, #net-lobby, #net-end, #modal-roster, #skill-tip, #whats-new')) return;
                 const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
                 if (t === canvas) {
@@ -16420,6 +16448,10 @@
                 openLobby, matchOver, begin, cancelShop, gate,
                 guestShop: () => role === 'guest' && shopping,
                 sendForm: sq => { if (link) link.send({ t: 'in', k: 'form', sq }); },
+                sendSquad: (id, on) => { if (link) link.send({ t: 'in', k: 'squad', id, on }); },
+                lineupDone: () => { guestSaid = true; if (link) link.send({ t: 'in', k: 'ready', name: 'lineup' }); lineupView(); },
+                lineupReady: t => !!((state.netReady && state.netReady.lineup) || [])[t] || (role === 'guest' && guestSaid),
+                lineupOpen, lineupClosed,
                 on: () => live,
                 guest: () => role === 'guest' && live,
                 isRemote: t => live && role === 'host' && t === remote(),

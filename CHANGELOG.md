@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.39 (14 Oct 2026)
+- **Changed:** in a two-device match, the starting-eleven screen is now separate on each device. Each player sees only their own team, ticks their own players, and taps **Ready**. The button shows whether the other player is ready, and both devices go on to the next screen once both players are. The same applies when picking players between drives. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+
 ## v2.38 (14 Oct 2026)
 - **Added:** saved formations. While you set up for a kick-off, a **Formations** column on the left has five slots. Tap **Save** then a slot to keep your current set-up there. Tap a filled slot to set your team up that way: players go back to their own squares by name and position, or to the same position if someone is missing. Each team has its own five slots, separately for Blood Bowl and Sevens. A saved team keeps them with the rest of its details, including backups; a default team keeps them in this browser. In a two-device match, each player has their own slots on their own device. The column goes away once the set-up is confirmed.
 - **Changed:** when the computer is the receiving team, it now reacts to how the kicking team has set up. It puts its three line players where they face the most of the kicking team's line (steering away from hard hitters). It leans its flankers and backfield towards the side the kicking team has left thinnest, and sends a flanker right out wide if a wide zone has been left empty. Its kicking set-up is unchanged.
