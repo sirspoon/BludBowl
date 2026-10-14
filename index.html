@@ -782,7 +782,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.02</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.03</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6272,7 +6272,7 @@
                         if (p.tempClaws) { p.skills = p.skills.filter(x => x !== 'Claws'); p.tempClaws = false; }
                         clearTempSkills(p); p.hexed = false; p.hexHold = false;
                         p.stunnedThisTurn = false;
-                        p.hasActed = false; p.remainingMA = p.ma; p.rushes = 2;
+                        p.hasActed = false; p.remainingMA = p.ma; p.rushes = 2; p.jumpedUp = false;
                         p.actionTaken = null; p.hasBlocked = false; p.usedSkills = [];
                     }
                 });
@@ -7212,7 +7212,7 @@
             hideEventPanel();
             state.players.forEach(p => {
                 if (p.team !== team) return;
-                p.hasActed = false; p.remainingMA = p.ma; p.rushes = 2; p.actionTaken = null;
+                p.hasActed = false; p.remainingMA = p.ma; p.rushes = 2; p.jumpedUp = false; p.actionTaken = null;
                 p.hasBlocked = false; p.usedSkills = []; p.stunnedThisTurn = false;
             });
             state.blitzUsed = false; state.ttmUsed = false; state.passUsed = false; state.handoffUsed = false;
@@ -7626,7 +7626,7 @@
                     if (p.hexed && p.team === state.activeTeam) { p.hexed = false; p.hexHold = true; }
                     if (p.team === state.activeTeam) {
                         p.isDistracted = false;
-                        p.hasActed = false; p.remainingMA = p.ma; p.rushes = 2; p.actionTaken = null; p.hasBlocked = false; p.usedSkills = []; p.frenzyDone = false;
+                        p.hasActed = false; p.remainingMA = p.ma; p.rushes = 2; p.jumpedUp = false; p.actionTaken = null; p.hasBlocked = false; p.usedSkills = []; p.frenzyDone = false;
                     }
                 });
             }
@@ -14011,8 +14011,8 @@
                     if(state.mode === MODES.ACTION_HANDOFF && state.ball.carrierId === p.id) document.getElementById('btn-execute-handoff').classList.remove('hidden');
                     if(state.mode === MODES.ACTION_TTM && getAdjacentRightStuffTeammate(p)) document.getElementById('btn-execute-ttm').classList.remove('hidden');
                     
-                    if ([MODES.ACTION_MOVE, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM, MODES.ACTION_VOMIT, MODES.ACTION_STAB, MODES.ACTION_CHAINSAW, MODES.TARGET_BOMB, MODES.TARGET_PASS, MODES.TARGET_HANDOFF, MODES.TARGET_TTM].includes(state.mode)) {
-                        if (p.remainingMA === p.ma && p.rushes >= 2 && !p.hasBlocked) document.getElementById('btn-cancel-action').classList.remove('hidden');
+                    if ([MODES.ACTION_MOVE, MODES.ACTION_BLOCK, MODES.ACTION_CHOMP, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM, MODES.ACTION_VOMIT, MODES.ACTION_STAB, MODES.ACTION_CHAINSAW, MODES.TARGET_BOMB, MODES.TARGET_PASS, MODES.TARGET_HANDOFF, MODES.TARGET_TTM].includes(state.mode)) {
+                        if (p.remainingMA === p.ma && p.rushes >= 2 && !p.hasBlocked && !p.jumpedUp) document.getElementById('btn-cancel-action').classList.remove('hidden');
                         document.getElementById('btn-end-action').classList.remove('hidden');
                     }
                 }
@@ -14034,7 +14034,7 @@
             log(`  ${p.type} tries to Jump Up into a block!`, 'text-sky-300 font-bold');
             if (!activationTest(p)) return;
             setupRoll('JUMP UP', p, Math.max(2, Math.min(6, p.ag - 1)), 'None',
-                () => { p.isDown = false; skillPop('Jump Up'); log(`  ${p.type} springs up and blocks!`, 'text-sky-300'); state.mode = MODES.ACTION_BLOCK; updateValidActions(p); },
+                () => { p.isDown = false; p.jumpedUp = true; skillPop('Jump Up'); log(`  ${p.type} springs up and blocks!`, 'text-sky-300'); state.mode = MODES.ACTION_BLOCK; updateValidActions(p); },
                 () => { log(`  ${p.type} can't get up: the activation ends.`, 'text-slate-400'); p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null; state.mode = MODES.IDLE; refreshSelection(p); },
                 { desc: 'Jump Up: an Agility test with +1 to stand up and block. Fail and the player stays Prone and their activation ends (no Turnover).', prevMode: MODES.LOCKED, skillAllowed: false,
                   explainFail: () => ({ title: 'Stays Down', text: 'The player stays Prone and their activation ends. It is not a Turnover.' }) });
@@ -14739,8 +14739,10 @@
         document.getElementById('btn-cancel-action').onclick = () => { 
             if (state.mode === MODES.BOMB_RETHROW) return;
             let p = getPlayerById(state.selectedId); 
-            if(p && p.remainingMA===p.ma && p.rushes>=2 && !p.hasBlocked) { p.rushes = 2;
+            if(p && p.remainingMA===p.ma && p.rushes>=2 && !p.hasBlocked && !p.jumpedUp) { p.rushes = 2;
                 p.actionTaken=null; 
+                if (state.mbPick && state.mbPick.atkId === p.id) state.mbPick = null;   // Multiple Block: drop the first pick too
+                state.stabArmed = state.chainsawArmed = state.chompArmed = state.vomitArmed = false;
                 if(state.mode===MODES.ACTION_BLITZ) state.blitzUsed=false; 
                 if(state.mode===MODES.ACTION_FOUL) state.foulUsed=false; 
                 if(state.mode===MODES.ACTION_PASS || state.mode===MODES.TARGET_PASS) state.passUsed=false; 

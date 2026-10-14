@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.03 (14 Oct 2026)
+- **Fixed:** the Cancel button now shows for Block and Chomp actions, so you can back out and pick a different action before any dice are rolled. Cancel isn't offered after a Jump Up into a block, because the player has already stood up for free. ([#6](https://github.com/sirspoon/BludBowl/issues/6))
+
 ## v2.02 (14 Oct 2026)
 - **Added:** click the version number on the title screen to see this list of changes. The number is now highlighted so it's clear you can click it.
 
