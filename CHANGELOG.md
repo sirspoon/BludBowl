@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.04 (14 Oct 2026)
+- **Changed:** rolls like Bone Head, Really Stupid, Animal Savagery, Unchannelled Fury, Bloodlust and Take Root now happen when the player first does something (takes a step or picks a target), not as soon as you choose the action. Until then, Cancel undoes a mis-click with nothing rolled. Once the roll is made, the result stands for the rest of the turn, even if you cancel. ([#6](https://github.com/sirspoon/BludBowl/issues/6))
+- **Fixed:** cancelling a Punt now lets the team punt again that turn.
+
 ## v2.03 (14 Oct 2026)
 - **Fixed:** the Cancel button now shows for Block and Chomp actions, so you can back out and pick a different action before any dice are rolled. Cancel isn't offered after a Jump Up into a block, because the player has already stood up for free. ([#6](https://github.com/sirspoon/BludBowl/issues/6))
 

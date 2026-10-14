@@ -782,7 +782,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.03</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.04</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -8861,6 +8861,7 @@
                 if (ts.length === 1 || AI.isAI(p.team)) { doGaze(p, ts.sort((a, b) => (b.id === state.ball.carrierId) - (a.id === state.ball.carrierId))[0]); return; }
                 askOptions('HYPNOTIC GAZE', `Who does ${p.name || p.type} stare down? On a 3+ they are Distracted.`, ts.map(q => ({ label: `${q.name || q.type} (${q.type})${q.id === state.ball.carrierId ? ' · has the ball' : ''}`, fn: () => doGaze(p, q) })), { team: p.team, ai: 0 }); };
             if (state.mode === MODES.IDLE) { p.actionTaken = 'gaze'; if (!activationTest(p)) return; }
+            else if (p.pendingAct && (!commitAction(p) || p.hasActed)) { render(); return; }
             go();
         }; }
         // Grak carries Crumbleberry: put him down next to Grak once Grak's activation is over
@@ -9025,6 +9026,24 @@
             }
         }
         { const b = document.getElementById('btn-action-star'); if (b) b.onclick = () => { const p = getPlayerById(state.selectedId), sa = starAction(p); if (sa) sa.fn(); }; }
+        // Declaring an action rolls nothing yet: Bone Head, Animal Savagery and the like are rolled when the player first
+        // does something with it (a step, a target), so a mis-click can still be cancelled. Once rolled, the result stands for the turn.
+        const actStamp = () => `${state.driveId || 0}:${state.half}:${state.turn[state.activeTeam]}`;
+        function declareAction(p) {
+            if (p.activatedAt === actStamp()) return true;                         // already rolled this turn
+            if (AI.isAI(p.team) || p.hexHold) return commitAction(p);              // the computer (and a hexed player) find out at once
+            p.pendingAct = true; return true;
+        }
+        function commitAction(p) { p.pendingAct = false; p.activatedAt = actStamp(); return activationTest(p); }
+        // would this tap actually do something for the selected player (a step or a target), rather than just look around?
+        function tapCommits(p, x, y) {
+            if (x < 0 || x >= CFG.cols || y < 0 || y >= CFG.rows || (x === p.x && y === p.y)) return false;
+            if (state.mode === MODES.TARGET_PASS && state.hailArmed) return true;
+            const c = getPlayer(x, y);
+            if (state.mode === MODES.ACTION_TTM && c && c.team === p.team && c.skills && c.skills.includes('Right Stuff') && cheb1(p, c) === 1) return true;
+            if (state.targets.some(t => (c && (t === c.id || (t && t.id === c.id))) || (t && typeof t === 'object' && t.x === x && t.y === y))) return true;
+            return !c && state.moves.some(m => m.x === x && m.y === y);
+        }
         function activationTest(p) {
             starCarryDrop();
             if (p.hexHold) { log(`  ${p.name || p.type} is still under Estelle's hex and can't act this turn.`, 'text-violet-300'); p.hasActed = true; state.mode = MODES.IDLE; refreshSelection(p); return false; }
@@ -13543,6 +13562,15 @@
         function handleGridClick(x, y) {
             if(x<-1 || x>CFG.cols || y<-1 || y>CFG.rows) return; 
             if (isWalking()) return;   // taps while a player is still walking would start a second move on top of the first
+            {   // the first real step or target: now roll for Bone Head and the like, then carry on with the tap
+                const sp = getPlayerById(state.selectedId);
+                if (sp && sp.pendingAct && sp.team === state.activeTeam && tapCommits(sp, x, y)) {
+                    const mode = state.mode;
+                    if (!commitAction(sp) || sp.hasActed || state.pendingRoll || state.mode === MODES.LOCKED || state.mode === MODES.IDLE) { render(); return; }
+                    state.mode = mode; updateValidActions(sp);
+                    return handleGridClick(x, y);
+                }
+            }
             if (state.mode === MODES.BOMB_RETHROW) { bombRethrowClick(x, y); return; }
             if (state.mode === MODES.TARGET_PASS && state.hailArmed && x >= 0 && x < CFG.cols && y >= 0 && y < CFG.rows) {
                 const t = getPlayerById(state.selectedId);
@@ -14040,17 +14068,17 @@
                   explainFail: () => ({ title: 'Stays Down', text: 'The player stays Prone and their activation ends. It is not a Turnover.' }) });
         }
 
-        document.getElementById('btn-action-move').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='move'; if (p.skills.includes('Sprint') && p.rushes === 2) p.rushes = 3; state.mode=MODES.ACTION_MOVE; if(!activationTest(p)) return; updateValidActions(p); };
-        document.getElementById('btn-action-block').onclick = () => { let p = getPlayerById(state.selectedId); if (p.isDown && p.skills.includes('Jump Up')) { jumpUpBlock(p); return; } p.actionTaken='block'; state.mode=MODES.ACTION_BLOCK; if(!activationTest(p)) return; updateValidActions(p); };
-        document.getElementById('btn-action-secure').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='secure_ball'; state.mode=MODES.ACTION_SECURE_BALL; state.secureUsed=true; log(`  ${p.type} declares Secure Ball.`); if(!activationTest(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-move').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='move'; if (p.skills.includes('Sprint') && p.rushes === 2) p.rushes = 3; state.mode=MODES.ACTION_MOVE; if(!declareAction(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-block').onclick = () => { let p = getPlayerById(state.selectedId); if (p.isDown && p.skills.includes('Jump Up')) { jumpUpBlock(p); return; } p.actionTaken='block'; state.mode=MODES.ACTION_BLOCK; if(!declareAction(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-secure').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='secure_ball'; state.mode=MODES.ACTION_SECURE_BALL; state.secureUsed=true; log(`  ${p.type} declares Secure Ball.`); if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-blitz').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='blitz'; state.mode=MODES.ACTION_BLITZ; state.blitzUsed=true; log(`  ${p.type} BLITZ!`, 'text-amber-400 font-bold');
             if (starIs(p, 'glart') && starFree(p, 'rush' + state.half) && !p.skills.includes('Frenzy')) { starSpend(p, 'rush' + state.half, 'Frenzied Rush'); tempSkill(p, ['Frenzy'], ['Grab']); log(`  FRENZIED RUSH! Glart has Frenzy for this Blitz (no Grab this turn).`, 'text-yellow-300 font-bold'); }
             if (starIs(p, 'roxanna') && starFree(p, 'nails' + state.half) && !p.skills.includes('Claws')) { starSpend(p, 'nails' + state.half, 'Slashing Nails'); p.skills.push('Claws'); p.tempClaws = true; log(`  SLASHING NAILS! Roxanna has Claws for this Blitz.`, 'text-yellow-300 font-bold'); }
-            if(!activationTest(p)) return; updateValidActions(p); };
+            if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-razzle').onclick = () => { const p = getPlayerById(state.selectedId); if (!p || !dmAvail(p.team, 2) || p.razzle) return; dmUse(p.team, 2, `${p.name || p.type} will take two Actions`); p.razzle = 'armed'; updateValidActions(p); };
-        document.getElementById('btn-action-foul').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='foul'; state.mode=MODES.ACTION_FOUL; if (state.foulUsed && dmAvail(p.team, 4) && !(starIs(p, 'blackgobbo') && (state.foulers || []).length < 2)) { dmUse(p.team, 4, `${p.name || p.type} fouls again, and can't be Sent-off for it`); p.grudge = true; } else if (state.foulUsed) log(`  SNEAKIEST OF THE LOT! A second Foul this turn.`, 'text-yellow-300 font-bold'); state.foulUsed=true; (state.foulers = state.foulers || []).push(p.id); log(`  ${p.type} declares a FOUL!`, 'text-stone-400 font-bold'); if(!activationTest(p)) return; updateValidActions(p); };
-        document.getElementById('btn-action-pass').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='pass'; state.mode=MODES.ACTION_PASS; state.passUsed=true; log(`  ${p.type} declares a Pass Action.`); if(!activationTest(p)) return; updateValidActions(p); };
-        document.getElementById('btn-action-handoff').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='handoff'; state.mode=MODES.ACTION_HANDOFF; state.handoffUsed=true; log(`  ${p.type} declares Hand-off Action.`); if(!activationTest(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-foul').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='foul'; state.mode=MODES.ACTION_FOUL; if (state.foulUsed && dmAvail(p.team, 4) && !(starIs(p, 'blackgobbo') && (state.foulers || []).length < 2)) { dmUse(p.team, 4, `${p.name || p.type} fouls again, and can't be Sent-off for it`); p.grudge = true; } else if (state.foulUsed) log(`  SNEAKIEST OF THE LOT! A second Foul this turn.`, 'text-yellow-300 font-bold'); state.foulUsed=true; (state.foulers = state.foulers || []).push(p.id); log(`  ${p.type} declares a FOUL!`, 'text-stone-400 font-bold'); if(!declareAction(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-pass').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='pass'; state.mode=MODES.ACTION_PASS; state.passUsed=true; log(`  ${p.type} declares a Pass Action.`); if(!declareAction(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-handoff').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='handoff'; state.mode=MODES.ACTION_HANDOFF; state.handoffUsed=true; log(`  ${p.type} declares Hand-off Action.`); if(!declareAction(p)) return; updateValidActions(p); };
         
         document.getElementById('btn-action-ttm').onclick = () => {
             let p = getPlayerById(state.selectedId);
@@ -14059,7 +14087,7 @@
             state.mode = MODES.ACTION_TTM;
             state.ttmUsed = true; state.ttmKick = false;
             log(`  ${p.type} declares Throw Teammate. Move into position or select target.`, 'text-fuchsia-400 font-bold');
-            if(!activationTest(p)) return; updateValidActions(p);
+            if(!declareAction(p)) return; updateValidActions(p);
         };
         document.getElementById('btn-action-ktm').onclick = () => {
             let p = getPlayerById(state.selectedId);
@@ -14068,7 +14096,7 @@
             state.mode = MODES.ACTION_TTM;
             state.ktmUsed = true; state.ttmKick = true;
             log(`  ${p.type} declares Kick Team-mate. Move into position or select target.`, 'text-fuchsia-400 font-bold');
-            if(!activationTest(p)) return; updateValidActions(p);
+            if(!declareAction(p)) return; updateValidActions(p);
         };
 
         document.getElementById('btn-action-stab').onclick = () => {
@@ -14080,7 +14108,7 @@
             }
             p.actionTaken = 'stab';
             log(`  ${p.type} declares a Stab.`, 'text-lime-300 font-bold');
-            if (!activationTest(p)) return;
+            if (!declareAction(p)) return;
             state.mode = MODES.ACTION_STAB;
             updateValidActions(p);
         };
@@ -14090,11 +14118,12 @@
             const p = getPlayerById(state.selectedId);
             handleStandUp(p); p.actionTaken = 'punt'; state.puntUsed = true;
             log(`  ${p.type} declares a Punt: move, then kick the ball downfield.`, 'text-amber-300 font-bold');
-            if (!activationTest(p)) return;
+            if (!declareAction(p)) return;
             state.mode = MODES.ACTION_MOVE; updateValidActions(p);
         };
         document.getElementById('btn-execute-punt').onclick = () => {
             const p = getPlayerById(state.selectedId);
+            if (p.pendingAct && (!commitAction(p) || p.hasActed)) { render(); return; }
             state.mode = MODES.LOCKED;
             const fwd = p.team === TEAMS.HUMAN ? 1 : -1;
             const dirs = [{ label: 'Downfield (towards their end zone)', d: [fwd, 0] }, { label: 'Towards the top sideline', d: [0, -1] }, { label: 'Towards the bottom sideline', d: [0, 1] }, { label: 'Back towards your own end zone', d: [-fwd, 0] }];
@@ -14146,7 +14175,7 @@
             }
             p.actionTaken = 'chomp';
             log(`  ${p.type} declares a Chomp.`, 'text-rose-300 font-bold');
-            if (!activationTest(p)) return;
+            if (!declareAction(p)) return;
             state.mode = MODES.ACTION_CHOMP;
             updateValidActions(p);
         };
@@ -14201,7 +14230,7 @@
             p.actionTaken = 'chainsaw';
             log(`  ${p.type} revs up a CHAINSAW ATTACK!`, 'text-orange-400 font-bold');
             sfx('chainsaw');
-            if (!activationTest(p)) return;
+            if (!declareAction(p)) return;
             state.mode = MODES.ACTION_CHAINSAW;
             updateValidActions(p);
         };
@@ -14264,7 +14293,7 @@
             p.actionTaken = 'bomb'; state.bombUsed = true;
             log(`  ${p.type} lights a BOMB! Pick a square to throw it at.`, 'text-orange-400 font-bold');
             sfx('fuse');
-            if (!activationTest(p)) return;
+            if (!declareAction(p)) return;
             state.mode = MODES.TARGET_BOMB;
             updateValidActions(p);
         };
@@ -14717,7 +14746,7 @@
             }
             p.actionTaken = 'vomit';
             log(`  ${p.type} declares ${p.skills.includes('Projectile Vomit') ? 'Projectile Vomit' : 'Breathe Fire'}.`, 'text-lime-400 font-bold');
-            if (!activationTest(p)) return;
+            if (!declareAction(p)) return;
             state.mode = MODES.ACTION_VOMIT;
             updateValidActions(p);
         };
@@ -14740,8 +14769,10 @@
             if (state.mode === MODES.BOMB_RETHROW) return;
             let p = getPlayerById(state.selectedId); 
             if(p && p.remainingMA===p.ma && p.rushes>=2 && !p.hasBlocked && !p.jumpedUp) { p.rushes = 2;
+                if (p.actionTaken === 'punt') state.puntUsed = false;
                 p.actionTaken=null; 
                 if (state.mbPick && state.mbPick.atkId === p.id) state.mbPick = null;   // Multiple Block: drop the first pick too
+                if (p.pendingAct) p.pendingAct = false;   // nothing was rolled, so nothing to keep
                 state.stabArmed = state.chainsawArmed = state.chompArmed = state.vomitArmed = false;
                 if(state.mode===MODES.ACTION_BLITZ) state.blitzUsed=false; 
                 if(state.mode===MODES.ACTION_FOUL) state.foulUsed=false; 
