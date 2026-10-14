@@ -825,7 +825,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.27</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.28</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -12077,11 +12077,13 @@
             let base = [47, 107, 42];
             if (tex) { try { const s1 = document.createElement('canvas'); s1.width = s1.height = 8; const sc = s1.getContext('2d'); sc.drawImage(tex, 0, 0, 8, 8); const d = sc.getImageData(0, 0, 8, 8).data; let r = 0, gg = 0, b = 0; for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; base = [r / n, gg / n, b / n].map(Math.round); } catch (e) {} }
             const mix = (a, k) => `rgb(${Math.round(a[0] * k + 11 * (1 - k))},${Math.round(a[1] * k + 15 * (1 - k))},${Math.round(a[2] * k + 25 * (1 - k))})`;   // towards the night sky
-            const sky = g.createLinearGradient(0, 0, 0, ground);
-            sky.addColorStop(0, mix(base, 0.18)); sky.addColorStop(1, mix(base, 0.5));
+            const sky = g.createLinearGradient(0, 0, 0, ground), grassy = style === 'blades' || style === 'worn';
+            if (grassy) { sky.addColorStop(0, 'rgb(16,32,66)'); sky.addColorStop(0.7, 'rgb(36,66,110)'); sky.addColorStop(1, 'rgb(52,86,120)'); }   // an evening-blue sky over the grass
+            else { sky.addColorStop(0, mix(base, 0.18)); sky.addColorStop(1, mix(base, 0.5)); }
             g.fillStyle = sky; g.fillRect(0, 0, W, H);
             // scenery, as a dark silhouette in the pitch's colour
-            const sil = mix(base, style === 'graveyard' ? 0.06 : 0.3), sil2 = mix(base, 0.42), hz = ground - 22;   // hz: where the floor starts
+            const blue = [30, 52, 86], tint = (a, b, k) => [0, 1, 2].map(i => a[i] * k + b[i] * (1 - k));   // grass pitches: the stands go blue-grey to sit in the blue sky
+            const sil = grassy ? mix(tint(base, blue, 0.25), 0.35) : mix(base, style === 'graveyard' ? 0.06 : 0.3), sil2 = grassy ? mix(tint(base, blue, 0.25), 0.55) : mix(base, 0.42), hz = ground - 22;   // hz: where the floor starts
             g.fillStyle = sil;
             if (style === 'graveyard') {
                 for (let i = 0; i < 9; i++) {   // headstones and crosses
