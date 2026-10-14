@@ -853,6 +853,10 @@
 @media (max-height: 520px) { #form-slots { gap: 3px; padding: 4px; } #form-slots button { min-height: 26px; min-width: 38px; font-size: 12px; } #form-slots .fs-cap { display: none; } }
 @keyframes fsPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(20,184,166,.0); } 50% { box-shadow: 0 0 0 3px rgba(20,184,166,.6); } }
 .net-theirs { opacity: .35 !important; filter: grayscale(1) !important; cursor: not-allowed !important; }
+#net-league { position: fixed; inset: 0; z-index: 330; background: #0b1220; overflow-y: auto; color: #e2e8f0; }
+#net-league.hidden, #nl-league.hidden, #net-league-btn.hidden { display: none; }
+#net-league .pg-head h2 { margin: 0; } #net-league [data-play], #net-league [data-watch], #net-league [data-sim], #net-league [data-act], #net-league .lg-who, #net-league [data-tb] { display: none !important; }
+#net-league-btn { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #b45309; background: rgba(66,32,6,.75); color: #fde68a; white-space: nowrap; }
 #net-chip { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #0284c7; background: rgba(8,47,73,.75); color: #bae6fd; white-space: nowrap; }
 #net-chip.bad { border-color: #e11d48; background: rgba(76,5,25,.8); color: #fecdd3; }
 #whats-new { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.65); display: grid; place-items: center; padding: 16px; font-family: Inter, system-ui, sans-serif; color: #e2e8f0; }
@@ -876,7 +880,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.42</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.43</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1174,6 +1178,7 @@
                         <button type="button" id="ind-chip" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-violet-500 bg-violet-950/70 text-violet-200 mr-1 whitespace-nowrap inline-block align-middle" onclick="indChipMenu()">🔮 Inducements</button>
                         <span id="bribe-indicator" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-yellow-600 bg-yellow-950/70 text-yellow-200 mr-1 whitespace-nowrap inline-block align-middle"></span>
                         <button type="button" id="net-chip" class="hidden" title="Two-device match: the connection to the other device"></button>
+                        <button type="button" id="net-league-btn" class="hidden" title="The league table and fixtures" onclick="NET.leagueView()">📋 League</button>
                         <span id="kickoff-banner" class="hidden text-amber-400 font-bold text-[9px] sm:text-[10px] bg-amber-950/80 border border-amber-500 px-2 py-0.5 rounded animate-pulse truncate inline-block max-w-full"></span>
                 </div>
                 
@@ -2067,7 +2072,7 @@
             // the match a report is built from: the one just played, or one the quick simulator worked out
             function liveSrc() {
                 return { score: [state.score[0], state.score[1]], fanFactor: [state.fanFactor[0] || 0, state.fanFactor[1] || 0], stalled: state.stalled, players: state.players,
-                    ids: [0, 1].map(i => NET.recordsHere(i) ? ROSTERS[i].careerTeamId : null), opp: [0, 1].map(i => ROSTERS[i].oppName || ROSTERS[1 - i].baseName || ROSTERS[1 - i].name), ai: [0, 1].map(i => !NET.on() && !NET.wasGuest() && AI.isOn(i)) };
+                    ids: [0, 1].map(i => NET.recordsHere(i) ? ROSTERS[i].careerTeamId : null), opp: [0, 1].map(i => ROSTERS[i].oppName || ROSTERS[1 - i].baseName || ROSTERS[1 - i].name), ai: [0, 1].map(i => !NET.wasGuest() && AI.isOn(i)) };
             }
             function buildReport(team, src) {
                 src = src || liveSrc();
@@ -2411,12 +2416,14 @@
                 const needMvp = reports.some(r => !r.ai && !r.mvp), rolled = Object.keys(pend).length > 0, needSev = reports.some(r => !r.ai && r.sev && !r.sev.done);
                 const mustAdv = finished ? [] : reports.filter(r => !r.ai && !r.sev).flatMap(r => r.rows.filter(x => !x.jm && !x.dead && mustAdvance(x.rec)).map(x => x.rec.name));
                 $('pg-finish').classList.toggle('hidden', finished);
-                $('pg-finish').disabled = needMvp || rolled || needSev || mustAdv.length > 0;
-                $('pg-finish').textContent = needMvp ? 'Roll for MVP first' : rolled ? 'Take your rolled advancement first' : needSev ? 'Finish the advancement first'
+                const hold = NET.finishHold();
+                $('pg-finish').disabled = needMvp || rolled || needSev || mustAdv.length > 0 || !!hold;
+                $('pg-finish').textContent = hold ? 'Waiting for the other report' : needMvp ? 'Roll for MVP first' : rolled ? 'Take your rolled advancement first' : needSev ? 'Finish the advancement first'
                     : mustAdv.length ? `${mustAdv.length === 1 ? mustAdv[0] + ' has' : mustAdv.length + ' players have'} enough SPP and must advance first` : 'Finish & save';
                 $('pg-after').classList.toggle('hidden', !finished);
                 $('pg-again').textContent = state.league ? 'Back to the league' : 'Main Menu';
                 $('pg-note').textContent = finished ? (reports.some(r => !r.ai && r.t.emPending) ? 'Saved. Next: spend your treasury, then roll for Expensive Mistakes. If you leave now, it is rolled before this team\'s next match.' : 'Saved. Use the Team Builder to hire and fire, buy re-rolls (double cost after the first match) and staff.') : 'Advance players now, or keep their SPP for later. Finishing saves everything.';
+                if (hold && !finished) $('pg-note').innerHTML = `${hold} <button type="button" class="pg-btn" data-pgnet="1">Do it on this device instead</button>`;   // a two-device league match
             }
             function wire() {
                 const root = $('post-game');
@@ -2483,7 +2490,8 @@
                             p.id = uid(); row.rec.id = p.id; row.rec = p; rep.t.players.push(p); rep.t.treasury -= cost;
                         }
                     }
-                    else if (b.id === 'pg-finish') { if (!Object.keys(pend).length) finish(); }
+                    else if (b.id === 'pg-finish') { if (!Object.keys(pend).length && !NET.finishHold()) finish(); }
+                    else if (d.pgnet) { NET.postHere(); return; }
                     else if (b.id === 'pg-builder' || d.pgtb) {   // spend in the Team Builder, then come back here
                         const r0 = rep || reports[0]; if (!r0) return;
                         $('post-game').classList.add('hidden');
@@ -2497,7 +2505,16 @@
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
 
-            return { reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS,
+            // the other device's league team, done on this device after all (it dropped out, or the host chose to)
+            function addReport(team) {
+                if (finished || reports.some(r => r.team === team)) return;
+                const r = buildReport(team); if (!r) return;
+                if (r.ai) autoTeam(r); else r.nominees = [];
+                reports.push(r); reports.sort((a, b) => a.team - b.team);
+                if (!$('post-game').classList.contains('hidden')) render();
+            }
+            const refresh = () => { if (!$('post-game').classList.contains('hidden')) render(); };
+            return { addReport, refresh, reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS,
                 started: t => (t.played || 0) > 0, statLine };
         })();
 
@@ -2742,16 +2759,29 @@
                 } else c.players.forEach(p => { delete p.vet; });
                 return c;
             }
+            // a team lent by another device for a while (a league team's post-match on the guest's device): it lives in memory only,
+            // and every save of it goes back through onTemp instead of into this device's storage
+            const temps = new Map(); let onTemp = null;
             function load() {
                 try {
                     const d = JSON.parse(localStorage.getItem(KEY) || '{}');
                     teams = (Array.isArray(d.teams) ? d.teams : []).filter(valid).map(clean);
+                    temps.forEach((t, id) => { const i = teams.findIndex(x => x.id === id); if (i >= 0) teams[i] = t; else teams.push(t); });
                     // older saves have no player ids: give them ids once and keep them, so records stay attached to the right player
                     if ((d.teams || []).some(t => t && Array.isArray(t.players) && t.players.some(p => p && !p.id))) persist();
                 } catch (e) { teams = []; }
             }
             function persist() {
-                try { localStorage.setItem(KEY, JSON.stringify({ version: VER, teams })); return true; } catch (e) { return false; }
+                let keep = teams;
+                if (temps.size) {
+                    teams.filter(t => temps.has(t.id)).forEach(t => {
+                        if (JSON.stringify(t) === JSON.stringify(temps.get(t.id))) return;   // unchanged: nothing to send
+                        const c = JSON.parse(JSON.stringify(t)); temps.set(t.id, c); if (onTemp) onTemp(c);
+                    });
+                    let stored = []; try { stored = JSON.parse(localStorage.getItem(KEY) || '{}').teams || []; } catch (e) {}
+                    keep = teams.map(t => temps.has(t.id) ? stored.find(x => x && x.id === t.id) : t).filter(Boolean);   // this device's own copy (if any) stays as it was
+                }
+                try { localStorage.setItem(KEY, JSON.stringify({ version: VER, teams: keep })); return true; } catch (e) { return false; }
             }
             load();
 
@@ -3245,7 +3275,8 @@
             const remove = id => { load(); teams = teams.filter(x => x.id !== id); persist(); };
             const get = id => { load(); const t = teams.find(x => x.id === id); return t ? JSON.parse(JSON.stringify(t)) : null; };
             const put = t => { load(); const c = clean(JSON.parse(JSON.stringify(t))), i = teams.findIndex(x => x.id === c.id); if (i >= 0) teams[i] = c; else teams.push(c); return persist(); };
-            return { open, list: () => { load(); return teams.slice(); }, toRace, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf };
+            const temp = (t, cb) => { temps.set(t.id, clean(JSON.parse(JSON.stringify(t)))); onTemp = cb; load(); };
+            return { temp, open, list: () => { load(); return teams.filter(t => !temps.has(t.id)); }, toRace, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf };
         })();
         // ---------- Trophies: gold, silver and bronze for the top three of a league season, cup or Swiss event ----------
         const TROPHY = {
@@ -3519,7 +3550,8 @@
             const get = id => leagues.find(l => l.id === id);
             const teamOf = id => TB.get(id);
             const nameOf = id => { const t = teamOf(id); return t ? t.name : '(deleted team)'; };
-            const isYou = (lg, id) => lg.coach[id] !== 'c';
+            const isYou = (lg, id) => lg.coach[id] !== 'c';   // a person: you ('p') or the other player on their device ('o')
+            const isOther = (lg, id) => lg.coach[id] === 'o';
             const inLeague = id => leagues.find(l => l.teams.includes(id));
 
             // ---- computer teams: a race's starting roster, a name and a kit ----
@@ -3971,7 +4003,7 @@
                     ${indTabsHtml((fav === 1 ? [1, 0] : [0, 1]).map(i => { const b = budget(i);
                         return { i, name: pm.T[i].name, cpu: pm.cpu[i], sub: b.total > 0 ? `${i === fav ? 'Favourite' : 'Underdog'} · left ${k(b.total - spent(i))}` : 'Nothing to spend' }; }), pm.tab, 'pmtab')}
                     <div class="ind-pane">${panel(pm.tab)}</div>
-                    <div class="lg-cta"><button type="button" class="pg-btn" data-act="pmback">Back</button>${!pm.watch && !pm.cpu[0] && !pm.cpu[1] ? '<button type="button" class="pg-btn" data-act="kickoff2" title="Play this fixture against someone on another device: they coach the away team">Play on two devices</button>' : ''}<button type="button" class="pg-primary" data-act="kickoff">Kick off →</button></div>`;
+                    <div class="lg-cta"><button type="button" class="pg-btn" data-act="pmback">Back</button>${twoOk(lg) ? `<button type="button" class="pg-primary" data-act="kickoff2" title="The other player coaches ${esc(nameOf(isOther(lg, byKey(lg, pm.key).h) ? byKey(lg, pm.key).h : byKey(lg, pm.key).a))} on their own device">Play on two devices →</button>` : ''}<button type="button" class="${twoOk(lg) ? 'pg-btn' : 'pg-primary'}" data-act="kickoff">${twoOk(lg) ? 'Play on this device' : 'Kick off →'}</button></div>`;
             }
 
             // ---- a played match comes back here ----
@@ -3994,7 +4026,7 @@
                 const t = teamOf(id), R = t && RACES[t.race];
                 return `<span class="th-tok ${big ? '' : 'lg-tok'}" style="background:${t ? t.primary : '#334155'};color:${t ? t.secondary : '#fff'}">${esc(R ? R.short || '' : '?')}</span>`;
             }
-            const coachTag = (lg, id) => (lg.holder === id ? '<span class="lg-coach lg-holder" title="League champions: an extra team re-roll this season">🏆</span>' : '') + (isYou(lg, id) ? '<span class="lg-coach you">You</span>' : '<span class="lg-coach">CPU</span>');
+            const coachTag = (lg, id) => (lg.holder === id ? '<span class="lg-coach lg-holder" title="League champions: an extra team re-roll this season">🏆</span>' : '') + (isOther(lg, id) ? '<span class="lg-coach you" title="Coached by the other player, on their device">Other</span>' : isYou(lg, id) ? '<span class="lg-coach you">You</span>' : '<span class="lg-coach">CPU</span>');
             function stageText(lg) {
                 if (lg.stage === 'season') return `Round ${lg.at + 1} of ${lg.rounds.length}`;
                 if (lg.stage === 'offseason') return 'Off-season';
@@ -4099,10 +4131,17 @@
                         const r = tb.find(x => x.id === id) || { w: 0, d: 0, l: 0 }, R = RACES[t.race];
                         return `<div class="lg-team"><div class="lg-team-row">${tok(id, true)}<div class="lg-team-main"><div class="lg-tn">${esc(t.name)}</div>
                             <div class="pg-dim">${esc(R.name)} · ${r.w}-${r.d}-${r.l} · TV ${k(CAREER.tv(t))} · treasury ${t.treasury != null && CAREER.started(t) ? k(t.treasury) : '–'} · ${t.rerolls} re-roll${t.rerolls === 1 ? '' : 's'}</div></div>
-                            <div class="lg-team-acts"><div class="ai-toggle lg-who" role="group" aria-label="Who coaches ${esc(t.name)}"><button type="button" data-coach="${id}|p" class="${isYou(lg, id) ? 'on' : ''}">You</button><button type="button" data-coach="${id}|c" class="${isYou(lg, id) ? '' : 'on'}">Computer</button></div>
+                            <div class="lg-team-acts"><div class="ai-toggle lg-who" role="group" aria-label="Who coaches ${esc(t.name)}"><button type="button" data-coach="${id}|p" class="${isYou(lg, id) && !isOther(lg, id) ? 'on' : ''}">You</button><button type="button" data-coach="${id}|o" class="${isOther(lg, id) ? 'on' : ''}" title="Another player, on their own device (Two Devices)">Other player</button><button type="button" data-coach="${id}|c" class="${isYou(lg, id) ? '' : 'on'}">Computer</button></div>
                             <button type="button" class="pg-btn" data-ros="${id}">${open1 === id ? 'Hide roster' : 'Roster'}</button>${isYou(lg, id) ? `<button type="button" class="pg-btn" data-tb="${id}">Team Builder</button>` : ''}</div></div>
                             ${open1 === id ? rosterHtml(t) : ''}</div>`;
                     }).join('')}</section>`;
+            }
+            function viewHtml(lid) {
+                load(); const lg = get(lid); if (!lg) return '';
+                const list = lg.stage === 'season' || lg.stage === 'playoffs' ? fixtureList(lg) : [];
+                return `<section class="pg-card th-headcard"><h3 class="th-h">${esc(lg.name)}</h3><div class="pg-dim">Season ${lg.season} · ${stageText(lg)}</div></section>
+                    ${list.length ? `<section class="pg-card"><h3>${lg.stage === 'season' ? 'This round' : stageText(lg)}</h3>${list.map(x => fxRow(lg, x.f, x.key, x.label, false)).join('')}</section>` : ''}
+                    <section class="pg-card"><h3>Table</h3>${tableHtml(lg, true)}</section>${fixturesHtml(lg)}`;
             }
             function leagueHtml(lg) {
                 const tabs = [['round', lg.stage === 'done' ? 'Champions' : lg.stage === 'offseason' ? 'Off-season' : 'This round'], ['table', 'Table'], ['fixtures', 'Fixtures'], ['teams', 'Teams']];
@@ -4134,7 +4173,7 @@
                     return `<div class="lg-pick ${busy ? 'off' : ''}"><button type="button" class="pg-chip ${on ? 'on' : ''}" data-mine="${t.id}" ${busy || (!on && mineIds.length >= d.size) ? 'disabled' : ''}>${on ? '✓ In' : 'Add'}</button>
                         <span class="th-tok lg-tok" style="background:${t.primary};color:${t.secondary}">${esc(R.short || '')}</span>
                         <div class="lg-team-main"><div class="lg-tn">${esc(t.name)}</div><div class="pg-dim">${esc(R.name)} · TV ${k(CAREER.tv(CAREER.normTeam(t)))}${busy ? ' · already in ' + esc(busy.name) : CAREER.started(t) ? ` · ${t.played} played` : ''}</div></div>
-                        ${on ? `<div class="ai-toggle lg-who" role="group" aria-label="Who coaches ${esc(t.name)}"><button type="button" data-mcoach="${t.id}|p" class="${on === 'p' ? 'on' : ''}">You</button><button type="button" data-mcoach="${t.id}|c" class="${on === 'c' ? 'on' : ''}">Computer</button></div>` : ''}</div>`;
+                        ${on ? `<div class="ai-toggle lg-who" role="group" aria-label="Who coaches ${esc(t.name)}"><button type="button" data-mcoach="${t.id}|p" class="${on === 'p' ? 'on' : ''}">You</button><button type="button" data-mcoach="${t.id}|o" class="${on === 'o' ? 'on' : ''}" title="Another player, on their own device (Two Devices)">Other player</button><button type="button" data-mcoach="${t.id}|c" class="${on === 'c' ? 'on' : ''}">Computer</button></div>` : ''}</div>`;
                 }).join('') : '<div class="pg-dim">You have no saved teams yet. Make one in Teams from the main menu, or run a league of computer teams to watch.</div>';
                 const cpuRows = d.cpu.slice(0, cpuN).map((v, i) => `<label class="lg-cpu"><span class="pg-dim">${i + 1}.</span><select class="lg-sel" data-cpu="${i}"><option value="random"${v === 'random' ? ' selected' : ''}>Random race</option>${races.map(r => `<option value="${r}"${v === r ? ' selected' : ''}>${esc(RACES[r].name)}</option>`).join('')}</select></label>`).join('');
                 return `<section class="pg-card lg-form">
@@ -4338,16 +4377,18 @@
                     <div class="lg-cta"><button type="button" class="pg-btn" data-act="rdback">Back</button><button type="button" class="pg-primary" data-act="rdok" ${bad ? 'disabled' : ''}>Confirm re-draft (${n} players)</button></div>
                     ${bad ? `<div class="pg-dim th-bad" style="text-align:center">${bad}</div>` : '<div class="pg-dim" style="text-align:center">Players you let go leave the team for good.</div>'}`;
             }
+            // two devices: exactly one side is the other player's team (the other side is yours or the computer's)
+            const twoOk = lg => { if (!pm || pm.watch) return false; const f = byKey(lg, pm.key); return !!f && isOther(lg, f.h) !== isOther(lg, f.a); };
             function play(lg, key, watch, two) {
                 const f = byKey(lg, key); if (!f || f.r || f.bye) return;
-                if (two && pm && pm.key === key) {   // two devices: the host coaches the home team, the other device the away team
+                if (two && pm && pm.key === key) {   // two devices: the other player's team is coached on their device, home or away
                     const ind = pmApply(); pm = null; mode = 'league';
                     prevAI = [AI.isOn(0), AI.isOn(1)];
-                    const lid = lg.id;
+                    const lid = lg.id, side = isOther(lg, f.h) ? 0 : 1, cpu = [f.h, f.a].findIndex(id => !isYou(lg, id));
                     close();
-                    NET.hostLeague({ name: lg.name, home: nameOf(f.h), away: nameOf(f.a) },
+                    NET.hostLeague({ name: lg.name, home: nameOf(f.h), away: nameOf(f.a), side, cpu: cpu >= 0, lid },
                         () => window.launchMatch('custom:' + f.h, 'custom:' + f.a, { replaceOk: true, career: !String(key).startsWith('fr:'), league: { lid, key, ind }, ind, extraRR: [f.h, f.a].map(id => id === lg.holder ? 1 : 0), fmt: lg.fmt === 'sevens' ? 'sevens' : 'std' }),
-                        () => open(lid));
+                        () => open(lid), side, cpu >= 0 ? cpu : null);
                     return;
                 }
                 if (!teamOf(f.h) || !teamOf(f.a)) { simFixture(lg, key); save(); render(); return; }
@@ -4438,7 +4479,7 @@
                 root.addEventListener('input', e => { if (draft && e.target.id === 'lg-name') draft.name = e.target.value; });
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
-            return { cpuTeam, raceKeys, IND, IND7, indList, indCost, indMax, offered, open, close, recordLive, simMatch, W, _pm: () => pm, _rd: () => rd, _autoRedraft: autoRedraft, table, get: id => { load(); return get(id); }, list: () => { load(); return leagues.slice(); }, _sim: simFixture, _save: save, _advance: advance };
+            return { viewHtml, cpuTeam, raceKeys, IND, IND7, indList, indCost, indMax, offered, open, close, recordLive, simMatch, W, _pm: () => pm, _rd: () => rd, _autoRedraft: autoRedraft, table, get: id => { load(); return get(id); }, list: () => { load(); return leagues.slice(); }, _sim: simFixture, _save: save, _advance: advance };
         })();
 
         // ---------- Tournaments for Matched Play teams: knockout cups and Swiss events ----------
@@ -15949,7 +15990,8 @@
             const INNER_ONLY = new Set(['panel-unit-container']);   // keep the guest's own layout for these, just copy what's inside
             let role = null, live = false, link = null, peer = null, code = '', rtt = null, lastSeen = 0, version = '';
             let guestRace = null, guestName = '', aiWas = null, bytes = 0, tickMs = 0;
-            const myTeam = () => (role === 'guest' ? 1 : 0), remote = () => (role === 'host' ? 1 : role === 'guest' ? 0 : -1);
+            let guestSide = 1;   // the team the guest's device coaches (an exhibition: always the right-hand team; a league fixture: home or away)
+            const myTeam = () => (role === 'guest' ? guestSide : 1 - guestSide), remote = () => (role === 'host' ? guestSide : role === 'guest' ? 1 - guestSide : -1);
             const real = () => CLOCK.real();
             const $ = id => document.getElementById(id);
 
@@ -15983,6 +16025,7 @@
             const cleanName = n => String(n || '').replace(/\s+/g, ' ').trim().slice(0, 20);
             const myName = () => { try { return cleanName(localStorage.getItem(NAME)); } catch (e) { return ''; } };
             const them = () => oppName || (role === 'host' ? 'The guest' : 'The host');
+            const themL = () => oppName || (role === 'host' ? 'the guest' : 'the host');   // (mid-sentence)
             const escH = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
             function setOpp(n) {
                 n = cleanName(n); if (n === oppName) return;
@@ -16109,7 +16152,8 @@
                 try { if (link) link.close(); } catch (e) {}
                 try { if (peer) peer.destroy(); } catch (e) {}
                 link = null; peer = null; role = null; rtt = null; guestRace = null; guestName = ''; guestToken = ''; oppName = '';
-                if (!live) league = null;
+                if (!live && !postOpen) { league = null; leagueHtml = ''; postTeam = null; guestSide = 1; }
+                paintLeagueBtn();
             }
             // ---- the guest getting back after a drop ----
             function startRetry() {
@@ -16146,8 +16190,8 @@
                     if (m.name != null) setOpp(m.name);
                     if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
                     if (role === 'host') {
-                        if (!inMatch()) { guestToken = m.token || ''; if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false) }); }
-                        else if (live) { resetSent(); if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false) }); link.send({ t: 'start' }); log(`  ${escH(them())} is back.`, 'text-emerald-300'); }
+                        if (!inMatch()) { guestToken = m.token || ''; if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false), side: guestSide, lid: league.fx && league.fx.lid }); }
+                        else if (live) { resetSent(); postSent = false; viewSent = ''; viewAt = 0; if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false), side: guestSide, lid: league.fx && league.fx.lid }); link.send({ t: 'start' }); log(`  ${escH(them())} is back.`, 'text-emerald-300'); }
                         else if (EXIND.open()) { link.send({ t: 'shop' }); shopSent = ''; }
                     }
                     return true;
@@ -16162,6 +16206,16 @@
                 if (m.t === 'resync') { resetSent(); return; }
                 if (m.t === 'chat' && live) { chatLine(them(), m.text, 1); return; }
                 if (m.t === 'note' && live) { log(`  ${escH(m.text)}`, 'text-amber-300'); return; }
+                if (m.t === 'teamback' && league && m.team && guestPost !== 'here') {   // the guest's league team, after its post-match report
+                    const id = ROSTERS[guestSide] && ROSTERS[guestSide].careerTeamId;
+                    const cur = m.team.id === id && TB.get(id);
+                    if (cur) {
+                        const fin = (m.team.played || 0) > (cur.played || 0);   // the report is finished once the game is counted
+                        TB.put(m.team);
+                        if (fin && guestPost !== 'done') { guestPost = 'done'; log(`  ${escH(them())} has finished ${escH(ROSTERS[guestSide].name)}'s post-match report.`, 'text-emerald-300'); CAREER.refresh(); }
+                    }
+                    return;
+                }
                 if (m.t === 'in' && m.k === 'exind') { EXIND.remote(m.d); return; }
                 if (m.t === 'in' && m.k === 'squad' && live) {
                     const p = state.netLineup && state.players.find(q => q.id === m.id);
@@ -16174,7 +16228,7 @@
             }
             function start(hostKey) {
                 if (league && role === 'host' && link) {   // a league fixture: the league's own pre-match screen has done the inducements
-                    AI.set(0, false); AI.set(1, false);
+                    AI.set(0, league.cpu === 0); AI.set(1, league.cpu === 1);   // the computer may coach the host's side
                     $('net-lobby').classList.add('hidden');
                     const go = league.launch; begin(); go();
                     return;
@@ -16189,10 +16243,11 @@
             }
             // the shopping is done: the match itself starts
             let netCareer = [false, false];
+            let postTeam = null, leagueHtml = '';
             function begin() {
                 live = true; resetSent();
-                if (link && league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false) });
-                setTimeout(() => { if (live) log(`  Playing ${escH(them())}. Double-tap the match log to send them a message.`, 'text-sky-300'); }, 2500);
+                if (link && league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false), side: guestSide, lid: league.fx && league.fx.lid });
+                setTimeout(() => { if (live) log(`  Playing ${escH(themL())}. Double-tap the match log to send them a message.`, 'text-sky-300'); }, 2500);
                 if (link) link.send({ t: 'start' });
                 paintChip();
             }
@@ -16208,7 +16263,7 @@
             function gate(name, go) {
                 if (go) gates[name] = go;
                 const r = state.netReady = state.netReady || {}, g = r[name] = r[name] || [false, false];
-                g[fromGuest ? 1 : 0] = true;
+                g[fromGuest ? guestSide : 1 - guestSide] = true;
                 if (g[0] && g[1]) { delete r[name]; const f = gates[name]; delete gates[name]; if (f) f(); }
             }
             const gates = {};
@@ -16222,7 +16277,16 @@
             // what has been sent already, so only the changes go each time
             let sent = null;
             function resetSent() { sent = { keys: {}, pl: new Map(), order: '', ui: {}, cv: {}, meta: '' }; logSent = -1; }
+            let guestPost = '', postSent = false, viewSent = '', viewAt = 0;
             function hostTick() {
+                if (role === 'host' && link && league && league.fx && league.fx.lid && real() - viewAt > 3000) {   // (every few seconds is plenty)
+                    viewAt = real(); const h = LEAGUE.viewHtml(league.fx.lid);
+                    if (h && h !== viewSent) { viewSent = h; link.send({ t: 'leagueview', html: h }); }
+                }
+                if (role === 'host' && live && link && league && state.isGameOver && !postSent && (state.careerOn || [])[guestSide] && guestPost !== 'here') {
+                    const t = TB.get(ROSTERS[guestSide].careerTeamId);
+                    if (t) { postSent = true; link.send({ t: 'postteam', team: t }); }
+                }
                 if (role === 'host' && !live && link && EXIND.open()) { const h = EXIND.guestView(); if (h !== shopSent) { shopSent = h; link.send({ t: 'exind', html: h }); } return; }
                 if (role !== 'host' || !live || !link || !state.players) return;
                 const meta = JSON.stringify({ rosters: [ROSTERS[0], ROSTERS[1]], pitch: { style: PITCH.style, seed: PITCH.seed }, fmt: GEO.fmt });
@@ -16302,7 +16366,10 @@
             function guestMsg(m) {
                 if (common(m)) return;
                 if (m.t === 'busy') { forgetRejoin(); const was = inMatch(); stopRetry(); try { if (link) link.close(); } catch (e) {} link = null; status('That match already has two players.', 'bad'); if (was) { live = false; shopping = false; showEnd('The host is playing with another device now.'); } return; }
-                if (m.t === 'fixture') { league = { text: m.text }; paintLobby(); return; }
+                if (m.t === 'fixture') { league = { text: m.text, lid: m.lid }; guestSide = m.side === 0 ? 0 : 1; paintLobby(); paintLeagueBtn(); return; }
+                if (m.t === 'leagueview') { leagueHtml = m.html; paintLeagueBtn(); const lh = $('net-league'); if (lh && !lh.classList.contains('hidden')) leagueView(); return; }
+                if (m.t === 'postteam') { postTeam = m.team; if (!postOpen) { postAsked = false; postGame(); } return; }
+                if (m.t === 'posthere') { if (!postOpen) { const el = $('net-end'); if (el && el.dataset.kind === 'post') showEnd(`${them()} is filling in ${ROSTERS[guestSide].name}'s report on the host's device.`); } return; }
                 if (m.t === 'shop') { shopping = true; $('net-lobby').classList.add('hidden'); $('ex-body').innerHTML = '<p class="pg-dim">Opening the inducements…</p>'; $('ex-back').hidden = true; $('ex-ind').classList.remove('hidden'); return; }
                 if (m.t === 'exind') { if (shopping) $('ex-body').innerHTML = m.html; return; }
                 if (m.t === 'lobby') { shopping = false; $('ex-ind').classList.add('hidden'); openLobby(); status('The host went back to the lobby.', 'wait'); return; }
@@ -16319,8 +16386,8 @@
             }
             // the guest's own career team: Expensive Mistakes left over from its last match are settled before this one
             function settleMine() {
-                const id = ROSTERS[1] && ROSTERS[1].careerTeamId, t = id && TB.get(id);
-                if (!t || !(state.careerOn || [])[1]) return;
+                const id = ROSTERS[guestSide] && ROSTERS[guestSide].careerTeamId, t = id && TB.get(id);
+                if (!t || !(state.careerOn || [])[guestSide]) return;
                 const em = CAREER.settleEM(t); if (!em || !link) return;
                 link.send({ t: 'note', text: `${t.name}: ${em.none ? em.text : `Expensive Mistakes left over from the last match (treasury ${Math.round(em.before)}k, rolled ${em.r}): ${em.text}`}` });
             }
@@ -16404,17 +16471,25 @@
                 }
             }
             let postOpen = false, postAsked = false;
-            const myCareerHere = () => { const id = ROSTERS[1] && ROSTERS[1].careerTeamId; return role === 'guest' && !league && !!(state.careerOn || [])[1] && !!id && !!TB.get(id); };
+            const myCareerHere = () => {
+                const G = guestSide, id = ROSTERS[G] && ROSTERS[G].careerTeamId;
+                if (role !== 'guest' || !(state.careerOn || [])[G] || !id) return false;
+                return league ? !!postTeam && postTeam.id === id : !!TB.get(id);   // a league team: the copy the host sent
+            };
             function postGame() {
                 if (role !== 'guest' || postAsked || !state.isGameOver) return;
                 postAsked = true;
                 if (!myCareerHere()) return;
-                showEnd(`The match is over. Fill in ${ROSTERS[1].name}'s post-match report on this device: MVP, SPP, injuries and winnings are saved to your team here.`, false, 'post');
+                showEnd(league ? `The match is over. Fill in ${ROSTERS[guestSide].name}'s post-match report on this device: MVP, SPP and advancements. It's saved to the league on the host's device.`
+                    : `The match is over. Fill in ${ROSTERS[guestSide].name}'s post-match report on this device: MVP, SPP, injuries and winnings are saved to your team here.`, false, 'post');
             }
             function openPost() {
-                postOpen = true; live = false; forgetRejoin();
+                postOpen = true; live = false; if (!league) forgetRejoin();
                 const el = $('net-end'); if (el) el.classList.add('hidden');
                 ['match-summary', 'modal-announce'].forEach(id => { const e = $(id); if (e) e.classList.add('hidden'); });
+                if (league && postTeam) {
+                    TB.temp(postTeam, t => { if (link) link.send({ t: 'teamback', team: t }); });   // (still connected: it goes back to the host)
+                }
                 try { CAREER.open(); } catch (e) { console.error('post-game', e); showEnd("Sorry, the post-match report couldn't be opened."); }
             }
             function ownView() {
@@ -16489,7 +16564,7 @@
                 }
                 if (!live) return;
                 if (t.closest('#modal-lineup')) return;   // the guest's own starting-eleven screen
-                if (t.closest('#net-chip, #net-chat, #net-lobby, #net-end, #modal-roster, #skill-tip, #whats-new')) return;
+                if (t.closest('#net-chip, #net-chat, #net-league, #net-league-btn, #net-lobby, #net-end, #post-game, #team-builder, #modal-roster, #skill-tip, #whats-new')) return;
                 const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
                 if (t === canvas) {
                     stop();
@@ -16538,9 +16613,10 @@
             // the host lost the other device: the computer can play their team for the rest of the match
             function takeOver() {
                 if (role !== 'host' || !live || link) return;
-                askChoice('OTHER DEVICE GONE', `The other device has disconnected. Let the computer play ${ROSTERS[1].name} for the rest of the match?`, 'Computer takes over', 'Wait', () => {
-                    live = false; close(); AI.set(1, true); paintChip(); SAVE.clearNet();
-                    log(`  The computer takes over ${ROSTERS[1].name}.`, 'text-emerald-300');
+                const G = guestSide;
+                askChoice('OTHER DEVICE GONE', `The other device has disconnected. Let the computer play ${ROSTERS[G].name} for the rest of the match?`, 'Computer takes over', 'Wait', () => {
+                    live = false; close(); AI.set(G, true); paintChip(); SAVE.clearNet(); guestPost = 'here';
+                    log(`  The computer takes over ${ROSTERS[G].name}.`, 'text-emerald-300');
                 }, null);
             }
 
@@ -16575,13 +16651,18 @@
             }
             // ---- a league fixture on two devices: the league (and both teams) live on the host's device; the guest coaches the away team ----
             let league = null;   // host: { text, launch }   guest: { text }
-            const fixText = (fx, asHost) => typeof fx === 'string' ? fx : asHost
-                ? `${fx.name}: you coach ${fx.home} (home) on this device; the other device coaches ${fx.away} (away).`
-                : `${fx.name}: you coach ${fx.away} (away); the host coaches ${fx.home} (home). The league and both teams' post-match are kept on the host's device.`;
-            function hostLeague(fx, launch, cancel) {
+            const fixText = (fx, asHost) => {
+                if (typeof fx === 'string') return fx;
+                const g = fx.side === 0 ? fx.home : fx.away, h = fx.side === 0 ? fx.away : fx.home, gw = fx.side === 0 ? 'home' : 'away', hw = fx.side === 0 ? 'away' : 'home';
+                const hc = fx.cpu ? 'the computer coaches' : asHost ? 'you coach' : 'the host coaches';
+                return asHost ? `${fx.name}: ${hc} ${h} (${hw}) on this device; the other player coaches ${g} (${gw}) on theirs.`
+                    : `${fx.name}: you coach ${g} (${gw}); ${hc} ${h} (${hw}) on the host's device. The league is kept on the host's device.`;
+            };
+            function hostLeague(fx, launch, cancel, side, cpuSide) {
                 aiWas = aiWas || [AI.isOn(0), AI.isOn(1)];
                 if (role !== 'host') open(true);   // (opening a room clears any earlier fixture)
-                league = { fx, text: fixText(fx, true), launch, cancel };
+                league = { fx, text: fixText(fx, true), launch, cancel, cpu: cpuSide };
+                guestSide = side === 0 ? 0 : 1; guestPost = '';
                 openLobby();
                 paintLobby();
             }
@@ -16617,6 +16698,7 @@
                 const L = $('net-lobby'), rs = $('nl-race'), sq = $('nl-squad');
                 rs.onchange = () => { sq.value = ''; fillPicker(rs, sq); sendTeam(); };
                 sq.addEventListener('change', paintCareer);
+                $('nl-league').onclick = leagueView;
                 $('nl-name').onchange = () => {
                     const n = cleanName($('nl-name').value); $('nl-name').value = n;
                     try { localStorage.setItem(NAME, n); } catch (e) {}
@@ -16641,6 +16723,25 @@
                 $('nl-career').onchange = () => sendTeam();
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLobby); else bindLobby();
+
+            // ---- the league, for the guest: the table and fixtures as they are on the host's device ----
+            function paintLeagueBtn() {
+                const b = $('net-league-btn'); if (!b) return;
+                b.classList.toggle('hidden', !(role === 'guest' && league && leagueHtml));
+                const lb = $('nl-league'); if (lb) lb.classList.toggle('hidden', !(role === 'guest' && league && leagueHtml));
+            }
+            function leagueView() {
+                let el = $('net-league');
+                if (!el) {
+                    el = document.createElement('div'); el.id = 'net-league'; el.className = 'hidden'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+                    el.innerHTML = `<div class="pg-wrap"><header class="pg-head"><button type="button" class="pg-btn nlv-close">← Back</button><h2>League</h2></header><div class="th-detail nlv-body"></div></div>`;
+                    document.body.appendChild(el);
+                    el.querySelector('.nlv-close').onclick = () => el.classList.add('hidden');
+                    el.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('.nlv-close')) { e.preventDefault(); e.stopPropagation(); } }, true);   // a view only
+                }
+                el.querySelector('.nlv-body').innerHTML = leagueHtml || '<p class="pg-dim">Nothing yet.</p>';
+                el.classList.remove('hidden');
+            }
 
             // ---- chat: double-tap the match log to send the other player a message (it goes in both logs) ----
             function chatLine(name, text, side) {   // the host writes every message into its log; the guest's copy follows
@@ -16669,7 +16770,7 @@
                 el.style.left = (Math.max(8, Math.min(innerWidth - w - 8, box.left)) / z) + 'px';
                 el.style.width = (w / z) + 'px';
                 el.style.bottom = (Math.max(8, innerHeight - box.bottom + 8) / z) + 'px';
-                const inp = el.querySelector('input'); inp.placeholder = `Message to ${them()}`;
+                const inp = el.querySelector('input'); inp.placeholder = `Message to ${themL()}`;
                 el.classList.remove('hidden'); inp.focus();
             }
             {   // a double tap (or double click) on the log
@@ -16702,14 +16803,19 @@
             return {
                 openLobby, matchOver, begin, cancelShop, gate, hostLeague,
                 careerSides: () => netCareer.slice(),
-                recordsHere: i => postOpen ? i === 1 : !live || !!league || i === myTeam(),   // whose career this device records
+                recordsHere: i => postOpen ? i === myTeam() : !live ? true : league ? (role === 'guest' ? false : i !== guestSide || guestPost === 'here') : i === myTeam(),   // whose career this device records
                 wasGuest: () => role === 'guest' || postOpen,
+                // the host's post-match waits for the guest's league report (or does it here instead)
+                finishHold: () => role === 'host' && league && (state.careerOn || [])[guestSide] && guestPost !== 'done' && guestPost !== 'here' ? `Waiting for ${themL()} to finish ${ROSTERS[guestSide].name}'s report…` : null,
+                postHere: () => { if (role !== 'host' || !league || guestPost === 'done') return; guestPost = 'here'; if (link) link.send({ t: 'posthere' }); CAREER.addReport(guestSide); },
+                leagueView,
                 hosting: () => role === 'host' && live,
-                saveInfo: () => ({ code, token: guestToken, aiWas, guestName, oppName, league: league ? { text: league.text, fx: league.fx } : null }),
+                saveInfo: () => ({ code, token: guestToken, aiWas, guestName, oppName, guestSide, guestPost, league: league ? { text: league.text, fx: league.fx, cpu: league.cpu } : null }),
                 resumeHost(info) {   // the host's page was closed: the match is back from the save; open the same room again
                     open(true, null, info.code);
                     guestToken = info.token || ''; aiWas = info.aiWas || null; guestName = info.guestName || ''; oppName = info.oppName || '';
-                    league = info.league ? { text: info.league.text, fx: info.league.fx } : null;
+                    league = info.league ? { text: info.league.text, fx: info.league.fx, cpu: info.league.cpu } : null;
+                    guestSide = info.guestSide === 0 ? 0 : 1; guestPost = info.guestPost || '';
                     live = true; resetSent(); paintChip();
                     log(`  Two-device match: the other device can rejoin with the code ${info.code} (Two Devices → Rejoin).`, 'text-sky-300');
                 },
@@ -16722,7 +16828,7 @@
                 on: () => live,
                 guest: () => role === 'guest' && live,
                 isRemote: t => live && role === 'host' && t === remote(),
-                myTeam,
+                myTeam, hostSide: () => 1 - guestSide,
                 theirTurn: () => live && !!state.players && !state.isGameOver && state.activeTeam !== myTeam(),
                 race: key => (String(key) === 'net:1' ? guestRace : null),
                 debugDrop: () => { if (link) link.c.close(); },   // (tests: a connection dropping)
@@ -16778,7 +16884,7 @@
             function ownerTeam(el) {
                 if (!el || !el.closest) return null;
                 const lp = el.closest('#lineup-pane0, #lineup-pane1'); if (lp) return +lp.id.slice(-1);
-                if (el.closest('#btn-announce-reload')) return NET.on() ? 0 : null;   // the final whistle's summary: the host's device
+                if (el.closest('#btn-announce-reload')) return NET.on() ? NET.hostSide() : null;   // the final whistle's summary: the host's device
                 const ii = el.closest('#modal-ind-intro'); if (ii) return ii.dataset.team != null && ii.dataset.team !== '' ? +ii.dataset.team : null;
                 if (el.closest('#modal-roll')) return state.pendingRoll ? state.pendingRoll.player.team : null;
                 if (el.closest('#modal-team-reroll')) return state.activeTeam;
@@ -18748,6 +18854,7 @@
         <p id="nl-ping" class="nl-dim"></p>
         <div id="nl-teams" class="hidden">
             <p id="nl-fixture" class="hidden"></p>
+            <button type="button" id="nl-league" class="nl-btn hidden">📋 League table and fixtures</button>
             <div class="nl-own">
             <label class="nl-dim">Your team</label>
             <div class="nl-sel"><select id="nl-race" aria-label="Race"></select><select id="nl-squad" aria-label="Team"></select></div>
