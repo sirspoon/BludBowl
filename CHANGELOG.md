@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.30 (14 Oct 2026)
+- **Changed:** the Jungle Temple's block clash backdrop is now properly jungly: misty green air, two layers of trees with tall palms, the temple overgrown with vines, hanging vines with leaves and big fern leaves curling in from the sides.
+
 ## v2.29 (14 Oct 2026)
 - **Changed:** the grass pitches' sky in the block clash animation is now a daytime blue, with a grey grandstand, a colourful crowd and the floodlights switched off.
 
