@@ -9,5 +9,8 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
 - Every change to the game bumps the version by 0.01 (e.g. v2.01 → v2.02).
   The version is the `#app-version` text on the title screen in `index.html`.
   Changes that don't touch the game (like this file) don't bump it.
+- With each version bump, add an entry at the top of `CHANGELOG.md` (version, date, what
+  changed in plain words, linking any issue it closes), and after pushing, tag the commit
+  (`git tag v2.02 && git push origin v2.02`).
 - Use the GitHub REST API (`gh api repos/sirspoon/BludBowl/...`) for issues;
   `gh issue list` and other GraphQL-based commands are blocked in cloud sessions.
