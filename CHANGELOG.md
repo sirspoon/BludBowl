@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.44 (14 Oct 2026)
+- **Added:** shared leagues for any number of players, each on their own device. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+  - **Creating one:** when creating a league, choose **Players: Several players, each on their own device** and how many places to leave for other players. You become the commissioner.
+  - **Joining:** the league starts in a setup stage. Tap **Invite players** for a room code. Each player goes to **Two Devices → Join** on their own device, types the code and picks one of their saved teams to bring. When everyone is in, the commissioner taps **Start the season**; any places left go to computer teams.
+  - **Everyone keeps a copy:** results, teams and the table sync whenever two players connect, either with **Connect to sync** on the league screen or during any Two Devices match. Changes made while connected (a result, a team saved after its post-match) reach the other device straight away.
+  - **Who plays what:** each player plays their own team's matches. Against a computer team they play on their own device. Against another player they tap **Play (two devices)** and the other player joins; only the coach of that team can join. Each player fills in their own team's post-match report on their own device. Only the commissioner runs computer-v-computer games and moves the league on, once every result is in. Each player re-drafts their own team in the off-season.
+  - **Showing who's who:** the league shows each team's coach by name, and a Players card lists everyone and their teams. Other players' teams are kept on your device as copies for the league, but don't appear in your own team lists.
+
 ## v2.43 (14 Oct 2026)
 - **Added:** league teams can be coached by the **Other player**, as well as by You or the Computer (set it when creating the league, or on the league's Teams tab). The other player's team is always coached on their device, whether it plays at home or away. A fixture between your team and theirs, or between their team and a computer team, offers **Play on two devices →** on the pre-match screen. For a computer opponent, the host's device runs the computer side. **Play on this device** still plays the match on one device. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 - **Added:** in a two-device league match, the other player fills in their own team's post-match report (MVP, SPP, advancements) on their own device, with a copy of the team sent from the host's device. When they finish, the updated team goes back and is saved in the league. The host's report waits for it, with a **Do it on this device instead** button in case the other player has dropped out or would rather not.

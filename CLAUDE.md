@@ -27,3 +27,4 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
 ## Testing
 - Two-device play (`NET` in `index.html`) uses PeerJS, which can't reach its server from a cloud session. Adding `?nettest`
   to the address swaps the network for a BroadcastChannel, so two tabs in one browser context can play each other.
+  Add `&dev=A` (any letters) as well to give each tab its own saved data, like separate devices (needed to test shared leagues).
