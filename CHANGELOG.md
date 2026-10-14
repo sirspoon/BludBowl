@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.22 (14 Oct 2026)
+- **Added:** when you play against the computer, a **▶▶ Speed up** button appears next to End Turn during the computer's turn. Tap it to run that turn at 4× speed (tap again to go back to normal). It switches itself off as soon as your turn comes round, and drops back to normal speed whenever you have something to answer during the computer's turn (such as choosing block dice or a re-roll), then carries on fast. ([#1](https://github.com/sirspoon/BludBowl/issues/1))
+
 ## v2.21 (14 Oct 2026)
 - **Changed:** Zap! now only lets you pick (and highlights) opposition players.
 

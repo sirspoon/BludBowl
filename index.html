@@ -820,7 +820,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.21</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.22</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1106,6 +1106,7 @@
                         </button>
 
                         <button id="btn-simspeed" title="Match speed (computer against computer)" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-300 px-2 py-1 rounded font-bold text-[10px] border border-amber-700 transition shadow whitespace-nowrap">▶ 1×</button>
+                        <button id="btn-aifast" type="button" title="Speed up the computer's turn (this turn only)" aria-pressed="false" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-300 px-2 py-1 rounded font-bold text-[10px] border border-amber-700 transition shadow whitespace-nowrap">▶▶ Speed up</button>
                         <button id="btn-end-turn" class="bg-red-950 hover:bg-red-900 text-red-100 px-3 py-1 rounded font-bold text-[10px] tracking-wider uppercase border border-red-800 transition shadow whitespace-nowrap">
                             End Turn
                         </button>
@@ -5522,9 +5523,17 @@
             want = +window.BB_SIM_SPEED || 1; if (!STEPS.includes(want) || want === 0) want = 1;
             try { localStorage.removeItem('bb-sim-speed'); } catch (e) {}   // an older version remembered the last speed
             const allowed = () => { try { return AI.isOn(0) && AI.isOn(1) && AI.isStarted() && !state.isGameOver; } catch (e) { return false; } };
+            // Against the computer: "Speed up" runs the computer's current turn at 4x. It switches itself off when the coach's turn
+            // comes round, and drops back to normal speed whenever the coach has something to answer during the computer's turn.
+            const FAST = 4;
+            let turbo = false, turboShown = null;
+            const aiTurn = () => { try { return AI.isStarted() && !state.isGameOver && AI.isOn(0) !== AI.isOn(1) && AI.isOn(state.activeTeam); } catch (e) { return false; } };
+            const open = id => { const e = document.getElementById(id); return !!e && !e.classList.contains('hidden'); };
+            const coachAsked = () => ['modal-choice', 'modal-roll', 'modal-team-reroll', 'modal-dice', 'modal-ind-intro', 'pick-banner', 'modal-roster'].some(open);
             function apply() {
                 const ok = allowed();
-                CLOCK.set(ok && want ? want : 1);
+                const sp = ok ? (want || 1) : (turbo && aiTurn() && !coachAsked() ? FAST : 1);
+                if (CLOCK.speed !== sp) CLOCK.set(sp);
                 try { AI.setPaused(ok && want === 0); } catch (e) {}
             }
             function cycle() {
@@ -5535,6 +5544,12 @@
             function paint(force) {
                 const ok = allowed(), b = document.getElementById('btn-simspeed');
                 if (!b) return;
+                {   // the one-turn speed-up against the computer
+                    const at = aiTurn(); if (!at && turbo) turbo = false;
+                    const f = document.getElementById('btn-aifast'), key = at + '|' + turbo;
+                    if (f && key !== turboShown) { turboShown = key; f.classList.toggle('hidden', !at); f.textContent = turbo ? '▶▶ 4× ✓' : '▶▶ Speed up'; f.setAttribute('aria-pressed', String(turbo)); }
+                    if (!ok) apply();
+                }
                 if (ok !== shown || force) { shown = ok; b.classList.toggle('hidden', !ok); b.textContent = LABEL[want]; apply(); }
                 const tk = document.getElementById('sim-ticker'), show = ok && (CLOCK.speed >= 100 || want === 0);
                 tk.classList.toggle('hidden', !show);
@@ -5546,10 +5561,13 @@
                     if (tk.dataset.top !== String(top)) { tk.dataset.top = String(top); tk.style.top = top + 'px'; }
                 }
             }
-            function matchOver() { CLOCK.set(1); try { AI.setPaused(false); } catch (e) {} shown = null; paint(true); }
-            function wire() { const b = document.getElementById('btn-simspeed'); if (b) b.onclick = e => { e.stopPropagation(); cycle(); }; }
+            function matchOver() { turbo = false; CLOCK.set(1); try { AI.setPaused(false); } catch (e) {} shown = null; paint(true); }
+            function wire() {
+                const b = document.getElementById('btn-simspeed'); if (b) b.onclick = e => { e.stopPropagation(); cycle(); };
+                const f = document.getElementById('btn-aifast'); if (f) f.onclick = e => { e.stopPropagation(); if (aiTurn()) { turbo = !turbo; turboShown = null; apply(); paint(true); } };
+            }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
-            return { paint, matchOver, cycle, get want() { return want; }, reset() { want = +window.BB_SIM_SPEED || 1; if (!STEPS.includes(want) || want === 0) want = 1; shown = null; tick = ''; } };
+            return { paint, matchOver, cycle, get want() { return want; }, get turbo() { return turbo; }, reset() { want = +window.BB_SIM_SPEED || 1; if (!STEPS.includes(want) || want === 0) want = 1; shown = null; tick = ''; turbo = false; turboShown = null; } };
         })();
 
         // ---------- Saving a match in progress ----------
