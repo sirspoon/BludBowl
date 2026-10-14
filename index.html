@@ -831,6 +831,17 @@
 #net-wait { position: fixed; left: 50%; transform: translateX(-50%); z-index: 65; pointer-events: none; font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 22px; line-height: 1; padding: 6px 16px 3px; border-radius: 999px; background: rgba(15,23,42,.55); border: 1px solid rgba(148,163,184,.35); color: #e2e8f0; white-space: nowrap; animation: netPulse 2.2s ease-in-out infinite; }
 #net-wait.hidden { display: none; }
 @keyframes netPulse { 0%, 100% { opacity: .3; } 50% { opacity: .75; } }
+#form-slots { position: fixed; left: 8px; top: 50%; transform: translateY(-50%); z-index: 35; display: flex; flex-direction: column; gap: 6px; align-items: stretch; padding: 6px; border-radius: 10px; background: rgba(15,23,42,.82); border: 1px solid #334155; font-family: Inter, system-ui, sans-serif; }
+#form-slots.hidden { display: none; }
+#form-slots .fs-cap { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; text-align: center; }
+#form-slots button { min-width: 44px; min-height: 34px; border-radius: 7px; border: 1px solid #475569; background: #1e293b; color: #64748b; font-weight: 800; font-size: 14px; cursor: pointer; }
+#form-slots button.filled { color: #fde68a; border-color: #b45309; background: #422006; }
+#form-slots button:disabled { opacity: .45; cursor: default; }
+#form-slots [data-fsave] { font-size: 11px; color: #e2e8f0; background: #0f766e; border-color: #14b8a6; text-transform: uppercase; }
+#form-slots.saving [data-fsave] { background: #475569; border-color: #94a3b8; }
+#form-slots.saving [data-fslot] { animation: fsPulse 1s ease-in-out infinite; color: #e2e8f0; border-color: #14b8a6; }
+@media (max-height: 520px) { #form-slots { gap: 3px; padding: 4px; } #form-slots button { min-height: 26px; min-width: 38px; font-size: 12px; } #form-slots .fs-cap { display: none; } }
+@keyframes fsPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(20,184,166,.0); } 50% { box-shadow: 0 0 0 3px rgba(20,184,166,.6); } }
 .net-theirs { opacity: .35 !important; filter: grayscale(1) !important; cursor: not-allowed !important; }
 #net-chip { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #0284c7; background: rgba(8,47,73,.75); color: #bae6fd; white-space: nowrap; }
 #net-chip.bad { border-color: #e11d48; background: rgba(76,5,25,.8); color: #fecdd3; }
@@ -855,7 +866,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.37</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.38</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6431,6 +6442,115 @@
                 dwarvenWisdom(() => startKickoffSequence(kt, rt), kt);
             }
         });
+
+        // ---------- Saved formations: five slots per team for your own kick-off set-ups ----------
+        // A saved team keeps them with the rest of its details (so they're in backups too); a default team keeps them in this
+        // browser. Squares are stored as the left-hand team's, so a formation works from either end. Players are matched back
+        // by name and position, then by position, then anyone.
+        const FORMS = (function () {
+            const N = 5, LS = 'bb-formations';
+            const $ = id => document.getElementById(id);
+            const fmt = () => (GEO.sev ? 'sevens' : 'std');
+            const idOf = team => { const k = String(ROSTERS[team].key || ''); return k.startsWith('custom:') && TB.get(k.slice(7)) ? k.slice(7) : null; };
+            const lsKey = team => fmt() + ':' + (ROSTERS[team].race || ROSTERS[team].key);
+            function slots(team) {
+                let all = null;
+                const id = idOf(team);
+                if (id) all = (TB.get(id).formations || {})[fmt()];
+                else { try { all = (JSON.parse(localStorage.getItem(LS) || '{}'))[lsKey(team)]; } catch (e) {} }
+                const a = Array.isArray(all) ? all.slice(0, N) : [];
+                while (a.length < N) a.push(null);
+                return a;
+            }
+            function write(team, a) {
+                const id = idOf(team);
+                if (id) { const t = TB.get(id); t.formations = Object.assign({}, t.formations || {}, { [fmt()]: a }); TB.put(t); return; }
+                try { const m = JSON.parse(localStorage.getItem(LS) || '{}'); m[lsKey(team)] = a; localStorage.setItem(LS, JSON.stringify(m)); } catch (e) {}
+            }
+            const setupPlayers = team => state.players.filter(p => p.team === team && !p.isCasualty && !p.isEjected && !p.isKO && !p.isReserve && p.x >= 0 && p.x < CFG.cols);
+            const fx = (team, x) => (team === TEAMS.HUMAN ? x : CFG.cols - 1 - x);
+            function capture(team) {   // the line of scrimmage first, so a short-handed team fills those squares first
+                const los = GEO.los(0);
+                return setupPlayers(team).map(p => ({ x: fx(team, p.x), y: p.y, pos: p.posKey, name: p.name || null }))
+                    .sort((a, b) => (b.x === los) - (a.x === los) || b.x - a.x || a.y - b.y);
+            }
+            function apply(team, sq) {
+                if (state.mode !== MODES.SETUP || state.setup.eventSetup || !Array.isArray(sq)) return;
+                const ps = setupPlayers(team), free = new Set(ps), at = new Map();
+                const squares = sq.map(s => ({ x: fx(team, s.x), y: s.y, pos: s.pos, name: s.name })).filter(s => s.x >= 0 && s.x < CFG.cols && s.y >= 0 && s.y < CFG.rows && GEO.inHalf(team, s.x));
+                const pass = test => squares.forEach(s => { if (at.has(s)) return; const p = [...free].find(p => test(p, s)); if (p) { at.set(s, p); free.delete(p); } });
+                pass((p, s) => s.name && p.name === s.name && p.posKey === s.pos);
+                pass((p, s) => p.posKey === s.pos);
+                pass(() => true);
+                const old = new Map(ps.map(p => [p, [p.x, p.y]]));
+                ps.forEach(p => { p.x = -50; p.y = -50; });
+                at.forEach((p, s) => { p.x = s.x; p.y = s.y; });
+                // more players than the formation has squares: back where they were, or the nearest free square in our half
+                [...free].forEach(p => {
+                    const [ox, oy] = old.get(p);
+                    if (!getPlayer(ox, oy)) { p.x = ox; p.y = oy; return; }
+                    for (let d = 1; d < CFG.cols; d++) for (let dx = -d; dx <= d; dx++) for (let dy = -d; dy <= d; dy++) {
+                        const x = ox + dx, y = oy + dy;
+                        if (p.x < 0 && x >= 0 && y >= 0 && x < CFG.cols && y < CFG.rows && GEO.inHalf(team, x) && !getPlayer(x, y)) { p.x = x; p.y = y; }
+                    }
+                });
+                state.selectedId = null;
+                updateSetupHUD(); render();
+            }
+            // ---- the buttons: a column down the left of the screen while you set up ----
+            let saving = false;
+            function myTeam() {   // the team setting up, if it's this device's to set up
+                if (state.mode !== MODES.SETUP || state.setup.eventSetup || !ROSTERS[0]) return null;
+                const t = state.setup.currentSettingTeam;
+                if (t == null) return null;
+                if (NET.on()) return t === NET.myTeam() ? t : null;
+                return AI.isAI(t) ? null : t;
+            }
+            function paint() {
+                const box = $('form-slots'); if (!box) return;
+                const t = myTeam();
+                box.classList.toggle('hidden', t == null);
+                if (t == null) { saving = false; return; }
+                const a = slots(t), sig = t + '|' + saving + '|' + a.map(x => (x ? x.at : 0)).join(',');
+                if (box.dataset.sig === sig) return;
+                box.dataset.sig = sig;
+                box.classList.toggle('saving', saving);
+                const save = box.querySelector('[data-fsave]');
+                save.textContent = saving ? 'Cancel' : 'Save';
+                save.title = saving ? 'Stop saving' : 'Save this set-up in a slot';
+                box.querySelectorAll('[data-fslot]').forEach(b => {
+                    const i = +b.dataset.fslot, f = a[i];
+                    b.classList.toggle('filled', !!f);
+                    b.disabled = !saving && !f;
+                    b.title = saving ? `Save this set-up in slot ${i + 1}${f ? ' (replacing the one there)' : ''}` : f ? `Set up as formation ${i + 1}` : `Slot ${i + 1} is empty: tap Save, then this slot`;
+                });
+            }
+            function tap(e) {
+                const b = e.target.closest('button'); if (!b || b.disabled) return;
+                const t = myTeam(); if (t == null) return;
+                if (b.dataset.fsave != null) { saving = !saving; paint(); return; }
+                const i = +b.dataset.fslot;
+                if (saving) {
+                    const a = slots(t); a[i] = { sq: capture(t), at: Date.now() }; write(t, a); saving = false;
+                    log(`  Set-up saved as formation ${i + 1}.`, 'text-slate-400');
+                    try { sfx('menuClick'); } catch (er) {}
+                } else {
+                    const f = slots(t)[i]; if (!f) return;
+                    if (NET.guest()) NET.sendForm(f.sq); else apply(t, f.sq);
+                    try { sfx('menuClick'); } catch (er) {}
+                }
+                paint();
+            }
+            function build() {
+                const box = document.createElement('div'); box.id = 'form-slots'; box.className = 'hidden'; box.setAttribute('role', 'group'); box.setAttribute('aria-label', 'Saved formations');
+                box.innerHTML = `<span class="fs-cap">Formations</span><button type="button" data-fsave>Save</button>` + Array.from({ length: N }, (_, i) => `<button type="button" data-fslot="${i}">${i + 1}</button>`).join('');
+                box.addEventListener('click', tap);
+                document.body.appendChild(box);
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
+            setInterval(() => { try { paint(); } catch (e) {} }, 250);
+            return { apply, slots };
+        })();
 
         // Leader: a team with a Leader on the pitch at the start of a half gets one extra (Leader) re-roll for that half
         function leaderCheck() {
@@ -15907,6 +16027,7 @@
                 if (m.t === 'team') { guestRace = m.race; guestName = m.name; paintLobby(); return; }
                 if (m.t === 'resync') { resetSent(); return; }
                 if (m.t === 'in' && m.k === 'exind') { EXIND.remote(m.d); return; }
+                if (m.t === 'in' && m.k === 'form' && live) { if (state.mode === MODES.SETUP && AI.decider() === remote()) FORMS.apply(remote(), m.sq); return; }
                 if (m.t === 'in' && live) { fromGuest = true; try { guestInput(m); } finally { fromGuest = false; } }
             }
             function start(hostKey) {
@@ -16298,6 +16419,7 @@
             return {
                 openLobby, matchOver, begin, cancelShop, gate,
                 guestShop: () => role === 'guest' && shopping,
+                sendForm: sq => { if (link) link.send({ t: 'in', k: 'form', sq }); },
                 on: () => live,
                 guest: () => role === 'guest' && live,
                 isRemote: t => live && role === 'host' && t === remote(),
@@ -17637,8 +17759,68 @@
                 const hitters = state.players.filter(q => q.team === opp && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected && q.skills.some(s => HITTER.test(s))).length;
                 return hitters >= 3 ? 'ruleOfFive' : 'standard';
             }
+            // Receiving, the kicking team is already in place: look at it and adjust the attacking set-up.
+            //  - the three on the line go where they line up against the most kicking-team linemen (first blocks with each
+            //    other's support), steering away from their hard hitters
+            //  - the flankers and the backfield pocket lean towards the side the kicking team has left thinnest, and a flanker
+            //    goes right out wide where they've left a wide zone empty
+            // (all in the left-hand team's squares: x = 0 is our own end zone)
+            function adaptOffence(team, S) {
+                const opp = other(team), W = CFG.cols, H = CFG.rows, wz = GEO.wz, mid = (H - 1) / 2;
+                const fx = x => team === TEAMS.HUMAN ? x : W - 1 - x;
+                const them = state.players.filter(q => q.team === opp && onPitch(q)).map(q => ({ x: fx(q.x), y: q.y, st: q.st, hit: q.skills.some(s => HITTER.test(s)) }));
+                if (!them.length) return S;
+                const out = S.map(s => s.slice());
+                const ourLos = GEO.los(0), theirLos = GEO.los(1);
+                // the line: a block of three rows in the centre, facing the most of their line (only when the lines touch)
+                if (theirLos === ourLos + 1) {
+                    const line = them.filter(q => q.x === theirLos);
+                    let best = null, bestV = -1e9;
+                    for (let c = wz + 1; c <= H - wz - 2; c++) {
+                        let v = -0.15 * Math.abs(c - mid);
+                        line.forEach(q => { const d = Math.abs(q.y - c); if (d <= 2) v += (d <= 1 ? 1 : 0.4) - (q.hit ? 0.8 : 0); });
+                        if (v > bestV) { bestV = v; best = c; }
+                    }
+                    const los = out.filter(s => s[2] === 'los');
+                    if (best != null && los.length === 3) [best - 1, best, best + 1].forEach((y, i) => { los[i][1] = y; });
+                }
+                // which side they've left thin (counting their players in the half near the line, beyond it the deep safeties matter less)
+                const near = them.filter(q => q.x - theirLos <= 6);
+                const top = near.filter(q => q.y < mid).length, bot = near.filter(q => q.y > mid).length;
+                const lean = top + 2 <= bot ? -1 : bot + 2 <= top ? 1 : 0;   // -1: towards the top rows, 1: the bottom
+                if (lean) {
+                    const shift = Math.abs(top - bot) >= 4 ? 2 : 1;
+                    out.forEach(s => { if (s[2] === 'screen' || s[2] === 'back') s[1] = Math.max(0, Math.min(H - 1, s[1] + lean * shift)); });
+                    // a wide zone they've left empty: a flanker right out there
+                    const emptyWide = lean < 0 ? !them.some(q => q.y < wz) : !them.some(q => q.y >= H - wz);
+                    if (emptyWide) {
+                        const fl = out.filter(s => s[2] === 'screen').sort((a, b) => lean < 0 ? a[1] - b[1] : b[1] - a[1])[0];
+                        if (fl) fl[1] = lean < 0 ? 1 : H - 2;
+                    }
+                }
+                // at most two in each wide zone (a shift can push a third in): the ones nearest the middle step back into it
+                [[y => y < wz, wz], [y => y >= H - wz, H - wz - 1]].forEach(([inZone, edge]) => {
+                    const z = out.filter(s => inZone(s[1])).sort((a, b) => Math.abs(a[1] - edge) - Math.abs(b[1] - edge));
+                    while (z.length > GEO.maxWide) z.shift()[1] = edge;
+                });
+                // no two on one square: the nearest free square up or down the same column, outside the wide zones if it can
+                const used = new Set(), central = y => y >= wz && y < H - wz;
+                for (const s of out) {
+                    if (used.has(s[0] + ',' + s[1])) {
+                        const wasCentral = central(s[1]);
+                        for (let d = 1; d < H; d++) {
+                            const y = [s[1] + d, s[1] - d].find(y => y >= 0 && y < H && !used.has(s[0] + ',' + y) && (!wasCentral || central(y)));
+                            if (y != null) { s[1] = y; break; }
+                        }
+                    }
+                    used.add(s[0] + ',' + s[1]);
+                }
+                return out;
+            }
             function placeSetup(team, ps) {
-                const S = (GEO.sev ? SETUPS7 : SETUPS)[pickSetup(team)];
+                const kind = pickSetup(team);
+                let S = (GEO.sev ? SETUPS7 : SETUPS)[kind];
+                if (kind === 'offence') { try { S = adaptOffence(team, S); } catch (e) { console.error('adaptOffence', e); } }
                 const mx = x => team === TEAMS.HUMAN ? x : CFG.cols - 1 - x;
                 const val = p => playerCost(p) * (p.av <= 7 ? 1.3 : 1);
                 const pool = [...ps], take = (cmp) => { pool.sort(cmp); return pool.shift(); };
@@ -17900,6 +18082,7 @@
             setInterval(() => { try { paintTurnButton(); tick(); } catch (e) { console.error('AI', e); } }, 120);
 
             return {
+                debugAdapt: t => adaptOffence(t, (GEO.sev ? SETUPS7 : SETUPS).offence),
                 isAI, act, ownerTeam, decider, isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),
                 set(t, v) { on[t] = !!v; save(); },
                 start() { started = true; },

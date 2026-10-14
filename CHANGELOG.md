@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.38 (14 Oct 2026)
+- **Added:** saved formations. While you set up for a kick-off, a **Formations** column on the left has five slots. Tap **Save** then a slot to keep your current set-up there. Tap a filled slot to set your team up that way: players go back to their own squares by name and position, or to the same position if someone is missing. Each team has its own five slots, separately for Blood Bowl and Sevens. A saved team keeps them with the rest of its details, including backups; a default team keeps them in this browser. In a two-device match, each player has their own slots on their own device. The column goes away once the set-up is confirmed.
+- **Changed:** when the computer is the receiving team, it now reacts to how the kicking team has set up. It puts its three line players where they face the most of the kicking team's line (steering away from hard hitters). It leans its flankers and backfield towards the side the kicking team has left thinnest, and sends a flanker right out wide if a wide zone has been left empty. Its kicking set-up is unchanged.
+
 ## v2.37 (14 Oct 2026)
 - **Changed:** while the kicking team sets up, the receiving team's players are hidden. They appear when the receiving team starts its own set-up, as in a real game, so the kicking team can't set up against a formation that isn't there yet. This applies to every match, including two-device matches. Set-ups during kick-off events (such as Solid Defence or Dwarven Wisdom) still show both teams.
 
