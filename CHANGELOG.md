@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.47 (14 Oct 2026)
+- **Fixed:** the version number no longer sits on top of the buttons in Settings or on the exhibition team screen. It now shows only on the title screen and the main menu.
+
 ## v2.46 (14 Oct 2026)
 - **Added:** against the computer, the faint pulsing waiting banner now shows too: **Computer's turn** during its turn and set-up, and **Computer is choosing…** when it has a choice to make during yours (such as picking the block dice). It doesn't show when the computer plays both teams, or when two people share one device.
 - **Changed:** the waiting banner (in two-device matches too) is hidden while a big announcement such as "ORCS SETUP" is on screen, which already says whose turn it is.
