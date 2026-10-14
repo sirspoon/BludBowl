@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.02 (14 Oct 2026)
+- **Added:** click the version number on the title screen to see this list of changes. The number is now highlighted so it's clear you can click it.
+
 ## v2.01 (14 Oct 2026)
 - **Fixed:** scoring a touchdown when both teams have used all their turns no longer starts a new drive. The game goes straight to half time or full time. ([#28](https://github.com/sirspoon/BludBowl/issues/28))
 - **Fixed:** the MVP roll now needs six nominees, or everyone who played if fewer than six did. Any missing nominees are filled in at random when the roll happens automatically. ([#8](https://github.com/sirspoon/BludBowl/issues/8))
