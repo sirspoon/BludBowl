@@ -513,6 +513,13 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.8); border-radius: 4px; }
 
         .modal-bg { background-color: rgba(11, 15, 25, 0.85); backdrop-filter: blur(4px); }
+        /* roll dialogs sit low on the screen with no dimming, so the pitch and the player making the roll stay in view */
+        .roll-sheet { background: transparent !important; backdrop-filter: none !important; align-items: flex-end !important; padding: 0 12px max(12px, env(safe-area-inset-bottom)) !important; }
+        .roll-sheet > div { max-width: min(560px, 100%) !important; padding: 10px 14px 12px !important; box-shadow: 0 -6px 28px rgba(0, 0, 0, .65), 0 0 0 1px rgba(0, 0, 0, .4) !important; background: rgba(15, 23, 42, .96) !important; }
+        .roll-sheet h2 { font-size: 1.2rem !important; line-height: 1.1; margin-bottom: 2px !important; }
+        .roll-sheet p, .roll-sheet #trr-meaning-box, .roll-sheet .bg-slate-950\/80 { margin-bottom: 6px !important; }
+        .roll-sheet .bg-slate-950\/80 { padding: 6px 10px !important; }
+        .roll-sheet #roll-text br { display: none; } .roll-sheet #roll-desc { margin-right: 4px; } .roll-sheet #roll-odds { margin-left: 4px; }
         /* drop-down menus drawn by the game (phones otherwise show their own system list) */
         .fs-wrap { position: relative; display: block; min-width: 0; }
         .fs-wrap > select { display: none !important; }
@@ -787,7 +794,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.08</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.09</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1191,7 +1198,7 @@
         </div>
     </div>
 
-    <div id="modal-roll" class="absolute inset-0 z-40 modal-bg flex items-center justify-center hidden pointer-events-auto">
+    <div id="modal-roll" class="absolute inset-0 z-40 modal-bg roll-sheet flex items-center justify-center hidden pointer-events-auto">
         <div class="bg-slate-900 border-2 border-amber-600 rounded-xl p-5 max-w-[300px] w-full shadow-2xl flex flex-col items-center">
             <h2 id="roll-title" class="text-2xl fantasy-font text-amber-500 mb-1">Roll Required!</h2>
             <p id="roll-text" class="text-sm text-slate-300 text-center mb-3">
@@ -1253,7 +1260,7 @@
         </div>
     </div>
 
-    <div id="modal-team-reroll" class="absolute inset-0 z-[60] modal-bg flex items-center justify-center hidden pointer-events-auto">
+    <div id="modal-team-reroll" class="absolute inset-0 z-[60] modal-bg roll-sheet flex items-center justify-center hidden pointer-events-auto">
         <div class="bg-slate-900 border-2 border-yellow-500 rounded-xl p-5 max-w-[320px] w-full shadow-2xl flex flex-col items-center">
             <h2 id="trr-title" class="text-2xl fantasy-font text-yellow-500 mb-0.5">Roll Failed!</h2>
             <div class="bg-slate-950/80 border border-slate-700 p-3 rounded-lg w-full text-center mb-4 shadow-inner">
@@ -9071,14 +9078,16 @@
             const r = first != null ? first : d6();
             if (pass(r) || p.team !== state.activeTeam || !(state.rr[p.team] > 0) || AI.isAI(p.team)) { done(r); return; }
             const was = state.mode; state.mode = MODES.LOCKED;
+            const sheet = on => document.getElementById('modal-choice').classList.toggle('roll-sheet', on);
+            sheet(true); camFocus(p, 'modal-choice');
             askChoice('TEAM RE-ROLL?', `${p.name || p.type}'s ${label} roll failed (rolled ${r}). Use a team re-roll? (${state.rr[p.team]} left)`, 'Re-roll', 'Accept it',
                 () => {
-                    state.mode = was; spendTeamReroll(p.team); updateTopBar(); sfx('teamReroll');
+                    sheet(false); state.mode = was; spendTeamReroll(p.team); updateTopBar(); sfx('teamReroll');
                     log(`  TEAM RE-ROLL used on the ${label} roll!`, 'text-amber-400 font-bold');
                     if (lonerBlocks(p)) { done(r); return; }
                     done(d6());
                 },
-                () => { state.mode = was; done(r); }, { team: p.team, ai: 'no' });
+                () => { sheet(false); state.mode = was; done(r); }, { team: p.team, ai: 'no' });
         }
         // the activation rolls are made first (so a failed one can be re-rolled), then played out by activationTest0 in the same order
         let actDice = null;
@@ -10172,7 +10181,31 @@
             const pr = state.pendingRoll, forced = !pr || pr.prevMode === MODES.LOCKED || ['LANDING', 'CATCH', 'INTERCEPT', 'EAT TEAM-MATE', 'ALWAYS HUNGRY'].includes(pr.type);
             document.getElementById('btn-roll-cancel').classList.toggle('hidden', forced);
             document.getElementById('modal-roll').classList.remove('hidden'); 
+            camFocus(player, 'modal-roll');
             render();
+        }
+        // Glide the camera so a player sits in the middle of the pitch still in view above a roll dialog. Only when they'd
+        // otherwise be hidden behind it or close to the edge of the screen; a player already in plain view stays put.
+        let camGlide = 0;
+        function camFocus(p, modalId) {
+            if (!p || p.x < 0 || p.x >= CFG.cols) return;
+            requestAnimationFrame(() => {
+                const card = document.querySelector('#' + modalId + ' > div'), W = window.innerWidth, H = window.innerHeight;
+                const freeH = Math.max(120, (card && card.offsetHeight ? card.getBoundingClientRect().top : H) - 8);
+                const z = state.camera.zoom, ts = CFG.tileSize;
+                const sx = state.camera.x + (p.x + 0.5) * ts * z, sy = state.camera.y + (p.y + 0.5) * ts * z;
+                const mx = W * 0.2, my = freeH * 0.2;
+                if (sx > mx && sx < W - mx && sy > my && sy < freeH - my) return;
+                const tx = W / 2 - (p.x + 0.5) * ts * z, ty = freeH / 2 - (p.y + 0.5) * ts * z;
+                const fx = state.camera.x, fy = state.camera.y, t0 = performance.now(), id = ++camGlide;
+                const step = now => {
+                    if (id !== camGlide || state.drag.active) return;
+                    const k = Math.min(1, (now - t0) / 380), e = 1 - Math.pow(1 - k, 3);
+                    state.camera.x = fx + (tx - fx) * e; state.camera.y = fy + (ty - fy) * e;
+                    if (k < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            });
         }
 
         document.getElementById('btn-roll-cancel').addEventListener('click', () => {
@@ -10300,6 +10333,7 @@
 
                 state.trrCtx = { type: pData.type, player: pData.player, target: pData.target };   // for the computer's re-roll budget
                 document.getElementById('modal-team-reroll').classList.remove('hidden');
+                camFocus(pData.player, 'modal-team-reroll');
                 document.getElementById('btn-trr-no').onclick = () => {
                     document.getElementById('modal-team-reroll').classList.add('hidden');
                     state.mode = pData.prevMode; state.pendingRoll = null;

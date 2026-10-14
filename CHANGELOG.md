@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.09 (14 Oct 2026)
+- **Changed:** the "Roll Required" and "Roll Failed" (team re-roll) panels, and the team re-roll question for skill rolls, are now a smaller panel at the bottom of the screen that no longer darkens or blurs the pitch. If the player making the roll would be hidden behind the panel or near the edge of the screen, the camera glides them into the middle of the pitch above it. ([#3](https://github.com/sirspoon/BludBowl/issues/3))
+
 ## v2.08 (14 Oct 2026)
 - **Added:** a failed Foul Appearance, Projectile Vomit, Breathe Fire, Hypnotic Gaze or Chomp (Monstrous Mouth) roll now offers a team re-roll too. If a re-rolled Foul Appearance passes, the block or special action carries on. ([#29](https://github.com/sirspoon/BludBowl/issues/29))
 
