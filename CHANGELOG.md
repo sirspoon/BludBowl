@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.23 (14 Oct 2026)
+- **Fixed:** the pitch could go completely black at the start of your turn after a sped-up computer turn. A camera glide (the one that brings a player into view for a roll) mixed up the game's clock with real time, and once a turn had been sped up it threw the camera millions of pixels off the pitch.
+- **Changed:** **Speed up** now stays on for the computer's later turns too, until you tap it off. Your own turns, and anything you're asked to answer, still run at normal speed. Each new match starts with it off.
+
 ## v2.22 (14 Oct 2026)
 - **Added:** when you play against the computer, a **▶▶ Speed up** button appears next to End Turn during the computer's turn. Tap it to run that turn at 4× speed (tap again to go back to normal). It switches itself off as soon as your turn comes round, and drops back to normal speed whenever you have something to answer during the computer's turn (such as choosing block dice or a re-roll), then carries on fast. ([#1](https://github.com/sirspoon/BludBowl/issues/1))
 

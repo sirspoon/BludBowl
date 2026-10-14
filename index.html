@@ -820,7 +820,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.22</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.23</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1106,7 +1106,7 @@
                         </button>
 
                         <button id="btn-simspeed" title="Match speed (computer against computer)" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-300 px-2 py-1 rounded font-bold text-[10px] border border-amber-700 transition shadow whitespace-nowrap">▶ 1×</button>
-                        <button id="btn-aifast" type="button" title="Speed up the computer's turn (this turn only)" aria-pressed="false" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-300 px-2 py-1 rounded font-bold text-[10px] border border-amber-700 transition shadow whitespace-nowrap">▶▶ Speed up</button>
+                        <button id="btn-aifast" type="button" title="Speed up the computer's turns (tap again to go back to normal)" aria-pressed="false" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-300 px-2 py-1 rounded font-bold text-[10px] border border-amber-700 transition shadow whitespace-nowrap">▶▶ Speed up</button>
                         <button id="btn-end-turn" class="bg-red-950 hover:bg-red-900 text-red-100 px-3 py-1 rounded font-bold text-[10px] tracking-wider uppercase border border-red-800 transition shadow whitespace-nowrap">
                             End Turn
                         </button>
@@ -5523,8 +5523,8 @@
             want = +window.BB_SIM_SPEED || 1; if (!STEPS.includes(want) || want === 0) want = 1;
             try { localStorage.removeItem('bb-sim-speed'); } catch (e) {}   // an older version remembered the last speed
             const allowed = () => { try { return AI.isOn(0) && AI.isOn(1) && AI.isStarted() && !state.isGameOver; } catch (e) { return false; } };
-            // Against the computer: "Speed up" runs the computer's current turn at 4x. It switches itself off when the coach's turn
-            // comes round, and drops back to normal speed whenever the coach has something to answer during the computer's turn.
+            // Against the computer: "Speed up" runs the computer's turns at 4x until the coach switches it off (for the rest of the
+            // match). The coach's own turns are always normal speed, and so is any moment the coach has something to answer.
             const FAST = 4;
             let turbo = false, turboShown = null;
             const aiTurn = () => { try { return AI.isStarted() && !state.isGameOver && AI.isOn(0) !== AI.isOn(1) && AI.isOn(state.activeTeam); } catch (e) { return false; } };
@@ -5545,7 +5545,7 @@
                 const ok = allowed(), b = document.getElementById('btn-simspeed');
                 if (!b) return;
                 {   // the one-turn speed-up against the computer
-                    const at = aiTurn(); if (!at && turbo) turbo = false;
+                    const at = aiTurn();   // (it stays on for later computer turns until the coach switches it off; their own turns are always normal speed)
                     const f = document.getElementById('btn-aifast'), key = at + '|' + turbo;
                     if (f && key !== turboShown) { turboShown = key; f.classList.toggle('hidden', !at); f.textContent = turbo ? '▶▶ 4× ✓' : '▶▶ Speed up'; f.setAttribute('aria-pressed', String(turbo)); }
                     if (!ok) apply();
@@ -10424,9 +10424,9 @@
                 if (sx > mx && sx < W - mx && sy > my && sy < freeH - my) return;
                 const tx = W / 2 - (p.x + 0.5) * ts * z, ty = freeH / 2 - (p.y + 0.5) * ts * z;
                 const fx = state.camera.x, fy = state.camera.y, t0 = performance.now(), id = ++camGlide;
-                const step = now => {
+                const step = () => {   // (the game clock, not the frame's real-time stamp: they drift apart once a turn has been sped up)
                     if (id !== camGlide || state.drag.active) return;
-                    const k = Math.min(1, (now - t0) / 380), e = 1 - Math.pow(1 - k, 3);
+                    const k = Math.max(0, Math.min(1, (performance.now() - t0) / 380)), e = 1 - Math.pow(1 - k, 3);
                     state.camera.x = fx + (tx - fx) * e; state.camera.y = fy + (ty - fy) * e;
                     if (k < 1) requestAnimationFrame(step);
                 };
@@ -14029,7 +14029,7 @@
             const from = { zoom: cam.zoom, x: cam.x, y: cam.y }, to = { zoom: z, x, y }, t0 = performance.now(), id = {}; camTween = id;
             const step = () => {
                 if (camTween !== id || state.drag.active) return;
-                const k = Math.min(1, (performance.now() - t0) / ms), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+                const k = Math.max(0, Math.min(1, (performance.now() - t0) / ms)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
                 cam.zoom = from.zoom + (to.zoom - from.zoom) * e; cam.x = from.x + (to.x - from.x) * e; cam.y = from.y + (to.y - from.y) * e;
                 if (k < 1) requestAnimationFrame(step);
             };
@@ -14058,7 +14058,7 @@
             const id = {}; camTween = id;
             const step = () => {
                 if (camTween !== id || state.drag.active) return;
-                const k = Math.min(1, (performance.now() - t0) / ms), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+                const k = Math.max(0, Math.min(1, (performance.now() - t0) / ms)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
                 cam.zoom = from.zoom + (to.zoom - from.zoom) * e; cam.x = from.x + (to.x - from.x) * e; cam.y = from.y + (to.y - from.y) * e;
                 if (k < 1) requestAnimationFrame(step);
             };
