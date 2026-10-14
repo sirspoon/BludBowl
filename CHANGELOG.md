@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.06 (14 Oct 2026)
+- **Added:** each weather now shows on the pitch. Blizzard has snow drifts and falling snow, Pouring Rain has wet grass, puddles and rain, Very Sunny has brighter grass and moving beams of light, Sweltering Heat has an orange glow and a heat shimmer, and Perfect Conditions has the odd cloud shadow. When the weather changes mid-match, the new weather blends in. ([#23](https://github.com/sirspoon/BludBowl/issues/23))
+- **Added:** a Weather effects option in Settings (Full, Light or Off). The moving effects fade back while you're choosing a move or a target.
+
 ## v2.05 (14 Oct 2026)
 - **Changed:** Glart's Frenzied Rush, Roxanna's Slashing Nails and the Desperate Measure for a second foul are now only used up once the player commits (takes a step or picks a target). Cancelling before then keeps them for later.
 - **Fixed:** cancelling a second foul no longer frees up a foul that had already been used that turn.

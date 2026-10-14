@@ -782,7 +782,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.05</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.06</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -812,6 +812,7 @@
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option></select></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
+            <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
             <input type="file" id="bk-file" accept=".json,application/json" class="hidden">
@@ -12904,6 +12905,179 @@
         // loop of its own each time it was called, so over a match dozens of loops piled up, each redrawing the whole
         // pitch every frame - which is what made the game get slower and slower as it went on.
         let frameLoopOn = false;
+        // ---- Weather on the pitch (issue #23) ----
+        // Two layers per weather: ground (painted on the grass under the players, never moves) and air (moving, drawn on top, kept faint).
+        // Everything is in pitch pixels, so it can be drawn inside the game's camera transform.
+        const WFX = (() => {
+            let cur = 'perfect', prev = null, mixT0 = 0, last = 0;
+            const MIX = 1600;                                          // ms to blend from one weather to the next
+            const grounds = {};                                        // cached ground layers, per weather and pitch size
+            let parts = { key: null, list: [] };
+            const rnd = seed => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };   // same drifts every time
+
+            function groundFor(key, W, H, ts) {
+                const id = key + W + 'x' + H; if (grounds[id]) return grounds[id];
+                const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'), r = rnd(key.length * 977 + 13);
+                const blob = (x, y, rad, inner, outer) => { const gr = g.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, inner); gr.addColorStop(1, outer); g.fillStyle = gr; g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill(); };
+                if (key === 'blizzard') {
+                    g.fillStyle = 'rgba(220,235,255,0.10)'; g.fillRect(0, 0, W, H);
+                    for (let i = 0; i < 110; i++) {                    // drifts banked against the sidelines and in the corners
+                        const side = r() < 0.5, x = r() * W, d = Math.pow(r(), 2.6) * ts * 1.8, y = side ? d : H - d;
+                        const corner = Math.min(x, W - x) < ts * 3 ? 1.5 : 1;
+                        blob(x, y, ts * (0.4 + r() * 0.9) * corner, 'rgba(248,251,255,0.48)', 'rgba(248,251,255,0)');
+                    }
+                    for (let i = 0; i < 6; i++) {                      // a few patches out in the middle
+                        const x = ts * 2 + r() * (W - ts * 4), y = ts * 3 + r() * (H - ts * 6);
+                        for (let k = 0; k < 4; k++) blob(x + (r() - .5) * ts, y + (r() - .5) * ts * .6, ts * (0.3 + r() * 0.45), 'rgba(245,249,255,0.32)', 'rgba(245,249,255,0)');
+                    }
+                } else if (key === 'rain') {
+                    g.fillStyle = 'rgba(8,24,38,0.28)'; g.fillRect(0, 0, W, H);   // wet, darker grass
+                    const pud = [];
+                    for (let i = 0; i < 9; i++) {
+                        const x = ts * 1.5 + r() * (W - ts * 3), y = ts + r() * (H - ts * 2), rx = ts * (0.6 + r() * 0.9), ry = rx * (0.45 + r() * 0.2);
+                        pud.push({ x, y, rx, ry });
+                        g.save(); g.translate(x, y); g.scale(1, ry / rx);
+                        const gr = g.createRadialGradient(0, 0, rx * .2, 0, 0, rx); gr.addColorStop(0, 'rgba(70,100,130,0.55)'); gr.addColorStop(.8, 'rgba(50,80,105,0.45)'); gr.addColorStop(1, 'rgba(50,80,105,0)');
+                        g.fillStyle = gr; g.beginPath(); g.arc(0, 0, rx, 0, 7); g.fill();
+                        g.strokeStyle = 'rgba(200,225,245,0.18)'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, rx * .82, Math.PI * 1.1, Math.PI * 1.7); g.stroke();
+                        g.restore();
+                    }
+                    c.puddles = pud;
+                } else if (key === 'sunny') {
+                    g.fillStyle = 'rgba(255,236,170,0.16)'; g.fillRect(0, 0, W, H);
+                } else if (key === 'heat') {                       // baked: warm across the pitch, hottest towards the bottom corners
+                    const lg = g.createLinearGradient(0, 0, W * 0.35, H);
+                    lg.addColorStop(0, 'rgba(255,190,90,0.10)'); lg.addColorStop(0.6, 'rgba(255,140,40,0.20)'); lg.addColorStop(1, 'rgba(240,100,20,0.30)');
+                    g.fillStyle = lg; g.fillRect(0, 0, W, H);
+                    const rg = g.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.2, W / 2, H * 0.45, Math.hypot(W, H) * 0.6);
+                    rg.addColorStop(0, 'rgba(255,170,60,0)'); rg.addColorStop(1, 'rgba(230,110,20,0.22)');
+                    g.fillStyle = rg; g.fillRect(0, 0, W, H);
+                }
+                return (grounds[id] = c);
+            }
+
+            function spawn(key, W, H, ts, n) {
+                const list = [];
+                for (let i = 0; i < n; i++) list.push({ x: Math.random() * W, y: Math.random() * H, z: 0.4 + Math.random() * 0.6, ph: Math.random() * 6.28 });
+                parts = { key, list, W, H };
+            }
+
+            // ground: call after drawing the grass, before the grid and players
+            function ground(ctx, W, H, ts, strength) {
+                if (!strength) return;
+                const m = mix();
+                if (prev && m < 1) { ctx.globalAlpha = (1 - m) * strength; ctx.drawImage(groundFor(prev, W, H, ts), 0, 0); }
+                ctx.globalAlpha = m * strength; ctx.drawImage(groundFor(cur, W, H, ts), 0, 0); ctx.globalAlpha = 1;
+            }
+
+            // air: call last, over the players. dim = 0..1 (fade back while choosing a target), still = no motion
+            function air(ctx, W, H, ts, now, strength, dim, still) {
+                const dt = Math.min(50, now - (last || now)); last = now;
+                if (!strength) return;
+                const m = mix(now), a = strength * (1 - 0.55 * dim);
+                ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();   // keep it on the pitch
+                if (prev && m < 1) layer(prev, ctx, W, H, ts, now, dt, a * (1 - m), still);
+                layer(cur, ctx, W, H, ts, now, dt, a * m, still);
+                ctx.restore();
+            }
+
+            function layer(key, ctx, W, H, ts, now, dt, a, still) {
+                const t = now / 1000;
+                const vignette = (rgba, inner) => { const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * inner, W / 2, H / 2, Math.hypot(W, H) / 2); g.addColorStop(0, rgba.replace(/[\d.]+\)$/, '0)')); g.addColorStop(1, rgba); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); };
+                ctx.save(); ctx.globalAlpha = a;
+                if (key === 'blizzard') {
+                    vignette('rgba(225,238,255,0.24)', 0.42);
+                    if (!still) {
+                        if (parts.key !== key || parts.W !== W) spawn(key, W, H, ts, Math.round(W * H / (ts * ts) * 0.55));
+                        const gust = Math.sin(t * 0.35) * 0.6 + Math.sin(t * 1.3) * 0.25;
+                        ctx.fillStyle = '#fff';
+                        parts.list.forEach(p => {
+                            p.y += dt * 0.045 * p.z * ts / 40; p.x += dt * (0.06 + gust * 0.08) * p.z * ts / 40 + Math.sin(t * 2 + p.ph) * 0.3;
+                            if (p.y > H) { p.y = -4; p.x = Math.random() * W; } if (p.x > W + 4) p.x = -4; if (p.x < -4) p.x = W + 4;
+                            ctx.globalAlpha = a * (0.35 + p.z * 0.5); ctx.beginPath(); ctx.arc(p.x, p.y, ts * 0.035 + p.z * ts * 0.05, 0, 7); ctx.fill();
+                        });
+                    }
+                } else if (key === 'rain') {
+                    ctx.fillStyle = 'rgba(20,40,70,0.14)'; ctx.fillRect(0, 0, W, H);
+                    const pud = groundFor('rain', W, H, ts).puddles || [];
+                    if (!still) {
+                        pud.forEach((p, i) => {                        // a ripple now and then in each puddle
+                            const k = ((t * 0.7 + i * 0.37) % 1);
+                            ctx.globalAlpha = a * (1 - k) * 0.5; ctx.strokeStyle = 'rgba(210,230,250,1)'; ctx.lineWidth = 1;
+                            ctx.beginPath(); ctx.ellipse(p.x + Math.sin(i * 7) * p.rx * .3, p.y, p.rx * .5 * k, p.ry * .5 * k, 0, 0, 7); ctx.stroke();
+                        });
+                        if (parts.key !== key || parts.W !== W) spawn(key, W, H, ts, Math.round(W * H / (ts * ts) * 0.6));
+                        ctx.strokeStyle = 'rgba(200,220,240,1)'; ctx.lineWidth = Math.max(1, ts * 0.025);
+                        parts.list.forEach(p => {
+                            const len = ts * (0.35 + p.z * 0.35);
+                            p.y += dt * 0.9 * p.z * ts / 40; p.x -= dt * 0.22 * p.z * ts / 40;
+                            if (p.y > H) { p.y = -len; p.x = Math.random() * (W + ts * 4); } if (p.x < -ts) p.x = W + ts;
+                            ctx.globalAlpha = a * (0.12 + p.z * 0.2); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + len * 0.25, p.y - len); ctx.stroke();
+                        });
+                    }
+                } else if (key === 'sunny') {
+                    ctx.globalCompositeOperation = 'screen';
+                    const ox = -W * 0.08, oy = -H * 0.25, beams = [[0.3, 0.05, 0.56], [0.43, 0.035, 0.42], [0.55, 0.06, 0.67], [0.68, 0.03, 0.35], [0.8, 0.05, 0.52], [0.92, 0.035, 0.74]];
+                    beams.forEach(([ang, w, sp], i) => {
+                        const breathe = still ? 0.8 : Math.pow(0.5 + 0.5 * Math.sin(t * sp + i * 2.1), 1.6);   // each beam fades in and out in its own time
+                        const th = ang + (still ? 0 : Math.sin(t * 0.25 + i) * 0.07), L = Math.hypot(W, H) * 1.3;
+                        const g = ctx.createLinearGradient(ox, oy, ox + Math.cos(th) * L, oy + Math.sin(th) * L);
+                        g.addColorStop(0, `rgba(255,236,160,${0.34 * breathe})`); g.addColorStop(0.55, `rgba(255,236,160,${0.11 * breathe})`); g.addColorStop(1, 'rgba(255,232,150,0)');
+                        ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(ox, oy);
+                        ctx.lineTo(ox + Math.cos(th - w) * L, oy + Math.sin(th - w) * L); ctx.lineTo(ox + Math.cos(th + w) * L, oy + Math.sin(th + w) * L); ctx.closePath(); ctx.fill();
+                    });
+                    ctx.globalCompositeOperation = 'source-over';
+                } else if (key === 'heat') {
+                    vignette('rgba(255,120,30,0.18)', 0.45);
+                    if (!still) {                                       // pale bands of shimmer drifting up the pitch
+                        ctx.strokeStyle = 'rgba(255,240,220,1)'; ctx.lineWidth = Math.max(1, ts * 0.025);
+                        for (let i = 0; i < 10; i++) {
+                            const k = ((t * 0.06 + i / 10) % 1), y = H * (1.05 - k * 1.1);
+                            ctx.globalAlpha = a * Math.sin(k * Math.PI) * 0.09;
+                            ctx.beginPath();
+                            for (let x = 0; x <= W; x += ts / 4) { const yy = y + Math.sin(x / (ts * 0.7) + t * 2.6 + i * 1.7) * ts * 0.1; x ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); }
+                            ctx.stroke();
+                        }
+                    }
+                } else if (key === 'perfect' && !still) {               // a soft cloud shadow drifting across every so often
+                    const cycle = 38, k = (t % cycle) / cycle, cx = -W * 0.4 + k * W * 1.8, cy = H * (0.35 + Math.sin(Math.floor(t / cycle)) * 0.2);
+                    [[0, 0, 1], [0.35, -0.15, 0.7], [-0.3, 0.12, 0.75], [0.15, 0.2, 0.6]].forEach(([dx, dy, s]) => {
+                        const R = ts * 4.2 * s, g = ctx.createRadialGradient(cx + dx * ts * 6, cy + dy * ts * 6, 0, cx + dx * ts * 6, cy + dy * ts * 6, R);
+                        g.addColorStop(0, 'rgba(10,20,30,0.13)'); g.addColorStop(1, 'rgba(10,20,30,0)'); ctx.fillStyle = g; ctx.fillRect(cx + dx * ts * 6 - R, cy + dy * ts * 6 - R, 2 * R, 2 * R);
+                    });
+                }
+                ctx.restore();
+            }
+
+            // Sweltering Heat only: the pitch shimmers in bands that drift upwards, done in screen pixels after everything else.
+            // One snapshot of the frame per draw, then only the strips inside a band are redrawn from it, so it stays cheap.
+            let snap = null;
+            function warp(ctx, canvas, now, box, strength, dim, still) {
+                if (still || !strength || (cur !== 'heat' && prev !== 'heat')) return;
+                const amt = (cur === 'heat' ? mix(now) : 1 - mix(now)) * strength * (1 - 0.6 * dim);
+                if (amt < 0.05) return;
+                const t = now / 1000, step = Math.max(3, Math.round(box.h / 120)), px = box.w / 900;
+                if (!snap) snap = document.createElement('canvas');
+                if (snap.width !== canvas.width || snap.height !== canvas.height) { snap.width = canvas.width; snap.height = canvas.height; }
+                const sc = snap.getContext('2d'); sc.clearRect(0, 0, snap.width, snap.height); sc.drawImage(canvas, 0, 0);
+                ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+                for (let y = box.y; y < box.y + box.h; y += step) {
+                    const f = (y - box.y) / box.h, band = Math.pow(Math.max(0, Math.sin(f * Math.PI * 3.2 + t * 1.4)), 3);   // rising bands
+                    if (band < 0.08) continue;                          // between bands the pitch is left alone
+                    const dx = Math.sin(y * 0.11 / px + t * 4.2) * 2.2 * band * (0.5 + 0.5 * f) * amt * px;
+                    if (Math.abs(dx) > 0.2) ctx.drawImage(snap, box.x, y, box.w, step, box.x + dx, y, box.w, step);
+                }
+                ctx.restore();
+            }
+
+            function mix(now = performance.now()) { if (!prev) return 1; const m = Math.min(1, (now - mixT0) / MIX); if (m >= 1) prev = null; return m; }
+            function set(key, blend = true) { if (key === cur) return; prev = blend ? cur : null; cur = key; mixT0 = performance.now(); }
+            return { ground, air, warp, set, get key() { return cur; } };
+        })();
+        // Settings: Full / Light / Off. The moving part fades back while you're choosing a move or target.
+        let wxFX = 1, wxDim = 0;
+        try { const v = localStorage.getItem('bb-weather-fx'); if (v != null && ['1', '0.55', '0'].includes(v)) wxFX = +v; } catch (e) {}
+        const wxStill = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
         // a pulsing reminder of the declared Blitz / Foul / Pass / Hand-off, so a misclick is spotted before the player moves
         let actBannerKey = '';
         function actBannerPaint() {
@@ -12942,6 +13116,13 @@
                     ctx.fillStyle = (x+y)%2===0 ? 'rgba(21,128,61,0.5)' : 'rgba(22,101,52,0.5)';
                     ctx.fillRect(x*ts, y*ts, ts, ts); 
                 }
+            }
+            {   // weather: follow the match (blending when it changes mid-game), then the still ground layer
+                const wk = (state.weather && state.weather.key) || 'perfect';
+                if (WFX.key !== wk) WFX.set(wk, !!state.live);
+                const choosing = state.selectedId != null && state.mode !== MODES.IDLE && !AI.isAI(state.activeTeam);
+                wxDim += ((choosing ? 1 : 0) - wxDim) * 0.12;
+                WFX.ground(ctx, CFG.cols * ts, CFG.rows * ts, ts, wxFX ? (wxFX < 1 ? 0.8 : 1) : 0);
             }
 
             state.bloodSplatters.forEach(b => {
@@ -13459,9 +13640,16 @@
                     ctx.restore();
                 }
             }
+            WFX.air(ctx, CFG.cols * ts, CFG.rows * ts, ts, performance.now(), wxFX, wxDim, wxStill());
             if (state.floaters && state.floaters.length) drawFloaters(ts);
 
             ctx.restore();
+            {   // Sweltering Heat shimmer, over just the part of the pitch that's on screen
+                const D = window.devicePixelRatio || 1, z = state.camera.zoom;
+                const x0 = Math.max(0, Math.round(state.camera.x * D)), y0 = Math.max(0, Math.round(state.camera.y * D));
+                const x1 = Math.min(canvas.width, Math.round((state.camera.x + CFG.cols * ts * z) * D)), y1 = Math.min(canvas.height, Math.round((state.camera.y + CFG.rows * ts * z) * D));
+                if (x1 > x0 && y1 > y0) WFX.warp(ctx, canvas, performance.now(), { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, wxFX, wxDim, wxStill());
+            }
         }
 
         function screenToWorld(x, y) {
@@ -16783,6 +16971,7 @@
                 on('st-sound', !SFX.isMuted(), 'On', 'Off');
                 on('st-music', MUSIC.isEnabled(), 'On', 'Off');
                 on('st-anim', !window.FAST_ANIM, 'Full', 'Quick');
+                on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
                 document.getElementById('st-text').textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';
                 document.getElementById('st-pitch').value = pitchPref;
             };
@@ -16792,6 +16981,11 @@
             document.getElementById('st-anim').addEventListener('click', () => {
                 window.FAST_ANIM = window.FAST_ANIM ? 0 : 1;
                 try { localStorage.setItem('bb-quick-anim', window.FAST_ANIM ? '1' : '0'); } catch (e) {}
+                paintSettings();
+            });
+            document.getElementById('st-weather').addEventListener('click', () => {
+                wxFX = wxFX === 1 ? 0.55 : wxFX > 0 ? 0 : 1;
+                try { localStorage.setItem('bb-weather-fx', String(wxFX)); } catch (e) {}
                 paintSettings();
             });
             document.getElementById('st-pitch').addEventListener('change', e => { setPitchPref(e.target.value); selPitch.value = pitchPref; });
