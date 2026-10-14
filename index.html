@@ -815,6 +815,9 @@
 #net-lobby .nl-back { align-self: flex-end; }
 #net-lobby .nl-pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 #net-lobby #nl-resume, #net-lobby #nl-rejoin { flex: 1 1 100%; } #net-lobby #nl-resume.hidden, #net-lobby #nl-rejoin.hidden { display: none; }
+#net-lobby .nl-check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #cbd5e1; } #net-lobby .nl-check.hidden, #net-lobby #nl-fixture.hidden { display: none; }
+#net-lobby .nl-check input { width: 18px; height: 18px; accent-color: #38bdf8; }
+#net-lobby #nl-fixture { margin: 0; font-size: 14px; color: #fde68a; } #net-lobby[data-league="1"] .nl-own { display: none; }
 #net-lobby .nl-name { display: flex; align-items: center; gap: 8px; } #net-lobby .nl-name input { flex: 1; text-transform: none; letter-spacing: 0; }
 #net-chat { position: fixed; z-index: 70; display: flex; gap: 6px; padding: 6px; border-radius: 10px; background: #0b1220; border: 1px solid #38bdf8; box-shadow: 0 6px 24px rgba(0,0,0,.6); font-family: Inter, system-ui, sans-serif; }
 #net-chat.hidden { display: none; }
@@ -873,7 +876,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.41</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.42</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -2064,7 +2067,7 @@
             // the match a report is built from: the one just played, or one the quick simulator worked out
             function liveSrc() {
                 return { score: [state.score[0], state.score[1]], fanFactor: [state.fanFactor[0] || 0, state.fanFactor[1] || 0], stalled: state.stalled, players: state.players,
-                    ids: [0, 1].map(i => ROSTERS[i].careerTeamId), opp: [0, 1].map(i => ROSTERS[i].oppName || ROSTERS[1 - i].baseName || ROSTERS[1 - i].name), ai: [0, 1].map(i => AI.isOn(i)) };
+                    ids: [0, 1].map(i => NET.recordsHere(i) ? ROSTERS[i].careerTeamId : null), opp: [0, 1].map(i => ROSTERS[i].oppName || ROSTERS[1 - i].baseName || ROSTERS[1 - i].name), ai: [0, 1].map(i => !NET.on() && !NET.wasGuest() && AI.isOn(i)) };
             }
             function buildReport(team, src) {
                 src = src || liveSrc();
@@ -3968,7 +3971,7 @@
                     ${indTabsHtml((fav === 1 ? [1, 0] : [0, 1]).map(i => { const b = budget(i);
                         return { i, name: pm.T[i].name, cpu: pm.cpu[i], sub: b.total > 0 ? `${i === fav ? 'Favourite' : 'Underdog'} · left ${k(b.total - spent(i))}` : 'Nothing to spend' }; }), pm.tab, 'pmtab')}
                     <div class="ind-pane">${panel(pm.tab)}</div>
-                    <div class="lg-cta"><button type="button" class="pg-btn" data-act="pmback">Back</button><button type="button" class="pg-primary" data-act="kickoff">Kick off →</button></div>`;
+                    <div class="lg-cta"><button type="button" class="pg-btn" data-act="pmback">Back</button>${!pm.watch && !pm.cpu[0] && !pm.cpu[1] ? '<button type="button" class="pg-btn" data-act="kickoff2" title="Play this fixture against someone on another device: they coach the away team">Play on two devices</button>' : ''}<button type="button" class="pg-primary" data-act="kickoff">Kick off →</button></div>`;
             }
 
             // ---- a played match comes back here ----
@@ -4335,8 +4338,18 @@
                     <div class="lg-cta"><button type="button" class="pg-btn" data-act="rdback">Back</button><button type="button" class="pg-primary" data-act="rdok" ${bad ? 'disabled' : ''}>Confirm re-draft (${n} players)</button></div>
                     ${bad ? `<div class="pg-dim th-bad" style="text-align:center">${bad}</div>` : '<div class="pg-dim" style="text-align:center">Players you let go leave the team for good.</div>'}`;
             }
-            function play(lg, key, watch) {
+            function play(lg, key, watch, two) {
                 const f = byKey(lg, key); if (!f || f.r || f.bye) return;
+                if (two && pm && pm.key === key) {   // two devices: the host coaches the home team, the other device the away team
+                    const ind = pmApply(); pm = null; mode = 'league';
+                    prevAI = [AI.isOn(0), AI.isOn(1)];
+                    const lid = lg.id;
+                    close();
+                    NET.hostLeague({ name: lg.name, home: nameOf(f.h), away: nameOf(f.a) },
+                        () => window.launchMatch('custom:' + f.h, 'custom:' + f.a, { replaceOk: true, career: !String(key).startsWith('fr:'), league: { lid, key, ind }, ind, extraRR: [f.h, f.a].map(id => id === lg.holder ? 1 : 0), fmt: lg.fmt === 'sevens' ? 'sevens' : 'std' }),
+                        () => open(lid));
+                    return;
+                }
                 if (!teamOf(f.h) || !teamOf(f.a)) { simFixture(lg, key); save(); render(); return; }
                 if (!pm || pm.key !== key) {
                     pmSetup(lg, key, watch);
@@ -4407,6 +4420,7 @@
                         else { pm = null; play(get(cur), key, d.act === 'frwatch'); return; }
                     }
                     else if (lg && pm && d.act === 'kickoff') { play(lg, pm.key, pm.watch); return; }
+                    else if (lg && pm && d.act === 'kickoff2') { play(lg, pm.key, false, true); return; }
                     else if (lg && d.watch) { pm = null; play(lg, d.watch, true); return; }
                     else return;
                     render();
@@ -5998,7 +6012,7 @@
             }
             function go() {
                 const opts = { career: X.career, fmt: X.fmt };
-                if (X.net) { opts.replaceOk = true; NET.begin(); }
+                if (X.net) { opts.replaceOk = true; opts.netCareer = NET.careerSides(); NET.begin(); }
                 const any = X.ind.some(d => Object.keys(d).some(key => key === 'stars' ? (d.stars || []).length : d[key]));
                 if (any) opts.ind = X.ind.map(d => JSON.parse(JSON.stringify(d)));
                 $('ex-ind').classList.add('hidden');
@@ -6096,6 +6110,7 @@
 
         // after a match: start the page afresh, straight onto the main menu (no splash or title screen)
         function backToMenu() {
+            if (NET.wasGuest()) { try { sessionStorage.setItem('bb-to-menu', '1'); } catch (e) {} location.reload(); return; }   // the guest's device after a two-device match
             const lid = state.league && state.league.lid, cid = state.cup && state.cup.cid;
             try { resetToMenu(); if (lid) LEAGUE.open(lid); else if (cid) CUP.open(cid); return; } catch (e) { console.error('reset failed, reloading instead', e); }
             try { sessionStorage.setItem('bb-to-menu', '1'); } catch (e) {}
@@ -6207,7 +6222,7 @@
                     <section class="ms-card"><h3>Casualties</h3>${casl}</section>`;
             }
             function open() {
-                const career = state.careerOn && state.careerOn.some(Boolean);
+                const career = state.careerOn && state.careerOn.some((v, i) => v && NET.recordsHere(i));
                 document.getElementById('ms-body').innerHTML = body();
                 document.getElementById('ms-report').classList.toggle('hidden', !career);
                 document.getElementById('ms-menu').classList.toggle('hidden', career);   // a career match must be finished in its report
@@ -16094,6 +16109,7 @@
                 try { if (link) link.close(); } catch (e) {}
                 try { if (peer) peer.destroy(); } catch (e) {}
                 link = null; peer = null; role = null; rtt = null; guestRace = null; guestName = ''; guestToken = ''; oppName = '';
+                if (!live) league = null;
             }
             // ---- the guest getting back after a drop ----
             function startRetry() {
@@ -16130,8 +16146,8 @@
                     if (m.name != null) setOpp(m.name);
                     if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
                     if (role === 'host') {
-                        if (!inMatch()) guestToken = m.token || '';
-                        else if (live) { resetSent(); link.send({ t: 'start' }); log(`  ${escH(them())} is back.`, 'text-emerald-300'); }
+                        if (!inMatch()) { guestToken = m.token || ''; if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false) }); }
+                        else if (live) { resetSent(); if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false) }); link.send({ t: 'start' }); log(`  ${escH(them())} is back.`, 'text-emerald-300'); }
                         else if (EXIND.open()) { link.send({ t: 'shop' }); shopSent = ''; }
                     }
                     return true;
@@ -16145,6 +16161,7 @@
                 if (m.t === 'team') { if (!live && !EXIND.open()) { guestRace = m.race; guestName = m.name; paintLobby(); } return; }
                 if (m.t === 'resync') { resetSent(); return; }
                 if (m.t === 'chat' && live) { chatLine(them(), m.text, 1); return; }
+                if (m.t === 'note' && live) { log(`  ${escH(m.text)}`, 'text-amber-300'); return; }
                 if (m.t === 'in' && m.k === 'exind') { EXIND.remote(m.d); return; }
                 if (m.t === 'in' && m.k === 'squad' && live) {
                     const p = state.netLineup && state.players.find(q => q.id === m.id);
@@ -16156,16 +16173,25 @@
                 if (m.t === 'in' && live) { fromGuest = true; try { guestInput(m); } finally { fromGuest = false; } }
             }
             function start(hostKey) {
+                if (league && role === 'host' && link) {   // a league fixture: the league's own pre-match screen has done the inducements
+                    AI.set(0, false); AI.set(1, false);
+                    $('net-lobby').classList.add('hidden');
+                    const go = league.launch; begin(); go();
+                    return;
+                }
                 if (!link || !guestRace) return;
                 aiWas = [AI.isOn(0), AI.isOn(1)];
                 AI.set(0, false); AI.set(1, false);
                 $('net-lobby').classList.add('hidden');
                 link.send({ t: 'shop' }); shopSent = '';
-                EXIND.start(hostKey, 'net:1', false, 'std', true);   // each side shops for its own team (straight on if neither has gold)
+                netCareer = [wantCareer(), !!guestRace.careerTeamId];
+                EXIND.start(hostKey, 'net:1', netCareer[0] || netCareer[1], 'std', true);   // each side shops for its own team (straight on if neither has gold)
             }
             // the shopping is done: the match itself starts
+            let netCareer = [false, false];
             function begin() {
                 live = true; resetSent();
+                if (link && league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false) });
                 setTimeout(() => { if (live) log(`  Playing ${escH(them())}. Double-tap the match log to send them a message.`, 'text-sky-300'); }, 2500);
                 if (link) link.send({ t: 'start' });
                 paintChip();
@@ -16276,9 +16302,11 @@
             function guestMsg(m) {
                 if (common(m)) return;
                 if (m.t === 'busy') { forgetRejoin(); const was = inMatch(); stopRetry(); try { if (link) link.close(); } catch (e) {} link = null; status('That match already has two players.', 'bad'); if (was) { live = false; shopping = false; showEnd('The host is playing with another device now.'); } return; }
+                if (m.t === 'fixture') { league = { text: m.text }; paintLobby(); return; }
                 if (m.t === 'shop') { shopping = true; $('net-lobby').classList.add('hidden'); $('ex-body').innerHTML = '<p class="pg-dim">Opening the inducements…</p>'; $('ex-back').hidden = true; $('ex-ind').classList.remove('hidden'); return; }
                 if (m.t === 'exind') { if (shopping) $('ex-body').innerHTML = m.html; return; }
                 if (m.t === 'lobby') { shopping = false; $('ex-ind').classList.add('hidden'); openLobby(); status('The host went back to the lobby.', 'wait'); return; }
+                if (m.t === 'start' && !live && !league) setTimeout(settleMine, 1500);
                 if (m.t === 'start') { live = true; shopping = false; $('ex-ind').classList.add('hidden'); shown = false; raw.keys = {}; raw.pl = new Map(); raw.order = []; $('net-lobby').classList.add('hidden'); paintChip(); return; }
                 if (!live) return;
                 if (m.t === 'meta') { applyMeta(m.d); return; }
@@ -16287,7 +16315,14 @@
                 if (m.t === 'cv') { pics[m.id + '#' + m.i] = m; paintPic(m.id + '#' + m.i); return; }
                 if (m.t === 'log') { applyLog(m); return; }
                 if (m.t === 'sfx') { try { p0(m.k, m.d, m.sz); } catch (e) {} return; }
-                if (m.t === 'end') { live = false; forgetRejoin(); showEnd('The host has finished the match.'); }
+                if (m.t === 'end') { live = false; forgetRejoin(); if (!postOpen && !($('net-end') && $('net-end').dataset.kind === 'post' && !$('net-end').classList.contains('hidden'))) showEnd(league ? "The host has finished the match. The league result and both teams' post-match are on the host's device." : 'The host has finished the match.'); }
+            }
+            // the guest's own career team: Expensive Mistakes left over from its last match are settled before this one
+            function settleMine() {
+                const id = ROSTERS[1] && ROSTERS[1].careerTeamId, t = id && TB.get(id);
+                if (!t || !(state.careerOn || [])[1]) return;
+                const em = CAREER.settleEM(t); if (!em || !link) return;
+                link.send({ t: 'note', text: `${t.name}: ${em.none ? em.text : `Expensive Mistakes left over from the last match (treasury ${Math.round(em.before)}k, rolled ${em.r}): ${em.text}`}` });
             }
             function applyMeta(d) {
                 ROSTERS[0] = d.rosters[0]; ROSTERS[1] = d.rosters[1];
@@ -16368,7 +16403,22 @@
                     if (me && !btn.disabled) btn.disabled = true;
                 }
             }
+            let postOpen = false, postAsked = false;
+            const myCareerHere = () => { const id = ROSTERS[1] && ROSTERS[1].careerTeamId; return role === 'guest' && !league && !!(state.careerOn || [])[1] && !!id && !!TB.get(id); };
+            function postGame() {
+                if (role !== 'guest' || postAsked || !state.isGameOver) return;
+                postAsked = true;
+                if (!myCareerHere()) return;
+                showEnd(`The match is over. Fill in ${ROSTERS[1].name}'s post-match report on this device: MVP, SPP, injuries and winnings are saved to your team here.`, false, 'post');
+            }
+            function openPost() {
+                postOpen = true; live = false; forgetRejoin();
+                const el = $('net-end'); if (el) el.classList.add('hidden');
+                ['match-summary', 'modal-announce'].forEach(id => { const e = $(id); if (e) e.classList.add('hidden'); });
+                try { CAREER.open(); } catch (e) { console.error('post-game', e); showEnd("Sorry, the post-match report couldn't be opened."); }
+            }
             function ownView() {
+                postGame();
                 lineupView();
                 const m = $('modal-dice');
                 if (m && !m.classList.contains('hidden') && state.combat && state.combat.chooser != null) paintDiceChooser(state.combat.chooser, state.combat.chooser !== myTeam());
@@ -16448,7 +16498,7 @@
                     if (link) link.send({ t: 'in', k: 'grid', x: w.gridX, y: w.gridY });
                     return;
                 }
-                if (t.closest('#match-summary')) { stop(); showEnd('The match is over.'); return; }
+                if (t.closest('#match-summary')) { stop(); if (myCareerHere()) { postAsked = false; postGame(); } else showEnd(league ? "The match is over. The league result and both teams' post-match are on the host's device." : 'The match is over.'); return; }
                 if (t.closest('#btn-saveexit')) { stop(); showEnd('Leave the match and go back to the main menu? It ends on the host\'s device too.', true); return; }
                 if (t.closest('#btn-end-turn')) { stop(); if (link) link.send({ t: 'in', k: 'click', id: 'btn-end-turn' }); return; }
                 const root = MIRROR.map(n => $(n.replace('*', ''))).find(r => r && r.contains(t));
@@ -16465,13 +16515,14 @@
                     el = document.createElement('div'); el.id = 'net-end'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
                     el.innerHTML = `<div class="ne-card"><p class="ne-text"></p><div class="ne-btns"><button type="button" class="ne-stay">Keep playing</button><button type="button" class="ne-go">Back to the menu</button></div></div>`;
                     document.body.appendChild(el);
-                    el.querySelector('.ne-go').onclick = () => { forgetRejoin(); close(); location.reload(); };   // a fresh page: the guest's own game is just as it was
+                    // (the Back to the menu button: a fresh page, so the guest's own game is just as it was; see below)
                     el.querySelector('.ne-stay').onclick = () => el.classList.add('hidden');
                 }
                 el.querySelector('.ne-text').textContent = text;
                 el.querySelector('.ne-stay').hidden = !canStay;
                 el.dataset.kind = kind || '';
-                el.querySelector('.ne-go').textContent = kind === 'retry' ? 'Leave the match' : 'Back to the menu';
+                el.querySelector('.ne-go').textContent = kind === 'retry' ? 'Leave the match' : kind === 'post' ? 'Post-match report →' : 'Back to the menu';
+                el.querySelector('.ne-go').onclick = kind === 'post' ? openPost : () => { forgetRejoin(); close(); location.reload(); };
                 el.classList.remove('hidden');
             }
 
@@ -16507,12 +16558,32 @@
                 squadSel.value = [...squadSel.options].some(o => o.value === keep) ? keep : '';
                 squadSel.disabled = squadSel.options.length < 2;
             }
+            // a saved team can have the match recorded in its career (on its own device: each device keeps its own team)
+            const careerOk = key => { if (!String(key).startsWith('custom:')) return false; const r = raceFor(key); return !!r.careerTeamId && !r.matched; };
+            function paintCareer() {
+                const key = teamOf($('nl-race'), $('nl-squad'));
+                $('nl-career-row').classList.toggle('hidden', !careerOk(key));
+            }
+            const wantCareer = () => careerOk(teamOf($('nl-race'), $('nl-squad'))) && $('nl-career').checked;
             function sendTeam() {
-                if (role !== 'guest' || !link) return;
+                paintCareer();
+                if (role !== 'guest' || !link || league) return;
                 const key = teamOf($('nl-race'), $('nl-squad')), r = JSON.parse(JSON.stringify(raceFor(key)));
-                delete r.careerTeamId;   // an exhibition: nothing is recorded
+                if (!wantCareer()) delete r.careerTeamId;   // the guest's team is recorded on the guest's device, if it wants
                 guestName = r.name;
                 link.send({ t: 'team', race: r, name: r.name });
+            }
+            // ---- a league fixture on two devices: the league (and both teams) live on the host's device; the guest coaches the away team ----
+            let league = null;   // host: { text, launch }   guest: { text }
+            const fixText = (fx, asHost) => typeof fx === 'string' ? fx : asHost
+                ? `${fx.name}: you coach ${fx.home} (home) on this device; the other device coaches ${fx.away} (away).`
+                : `${fx.name}: you coach ${fx.away} (away); the host coaches ${fx.home} (home). The league and both teams' post-match are kept on the host's device.`;
+            function hostLeague(fx, launch, cancel) {
+                aiWas = aiWas || [AI.isOn(0), AI.isOn(1)];
+                if (role !== 'host') open(true);   // (opening a room clears any earlier fixture)
+                league = { fx, text: fixText(fx, true), launch, cancel };
+                openLobby();
+                paintLobby();
             }
             function paintLobby() {
                 const L = $('net-lobby'); if (!L) return;
@@ -16521,7 +16592,11 @@
                 $('nl-ping').textContent = link ? `Connected${oppName ? ` to ${oppName}` : ''}${rtt != null ? ` · ${rtt} ms` : ''}` : '';
                 const opp = $('nl-opp');
                 opp.textContent = role === 'host' ? (guestRace ? `${oppName ? oppName + "'s" : "The other player's"} team: ${guestName}` : link ? `Waiting for ${oppName || 'the other player'} to pick a team…` : '') : role === 'guest' && link ? `Pick your team. ${oppName || 'The host'} starts the match.` : '';
-                $('nl-start').disabled = !(role === 'host' && link && guestRace);
+                $('nl-start').disabled = !(role === 'host' && link && (guestRace || league));
+                L.dataset.league = league ? '1' : '';
+                const fx = $('nl-fixture'); fx.classList.toggle('hidden', !league); if (league) fx.textContent = league.text;
+                if (league && role === 'host') opp.textContent = link ? `${oppName || 'The other player'} is connected.` : 'Waiting for the other player to join with the code…';
+                if (league && role === 'guest') opp.textContent = 'The host starts the match.';
                 $('nl-teams').classList.toggle('hidden', !link);
                 // carrying on: the host's saved two-device match, or the match this device was the guest in
                 const sv = !role && SAVE.readNet(), rj = !role && rejoinRec();
@@ -16535,12 +16610,13 @@
                 const rs = $('nl-race'), sq = $('nl-squad');
                 $('nl-name').value = myName();
                 if (!rs.options.length) { fillPicker(rs, sq); rs.value = 'human'; }
-                fillPicker(rs, sq);
+                fillPicker(rs, sq); paintCareer();
                 L.classList.remove('hidden'); paintLobby();
             }
             function bindLobby() {
                 const L = $('net-lobby'), rs = $('nl-race'), sq = $('nl-squad');
                 rs.onchange = () => { sq.value = ''; fillPicker(rs, sq); sendTeam(); };
+                sq.addEventListener('change', paintCareer);
                 $('nl-name').onchange = () => {
                     const n = cleanName($('nl-name').value); $('nl-name').value = n;
                     try { localStorage.setItem(NAME, n); } catch (e) {}
@@ -16558,7 +16634,11 @@
                 $('nl-join').onclick = join;
                 $('nl-join-code').onkeydown = e => { if (e.key === 'Enter') join(); };
                 $('nl-start').onclick = () => start(teamOf(rs, sq));
-                $('nl-leave').onclick = () => { close(); status('', ''); paintLobby(); L.classList.add('hidden'); };
+                $('nl-leave').onclick = () => {
+                    const lg = league; league = null; close(); status('', ''); paintLobby(); L.classList.add('hidden');
+                    if (lg && lg.cancel) { if (aiWas) { AI.set(0, aiWas[0]); AI.set(1, aiWas[1]); aiWas = null; } lg.cancel(); }
+                };
+                $('nl-career').onchange = () => sendTeam();
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLobby); else bindLobby();
 
@@ -16620,12 +16700,16 @@
             }
 
             return {
-                openLobby, matchOver, begin, cancelShop, gate,
+                openLobby, matchOver, begin, cancelShop, gate, hostLeague,
+                careerSides: () => netCareer.slice(),
+                recordsHere: i => postOpen ? i === 1 : !live || !!league || i === myTeam(),   // whose career this device records
+                wasGuest: () => role === 'guest' || postOpen,
                 hosting: () => role === 'host' && live,
-                saveInfo: () => ({ code, token: guestToken, aiWas, guestName, oppName }),
+                saveInfo: () => ({ code, token: guestToken, aiWas, guestName, oppName, league: league ? { text: league.text, fx: league.fx } : null }),
                 resumeHost(info) {   // the host's page was closed: the match is back from the save; open the same room again
                     open(true, null, info.code);
                     guestToken = info.token || ''; aiWas = info.aiWas || null; guestName = info.guestName || ''; oppName = info.oppName || '';
+                    league = info.league ? { text: info.league.text, fx: info.league.fx } : null;
                     live = true; resetSent(); paintChip();
                     log(`  Two-device match: the other device can rejoin with the code ${info.code} (Two Devices → Rejoin).`, 'text-sky-300');
                 },
@@ -16694,6 +16778,7 @@
             function ownerTeam(el) {
                 if (!el || !el.closest) return null;
                 const lp = el.closest('#lineup-pane0, #lineup-pane1'); if (lp) return +lp.id.slice(-1);
+                if (el.closest('#btn-announce-reload')) return NET.on() ? 0 : null;   // the final whistle's summary: the host's device
                 const ii = el.closest('#modal-ind-intro'); if (ii) return ii.dataset.team != null && ii.dataset.team !== '' ? +ii.dataset.team : null;
                 if (el.closest('#modal-roll')) return state.pendingRoll ? state.pendingRoll.player.team : null;
                 if (el.closest('#modal-team-reroll')) return state.activeTeam;
@@ -18584,7 +18669,7 @@
                 try { resizeCanvas(); buildPitchTexture(); } catch (e) { console.error(e); }
                 {   // a career match records SPP, injuries and winnings for saved teams (not when a team plays itself)
                     const on = !!opts.career && k0 !== k1;
-                    state.careerOn = [0, 1].map(i => on && !!ROSTERS[i].careerTeamId && !ROSTERS[i].matched);   // Matched Play: no SPP, injuries don't carry over
+                    state.careerOn = [0, 1].map(i => on && !!ROSTERS[i].careerTeamId && !ROSTERS[i].matched && (!opts.netCareer || !!opts.netCareer[i]));   // Matched Play: no SPP, injuries don't carry over
                     ROSTERS[0].oppName = ROSTERS[1].baseName; ROSTERS[1].oppName = ROSTERS[0].baseName;
                 }
                 state.league = opts.league || null;
@@ -18662,8 +18747,12 @@
         <p id="nl-status" aria-live="polite"></p>
         <p id="nl-ping" class="nl-dim"></p>
         <div id="nl-teams" class="hidden">
+            <p id="nl-fixture" class="hidden"></p>
+            <div class="nl-own">
             <label class="nl-dim">Your team</label>
             <div class="nl-sel"><select id="nl-race" aria-label="Race"></select><select id="nl-squad" aria-label="Team"></select></div>
+            <label id="nl-career-row" class="nl-check hidden"><input type="checkbox" id="nl-career" checked> Record this match in my team's career (SPP, injuries, winnings)</label>
+            </div>
             <p id="nl-opp"></p>
             <button type="button" id="nl-start" class="nl-btn nl-go" disabled>Start match</button>
             <p class="nl-dim nl-hostonly">You play the left-hand team and kick off the match from this device. The match isn't saved, and no SPP or injuries are kept.</p>

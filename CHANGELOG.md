@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.42 (14 Oct 2026)
+- **Added:** career teams in two-device matches. When you pick one of your saved teams in the Two Devices lobby, tick **Record this match in my team's career** to keep its SPP, injuries and winnings. Each player decides for their own team, and each team is recorded on its own device. After the final whistle, each device fills in its own team's post-match report (MVP, SPP, advancements, winnings, Expensive Mistakes) and saves it to the team there. Expensive Mistakes left over from the guest team's last match are settled when the match starts, and shown in the log. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+- **Added:** league fixtures on two devices. On a league's pre-match screen, **Play on two devices** opens a room. The other player joins with the code and coaches the away team, and the host coaches the home team. The league's inducements are chosen on the pre-match screen as before. The league, both teams and both post-match reports stay on the host's device, as in a normal league match. This needs both teams to be coached by people in the league, not the computer.
+- **Changed:** in a two-device match, only the host can open the match summary from the final whistle.
+
 ## v2.41 (14 Oct 2026)
 - **Added:** a name for two-device matches. Type it in **Your name** at the top of the Two Devices screen; it's remembered on that device. The other player sees it in the lobby ("Connected to Sam", "Sam's team: Orcs"), in the connection chip ("⇄ vs Sam"), and in the waiting banner ("Sam's turn", "Sam is choosing…"). ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 - **Added:** chat in two-device matches. Double-tap (or double-click) the match log, type a message and press Enter or Send. It appears in both players' logs with the sender's name, in a different colour for each player, with a sound for the one receiving it.
