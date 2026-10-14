@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.52 (14 Oct 2026)
+- **Added:** replays. Once all the dice for a pass, Throw Team-mate or bomb are done, a close-up replay plays from low down behind the thrower. The camera follows the ball (or the thrown player, or the bomb) past the other players, in the style of an old 16-bit console.
+  - **Passes:** catches, drops, interception attempts, inaccurate passes, passes into the crowd and fumbles.
+  - **Throw Team-mate:** the thrown player somersaults through the air and lands on their feet, crash-lands, lands on someone or goes into the crowd.
+  - **Bombs:** interceptions and catches (with the throw on), and a pixel-art explosion that knocks down whoever was hit.
+  - **The moment itself:** a successful catch, interception or landing gets a brief slow-down, a flash and a golden glow.
+  - **The words** ("CAUGHT!", "INTERCEPTED!", "BOOM!") pop up like the skill pops: gold and white when it's good for your team, red when it's bad, and fiery for a bomb. In a two-device match each device colours them for its own team.
+  - **Settings → Replays** turns them on or off. They're skipped with Quick animations and in computer-v-computer matches. Tap a replay to skip it.
+
 ## v2.51 (14 Oct 2026)
 - **Fixed:** the panels at the bottom of the screen (such as the team re-roll question) no longer slip off the bottom on a phone when the browser's address bar is showing. Pop-ups now fit the part of the screen you can actually see, and a tall panel scrolls instead.
 - **Changed:** questions during a match, such as Taunt, now use the smaller panel at the bottom of the screen (like the Dodge roll) instead of covering the pitch. For Taunt, the camera also brings the player into view. Questions before and after the match still appear in the middle.

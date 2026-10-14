@@ -61,6 +61,18 @@
             82%  { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
             100% { opacity: 0; transform: translate(-50%, -56%) scale(1.12); }
         }
+        /* replays: the low, close-up pass / Throw Team-mate / bomb replay over the pitch */
+        #replay { position: fixed; inset: 0; z-index: 72; display: flex; align-items: center; justify-content: center; background: rgba(2,6,16,.55); animation: rpIn .25s ease-out both; cursor: pointer; }
+        #replay.hidden { display: none; }
+        #replay.rp-out { opacity: 0; transition: opacity .25s; }
+        #replay .rp-stage { position: relative; width: min(96vw, 980px, calc((var(--app-h, 100vh) - 24px) * 16 / 9)); aspect-ratio: 16 / 9; background: #000; border: 2px solid #475569; border-radius: 10px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+        @media (max-aspect-ratio: 1/1) { #replay .rp-stage { width: min(96vw, calc((var(--app-h, 100vh) - 24px) * 4 / 5)); aspect-ratio: 4 / 5; } }
+        #replay canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+        #replay .rp-tag { position: absolute; left: 10px; top: 9px; font: 10px 'Press Start 2P', monospace; color: #f8fafc; text-shadow: 2px 2px 0 #000; letter-spacing: 1px; pointer-events: none; }
+        #replay .rp-tag i { display: inline-block; width: 8px; height: 8px; margin-right: 7px; background: #ef4444; vertical-align: 0; animation: rpBlink 1s steps(2, start) infinite; }
+        #replay .rp-skip { position: absolute; right: 10px; bottom: 8px; font: 500 11px ui-monospace, monospace; color: rgba(230,236,245,.55); pointer-events: none; }
+        @keyframes rpIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes rpBlink { to { visibility: hidden; } }
         #splash { position: absolute; inset: 0; z-index: 150; background: #000; display: flex; align-items: center; justify-content: center; transition: opacity 2.3s ease-in; }
         #splash.fading { opacity: 0; pointer-events: none; }
         #btn-splash { background: #000; color: #a9a9a9; border: 2px solid #a9a9a9; border-radius: 6px; padding: 12px 34px; font-family: 'Teko', 'Arial Narrow', sans-serif; font-size: 30px; letter-spacing: .12em; cursor: pointer; transition: color .15s, border-color .15s; }
@@ -890,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.51</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.52</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -921,6 +933,7 @@
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option></select></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
+            <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
@@ -6519,7 +6532,7 @@
         // the turn only changes hands once whatever caused it has played out: a ball still bouncing, a catch roll still to
         // make, an Apothecary to decide on (on a slow phone, or a fast match, those can outlast the usual pause)
         function playSettled() {
-            return !state.pendingRoll && !state.ballAnimation.active && !state.flightAnimation.active
+            return !state.pendingRoll && !state.ballAnimation.active && !state.flightAnimation.active && !PASSFX.busy()
                 && ['modal-roll', 'modal-dice', 'modal-choice', 'modal-team-reroll'].every(id => { const e = document.getElementById(id); return !e || e.classList.contains('hidden'); });
         }
         function afterSettled(ms, fn) {
@@ -6527,6 +6540,7 @@
         }
         function triggerTurnover(reason, delay = 0) {
             if (state.isGameOver) return;
+            if (REPLAY.get()) { REPLAY.then(() => triggerTurnover(reason, delay)); return; }   // a pass / Throw Team-mate / bomb replay first
             starCarryDrop(true);
             if (state.charge) {
                 // A player fell over during Charge!: the Charge ends (no real Turnover)
@@ -8352,7 +8366,7 @@
             if (state.leaderRR && state.leaderRR.some(Boolean)) leaderCheck();
             state.turnActed = false;
             state.setPiece = null; state.players.forEach(p => { if (p.razzle) p.razzle = null; });
-            state.blitzUsed = false; state.passUsed = false; state.handoffUsed = false; state.foulUsed = false; state.foulers = []; state.barikCatch = null; state.ttmUsed = false; state.ktmUsed = false; state.secureUsed = false; state.bombUsed = false;
+            state.blitzUsed = false; state.passUsed = false; state.handoffUsed = false; state.foulUsed = false; state.foulers = []; state.barikCatch = null; state.ttmUsed = false; state.ktmUsed = false; state.secureUsed = false; state.bombUsed = false; REPLAY.cancel();
             log(`--- ${ROSTERS[state.activeTeam].name} Turn ${state.turn[state.activeTeam]} ---`, 'text-white font-bold');
             {
                 const tm = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId);
@@ -10996,6 +11010,7 @@
 
         document.getElementById('btn-roll-cancel').addEventListener('click', () => {
             if (!state.pendingRoll || state.pendingRoll.prevMode === MODES.LOCKED) return;   // forced rolls can't be called off
+            REPLAY.cancel();   // the action was called off: nothing to replay
             if (state.pathData && !state.pathData.done) state.pathData.done = true;   // the move stops where the player is
             document.getElementById('modal-roll').classList.add('hidden'); state.mode = state.pendingRoll.prevMode;
             log(`  ${state.pendingRoll.type} cancelled.`, 'text-slate-400');
@@ -11187,6 +11202,7 @@
             return true;
         }
         function checkTurnoverPass(activeTeamId) {
+            if (REPLAY.get()) { REPLAY.then(() => checkTurnoverPass(activeTeamId)); return; }
             if (state.ball.carrierId) {
                 let carrier = getPlayerById(state.ball.carrierId);
                 if (carrier.team === activeTeamId) { sfx('crowdYeah', 300); sfx('applause', 500); }
@@ -11238,22 +11254,23 @@
                 
                 setupRoll('CATCH', p, withRaw(cTarget, cRaw), 'Catch',
                     () => {
-                        log(`  ${p.type} catches the pass!`, 'text-green-400 font-bold');
+                        log(`  ${p.type} catches the pass!`, 'text-green-400 font-bold'); REPLAY.set('catch', { id: p.id, ok: true }, true);
                         if (p.team === thrower.team && state.passData && state.passData.isAccurate && state.passData.target && state.passData.target.id === p.id) sppGain(thrower, 'cp');
                         if (p.team === thrower.team && prayerOn(p.team, 11)) sppGain(p, 'dazzle');
                         state.ball.carrierId = p.id; state.ball.x = -1; state.ball.y = -1;
                         checkTurnoverPass(thrower.team);
                     },
                     () => {
-                        log(`  ${p.type} drops the pass!`);
+                        log(`  ${p.type} drops the pass!`); REPLAY.set('catch', { id: p.id, ok: false }, true);
                         scatterBall(x, y, () => checkTurnoverPass(thrower.team));
                     },
                     { desc: 'Attempting to catch the pass.', prevMode: MODES.LOCKED, skillAllowed: true, helps: dcHelps,
                       explainFail: () => ({ title: 'Dropped Pass', text: 'The ball bounces from this square. If your team ends up without the ball, it is a TURNOVER.' }) }
                 );
             } else {
-                const caught = () => { if (checkTouchdown()) return; checkTurnoverPass(thrower.team); };
-                if (!p && tryDivingCatch(x, y, thrower.team, caught, () => scatterBall(x, y, () => checkTurnoverPass(thrower.team)))) return;
+                const dc = !p && divingCatcher(x, y, thrower.team);
+                const caught = () => { if (dc) REPLAY.set('catch', { id: dc.id, ok: true, dive: true }, true); REPLAY.then(() => { if (checkTouchdown()) return; checkTurnoverPass(thrower.team); }); };
+                if (!p && tryDivingCatch(x, y, thrower.team, caught, () => { if (dc) REPLAY.set('catch', { id: dc.id, ok: false, dive: true }, true); scatterBall(x, y, () => checkTurnoverPass(thrower.team)); })) return;
                 log(`  Pass hits the turf and bounces!`);
                 scatterBall(x, y, () => checkTurnoverPass(thrower.team));
             }
@@ -11311,7 +11328,7 @@
 
             setupRoll('INTERCEPT', interceptor, withRaw(target, iRaw), 'Catch',
                 () => {
-                    log(`  INTERCEPTED by ${interceptor.type}!`, 'text-fuchsia-400 font-bold text-lg');
+                    log(`  INTERCEPTED by ${interceptor.type}!`, 'text-fuchsia-400 font-bold text-lg'); REPLAY.set('int', { id: interceptor.id, ok: true });
                     sppGain(interceptor, 'int');
                     state.ball.carrierId = null;
                     animateBallFlight(state.passData.thrower.x, state.passData.thrower.y, interceptor.x, interceptor.y, 600, () => {
@@ -11321,7 +11338,7 @@
                     }, false);
                 },
                 () => {
-                    log(`  Interception failed!`);
+                    log(`  Interception failed!`); REPLAY.set('int', { id: interceptor.id, ok: false });
                     continuePassFlight();
                 },
                 { desc: `Attempting to intercept pass (-${intPenalty} modifier).`, prevMode: MODES.LOCKED, skillAllowed: true, helps: interceptor.skills.includes('Very Long Legs') ? [['Very Long Legs', 2]] : [],
@@ -11364,6 +11381,7 @@
             });
 
             state.passData = { thrower, target, isAccurate, landingX, landingY, scatterPath };
+            REPLAY.set('land', { x: landingX, y: landingY });
 
             if (interceptors.length > 0 && thrower.skills.includes('Cloud Burster')) {
                 const tall = interceptors.filter(q => q.skills.includes('Very Long Legs'));
@@ -11412,6 +11430,7 @@
                     );
                 }, false);
             } else onTheBall(thrower, receiver, () => {
+                REPLAY.start('pass', { thr: thrower.id, tgt: { x: receiver.x, y: receiver.y }, team: thrower.team });
                 const throwTZs0 = thrower.skills.includes('Nerves of Steel') ? 0 : getTackleZones(thrower.x, thrower.y, oppTeam), dp0 = dpCount(thrower);
                 const acc0 = (thrower.skills.includes('Accurate') && passPenalty <= 1 ? 1 : 0) + (thrower.skills.includes('Cannoneer') && passPenalty >= 2 ? 1 : 0);
                 setPieceAsk(thrower, receiver, Math.max(2, Math.min(6, thrower.pa + passPenalty + throwTZs0 + dp0 - acc0)), sp => {
@@ -11423,7 +11442,7 @@
 
                 setupRoll('PASS', thrower, pTarget, 'Pass',
                     (finalRoll) => { 
-                        log(`  Accurate pass targeting ${receiver.type}!`, 'text-purple-400 font-bold');
+                        log(`  Accurate pass targeting ${receiver.type}!`, 'text-purple-400 font-bold'); REPLAY.set('res', 'acc');
                         state.ball.carrierId = null;
                         thrower.hasActed = true; thrower.remainingMA = 0; thrower.rushes = 0;
                         processPassFlight(thrower, receiver, true, finalRoll);
@@ -11433,6 +11452,7 @@
                         thrower.hasActed = true; thrower.remainingMA = 0; thrower.rushes = 0;
 
                         if (finalRoll === 1 && thrower.skills.includes('Safe Pass')) {
+                            REPLAY.cancel();
                             log(`  SAFE PASS! ${thrower.type} rolled a natural 1 but keeps hold of the ball. Their activation ends, no Turnover.`, 'text-sky-300 font-bold'); skillPop('Safe Pass');
                             state.ball.carrierId = thrower.id;
                             state.mode = MODES.IDLE;
@@ -11440,11 +11460,11 @@
                             return;
                         }
                         if (isFumbleRoll(finalRoll, totalModifier)) {
-                            log(`  FUMBLED PASS! Ball drops at thrower's feet!`, 'text-red-500 font-bold');
+                            log(`  FUMBLED PASS! Ball drops at thrower's feet!`, 'text-red-500 font-bold'); REPLAY.set('res', 'fumble');
                             sfx('fumble'); sfx('crowdOoooh', 250);
                             scatterBall(thrower.x, thrower.y, () => triggerTurnover("Fumbled Pass!"));
                         } else {
-                            log(`  INACCURATE PASS! Ball flies toward target but scatters 3 times!`, 'text-yellow-400 font-bold');
+                            log(`  INACCURATE PASS! Ball flies toward target but scatters 3 times!`, 'text-yellow-400 font-bold'); REPLAY.set('res', 'inacc');
                             processPassFlight(thrower, receiver, false, finalRoll);
                         }
                     }, 
@@ -11542,6 +11562,7 @@
 
         // a Throw Team-mate that ends without a turnover: the team carries on with its turn
         function ttmCarryOn() {
+            if (REPLAY.get()) { REPLAY.then(ttmCarryOn); return; }
             if (checkTouchdown()) return;
             state.mode = MODES.IDLE;
             refreshSelection(getPlayerById(state.selectedId));
@@ -11563,6 +11584,7 @@
         }
         function resolveTTMLanding(thrown, targetX, targetY, isAccurate, swooped = false) {
             clearScatterMarksSoon();
+            REPLAY.set('land', { x: targetX, y: targetY }, true);
             thrown.x = targetX;
             thrown.y = targetY;
             thrown.isDown = false;
@@ -11571,7 +11593,7 @@
             // Out of bounds crowd surf check
             if (targetX < 0 || targetX >= CFG.cols || targetY < 0 || targetY >= CFG.rows) {
                 state.ttmCrash = null;
-                log(`  ${thrown.type} scattered into the crowd!`, 'text-fuchsia-400 font-bold');
+                log(`  ${thrown.type} scattered into the crowd!`, 'text-fuchsia-400 font-bold'); REPLAY.set('out', true);
                 if (state.ball.carrierId === thrown.id) {
                     throwIn(targetX, targetY);
                 }
@@ -11587,7 +11609,7 @@
                 // the thrown player then Bounces from that square and Falls Over - crashing again if that square is taken too
                 state.ttmCrash = state.ttmCrash || { ownMate: false, hadBall: state.ball.carrierId === thrown.id };
                 if (occupant.team === thrown.team) state.ttmCrash.ownMate = true;
-                log(`  SQUASH! ${thrown.type} crash lands on ${occupant.type}!`, 'text-red-500 font-bold text-sm');
+                log(`  SQUASH! ${thrown.type} crash lands on ${occupant.type}!`, 'text-red-500 font-bold text-sm'); REPLAY.set('crash', { on: occupant.id }, true);
                 occupant.isDown = true; occupant.isStunned = false;
                 if (state.ball.carrierId === occupant.id) dropBall(occupant);
                 harm({ kind: 'squashed', by: thrown }, () => checkArmor(occupant, null, thrown.skills.includes('Lethal Flight') && occupant.team !== thrown.team && !state.ttmKick ? { flex: 1, flexName: 'Lethal Flight', cause: thrown } : {}));
@@ -11598,6 +11620,7 @@
                 holdFlight(thrown, targetX, targetY, 600, () => {
                     animatePlayerFlight(thrown, targetX, targetY, sx, sy, 700, () => {
                         if (state.ttmMarks) state.ttmMarks.hops.push({ x: sx, y: sy, bounce: true });
+                        { const rc = REPLAY.get(); if (rc && rc.crash && !rc.crash.to) rc.crash.to = { x: sx, y: sy }; }
                         if (sx < 0 || sx >= CFG.cols || sy < 0 || sy >= CFG.rows || getPlayer(sx, sy)) { resolveTTMLanding(thrown, sx, sy, isAccurate); return; }
                         const crash = state.ttmCrash; state.ttmCrash = null;
                         thrown.x = sx; thrown.y = sy; thrown.isDown = true;
@@ -11625,8 +11648,8 @@
 
             if (state.ttmData && state.ttmData.fumble && state.ttmData.thrown === thrown && starIs(state.ttmData.thrower, 'deeproot')) {
                 log(`  RELIABLE! Deeproot's fumble still sets ${thrown.type} down safely.`, 'text-yellow-300 font-bold'); skillPop('Reliable');
-                if (checkTouchdown()) return;
-                state.mode = MODES.IDLE; refreshSelection(getPlayerById(state.selectedId)); return;
+                REPLAY.set('landed', true);
+                REPLAY.then(() => { if (checkTouchdown()) return; state.mode = MODES.IDLE; refreshSelection(getPlayerById(state.selectedId)); }); return;
             }
             log(`  ${thrown.type} attempts to stick the landing (${landTarget}+ required)...`, 'text-amber-300');
             if (swooped) thrown.usedSkills = (thrown.usedSkills || []).filter(k => k !== 'Swoop');
@@ -11635,12 +11658,15 @@
                     log(`  LANDING SUCCESS! ${thrown.type} lands safely on their feet!`, 'text-green-400 font-bold');
                     const td = state.ttmData;
                     if (td && td.thrown === thrown && !td.fumble && !state.ttmKick) { sppGain(thrown, 'ttm'); if (td.isAccurate) sppGain(td.thrower, 'ttm'); }
-                    if (checkTouchdown()) return;
-                    state.mode = MODES.IDLE;
-                    refreshSelection(getPlayerById(state.selectedId));
+                    REPLAY.set('landed', true);
+                    REPLAY.then(() => {
+                        if (checkTouchdown()) return;
+                        state.mode = MODES.IDLE;
+                        refreshSelection(getPlayerById(state.selectedId));
+                    });
                 },
                 () => {
-                    log(`  LANDING FAILED! ${thrown.type} crashes hard to the turf!`, 'text-red-400 font-bold');
+                    log(`  LANDING FAILED! ${thrown.type} crashes hard to the turf!`, 'text-red-400 font-bold'); REPLAY.set('landed', false);
                     thrown.isDown = true;
                     const hadBall = state.ball.carrierId === thrown.id;
                     if (hadBall) dropBall(thrown); else bounceLooseBallUnder(thrown);
@@ -11733,6 +11759,8 @@
             thrower.remainingMA = 0;
             thrower.rushes = 0;
             thrown.wasProne = !!thrown.isDown;
+            if (state.ttmKick) REPLAY.cancel();
+            else REPLAY.start('ttm', { thr: thrower.id, thrown: thrown.id, ball: state.ball.carrierId === thrown.id, tgt: { x: targetX, y: targetY }, team: thrower.team });
 
             const oppTeam = thrower.team === TEAMS.HUMAN ? TEAMS.ORC : TEAMS.HUMAN;
             const throwTZs = getTackleZones(thrower.x, thrower.y, oppTeam), dp = dpCount(thrower);
@@ -11748,7 +11776,7 @@
                         animatePlayerFlight(thrown, thrown.x, thrown.y, targetX, targetY, 800, () => resolveTTMLanding(thrown, targetX, targetY, true));
                         return;
                     }
-                    log(`  SUPERB THROW! ${thrower.type} flings ${thrown.type}, who scatters 3 times from the target square.`, 'text-fuchsia-400 font-bold');
+                    log(`  SUPERB THROW! ${thrower.type} flings ${thrown.type}, who scatters 3 times from the target square.`, 'text-fuchsia-400 font-bold'); REPLAY.set('res', 'superb');
                     ttmScatterOrSwoop(thrower, thrown, targetX, targetY, true);
                 },
                 (finalRoll) => {
@@ -11767,10 +11795,10 @@
                             triggerTurnover("Fumbled Kick Team-mate!");
                             return;
                         }
-                        log(`  FUMBLED THROW! ${thrower.type} fumbles ${thrown.type}!`, 'text-red-500 font-bold');
+                        log(`  FUMBLED THROW! ${thrower.type} fumbles ${thrown.type}!`, 'text-red-500 font-bold'); REPLAY.set('res', 'fumble');
                         ttmFumbleTumble(thrown, thrower);
                     } else if (!state.ttmKick) {
-                        log(`  SUBPAR THROW! ${thrown.type} hurtles wildly, scatters 3 times and will find it harder to land (-1).`, 'text-yellow-400 font-bold');
+                        log(`  SUBPAR THROW! ${thrown.type} hurtles wildly, scatters 3 times and will find it harder to land (-1).`, 'text-yellow-400 font-bold'); REPLAY.set('res', 'subpar');
                         ttmScatterOrSwoop(thrower, thrown, targetX, targetY, false);
                     } else {
                         log(`  INACCURATE THROW! ${thrown.type} hurtles wildly and scatters 3 times!`, 'text-yellow-400 font-bold');
@@ -15659,7 +15687,9 @@
             const target = Math.max(2, Math.min(6, (thrower.pa == null ? 6 : thrower.pa) + totalModifier));
             const range = ['Quick', 'Short', 'Long', 'Bomb'][penalty] || 'Long';
             const drive = state.driveId;
-            const finish = re ? re.done : turnoverWhy => {
+            if (!re) REPLAY.start('bomb', { legs: [], team: thrower.team });
+            { const rc = REPLAY.get(); if (rc && rc.legs) rc.legs.push({ from: thrower.id, tgt: { x: tx, y: ty } }); }
+            const finish0 = re ? re.done : turnoverWhy => {
                 if (drive !== state.driveId) return;
                 thrower.actionTaken = null;
                 if (turnoverWhy) { thrower.ayce = 0; triggerTurnover(turnoverWhy, 900); return; }
@@ -15679,14 +15709,15 @@
                 state.mode = MODES.IDLE;
                 refreshSelection(thrower);
             };
+            const finish = re ? finish0 : why => REPLAY.then(() => finish0(why));   // the replay of the whole bomb (and any throws back) first
             setupRoll('THROW BOMB', thrower, target, 'Pass',
-                () => bombIntercept(thrower, tx, ty, true, origin, finish, () => {
+                () => { const lg = REPLAY.leg(); if (lg) lg.res = 'acc'; bombIntercept(thrower, tx, ty, true, origin, finish, () => {
                     log(`  The bomb sails right on target!`, 'text-orange-300 font-bold');
                     animateBomb(thrower.x, thrower.y, tx, ty, 850, 2.2, () => bombLands(tx, ty, thrower, origin, finish));
-                }),
+                }); },
                 (roll) => {
                     if (isFumbleRoll(roll, totalModifier)) {
-                        log(`  FUMBLE! The bomb slips from ${thrower.type}'s fingers...`, 'text-red-500 font-bold');
+                        log(`  FUMBLE! The bomb slips from ${thrower.type}'s fingers...`, 'text-red-500 font-bold'); { const lg = REPLAY.leg(); if (lg) lg.res = 'fumble'; }
                         sfx('fumble');
                         animateBomb(thrower.x, thrower.y, thrower.x, thrower.y, 450, 0.4, () => explodeBomb(thrower.x, thrower.y, thrower, finish));
                         return;
@@ -15697,6 +15728,7 @@
                         const d = dirs[Math.floor(Math.random() * 8)]; lx += d[0]; ly += d[1]; path.push({ x: lx, y: ly });
                         if (lx < 0 || lx >= CFG.cols || ly < 0 || ly >= CFG.rows) break;
                     }
+                    { const lg = REPLAY.leg(); if (lg) { lg.res = 'inacc'; lg.land = { x: lx, y: ly }; } }
                     const hop = (i, fx, fy) => {
                         if (i >= path.length) { bombLands(fx, fy, thrower, origin, finish); return; }
                         const q = path[i];
@@ -15725,6 +15757,7 @@
         const bombCanCatch = p => !!p && !p.isDown && !p.isStunned && !p.isCasualty && !p.isKO && !p.isReserve && !p.isEjected && !p.skills.includes('No Ball');
         function bombLands(x, y, thrower, origin, done) {
             const p = getPlayer(x, y);
+            const lg = REPLAY.leg(); if (lg) lg.land = { x, y };
             if (!p) {   // an empty square: a player with Diving Catch next to it may dive for the bomb
                 const dc = divingCatcher(x, y, origin && origin.team === TEAMS.HUMAN ? TEAMS.ORC : TEAMS.HUMAN);
                 if (dc) {
@@ -15732,8 +15765,8 @@
                     const dive = () => {
                         skillPop('Diving Catch'); log(`  DIVING CATCH! ${dc.type} dives for the bomb!`, 'text-sky-300 font-bold');
                         setupRoll('CATCH', dc, withRaw(t, raw), 'Catch',
-                            () => { log(`  ${dc.type} catches the bomb without leaving their square!`, 'text-green-400 font-bold'); animateBomb(x, y, dc.x, dc.y, 300, 0.3, () => bombCaught(dc, origin, done)); },
-                            () => { log(`  ${dc.type} misses it.`, 'text-red-400'); explodeBomb(x, y, thrower, done); },
+                            () => { log(`  ${dc.type} catches the bomb without leaving their square!`, 'text-green-400 font-bold'); if (lg) lg.catch = { id: dc.id, ok: true, dive: true }; animateBomb(x, y, dc.x, dc.y, 300, 0.3, () => bombCaught(dc, origin, done)); },
+                            () => { log(`  ${dc.type} misses it.`, 'text-red-400'); if (lg) lg.catch = { id: dc.id, ok: false, dive: true }; explodeBomb(x, y, thrower, done); },
                             { desc: `Diving Catch: ${dc.type} dives for the bomb landing next to them. Catch it and they must throw it again; miss and it explodes where it lands.`, prevMode: MODES.LOCKED, skillAllowed: true,
                               explainFail: () => ({ title: 'Missed', text: 'The bomb explodes where it landed.' }) });
                     };
@@ -15746,8 +15779,8 @@
             const raw = (p.ag == null ? 6 : p.ag) + getTackleZones(x, y, p.team === TEAMS.HUMAN ? TEAMS.ORC : TEAMS.HUMAN), t = Math.max(2, Math.min(6, raw));
             log(`  The bomb comes down on ${ROSTERS[p.team].name} ${p.type}, who has to try to Catch it (${t}+)!`, 'text-orange-300 font-bold');
             setupRoll('CATCH', p, withRaw(t, raw), 'Catch',
-                () => { log(`  ${p.type} catches the bomb, fuse still fizzing!`, 'text-green-400 font-bold'); bombCaught(p, origin, done); },
-                () => { log(`  ${p.type} fumbles the bomb...`, 'text-red-400'); explodeBomb(x, y, thrower, done); },
+                () => { log(`  ${p.type} catches the bomb, fuse still fizzing!`, 'text-green-400 font-bold'); if (lg) lg.catch = { id: p.id, ok: true }; bombCaught(p, origin, done); },
+                () => { log(`  ${p.type} fumbles the bomb...`, 'text-red-400'); if (lg) lg.catch = { id: p.id, ok: false }; explodeBomb(x, y, thrower, done); },
                 { desc: `Catching a lit bomb. Catch it and ${p.type} must throw it again straight away; drop it and it explodes in their square.`, prevMode: MODES.LOCKED, skillAllowed: true,
                   explainFail: () => ({ title: 'Dropped Bomb', text: 'A dropped bomb does not bounce: it explodes in this square.' }) });
         }
@@ -15764,10 +15797,10 @@
             const tOf = q => Math.max(2, Math.min(6, rawOf(q)));
             const go = q => { const raw = rawOf(q), t = tOf(q); setupRoll('INTERCEPT', q, withRaw(t, raw), 'Catch',
                 () => {
-                    log(`  ${q.type} INTERCEPTS the bomb!`, 'text-fuchsia-400 font-bold text-lg');
+                    log(`  ${q.type} INTERCEPTS the bomb!`, 'text-fuchsia-400 font-bold text-lg'); { const lg = REPLAY.leg(); if (lg) lg.int = { id: q.id, ok: true }; }
                     animateBomb(thrower.x, thrower.y, q.x, q.y, 600, 1.2, () => bombCaught(q, origin, done));
                 },
-                () => { log(`  ${q.type} can't get a hand to the bomb.`, 'text-slate-300'); fly(); },
+                () => { log(`  ${q.type} can't get a hand to the bomb.`, 'text-slate-300'); { const lg = REPLAY.leg(); if (lg) lg.int = { id: q.id, ok: false }; } fly(); },
                 { desc: `Intercepting a bomb (-${pen}). Catch it and ${q.type} must throw it again straight away.`, prevMode: MODES.LOCKED, skillAllowed: true,
                   helps: q.skills.includes('Very Long Legs') ? [['Very Long Legs', 2]] : [],
                   explainFail: () => ({ title: 'Interception Missed', text: 'The bomb flies on.' }) }); };
@@ -15821,6 +15854,7 @@
                 if (r >= 4) { hit.push(p); log(`    ${ROSTERS[p.team].name} ${p.type} is caught in the blast (${r})!`, 'text-orange-300'); }
                 else log(`    ${ROSTERS[p.team].name} ${p.type} dives clear (${r}).`, 'text-slate-400');
             });
+            REPLAY.set('boom', { x, y, hit: hit.map(p => p.id) });
             let ownDown = false;
             hit.forEach(p => {
                 if (p.isCasualty || p.isKO || p.isReserve) return;
@@ -15837,6 +15871,499 @@
             if (!hit.length) log(`  Nobody was close enough to get hurt.`, 'text-slate-400');
             setTimeout(() => done(ownDown ? 'The bomb knocked down one of your own players!' : null), 900);
         }
+
+        // ---------- Replays: a low, close-up (SNES "Mode 7" style) replay of a pass, Throw Team-mate or bomb, once its dice are all done ----------
+        // REPLAY records what happens while the action plays out on the pitch; REPLAY.then(fn) plays it (when the dice have settled) before the
+        // game carries on (turnover, touchdown, or the rest of the turn). PASSFX draws it from the recorded script.
+        const PASSFX = (() => {
+            let root = null, cv = null, g = null, W = 480, H = 300, F = 280, HC = 150, raf = 0, P = [], ball = null, blasts = [], banner = null, flashT0 = -1e9, nowT = 0;
+            let segs = [], si = 0, segT0 = 0, clockMs = 0, lastReal = 0, onDone = null, watch = 0, gr = null;
+            const cam = { x: 0, y: 0, h: 13, a: Math.PI / 2 - 0.001, hd: -Math.PI / 2 };
+            const V = { h: 1.35, a: 0.14, bob: 0.7, back: 3.2, da: 0.08 };   // the low camera, just behind the play
+            const CATCH_JUMP = 1.05, CATCH_HANDS = CATCH_JUMP + 0.6, INT_JUMP = 1.25;
+            const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, lerp = (a, b, t) => a + (b - a) * t;
+            const angLerp = (a, b, t) => { const d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return a + d * t; };
+            const hash = (a, b, c = 0) => { const v = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453; return v - Math.floor(v); };
+            // the words across the scene, in the style of the skill pops: gold-white when it's good for the watcher's team, red when bad, fiery for a bomb
+            const TONES = { good: { fill: '#fff6c8', edge: '#3a2600', shadow: '#d99a00' }, bad: { fill: '#ff6b6b', edge: '#2a0505', shadow: '#8f1010' }, bomb: { fill: '#ffffff', edge: '#3a0a00', shadow: '#ff6a1a' } };
+            const tone = team => team === watch ? 'good' : 'bad';
+
+            function build_dom() {
+                if (root) return;
+                root = document.createElement('div'); root.id = 'replay'; root.className = 'hidden';
+                root.innerHTML = '<div class="rp-stage"><canvas aria-label="Replay"></canvas><div class="rp-tag"><i></i>REPLAY</div><div class="rp-skip">tap to skip</div></div>';
+                document.body.appendChild(root);
+                cv = root.querySelector('canvas'); g = cv.getContext('2d');
+                root.addEventListener('click', e => { e.stopPropagation(); finish(); });
+            }
+            function size() {
+                const r = cv.getBoundingClientRect(), ar = r.width / Math.max(1, r.height);
+                H = r.width < 600 ? 360 : 300; W = Math.max(200, Math.round(H * ar));
+                cv.width = W; cv.height = H; F = H * 0.95; HC = H * 0.5;
+            }
+            function basis() { const dx = Math.cos(cam.hd), dy = Math.sin(cam.hd); return { dx, dy, px: -dy, py: dx, ca: Math.cos(cam.a), sa: Math.sin(cam.a) }; }
+            function project(x, y, z, B) {
+                const rx = x - cam.x, ry = y - cam.y, d = rx * B.dx + ry * B.dy, s = rx * B.px + ry * B.py, dz = z - cam.h;
+                const zc = d * B.ca - dz * B.sa, up = d * B.sa + dz * B.ca;
+                return { x: W / 2 + F * s / zc, y: HC - F * up / zc, zc };
+            }
+
+            // ---- the ground: a line-free patch of this match's pitch, tiled out to the horizon and drawn a row at a time; the stands beyond ----
+            const RS = 14, RW = 64 * RS, DB = 16, RH = (DB + 48) * RS;
+            let rot = null, rg = null;
+            function prepGround() {
+                if (!rot) { rot = document.createElement('canvas'); rot.width = RW; rot.height = RH; rg = rot.getContext('2d'); }
+                const tex = PITCH.tex, TS = tex ? tex.width / CFG.cols : 1;
+                let pat = null, sur = '#2f6b2a';
+                if (tex) {
+                    try {
+                        const s1 = document.createElement('canvas'); s1.width = s1.height = 8; const sc = s1.getContext('2d'); sc.drawImage(tex, 0, 0, 8, 8);
+                        const d = sc.getImageData(0, 0, 8, 8).data; let rr = 0, gg = 0, bb = 0; for (let i = 0; i < d.length; i += 4) { rr += d[i]; gg += d[i + 1]; bb += d[i + 2]; }
+                        sur = `rgb(${Math.round(rr / 64 * 0.8)},${Math.round(gg / 64 * 0.8)},${Math.round(bb / 64 * 0.8)})`;
+                    } catch (e) {}
+                    const sx = Math.round(TS) + 2, w = Math.round(Math.max(4, Math.min(10, Math.floor(CFG.cols / 2) - 2)) * TS), h = Math.round(CFG.rows * TS) - 2;
+                    const t = document.createElement('canvas'); t.width = w * 2; t.height = h * 2; const c = t.getContext('2d');
+                    [[1, 1, 0, 0], [-1, 1, 2 * w, 0], [1, -1, 0, 2 * h], [-1, -1, 2 * w, 2 * h]].forEach(([a, dd, e, f]) => { c.setTransform(a, 0, 0, dd, e, f); c.drawImage(tex, sx, 1, w, h, 0, 0, w, h); });
+                    pat = rg.createPattern(t, 'repeat');
+                }
+                const bd = clashBackdrop(960, 300, 300), dpr = bd.width / 960, sh = Math.round(bd.height - 22 * dpr);
+                let skyTop = '#4a8ace', skyBot = '#b0d2ec';
+                try { const c = bd.getContext('2d'), a = c.getImageData(2, 2, 1, 1).data, b = c.getImageData(2, Math.round(sh * 0.55), 1, 1).data; skyTop = `rgb(${a[0]},${a[1]},${a[2]})`; skyBot = `rgb(${b[0]},${b[1]},${b[2]})`; } catch (e) {}
+                gr = { TS, pat, sur, bd, sh, skyTop, skyBot };
+            }
+            function drawGround(B) {
+                rg.setTransform(1, 0, 0, 1, 0, 0); rg.fillStyle = gr.sur; rg.fillRect(0, 0, RW, RH);
+                const k = RS / gr.TS, ox = RW / 2 - RS * (cam.x * B.px + cam.y * B.py), oy = RH - DB * RS + RS * (cam.x * B.dx + cam.y * B.dy);
+                rg.setTransform(k * B.px, -k * B.dx, k * B.py, -k * B.dy, ox, oy);
+                if (gr.pat) { rg.fillStyle = gr.pat; const R = 70 * gr.TS; rg.fillRect(cam.x * gr.TS - R, cam.y * gr.TS - R, 2 * R, 2 * R); }
+                rg.setTransform(1, 0, 0, 1, 0, 0);
+                const hz = HC - F * Math.tan(cam.a);
+                g.fillStyle = gr.sur; g.fillRect(0, Math.max(0, hz), W, H);
+                for (let y = Math.max(0, Math.ceil(hz + 0.5)); y < H; y++) {
+                    const kk = (HC - y - 0.5) / F, den = B.sa - kk * B.ca; if (den <= 1e-4) continue;
+                    const d = cam.h * (B.ca + kk * B.sa) / den, zc = d * B.ca + cam.h * B.sa; if (zc <= 0) continue;
+                    const half = (W / 2) * zc / F, sy = RH - (d + DB) * RS;
+                    if (sy < 0 || sy >= RH) continue;
+                    g.drawImage(rot, RW / 2 - half * RS, sy, 2 * half * RS, 1, 0, y, W, 1);
+                }
+                if (hz > -20 && hz < H) {   // the far distance fades into the air
+                    const fog = g.createLinearGradient(0, hz, 0, hz + H * 0.07);
+                    fog.addColorStop(0, gr.skyBot); fog.addColorStop(1, 'rgba(0,0,0,0)');
+                    g.save(); g.globalAlpha = 0.5; g.fillStyle = fog; g.fillRect(0, hz, W, H * 0.07); g.restore();
+                }
+                return hz;
+            }
+            function drawSky(hz) {
+                if (hz <= 0) return;
+                const sky = g.createLinearGradient(0, 0, 0, hz); sky.addColorStop(0, gr.skyTop); sky.addColorStop(1, gr.skyBot);
+                g.fillStyle = sky; g.fillRect(0, 0, W, hz + 1);
+                const bw = gr.bd.width, scale = Math.max(W / bw, (hz + 4) / gr.sh * 0.9), w = bw * scale, h = gr.sh * scale;
+                const off = ((cam.hd / (Math.PI * 2)) * w * 1.5) % w;   // turning the camera slides the stands round
+                for (let x = -off - w; x < W; x += w) g.drawImage(gr.bd, 0, 0, bw, gr.sh, x, hz - h, w, h);
+            }
+
+            // ---- the players and the ball (or bomb), in depth order ----
+            function drawPlayers(B) {
+                const list = P.filter(p => !p.gone).map(p => ({ p, f: project(p.x + 0.5, p.y + 0.5, 0, B) })).filter(o => o.f.zc > 0.35);
+                if (ball.on && !ball.holder) list.push({ loose: true, f: project(ball.x, ball.y, 0, B) });
+                list.sort((a, b) => b.f.zc - a.f.zc);
+                list.forEach(({ p, f, loose }) => {
+                    if (loose) { drawBall(B); return; }
+                    const s = 1.15 * F / f.zc, sp = p.spr; if (!sp) return;
+                    const sw = s * sp.width / Math.max(1, sp.height), lift = p.z * F / f.zc;
+                    g.save();
+                    g.globalAlpha = Math.min(1, (f.zc - 0.35) / 0.5) * (f.zc < 1.8 ? 0.45 + 0.55 * Math.max(0, f.zc - 0.6) / 1.2 : 1);   // see-through right in front of the camera
+                    g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(f.x, f.y, s * 0.28, s * 0.07, 0, 0, Math.PI * 2); g.fill();
+                    g.translate(f.x, f.y - lift); g.rotate(p.lean || 0);
+                    g.imageSmoothingEnabled = false;
+                    const gk = p.glowT0 ? (nowT - p.glowT0) / 2400 : 1, peak = Math.max(0, 1 - gk / 0.2);
+                    if (gk < 1) {   // a golden glow that pulses and fades
+                        const ga = Math.min(1, (1 - gk) * (0.7 + 0.3 * Math.sin(nowT / 70)) + peak * 0.6), rr = s * (0.85 + 0.5 * peak);
+                        const rg2 = g.createRadialGradient(0, -s * 0.5, s * 0.05, 0, -s * 0.5, rr);
+                        rg2.addColorStop(0, `rgba(255,248,200,${ga})`); rg2.addColorStop(0.5, `rgba(255,200,70,${0.6 * ga})`); rg2.addColorStop(1, 'rgba(255,190,60,0)');
+                        g.fillStyle = rg2; g.beginPath(); g.arc(0, -s * 0.5, rr, 0, Math.PI * 2); g.fill();
+                        g.save(); g.strokeStyle = `rgba(255,244,190,${0.8 * ga})`; g.lineWidth = Math.max(1, s * (0.035 + 0.03 * peak));
+                        for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4 + nowT / 900; g.beginPath(); g.moveTo(Math.cos(an) * s * 0.45, -s * 0.5 + Math.sin(an) * s * 0.45); g.lineTo(Math.cos(an) * rr * 1.1, -s * 0.5 + Math.sin(an) * rr * 1.1); g.stroke(); }
+                        g.restore();
+                    }
+                    g.drawImage(sp, -sw / 2, -s * 0.97, sw, s);
+                    if (gk < 1) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.min(0.9, (1 - gk) * 0.4 + peak * 0.5); g.drawImage(sp, -sw / 2, -s * 0.97, sw, s); g.globalCompositeOperation = 'source-over'; }
+                    g.restore();
+                    p._scr = { s, fx: f.x, fy: f.y - lift, lean: p.lean || 0 };   // where their hands are, for a ball being held
+                    if (ball.on && ball.holder === p) drawBall(B);   // in their hands: in front of them, behind anyone nearer
+                });
+            }
+            function drawBall(B) {
+                if (!ball.on) return;
+                let x = ball.x, y = ball.y, z = ball.z;
+                if (ball.holder) { x = ball.holder.x + 0.5; y = ball.holder.y + 0.5; z = ball.holder.z + 1; }
+                const f0 = project(x, y, 0, B), f = project(x, y, z, B); if (f.zc <= 0.2) return;
+                let r = 0.17 * F / f.zc, px = f.x, py = f.y;
+                const h = ball.holder && ball.holder._scr;
+                if (h) { r = h.s * 0.085; const ox = h.s * 0.12, oy = -h.s * 0.5, c = Math.cos(h.lean), sn = Math.sin(h.lean); px = h.fx + ox * c - oy * sn; py = h.fy + ox * sn + oy * c; }
+                else { g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(f0.x, f0.y, r * 1.1, r * 0.35, 0, 0, Math.PI * 2); g.fill(); }
+                g.save(); g.translate(px, py);
+                if (ball.bomb) {   // a black bomb with a fizzing fuse
+                    g.rotate(ball.spin * 0.5);
+                    const br = r * 1.05;
+                    g.fillStyle = '#111827'; g.beginPath(); g.arc(0, 0, br, 0, Math.PI * 2); g.fill();
+                    g.strokeStyle = '#9ca3af'; g.lineWidth = Math.max(1, br * 0.12); g.stroke();
+                    g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.arc(-br * 0.35, -br * 0.35, br * 0.28, 0, Math.PI * 2); g.fill();
+                    g.strokeStyle = '#78350f'; g.lineWidth = Math.max(1, br * 0.18); g.beginPath(); g.moveTo(br * 0.55, -br * 0.65); g.quadraticCurveTo(br * 0.9, -br * 1.2, br * 1.15, -br * 1.25); g.stroke();
+                    const fl = 0.7 + 0.3 * Math.sin(nowT / 35), sg = g.createRadialGradient(br * 1.2, -br * 1.3, 0, br * 1.2, -br * 1.3, br * 0.7 * fl);
+                    sg.addColorStop(0, '#fffbe0'); sg.addColorStop(0.4, '#fde047'); sg.addColorStop(1, 'rgba(249,115,22,0)');
+                    g.fillStyle = sg; g.beginPath(); g.arc(br * 1.2, -br * 1.3, br * 0.7 * fl, 0, Math.PI * 2); g.fill();
+                } else {
+                    g.rotate(ball.spin);
+                    g.fillStyle = '#c2410c'; g.beginPath(); g.ellipse(0, 0, r * 1.25, r * 0.85, 0, 0, Math.PI * 2); g.fill();
+                    g.strokeStyle = '#fff7ed'; g.lineWidth = Math.max(1, r * 0.18); g.beginPath(); g.moveTo(-r * 0.55, 0); g.lineTo(r * 0.55, 0); g.stroke();
+                    for (let i = -2; i <= 2; i++) { g.beginPath(); g.moveTo(i * r * 0.22, -r * 0.2); g.lineTo(i * r * 0.22, r * 0.2); g.stroke(); }
+                }
+                g.restore();
+            }
+
+            // ---- explosions, in chunky cells with a few flat colours and ragged edges to sit with the pixel-art sprites ----
+            function pixBlob(cx, cy, rx, ry, cell, pal, seed, jag, holes = 0, step = 0) {
+                cell = Math.max(2, Math.round(cell));
+                const nx = Math.ceil(rx * (1 + jag) / cell), ny = Math.ceil(ry * (1 + jag) / cell), ox = Math.round(cx / cell) * cell, oy = Math.round(cy / cell) * cell;
+                for (let j = -ny; j <= ny; j++) for (let i = -nx; i <= nx; i++) {
+                    const dx = (i + 0.5) * cell / rx, dy = (j + 0.5) * cell / ry, an = Math.atan2(dy, dx);
+                    const sec = Math.floor((an + Math.PI) / (Math.PI * 2) * 11), sec2 = Math.floor((an + Math.PI) / (Math.PI * 2) * 23);
+                    const edge = 1 + jag * (hash(sec, seed, step) - 0.5) + jag * 0.5 * (hash(sec2, seed + 3, step) - 0.5);
+                    const v = Math.hypot(dx, dy) / edge; if (v > 1) continue;
+                    if (holes && (v > 1 - holes * 0.6 || hash(Math.floor(i / 2), Math.floor(j / 2), seed + step * 0.37) < holes * 0.45)) continue;   // shrinking and breaking up as it fades
+                    const c = pal.find(q => v <= q[0]); if (!c) continue;
+                    g.fillStyle = c[1]; g.fillRect(ox + i * cell, oy + j * cell, cell, cell);
+                }
+            }
+            function drawScorch(B) {
+                blasts.forEach(b => {
+                    const f = project(b.x, b.y, 0, B); if (f.zc <= 0.3 || clockMs - b.t0 < 120) return;
+                    const u = F / f.zc, flat = Math.sin(cam.a + 0.25);
+                    pixBlob(f.x, f.y, u * 0.8, u * 0.8 * flat, u * 0.09, [[0.45, '#120c06'], [0.75, '#241809'], [1, '#3b2a12']], b.seed, 0.45);
+                });
+            }
+            function drawBlasts(B) {
+                blasts.forEach(b => {
+                    const k = (clockMs - b.t0) / 2200; if (k < 0 || k > 1) return;
+                    const f = project(b.x, b.y, 0, B); if (f.zc <= 0.3) return;
+                    const u = F / f.zc, flat = Math.sin(cam.a + 0.25), cell = Math.max(3, u * 0.09), step = Math.floor(k * 22);
+                    if (k < 0.45) {   // the shock ring along the ground
+                        const rr = u * (0.4 + 3.2 * Math.sqrt(k / 0.45)), n = 40, c = Math.round(cell);
+                        g.fillStyle = k < 0.2 ? '#fff7d6' : '#e5d3a8';
+                        for (let i = 0; i < n; i++) { if (hash(i, step, b.seed) < k * 1.8) continue; const an = i / n * Math.PI * 2; g.fillRect(Math.round((f.x + Math.cos(an) * rr) / c) * c, Math.round((f.y + Math.sin(an) * rr * flat) / c) * c, c, c); }
+                    }
+                    if (k >= 0.12) for (let i = 0; i < 7; i++) {   // smoke billowing up
+                        const an = i * 2.4 + b.seed, sx = f.x + Math.cos(an) * u * (0.25 + 0.9 * k), sy = f.y - u * (0.4 + 1.5 * k) - Math.sin(an) * u * 0.3 * k, sr = u * (0.3 + 0.4 * k);
+                        pixBlob(sx, sy, sr, sr, cell, [[0.55, i % 2 ? '#6e675f' : '#5d5750'], [1, '#433e39']], b.seed + i, 0.5, Math.max(0, (k - 0.45) / 0.55), step);
+                    }
+                    const fk = Math.min(1, k * 4), fr = u * (0.3 + 1.0 * (1 - Math.pow(1 - fk, 3))), cool = Math.max(0, (k - 0.3) / 0.45), fy = f.y - u * (0.5 + 0.5 * k);
+                    if (cool < 1) {   // the fireball: white-hot, then yellow, orange, red; cooling and falling apart
+                        const pal = cool < 0.15 ? [[0.3, '#ffffff'], [0.55, '#fff3a0'], [0.78, '#fbbf24'], [0.92, '#f97316'], [1, '#c2410c']]
+                            : cool < 0.5 ? [[0.25, '#fff3a0'], [0.5, '#fbbf24'], [0.75, '#f97316'], [1, '#b91c1c']] : [[0.35, '#f97316'], [0.7, '#b91c1c'], [1, '#5b1a10']];
+                        pixBlob(f.x, fy, fr, fr * 0.92, cell, pal, b.seed + 9, 0.38, cool * 0.85, step);
+                    }
+                    for (let i = 0; i < 18; i++) {   // bits of earth and turf flying out
+                        const an = hash(i, b.seed, 1.7) * Math.PI * 2, sp = 0.8 + 1.8 * hash(i + 40, b.seed, 1.7), up = (2 + 2.5 * hash(i + 80, b.seed, 1.7)) * k - 5 * k * k;
+                        if (up < 0) continue;
+                        const q = project(b.x + Math.cos(an) * sp * k, b.y + Math.sin(an) * sp * k, up, B); if (q.zc <= 0.3) continue;
+                        const d = Math.max(2, Math.round(F / q.zc * (0.04 + 0.04 * hash(i + 120, b.seed, 1.7))));
+                        g.fillStyle = i % 3 ? '#3b2a14' : '#2f6b2a'; g.fillRect(Math.round(q.x - d / 2), Math.round(q.y - d / 2), d, d);
+                    }
+                });
+            }
+            // the big words: the skill pop's look and its bouncy, stepped reveal
+            const KF = [[0, 0, 0.2, 0], [0.14, 1, 1.45, 0], [0.24, 1, 0.92, 0.12], [0.34, 1, 1.18, -0.08], [0.44, 1, 0.98, 0.04], [0.54, 1, 1.05, -0.02], [0.64, 1, 1, 0], [0.82, 1, 1.04, 0], [1, 0, 1.12, -0.06]];
+            function drawBanner() {
+                if (!banner) return;
+                const t = Math.floor(Math.min(1, (nowT - banner.t0) / 1700) * 24) / 24; if (t >= 1) return;
+                let i = 0; while (i < KF.length - 2 && t > KF[i + 1][0]) i++;
+                const a = KF[i], b = KF[i + 1], u = (t - a[0]) / (b[0] - a[0]), op = lerp(a[1], b[1], u), sc = lerp(a[2], b[2], u), dy = lerp(a[3], b[3], u);
+                const st = TONES[banner.tone] || TONES.good, text = banner.text;
+                const fs = Math.max(8, Math.round(Math.min(H * 0.1, W * 0.62 / (text.length * 1.08)))), e = Math.max(2, Math.round(fs * 0.09));   // room for the bounce (it peaks at 1.45x)
+                g.save(); g.globalAlpha = Math.max(0, Math.min(1, op));
+                g.translate(Math.round(W / 2), Math.round(H * 0.2 + dy * fs * 2)); g.scale(sc, sc);
+                g.font = `${fs}px 'Press Start 2P', 'Courier New', monospace`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillText(text, e * 3, e * 3);
+                g.fillStyle = st.shadow; g.fillText(text, e * 2, e * 2);
+                g.fillStyle = st.edge; [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([x, y]) => g.fillText(text, x * e, y * e));
+                g.fillStyle = st.fill; g.fillText(text, 0, 0);
+                g.restore();
+            }
+
+            // ---- the timeline: segments of a set length, each moving things along as it goes (some in slow motion) ----
+            function tick(now) {
+                raf = requestAnimationFrame(tick);
+                const cur = segs[si], dt = Math.min(60, now - lastReal) * ((cur && cur.slow) || 1); lastReal = now; clockMs += dt;
+                while (si < segs.length && clockMs - segT0 >= segs[si].ms) { const s = segs[si]; if (!s._in) enter(s, now); s.fn(1); segT0 += s.ms; si++; }
+                if (si >= segs.length) { draw(now); finish(); return; }
+                const s = segs[si]; if (!s._in) enter(s, now); s.fn(Math.min(1, (clockMs - segT0) / s.ms));
+                draw(now);
+            }
+            function enter(s, now) {
+                s._in = true;
+                if (s.banner) banner = { text: s.banner[0], tone: s.banner[1], t0: now };
+                if (s.star) { flashT0 = now; s.star.glowT0 = now; }   // the moment: a flash, and the player glows
+                if (s.boom) { blasts.push({ x: s.boom.x, y: s.boom.y, t0: clockMs, seed: Math.random() * 6 }); flashT0 = now; ball.on = false; }
+            }
+            function draw(now) {
+                nowT = now;
+                const last = blasts[blasts.length - 1], sk = last ? Math.max(0, 1 - (clockMs - last.t0) / 700) : 0, keep = { x: cam.x, y: cam.y, h: cam.h };
+                if (sk > 0) { cam.x += Math.sin(now * 0.09) * 0.09 * sk; cam.y += Math.cos(now * 0.11) * 0.09 * sk; cam.h += Math.sin(now * 0.13) * 0.07 * sk; }   // the camera shakes after a blast
+                try {
+                    const B = basis();
+                    g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
+                    g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+                    const hz = drawGround(B); drawSky(hz);
+                    drawScorch(B); drawPlayers(B); drawBlasts(B);
+                    const fl = (now - flashT0) / 320; if (fl >= 0 && fl < 1) { g.fillStyle = `rgba(255,255,240,${0.8 * (1 - fl) * (1 - fl)})`; g.fillRect(0, 0, W, H); }
+                    drawBanner();
+                } finally { cam.x = keep.x; cam.y = keep.y; cam.h = keep.h; }
+            }
+
+            // ---- the scripts: what to show, from what the recorder saw ----
+            const sq = o => ({ x: o.x + 0.5, y: o.y + 0.5 }), C = p => ({ x: p.x + 0.5, y: p.y + 0.5 });
+            const offPitch = o => o.x < 0 || o.y < 0 || o.x >= CFG.cols || o.y >= CFG.rows;
+            const add = (ms, fn, opt = {}) => segs.push(Object.assign({ ms, fn }, opt));
+            const lineOf = (a, b) => { const hd = Math.atan2(b.y - a.y, b.x - a.x) || 0; return { hd, dir: { x: Math.cos(hd), y: Math.sin(hd) }, dist: Math.max(0.5, Math.hypot(b.x - a.x, b.y - a.y)) }; };
+            const behindOf = (from, L) => ({ x: from.x - L.dir.x * (V.back - 0.6), y: from.y - L.dir.y * (V.back - 0.6), h: V.h, a: V.a, hd: L.hd });
+            const camTo = (ms, to, opt = {}) => { let st = null; add(ms, u => { if (!st) st = { ...cam }; const e = ease(u); cam.x = lerp(st.x, to.x, e); cam.y = lerp(st.y, to.y, e); cam.h = lerp(st.h, to.h, Math.pow(e, 0.6)); cam.a = lerp(st.a, to.a, Math.min(1, e * 1.15)); cam.hd = angLerp(st.hd, to.hd, e); }, opt); };
+            const outro = end => { let st = null; add(500, () => {}); add(1100, u => { if (!st) st = { ...cam }; const e = ease(u); cam.x = lerp(st.x, end.x, e); cam.y = lerp(st.y, end.y, e); cam.h = lerp(st.h, 13, Math.pow(e, 1.6)); cam.a = lerp(st.a, Math.PI / 2 - 0.001, Math.min(1, e * 1.1)); cam.hd = angLerp(st.hd, -Math.PI / 2, e); }); };
+            const jump = (p, t, tc, w, hgt) => { const k = (t - (tc - w)) / w; p.z = k <= 0 ? 0 : k >= 1 ? hgt : hgt * Math.sin(Math.PI / 2 * k); };   // timed to be at the top as the ball arrives
+            // the ball's flight along path(t), the camera chasing it from 'start'
+            const flight = (path, L, start, t0, t1, ms, extra, opt = {}) => add(Math.max(1, ms), u => {
+                const t = lerp(t0, t1, u), b = path(t);
+                ball.holder = null; ball.x = b.x; ball.y = b.y; ball.z = b.z; ball.spin += 0.35;
+                const k = Math.min(1, t / 0.18);
+                cam.x = lerp(start.x, b.x - L.dir.x * V.back, ease(k)); cam.y = lerp(start.y, b.y - L.dir.y * V.back, ease(k)); cam.h = V.h + V.bob * Math.sin(Math.PI * t) * k; cam.a = V.a + V.da * Math.sin(Math.PI * t); cam.hd = L.hd;
+                if (extra) extra(t);
+            }, opt);
+            const pathFor = (from, tgt, end, endZ, L) => t => { const bend = t * t; return { x: lerp(from.x, tgt.x, t) + (end.x - tgt.x) * bend, y: lerp(from.y, tgt.y, t) + (end.y - tgt.y) * bend, z: lerp(1.0, endZ, t) + (0.55 + 0.09 * L.dist) * 4 * t * (1 - t) }; };
+            const along = (from, L, p) => { const c = C(p); return Math.max(0.2, Math.min(0.7, ((c.x - from.x) * L.dir.x + (c.y - from.y) * L.dir.y) / L.dist)); };
+            // the ball comes loose and bounces off sideways from a point
+            const looseBounce = (at, L, ms, opt) => { const side = { x: -L.dir.y, y: L.dir.x }, end = { x: at.x + side.x * 1.3 + L.dir.x * 0.5, y: at.y + side.y * 1.3 + L.dir.y * 0.5 };
+                add(ms, u => { ball.holder = null; ball.x = lerp(at.x, end.x, u); ball.y = lerp(at.y, end.y, u); ball.z = Math.abs(Math.sin(u * Math.PI * 2.2)) * (1 - u) * 1.1; ball.spin += 0.25; }, opt); return end; };
+            const fall = (p, from, up = 0.35) => { const B = basis(), sd = Math.sign((p.x + 0.5 - from.x) * B.px + (p.y + 0.5 - from.y) * B.py) || 1; return u => { p.lean = sd * Math.PI / 2 * ease(u); p.z = up * Math.sin(Math.PI * u); }; };
+
+            function buildPass(r) {
+                const T = pl(r.thr); if (!T) return false;
+                const from = C(T), tgt = sq(r.tgt), L = lineOf(from, tgt), behind = behindOf(from, L), opp = 1 - T.team;
+                ball.on = true; ball.bomb = false; ball.holder = T;
+                camTo(1000, behind);
+                let end = from;
+                if (r.res === 'fumble') {   // the arm goes back... and the ball slips out and bounces away
+                    const side = { x: -L.dir.y, y: L.dir.x }, bx = u => from.x + L.dir.x * 0.35 + side.x * 1.2 * u + L.dir.x * 0.5 * u, by = u => from.y + L.dir.y * 0.35 + side.y * 1.2 * u + L.dir.y * 0.5 * u;
+                    add(300, u => { T.lean = -0.4 * ease(u); });
+                    add(260, u => { T.lean = -0.4 + 0.65 * ease(u); ball.holder = null; ball.x = lerp(from.x, bx(0), u); ball.y = lerp(from.y, by(0), u); ball.z = 1.0 + 0.4 * Math.sin(Math.PI * u) + 0.1 * u; ball.spin += 0.5; }, { slow: 0.4, banner: ['FUMBLE!', tone(opp)] });
+                    add(1200, u => {
+                        const ph = Math.min(2.999, u * 3), n = Math.floor(ph), f = ph - n;
+                        ball.x = bx(u); ball.y = by(u); ball.z = n === 0 ? 1.1 * (1 - f * f) : [0, 0.5, 0.2][n] * 4 * f * (1 - f); ball.spin += 0.25 * (1 - u);
+                        T.lean = 0.25 * (1 - ease(u)) + 0.15 * Math.sin(u * Math.PI * 3) * (1 - u);
+                        const k = ease(Math.min(1, u * 1.5)); cam.x = lerp(behind.x, bx(u) - L.dir.x * 2.6, k); cam.y = lerp(behind.y, by(u) - L.dir.y * 2.6, k);
+                    });
+                    end = { x: bx(1), y: by(1) };
+                    outro(end); return true;
+                }
+                add(380, u => { T.lean = -0.35 * Math.sin(Math.PI * Math.min(1, u * 1.2)); });
+                const land = r.land ? sq(r.land) : tgt, Cc = r.catch ? pl(r.catch.id) : null, to = Cc && r.catch.dive ? C(Cc) : land;
+                const L2 = lineOf(from, to), path = pathFor(from, tgt, to, Cc ? 1.0 + CATCH_HANDS : 0.05, L2), fms = 700 + 75 * L2.dist;
+                const I = r.int ? pl(r.int.id) : null;
+                if (I) {
+                    const ti = along(from, L2, I);
+                    flight(path, L, behind, 0, ti - 0.1, fms * (ti - 0.1), t => jump(I, t, ti, 0.12, INT_JUMP));
+                    if (r.int.ok) {
+                        flight(path, L, behind, ti - 0.1, ti, fms * 0.1, t => jump(I, t, ti, 0.12, INT_JUMP), { slow: 0.25 });
+                        add(420, () => { ball.holder = I; I.z = INT_JUMP; }, { star: I, banner: ['INTERCEPTED!', tone(I.team)] });
+                        add(900, u => { ball.holder = I; I.z = INT_JUMP * (1 - ease(u)); }, { slow: 0.6 });
+                        outro(C(I)); return true;
+                    }
+                    flight(path, L, behind, ti - 0.1, ti + 0.02, fms * 0.12, t => jump(I, t, ti, 0.12, INT_JUMP), { banner: ['MISSED!', tone(T.team)] });
+                    flight(path, L, behind, ti + 0.02, 0.78, fms * (0.76 - ti), t => { I.z = INT_JUMP * Math.max(0, 1 - (t - ti - 0.02) / 0.15); });
+                } else flight(path, L, behind, 0, 0.78, fms * 0.78);
+                if (Cc) {
+                    flight(path, L, behind, 0.78, 0.93, fms * 0.15, t => jump(Cc, t, 1, 0.2, CATCH_JUMP));
+                    flight(path, L, behind, 0.93, 1, fms * 0.07, t => jump(Cc, t, 1, 0.2, CATCH_JUMP), r.catch.ok ? { slow: 0.22 } : {});
+                    if (r.catch.ok) {
+                        add(420, () => { ball.holder = Cc; Cc.z = CATCH_JUMP; }, { star: Cc, banner: ['CAUGHT!', tone(Cc.team)] });
+                        add(900, u => { ball.holder = Cc; Cc.z = CATCH_JUMP * (1 - ease(u)); }, { slow: 0.6 });
+                        end = to;
+                    } else {
+                        const side = { x: -L.dir.y, y: L.dir.x }, e2 = { x: to.x + side.x * 1.4 + L.dir.x * 0.5, y: to.y + side.y * 1.4 + L.dir.y * 0.5 };
+                        add(900, u => { ball.holder = null; ball.x = lerp(to.x, e2.x, u); ball.y = lerp(to.y, e2.y, u); ball.z = u < 0.77 ? 1.0 + CATCH_HANDS * (1 - u) * 0.6 + 0.9 * Math.sin(Math.PI * Math.min(1, u * 1.3)) : Math.abs(Math.sin((u - 0.77) * 14)) * 0.25 * (1 - u); ball.spin += 0.3; Cc.z = CATCH_JUMP * (1 - ease(Math.min(1, u * 2))); },
+                            { banner: ['DROPPED!', tone(1 - Cc.team)] });
+                        end = e2;
+                    }
+                } else {
+                    const out = offPitch(r.land || r.tgt);
+                    flight(path, L, behind, 0.78, 1, fms * 0.22, null, out ? { banner: ['INTO THE CROWD!', tone(opp)] } : r.res === 'inacc' ? { banner: ['OFF TARGET!', tone(opp)] } : {});
+                    end = out ? to : looseBounce(to, L, 800);
+                }
+                outro(end); return true;
+            }
+
+            function buildTTM(r) {
+                const O = pl(r.thr), Hf = pl(r.thrown); if (!O || !Hf) return false;
+                const from = C(O), start = C(Hf), tgt = sq(r.tgt), land = sq(r.land || r.tgt), L = lineOf(from, tgt), behind = behindOf(from, L);
+                const put = (p, x, y) => { p.x = x - 0.5; p.y = y - 0.5; };
+                if (r.ball) { ball.on = true; ball.holder = Hf; }
+                camTo(1000, behind);
+                add(450, u => { const e = ease(u); put(Hf, lerp(start.x, from.x + L.dir.x * 0.2, e), lerp(start.y, from.y + L.dir.y * 0.2, e)); Hf.z = 1.1 * e; Hf.lean = -0.4 * e; Hf.down = false; });   // the thrower picks them up
+                const upright = r.landed === true && !r.crash && !r.out, L2 = lineOf(from, land);
+                if (r.res === 'fumble') {   // dropped: they tumble out of the thrower's grip into the next square
+                    add(320, u => { O.lean = -0.25 * Math.sin(Math.PI * u); });
+                    add(700, u => { put(Hf, lerp(from.x + L.dir.x * 0.2, land.x, u), lerp(from.y + L.dir.y * 0.2, land.y, u)); Hf.z = 1.1 * (1 - u) + 0.6 * Math.sin(Math.PI * u); Hf.lean = -0.4 + u * (upright ? 0.4 : 1.4); }, { slow: 0.5, banner: ['FUMBLE!', tone(1 - O.team)] });
+                } else {
+                    add(320, u => { O.lean = -0.4 * Math.sin(Math.PI * u); Hf.lean = -0.4 - 0.5 * u; });
+                    const flightMs = 900 + 80 * L2.dist, arc = 1.4 + 0.12 * L2.dist;
+                    const fly = (t0, t1, ms, opt = {}) => add(ms, u => {
+                        const t = lerp(t0, t1, u);
+                        put(Hf, lerp(from.x, land.x, t), lerp(from.y, land.y, t)); Hf.z = lerp(1.1, 0, t) + arc * 4 * t * (1 - t);
+                        Hf.lean = upright ? lerp(-0.9, Math.PI * 2, t) : -0.9 + t * Math.PI * 2.4;   // a somersault: a safe landing comes round to upright
+                        const k = Math.min(1, t / 0.2), hx = Hf.x + 0.5, hy = Hf.y + 0.5;
+                        cam.x = lerp(behind.x, hx - L2.dir.x * V.back, ease(k)); cam.y = lerp(behind.y, hy - L2.dir.y * V.back, ease(k)); cam.h = V.h + V.bob * Math.sin(Math.PI * t) * k; cam.a = V.a + V.da * Math.sin(Math.PI * t); cam.hd = L2.hd;
+                    }, opt);
+                    fly(0, 0.8, flightMs * 0.8);
+                    fly(0.8, 1, flightMs * 0.2, upright ? { slow: 0.3 } : r.out ? { banner: ['INTO THE CROWD!', tone(1 - Hf.team)] } : {});
+                }
+                let end = land;
+                if (r.out) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); }
+                else if (r.crash) {   // a crash landing on whoever is there: they go down, and the thrown player bounces off and falls
+                    const Oc = pl(r.crash.on), to2 = r.crash.to ? sq(r.crash.to) : land, knock = Oc ? fall(Oc, land) : null;
+                    add(900, u => {
+                        if (knock && !Oc.down) knock(Math.min(1, u * 2));
+                        const k = Math.min(1, u * 1.4); put(Hf, lerp(land.x, to2.x, k), lerp(land.y, to2.y, k)); Hf.z = 0.8 * Math.sin(Math.PI * k); Hf.lean = Math.PI / 2 * ease(k);
+                        if (r.ball && u > 0.5) { const v = (u - 0.5) * 2; ball.holder = null; ball.x = to2.x + -L2.dir.y * 1.1 * v; ball.y = to2.y + L2.dir.x * 1.1 * v; ball.z = Math.abs(Math.sin(v * Math.PI * 2)) * (1 - v) * 0.9; ball.spin += 0.25; }
+                    }, { banner: ['CRASH LANDING!', tone(1 - Hf.team)] });
+                    end = to2;
+                } else if (r.landed === true) {
+                    add(420, () => { Hf.z = 0; Hf.lean = 0; put(Hf, land.x, land.y); }, { star: Hf, banner: ['SAFE LANDING!', tone(Hf.team)] });
+                    add(800, u => { Hf.z = 0.12 * Math.sin(Math.PI * u); }, { slow: 0.6 });
+                } else if (r.landed === false) {
+                    add(900, u => {
+                        Hf.z = 0; Hf.lean = Math.PI / 2 * Math.min(1, u * 2.5);
+                        if (r.ball) { ball.holder = null; ball.x = land.x + -L2.dir.y * 1.2 * u + L2.dir.x * 0.6 * u; ball.y = land.y + L2.dir.x * 1.2 * u + L2.dir.y * 0.6 * u; ball.z = Math.abs(Math.sin(u * Math.PI * 2.2)) * (1 - u) * 1.1; ball.spin += 0.25; }
+                    }, { banner: ['CRASH LANDING!', tone(1 - Hf.team)] });
+                } else add(300, () => { Hf.z = 0; Hf.lean = 0; });
+                outro(end); return true;
+            }
+
+            function buildBomb(r) {
+                const legs = r.legs || []; if (!legs.length || !pl(legs[0].from)) return false;
+                ball.on = true; ball.bomb = true; ball.holder = pl(legs[0].from);
+                let end = C(ball.holder);
+                for (let i = 0; i < legs.length; i++) {
+                    const lg = legs[i], Tp = pl(lg.from); if (!Tp) break;
+                    const from = C(Tp), tgt = sq(lg.tgt), L = lineOf(from, tgt), behind = behindOf(from, L);
+                    camTo(i ? 800 : 1000, behind);
+                    add(380, u => { ball.holder = Tp; Tp.lean = -0.35 * Math.sin(Math.PI * Math.min(1, u * 1.2)); });
+                    if (lg.res === 'fumble') {
+                        add(700, u => { Tp.lean = 0.2 * Math.sin(Math.PI * u * 2); ball.holder = null; ball.x = from.x + L.dir.x * 0.15; ball.y = from.y + L.dir.y * 0.15; ball.z = Math.max(0, 1.0 * (1 - u * u)) + 0.25 * Math.abs(Math.sin(u * 9)) * (1 - u); ball.spin += 0.2; },
+                            { slow: 0.5, banner: ['FUMBLE!', tone(1 - Tp.team)] });
+                        end = from; break;
+                    }
+                    const land = lg.land ? sq(lg.land) : tgt, Cc = lg.catch ? pl(lg.catch.id) : null, to = Cc && lg.catch.dive ? C(Cc) : land;
+                    const L2 = lineOf(from, to), path = pathFor(from, tgt, to, Cc ? 1.6 : 0.15, L2), fms = 650 + 85 * L2.dist;
+                    const I = lg.int ? pl(lg.int.id) : null;
+                    if (I) {
+                        const ti = along(from, L2, I);
+                        flight(path, L, behind, 0, ti - 0.1, fms * (ti - 0.1), t => jump(I, t, ti, 0.12, INT_JUMP));
+                        if (lg.int.ok) {
+                            flight(path, L, behind, ti - 0.1, ti, fms * 0.1, t => jump(I, t, ti, 0.12, INT_JUMP), { slow: 0.25 });
+                            add(420, () => { ball.holder = I; I.z = INT_JUMP; }, { star: I, banner: ['INTERCEPTED!', tone(I.team)] });
+                            add(700, u => { ball.holder = I; I.z = INT_JUMP * (1 - ease(u)); }, { slow: 0.6 });
+                            end = C(I); continue;   // ...and they must throw it on (the next leg), unless it goes off in their hands
+                        }
+                        flight(path, L, behind, ti - 0.1, ti + 0.02, fms * 0.12, t => jump(I, t, ti, 0.12, INT_JUMP), { banner: ['MISSED!', tone(Tp.team)] });
+                        flight(path, L, behind, ti + 0.02, 0.88, fms * (0.86 - ti), t => { I.z = INT_JUMP * Math.max(0, 1 - (t - ti - 0.02) / 0.15); });
+                    } else flight(path, L, behind, 0, 0.88, fms * 0.88);
+                    if (Cc) {
+                        flight(path, L, behind, 0.88, 1, fms * 0.12, t => jump(Cc, t, 1, 0.14, 0.5), { slow: 0.4 });
+                        if (lg.catch.ok) {
+                            add(420, () => { ball.holder = Cc; Cc.z = 0.5; }, { star: Cc, banner: ['CAUGHT!', tone(Cc.team)] });
+                            add(600, u => { ball.holder = Cc; Cc.z = 0.5 * (1 - ease(u)); });
+                            end = C(Cc); continue;
+                        }
+                        add(450, u => { ball.holder = null; ball.x = to.x + 0.25; ball.y = to.y; ball.z = Math.max(0, 1.2 * (1 - u * 1.4)); Cc.z = 0.5 * (1 - u); ball.spin += 0.3; }, { banner: ['DROPPED!', tone(1 - Cc.team)] });
+                    } else flight(path, L, behind, 0.88, 1, fms * 0.12, null, offPitch(lg.land || lg.tgt) ? { slow: 0.4, banner: ['INTO THE CROWD!', tone(Tp.team === r.team ? 1 - r.team : r.team)] } : { slow: 0.4 });
+                    end = to;
+                }
+                if (r.boom) {   // the explosion: whoever is hit goes up and over
+                    const at = sq(r.boom), hit = (r.boom.hit || []).map(pl).filter(Boolean), falls = hit.map(p => p.down ? null : fall(p, at, Math.max(Math.abs(p.x + 0.5 - at.x), Math.abs(p.y + 0.5 - at.y)) < 0.6 ? 0.9 : 0.35));
+                    add(1500, u => { hit.forEach((p, i) => { const k = Math.min(1, u * 2); if (falls[i]) falls[i](k); else p.z = 0.25 * Math.sin(Math.PI * k); }); }, { boom: at, banner: ['BOOM!', 'bomb'] });
+                    end = at;
+                } else add(300, () => { ball.on = false; });
+                outro(end); return true;
+            }
+
+            let script = null;
+            const pl = id => P.find(p => p.id === id);
+            function setup(r) {
+                prepGround();
+                P = (r.players || []).map(s => { const q = state.players.find(p => p.id === s.id); const spr = q ? spriteCanvas(q) : null; return spr && { id: s.id, team: q.team, x: s.x, y: s.y, z: 0, lean: s.down ? Math.PI / 2 : 0, down: s.down, spr }; }).filter(Boolean);
+                ball = { x: 0, y: 0, z: 0, on: false, spin: 0, holder: null, bomb: false };
+                if (r.kind !== 'bomb' && r.gb) { if (r.gb.id != null) { ball.on = true; ball.holder = pl(r.gb.id) || null; ball.on = !!ball.holder; } else if (r.gb.x >= 0) { ball.on = true; ball.x = r.gb.x + 0.5; ball.y = r.gb.y + 0.5; } }
+                blasts = []; banner = null; flashT0 = -1e9; segs = []; si = 0; segT0 = 0; clockMs = 0;
+                const T = pl(r.thr || (r.legs && r.legs[0] && r.legs[0].from));
+                if (T) { cam.x = T.x + 0.5; cam.y = T.y + 0.5; } cam.h = 13; cam.a = Math.PI / 2 - 0.001; cam.hd = -Math.PI / 2;
+                return r.kind === 'pass' ? buildPass(r) : r.kind === 'ttm' ? buildTTM(r) : r.kind === 'bomb' ? buildBomb(r) : false;
+            }
+            function finish() {
+                if (!script) return;
+                script = null; cancelAnimationFrame(raf);
+                root.classList.add('rp-out');
+                const cb = onDone; onDone = null;
+                setTimeout(() => { root.classList.add('hidden'); root.classList.remove('rp-out'); if (cb) cb(); }, 260);
+            }
+            function play(r, team, done) {
+                try {
+                    build_dom(); watch = team;
+                    root.classList.remove('hidden'); size();
+                    if (!setup(r)) { root.classList.add('hidden'); if (done) done(); return; }
+                    script = r; onDone = done;
+                    lastReal = performance.now(); draw(lastReal); raf = requestAnimationFrame(tick);
+                } catch (e) { console.error(e); if (root) root.classList.add('hidden'); script = null; if (done) done(); }
+            }
+            window.addEventListener('resize', () => { if (script) size(); });
+            return { play, busy: () => !!script };
+        })();
+
+        const REPLAY = (() => {
+            let rec = null, waiting = false;
+            const enabled = () => { try { return localStorage.getItem('bb-replays') !== '0'; } catch (e) { return true; } };
+            const wanted = () => enabled() && !window.FAST_ANIM && !(AI.isAI(0) && AI.isAI(1)) && !(NET.guest && NET.guest());
+            const onPitch = p => p.x >= 0 && p.y >= 0 && p.x < CFG.cols && p.y < CFG.rows && !p.isCasualty && !p.isKO && !p.isReserve && !p.isEjected && !p.isFading;
+            // the team whose point of view the colours take: this device's team, or the person's against the computer, or (hot-seat) the thrower's
+            const viewTeam = r => NET.on() ? NET.myTeam() : AI.isAI(0) !== AI.isAI(1) ? (AI.isAI(0) ? 1 : 0) : r.team;
+            return {
+                enabled,
+                setEnabled(on) { try { localStorage.setItem('bb-replays', on ? '1' : '0'); } catch (e) {} },
+                start(kind, data) {
+                    rec = null; if (!wanted()) return;
+                    const b = state.ball;
+                    rec = Object.assign({ kind, at: Date.now(), drive: state.driveId,
+                        players: state.players.filter(onPitch).map(p => ({ id: p.id, x: p.x, y: p.y, down: !!(p.isDown || p.isStunned) })),
+                        gb: b.carrierId != null ? { id: b.carrierId } : { x: b.x, y: b.y } }, data);
+                },
+                set(k, v, once) { if (rec && !(once && rec[k] != null)) rec[k] = v; },
+                get: () => rec,
+                leg() { return rec && rec.legs ? rec.legs[rec.legs.length - 1] : null; },
+                cancel() { rec = null; },
+                busy: () => waiting || PASSFX.busy(),
+                // carry on with fn, after playing the recorded replay (once the dice and armour rolls have settled)
+                then(fn) {
+                    const r = rec; rec = null;
+                    if (!r || r.drive !== state.driveId || Date.now() - r.at > 180000) { fn(); return; }
+                    waiting = true;
+                    afterSettled(60, () => {
+                        waiting = false;
+                        if (state.isGameOver) { fn(); return; }
+                        try { NET.replay(r); } catch (e) {}
+                        PASSFX.play(r, viewTeam(r), fn);
+                    });
+                },
+                show: (r, team) => PASSFX.play(r, team, null)   // the guest's copy of the host's replay
+            };
+        })();
 
         // ---------- Ball & Chain ----------
         const BNC_FACE = [[1, 0], [-1, 0], [0, -1], [0, 1]];
@@ -16716,6 +17243,7 @@
                 if (m.t === 'ui') { Object.keys(m.ui).forEach(id => { mirror(id, m.ui[id]); Object.keys(pics).forEach(k => { if (k.startsWith(id + '#')) paintPic(k); }); }); ownView(); return; }
                 if (m.t === 'cv') { pics[m.id + '#' + m.i] = m; paintPic(m.id + '#' + m.i); return; }
                 if (m.t === 'log') { applyLog(m); return; }
+                if (m.t === 'replay') { try { REPLAY.show(m.r, myTeam()); } catch (e) {} return; }
                 if (m.t === 'sfx') { try { p0(m.k, m.d, m.sz); } catch (e) {} return; }
                 if (m.t === 'end') { live = false; forgetRejoin(); if (!postOpen && !($('net-end') && $('net-end').dataset.kind === 'post' && !$('net-end').classList.contains('hidden'))) showEnd(league ? "The host has finished the match. The league result and both teams' post-match are on the host's device." : 'The host has finished the match.'); }
             }
@@ -17189,6 +17717,7 @@
                     log(`  Two-device match: the other device can rejoin with the code ${info.code} (Two Devices → Rejoin).`, 'text-sky-300');
                 },
                 guestShop: () => role === 'guest' && shopping,
+                replay: r => { if (role === 'host' && live && link) link.send({ t: 'replay', r }); },
                 sendForm: sq => { if (link) link.send({ t: 'in', k: 'form', sq }); },
                 sendSquad: (id, on) => { if (link) link.send({ t: 'in', k: 'squad', id, on }); },
                 lineupDone: () => { guestSaid = true; if (link) link.send({ t: 'in', k: 'ready', name: 'lineup' }); lineupView(); },
@@ -18807,7 +19336,7 @@
                     return;
                 }
                 if (vis('modal-dice')) { diceChoice(); return; }
-                if (state.ballAnimation.active || state.flightAnimation.active) return;
+                if (state.ballAnimation.active || state.flightAnimation.active || REPLAY.busy()) return;   // (and a replay playing)
                 const d = decider();
                 switch (state.mode) {
                     case MODES.SETUP: plan = null; if (isAI(d)) after('setup', 1300, () => setupTeam(d)); return;
@@ -19111,6 +19640,7 @@
                 on('st-sound', !SFX.isMuted(), 'On', 'Off');
                 on('st-music', MUSIC.isEnabled(), 'On', 'Off');
                 on('st-anim', !window.FAST_ANIM, 'Full', 'Quick');
+                on('st-replay', REPLAY.enabled(), 'On', 'Off');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
                 document.getElementById('st-text').textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';
                 document.getElementById('st-pitch').value = pitchPref;
@@ -19123,6 +19653,7 @@
                 try { localStorage.setItem('bb-quick-anim', window.FAST_ANIM ? '1' : '0'); } catch (e) {}
                 paintSettings();
             });
+            document.getElementById('st-replay').addEventListener('click', () => { REPLAY.setEnabled(!REPLAY.enabled()); paintSettings(); });
             document.getElementById('st-weather').addEventListener('click', () => {
                 wxFX = wxFX === 1 ? 0.55 : wxFX > 0 ? 0 : 1;
                 try { localStorage.setItem('bb-weather-fx', String(wxFX)); } catch (e) {}
