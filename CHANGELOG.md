@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.33 (14 Oct 2026)
+- **Added (early test):** **Two Devices** on the main menu lets you play a friend on another phone, tablet or computer, for exhibition matches. One player taps **Host a game** and gets a room code such as ORC-4821. The other taps Join and types it in. Each picks their own team (a default team or one of their saved teams), then the host taps **Start match**. The host plays the left-hand team, and the host's device runs the match and rolls all the dice. The other device shows the same pitch, panels, log and sounds, and its taps are sent to the host for its own team: moving, blocking, ending the turn, choosing block dice, re-rolls and other questions for that team. Neither player can answer the other's questions. A chip in the top bar shows the connection and its delay. If the other device drops out, the host can tap it to let the computer play their team. Two-device matches aren't saved, and no SPP or injuries are kept. Both devices need an internet connection to find each other. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+
 ## v2.32 (14 Oct 2026)
 - **Added:** a new **High Elven** pitch. It has lush, neatly striped emerald grass, white-and-gold lines and an elven circle inlaid at the centre. Choose it in Settings or before a match; with Pitch set to Home Team, High Elves now play at home on it. Its block clash backdrop is an elven stadium: tiers of white marble with arches and a crowd, slender white towers with pointed roofs and pennants (a great tower over the halfway line), and snowy peaks and waterfalls beyond. This replaces the elven valley from v2.31, so grass pitches show the normal stadium again.
 

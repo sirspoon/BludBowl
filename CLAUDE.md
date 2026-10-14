@@ -23,3 +23,7 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
   https://bloodbowlbase.ru/bb2025/ as the reference (e.g. `core_rules/league_play/`,
   `core_rules/rules_and_regulations/`). The WebFetch tool can't reach it, but `curl` from
   the shell can: fetch the page and strip the HTML to read it.
+
+## Testing
+- Two-device play (`NET` in `index.html`) uses PeerJS, which can't reach its server from a cloud session. Adding `?nettest`
+  to the address swaps the network for a BroadcastChannel, so two tabs in one browser context can play each other.

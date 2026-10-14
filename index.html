@@ -804,6 +804,32 @@
 #app-version { position: absolute; z-index: 5; right: max(12px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); padding: 3px 9px; border-radius: 999px;
     border: 1px solid #a16207; background: rgba(120,53,15,.35); color: #fbbf24; font: 700 11px/1.2 Inter, system-ui, sans-serif; letter-spacing: .08em; cursor: pointer; transition: background .15s, border-color .15s; }
 #app-version:hover, #app-version:focus-visible { background: rgba(180,83,9,.5); border-color: #f59e0b; color: #fde68a; outline: none; }
+#net-lobby, #net-end { position: fixed; inset: 0; z-index: 320; background: rgba(0,0,0,.7); display: grid; place-items: center; padding: 16px; font-family: Inter, system-ui, sans-serif; color: #e2e8f0; }
+#net-lobby.hidden, #net-end.hidden { display: none; }
+#net-lobby .nl-card, #net-end .ne-card { background: #121a2b; border: 1px solid #263247; border-top: 3px solid #38bdf8; border-radius: 12px; width: min(440px, 100%); max-height: 90vh; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+#net-lobby h2 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; letter-spacing: .04em; font-size: 30px; line-height: 1; color: #38bdf8; margin: 0; }
+#net-lobby .nl-dim { color: #94a3b8; font-size: 13px; margin: 0; }
+#net-lobby .nl-btn, #net-end .ne-go, #net-end .ne-stay { background: #1e293b; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 9px 14px; font-weight: 700; cursor: pointer; font-size: 14px; }
+#net-lobby .nl-btn:disabled { opacity: .45; cursor: default; }
+#net-lobby .nl-go { background: #075985; border-color: #38bdf8; font-size: 16px; }
+#net-lobby .nl-back { align-self: flex-end; }
+#net-lobby .nl-pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#net-lobby .nl-join { display: flex; gap: 6px; flex: 1 1 200px; }
+#net-lobby input, #net-lobby select { background: #0b1220; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 16px; min-width: 0; }
+#net-lobby input { flex: 1; text-transform: uppercase; letter-spacing: .08em; }
+#net-lobby .nl-sel { display: flex; gap: 6px; } #net-lobby .nl-sel select { flex: 1; }
+#net-lobby .nl-room { display: none; align-items: baseline; gap: 10px; } #net-lobby[data-role="host"] .nl-room { display: flex; }
+#net-lobby #nl-code { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; letter-spacing: .08em; color: #fbbf24; line-height: 1; }
+#net-lobby[data-role="host"] .nl-pick, #net-lobby[data-role="guest"] .nl-pick { display: none; }
+#net-lobby:not([data-role="host"]) #nl-start, #net-lobby:not([data-role="host"]) .nl-hostonly { display: none; }
+#net-lobby #nl-status { margin: 0; font-size: 14px; } #net-lobby #nl-status:empty { display: none; }
+#net-lobby #nl-status[data-kind="bad"] { color: #fda4af; } #net-lobby #nl-status[data-kind="ok"] { color: #86efac; } #net-lobby #nl-status[data-kind="wait"] { color: #fde68a; }
+#net-lobby #nl-opp { margin: 0; font-size: 14px; color: #cbd5e1; }
+#net-lobby #nl-teams { display: flex; flex-direction: column; gap: 8px; } #net-lobby #nl-teams.hidden { display: none; }
+#net-end .ne-text { margin: 0; font-size: 15px; }
+#net-end .ne-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; } #net-end .ne-go { background: #075985; border-color: #38bdf8; }
+#net-chip { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #0284c7; background: rgba(8,47,73,.75); color: #bae6fd; white-space: nowrap; }
+#net-chip.bad { border-color: #e11d48; background: rgba(76,5,25,.8); color: #fecdd3; }
 #whats-new { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.65); display: grid; place-items: center; padding: 16px; font-family: Inter, system-ui, sans-serif; color: #e2e8f0; }
 #whats-new.hidden { display: none; }
 #whats-new .wn-card { position: relative; background: #121a2b; border: 1px solid #263247; border-top: 3px solid #fbbf24; border-radius: 12px; width: min(520px, 100%); max-height: min(80vh, 640px);
@@ -825,7 +851,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.32</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.33</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -835,6 +861,7 @@
                 <div class="sv-btns"><button type="button" class="sv-btn sv-go" data-sv="resume">▶ Resume</button><button type="button" class="sv-btn" data-sv="export">Export</button><button type="button" class="sv-btn sv-bad" data-sv="discard">Discard</button></div>
             </div>
             <button type="button" class="mm-btn mm-hero" data-go="exhibition"><span class="mm-t">Exhibition Match</span><span class="mm-s">A one-off game with default or saved teams</span></button>
+            <button type="button" class="mm-btn" data-go="net"><span class="mm-t">Two Devices</span><span class="mm-s">Play a friend on another phone or computer</span></button>
             <button type="button" class="mm-btn" data-go="league"><span class="mm-t">League</span><span class="mm-s">Seasons, fixtures, a league table and play-offs</span></button>
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">Knockout cups and Swiss events for Matched Play teams</span></button>
             <button type="button" class="mm-btn" data-go="teams"><span class="mm-t">Teams</span><span class="mm-s">Build, manage and back up your teams and their careers</span></button>
@@ -1121,6 +1148,7 @@
                 <div id="top-bar-row-status">
                         <button type="button" id="ind-chip" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-violet-500 bg-violet-950/70 text-violet-200 mr-1 whitespace-nowrap inline-block align-middle" onclick="indChipMenu()">🔮 Inducements</button>
                         <span id="bribe-indicator" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-yellow-600 bg-yellow-950/70 text-yellow-200 mr-1 whitespace-nowrap inline-block align-middle"></span>
+                        <button type="button" id="net-chip" class="hidden" title="Two-device match: the connection to the other device"></button>
                         <span id="kickoff-banner" class="hidden text-amber-400 font-bold text-[9px] sm:text-[10px] bg-amber-950/80 border border-amber-500 px-2 py-0.5 rounded animate-pulse truncate inline-block max-w-full"></span>
                 </div>
                 
@@ -1377,7 +1405,9 @@
             return {
                 get speed() { return k; },
                 pending: () => pend.size,
-                clearTimeouts() { pend.forEach(id => rCT(id)); pend.clear(); },   // drop everything a finished match still had pending
+                clearTimeouts() { pend.forEach(id => rCT(id)); pend.clear(); },
+                real: rNow,
+                align(t) { v0 = +t; r0 = rNow(); },   // a guest device keeps its clock with the host's   // drop everything a finished match still had pending
                 set(n) { n = Math.max(1, +n || 1); if (n === k) return; v0 = vnow(); r0 = rNow(); k = n; document.body && document.body.classList.toggle('sim-max', k >= 100); }
             };
         })();
@@ -4869,6 +4899,7 @@
         }
         function raceFor(key) {
             if (String(key).startsWith('custom:')) return TB.toRace(key.slice(7)) || RACES.human;
+            if (String(key).startsWith('net:')) return NET.race(key) || RACES.human;   // the other device's team
             return RACES[key] || RACES.human;
         }
 
@@ -5673,7 +5704,7 @@
                         comp: (GEO.sev ? 'Sevens · ' : '') + (state.league ? 'League match' : state.cup ? 'Tournament match' : (state.careerOn || []).some(Boolean) ? 'Career match' : 'Exhibition') } };
             }
             function save(force) {
-                if (busy || !quiet()) return false;
+                if (busy || NET.on() || !quiet()) return false;   // a two-device match isn't kept
                 const g = sig(); if (!force && g === last) return false;
                 let txt = '';
                 try { const d = snapshot(); txt = JSON.stringify(d); localStorage.setItem(KEY, txt); }
@@ -5785,13 +5816,14 @@
             // the in-match "save and exit" button
             function exitAsk() {
                 if (!state.live || state.isGameOver) return;
+                if (NET.on()) { askChoice('LEAVE MATCH', "Leave this two-device match and go back to the main menu? It isn't saved, and it ends on the other device too.", 'Leave match', 'Keep playing', () => { state.live = false; backToMenu(); }, null); return; }
                 const saved = save(true) || has();
                 askChoice('SAVE & EXIT', saved
                     ? `Your match is saved${quiet() ? '' : ' as it was at the end of the last action'}. Go back to the main menu? Carry on any time with Continue Match.`
                     : "Nothing is saved yet: the match saves from the first turn. Go back to the main menu anyway?", 'Exit to menu', 'Keep playing',
                     () => { state.live = false; backToMenu(); }, null);
             }
-            return { save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note };
+            return { encode, decode, save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note };
         })();
 
         // ---------- Back up everything the game keeps on this device, and restore it ----------
@@ -6018,6 +6050,7 @@
         }
         // wipe the finished match and show the main menu, in the same page
         function resetToMenu() {
+            try { NET.matchOver(); } catch (e) {}
             CLOCK.clearTimeouts(); CLOCK.set(1);
             if (announceState.handler) document.getElementById('modal-announce').removeEventListener('click', announceState.handler);
             announceState = { timeout: null, handler: null };
@@ -6174,7 +6207,7 @@
                 if (!state.penalties) penalties();
             }
             state.isGameOver = true; state.mode = MODES.LOCKED;
-            try { SAVE.clear(); } catch (e) {}
+            try { if (!NET.on()) SAVE.clear(); } catch (e) {}   // a two-device match leaves any saved match alone
             if (state.cup) { try { CUP.recordLive(); } catch (e) { console.error('cup', e); } }
             try { mournMatched(); } catch (e) { console.error('mourn', e); }
             SIMSPEED.matchOver();
@@ -15704,6 +15737,439 @@
             modal.classList.remove('hidden');
         }
 
+        // ---------- Two devices: a match between two people, each on their own phone or computer ----------
+        // The host's device plays the real match (every rule and every dice roll). The guest's device draws what the host sends
+        // (the match state, the panels on screen, the log and the sounds) and passes the guest's taps back to the host, which
+        // carries them out for the guest's team. The devices find each other through PeerJS's free broker with a room code,
+        // then talk directly (WebRTC). Adding ?nettest to the address swaps the network for a BroadcastChannel between two tabs.
+        const NET = (function () {
+            const PEER_SRC = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js'];
+            const TEST = /[?&]nettest\b/.test(location.search);
+            const WORDS = ['ORC', 'ELF', 'OGR', 'RAT', 'GOB', 'TRL', 'IMP', 'HOB', 'DWF', 'LIZ', 'MUM', 'SKV', 'NUF', 'BOK'];
+            // panels copied from the host's screen to the guest's (the ones marked * are made by the game as needed)
+            const MIRROR = ['modal-roll', 'modal-team-reroll', 'modal-dice', 'modal-choice', 'event-panel', 'setup-controls-container', 'modal-announce', 'modal-lineup',
+                '*modal-ind-intro', '*pick-banner', 'panel-unit-container', 'turn-banner', 'removal-toast', 'pitch-curtain', 'match-summary'];
+            const INNER_ONLY = new Set(['panel-unit-container']);   // keep the guest's own layout for these, just copy what's inside
+            let role = null, live = false, link = null, peer = null, code = '', rtt = null, lastSeen = 0, version = '';
+            let guestRace = null, guestName = '', aiWas = null, bytes = 0, tickMs = 0;
+            const myTeam = () => (role === 'guest' ? 1 : 0), remote = () => (role === 'host' ? 1 : role === 'guest' ? 0 : -1);
+            const real = () => CLOCK.real();
+            const $ = id => document.getElementById(id);
+
+            // ---- the connection ----
+            function loadPeer() {
+                if (window.Peer) return Promise.resolve();
+                const one = src => new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+                return one(PEER_SRC[0]).catch(() => one(PEER_SRC[1]));
+            }
+            const slug = c => 'bludbowl-v2-' + String(c).toLowerCase().replace(/[^a-z0-9]/g, '');
+            const newCode = () => WORDS[Math.floor(Math.random() * WORDS.length)] + '-' + String(1000 + Math.floor(Math.random() * 9000));
+            function wire(send, close) {
+                link = { send: m => { try { const j = JSON.stringify(m); bytes += j.length; send(j); } catch (e) { console.error('net send', e); } }, close };
+            }
+            function onData(raw) {
+                let m; try { m = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return; }
+                if (!m || !m.t) return;
+                lastSeen = real();
+                try { (role === 'host' ? hostMsg : guestMsg)(m); } catch (e) { console.error('net message', m.t, e); }
+            }
+            function dropped(why) {
+                const was = !!link; link = null; rtt = null;
+                if (!was) return;
+                status(why || 'The other device has gone.', 'bad');
+                if (!live) return;
+                paintChip();
+                if (role === 'host') log('  The other device has disconnected. Tap ⚠ Disconnected at the top to let the computer play their team.', 'text-rose-300');
+                else showEnd('Lost the connection to the host. The match carries on there.');
+            }
+            function open(asHost, joinCode) {
+                close();
+                role = asHost ? 'host' : 'guest'; code = asHost ? newCode() : joinCode;
+                version = (($('app-version') || {}).textContent || '').trim();
+                if (TEST) {   // two tabs on one computer
+                    const bc = new BroadcastChannel(slug(code)), me = Math.random().toString(36).slice(2);
+                    let other = null;
+                    bc.onmessage = e => {
+                        const d = e.data; if (!d || d.from === me) return;
+                        if (d.knock) { if (asHost && !other) { other = d.from; bc.postMessage({ from: me, to: other, welcome: 1 }); wire(x => bc.postMessage({ from: me, to: other, x }), () => bc.close()); connected(); } return; }
+                        if (d.to !== me) return;
+                        if (d.welcome && !asHost) { other = d.from; wire(x => bc.postMessage({ from: me, to: other, x }), () => bc.close()); connected(); return; }
+                        if (d.x != null) onData(d.x);
+                    };
+                    peer = { destroy: () => bc.close() };
+                    if (asHost) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait');
+                    else { status('Looking for the game…', 'wait'); bc.postMessage({ from: me, knock: 1 }); }
+                    return;
+                }
+                status('Connecting to the matchmaking server…', 'wait');
+                loadPeer().then(() => {
+                    if (role !== (asHost ? 'host' : 'guest')) return;
+                    const bind = c => {
+                        c.on('open', () => { wire(x => c.send(x), () => c.close()); connected(); });
+                        c.on('data', onData);
+                        c.on('close', () => dropped());
+                        c.on('error', e => console.error('net conn', e));
+                    };
+                    peer = asHost ? new Peer(slug(code)) : new Peer();
+                    peer.on('open', () => {
+                        if (asHost) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait');
+                        else { status('Looking for the game…', 'wait'); bind(peer.connect(slug(code), { reliable: true })); }
+                    });
+                    if (asHost) peer.on('connection', c => { if (link) { c.on('open', () => c.close()); return; } bind(c); });
+                    peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
+                    peer.on('error', e => {
+                        const t = e && e.type;
+                        if (t === 'unavailable-id' && asHost) { open(true); return; }   // that code is taken: pick another
+                        if (t === 'peer-unavailable') status(`No game found with the code ${code}. Check it, and that the host's screen is still showing it.`, 'bad');
+                        else if (t === 'network' || t === 'server-error' || t === 'socket-error') status("Can't reach the matchmaking server. Check the internet connection and try again.", 'bad');
+                        else if (t === 'browser-incompatible') status("This browser can't make a direct connection (WebRTC).", 'bad');
+                        else status('Connection problem: ' + (t || e), 'bad');
+                    });
+                }).catch(() => status("Couldn't load the connection library. Check the internet connection and try again.", 'bad'));
+            }
+            function close() {
+                try { if (link) link.send({ t: 'bye' }); } catch (e) {}
+                try { if (link) link.close(); } catch (e) {}
+                try { if (peer) peer.destroy(); } catch (e) {}
+                link = null; peer = null; role = null; rtt = null; guestRace = null; guestName = '';
+            }
+            function connected() {
+                status('', '');
+                link.send({ t: 'hello', v: version, role });
+                if (role === 'guest') sendTeam();
+                paintLobby();
+            }
+            window.addEventListener('pagehide', () => { try { if (link) link.send({ t: 'bye' }); } catch (e) {} });
+            // ping every couple of seconds: shows the delay, and notices a device that has gone quiet
+            setInterval(() => {
+                if (!link) return;
+                link.send({ t: 'ping', at: real() });
+                if (lastSeen && real() - lastSeen > 15000) { try { link.close(); } catch (e) {} dropped('Lost touch with the other device.'); }
+                paintChip();
+            }, 2000);
+            function common(m) {
+                if (m.t === 'ping') { link && link.send({ t: 'pong', at: m.at }); return true; }
+                if (m.t === 'pong') { rtt = Math.round(real() - m.at); paintChip(); paintLobby(); return true; }
+                if (m.t === 'bye') { dropped('The other device has left.'); return true; }
+                if (m.t === 'hello') {
+                    if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
+                    return true;
+                }
+                return false;
+            }
+
+            // ---- the host's side ----
+            function hostMsg(m) {
+                if (common(m)) return;
+                if (m.t === 'team') { guestRace = m.race; guestName = m.name; paintLobby(); return; }
+                if (m.t === 'resync') { resetSent(); return; }
+                if (m.t === 'in' && live) guestInput(m);
+            }
+            function start(hostKey) {
+                if (!link || !guestRace) return;
+                aiWas = [AI.isOn(0), AI.isOn(1)];
+                AI.set(0, false); AI.set(1, false);
+                live = true; resetSent();
+                $('net-lobby').classList.add('hidden');
+                link.send({ t: 'start' });
+                window.launchMatch(hostKey, 'net:1', { replaceOk: true });
+                paintChip();
+            }
+            // what has been sent already, so only the changes go each time
+            let sent = null;
+            function resetSent() { sent = { keys: {}, pl: new Map(), order: '', ui: {}, cv: {}, meta: '' }; logSent = -1; }
+            function hostTick() {
+                if (role !== 'host' || !live || !link || !state.players) return;
+                const meta = JSON.stringify({ rosters: [ROSTERS[0], ROSTERS[1]], pitch: { style: PITCH.style, seed: PITCH.seed }, fmt: GEO.fmt });
+                if (meta !== sent.meta) { sent.meta = meta; link.send({ t: 'meta', d: JSON.parse(meta) }); }
+                // the match state: each part, and each player, only when it has changed
+                const seen = new Set(state.players), keys = {}, pl = [];
+                Object.keys(state).forEach(k => {
+                    if (k === 'camera' || k === 'drag' || k === 'players') return;
+                    const e = SAVE.encode(state[k], false, seen), s = e === undefined ? '' : JSON.stringify(e);
+                    if (sent.keys[k] !== s) { sent.keys[k] = s; keys[k] = e === undefined ? null : e; }
+                });
+                Object.keys(sent.keys).forEach(k => { if (!(k in state)) { delete sent.keys[k]; keys[k] = null; } });
+                state.players.forEach(p => { const e = SAVE.encode(p, true, seen), s = JSON.stringify(e); if (sent.pl.get(p.id) !== s) { sent.pl.set(p.id, s); pl.push(e); } });
+                const order = state.players.map(p => p.id).join(','), msg = { t: 'snap', vt: performance.now() };
+                if (order !== sent.order) { sent.order = order; msg.order = state.players.map(p => p.id); }
+                if (Object.keys(keys).length) msg.keys = keys;
+                if (pl.length) msg.pl = pl;
+                if (msg.keys || msg.pl || msg.order) link.send(msg);
+                // the panels on screen
+                const ui = {};
+                MIRROR.forEach(n => {
+                    const id = n.replace('*', ''), el = $(id), h = el ? el.outerHTML : '';
+                    if (sent.ui[id] !== h) { sent.ui[id] = h; ui[id] = el ? h : null; }
+                });
+                if (Object.keys(ui).length) link.send({ t: 'ui', ui });
+                // pictures drawn on canvases (the dice, the block clash) don't come with the panel: send them as images
+                MIRROR.forEach(n => {
+                    const id = n.replace('*', ''), el = $(id);
+                    if (!el || el.classList.contains('hidden') || id === 'pitch-curtain') return;
+                    el.querySelectorAll('canvas').forEach((c, i) => {
+                        if (!c.width || !c.height || !c.offsetParent) return;
+                        let url = ''; try { url = c.toDataURL(c.width * c.height > 40000 ? 'image/jpeg' : 'image/png', 0.7); } catch (e) { return; }
+                        const k = id + '#' + i;
+                        if (sent.cv[k] !== url) { sent.cv[k] = url; link.send({ t: 'cv', id, i, url, w: c.width, h: c.height }); }
+                    });
+                });
+                // the match log: lines added since last time
+                const lg = $('message-log');
+                if (lg) {
+                    const n = lg.children.length, lastHtml = n ? lg.lastElementChild.outerHTML : '';
+                    if (logSent < 0 || n < logSent.n || (n === logSent.n && lastHtml !== logSent.last)) { link.send({ t: 'log', all: [...lg.children].slice(-250).map(c => c.outerHTML) }); }
+                    else if (n > logSent.n) link.send({ t: 'log', add: [...lg.children].slice(logSent.n).map(c => c.outerHTML) });
+                    logSent = { n, last: lastHtml };
+                }
+            }
+            let logSent = -1;
+            setInterval(() => { const t0 = real(); try { hostTick(); } catch (e) { console.error('net tick', e); } tickMs = Math.max(tickMs * 0.9, real() - t0); }, 110);
+            // the guest's taps, carried out for the guest's team (never on the host's own prompts)
+            function guestInput(m) {
+                const R = remote();
+                if (m.k === 'grid') {
+                    if (!state.pitchPick) {
+                        if ([MODES.ROLL_PROMPT, MODES.LOCKED].includes(state.mode)) return;
+                        if (AI.decider() !== R) return;
+                    }
+                    AI.act(() => handleGridClick(m.x, m.y));
+                    return;
+                }
+                if (m.k === 'click') {
+                    let el = m.id ? $(m.id) : $(m.root);
+                    if (!m.id) for (const i of m.path || []) { el = el && el.children[i]; }
+                    if (!el || (!m.id && fingerprint(el) !== m.fp)) return;   // the panel changed in the meantime: ignore the tap
+                    const owner = AI.ownerTeam(el);
+                    if (owner != null && owner !== R) return;
+                    AI.act(() => { if (typeof el.click === 'function') el.click(); else el.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
+                }
+            }
+            const fingerprint = el => el.tagName + ':' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+            // sounds play on both devices
+            const p0 = SFX.play, v0 = SFX.voice;
+            SFX.play = (k, d, sz) => { if (role === 'host' && live && link) link.send({ t: 'sfx', k, d, sz }); return p0(k, d, sz); };
+            SFX.voice = (k, p, d) => { if (role === 'host' && live && link) link.send({ t: 'sfx', k, d }); return v0(k, p, d); };
+
+            // ---- the guest's side ----
+            const raw = { keys: {}, pl: new Map(), order: [] };
+            let shown = false, followKey = '';
+            function guestMsg(m) {
+                if (common(m)) return;
+                if (m.t === 'start') { live = true; shown = false; raw.keys = {}; raw.pl = new Map(); raw.order = []; $('net-lobby').classList.add('hidden'); paintChip(); return; }
+                if (!live) return;
+                if (m.t === 'meta') { applyMeta(m.d); return; }
+                if (m.t === 'snap') { applySnap(m); return; }
+                if (m.t === 'ui') { Object.keys(m.ui).forEach(id => { mirror(id, m.ui[id]); Object.keys(pics).forEach(k => { if (k.startsWith(id + '#')) paintPic(k); }); }); return; }
+                if (m.t === 'cv') { pics[m.id + '#' + m.i] = m; paintPic(m.id + '#' + m.i); return; }
+                if (m.t === 'log') { applyLog(m); return; }
+                if (m.t === 'sfx') { try { p0(m.k, m.d, m.sz); } catch (e) {} return; }
+                if (m.t === 'end') { live = false; showEnd('The host has finished the match.'); }
+            }
+            function applyMeta(d) {
+                ROSTERS[0] = d.rosters[0]; ROSTERS[1] = d.rosters[1];
+                if (GEO.fmt !== d.fmt) setFormat(d.fmt);
+                const pitchChanged = PITCH.style !== d.pitch.style || PITCH.seed !== d.pitch.seed;
+                PITCH.style = d.pitch.style; PITCH.seed = d.pitch.seed;
+                try { applyTeamLabels(); } catch (e) {}
+                if (!shown) {
+                    shown = true;
+                    const sp = $('splash'); if (sp) sp.style.display = 'none';
+                    const ss = $('start-screen'); if (ss) ss.style.display = 'none';
+                    try { MUSIC.matchStart(); } catch (e) {}
+                }
+                if (pitchChanged || !PITCH.tex) { try { resizeCanvas(); buildPitchTexture(); } catch (e) { console.error(e); } }
+            }
+            function applySnap(m) {
+                if (m.order) raw.order = m.order;
+                if (m.keys) Object.keys(m.keys).forEach(k => { if (m.keys[k] === null) delete raw.keys[k]; else raw.keys[k] = m.keys[k]; });
+                if (m.pl) m.pl.forEach(p => raw.pl.set(p.id, p));
+                const enc = raw.order.map(id => raw.pl.get(id)).filter(Boolean);
+                const byId = new Map(enc.map(p => [p.id, {}]));
+                const pl = enc.map(p => Object.assign(byId.get(p.id), SAVE.decode(p, byId)));
+                pl.forEach(p => { if (p.walkAnim && typeof p.walkAnim.ease !== 'function') p.walkAnim.ease = k => k; });   // functions don't travel
+                const cam = state.camera, drag = state.drag;
+                Object.keys(state).forEach(k => delete state[k]);
+                Object.keys(raw.keys).forEach(k => { state[k] = SAVE.decode(raw.keys[k], byId); });
+                state.players = pl; state.camera = cam; state.drag = drag;
+                // keep the guest's clock with the host's, so moves and flights glide at the right moment
+                const want = m.vt + (rtt || 0) / 2;
+                if (Math.abs(performance.now() - want) > 60) CLOCK.align(want);
+                try { updateTopBar(); updateWeatherBadge(); } catch (e) {}
+                follow();
+            }
+            function follow() {   // the guest's camera follows a flying ball or a player setting off, as the host's does
+                const ts = CFG.tileSize, b = state.ballAnimation, f = state.flightAnimation;
+                let key = '', cells = null;
+                if (b && b.active) { key = 'b' + b.startTime; cells = [{ x: Math.floor(b.startX / ts), y: Math.floor(b.startY / ts) }, { x: Math.floor(b.endX / ts), y: Math.floor(b.endY / ts) }]; }
+                else if (f && f.active) { key = 'f' + f.startTime; cells = [{ x: Math.floor(f.endX / ts), y: Math.floor(f.endY / ts) }]; }
+                else { const w = state.players.find(p => p.walkAnim); if (w) { key = 'w' + w.id + w.walkAnim.t0; cells = [w]; } }
+                if (key && key !== followKey) { followKey = key; try { followAction(cells); } catch (e) {} }
+            }
+            const pics = {};
+            function paintPic(k) {
+                const m = pics[k], root = m && $(m.id), c = root && root.querySelectorAll('canvas')[m.i]; if (!c) return;
+                const img = new Image();
+                img.onload = () => { if (c.width !== m.w) c.width = m.w; if (c.height !== m.h) c.height = m.h; const g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0); };
+                img.src = m.url;
+            }
+            function mirror(id, html) {
+                let el = $(id);
+                if (html == null) { if (el && MIRROR.includes('*' + id)) el.remove(); return; }
+                const tpl = document.createElement('template'); tpl.innerHTML = html;
+                const src = tpl.content.firstElementChild; if (!src) return;
+                if (!el) { el = document.createElement(src.tagName); el.id = id; document.body.appendChild(el); }
+                if (!INNER_ONLY.has(id)) {
+                    [...el.attributes].forEach(a => { if (a.name !== 'id' && a.name !== 'style' && !src.hasAttribute(a.name)) el.removeAttribute(a.name); });
+                    [...src.attributes].forEach(a => { if (a.name !== 'id' && a.name !== 'style') el.setAttribute(a.name, a.value); });
+                    ['display', 'opacity', 'visibility'].forEach(p => { el.style[p] = src.style[p]; });
+                }
+                el.innerHTML = src.innerHTML;
+            }
+            function applyLog(m) {
+                const lg = $('message-log'); if (!lg) return;
+                const atEnd = lg.scrollTop + lg.clientHeight >= lg.scrollHeight - 30;
+                if (m.all) lg.innerHTML = m.all.join('');
+                else if (m.add) lg.insertAdjacentHTML('beforeend', m.add.join(''));
+                while (lg.children.length > 300) lg.firstElementChild.remove();
+                if (atEnd || m.all) lg.scrollTop = lg.scrollHeight;
+            }
+            // the guest's taps go to the host: the pitch as a square, a panel's button as where it sits in the panel
+            document.addEventListener('click', e => {
+                if (role !== 'guest' || !live) return;
+                const t = e.target; if (!t || !t.closest) return;
+                if (t.closest('#net-chip, #net-lobby, #net-end, #modal-roster, #skill-tip, #whats-new')) return;
+                const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
+                if (t === canvas) {
+                    stop();
+                    if (state.drag && state.drag.active && Math.hypot(e.clientX - state.drag.startX, e.clientY - state.drag.startY) > 5) return;
+                    const w = screenToWorld(e.clientX, e.clientY);
+                    if (link) link.send({ t: 'in', k: 'grid', x: w.gridX, y: w.gridY });
+                    return;
+                }
+                if (t.closest('#match-summary')) { stop(); showEnd('The match is over.'); return; }
+                if (t.closest('#btn-saveexit')) { stop(); showEnd('Leave the match and go back to the main menu? It ends on the host\'s device too.', true); return; }
+                if (t.closest('#btn-end-turn')) { stop(); if (link) link.send({ t: 'in', k: 'click', id: 'btn-end-turn' }); return; }
+                const root = MIRROR.map(n => $(n.replace('*', ''))).find(r => r && r.contains(t));
+                if (!root) return;
+                stop();
+                const path = []; let n = t;
+                while (n && n !== root) { path.unshift([...n.parentNode.children].indexOf(n)); n = n.parentNode; }
+                if (link) link.send({ t: 'in', k: 'click', root: root.id, path, fp: fingerprint(t) });
+            }, true);
+            // the guest never runs the match itself: if a setting or a save would, it's skipped
+            function showEnd(text, canStay) {
+                let el = $('net-end');
+                if (!el) {
+                    el = document.createElement('div'); el.id = 'net-end'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+                    el.innerHTML = `<div class="ne-card"><p class="ne-text"></p><div class="ne-btns"><button type="button" class="ne-stay">Keep playing</button><button type="button" class="ne-go">Back to the menu</button></div></div>`;
+                    document.body.appendChild(el);
+                    el.querySelector('.ne-go').onclick = () => { close(); location.reload(); };   // a fresh page: the guest's own game is just as it was
+                    el.querySelector('.ne-stay').onclick = () => el.classList.add('hidden');
+                }
+                el.querySelector('.ne-text').textContent = text;
+                el.querySelector('.ne-stay').hidden = !canStay;
+                el.classList.remove('hidden');
+            }
+
+            // ---- when the host's match ends ----
+            function matchOver() {
+                if (aiWas) { AI.set(0, aiWas[0]); AI.set(1, aiWas[1]); aiWas = null; }
+                if (role !== 'host' || !live) { if (role === 'host' && !live) close(); paintChip(); return; }
+                live = false;
+                if (link) link.send({ t: 'end' });
+                close(); paintChip();
+            }
+            // the host lost the other device: the computer can play their team for the rest of the match
+            function takeOver() {
+                if (role !== 'host' || !live || link) return;
+                askChoice('OTHER DEVICE GONE', `The other device has disconnected. Let the computer play ${ROSTERS[1].name} for the rest of the match?`, 'Computer takes over', 'Wait', () => {
+                    live = false; close(); AI.set(1, true); paintChip();
+                    log(`  The computer takes over ${ROSTERS[1].name}.`, 'text-emerald-300');
+                }, null);
+            }
+
+            // ---- the lobby ----
+            function status(text, kind) {
+                const el = $('nl-status'); if (!el) return;
+                el.textContent = text; el.dataset.kind = kind || '';
+            }
+            function teamOf(raceSel, squadSel) { return squadSel.value || raceSel.value; }
+            function fillPicker(raceSel, squadSel) {
+                if (!raceSel.options.length) Object.values(RACES).forEach(r => raceSel.appendChild(new Option(r.name, r.key)));
+                const keep = squadSel.value; squadSel.innerHTML = '';
+                squadSel.appendChild(new Option('Default team', ''));
+                TB.list().filter(t => t.race === raceSel.value && !t.cpu && !TB.isSev(t)).forEach(t => squadSel.appendChild(new Option(t.name, 'custom:' + t.id)));
+                squadSel.value = [...squadSel.options].some(o => o.value === keep) ? keep : '';
+                squadSel.disabled = squadSel.options.length < 2;
+            }
+            function sendTeam() {
+                if (role !== 'guest' || !link) return;
+                const key = teamOf($('nl-race'), $('nl-squad')), r = JSON.parse(JSON.stringify(raceFor(key)));
+                delete r.careerTeamId; delete r.mpInd;   // an exhibition: nothing is recorded, nothing is brought along
+                guestName = r.name;
+                link.send({ t: 'team', race: r, name: r.name });
+            }
+            function paintLobby() {
+                const L = $('net-lobby'); if (!L) return;
+                L.dataset.role = role || '';
+                $('nl-code').textContent = role === 'host' ? code : '';
+                $('nl-ping').textContent = link ? `Connected${rtt != null ? ` · ${rtt} ms` : ''}` : '';
+                const opp = $('nl-opp');
+                opp.textContent = role === 'host' ? (guestRace ? `Opponent's team: ${guestName}` : link ? 'Waiting for the other player to pick a team…' : '') : role === 'guest' && link ? 'Pick your team. The host starts the match.' : '';
+                $('nl-start').disabled = !(role === 'host' && link && guestRace);
+                $('nl-teams').classList.toggle('hidden', !link);
+            }
+            function openLobby() {
+                const L = $('net-lobby');
+                const rs = $('nl-race'), sq = $('nl-squad');
+                if (!rs.options.length) { fillPicker(rs, sq); rs.value = 'human'; }
+                fillPicker(rs, sq);
+                L.classList.remove('hidden'); paintLobby();
+            }
+            function bindLobby() {
+                const L = $('net-lobby'), rs = $('nl-race'), sq = $('nl-squad');
+                rs.onchange = () => { sq.value = ''; fillPicker(rs, sq); sendTeam(); };
+                sq.onchange = () => sendTeam();
+                $('nl-host').onclick = () => { open(true); paintLobby(); };
+                const join = () => {
+                    const c = $('nl-join-code').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (c.length < 5) { status('Type the code shown on the host\'s screen, like ORC-4821.', 'bad'); return; }
+                    open(false, c.slice(0, 3) + '-' + c.slice(3)); paintLobby();
+                };
+                $('nl-join').onclick = join;
+                $('nl-join-code').onkeydown = e => { if (e.key === 'Enter') join(); };
+                $('nl-start').onclick = () => start(teamOf(rs, sq));
+                $('nl-leave').onclick = () => { close(); status('', ''); paintLobby(); L.classList.add('hidden'); };
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLobby); else bindLobby();
+
+            // ---- the little connection chip in the top bar during a match ----
+            document.addEventListener('click', e => {
+                if (!e.target.closest || !e.target.closest('#net-chip')) return;
+                if (role === 'host') takeOver(); else if (role === 'guest' && !link) showEnd('Lost the connection to the host.');
+            });
+            function paintChip() {
+                const c = $('net-chip'); if (!c) return;
+                const on = live || (role && role === 'guest' && shown);
+                c.classList.toggle('hidden', !on);
+                if (!on) return;
+                const ok = !!link;
+                c.textContent = ok ? `⇄ ${role === 'host' ? 'Host' : 'Guest'}${rtt != null ? ` · ${rtt} ms` : ''}` : '⚠ Disconnected';
+                c.classList.toggle('bad', !ok);
+            }
+
+            return {
+                openLobby, matchOver,
+                on: () => live,
+                guest: () => role === 'guest' && live,
+                isRemote: t => live && role === 'host' && t === remote(),
+                theirTurn: () => live && !!state.players && !state.isGameOver && state.activeTeam !== myTeam(),
+                race: key => (String(key) === 'net:1' ? guestRace : null),
+                debug: () => ({ role, live, code, rtt, link: !!link, guestRace: !!guestRace, bytes, tickMs: Math.round(tickMs * 10) / 10 })
+            };
+        })();
+
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         const AI = (function () {
             const on = { 0: false, 1: false };
@@ -15748,19 +16214,25 @@
                     default: return state.activeTeam;
                 }
             }
-            // stop a person clicking on the computer's prompts or pieces
+            // which team a prompt or piece on screen belongs to (null: anyone's)
+            function ownerTeam(el) {
+                if (!el || !el.closest) return null;
+                if (el.closest('#modal-roll')) return state.pendingRoll ? state.pendingRoll.player.team : null;
+                if (el.closest('#modal-team-reroll')) return state.activeTeam;
+                if (el.closest('#btn-combat-trr')) return state.activeTeam;
+                if (el.closest('#dice-container')) return state.combat ? state.combat.chooser : null;
+                if (el.closest('#modal-choice')) return state.choice && state.choice.team != null ? state.choice.team : null;
+                if (el.closest('#btn-end-turn') || el.closest('#action-toolbar')) return state.activeTeam;
+                if (el.closest('#btn-confirm-setup')) return state.mode === MODES.SETUP ? state.setup.currentSettingTeam : null;
+                if (el.closest('#event-panel')) return state.bncAwait ? state.activeTeam : state.otb ? state.otb.team : state.kickEvent ? state.kickEvent.team : (state.charge ? state.charge.team : null);
+                if (el.id === 'gameCanvas' || el.tagName === 'CANVAS') return state.mode !== MODES.LOCKED ? decider() : null;
+                return null;
+            }
+            // stop a person clicking on the computer's prompts or pieces (or, in a two-device match, the other player's)
             function ownsTarget(el) {
                 if (!started || internal || !el || !el.closest) return false;
-                if (el.closest('#modal-roll')) return !!(state.pendingRoll && isAI(state.pendingRoll.player.team));
-                if (el.closest('#modal-team-reroll')) return isAI(state.activeTeam);
-                if (el.closest('#btn-combat-trr')) return isAI(state.activeTeam);
-                if (el.closest('#dice-container')) return !!(state.combat && isAI(state.combat.chooser));
-                if (el.closest('#modal-choice')) return !!(state.choice && isAI(state.choice.team));
-                if (el.closest('#btn-end-turn') || el.closest('#action-toolbar')) return isAI(state.activeTeam);
-                if (el.closest('#btn-confirm-setup')) return state.mode === MODES.SETUP && isAI(state.setup.currentSettingTeam);
-                if (el.closest('#event-panel')) return state.bncAwait ? isAI(state.activeTeam) : state.otb ? isAI(state.otb.team) : state.kickEvent ? isAI(state.kickEvent.team) : (state.charge ? isAI(state.charge.team) : false);
-                if (el.id === 'gameCanvas' || el.tagName === 'CANVAS') return isAI(decider()) && state.mode !== MODES.LOCKED;
-                return false;
+                const t = ownerTeam(el);
+                return t != null && (isAI(t) || NET.isRemote(t));
             }
             document.addEventListener('click', e => { if (ownsTarget(e.target)) { e.stopPropagation(); e.preventDefault(); } }, true);
 
@@ -17281,14 +17753,14 @@
             let lastLabel = null;
             function paintTurnButton() {
                 const b = document.getElementById('btn-end-turn'); if (!b) return;
-                const cpu = started && isAI(state.activeTeam) && !state.isGameOver;
-                const label = cpu ? 'Computer…' : 'End Turn';
-                if (label !== lastLabel) { lastLabel = label; b.textContent = label; b.style.opacity = cpu ? '0.6' : ''; b.title = cpu ? 'The computer is playing this turn' : ''; }
+                const cpu = started && isAI(state.activeTeam) && !state.isGameOver, away = NET.theirTurn();
+                const label = cpu ? 'Computer…' : away ? 'Their turn…' : 'End Turn';
+                if (label !== lastLabel) { lastLabel = label; b.textContent = label; b.style.opacity = cpu || away ? '0.6' : ''; b.title = cpu ? 'The computer is playing this turn' : away ? 'The other player is playing this turn' : ''; }
             }
             setInterval(() => { try { paintTurnButton(); tick(); } catch (e) { console.error('AI', e); } }, 120);
 
             return {
-                isAI, isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),
+                isAI, act, ownerTeam, decider, isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),
                 set(t, v) { on[t] = !!v; save(); },
                 start() { started = true; },
                 setSpeed(s) { speed = s; },
@@ -17530,6 +18002,7 @@
                 if (go === 'teams') HUB.open(() => { fillPickers(); refreshPick(); });
                 else if (go === 'league') LEAGUE.open();
                 else if (go === 'tournament') CUP.open();
+                else if (go === 'net') NET.openLobby();
                 else showPanel(go);
             });
             // Settings: the same switches as the in-match buttons, in one place
@@ -17635,6 +18108,27 @@
         window.onload = init;
     </script>
 <div id="act-banner" class="hidden"></div>
+<div id="net-lobby" class="hidden" role="dialog" aria-modal="true" aria-labelledby="nl-title">
+    <div class="nl-card">
+        <h2 id="nl-title">Two Devices</h2>
+        <p class="nl-dim">Play a friend on another phone, tablet or computer. One of you hosts; the other joins with the host's room code. Both devices need an internet connection.</p>
+        <div class="nl-pick">
+            <button type="button" id="nl-host" class="nl-btn">Host a game</button>
+            <div class="nl-join"><input id="nl-join-code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="9" placeholder="ORC-4821" aria-label="Room code"><button type="button" id="nl-join" class="nl-btn">Join</button></div>
+        </div>
+        <div class="nl-room"><span class="nl-dim">Room code</span><b id="nl-code"></b></div>
+        <p id="nl-status" aria-live="polite"></p>
+        <p id="nl-ping" class="nl-dim"></p>
+        <div id="nl-teams" class="hidden">
+            <label class="nl-dim">Your team</label>
+            <div class="nl-sel"><select id="nl-race" aria-label="Race"></select><select id="nl-squad" aria-label="Team"></select></div>
+            <p id="nl-opp"></p>
+            <button type="button" id="nl-start" class="nl-btn nl-go" disabled>Start match</button>
+            <p class="nl-dim nl-hostonly">You play the left-hand team and kick off the match from this device. The match isn't saved, and no SPP or injuries are kept.</p>
+        </div>
+        <button type="button" id="nl-leave" class="nl-btn nl-back">Close</button>
+    </div>
+</div>
 <div id="whats-new" class="hidden" role="dialog" aria-modal="true" aria-labelledby="wn-title">
     <div class="wn-card"><h2 id="wn-title">What's new</h2><button type="button" class="wn-close" aria-label="Close">✕</button><div class="wn-body"></div></div>
 </div>
