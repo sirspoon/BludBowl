@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.35 (14 Oct 2026)
+- **Added:** in a two-device match, a faint pulsing banner shows on your device whenever you're waiting for the other player. It says **Opponent's turn** during their turn, and **Opponent is choosing…** when they have a choice to make in your turn (such as picking the block dice). It sits just above the match log, or under the panel they're choosing on, and never blocks a tap. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+
 ## v2.34 (14 Oct 2026)
 - **Changed:** in a two-device match, buttons that are the other player's to press are greyed out on your device: the action buttons and End Turn during their turn, the block dice when they're choosing, and their re-roll and question panels. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 - **Fixed:** in a two-device match, the block dice panel is red ("DANGER!") only on the device whose player isn't choosing. The player who picks the die sees it in the normal colours. ([#18](https://github.com/sirspoon/BludBowl/issues/18))

@@ -828,6 +828,9 @@
 #net-lobby #nl-teams { display: flex; flex-direction: column; gap: 8px; } #net-lobby #nl-teams.hidden { display: none; }
 #net-end .ne-text { margin: 0; font-size: 15px; }
 #net-end .ne-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; } #net-end .ne-go { background: #075985; border-color: #38bdf8; }
+#net-wait { position: fixed; left: 50%; transform: translateX(-50%); z-index: 65; pointer-events: none; font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 22px; line-height: 1; padding: 6px 16px 3px; border-radius: 999px; background: rgba(15,23,42,.55); border: 1px solid rgba(148,163,184,.35); color: #e2e8f0; white-space: nowrap; animation: netPulse 2.2s ease-in-out infinite; }
+#net-wait.hidden { display: none; }
+@keyframes netPulse { 0%, 100% { opacity: .3; } 50% { opacity: .75; } }
 .net-theirs { opacity: .35 !important; filter: grayscale(1) !important; cursor: not-allowed !important; }
 #net-chip { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #0284c7; background: rgba(8,47,73,.75); color: #bae6fd; white-space: nowrap; }
 #net-chip.bad { border-color: #e11d48; background: rgba(76,5,25,.8); color: #fecdd3; }
@@ -852,7 +855,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.34</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.35</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -16049,6 +16052,37 @@
                 });
             }
             setInterval(() => { try { greyOut(); } catch (e) {} }, 150);
+            // a faint pulsing banner over the bottom of the pitch whenever it's the other player's turn or choice
+            function waitBanner() {
+                let el = $('net-wait');
+                const vis = id => { const e = $(id); return !!e && !e.classList.contains('hidden'); };
+                let who = null, text = '';
+                if (live && state.players && !state.isGameOver && state.live !== false) {
+                    if (vis('modal-dice') && state.combat && state.combat.chooser != null) who = state.combat.chooser;
+                    else if (vis('modal-choice') && state.choice && state.choice.team != null) who = state.choice.team;
+                    else if (vis('modal-roll') && state.pendingRoll && state.pendingRoll.player) who = state.pendingRoll.player.team;
+                    else { try { who = AI.decider(); } catch (e) { who = state.activeTeam; } }
+                    if (who != null && who !== myTeam()) text = who === state.activeTeam && who === AI.decider() ? "Opponent's turn" : 'Opponent is choosing…';
+                }
+                if (!text) { if (el) el.classList.add('hidden'); return; }
+                if (!el) { el = document.createElement('div'); el.id = 'net-wait'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
+                if (el.textContent !== text) el.textContent = text;
+                // with a panel open: just below it (or above, if there's no room); otherwise just above the log and unit panels
+                const open = ['modal-dice', 'modal-choice', 'modal-roll', 'modal-team-reroll'].map(id => $(id)).find(e => e && !e.classList.contains('hidden'));
+                const card = open && [...open.children].map(c => c.getBoundingClientRect()).filter(r => r.height > 0).sort((a, b) => b.width * b.height - a.width * a.height)[0];
+                if (card) {
+                    el.style.bottom = '';
+                    if (innerHeight - card.bottom > 48) el.style.top = ((card.bottom + 10) / uiScale()) + 'px';
+                    else { el.style.top = ''; el.style.bottom = ((innerHeight - card.top + 10) / uiScale()) + 'px'; }
+                    el.classList.remove('hidden'); return;
+                }
+                el.style.top = '';
+                const tops = ['panel-log-container', 'panel-unit-container'].map(id => $(id)).map(e => e && e.getBoundingClientRect()).filter(r => r && r.height > 0).map(r => r.top);   // (fixed panels have no offsetParent)
+                const bottom = Math.max(8, innerHeight - (tops.length ? Math.min(...tops) : innerHeight) + 8);
+                el.style.bottom = (bottom / uiScale()) + 'px';
+                el.classList.remove('hidden');
+            }
+            setInterval(() => { try { waitBanner(); } catch (e) {} }, 200);
             function applyLog(m) {
                 const lg = $('message-log'); if (!lg) return;
                 const atEnd = lg.scrollTop + lg.clientHeight >= lg.scrollHeight - 30;
