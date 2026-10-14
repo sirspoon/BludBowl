@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.53</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.54</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -8396,6 +8396,7 @@
                 log(`  SAVAGE MAULING! Wilhelm re-rolls the Injury roll: ${was} becomes ${roll}.`, 'text-yellow-300 font-bold');
             }
 
+            REPLAY.injury(player.id, inj.out);
             if (inj.out === 'stun') {
                 if (inj.saved) {
                     log(`  Thick Skull saves ${player.type} from KO! Stunned instead.`, 'text-yellow-400 font-bold'); skillPop('Thick Skull');
@@ -8942,6 +8943,7 @@
     'knockedDown': () => { tone(120, 40, 0.25, 'triangle', 0.55); noise(0.22, 0.5, 0.02, 2200, 200); },
     'skillPop': () => { tone(660, 990, 0.08, 'triangle', 0.22); tone(990, 1320, 0.1, 'triangle', 0.2, 0.07); },
     'squish': () => { noise(0.16, 0.55, 0, 1600, 250); tone(240, 70, 0.15, 'sine', 0.4); tone(150, 55, 0.12, 'triangle', 0.25, 0.03); noise(0.08, 0.25, 0.09, 900, 200); },
+    'squelch': () => { noise(0.12, 0.6, 0, 1200, 180); tone(180, 55, 0.18, 'sine', 0.45); for (let i = 0; i < 4; i++) { tone(420 - i * 60 + Math.random() * 80, 120, 0.06, 'sine', 0.22, 0.06 + i * 0.055); noise(0.05, 0.3, 0.07 + i * 0.055, 1800 - i * 250, 300); } tone(260, 90, 0.14, 'triangle', 0.2, 0.26); },   // a wet splat (replays)
     'stompThump': () => { noise(0.1, 0.6, 0, 2800, 200); tone(90, 40, 0.1, 'square', 0.4); },   // one of the foul's two stomps
     'foulStomp': () => { noise(0.1, 0.6, 0, 2800, 200); tone(90, 40, 0.1, 'square', 0.4); noise(0.12, 0.6, 0.14, 2800, 200); tone(80, 35, 0.12, 'square', 0.4, 0.14); },
     'ballBounce': () => { [0, 0.16, 0.28].forEach((d, i) => tone(520 - i * 70, 180 - i * 20, 0.09 - i * 0.015, 'triangle', 0.4 - i * 0.1, d)); },
@@ -15876,7 +15878,7 @@
         // REPLAY records what happens while the action plays out on the pitch; REPLAY.then(fn) plays it (when the dice have settled) before the
         // game carries on (turnover, touchdown, or the rest of the turn). PASSFX draws it from the recorded script.
         const PASSFX = (() => {
-            let root = null, cv = null, g = null, W = 480, H = 300, F = 280, HC = 150, raf = 0, P = [], ball = null, blasts = [], banner = null, flashT0 = -1e9, nowT = 0;
+            let root = null, cv = null, g = null, W = 480, H = 300, F = 280, HC = 150, raf = 0, P = [], ball = null, blasts = [], gore = [], banner = null, flashT0 = -1e9, nowT = 0;
             let segs = [], si = 0, segT0 = 0, clockMs = 0, lastReal = 0, onDone = null, watch = 0, gr = null;
             const cam = { x: 0, y: 0, h: 13, a: Math.PI / 2 - 0.001, hd: -Math.PI / 2 };
             const V = { h: 1.35, a: 0.14, bob: 0.7, back: 3.2, da: 0.08 };   // the low camera, just behind the play
@@ -16036,7 +16038,36 @@
                     g.fillStyle = c[1]; g.fillRect(ox + i * cell, oy + j * cell, cell, cell);
                 }
             }
+            // ---- blood: chunky drops burst out of an injured player, arc through the air and splat on the ground ----
+            const GORE = ['#7f1d1d', '#991b1b', '#b91c1c', '#dc2626'], GRAV = 9.8;
+            function bleed(p, sev) {
+                const n = sev === 'cas' ? 46 : sev === 'ko' ? 28 : 14, hard = sev === 'cas' ? 1.35 : sev === 'ko' ? 1.1 : 0.85, x0 = p.x + 0.5, y0 = p.y + 0.5, z0 = 0.35 + (p.z || 0);
+                for (let i = 0; i < n; i++) {
+                    const an = Math.random() * Math.PI * 2, sp = (0.5 + Math.random() * 1.9) * hard, vz = (1.4 + Math.random() * 2.8) * hard;
+                    const tl = (vz + Math.sqrt(vz * vz + 2 * GRAV * z0)) / GRAV;   // when it comes down
+                    gore.push({ x0, y0, z0, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, vz, tl, t0: clockMs, size: i % 7 === 0 ? 0.13 : 0.04 + Math.random() * 0.05, col: GORE[i % GORE.length], seed: Math.random() * 9 });
+                }
+                if (!(NET.guest && NET.guest())) { try { sfx('squelch'); } catch (e) {} }   // (a guest hears the host's)
+            }
+            const goreAt = (d, t) => ({ x: d.x0 + d.vx * t, y: d.y0 + d.vy * t, z: Math.max(0, d.z0 + d.vz * t - GRAV / 2 * t * t) });
+            function drawGoreGround(B) {   // the splats left on the ground
+                gore.forEach(d => {
+                    const t = (clockMs - d.t0) / 1000; if (t < d.tl) return;
+                    const q = goreAt(d, d.tl), f = project(q.x, q.y, 0, B); if (f.zc <= 0.3) return;
+                    const u = F / f.zc, r = u * d.size * 1.5;
+                    pixBlob(f.x, f.y, r, r * Math.sin(cam.a + 0.25), Math.max(2, u * 0.035), [[0.6, d.col], [1, '#5f1414']], d.seed, 0.5);
+                });
+            }
+            function drawGoreAir(B) {   // the drops still flying
+                gore.forEach(d => {
+                    const t = (clockMs - d.t0) / 1000; if (t >= d.tl) return;
+                    const q = goreAt(d, t), f = project(q.x, q.y, q.z, B); if (f.zc <= 0.3) return;
+                    const sz = Math.max(2, Math.round(F / f.zc * d.size));
+                    g.fillStyle = d.col; g.fillRect(Math.round(f.x - sz / 2), Math.round(f.y - sz / 2), sz, sz);
+                });
+            }
             function drawScorch(B) {
+                drawGoreGround(B);
                 blasts.forEach(b => {
                     const f = project(b.x, b.y, 0, B); if (f.zc <= 0.3 || clockMs - b.t0 < 120) return;
                     const u = F / f.zc, flat = Math.sin(cam.a + 0.25);
@@ -16117,7 +16148,7 @@
                     g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
                     g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
                     const hz = drawGround(B); drawSky(hz);
-                    drawScorch(B); drawPlayers(B); drawBlasts(B);
+                    drawScorch(B); drawPlayers(B); drawGoreAir(B); drawBlasts(B);
                     const fl = (now - flashT0) / 320; if (fl >= 0 && fl < 1) { g.fillStyle = `rgba(255,255,240,${0.8 * (1 - fl) * (1 - fl)})`; g.fillRect(0, 0, W, H); }
                     drawBanner();
                 } finally { cam.x = keep.x; cam.y = keep.y; cam.h = keep.h; }
@@ -16228,12 +16259,15 @@
                     fly(0.8, 1, flightMs * 0.2, upright ? { slow: 0.3 } : r.out ? { banner: ['INTO THE CROWD!', tone(1 - Hf.team)] } : {});
                 }
                 let end = land;
+                const inj = r.inj || {}, bled = {}, hurt = p => { if (p && inj[p.id] && !bled[p.id]) { bled[p.id] = true; bleed(p, inj[p.id]); } };
                 if (r.out) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); }
                 else if (r.crash) {   // a crash landing on whoever is there: they go down, and the thrown player bounces off and falls
                     const Oc = pl(r.crash.on), to2 = r.crash.to ? sq(r.crash.to) : land, knock = Oc ? fall(Oc, land) : null;
                     add(900, u => {
                         if (knock && !Oc.down) knock(Math.min(1, u * 2));
+                        if (u > 0.05) hurt(Oc);   // squashed
                         const k = Math.min(1, u * 1.4); put(Hf, lerp(land.x, to2.x, k), lerp(land.y, to2.y, k)); Hf.z = 0.8 * Math.sin(Math.PI * k); Hf.lean = Math.PI / 2 * ease(k);
+                        if (k >= 1) hurt(Hf);   // and the thrown player hits the ground
                         if (r.ball && u > 0.5) { const v = (u - 0.5) * 2; ball.holder = null; ball.x = to2.x + -L2.dir.y * 1.1 * v; ball.y = to2.y + L2.dir.x * 1.1 * v; ball.z = Math.abs(Math.sin(v * Math.PI * 2)) * (1 - v) * 0.9; ball.spin += 0.25; }
                     }, { banner: ['CRASH LANDING!', tone(1 - Hf.team)] });
                     end = to2;
@@ -16243,9 +16277,13 @@
                 } else if (r.landed === false) {
                     add(900, u => {
                         Hf.z = 0; Hf.lean = Math.PI / 2 * Math.min(1, u * 2.5);
+                        if (u > 0.12) hurt(Hf);
                         if (r.ball) { ball.holder = null; ball.x = land.x + -L2.dir.y * 1.2 * u + L2.dir.x * 0.6 * u; ball.y = land.y + L2.dir.x * 1.2 * u + L2.dir.y * 0.6 * u; ball.z = Math.abs(Math.sin(u * Math.PI * 2.2)) * (1 - u) * 1.1; ball.spin += 0.25; }
                     }, { banner: ['CRASH LANDING!', tone(1 - Hf.team)] });
                 } else add(300, () => { Hf.z = 0; Hf.lean = 0; });
+                // the worst injury gets its own word (a Stunned player isn't really hurt)
+                const sevN = { stun: 1, ko: 2, cas: 3 }, worst = [Hf, r.crash && pl(r.crash.on)].filter(p => p && sevN[inj[p.id]] > 1).sort((a, b) => sevN[inj[b.id]] - sevN[inj[a.id]])[0];
+                if (worst && !r.out) add(1200, () => {}, { banner: [inj[worst.id] === 'cas' ? 'CASUALTY!' : 'KNOCKED OUT!', tone(1 - worst.team)] });
                 outro(end); return true;
             }
 
@@ -16304,7 +16342,7 @@
                 P = (r.players || []).map(s => { const q = state.players.find(p => p.id === s.id); const spr = q ? spriteCanvas(q) : null; return spr && { id: s.id, team: q.team, x: s.x, y: s.y, z: 0, lean: s.down ? Math.PI / 2 : 0, down: s.down, spr }; }).filter(Boolean);
                 ball = { x: 0, y: 0, z: 0, on: false, spin: 0, holder: null, bomb: false };
                 if (r.kind !== 'bomb' && r.gb) { if (r.gb.id != null) { ball.on = true; ball.holder = pl(r.gb.id) || null; ball.on = !!ball.holder; } else if (r.gb.x >= 0) { ball.on = true; ball.x = r.gb.x + 0.5; ball.y = r.gb.y + 0.5; } }
-                blasts = []; banner = null; flashT0 = -1e9; segs = []; si = 0; segT0 = 0; clockMs = 0;
+                blasts = []; gore = []; banner = null; flashT0 = -1e9; segs = []; si = 0; segT0 = 0; clockMs = 0;
                 const T = pl(r.thr || (r.legs && r.legs[0] && r.legs[0].from));
                 if (T) { cam.x = T.x + 0.5; cam.y = T.y + 0.5; } cam.h = 13; cam.a = Math.PI / 2 - 0.001; cam.hd = -Math.PI / 2;
                 return r.kind === 'pass' ? buildPass(r) : r.kind === 'ttm' ? buildTTM(r) : r.kind === 'bomb' ? buildBomb(r) : false;
@@ -16347,6 +16385,7 @@
                         gb: b.carrierId != null ? { id: b.carrierId } : { x: b.x, y: b.y } }, data);
                 },
                 set(k, v, once) { if (rec && !(once && rec[k] != null)) rec[k] = v; },
+                injury(id, out) { if (rec && rec.kind === 'ttm') (rec.inj = rec.inj || {})[id] = out; },   // who was hurt in a Throw Team-mate, and how: 'stun', 'ko' or 'cas'
                 get: () => rec,
                 leg() { return rec && rec.legs ? rec.legs[rec.legs.length - 1] : null; },
                 cancel() { rec = null; },

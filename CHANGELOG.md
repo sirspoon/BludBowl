@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.54 (14 Oct 2026)
+- **Added:** blood in Throw Team-mate replays. When a thrown player crash-lands on someone and hurts them, or is hurt themselves (a failed landing or a crash), a burst of chunky pixel blood sprays out with a wet squelch. The drops fly up and splat on the ground. A worse injury means a bigger burst. A Knocked Out or Casualty result then gets its own word: "KNOCKED OUT!" or "CASUALTY!", in gold or red depending on whose player it was.
+
 ## v2.53 (14 Oct 2026)
 - **Fixed:** a replay could get stuck panning over empty pitch, with no players or ball, and never finish. This happened in any match where the computer's turns had been sped up (4×), even when the replay was of your own throw. It could also happen on the second device in a two-device match. Replays now always run in real time.
 
