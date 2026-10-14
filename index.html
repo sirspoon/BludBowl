@@ -820,7 +820,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.20</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.21</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6956,8 +6956,8 @@
                     { label: 'Zap! a player', fn: () => {
                         const best = new Set(zapTargets(t).map(z => z.p.id));
                         pitchPick({ title: 'ZAP!', hint: 'Tap the player to turn into a frog (the glowing ones are the best bets).', confirmLabel: 'Zap!',
-                            cells: state.players.filter(q => onPitchP(q) && !q.frog).map(q => ({ x: q.x, y: q.y, data: q, hint: best.has(q.id) })),
-                            describe: c => `${nm(c.data)} (${c.data.type}, ST ${c.data.st})${c.data.team === t ? ', one of yours' : ''}${state.ball.carrierId === c.data.id ? ', has the ball' : ''}: ${Math.round(zapChance(c.data) * 100)}% to turn them into a frog.`,
+                            cells: state.players.filter(q => onPitchP(q) && !q.frog && q.team !== t).map(q => ({ x: q.x, y: q.y, data: q, hint: best.has(q.id) })),
+                            describe: c => `${nm(c.data)} (${c.data.type}, ST ${c.data.st})${state.ball.carrierId === c.data.id ? ', has the ball' : ''}: ${Math.round(zapChance(c.data) * 100)}% to turn them into a frog.`,
                             onPick: q => castZap(t, q, done), onCancel: menu });
                     } },
                     { label: 'Fireball a square', fn: () => {

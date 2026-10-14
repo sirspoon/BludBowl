@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.21 (14 Oct 2026)
+- **Changed:** Zap! now only lets you pick (and highlights) opposition players.
+
 ## v2.20 (14 Oct 2026)
 - **Changed:** the Sports-Wizard's spells are now aimed on the pitch instead of from a list. Choose Zap! or Fireball, then tap a player or square: the choices glow (the best bets brighter), a banner shows what would happen (the Fireball's blast area and who's in it, or the chance to Zap! a player) and you tap Confirm or tap it again. Cancel goes back. Fireball can now target any square and Zap! any player, as the rules allow. ([#5](https://github.com/sirspoon/BludBowl/issues/5))
 - **Changed:** Star Player abilities that pick a player (such as Black Ink, Vicious Vines and Baleful Hex) work the same way: tap the highlighted player on the pitch.
