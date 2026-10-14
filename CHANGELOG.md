@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.34 (14 Oct 2026)
+- **Changed:** in a two-device match, buttons that are the other player's to press are greyed out on your device: the action buttons and End Turn during their turn, the block dice when they're choosing, and their re-roll and question panels. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+- **Fixed:** in a two-device match, the block dice panel is red ("DANGER!") only on the device whose player isn't choosing. The player who picks the die sees it in the normal colours. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+
 ## v2.33 (14 Oct 2026)
 - **Added (early test):** **Two Devices** on the main menu lets you play a friend on another phone, tablet or computer, for exhibition matches. One player taps **Host a game** and gets a room code such as ORC-4821. The other taps Join and types it in. Each picks their own team (a default team or one of their saved teams), then the host taps **Start match**. The host plays the left-hand team, and the host's device runs the match and rolls all the dice. The other device shows the same pitch, panels, log and sounds, and its taps are sent to the host for its own team: moving, blocking, ending the turn, choosing block dice, re-rolls and other questions for that team. Neither player can answer the other's questions. A chip in the top bar shows the connection and its delay. If the other device drops out, the host can tap it to let the computer play their team. Two-device matches aren't saved, and no SPP or injuries are kept. Both devices need an internet connection to find each other. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 

@@ -828,6 +828,7 @@
 #net-lobby #nl-teams { display: flex; flex-direction: column; gap: 8px; } #net-lobby #nl-teams.hidden { display: none; }
 #net-end .ne-text { margin: 0; font-size: 15px; }
 #net-end .ne-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; } #net-end .ne-go { background: #075985; border-color: #38bdf8; }
+.net-theirs { opacity: .35 !important; filter: grayscale(1) !important; cursor: not-allowed !important; }
 #net-chip { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #0284c7; background: rgba(8,47,73,.75); color: #bae6fd; white-space: nowrap; }
 #net-chip.bad { border-color: #e11d48; background: rgba(76,5,25,.8); color: #fecdd3; }
 #whats-new { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.65); display: grid; place-items: center; padding: 16px; font-family: Inter, system-ui, sans-serif; color: #e2e8f0; }
@@ -851,7 +852,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.33</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.34</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -11629,18 +11630,8 @@
             const sub = document.getElementById('dice-subtitle');
             const card = document.getElementById('dice-modal-card');
 
-            let isOpponentChoosing = (chooser !== atk.team);
-            if (isOpponentChoosing) {
-                c.className = 'flex flex-wrap justify-center gap-3 p-3 rounded-lg w-full dice-danger-glow border-2 border-red-500';
-                sub.className = 'text-[11px] font-bold uppercase px-3 py-1 rounded mb-4 bg-red-900 text-red-200 border border-red-500 animate-pulse';
-                sub.textContent = `${ROSTERS[chooser].name.toUpperCase()} CHOOSES (DANGER!)`;
-                card.className = 'bg-slate-900 border-2 border-red-600 rounded-xl p-5 max-w-[400px] w-full shadow-2xl flex flex-col items-center';
-            } else {
-                c.className = 'flex flex-wrap justify-center gap-3 p-3 rounded-lg w-full bg-slate-950/60 border border-slate-700';
-                sub.className = 'text-[11px] font-bold uppercase px-3 py-1 rounded mb-4 bg-slate-800 text-slate-300';
-                sub.textContent = `${ROSTERS[chooser].name.toUpperCase()} CHOOSES`;
-                card.className = 'bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-[400px] w-full shadow-2xl flex flex-col items-center';
-            }
+            // red when it's the other side's choice (in a two-device match: the other device's)
+            paintDiceChooser(chooser, NET.on() ? chooser !== NET.myTeam() : chooser !== atk.team);
             
             state.combat.chooser = chooser;
             let drawDice = function (rolledArray) {
@@ -15737,6 +15728,21 @@
             modal.classList.remove('hidden');
         }
 
+        function paintDiceChooser(chooser, danger) {
+            const c = document.getElementById('dice-container'), sub = document.getElementById('dice-subtitle'), card = document.getElementById('dice-modal-card');
+            if (!c || !sub || !card || !ROSTERS[chooser]) return;
+            if (danger) {
+                c.className = 'flex flex-wrap justify-center gap-3 p-3 rounded-lg w-full dice-danger-glow border-2 border-red-500';
+                sub.className = 'text-[11px] font-bold uppercase px-3 py-1 rounded mb-4 bg-red-900 text-red-200 border border-red-500 animate-pulse';
+                sub.textContent = `${ROSTERS[chooser].name.toUpperCase()} CHOOSES (DANGER!)`;
+                card.className = 'bg-slate-900 border-2 border-red-600 rounded-xl p-5 max-w-[400px] w-full shadow-2xl flex flex-col items-center';
+            } else {
+                c.className = 'flex flex-wrap justify-center gap-3 p-3 rounded-lg w-full bg-slate-950/60 border border-slate-700';
+                sub.className = 'text-[11px] font-bold uppercase px-3 py-1 rounded mb-4 bg-slate-800 text-slate-300';
+                sub.textContent = `${ROSTERS[chooser].name.toUpperCase()} CHOOSES`;
+                card.className = 'bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-[400px] w-full shadow-2xl flex flex-col items-center';
+            }
+        }
         // ---------- Two devices: a match between two people, each on their own phone or computer ----------
         // The host's device plays the real match (every rule and every dice roll). The guest's device draws what the host sends
         // (the match state, the panels on screen, the log and the sounds) and passes the guest's taps back to the host, which
@@ -15959,8 +15965,8 @@
                 if (m.t === 'start') { live = true; shown = false; raw.keys = {}; raw.pl = new Map(); raw.order = []; $('net-lobby').classList.add('hidden'); paintChip(); return; }
                 if (!live) return;
                 if (m.t === 'meta') { applyMeta(m.d); return; }
-                if (m.t === 'snap') { applySnap(m); return; }
-                if (m.t === 'ui') { Object.keys(m.ui).forEach(id => { mirror(id, m.ui[id]); Object.keys(pics).forEach(k => { if (k.startsWith(id + '#')) paintPic(k); }); }); return; }
+                if (m.t === 'snap') { applySnap(m); ownView(); return; }
+                if (m.t === 'ui') { Object.keys(m.ui).forEach(id => { mirror(id, m.ui[id]); Object.keys(pics).forEach(k => { if (k.startsWith(id + '#')) paintPic(k); }); }); ownView(); return; }
                 if (m.t === 'cv') { pics[m.id + '#' + m.i] = m; paintPic(m.id + '#' + m.i); return; }
                 if (m.t === 'log') { applyLog(m); return; }
                 if (m.t === 'sfx') { try { p0(m.k, m.d, m.sz); } catch (e) {} return; }
@@ -16026,6 +16032,23 @@
                 }
                 el.innerHTML = src.innerHTML;
             }
+            // the guest's copy of the block dice panel is red only when the host is choosing
+            function ownView() {
+                const m = $('modal-dice');
+                if (m && !m.classList.contains('hidden') && state.combat && state.combat.chooser != null) paintDiceChooser(state.combat.chooser, state.combat.chooser !== myTeam());
+                greyOut();
+            }
+            // on both devices: the buttons that are the other player's to press are greyed out
+            const THEIRS = '#btn-end-turn, #action-toolbar button, #modal-dice button, #modal-choice button, #modal-roll button, #modal-team-reroll button, #btn-confirm-setup, #event-panel button, #pick-banner button';
+            function greyOut() {
+                const on = live && !!state.players;
+                document.querySelectorAll(THEIRS).forEach(b => {
+                    let t = null; if (on) { try { t = AI.ownerTeam(b); } catch (e) {} if (t == null && b.closest('#modal-dice') && state.combat) t = state.activeTeam; }
+                    const theirs = on && t != null && t !== myTeam();
+                    if (b.classList.contains('net-theirs') !== theirs) b.classList.toggle('net-theirs', theirs);
+                });
+            }
+            setInterval(() => { try { greyOut(); } catch (e) {} }, 150);
             function applyLog(m) {
                 const lg = $('message-log'); if (!lg) return;
                 const atEnd = lg.scrollTop + lg.clientHeight >= lg.scrollHeight - 30;
@@ -16164,6 +16187,7 @@
                 on: () => live,
                 guest: () => role === 'guest' && live,
                 isRemote: t => live && role === 'host' && t === remote(),
+                myTeam,
                 theirTurn: () => live && !!state.players && !state.isGameOver && state.activeTeam !== myTeam(),
                 race: key => (String(key) === 'net:1' ? guestRace : null),
                 debug: () => ({ role, live, code, rtt, link: !!link, guestRace: !!guestRace, bytes, tickMs: Math.round(tickMs * 10) / 10 })
