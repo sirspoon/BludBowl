@@ -787,7 +787,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.07</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.08</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -8865,8 +8865,9 @@
         }
         // Hypnotic Gaze
         function gazeTargets(p) { return state.players.filter(q => q.team !== p.team && standingOn(q) && !q.isDistracted && cheb1(p, q) === 1); }
-        function doGaze(p, q) {
-            let r = d6();
+        function doGaze(p, q, gr) {
+            if (gr == null && !(starIs(p, 'eldril') && starFree(p, 'dance' + state.half))) { state.mode = MODES.LOCKED; teamRerollable(p, 'Hypnotic Gaze', x => x >= 3, x => doGaze(p, q, x)); return; }
+            let r = gr != null ? gr : d6();
             log(`  ${p.name || p.type} fixes ${q.name || q.type} with a HYPNOTIC GAZE (${r}${r >= 3 ? ': it works!' : ': no effect'}).`, r >= 3 ? 'text-violet-300 font-bold' : 'text-slate-300');
             if (r < 3 && starIs(p, 'eldril') && starFree(p, 'dance' + state.half)) { starSpend(p, 'dance' + state.half, 'Mesmerising Dance'); r = d6(); log(`  MESMERISING DANCE! Eldril tries again: ${r}${r >= 3 ? ', it works!' : ', no effect'}.`, 'text-yellow-300 font-bold'); }
             if (r >= 3) { q.isDistracted = true; skillPop('Hypnotic Gaze'); }
@@ -9259,14 +9260,15 @@
             state.mode = MODES.LOCKED;
             payBlitzCost(atk, () => startVomit(atkId, defId));
         }
-        function startVomit(atkId, defId, gated) {
+        function startVomit(atkId, defId, gated, vr) {
             const atk = getPlayerById(atkId), def = getPlayerById(defId);
             state.vomitArmed = false;
             if (!gated && specialGate(atk, def, () => startVomit(atkId, defId, true))) return;
             state.mode = MODES.LOCKED;
             atk.hasBlocked = true; state.vomitArmed = false;
             if (!atk.skills.includes('Projectile Vomit') && atk.skills.includes('Breathe Fire')) { breatheFire(atk, def); return; }
-            const r = d6();
+            if (vr == null) { teamRerollable(atk, 'Projectile Vomit', x => x >= 2, x => startVomit(atkId, defId, true, x)); return; }
+            const r = vr;
             log(`  ${atk.type} uses PROJECTILE VOMIT on ${def.type}! Roll: ${r}`, 'text-lime-400 font-bold');
             sfxVoice('bleugh', atk);
             let backfired = false;
@@ -9287,8 +9289,9 @@
         }
 
         // Breathe Fire: D6 (-1 against ST 5+). 1: the fire-breather is Knocked Down (Turnover); 2-3: nothing; 4+: the target is Placed Prone; a natural 6 Knocks them Down.
-        function breatheFire(atk, def) {
-            const n = d6(), m = def.st >= 5 ? -1 : 0, r = n + m;
+        function breatheFire(atk, def, fr) {
+            if (fr == null) { state.mode = MODES.LOCKED; const m0 = def.st >= 5 ? -1 : 0; teamRerollable(atk, 'Breathe Fire', x => x + m0 >= 4, x => breatheFire(atk, def, x)); return; }
+            const n = fr, m = def.st >= 5 ? -1 : 0, r = n + m;
             log(`  ${atk.type} BREATHES FIRE at ${def.type}! Roll: ${n}${m ? ' -1 (ST 5+)' : ''}`, 'text-orange-400 font-bold');
             skillPop('Breathe Fire'); sfx('fire');
             atk.hasActed = true; atk.remainingMA = 0; atk.rushes = 0; atk.actionTaken = null; state.mode = MODES.IDLE;
@@ -11072,24 +11075,34 @@
         }
 
         // Foul Appearance: before blocking (or a special action on) this player, roll a D6 - a 1 and the action is lost
-        function foulAppearanceStops(atk, def) {
+        // (true means it has taken over: the action is lost, or it's waiting on a team re-roll answer and will call again() if it then passes)
+        function foulAppearanceStops(atk, def, again) {
             if (!def || !def.skills.includes('Foul Appearance') || def.team === atk.team) return false;
-            const r = d6();
-            if (r > 1) { log(`  Foul Appearance: ${atk.type} rolls ${r} and steels themselves.`, 'text-slate-400'); return false; }
-            log(`  FOUL APPEARANCE! ${atk.type} rolls a 1 and can't bring themselves to touch ${def.type}. The activation ends.`, 'text-rose-300 font-bold'); skillPop('Foul Appearance');
-            atk.hasActed = true; atk.remainingMA = 0; atk.rushes = 0; atk.actionTaken = null; state.mode = MODES.IDLE; refreshSelection(atk);
-            return true;
+            if (atk.faOk === def.id) { atk.faOk = null; return false; }   // already passed, after a re-roll
+            let sync = true, res = null;
+            teamRerollable(atk, 'Foul Appearance', x => x > 1, r => {
+                if (r > 1) {
+                    log(`  Foul Appearance: ${atk.type} rolls ${r} and steels themselves.`, 'text-slate-400');
+                    if (sync) res = false; else { atk.faOk = def.id; if (again) again(); }
+                    return;
+                }
+                log(`  FOUL APPEARANCE! ${atk.type} rolls a 1 and can't bring themselves to touch ${def.type}. The activation ends.`, 'text-rose-300 font-bold'); skillPop('Foul Appearance');
+                atk.hasActed = true; atk.remainingMA = 0; atk.rushes = 0; atk.actionTaken = null; state.mode = MODES.IDLE; refreshSelection(atk);
+                res = true;
+            });
+            sync = false;
+            return res === null ? true : res;
         }
         function initBlock(atkId, defId) {
             const atk = getPlayerById(atkId), second = state.mbPick && state.mbPick.atkId === atkId;
             if (second && defId === state.mbPick.first) return;
-            if (!state.mbQueue && foulAppearanceStops(atk, getPlayerById(defId))) { if (second) state.mbPick = null; return; }
+            if (!state.mbQueue && foulAppearanceStops(atk, getPlayerById(defId), () => initBlock(atkId, defId))) { if (second && atk.hasActed) state.mbPick = null; return; }
             if (!state.mbQueue && dumpOffFirst(atk, getPlayerById(defId), () => initBlock2(atkId, defId))) return;
             initBlock2(atkId, defId);
         }
         // before a Special Action aimed at a player: their Foul Appearance, then their Dump-off. True if that takes over the flow.
         function specialGate(atk, def, again) {
-            if (foulAppearanceStops(atk, def)) return true;
+            if (foulAppearanceStops(atk, def, () => { if (!dumpOffFirst(atk, def, again)) again(); })) return true;
             return dumpOffFirst(atk, def, again);
         }
         // Dump-off: a ball carrier about to be blocked may first make a Quick Pass (no Turnover either way)
@@ -14445,9 +14458,10 @@
             state.mode = MODES.ACTION_CHOMP;
             updateValidActions(p);
         };
-        function doChomp(atk, def, gated) {
+        function doChomp(atk, def, gated, cr) {
             if (!gated && specialGate(atk, def, () => doChomp(atk, def, true))) return;
-            const r = d6();
+            if (cr == null) { state.mode = MODES.LOCKED; teamRerollable(atk, 'Chomp', x => x >= 3, x => doChomp(atk, def, true, x)); return; }
+            const r = cr;
             if (r >= 3) { def.chompedBy = atk.id; log(`  CHOMP! ${atk.type} (rolled ${r}) clamps onto ${def.type}: they can't leave their square while ${atk.type} marks them.`, 'text-rose-300 font-bold'); skillPop('Monstrous Mouth'); sfx('blockHit'); }
             else log(`  ${atk.type} snaps at ${def.type} and misses (rolled ${r}).`, 'text-slate-400');
             atk.remainingMA = 0; atk.rushes = 0; atk.hasActed = true; atk.actionTaken = null; state.mode = MODES.IDLE; refreshSelection(atk);

@@ -2,10 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.08 (14 Oct 2026)
+- **Added:** a failed Foul Appearance, Projectile Vomit, Breathe Fire, Hypnotic Gaze or Chomp (Monstrous Mouth) roll now offers a team re-roll too. If a re-rolled Foul Appearance passes, the block or special action carries on. ([#29](https://github.com/sirspoon/BludBowl/issues/29))
+
 ## v2.07 (14 Oct 2026)
 - **Added:** ▲ and ▼ buttons on each player in the Team Builder roster to move them up or down, and a **Positionals first** button that puts the most expensive positions at the top and Linemen at the bottom. ([#2](https://github.com/sirspoon/BludBowl/issues/2))
 - **Added:** a failed Dauntless, Bone Head, Really Stupid, Animal Savagery, Unchannelled Fury, Bloodlust or Take Root roll now offers a team re-roll if you have one left. ([#29](https://github.com/sirspoon/BludBowl/issues/29))
-- **Changed:** you can now use more than one team re-roll in a turn, as long as each one is on a different roll. The computer still uses at most one a turn. ([#20](https://github.com/sirspoon/BludBowl/issues/20))
+- **Changed:** you can now use more than one team re-roll in a turn, as long as each one is on a different roll (the 2025 rules). The computer still uses at most one a turn. ([#20](https://github.com/sirspoon/BludBowl/issues/20))
 
 ## v2.06 (14 Oct 2026)
 - **Added:** each weather now shows on the pitch. Blizzard has snow drifts and falling snow, Pouring Rain has wet grass, puddles and rain, Very Sunny has brighter grass and moving beams of light, Sweltering Heat has an orange glow and a heat shimmer, and Perfect Conditions has the odd cloud shadow. When the weather changes mid-match, the new weather blends in. ([#23](https://github.com/sirspoon/BludBowl/issues/23))
