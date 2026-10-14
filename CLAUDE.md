@@ -17,3 +17,9 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
   open: the owner checks the fix on the live site and closes it themselves.
 - Use the GitHub REST API (`gh api repos/sirspoon/BludBowl/...`) for issues;
   `gh issue list` and other GraphQL-based commands are blocked in cloud sessions.
+
+## Rules
+- The game follows the Blood Bowl 2025 (Third Season) rules. The owner uses
+  https://bloodbowlbase.ru/bb2025/ as the reference (e.g. `core_rules/league_play/`,
+  `core_rules/rules_and_regulations/`). The WebFetch tool can't reach it, but `curl` from
+  the shell can: fetch the page and strip the HTML to read it.
