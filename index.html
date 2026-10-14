@@ -886,7 +886,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.49</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.50</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -8187,6 +8187,7 @@
         }
 
         function checkTouchdown() {
+            releaseBlock();
             if (!state.ball.carrierId) return false;
             let carrier = getPlayerById(state.ball.carrierId);
             
@@ -10709,9 +10710,38 @@
             if (window.FAST_ANIM || !p || (tx === p.x && ty === p.y)) return;
             p.bumpAnim = { tx, ty, amp, t0: performance.now() + delay, dur };
         }
-        function blockClashOnPitch(atk, def) {
-            pitchBump(atk, def.x, def.y, 0.32);                                         // in at them…
-            pitchBump(def, def.x + (def.x - atk.x), def.y + (def.y - atk.y), 0.16, 110);   // …and they rock back
+        function blockClashOnPitch(atk, def, delay = 0) {
+            pitchBump(atk, def.x, def.y, 0.32, delay);                                         // in at them…
+            pitchBump(def, def.x + (def.x - atk.x), def.y + (def.y - atk.y), 0.16, delay + 110);   // …and they rock back
+        }
+        // While a block's choices are made (push squares, Stand Firm, Taunt, following up), the players in it stay where they
+        // were on the pitch; once the last choice is made it all plays out in one go: the clash, the slides, then the falls.
+        function holdBlock(atk, def) {
+            if (window.FAST_ANIM || !atk || !def) { state.blockHold = null; return; }
+            state.blockHold = { pos: {}, atk: atk.id, def: def.id, ax: atk.x, ay: atk.y, dx: def.x, dy: def.y };
+            holdPlayer(atk); holdPlayer(def);
+        }
+        function holdPlayer(p) {   // (a player shoved in a chain push joins in)
+            const H = state.blockHold; if (!H || !p || H.pos[p.id]) return;
+            H.pos[p.id] = { x: p.x, y: p.y, down: !!p.isDown };
+        }
+        function releaseBlock() {
+            const H = state.blockHold; if (!H) return;
+            state.blockHold = null;
+            const now = performance.now(), CLASH = 280, SLIDE = 300;
+            const atk = getPlayerById(H.atk), def = getPlayerById(H.def);
+            // the clash, between where they stood
+            if (atk) atk.bumpAnim = { tx: H.dx, ty: H.dy, amp: 0.32, t0: now, dur: 300, fromX: H.ax, fromY: H.ay };
+            if (def) def.bumpAnim = { tx: H.dx + (H.dx - H.ax), ty: H.dy + (H.dy - H.ay), amp: 0.16, t0: now + 110, dur: 300, fromX: H.dx, fromY: H.dy };
+            let moved = false;
+            Object.keys(H.pos).forEach(id => {
+                const p = getPlayerById(+id), was = H.pos[id]; if (!p) return;
+                if (p.x !== was.x || p.y !== was.y) {
+                    moved = true;
+                    if (p.x >= 0 && p.x < CFG.cols && p.y >= 0 && p.y < CFG.rows) p.walkAnim = { fx: was.x, fy: was.y, t0: now + CLASH, dur: SLIDE, ease: k => 1 - (1 - k) * (1 - k), keep: true };
+                }
+                p.fallAt = now + CLASH + (moved ? SLIDE : 60);   // anyone knocked down topples once they've arrived
+            });
         }
         function slideTo(p, fx, fy, ms = 300) {   // p has already been moved: draw them sliding there from (fx, fy)
             if (window.FAST_ANIM || !p || fx == null || (fx === p.x && fy === p.y)) return;
@@ -10721,23 +10751,29 @@
         function withBump(p, pos) {
             const b = p.bumpAnim; if (!b) return pos;
             const k = (performance.now() - b.t0) / b.dur;
-            if (k < 0) return pos;
-            if (k >= 1) { p.bumpAnim = null; return pos; }
-            const dx = b.tx - p.x, dy = b.ty - p.y, L = Math.hypot(dx, dy) || 1, d = Math.sin(Math.PI * k) * b.amp;
+            if (k < 0 || k >= 1) { if (k >= 1) p.bumpAnim = null; return pos; }
+            if (b.fromX != null && p.walkAnim && performance.now() < p.walkAnim.t0) pos = { x: b.fromX, y: b.fromY };   // (still at the start of their slide)
+            const ox = b.fromX != null ? b.fromX : p.x, oy = b.fromY != null ? b.fromY : p.y;
+            const dx = b.tx - ox, dy = b.ty - oy, L = Math.hypot(dx, dy) || 1, d = Math.sin(Math.PI * k) * b.amp;
             return { x: pos.x + dx / L * d, y: pos.y + dy / L * d };
         }
         // falling over (and getting back up): how far round a player is, 0 standing to 1 lying down, eased over a moment
         const fallSeen = new Map();   // player id -> { down, t }
         function fallTurn(p) {
-            const now = performance.now(), down = !!p.isDown, f = fallSeen.get(p.id);
+            const H = state.blockHold, h = H && H.pos[p.id];
+            const now = performance.now(), down = h ? h.down : !!p.isDown, f = fallSeen.get(p.id);
             if (!f || window.FAST_ANIM) { fallSeen.set(p.id, { down, t: -1e9 }); return down ? 1 : 0; }
-            if (f.down !== down) { f.down = down; f.t = now; }
+            if (f.down !== down) { f.down = down; f.t = Math.max(now, p.fallAt && p.fallAt - now < 3000 ? p.fallAt : now); }
             const k = Math.max(0, Math.min(1, (now - f.t) / (down ? 280 : 220)));
             const e = down ? k * k * (2.2 - 1.2 * k) : 1 - (1 - k) * (1 - k);   // a fall picks up speed (with a little bounce at the end); getting up eases out
             return down ? Math.min(1.06, e) : 1 - e;
         }
         // where to draw a player: part-way between squares while walking (or sliding after a push)
-        function drawPos(p) { return withBump(p, drawPos0(p)); }
+        function drawPos(p) {
+            const H = state.blockHold, h = H && H.pos[p.id];
+            if (h) { if (!state.combat) releaseBlock(); else return { x: h.x, y: h.y }; }   // (held while the block's choices are made)
+            return withBump(p, drawPos0(p));
+        }
         function drawPos0(p) {
             const f = p.foulAnim;
             if (f) {
@@ -12791,7 +12827,7 @@
                     break;
             }
             state.combat.atkDown = atkDown; state.combat.defDown = defDown;
-            blockClashOnPitch(atk, def);
+            holdBlock(atk, def);
 
             if(push) {
                 state.combat.vacatedSquare = { x: def.x, y: def.y };
@@ -12802,6 +12838,7 @@
         }
 
         function finalizeBlock() {
+            releaseBlock();
             let { atk, def, atkDown, defDown } = state.combat;
 
             if (state.combat.placedProne) { // Wrestle: both players are Placed Prone (no armour rolls, no Turnover)
@@ -14938,6 +14975,7 @@
                     let occupant = isCrowd ? null : getPlayer(s.x, s.y);
 
                     if (occupant) {
+                        holdPlayer(occupant);
                         pushed.x = s.x; pushed.y = s.y; slideTo(pushed, fromX, fromY);
                         if (state.ball.carrierId === pushed.id) { state.ball.x = s.x; state.ball.y = s.y; }
                         log(`   ${pushed.type} chain-pushes ${occupant.type}!`, 'text-yellow-300 font-bold');

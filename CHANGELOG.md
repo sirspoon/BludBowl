@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.50 (14 Oct 2026)
+- **Changed:** a block now plays out on the pitch in one go, once every choice has been made. While the push square, Stand Firm, Taunt and following up are being chosen, the players stay where they were. Then the attacker lunges in and the defender rocks back, everyone pushed (and the attacker, if they follow up) slides to their new square, and anyone knocked down topples over once they've arrived. Before, the lunge came first, then pauses while things were chosen, then players moved one at a time.
+
 ## v2.49 (14 Oct 2026)
 - **Changed:** players now topple over when they're knocked down or fall, turning onto their side over about a quarter of a second instead of snapping flat. Standing back up turns them upright the same way. With Animations set to Quick, they still change straight away.
 
