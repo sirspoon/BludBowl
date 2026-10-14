@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.15 (14 Oct 2026)
+- **Changed:** the camera now follows the action when it's off screen: the ball in the air (so a kick-off is followed to where it lands, as are passes and bounces), a player setting off on a move, both players in a block, and the ball at the start of each turn. It only moves when something is actually out of view, never zooms in, and leaves the camera alone for a few seconds after you've dragged or zoomed it yourself. ([#24](https://github.com/sirspoon/BludBowl/issues/24))
+
 ## v2.14 (14 Oct 2026)
 - **Changed:** a Journeyman you hire after a match (and a player Raised from the dead who joins) now gets a proper random name for their race instead of keeping "Journeyman 1". A name you've already changed is kept. ([#10](https://github.com/sirspoon/BludBowl/issues/10))
 

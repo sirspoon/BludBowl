@@ -794,7 +794,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.14</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.15</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6398,6 +6398,7 @@
 
         function animateBallFlight(startX, startY, endX, endY, duration, onComplete, isArc = true) {
             const ts = CFG.tileSize;
+            followAction([{ x: startX, y: startY }, { x: endX, y: endY }], Math.max(250, Math.min(600, duration * 0.6)));
             state.ballAnimation = {
                 active: true,
                 startX: startX * ts + ts / 2,
@@ -7732,6 +7733,10 @@
             turnBannerTimer = setTimeout(() => el.classList.add('hidden'), 1900);
         }
         function startTurnPhase() {
+            {   // bring the ball into view as a turn starts
+                const c = state.ball && state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                followAction([c || (state.ball ? { x: state.ball.x, y: state.ball.y } : null)]);
+            }
             state.puntUsed = false; state.hailArmed = false; state.fumbleArmed = null;
             if (state.leaderRR && state.leaderRR.some(Boolean)) leaderCheck();
             state.turnActed = false;
@@ -9776,6 +9781,7 @@
 
         function startPath(player, path) {
             state.jumpArmed = false;
+            followAction([player, path && path[path.length - 1]]);
             state.pathData = { path, stepIndex: 0, drive: state.driveId || 0, pid: player.id, team: state.activeTeam, turn: state.turn[state.activeTeam] };
             processNextStep(player);
         }
@@ -11289,6 +11295,7 @@
             }
             { const a = getPlayerById(atkId); if (a) MATCH.note('blocks', a.team); }
             const atk = getPlayerById(atkId), def = getPlayerById(defId);
+            followAction([atk, def], 350);
             state.mode = MODES.LOCKED;
             
             if(atk.actionTaken === 'blitz') { 
@@ -13812,13 +13819,40 @@
             const r = canvas.getBoundingClientRect();
             return { gridX: Math.floor((x-r.left-state.camera.x)/(CFG.tileSize*state.camera.zoom)), gridY: Math.floor((y-r.top-state.camera.y)/(CFG.tileSize*state.camera.zoom)) };
         }
-        function adjustZoom(delta, focusX, focusY) {
+        function adjustZoom(delta, focusX, focusY) { camUserAt = performance.now();
             const r = canvas.getBoundingClientRect(); const msx = focusX - r.left, msy = focusY - r.top;
             const wx = (msx - state.camera.x)/state.camera.zoom, wy = (msy - state.camera.y)/state.camera.zoom;
             state.camera.zoom = Math.max(0.4, Math.min(3, state.camera.zoom * delta));
             state.camera.x = msx - wx * state.camera.zoom; state.camera.y = msy - wy * state.camera.zoom;
         }
 
+        // Follow the action for the coach: when the given squares (the ball, a mover and where they're going, a block) aren't on
+        // screen, glide them into view. It never zooms in (only out, if they wouldn't otherwise fit), keeps as much pitch on screen
+        // as it can, and leaves the camera alone for a few seconds after the coach has dragged or zoomed it themselves.
+        let camUserAt = 0;
+        function followAction(cells, ms = 500) {
+            cells = cells.filter(c => c && c.x != null && c.x >= 0 && c.x < CFG.cols && c.y >= 0 && c.y < CFG.rows);
+            if (!cells.length || state.drag.active || performance.now() - camUserAt < 3000) return;
+            const W = window.innerWidth, H = window.innerHeight, ts = CFG.tileSize, cam = state.camera;
+            const L = W * 0.03, R = W * 0.97, T = H * 0.1, B = H * 0.9;   // clear of the top bar and the bottom panels
+            const xs = cells.map(c => (c.x + 0.5) * ts), ys = cells.map(c => (c.y + 0.5) * ts);
+            const minX = Math.min(...xs) - ts * 0.4, maxX = Math.max(...xs) + ts * 0.4, minY = Math.min(...ys) - ts * 0.4, maxY = Math.max(...ys) + ts * 0.4;
+            const seen = (wx, wy) => { const sx = cam.x + wx * cam.zoom, sy = cam.y + wy * cam.zoom; return sx >= L && sx <= R && sy >= T && sy <= B; };
+            if (seen(minX, minY) && seen(maxX, maxY)) return;   // already in view: leave it
+            const z = Math.max(0.4, Math.min(cam.zoom, (R - L) / (maxX - minX), (B - T) / (maxY - minY)));
+            let x = (L + R) / 2 - (minX + maxX) / 2 * z, y = (T + B) / 2 - (minY + maxY) / 2 * z;
+            const pw = CFG.cols * ts * z, ph = CFG.rows * ts * z;   // don't slide the pitch further than needed
+            x = pw <= R - L ? (W - pw) / 2 : Math.min(L, Math.max(R - pw, x));
+            y = ph <= B - T ? (T + B - ph) / 2 : Math.min(T, Math.max(B - ph, y));
+            const from = { zoom: cam.zoom, x: cam.x, y: cam.y }, to = { zoom: z, x, y }, t0 = performance.now(), id = {}; camTween = id;
+            const step = () => {
+                if (camTween !== id || state.drag.active) return;
+                const k = Math.min(1, (performance.now() - t0) / ms), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+                cam.zoom = from.zoom + (to.zoom - from.zoom) * e; cam.x = from.x + (to.x - from.x) * e; cam.y = from.y + (to.y - from.y) * e;
+                if (k < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        }
         // Smoothly pan (and if needed zoom in) so the given squares are comfortably on screen. Used when the computer acts.
         let camTween = null;
         function cameraFocus(cells, ms = 450) {
@@ -13876,7 +13910,7 @@
             });
         }
         window.addEventListener('mousemove', e => {
-            if(!state.drag.active) return; state.camera.x += e.clientX - state.drag.startX; state.camera.y += e.clientY - state.drag.startY;
+            if(!state.drag.active) return; if (e.clientX !== state.drag.startX || e.clientY !== state.drag.startY) camUserAt = performance.now(); state.camera.x += e.clientX - state.drag.startX; state.camera.y += e.clientY - state.drag.startY;
             state.drag.startX = e.clientX; state.drag.startY = e.clientY;
         });
 
@@ -13887,7 +13921,7 @@
         });
         canvas.addEventListener('touchmove', e => {
             if(state.drag.active && e.touches.length===1) {
-                state.camera.x += e.touches[0].clientX - state.drag.startX; state.camera.y += e.touches[0].clientY - state.drag.startY;
+                camUserAt = performance.now(); state.camera.x += e.touches[0].clientX - state.drag.startX; state.camera.y += e.touches[0].clientY - state.drag.startY;
                 state.drag.startX = e.touches[0].clientX; state.drag.startY = e.touches[0].clientY;
             } else if(e.touches.length===2 && touchDist) {
                 let d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
