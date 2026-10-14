@@ -885,7 +885,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.45</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.46</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -16752,12 +16752,17 @@
                 let el = $('net-wait');
                 const vis = id => { const e = $(id); return !!e && !e.classList.contains('hidden'); };
                 let who = null, text = '';
-                if (live && state.players && !state.isGameOver && state.live !== false) {
+                // against the computer on one device: the same banner, for the computer's side (not when it plays both, or nobody does)
+                const vsCpu = !live && !!state.players && state.live && !state.isGameOver && AI.isStarted() && AI.isAI(0) !== AI.isAI(1);
+                const me = live ? myTeam() : AI.isAI(0) ? 1 : 0;
+                const covered = ['modal-announce', 'modal-lineup', 'match-summary', 'post-game'].some(vis);   // (a big announcement already says whose turn it is)
+                if ((live || vsCpu) && !covered && state.players && !state.isGameOver && state.live !== false) {
                     if (vis('modal-dice') && state.combat && state.combat.chooser != null) who = state.combat.chooser;
                     else if (vis('modal-choice') && state.choice && state.choice.team != null) who = state.choice.team;
                     else if (vis('modal-roll') && state.pendingRoll && state.pendingRoll.player) who = state.pendingRoll.player.team;
                     else { try { who = AI.decider(); } catch (e) { who = state.activeTeam; } }
-                    if (who != null && who !== myTeam()) { const n = oppName ? (oppName.length > 14 ? oppName.slice(0, 13) + '…' : oppName) : ''; text = who === state.activeTeam && who === AI.decider() ? (n ? `${n}'s turn` : "Opponent's turn") : `${n || 'Opponent'} is choosing…`; }
+                    if (who != null && who !== me && !live) text = who === state.activeTeam && who === AI.decider() ? "Computer's turn" : 'Computer is choosing…';
+                    else if (who != null && who !== me) { const n = oppName ? (oppName.length > 14 ? oppName.slice(0, 13) + '…' : oppName) : ''; text = who === state.activeTeam && who === AI.decider() ? (n ? `${n}'s turn` : "Opponent's turn") : `${n || 'Opponent'} is choosing…`; }
                 }
                 if (!text) { if (el) el.classList.add('hidden'); return; }
                 if (!el) { el = document.createElement('div'); el.id = 'net-wait'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }

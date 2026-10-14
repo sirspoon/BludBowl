@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.46 (14 Oct 2026)
+- **Added:** against the computer, the faint pulsing waiting banner now shows too: **Computer's turn** during its turn and set-up, and **Computer is choosing…** when it has a choice to make during yours (such as picking the block dice). It doesn't show when the computer plays both teams, or when two people share one device.
+- **Changed:** the waiting banner (in two-device matches too) is hidden while a big announcement such as "ORCS SETUP" is on screen, which already says whose turn it is.
+
 ## v2.45 (14 Oct 2026)
 - **Added:** in a shared league, the commissioner can settle a match a player hasn't played. Each unplayed match in the current round that involves another player's team has a **Resolve…** button on the commissioner's device. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
   - **Against a computer team:** after a warning, **Sim it now** quick-sims the match, with the computer coaching the player's team. The sim's SPP, injuries and winnings go on both teams.
