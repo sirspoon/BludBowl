@@ -825,7 +825,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.25</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.26</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -12063,6 +12063,74 @@
             }
             c.restore();
         }
+        // The clash scene's backdrop, made to match the pitch being played on: its floor is a strip of the real pitch texture,
+        // the sky takes the pitch's own colour, and behind the players stands that pitch's scenery (stands, a wall, a temple,
+        // a graveyard). Built once per pitch and size, then just copied every frame.
+        let clashBg = { key: '', cv: null };
+        function clashBackdrop(W, H, ground) {
+            const tex = PITCH.tex, style = PITCH.style || 'blades', key = [style, PITCH.seed, W, H, !!tex].join('|');
+            if (clashBg.key === key && clashBg.cv) return clashBg.cv;
+            const cv = document.createElement('canvas'), dpr = window.devicePixelRatio || 1;
+            cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+            const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+            // the pitch's average colour
+            let base = [47, 107, 42];
+            if (tex) { try { const s1 = document.createElement('canvas'); s1.width = s1.height = 8; const sc = s1.getContext('2d'); sc.drawImage(tex, 0, 0, 8, 8); const d = sc.getImageData(0, 0, 8, 8).data; let r = 0, gg = 0, b = 0; for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; base = [r / n, gg / n, b / n].map(Math.round); } catch (e) {} }
+            const mix = (a, k) => `rgb(${Math.round(a[0] * k + 11 * (1 - k))},${Math.round(a[1] * k + 15 * (1 - k))},${Math.round(a[2] * k + 25 * (1 - k))})`;   // towards the night sky
+            const sky = g.createLinearGradient(0, 0, 0, ground);
+            sky.addColorStop(0, mix(base, 0.18)); sky.addColorStop(1, mix(base, 0.5));
+            g.fillStyle = sky; g.fillRect(0, 0, W, H);
+            // scenery, as a dark silhouette in the pitch's colour
+            const sil = mix(base, style === 'graveyard' ? 0.06 : 0.3), sil2 = mix(base, 0.42), hz = ground - 22;   // hz: where the floor starts
+            g.fillStyle = sil;
+            if (style === 'graveyard') {
+                for (let i = 0; i < 9; i++) {   // headstones and crosses
+                    const x = 12 + i * (W - 24) / 8 + ((i * 37) % 11) - 5, w = 9 + (i % 3) * 3, h = 14 + (i * 13) % 12;
+                    if (i % 3 === 1) { g.fillRect(x - 1.5, hz - h - 6, 3, h + 6); g.fillRect(x - 6, hz - h, 12, 3); }
+                    else { g.beginPath(); g.moveTo(x - w / 2, hz); g.lineTo(x - w / 2, hz - h + w / 2); g.arc(x, hz - h + w / 2, w / 2, Math.PI, 0); g.lineTo(x + w / 2, hz); g.fill(); }
+                }
+                g.strokeStyle = sil; g.lineWidth = 3;   // a bare tree
+                const tx = W * 0.86; g.beginPath(); g.moveTo(tx, hz); g.lineTo(tx, hz - 52); g.moveTo(tx, hz - 32); g.lineTo(tx - 18, hz - 50); g.moveTo(tx, hz - 42); g.lineTo(tx + 16, hz - 58); g.moveTo(tx - 9, hz - 41); g.lineTo(tx - 16, hz - 62); g.stroke();
+                g.fillStyle = 'rgba(226,232,240,0.55)'; g.beginPath(); g.arc(W * 0.12, 18, 9, 0, 7); g.fill();   // the moon
+            } else if (style === 'jungle') {
+                g.fillStyle = sil2;   // a stepped temple in the distance
+                for (let k = 0; k < 5; k++) { const w = 110 - k * 18; g.fillRect(W * 0.5 - w / 2, hz - 10 - k * 10, w, 11); }
+                g.fillStyle = sil;
+                for (let i = 0; i < 14; i++) {   // hanging vines and leaves from the top
+                    const x = (i + 0.5) * W / 14, len = 18 + (i * 29) % 34;
+                    g.fillRect(x - 1, 0, 2, len);
+                    g.beginPath(); g.ellipse(x, len, 6, 3.5, (i % 2 ? 0.6 : -0.6), 0, 7); g.fill();
+                }
+                for (let i = 0; i < 7; i++) { g.beginPath(); g.ellipse((i + 0.5) * W / 7, hz + 2, 26, 12, 0, Math.PI, 0); g.fill(); }   // undergrowth
+            } else if (style === 'flagstone') {
+                g.fillStyle = sil;   // a stone wall
+                g.fillRect(0, hz - 38, W, 38);
+                g.strokeStyle = mix(base, 0.18); g.lineWidth = 1.5;
+                for (let r = 0; r < 4; r++) { const y = hz - 38 + r * 9.5; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+                    for (let x = (r % 2) * 14; x < W; x += 28) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 9.5); g.stroke(); } }
+                g.fillStyle = sil2; for (let x = 6; x < W; x += 26) g.fillRect(x, hz - 46, 14, 8);   // battlements
+            } else {   // grass and muddy grass: a grandstand full of fans, under the floodlights
+                g.fillStyle = sil; g.beginPath(); g.moveTo(0, hz); g.lineTo(0, hz - 30); g.lineTo(W, hz - 44); g.lineTo(W, hz); g.fill();
+                for (let i = 0; i < 70; i++) {   // heads in the crowd
+                    const x = (i * 53) % W, y = hz - 6 - ((i * 31) % 26) * (0.55 + 0.45 * x / W);
+                    g.fillStyle = i % 4 ? sil2 : mix(base, 0.55); g.beginPath(); g.arc(x, y, 2.4, 0, 7); g.fill();
+                }
+                [[W * 0.08, 0.9], [W * 0.92, 1]].forEach(([x, k]) => {   // floodlights
+                    g.fillStyle = sil; g.fillRect(x - 1.5, 10, 3, hz - 40);
+                    const fl = g.createRadialGradient(x, 10, 1, x, 10, 24 * k); fl.addColorStop(0, 'rgba(255,248,220,0.5)'); fl.addColorStop(1, 'rgba(255,248,220,0)');
+                    g.fillStyle = fl; g.fillRect(x - 26, -16, 52, 52);
+                });
+            }
+            // the floor: a strip of the real pitch, a little darker towards the back
+            if (tex) {
+                const sw = Math.min(tex.width * 0.3, tex.height * (W / (H - hz)) * 0.55), sx0 = tex.width * 0.12, sh = sw * (H - hz) / W;   // (from one side, clear of the halfway line)
+                g.drawImage(tex, sx0, tex.height * 0.5 - sh / 2, sw, sh, 0, hz, W, H - hz);
+            } else { g.fillStyle = mix(base, 1); g.fillRect(0, hz, W, H - hz); }
+            const fade = g.createLinearGradient(0, hz, 0, H); fade.addColorStop(0, 'rgba(0,0,0,0.45)'); fade.addColorStop(0.5, 'rgba(0,0,0,0.12)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
+            g.fillStyle = fade; g.fillRect(0, hz, W, H - hz);
+            clashBg = { key, cv };
+            return cv;
+        }
         function clashDraw() {
             const cv = document.getElementById('clash-cv'), modal = document.getElementById('modal-dice');
             if (!cv || modal.classList.contains('hidden') || !clash.atk) { if (clash.done) { const d = clash.done; clash.done = null; d(); } return; }
@@ -12077,9 +12145,9 @@
             let sx = 0, sy = 0;
             if (t > CLASH_IN && t < CLASH_IN + 220) { const k = 1 - (t - CLASH_IN) / 220; sx = (Math.random() - 0.5) * 10 * k; sy = (Math.random() - 0.5) * 8 * k; }
             c.save(); c.translate(sx, sy);
-            // backdrop: the pitch, dark at the edges
-            const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1e293b'); g.addColorStop(0.62, '#1f3b2a'); g.addColorStop(1, '#2f6b2a');
-            c.fillStyle = g; c.fillRect(-12, -12, W + 24, H + 24);
+            // backdrop: the pitch being played on, its colours and its scenery
+            c.fillStyle = '#0b0f19'; c.fillRect(-12, -12, W + 24, H + 24);
+            c.drawImage(clashBackdrop(W, H, ground), -8, -8, W + 16, H + 16);
             c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(-12, ground - 4, W + 24, 1);
             // anime speed lines streaming past the attacker (thicker and faster as he charges in)
             const charging = t >= 0 && t < CLASH_IN;
