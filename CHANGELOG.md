@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.32 (14 Oct 2026)
+- **Added:** a new **High Elven** pitch. It has lush, neatly striped emerald grass, white-and-gold lines and an elven circle inlaid at the centre. Choose it in Settings or before a match; with Pitch set to Home Team, High Elves now play at home on it. Its block clash backdrop is an elven stadium: tiers of white marble with arches and a crowd, slender white towers with pointed roofs and pennants (a great tower over the halfway line), and snowy peaks and waterfalls beyond. This replaces the elven valley from v2.31, so grass pitches show the normal stadium again.
+
 ## v2.31 (14 Oct 2026)
 - **Added:** when High Elves are the home team on a grass pitch, the block clash backdrop becomes an elven valley: a soft golden sky, snowy mountains, waterfalls down the cliffs, slender white towers with pointed roofs and an arched bridge, mist and pale trees. Other home teams keep the stadium.
 
