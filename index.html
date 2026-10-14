@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.54</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.55</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -11611,7 +11611,7 @@
                 // the thrown player then Bounces from that square and Falls Over - crashing again if that square is taken too
                 state.ttmCrash = state.ttmCrash || { ownMate: false, hadBall: state.ball.carrierId === thrown.id };
                 if (occupant.team === thrown.team) state.ttmCrash.ownMate = true;
-                log(`  SQUASH! ${thrown.type} crash lands on ${occupant.type}!`, 'text-red-500 font-bold text-sm'); REPLAY.set('crash', { on: occupant.id }, true);
+                log(`  SQUASH! ${thrown.type} crash lands on ${occupant.type}!`, 'text-red-500 font-bold text-sm'); { const rc = REPLAY.get(); if (rc && rc.kind === 'ttm') (rc.crashes = rc.crashes || []).push({ on: occupant.id }); }   // (a bounce can crash onto someone else too)
                 occupant.isDown = true; occupant.isStunned = false;
                 if (state.ball.carrierId === occupant.id) dropBall(occupant);
                 harm({ kind: 'squashed', by: thrown }, () => checkArmor(occupant, null, thrown.skills.includes('Lethal Flight') && occupant.team !== thrown.team && !state.ttmKick ? { flex: 1, flexName: 'Lethal Flight', cause: thrown } : {}));
@@ -11622,7 +11622,7 @@
                 holdFlight(thrown, targetX, targetY, 600, () => {
                     animatePlayerFlight(thrown, targetX, targetY, sx, sy, 700, () => {
                         if (state.ttmMarks) state.ttmMarks.hops.push({ x: sx, y: sy, bounce: true });
-                        { const rc = REPLAY.get(); if (rc && rc.crash && !rc.crash.to) rc.crash.to = { x: sx, y: sy }; }
+                        { const rc = REPLAY.get(), c = rc && rc.crashes && rc.crashes[rc.crashes.length - 1]; if (c && !c.to) c.to = { x: sx, y: sy }; }
                         if (sx < 0 || sx >= CFG.cols || sy < 0 || sy >= CFG.rows || getPlayer(sx, sy)) { resolveTTMLanding(thrown, sx, sy, isAccurate); return; }
                         const crash = state.ttmCrash; state.ttmCrash = null;
                         thrown.x = sx; thrown.y = sy; thrown.isDown = true;
@@ -16241,7 +16241,8 @@
                 if (r.ball) { ball.on = true; ball.holder = Hf; }
                 camTo(1000, behind);
                 add(450, u => { const e = ease(u); put(Hf, lerp(start.x, from.x + L.dir.x * 0.2, e), lerp(start.y, from.y + L.dir.y * 0.2, e)); Hf.z = 1.1 * e; Hf.lean = -0.4 * e; Hf.down = false; });   // the thrower picks them up
-                const upright = r.landed === true && !r.crash && !r.out, L2 = lineOf(from, land);
+                const crashes = r.crashes || [], outFirst = r.out && !crashes.length;   // straight into the crowd, or only after bouncing off someone
+                const upright = r.landed === true && !crashes.length && !r.out, L2 = lineOf(from, land);
                 if (r.res === 'fumble') {   // dropped: they tumble out of the thrower's grip into the next square
                     add(320, u => { O.lean = -0.25 * Math.sin(Math.PI * u); });
                     add(700, u => { put(Hf, lerp(from.x + L.dir.x * 0.2, land.x, u), lerp(from.y + L.dir.y * 0.2, land.y, u)); Hf.z = 1.1 * (1 - u) + 0.6 * Math.sin(Math.PI * u); Hf.lean = -0.4 + u * (upright ? 0.4 : 1.4); }, { slow: 0.5, banner: ['FUMBLE!', tone(1 - O.team)] });
@@ -16256,21 +16257,29 @@
                         cam.x = lerp(behind.x, hx - L2.dir.x * V.back, ease(k)); cam.y = lerp(behind.y, hy - L2.dir.y * V.back, ease(k)); cam.h = V.h + V.bob * Math.sin(Math.PI * t) * k; cam.a = V.a + V.da * Math.sin(Math.PI * t); cam.hd = L2.hd;
                     }, opt);
                     fly(0, 0.8, flightMs * 0.8);
-                    fly(0.8, 1, flightMs * 0.2, upright ? { slow: 0.3 } : r.out ? { banner: ['INTO THE CROWD!', tone(1 - Hf.team)] } : {});
+                    fly(0.8, 1, flightMs * 0.2, upright ? { slow: 0.3 } : outFirst ? { banner: ['INTO THE CROWD!', tone(1 - Hf.team)] } : {});
                 }
                 let end = land;
                 const inj = r.inj || {}, bled = {}, hurt = p => { if (p && inj[p.id] && !bled[p.id]) { bled[p.id] = true; bleed(p, inj[p.id]); } };
-                if (r.out) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); }
-                else if (r.crash) {   // a crash landing on whoever is there: they go down, and the thrown player bounces off and falls
-                    const Oc = pl(r.crash.on), to2 = r.crash.to ? sq(r.crash.to) : land, knock = Oc ? fall(Oc, land) : null;
-                    add(900, u => {
-                        if (knock && !Oc.down) knock(Math.min(1, u * 2));
-                        if (u > 0.05) hurt(Oc);   // squashed
-                        const k = Math.min(1, u * 1.4); put(Hf, lerp(land.x, to2.x, k), lerp(land.y, to2.y, k)); Hf.z = 0.8 * Math.sin(Math.PI * k); Hf.lean = Math.PI / 2 * ease(k);
-                        if (k >= 1) hurt(Hf);   // and the thrown player hits the ground
-                        if (r.ball && u > 0.5) { const v = (u - 0.5) * 2; ball.holder = null; ball.x = to2.x + -L2.dir.y * 1.1 * v; ball.y = to2.y + L2.dir.x * 1.1 * v; ball.z = Math.abs(Math.sin(v * Math.PI * 2)) * (1 - v) * 0.9; ball.spin += 0.25; }
-                    }, { banner: ['CRASH LANDING!', tone(1 - Hf.team)] });
-                    end = to2;
+                if (outFirst) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); }
+                else if (crashes.length) {   // crash landings: whoever is landed on goes down, and the thrown player bounces off (maybe onto someone else) and falls
+                    let at = land;
+                    crashes.forEach((c, i) => {
+                        const Oc = pl(c.on), from2 = at, to2 = c.to ? sq(c.to) : at, last = i === crashes.length - 1, knock = Oc && !Oc.down ? fall(Oc, from2) : null;
+                        const lean0 = i ? Math.PI / 2 : 0;
+                        add(i ? 800 : 900, u => {
+                            if (knock) knock(Math.min(1, u * 2));
+                            if (u > 0.05) hurt(Oc);   // squashed
+                            const k = Math.min(1, u * 1.4); put(Hf, lerp(from2.x, to2.x, k), lerp(from2.y, to2.y, k)); Hf.z = (i ? 0.55 : 0.8) * Math.sin(Math.PI * k);
+                            Hf.lean = last ? lerp(lean0, Math.PI / 2 + (i ? Math.PI * 2 : 0), ease(k)) : lean0 + Math.PI * 2 * ease(k);   // tumbling on, and down at the end
+                            if (last && k >= 1 && !r.out) hurt(Hf);   // the thrown player hits the ground
+                            if (r.ball && i === 0 && u > 0.5) { const v = (u - 0.5) * 2; ball.holder = null; ball.x = to2.x + -L2.dir.y * 1.1 * v; ball.y = to2.y + L2.dir.x * 1.1 * v; ball.z = Math.abs(Math.sin(v * Math.PI * 2)) * (1 - v) * 0.9; ball.spin += 0.25; }
+                            const hx = Hf.x + 0.5 - L2.dir.x * V.back, hy = Hf.y + 0.5 - L2.dir.y * V.back; cam.x = lerp(cam.x, hx, 0.06); cam.y = lerp(cam.y, hy, 0.06);   // the camera follows the bounces
+                        }, i === 0 ? { banner: ['CRASH LANDING!', tone(1 - Hf.team)] } : {});
+                        if (!(last && r.out)) end = to2; else end = from2;   // (if they bounced into the crowd, the view ends over the last crash)
+                        at = to2;
+                    });
+                    if (r.out) add(700, () => { Hf.gone = true; if (r.ball && ball.holder === Hf) ball.on = false; }, { banner: ['INTO THE CROWD!', tone(1 - Hf.team)] });   // bounced off the pitch
                 } else if (r.landed === true) {
                     add(420, () => { Hf.z = 0; Hf.lean = 0; put(Hf, land.x, land.y); }, { star: Hf, banner: ['SAFE LANDING!', tone(Hf.team)] });
                     add(800, u => { Hf.z = 0.12 * Math.sin(Math.PI * u); }, { slow: 0.6 });
@@ -16282,8 +16291,8 @@
                     }, { banner: ['CRASH LANDING!', tone(1 - Hf.team)] });
                 } else add(300, () => { Hf.z = 0; Hf.lean = 0; });
                 // the worst injury gets its own word (a Stunned player isn't really hurt)
-                const sevN = { stun: 1, ko: 2, cas: 3 }, worst = [Hf, r.crash && pl(r.crash.on)].filter(p => p && sevN[inj[p.id]] > 1).sort((a, b) => sevN[inj[b.id]] - sevN[inj[a.id]])[0];
-                if (worst && !r.out) add(1200, () => {}, { banner: [inj[worst.id] === 'cas' ? 'CASUALTY!' : 'KNOCKED OUT!', tone(1 - worst.team)] });
+                const sevN = { stun: 1, ko: 2, cas: 3 }, worst = [r.out ? null : Hf, ...crashes.map(c => pl(c.on))].filter(p => p && sevN[inj[p.id]] > 1).sort((a, b) => sevN[inj[b.id]] - sevN[inj[a.id]])[0];
+                if (worst) add(1200, () => {}, { banner: [inj[worst.id] === 'cas' ? 'CASUALTY!' : 'KNOCKED OUT!', tone(1 - worst.team)] });
                 outro(end); return true;
             }
 

@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.55 (14 Oct 2026)
+- **Fixed:** in a Throw Team-mate replay, a thrown player who crash-lands on someone, bounces off and lands on someone else (and so on) now shows every crash. Each player landed on goes down and bleeds if they were hurt, and the thrown player tumbles on from one to the next before falling. The camera follows them. Before, only the first player landed on was shown. If a bounce sends them into the crowd, the replay now shows the crashes first and then "INTO THE CROWD!". Before, it showed them flying straight into the crowd.
+
 ## v2.54 (14 Oct 2026)
 - **Added:** blood in Throw Team-mate replays. When a thrown player crash-lands on someone and hurts them, or is hurt themselves (a failed landing or a crash), a burst of chunky pixel blood sprays out with a wet squelch. The drops fly up and splat on the ground. A worse injury means a bigger burst. A Knocked Out or Casualty result then gets its own word: "KNOCKED OUT!" or "CASUALTY!", in gold or red depending on whose player it was.
 
