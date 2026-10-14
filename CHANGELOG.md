@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.56 (14 Oct 2026)
+- **Added:** in the block and blitz clash animation (the picture above the block dice), whoever has the ball is shown holding it at their front hand. It moves, leans and falls with them. If the carrier is knocked down, or a push with Strip Ball knocks it out of their hands, the ball pops loose at the moment of impact and bounces away past them.
+
 ## v2.55 (14 Oct 2026)
 - **Fixed:** in a Throw Team-mate replay, a thrown player who crash-lands on someone, bounces off and lands on someone else (and so on) now shows every crash. Each player landed on goes down and bleeds if they were hurt, and the thrown player tumbles on from one to the next before falling. The camera follows them. Before, only the first player landed on was shown. If a bounce sends them into the crowd, the replay now shows the crashes first and then "INTO THE CROWD!". Before, it showed them flying straight into the crowd.
 

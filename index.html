@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.55</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.56</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -12580,19 +12580,32 @@
             cancelAnimationFrame(clash.raf); clash.raf = requestAnimationFrame(clashDraw);
         }
         const CLASH_IN = 260, CLASH_TOTAL = 1350;
-        function clashFigure(c, p, x, footY, h, rot, flip) {
+        // the ball, drawn small and pixel-style: in a carrier's hand in the clash, or popping loose
+        function clashBall(c, x, y, r, spin = 0) {
+            c.save(); c.translate(Math.round(x), Math.round(y)); c.rotate(spin);
+            c.fillStyle = '#1c0a02'; c.beginPath(); c.ellipse(0, 0, r * 1.3 + 1.5, r * 0.88 + 1.5, 0, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#c2410c'; c.beginPath(); c.ellipse(0, 0, r * 1.3, r * 0.88, 0, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#fff7ed'; const w = Math.max(1, Math.round(r * 0.22));
+            c.fillRect(Math.round(-r * 0.6), -Math.floor(w / 2), Math.round(r * 1.2), w);   // the seam and its laces
+            for (let i = -1; i <= 1; i++) c.fillRect(Math.round(i * r * 0.4) - Math.floor(w / 2), Math.round(-r * 0.32), w, Math.round(r * 0.64));
+            c.restore();
+        }
+        const clashCarrying = p => !!p && state.ball && state.ball.carrierId === p.id;
+        function clashFigure(c, p, x, footY, h, rot, flip, holding = false) {
             c.save(); c.translate(x, footY - h * 0.34 * Math.abs(Math.sin(rot))); c.rotate(rot);   // lying down: lift so the body rests on the ground
             const cv = spriteFor(p) ? spriteCanvas(p, false) : null;
             if (cv) {
                 c.imageSmoothingEnabled = false;
                 if (flip) c.scale(-1, 1);
                 const sq = spriteSquash(p); c.drawImage(cv, -h / 2, -h * sq, h, h * sq);
+                if (holding) clashBall(c, h * 0.22, -h * sq * 0.42, Math.max(3, h * 0.065));   // tucked in at their front hand (it turns and falls with them)
             } else {   // teams without sprites: their round token, stood on its edge
                 const st = teamStyle(p.team), r = h * 0.3;
                 c.fillStyle = (st.fill || '#94a3b8').slice(0, 7); c.strokeStyle = '#0f172a'; c.lineWidth = 3;
                 c.beginPath(); c.arc(0, -r - 2, r, 0, Math.PI * 2); c.fill(); c.stroke();
                 c.fillStyle = (st.text || '#fff').slice(0, 7); c.font = `bold ${Math.round(r * 0.9)}px sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
                 c.fillText(p.label || p.type[0], 0, -r - 2);
+                if (holding) clashBall(c, r * 0.9, -r * 0.6, Math.max(3, r * 0.3));
             }
             c.restore();
         }
@@ -12784,8 +12797,20 @@
             // shadows
             c.fillStyle = 'rgba(0,0,0,0.35)';
             [[ax, atkH], [dx, defH]].forEach(([x, h]) => { c.beginPath(); c.ellipse(x, ground, h * 0.32, 5, 0, 0, Math.PI * 2); c.fill(); });
-            clashFigure(c, clash.atk, ax, ground + ay + bob + (t < 0 ? (Math.random() - 0.5) * 1.2 : 0), atkH, arot, false);
-            clashFigure(c, clash.def, dx, ground + dy, defH, drot, true);
+            // the ball carrier holds it until the hit; if they go down (or Strip Ball knocks it out of their hands) it pops loose
+            const aBall = clashCarrying(clash.atk), dBall = clashCarrying(clash.def), o = clash.out;
+            const strip = o && dBall && o.push && !o.defDown && clash.atk.skills.includes('Strip Ball') && !clash.def.skills.includes('Sure Hands');
+            const loose = t >= CLASH_IN && o && ((aBall && o.atkDown) || (dBall && (o.defDown || strip)));
+            clashFigure(c, clash.atk, ax, ground + ay + bob + (t < 0 ? (Math.random() - 0.5) * 1.2 : 0), atkH, arot, false, aBall && !loose);
+            clashFigure(c, clash.def, dx, ground + dy, defH, drot, true, dBall && !loose);
+            if (loose) {   // up out of their hands, then bouncing away behind them
+                const k = Math.min(1, (t - CLASH_IN) / (CLASH_TOTAL - CLASH_IN)), side = aBall ? -1 : 1, h = aBall ? atkH : defH;
+                const r = Math.max(3, h * 0.065), x0 = (aBall ? W * 0.44 : W * 0.73 - W * 0.17 * 0.8) + side * h * 0.22;
+                const x1 = aBall ? Math.max(r * 2 + 4, W * 0.4 - h * 1.08) : Math.min(W - r * 2 - 4, W * 0.63 + h * 1.08);   // clear of the fallen body (it lies a sprite's length that way)
+                const bx = x0 + (x1 - x0) * (1 - (1 - k) * (1 - k)), hop = k < 0.3 ? Math.sin(k / 0.3 * Math.PI / 2) * h * 0.55 + (1 - k / 0.3) * h * 0.1 : Math.abs(Math.cos((k - 0.3) / 0.7 * Math.PI * 2.5)) * (1 - k) * h * 0.55;
+                c.fillStyle = 'rgba(0,0,0,0.3)'; c.beginPath(); c.ellipse(bx, ground, r * 1.4, 2.5, 0, 0, Math.PI * 2); c.fill();
+                clashBall(c, bx, ground - r - hop, r, side * k * 9);
+            }
             // impact: a white flash and a jagged starburst where they meet
             if (t > CLASH_IN - 20 && t < CLASH_IN + 420) {
                 const k = (t - CLASH_IN + 20) / 440, cx = W * 0.5, cy = ground - fig * 0.55;
