@@ -513,6 +513,16 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.8); border-radius: 4px; }
 
         .modal-bg { background-color: rgba(11, 15, 25, 0.85); backdrop-filter: blur(4px); }
+        #modal-ind-intro { position: fixed; inset: 0; z-index: 250; display: grid; place-items: center; padding: 16px; background: rgba(11, 15, 25, .72); font-family: Inter, system-ui, sans-serif; }
+        #modal-ind-intro.hidden { display: none; }
+        #modal-ind-intro .ii-card { width: min(460px, 100%); max-height: 86vh; overflow-y: auto; background: #1e1b2e; border: 1px solid #4c1d95; border-top: 4px solid #8b5cf6; border-radius: 12px; padding: 14px 16px 16px; box-shadow: 0 20px 50px rgba(0,0,0,.6); color: #e2e8f0; text-align: center; }
+        #modal-ind-intro .ii-cap { font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #c4b5fd; }
+        #modal-ind-intro .ii-team { font-family: 'Teko', 'Impact', sans-serif; font-size: 30px; line-height: 1; text-transform: uppercase; letter-spacing: .03em; margin: 4px 0 2px; color: #fff; }
+        #modal-ind-intro .ii-hint { font-size: 11.5px; color: #a5b4fc; margin: 0 0 10px; }
+        #modal-ind-intro .ii-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 14px; }
+        #modal-ind-intro .ii-tag { font-size: 12.5px; padding: 4px 9px; white-space: normal; max-width: 100%; text-align: center; line-height: 1.3; }
+        #modal-ind-intro .ii-ok { min-width: 120px; padding: 9px 18px; border: 0; border-radius: 8px; background: #7c3aed; color: #fff; font: 800 13px/1 Inter, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+        #modal-ind-intro .ii-ok:hover, #modal-ind-intro .ii-ok:focus-visible { background: #8b5cf6; outline: 2px solid #c4b5fd; outline-offset: 2px; }
         /* roll dialogs sit low on the screen with no dimming, so the pitch and the player making the roll stay in view */
         .roll-sheet { background: transparent !important; backdrop-filter: none !important; align-items: flex-end !important; padding: 0 12px max(12px, env(safe-area-inset-bottom)) !important; }
         .roll-sheet > div { max-width: min(560px, 100%) !important; padding: 10px 14px 12px !important; box-shadow: 0 -6px 28px rgba(0, 0, 0, .65), 0 0 0 1px rgba(0, 0, 0, .4) !important; background: rgba(15, 23, 42, .96) !important; }
@@ -794,7 +804,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.16</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.17</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6680,10 +6690,30 @@
             return '';
         }
         // Iron Man, Knuckle Dusters and Intensive Training for a human coach: chosen once the inducements have been announced
-        function prayerPicks(done) {
-            const it = (state.prayerPicks || []).shift();
+        // One team's inducements before kick-off: each one a tag you can tap for what it does, and an OK button.
+        // (When the computer plays itself, it closes on its own after a few seconds.)
+        function showInducementsPanel(entry, done) {
+            let m = document.getElementById('modal-ind-intro');
+            if (!m) {
+                m = document.createElement('div'); m.id = 'modal-ind-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+                m.innerHTML = `<div class="ii-card"><div class="ii-cap">Inducements</div><h2 class="ii-team"></h2><p class="ii-hint">Tap one to see what it does.</p><div class="ii-list"></div><button type="button" class="ii-ok">OK</button></div>`;
+                document.body.appendChild(m);
+            }
+            const R = ROSTERS[entry.t], st = teamStyle(entry.t), esc2 = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            m.querySelector('.ii-team').textContent = R.name;
+            m.querySelector('.ii-card').style.borderTopColor = st.fill || '#8b5cf6';
+            m.querySelector('.ii-list').innerHTML = entry.items.map(it => `<span class="skill-tag ii-tag" data-skill="${esc2(it.label)}" data-tip="${esc2(it.tip || 'No description.')}">${esc2(it.label)}</span>`).join('');
+            m.classList.remove('hidden');
+            let shut = false, timer = null;
+            const close = () => { if (shut) return; shut = true; clearTimeout(timer); m.classList.add('hidden'); done(); };
+            const ok = m.querySelector('.ii-ok'); ok.onclick = close; setTimeout(() => ok.focus(), 0);
+            if (AI.isAI(0) && AI.isAI(1)) timer = setTimeout(close, 5000);
+        }
+        function prayerPicks(done, team) {   // team: only that team's picks
+            const queue = state.prayerPicks || [], qi = team == null ? 0 : queue.findIndex(x => x.t === team);
+            const it = qi >= 0 && queue.length ? queue.splice(qi, 1)[0] : null;
             if (!it) { done(); return; }
-            const { t, r } = it, nm = p => p.name || p.type, next = () => prayerPicks(done);
+            const { t, r } = it, nm = p => p.name || p.type, next = () => prayerPicks(done, team);
             if (r === 'dope') {   // You Dope!: +1 ST or AG for one player, for the game
                 const pool = state.players.filter(p => p.team === t && !p.isCasualty && !p.star && p.inSquad).sort((a, b) => playerCost(b) - playerCost(a));
                 const apply = (p, st) => { if (st) p.st++; else p.ag = Math.max(1, p.ag - 1); p.doped = true; log(`  YOU DOPE! ${nm(p)} gets ${st ? '+1 ST' : '+1 AG'} for the game (a D6 at the end of each drive they play: 1-2 and they're Knocked-out).`, 'text-fuchsia-300 font-bold'); next(); };
@@ -6721,42 +6751,83 @@
                 list.map(sk => ({ label: sk, fn: () => { p.skills.push(sk); log(`  INTENSIVE TRAINING: ${nm(p)} gains ${sk} for this game.`, 'text-violet-300 font-bold'); next(); } })), { team: t, ai: 0 });
         }
         // ind: [{ prayers (how many), ptac, temps, mascot, kegs, bribes, ett, apo, chef }, {...}]; returns a line per team for the pre-match announcement
+        // what each inducement does, for the tap-for-details tags on the inducements panel
+        const IND_TIPS = {
+            ett: 'Each Extra Team Training gives an extra team re-roll for this game.',
+            bribes: 'When a player is Sent-off (after any Argue the Call), use a Bribe and roll a D6: on a 2+ they stay on and there is no Turnover. On a natural 1 the ref keeps the Bribe and sends them off anyway.',
+            ptac: 'One more Assistant Coach for this game for each one hired. Assistant Coaches help with kick-off events such as Brilliant Coaching.',
+            temps: 'One more Cheerleader for this game for each one hired. Cheerleaders help with the Cheering Fans kick-off event.',
+            apo: 'Once per game, used exactly like your own Apothecary.',
+            kegs: '+1 to the roll whenever you roll to recover a Knocked-out player, for each keg.',
+            mascot: 'An extra team re-roll each half, but before using it roll a D6: on a 4+ it works, on a 1-3 it is lost for the half. Also lets you re-roll a natural 1 for Cheering Fans.',
+            ref: 'Dodgy League Rep. Close Scrutiny: after an opposition player makes a Foul, roll a D6; on a 5+ they are Sent-off. "I didn\'t see a thing!": +1 when you Argue the Call (a natural 1 still fails).',
+            bugman: "Josef Bugman. Bugman's XXXX: +1 to rolls to recover Knocked-out players. Dwarven Wisdom: once per game, after set-up and before the kick-off, take D3 of your players off the pitch and set them up again.",
+            mage: 'Once per game, at the start of one of your turns, roll on the Weather table with a modifier of up to +2 or -2. The new weather lasts until the next Changing Weather kick-off result.',
+            wizard: 'Sports-Wizard: once per game, at the end of any turn, cast Fireball (every player in or next to a square is Knocked Down on a 4+, +1 to the armour roll) or Zap! (turn one player into a Frog if a D6 equals or beats their ST, or on a 6).',
+            mercs: 'Players from your own roster hired for this game only, with Loner (4+). They can be given one Primary skill. They cannot be hired after the game.',
+            rookies: '2D3+1 extra Journeymen for this game, on top of any needed to make 11. They leave after the game unless hired.',
+            chef: 'At the start of each half, roll three D6: for each 4+ you gain a team re-roll for the half and the opposition loses one.',
+            mortuary: 'Once per game, re-roll a failed Regeneration roll for one of your players.',
+            prayers: 'Each Prayer to Nuffle is a roll on the Prayers to Nuffle table, lasting the whole game.',
+            dm: 'Each Desperate Measure is a roll on the Desperate Measures table: a one-off trick to use during the game.'
+        };
+        const PRAYER_TIPS = [null,
+            'Treacherous Trapdoor: whenever a player from either team enters a Trapdoor square, roll a D6. On a 1 they fall through: an Injury roll as if pushed into the crowd, and the ball bounces from the trapdoor.',
+            'Friends with the Ref: when you Argue the Call, a 5 or 6 counts as "Well, when you put it like that...".',
+            'Stiletto: one random player on your team gains Stab for the game.',
+            'Iron Man: one player of your choice gets +1 AV (to a maximum of 11+) for the game.',
+            'Knuckle Dusters: one player of your choice gains Mighty Blow for the game.',
+            'Bad Habits: D3 random opposition players gain Loner (2+) for the game.',
+            'Greasy Cleats: one random opposition player has -1 MA (to a minimum of 1) for the game.',
+            'Blessing of Nuffle: one random player on your team gains Pro for the game.',
+            'Moles Under the Pitch: opposition players get -1 when they Rush.',
+            'Perfect Passing: your players earn 2 SPP for a Completion instead of 1.',
+            'Dazzling Catching: your players earn 1 SPP for catching a pass.',
+            'Fan Interaction: if an opposition player is pushed into the crowd and suffers a Casualty, the player who pushed them earns 2 SPP.',
+            'Fouling Frenzy: your players earn 2 SPP for causing a Casualty with a Foul.',
+            'Throw a Rock: once per game, at the start of one of your turns before anyone acts, pick a random opposition player on the pitch: on a 4+ they are Knocked Down.',
+            'Under Scrutiny: an opposition player who breaks armour with a Foul is always Sent-off, double or not.',
+            'Intensive Training: one random player on your team gains a Primary skill of your choice for the game.'];
         function applyInducements(ind) {
             state.ind = [0, 1].map(i => Object.assign({}, (ind && ind[i]) || {}));
             state.prayerPicks = [];
-            const lines = [];
+            const lines = []; state.indTeams = [];
             [0, 1].forEach(t => {
                 const d = state.ind[t], R = ROSTERS[t], got = [], pl = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-                if (d.ett) { R.rerolls = (R.rerolls || 0) + d.ett; state.rr[t] = (state.rr[t] || 0) + d.ett; got.push(`Extra Team Training ×${d.ett}`); }
-                if (d.bribes) { state.bribes[t] = (state.bribes[t] || 0) + d.bribes; got.push(pl(d.bribes, 'Bribe')); }
-                if (d.ptac) { R.assistantCoaches = (R.assistantCoaches || 0) + d.ptac; got.push(pl(d.ptac, 'Part-time Assistant Coach').replace('Coachs', 'Coaches')); }
-                if (d.temps) { R.cheerleaders = (R.cheerleaders || 0) + d.temps; got.push(pl(d.temps, 'Temp Agency Cheerleader')); }
-                if (d.apo) { R.apothecary = (R.apothecary || 0) + d.apo; got.push(pl(d.apo, 'Wandering Apothecary').replace('Apothecarys', 'Apothecaries')); }
-                if (d.kegs) got.push(`Blitzer's Best Kegs ×${d.kegs}`);
-                if (d.mascot) got.push('a Team Mascot');
-                if (d.ref) got.push('a Biased Referee');
-                if (d.bugman) got.push('Josef Bugman');
-                if (d.mage) got.push('a Weather Mage');
-                if (d.wizard) got.push('a Sports-Wizard');
-                if ((d.mercs || []).length) got.push(`${d.mercs.length} Mercenar${d.mercs.length === 1 ? 'y' : 'ies'}`);
-                if (d.rookieCount) got.push(`Riotous Rookies (${d.rookieCount} extra Journeymen)`);
-                if (d.chef) got.push('a Halfling Master Chef');
-                if ((d.stars || []).length) got.unshift(`Star Player${d.stars.length > 1 ? 's' : ''} ${d.stars.map(sk => STARS[sk].name).join(' and ')}`);
-                if (d.mortuary) got.push('a Mortuary Assistant');
+                const tips = [];   // the tip for each entry in got, by position
+                const g0 = got.push.bind(got), gu = got.unshift.bind(got);
+                const keyed = (key, tip) => s2 => { const n = g0(s2); tips[n - 1] = tip || IND_TIPS[key] || ''; return n; };
+                if (d.ett) { R.rerolls = (R.rerolls || 0) + d.ett; state.rr[t] = (state.rr[t] || 0) + d.ett; keyed('ett')(`Extra Team Training ×${d.ett}`); }
+                if (d.bribes) { state.bribes[t] = (state.bribes[t] || 0) + d.bribes; keyed('bribes')(pl(d.bribes, 'Bribe')); }
+                if (d.ptac) { R.assistantCoaches = (R.assistantCoaches || 0) + d.ptac; keyed('ptac')(pl(d.ptac, 'Part-time Assistant Coach').replace('Coachs', 'Coaches')); }
+                if (d.temps) { R.cheerleaders = (R.cheerleaders || 0) + d.temps; keyed('temps')(pl(d.temps, 'Temp Agency Cheerleader')); }
+                if (d.apo) { R.apothecary = (R.apothecary || 0) + d.apo; keyed('apo')(pl(d.apo, 'Wandering Apothecary').replace('Apothecarys', 'Apothecaries')); }
+                if (d.kegs) keyed('kegs')(`Blitzer's Best Kegs ×${d.kegs}`);
+                if (d.mascot) keyed('mascot')('a Team Mascot');
+                if (d.ref) keyed('ref')('a Biased Referee');
+                if (d.bugman) keyed('bugman')('Josef Bugman');
+                if (d.mage) keyed('mage')('a Weather Mage');
+                if (d.wizard) keyed('wizard')('a Sports-Wizard');
+                if ((d.mercs || []).length) keyed('mercs')(`${d.mercs.length} Mercenar${d.mercs.length === 1 ? 'y' : 'ies'}`);
+                if (d.rookieCount) keyed('rookies')(`Riotous Rookies (${d.rookieCount} extra Journeymen)`);
+                if (d.chef) keyed('chef')('a Halfling Master Chef');
+                if ((d.stars || []).length) { gu(`Star Player${d.stars.length > 1 ? 's' : ''} ${d.stars.map(sk => STARS[sk].name).join(' and ')}`); tips.unshift(d.stars.map(sk => `${STARS[sk].name}: ${STARS[sk].rule ? STARS[sk].rule + '. ' : ''}${STARS[sk].text || ''}`).join(' ')); }
+                if (d.mortuary) keyed('mortuary')('a Mortuary Assistant');
                 const n = d.prayers || 0, rolled = [];
                 for (let k = 0; k < n; k++) { let r, g = 0; do { r = GEO.sev ? SEV_PRAYERS[Math.floor(Math.random() * 8) + 1] : Math.floor(Math.random() * 16) + 1; } while (rolled.includes(r) && g++ < 60); rolled.push(r); }
                 d.prayers = rolled;
-                rolled.forEach(r => { const what = prayerApply(t, r); got.push(`Prayer ${GEO.sev ? SEV_PRAYERS.indexOf(r) + ' (D8)' : r}: ${PRAYERS[r]}${what ? ` (${what})` : ''}`); });
+                rolled.forEach(r => { const what = prayerApply(t, r); keyed('prayers', PRAYER_TIPS[r])(`Prayer ${GEO.sev ? SEV_PRAYERS.indexOf(r) + ' (D8)' : r}: ${PRAYERS[r]}${what ? ` (${what})` : ''}`); });
                 // Desperate Measures: a D8 each, duplicates rolled again
                 const nd = Math.min(8, d.dm || 0), dms = [];
                 for (let k = 0; k < nd; k++) { let r, g = 0; do { r = Math.floor(Math.random() * 8) + 1; } while (dms.includes(r) && g++ < 80); dms.push(r); }
                 d.dms = dms; d.dmUsed = {};
                 dms.forEach(r => {
-                    got.push(`Desperate Measures ${r}: ${DM_NAMES[r]}`);
-                    if (r === 8) { d.wizard = 1; got.push('a Sports-Wizard (Magic Scroll)'); }
+                    keyed('dm', DM_TEXT[r])(`Desperate Measures ${r}: ${DM_NAMES[r]}`);
+                    if (r === 8) { d.wizard = 1; keyed('wizard')('a Sports-Wizard (Magic Scroll)'); }
                     if (r === 1 || r === 3) (state.prayerPicks = state.prayerPicks || []).push({ t, r: r === 1 ? 'dope' : 'hangover' });
                 });
-                if (got.length) { lines.push(`${R.name}: ${got.join(', ')}`); log(`  INDUCEMENTS — ${R.name}: ${got.join(', ')}.`, 'text-violet-300 font-bold'); }
+                if (got.length) { lines.push(`${R.name}: ${got.join(', ')}`); log(`  INDUCEMENTS — ${R.name}: ${got.join(', ')}.`, 'text-violet-300 font-bold');
+                    state.indTeams.push({ t, items: got.map((g, i) => ({ label: g, tip: tips[i] || '' })) }); }
             });
             halfInducements();
             return lines;
@@ -17234,9 +17305,10 @@
                     state.initialKickingTeam = kicker;
                     sfx('coinToss'); MUSIC.matchStart(); AI.start(); state.live = true;
 
-                    const ind = state.indLines || [];
-                    const pre = go => ind.length ? announce('INDUCEMENTS', ind.join(' • '), 'bg-violet-900/90', go, 6000) : go();
-                    pre(() => prayerPicks(() => runPreGame(() => announce(
+                    // each team's inducements in turn, each followed straight away by any picks that team has to make
+                    const teams = state.indTeams || [];
+                    const pre = (i, go) => { if (i > 1) { go(); return; } const e = teams.find(x => x.t === i); if (!e) { prayerPicks(() => pre(i + 1, go), i); return; } showInducementsPanel(e, () => prayerPicks(() => pre(i + 1, go), i)); };
+                    pre(0, () => prayerPicks(() => runPreGame(() => announce(
                         "COIN TOSS", 
                         `${ROSTERS[winner].name} win the toss & choose to receive! ${ROSTERS[kicker].name} deploy first.`,
                         "bg-amber-800/90", 
