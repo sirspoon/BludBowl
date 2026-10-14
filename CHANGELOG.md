@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.40 (14 Oct 2026)
+- **Added:** reconnecting in two-device matches. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+  - **The guest's connection drops** (bad signal, or the phone's screen went off): the guest's device shows "Reconnecting…" and keeps trying by itself. When it gets back, it picks up the match exactly where the host is, including any question waiting for that player. The host can keep playing its own turn meanwhile.
+  - **The guest's page is closed or reloaded:** open **Two Devices** again and tap **Rejoin match** with its code.
+  - **The host's page is closed or reloaded:** a two-device match is now saved on the host's device at each quiet moment (in its own slot, so any saved one-device match is left alone). Open **Two Devices** and tap **Resume hosted match**. The same room code opens again, and the guest's device, which waits with "Reconnecting…", joins back by itself.
+  - Only the same guest device can rejoin a match in progress. The host's ⚠ Disconnected chip still offers to let the computer take over the other team instead.
+
 ## v2.39 (14 Oct 2026)
 - **Changed:** in a two-device match, the starting-eleven screen is now separate on each device. Each player sees only their own team, ticks their own players, and taps **Ready**. The button shows whether the other player is ready, and both devices go on to the next screen once both players are. The same applies when picking players between drives. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 

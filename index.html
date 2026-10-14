@@ -814,6 +814,7 @@
 #net-lobby .nl-go { background: #075985; border-color: #38bdf8; font-size: 16px; }
 #net-lobby .nl-back { align-self: flex-end; }
 #net-lobby .nl-pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#net-lobby #nl-resume, #net-lobby #nl-rejoin { flex: 1 1 100%; } #net-lobby #nl-resume.hidden, #net-lobby #nl-rejoin.hidden { display: none; }
 #net-lobby .nl-join { display: flex; gap: 6px; flex: 1 1 200px; }
 #net-lobby input, #net-lobby select { background: #0b1220; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 16px; min-width: 0; }
 #net-lobby input { flex: 1; text-transform: uppercase; letter-spacing: .08em; }
@@ -866,7 +867,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.39</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.40</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -5667,7 +5668,7 @@
         // The match is saved in this browser whenever it is at a quiet moment (nothing rolling, moving or waiting for an answer):
         // at the start of every turn, after every player's action, and when the app goes into the background. One slot.
         const SAVE = (function () {
-            const KEY = 'bb-match-save', V = 1, BUILD = 'bb201';
+            const KEY = 'bb-match-save', KEYN = 'bb-net-save', V = 1, BUILD = 'bb201';   // KEYN: a hosted two-device match (kept apart from the usual slot)
             let last = '', busy = false;
             const read = () => { try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); return d && d.v === V ? d : d ? { old: true } : null; } catch (e) { return null; } };
             const has = () => { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } };
@@ -5714,17 +5715,18 @@
                 });
                 const logEl = document.getElementById('message-log'), lines = logEl ? [...logEl.children].slice(-250).map(c => c.outerHTML).join('') : '';
                 return { v: V, build: BUILD, at: Date.now(), rosters: [ROSTERS[0], ROSTERS[1]], state: st, match: encode(MATCH.data, false, new Set()),
-                    ai: [AI.isOn(0), AI.isOn(1)], pitch: { style: PITCH.style, seed: PITCH.seed }, log: lines,
+                    ai: [AI.isOn(0), AI.isOn(1)], pitch: { style: PITCH.style, seed: PITCH.seed }, log: lines, net: NET.hosting() ? NET.saveInfo() : null,
                     card: { t: [ROSTERS[0].name, ROSTERS[1].name], s: [state.score[0], state.score[1]], half: state.half, turn: state.turn[state.activeTeam], who: ROSTERS[state.activeTeam].name,
                         comp: (GEO.sev ? 'Sevens · ' : '') + (state.league ? 'League match' : state.cup ? 'Tournament match' : (state.careerOn || []).some(Boolean) ? 'Career match' : 'Exhibition') } };
             }
             function save(force) {
-                if (busy || NET.on() || !quiet()) return false;   // a two-device match isn't kept
+                if (busy || NET.guest() || !quiet()) return false;   // (the guest's device never keeps the match: the host has it)
+                const key = NET.hosting() ? KEYN : KEY;
                 const g = sig(); if (!force && g === last) return false;
                 let txt = '';
-                try { const d = snapshot(); txt = JSON.stringify(d); localStorage.setItem(KEY, txt); }
+                try { const d = snapshot(); txt = JSON.stringify(d); localStorage.setItem(key, txt); }
                 catch (e) {   // out of room: try again without the match log
-                    try { const d = snapshot(); d.log = ''; localStorage.setItem(KEY, JSON.stringify(d)); } catch (e2) { console.error('match save failed', e2); return false; }
+                    try { const d = snapshot(); d.log = ''; localStorage.setItem(key, JSON.stringify(d)); } catch (e2) { console.error('match save failed', e2); return false; }
                 }
                 last = g; return true;
             }
@@ -5838,7 +5840,10 @@
                     : "Nothing is saved yet: the match saves from the first turn. Go back to the main menu anyway?", 'Exit to menu', 'Keep playing',
                     () => { state.live = false; backToMenu(); }, null);
             }
-            return { encode, decode, save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note };
+            const readNet = () => { try { const d = JSON.parse(localStorage.getItem(KEYN) || 'null'); return d && d.v === V && d.net ? d : null; } catch (e) { return null; } };
+            const clearNet = () => { try { localStorage.removeItem(KEYN); } catch (e) {} };
+            function resumeNet() { const d = readNet(); if (!d) return; if (resume(d)) NET.resumeHost(d.net); }
+            return { readNet, clearNet, resumeNet, encode, decode, save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note };
         })();
 
         // ---------- Back up everything the game keeps on this device, and restore it ----------
@@ -6249,7 +6254,7 @@
                 if (!state.penalties) penalties();
             }
             state.isGameOver = true; state.mode = MODES.LOCKED;
-            try { if (!NET.on()) SAVE.clear(); } catch (e) {}   // a two-device match leaves any saved match alone
+            try { if (NET.on()) SAVE.clearNet(); else SAVE.clear(); } catch (e) {}   // a two-device match leaves any other saved match alone
             if (state.cup) { try { CUP.recordLive(); } catch (e) { console.error('cup', e); } }
             try { mournMatched(); } catch (e) { console.error('mourn', e); }
             SIMSPEED.matchOver();
@@ -15935,95 +15940,181 @@
             }
             const slug = c => 'bludbowl-v2-' + String(c).toLowerCase().replace(/[^a-z0-9]/g, '');
             const newCode = () => WORDS[Math.floor(Math.random() * WORDS.length)] + '-' + String(1000 + Math.floor(Math.random() * 9000));
-            function wire(send, close) {
-                link = { send: m => { try { const j = JSON.stringify(m); bytes += j.length; send(j); } catch (e) { console.error('net send', e); } }, close };
+            // a connection, whatever carries it: on('open' | 'data' | 'close'), send(text), close()
+            function wire(c) {
+                link = { c, send: m => { try { const j = JSON.stringify(m); bytes += j.length; c.send(j); } catch (e) { console.error('net send', e); } }, close: () => c.close() };
+                lastSeen = real();
             }
+            const parse = raw => { try { return typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return null; } };
             function onData(raw) {
-                let m; try { m = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return; }
+                const m = parse(raw);
                 if (!m || !m.t) return;
                 lastSeen = real();
                 try { (role === 'host' ? hostMsg : guestMsg)(m); } catch (e) { console.error('net message', m.t, e); }
             }
+            // the guest's device remembers which match it's in, so it can rejoin after the page is closed or reloaded
+            const REJOIN = 'bb-net-guest';
+            const rejoinRec = () => { try { const r = JSON.parse(localStorage.getItem(REJOIN) || 'null'); return r && Date.now() - r.at < 12 * 3600e3 ? r : null; } catch (e) { return null; } };
+            const keepRejoin = () => { try { localStorage.setItem(REJOIN, JSON.stringify({ code, token, at: Date.now() })); } catch (e) {} };
+            const forgetRejoin = () => { try { localStorage.removeItem(REJOIN); } catch (e) {} };
+            let token = '', guestToken = '', retryT = null, retryAt = 0;
+            const inMatch = () => live || (role === 'guest' ? shopping : EXIND.open());
             function dropped(why) {
                 const was = !!link; link = null; rtt = null;
                 if (!was) return;
+                paintChip(); paintLobby();
+                if (role === 'guest' && inMatch()) { startRetry(); return; }   // the guest's device keeps trying to get back
                 status(why || 'The other device has gone.', 'bad');
-                if (!live) return;
-                paintChip();
-                if (role === 'host') log('  The other device has disconnected. Tap ⚠ Disconnected at the top to let the computer play their team.', 'text-rose-300');
-                else showEnd('Lost the connection to the host. The match carries on there.');
+                if (role === 'host' && live) log(`  The other device has disconnected. It can rejoin with the code ${code} (Two Devices → Rejoin), or tap ⚠ Disconnected at the top to let the computer play their team.`, 'text-rose-300');
             }
-            function open(asHost, joinCode) {
-                close();
-                role = asHost ? 'host' : 'guest'; code = asHost ? newCode() : joinCode;
-                version = (($('app-version') || {}).textContent || '').trim();
-                if (TEST) {   // two tabs on one computer
-                    const bc = new BroadcastChannel(slug(code)), me = Math.random().toString(36).slice(2);
-                    let other = null;
-                    bc.onmessage = e => {
-                        const d = e.data; if (!d || d.from === me) return;
-                        if (d.knock) { if (asHost && !other) { other = d.from; bc.postMessage({ from: me, to: other, welcome: 1 }); wire(x => bc.postMessage({ from: me, to: other, x }), () => bc.close()); connected(); } return; }
-                        if (d.to !== me) return;
-                        if (d.welcome && !asHost) { other = d.from; wire(x => bc.postMessage({ from: me, to: other, x }), () => bc.close()); connected(); return; }
-                        if (d.x != null) onData(d.x);
+            // the host: a device has connected. Only its hello counts: the guest (or the guest coming back) takes the link
+            function incoming(c) {
+                c.on('data', raw => {
+                    if (link && link.c === c) { onData(raw); return; }
+                    const m = parse(raw); if (!m || m.t !== 'hello') return;
+                    const ok = guestToken && inMatch() ? m.token === guestToken : !link || m.token === guestToken;   // mid-match: only the same guest
+                    if (!ok) { try { c.send(JSON.stringify({ t: 'busy' })); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 400); return; }
+                    const old = link; wire(c);
+                    if (old && old.c !== c) { try { old.close(); } catch (e) {} }
+                    status('', ''); link.send({ t: 'hello', v: version, role });
+                    onData(raw);
+                    paintLobby(); paintChip();
+                });
+                c.on('close', () => { if (link && link.c === c) dropped(); });
+                c.on('error', e => console.error('net conn', e));
+            }
+            // the guest: a connection to the host (a first join, or another go after a drop)
+            function outgoing(c) {
+                c.on('open', () => {
+                    if (link) { try { c.close(); } catch (e) {} return; }
+                    wire(c); stopRetry();
+                    status('', '');
+                    link.send({ t: 'hello', v: version, role, token });
+                    keepRejoin();
+                    if (!inMatch()) sendTeam();
+                    paintLobby(); paintChip();
+                });
+                c.on('data', raw => { if (link && link.c === c) onData(raw); });
+                c.on('close', () => { if (link && link.c === c) dropped(); });
+                c.on('error', e => console.error('net conn', e));
+            }
+            // two tabs on one computer (?nettest): the same connections, over a BroadcastChannel
+            function testNet(asHost) {
+                const bc = new BroadcastChannel(slug(code)), me = Math.random().toString(36).slice(2), conns = new Map();
+                const mk = other => {
+                    const h = {}, c = {
+                        on: (e, f) => { (h[e] = h[e] || []).push(f); }, fire: (e, x) => (h[e] || []).forEach(f => f(x)),
+                        send: x => { if (!c.closed) bc.postMessage({ from: me, to: other, x }); },
+                        close: () => { if (c.closed) return; c.closed = true; bc.postMessage({ from: me, to: other, bye: 1 }); c.fire('close'); }
                     };
-                    peer = { destroy: () => bc.close() };
+                    conns.set(other, c); return c;
+                };
+                bc.onmessage = e => {
+                    const d = e.data; if (!d || d.from === me) return;
+                    if (d.knock) { if (asHost) { const c = mk(d.from); incoming(c); bc.postMessage({ from: me, to: d.from, welcome: 1 }); } return; }
+                    if (d.to !== me) return;
+                    if (d.welcome && !asHost) { const c = mk(d.from); outgoing(c); c.fire('open'); return; }
+                    const c = conns.get(d.from); if (!c) return;
+                    if (d.bye) { if (!c.closed) { c.closed = true; c.fire('close'); } return; }
+                    if (d.x != null) c.fire('data', d.x);
+                };
+                return { destroy: () => { conns.forEach(c => { try { c.close(); } catch (e) {} }); bc.close(); }, knock: () => bc.postMessage({ from: me, knock: 1 }), test: true };
+            }
+            function connectNow() {   // the guest: (another) go at reaching the host
+                if (!peer) return;
+                if (peer.test) { peer.knock(); return; }
+                if (peer.destroyed) { newGuestPeer(); return; }
+                if (peer.disconnected) { try { peer.reconnect(); } catch (e) {} return; }
+                if (peer.open) outgoing(peer.connect(slug(code), { reliable: true }));
+            }
+            function newGuestPeer() {
+                peer = new Peer();
+                peer.on('open', () => { if (!link) { if (!retryT) status('Looking for the game…', 'wait'); outgoing(peer.connect(slug(code), { reliable: true })); } });
+                peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
+                peer.on('error', peerError);
+            }
+            function peerError(e) {
+                const t = e && e.type;
+                if (role === 'host' && t === 'unavailable-id') {
+                    if (live) { log(`  The room code ${code} isn't free yet; trying again…`, 'text-slate-400'); setTimeout(() => { if (role === 'host' && live && !link) reopenHost(); }, 5000); }
+                    else open(true);   // that code is taken: pick another
+                    return;
+                }
+                if (retryT) return;   // still trying to get back: carry on
+                if (t === 'peer-unavailable') status(`No game found with the code ${code}. Check it, and that the host's screen is still showing it.`, 'bad');
+                else if (t === 'network' || t === 'server-error' || t === 'socket-error') status("Can't reach the matchmaking server. Check the internet connection and try again.", 'bad');
+                else if (t === 'browser-incompatible') status("This browser can't make a direct connection (WebRTC).", 'bad');
+                else status('Connection problem: ' + (t || e), 'bad');
+            }
+            function hostPeer() {
+                peer = new Peer(slug(code));
+                peer.on('open', () => { if (!live) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait'); else log(`  Waiting for the other device to rejoin with the code ${code}.`, 'text-sky-300'); });
+                peer.on('connection', incoming);
+                peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
+                peer.on('error', peerError);
+            }
+            function reopenHost() { try { if (peer) peer.destroy(); } catch (e) {} peer = null; loadPeer().then(hostPeer).catch(() => {}); }
+            function open(asHost, joinCode, keepCode) {
+                close();
+                role = asHost ? 'host' : 'guest'; code = asHost ? (keepCode || newCode()) : joinCode;
+                version = (($('app-version') || {}).textContent || '').trim();
+                if (!asHost) { const r = rejoinRec(); token = r && r.code === code ? r.token : Math.random().toString(36).slice(2, 12); }
+                if (TEST) {
+                    peer = testNet(asHost);
                     if (asHost) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait');
-                    else { status('Looking for the game…', 'wait'); bc.postMessage({ from: me, knock: 1 }); }
+                    else { status('Looking for the game…', 'wait'); peer.knock(); }
                     return;
                 }
                 status('Connecting to the matchmaking server…', 'wait');
                 loadPeer().then(() => {
                     if (role !== (asHost ? 'host' : 'guest')) return;
-                    const bind = c => {
-                        c.on('open', () => { wire(x => c.send(x), () => c.close()); connected(); });
-                        c.on('data', onData);
-                        c.on('close', () => dropped());
-                        c.on('error', e => console.error('net conn', e));
-                    };
-                    peer = asHost ? new Peer(slug(code)) : new Peer();
-                    peer.on('open', () => {
-                        if (asHost) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait');
-                        else { status('Looking for the game…', 'wait'); bind(peer.connect(slug(code), { reliable: true })); }
-                    });
-                    if (asHost) peer.on('connection', c => { if (link) { c.on('open', () => c.close()); return; } bind(c); });
-                    peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
-                    peer.on('error', e => {
-                        const t = e && e.type;
-                        if (t === 'unavailable-id' && asHost) { open(true); return; }   // that code is taken: pick another
-                        if (t === 'peer-unavailable') status(`No game found with the code ${code}. Check it, and that the host's screen is still showing it.`, 'bad');
-                        else if (t === 'network' || t === 'server-error' || t === 'socket-error') status("Can't reach the matchmaking server. Check the internet connection and try again.", 'bad');
-                        else if (t === 'browser-incompatible') status("This browser can't make a direct connection (WebRTC).", 'bad');
-                        else status('Connection problem: ' + (t || e), 'bad');
-                    });
+                    if (asHost) hostPeer(); else newGuestPeer();
                 }).catch(() => status("Couldn't load the connection library. Check the internet connection and try again.", 'bad'));
             }
             function close() {
+                stopRetry();
                 try { if (link) link.send({ t: 'bye' }); } catch (e) {}
                 try { if (link) link.close(); } catch (e) {}
                 try { if (peer) peer.destroy(); } catch (e) {}
-                link = null; peer = null; role = null; rtt = null; guestRace = null; guestName = '';
+                link = null; peer = null; role = null; rtt = null; guestRace = null; guestName = ''; guestToken = '';
             }
-            function connected() {
-                status('', '');
-                link.send({ t: 'hello', v: version, role });
-                if (role === 'guest') sendTeam();
-                paintLobby();
+            // ---- the guest getting back after a drop ----
+            function startRetry() {
+                if (retryT) return;
+                retryAt = real(); reconnectBox();
+                connectNow();
+                retryT = setInterval(() => { if (link || role !== 'guest') { stopRetry(); return; } reconnectBox(); connectNow(); }, 4000);
+            }
+            function stopRetry() { if (retryT) clearInterval(retryT); retryT = null; const el = $('net-end'); if (el && el.dataset.kind === 'retry') el.classList.add('hidden'); }
+            function reconnectBox() {
+                const s = Math.round((real() - retryAt) / 1000);
+                showEnd(s < 150 ? `Lost the connection to the host. Reconnecting… (${s}s)` : `Still trying to reach the host (${Math.round(s / 60)} min). If the host's page was closed, they can carry on from Two Devices → Resume on their device, and this one will rejoin.`, false, 'retry');
             }
             window.addEventListener('pagehide', () => { try { if (link) link.send({ t: 'bye' }); } catch (e) {} });
+            // back from the background (a phone's screen was off): check the connection straight away
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState !== 'visible' || !role) return;
+                if (link) { link.send({ t: 'ping', at: real() }); setTimeout(() => { if (link && real() - lastSeen > 4000) { try { link.close(); } catch (e) {} dropped('Lost touch with the other device.'); } }, 3000); }
+                else if (role === 'guest' && inMatch()) startRetry();
+            });
             // ping every couple of seconds: shows the delay, and notices a device that has gone quiet
             setInterval(() => {
                 if (!link) return;
                 link.send({ t: 'ping', at: real() });
-                if (lastSeen && real() - lastSeen > 15000) { try { link.close(); } catch (e) {} dropped('Lost touch with the other device.'); }
+                if (lastSeen && real() - lastSeen > 10000) { try { link.close(); } catch (e) {} dropped('Lost touch with the other device.'); }
                 paintChip();
             }, 2000);
             function common(m) {
                 if (m.t === 'ping') { link && link.send({ t: 'pong', at: m.at }); return true; }
                 if (m.t === 'pong') { rtt = Math.round(real() - m.at); paintChip(); paintLobby(); return true; }
-                if (m.t === 'bye') { dropped('The other device has left.'); return true; }
+                if (m.t === 'bye') { try { if (link) link.close(); } catch (e) {} dropped('The other device has left.'); return true; }
                 if (m.t === 'hello') {
                     if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
+                    if (role === 'host') {
+                        if (!inMatch()) guestToken = m.token || '';
+                        else if (live) { resetSent(); link.send({ t: 'start' }); log('  The other device is back.', 'text-emerald-300'); }
+                        else if (EXIND.open()) { link.send({ t: 'shop' }); shopSent = ''; }
+                    }
                     return true;
                 }
                 return false;
@@ -16032,7 +16123,7 @@
             // ---- the host's side ----
             function hostMsg(m) {
                 if (common(m)) return;
-                if (m.t === 'team') { guestRace = m.race; guestName = m.name; paintLobby(); return; }
+                if (m.t === 'team') { if (!live && !EXIND.open()) { guestRace = m.race; guestName = m.name; paintLobby(); } return; }
                 if (m.t === 'resync') { resetSent(); return; }
                 if (m.t === 'in' && m.k === 'exind') { EXIND.remote(m.d); return; }
                 if (m.t === 'in' && m.k === 'squad' && live) {
@@ -16163,6 +16254,7 @@
             let shown = false, followKey = '', shopping = false;
             function guestMsg(m) {
                 if (common(m)) return;
+                if (m.t === 'busy') { forgetRejoin(); const was = inMatch(); stopRetry(); try { if (link) link.close(); } catch (e) {} link = null; status('That match already has two players.', 'bad'); if (was) { live = false; shopping = false; showEnd('The host is playing with another device now.'); } return; }
                 if (m.t === 'shop') { shopping = true; $('net-lobby').classList.add('hidden'); $('ex-body').innerHTML = '<p class="pg-dim">Opening the inducements…</p>'; $('ex-back').hidden = true; $('ex-ind').classList.remove('hidden'); return; }
                 if (m.t === 'exind') { if (shopping) $('ex-body').innerHTML = m.html; return; }
                 if (m.t === 'lobby') { shopping = false; $('ex-ind').classList.add('hidden'); openLobby(); status('The host went back to the lobby.', 'wait'); return; }
@@ -16174,7 +16266,7 @@
                 if (m.t === 'cv') { pics[m.id + '#' + m.i] = m; paintPic(m.id + '#' + m.i); return; }
                 if (m.t === 'log') { applyLog(m); return; }
                 if (m.t === 'sfx') { try { p0(m.k, m.d, m.sz); } catch (e) {} return; }
-                if (m.t === 'end') { live = false; showEnd('The host has finished the match.'); }
+                if (m.t === 'end') { live = false; forgetRejoin(); showEnd('The host has finished the match.'); }
             }
             function applyMeta(d) {
                 ROSTERS[0] = d.rosters[0]; ROSTERS[1] = d.rosters[1];
@@ -16343,17 +16435,19 @@
                 if (link) link.send({ t: 'in', k: 'click', root: root.id, path, fp: fingerprint(t) });
             }, true);
             // the guest never runs the match itself: if a setting or a save would, it's skipped
-            function showEnd(text, canStay) {
+            function showEnd(text, canStay, kind) {
                 let el = $('net-end');
                 if (!el) {
                     el = document.createElement('div'); el.id = 'net-end'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
                     el.innerHTML = `<div class="ne-card"><p class="ne-text"></p><div class="ne-btns"><button type="button" class="ne-stay">Keep playing</button><button type="button" class="ne-go">Back to the menu</button></div></div>`;
                     document.body.appendChild(el);
-                    el.querySelector('.ne-go').onclick = () => { close(); location.reload(); };   // a fresh page: the guest's own game is just as it was
+                    el.querySelector('.ne-go').onclick = () => { forgetRejoin(); close(); location.reload(); };   // a fresh page: the guest's own game is just as it was
                     el.querySelector('.ne-stay').onclick = () => el.classList.add('hidden');
                 }
                 el.querySelector('.ne-text').textContent = text;
                 el.querySelector('.ne-stay').hidden = !canStay;
+                el.dataset.kind = kind || '';
+                el.querySelector('.ne-go').textContent = kind === 'retry' ? 'Leave the match' : 'Back to the menu';
                 el.classList.remove('hidden');
             }
 
@@ -16363,13 +16457,14 @@
                 if (role !== 'host' || !live) { if (role === 'host' && !live) close(); paintChip(); return; }
                 live = false;
                 if (link) link.send({ t: 'end' });
+                SAVE.clearNet();
                 close(); paintChip();
             }
             // the host lost the other device: the computer can play their team for the rest of the match
             function takeOver() {
                 if (role !== 'host' || !live || link) return;
                 askChoice('OTHER DEVICE GONE', `The other device has disconnected. Let the computer play ${ROSTERS[1].name} for the rest of the match?`, 'Computer takes over', 'Wait', () => {
-                    live = false; close(); AI.set(1, true); paintChip();
+                    live = false; close(); AI.set(1, true); paintChip(); SAVE.clearNet();
                     log(`  The computer takes over ${ROSTERS[1].name}.`, 'text-emerald-300');
                 }, null);
             }
@@ -16404,6 +16499,12 @@
                 opp.textContent = role === 'host' ? (guestRace ? `Opponent's team: ${guestName}` : link ? 'Waiting for the other player to pick a team…' : '') : role === 'guest' && link ? 'Pick your team. The host starts the match.' : '';
                 $('nl-start').disabled = !(role === 'host' && link && guestRace);
                 $('nl-teams').classList.toggle('hidden', !link);
+                // carrying on: the host's saved two-device match, or the match this device was the guest in
+                const sv = !role && SAVE.readNet(), rj = !role && rejoinRec();
+                const rb = $('nl-resume'), jb = $('nl-rejoin');
+                rb.classList.toggle('hidden', !sv); jb.classList.toggle('hidden', !rj || !!sv);
+                if (sv) rb.textContent = `Resume hosted match ${sv.net.code}: ${sv.card.t[0]} ${sv.card.s[0]} – ${sv.card.s[1]} ${sv.card.t[1]}`;
+                if (rj) jb.textContent = `Rejoin match ${rj.code}`;
             }
             function openLobby() {
                 const L = $('net-lobby');
@@ -16417,6 +16518,8 @@
                 rs.onchange = () => { sq.value = ''; fillPicker(rs, sq); sendTeam(); };
                 sq.onchange = () => sendTeam();
                 $('nl-host').onclick = () => { open(true); paintLobby(); };
+                $('nl-resume').onclick = () => { L.classList.add('hidden'); SAVE.resumeNet(); };
+                $('nl-rejoin').onclick = () => { const r = rejoinRec(); if (r) { open(false, r.code); paintLobby(); } };
                 const join = () => {
                     const c = $('nl-join-code').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                     if (c.length < 5) { status('Type the code shown on the host\'s screen, like ORC-4821.', 'bad'); return; }
@@ -16446,6 +16549,14 @@
 
             return {
                 openLobby, matchOver, begin, cancelShop, gate,
+                hosting: () => role === 'host' && live,
+                saveInfo: () => ({ code, token: guestToken, aiWas, guestName }),
+                resumeHost(info) {   // the host's page was closed: the match is back from the save; open the same room again
+                    open(true, null, info.code);
+                    guestToken = info.token || ''; aiWas = info.aiWas || null; guestName = info.guestName || '';
+                    live = true; resetSent(); paintChip();
+                    log(`  Two-device match: the other device can rejoin with the code ${info.code} (Two Devices → Rejoin).`, 'text-sky-300');
+                },
                 guestShop: () => role === 'guest' && shopping,
                 sendForm: sq => { if (link) link.send({ t: 'in', k: 'form', sq }); },
                 sendSquad: (id, on) => { if (link) link.send({ t: 'in', k: 'squad', id, on }); },
@@ -16458,6 +16569,7 @@
                 myTeam,
                 theirTurn: () => live && !!state.players && !state.isGameOver && state.activeTeam !== myTeam(),
                 race: key => (String(key) === 'net:1' ? guestRace : null),
+                debugDrop: () => { if (link) link.c.close(); },   // (tests: a connection dropping)
                 debug: () => ({ role, live, code, rtt, link: !!link, guestRace: !!guestRace, bytes, tickMs: Math.round(tickMs * 10) / 10 })
             };
         })();
@@ -18468,6 +18580,8 @@
         <h2 id="nl-title">Two Devices</h2>
         <p class="nl-dim">Play a friend on another phone, tablet or computer. One of you hosts; the other joins with the host's room code. Both devices need an internet connection.</p>
         <div class="nl-pick">
+            <button type="button" id="nl-resume" class="nl-btn nl-go hidden"></button>
+            <button type="button" id="nl-rejoin" class="nl-btn nl-go hidden"></button>
             <button type="button" id="nl-host" class="nl-btn">Host a game</button>
             <div class="nl-join"><input id="nl-join-code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="9" placeholder="ORC-4821" aria-label="Room code"><button type="button" id="nl-join" class="nl-btn">Join</button></div>
         </div>
