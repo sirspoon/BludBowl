@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.24 (14 Oct 2026)
+- **Fixed:** with **Speed up** on, the computer's blocks (the dice panel, the clash animation and the computer picking its die) now run at the faster speed too. They were dropping back to normal speed because the game treated every dice panel as a question for you, even when the computer was the one choosing. The same applied to the computer's own re-roll and choice panels. Panels that really are for you still slow down.
+
 ## v2.23 (14 Oct 2026)
 - **Fixed:** the pitch could go completely black at the start of your turn after a sped-up computer turn. A camera glide (the one that brings a player into view for a roll) mixed up the game's clock with real time, and once a turn had been sped up it threw the camera millions of pixels off the pitch.
 - **Changed:** **Speed up** now stays on for the computer's later turns too, until you tap it off. Your own turns, and anything you're asked to answer, still run at normal speed. Each new match starts with it off.

@@ -820,7 +820,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.23</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.24</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -5529,7 +5529,16 @@
             let turbo = false, turboShown = null;
             const aiTurn = () => { try { return AI.isStarted() && !state.isGameOver && AI.isOn(0) !== AI.isOn(1) && AI.isOn(state.activeTeam); } catch (e) { return false; } };
             const open = id => { const e = document.getElementById(id); return !!e && !e.classList.contains('hidden'); };
-            const coachAsked = () => ['modal-choice', 'modal-roll', 'modal-team-reroll', 'modal-dice', 'modal-ind-intro', 'pick-banner', 'modal-roster'].some(open);
+            // the coach is being asked something (not the computer deciding on a panel of its own: picking its block dice, its re-rolls...)
+            const mine = t => t == null || !AI.isOn(t);
+            const coachAsked = () => {
+                if (['modal-ind-intro', 'pick-banner', 'modal-roster'].some(open)) return true;
+                if (open('modal-dice') && mine(state.combat && state.combat.chooser)) return true;
+                if (open('modal-choice') && mine(state.choice && state.choice.team)) return true;
+                if (open('modal-roll') && mine(state.pendingRoll && state.pendingRoll.player && state.pendingRoll.player.team)) return true;
+                if (open('modal-team-reroll') && mine(state.trrCtx && state.trrCtx.player && state.trrCtx.player.team)) return true;
+                return false;
+            };
             function apply() {
                 const ok = allowed();
                 const sp = ok ? (want || 1) : (turbo && aiTurn() && !coachAsked() ? FAST : 1);
