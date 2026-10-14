@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.49 (14 Oct 2026)
+- **Changed:** players now topple over when they're knocked down or fall, turning onto their side over about a quarter of a second instead of snapping flat. Standing back up turns them upright the same way. With Animations set to Quick, they still change straight away.
+
 ## v2.48 (14 Oct 2026)
 - **Added:** blocks and blitzes now play out on the pitch too, instead of the players just appearing in their new squares.
   - **The clash:** once the block dice are decided, the attacker lunges into the defender and the defender rocks back.

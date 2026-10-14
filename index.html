@@ -886,7 +886,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.48</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.49</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10726,6 +10726,16 @@
             const dx = b.tx - p.x, dy = b.ty - p.y, L = Math.hypot(dx, dy) || 1, d = Math.sin(Math.PI * k) * b.amp;
             return { x: pos.x + dx / L * d, y: pos.y + dy / L * d };
         }
+        // falling over (and getting back up): how far round a player is, 0 standing to 1 lying down, eased over a moment
+        const fallSeen = new Map();   // player id -> { down, t }
+        function fallTurn(p) {
+            const now = performance.now(), down = !!p.isDown, f = fallSeen.get(p.id);
+            if (!f || window.FAST_ANIM) { fallSeen.set(p.id, { down, t: -1e9 }); return down ? 1 : 0; }
+            if (f.down !== down) { f.down = down; f.t = now; }
+            const k = Math.max(0, Math.min(1, (now - f.t) / (down ? 280 : 220)));
+            const e = down ? k * k * (2.2 - 1.2 * k) : 1 - (1 - k) * (1 - k);   // a fall picks up speed (with a little bounce at the end); getting up eases out
+            return down ? Math.min(1.06, e) : 1 - e;
+        }
         // where to draw a player: part-way between squares while walking (or sliding after a push)
         function drawPos(p) { return withBump(p, drawPos0(p)); }
         function drawPos0(p) {
@@ -14401,7 +14411,7 @@
                     ctx.restore();
                     return;
                 }
-                if(p.isDown) ctx.rotate(Math.PI/2);
+                ctx.rotate(Math.PI / 2 * fallTurn(p));
                 
                 let isBigGuy = /Ogre|Troll|Kroxigor|Treeman|Big Guy|Minotaur/.test(p.type);   // Rat Ogre, Kroxigor, the Ogre team's blockers etc. too
                 let isSmallGuy = p.skills && p.skills.includes('Right Stuff');
