@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.51 (14 Oct 2026)
+- **Fixed:** the panels at the bottom of the screen (such as the team re-roll question) no longer slip off the bottom on a phone when the browser's address bar is showing. Pop-ups now fit the part of the screen you can actually see, and a tall panel scrolls instead.
+- **Changed:** questions during a match, such as Taunt, now use the smaller panel at the bottom of the screen (like the Dodge roll) instead of covering the pitch. For Taunt, the camera also brings the player into view. Questions before and after the match still appear in the middle.
+- **Added:** while a block is being decided, a faint dashed circle (with an arrow) shows where each pushed player is going, since they stay in their old square until the block plays out.
+
 ## v2.50 (14 Oct 2026)
 - **Changed:** a block now plays out on the pitch in one go, once every choice has been made. While the push square, Stand Firm, Taunt and following up are being chosen, the players stay where they were. Then the attacker lunges in and the defender rocks back, everyone pushed (and the attacker, if they follow up) slides to their new square, and anyone knocked down topples over once they've arrived. Before, the lunge came first, then pauses while things were chosen, then players moved one at a time.
 

@@ -100,6 +100,10 @@
         #log-grip:hover span, #log-grip.drag span { background: #fbbf24; }
         #top-bar-wrap, #panel-log-container, #panel-unit-container, #setup-controls-container, #event-panel,
         .modal-bg > div, #removal-toast > div, #skill-tip, #team-panel { zoom: var(--ui); }
+        /* pop-ups fill the part of the screen you can actually see (on a phone the address bar can make the page taller than the
+           screen, which pushed the bottom panels off the bottom) */
+        .modal-bg { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: auto !important; height: 100vh; height: var(--app-h, 100dvh) !important; }
+        .roll-sheet > div { max-height: calc((var(--app-h, 100dvh) - 20px) / var(--ui)); overflow-y: auto; overscroll-behavior: contain; }
         #skill-tip {
             position: fixed; z-index: 300; max-width: min(260px, calc((100vw - 16px) / var(--ui))); pointer-events: none;
             background: rgba(10,15,28,0.97); border: 1px solid #fbbf24; border-radius: 8px; padding: 6px 9px;
@@ -886,7 +890,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.50</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.51</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1519,6 +1523,10 @@
         function applyUiScale() { document.documentElement.style.setProperty('--ui', String(uiScale())); }
         applyUiScale();
         window.addEventListener('resize', applyUiScale);
+        {   // the height of the screen you can see (it changes as a phone's address bar comes and goes)
+            const setH = () => { const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight; document.documentElement.style.setProperty('--app-h', Math.round(h) + 'px'); };
+            setH(); window.addEventListener('resize', setH); if (window.visualViewport) window.visualViewport.addEventListener('resize', setH);
+        }
         const TEAMS = { HUMAN: 0, ORC: 1 };
         const FACES = { SKULL: 1, BOTH_DOWN: 2, PUSH1: 3, PUSH2: 4, STUMBLE: 5, POW: 6 };
         
@@ -7078,6 +7086,7 @@
             yes.textContent = yesLabel;
             if (noLabel) { no.textContent = noLabel; no.classList.remove('hidden'); } else { no.classList.add('hidden'); }
             const modal = document.getElementById('modal-choice');
+            modal.classList.toggle('roll-sheet', inPlay());
             modal.classList.remove('hidden');
             yes.onclick = () => { modal.classList.add('hidden'); if (onYes) onYes(); };
             no.onclick = () => { modal.classList.add('hidden'); if (onNo) onNo(); };
@@ -7099,8 +7108,11 @@
                 b.onclick = () => { modal.classList.add('hidden'); box.classList.add('hidden'); document.getElementById('choice-yesno').classList.remove('hidden'); if (o.fn) o.fn(); };
                 box.appendChild(b);
             });
+            modal.classList.toggle('roll-sheet', inPlay());
             modal.classList.remove('hidden');
         }
+        // the match is being played (not the pre-match or the end): questions then sit at the bottom so the pitch stays in view
+        function inPlay() { return !!state.live && !state.isGameOver && ((state.turn[0] || 0) >= 1 || (state.turn[1] || 0) >= 1); }
 
         document.getElementById('weather-badge').addEventListener('click', () => {
             if (!document.getElementById('modal-choice').classList.contains('hidden')) return;
@@ -14356,6 +14368,25 @@
                 }
             }
 
+            if (state.blockHold && state.combat) {
+                const H = state.blockHold;
+                Object.keys(H.pos).forEach(id => {
+                    const q = getPlayerById(+id), w = H.pos[id];
+                    if (!q || (q.x === w.x && q.y === w.y) || q.x < 0 || q.x >= CFG.cols || q.y < 0 || q.y >= CFG.rows) return;
+                    let col = '#e2e8f0'; try { col = teamStyle(q.team).fill || col; } catch (e) {}
+                    const cx = q.x * ts + ts / 2, cy = q.y * ts + ts / 2, fx = w.x * ts + ts / 2, fy = w.y * ts + ts / 2, r = ts * 0.36;
+                    ctx.save();
+                    ctx.globalAlpha = 0.2; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+                    ctx.globalAlpha = 0.85; ctx.strokeStyle = col; ctx.lineWidth = Math.max(2, ts * 0.05); ctx.setLineDash([ts * 0.12, ts * 0.09]);
+                    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+                    // an arrow from where they're standing to where they'll go
+                    const dx = cx - fx, dy = cy - fy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+                    const sx = fx + ux * ts * 0.42, sy = fy + uy * ts * 0.42, ex = cx - ux * (r + 2), ey = cy - uy * (r + 2);
+                    ctx.setLineDash([]); ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+                    const hs = ts * 0.13; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex - ux * hs - uy * hs * 0.7, ey - uy * hs + ux * hs * 0.7); ctx.lineTo(ex - ux * hs + uy * hs * 0.7, ey - uy * hs - ux * hs * 0.7); ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+                    ctx.restore();
+                });
+            }
             if(state.mode === MODES.PUSH_CHOICE) {
                 state.combat.pushSquares.forEach(s => {
                     let isCrowd = (s.x < 0 || s.x >= CFG.cols || s.y < 0 || s.y >= CFG.rows);
@@ -15026,6 +15057,7 @@
                     };
                     if (defHasTaunt && state.combat.vacatedSquare) {
                         state.mode = MODES.LOCKED;
+                        try { camFocus(state.combat.def, 'modal-choice'); } catch (e) {}
                         askChoice('TAUNT', `${state.combat.def.type} taunts ${state.combat.atk.type}. Force them to follow up into the vacated square?`, 'Force Follow-up', 'No Thanks',
                             () => {
                                 let v = state.combat.vacatedSquare;
