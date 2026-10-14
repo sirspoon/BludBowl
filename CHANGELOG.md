@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.05 (14 Oct 2026)
+- **Changed:** Glart's Frenzied Rush, Roxanna's Slashing Nails and the Desperate Measure for a second foul are now only used up once the player commits (takes a step or picks a target). Cancelling before then keeps them for later.
+- **Fixed:** cancelling a second foul no longer frees up a foul that had already been used that turn.
+
 ## v2.04 (14 Oct 2026)
 - **Changed:** rolls like Bone Head, Really Stupid, Animal Savagery, Unchannelled Fury, Bloodlust and Take Root now happen when the player first does something (takes a step or picks a target), not as soon as you choose the action. Until then, Cancel undoes a mis-click with nothing rolled. Once the roll is made, the result stands for the rest of the turn, even if you cancel. ([#6](https://github.com/sirspoon/BludBowl/issues/6))
 - **Fixed:** cancelling a Punt now lets the team punt again that turn.

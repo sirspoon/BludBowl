@@ -782,7 +782,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.04</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.05</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9030,11 +9030,14 @@
         // does something with it (a step, a target), so a mis-click can still be cancelled. Once rolled, the result stands for the turn.
         const actStamp = () => `${state.driveId || 0}:${state.half}:${state.turn[state.activeTeam]}`;
         function declareAction(p) {
-            if (p.activatedAt === actStamp()) return true;                         // already rolled this turn
+            if (p.activatedAt === actStamp()) { payOnCommit(p); return true; }     // already rolled this turn
             if (AI.isAI(p.team) || p.hexHold) return commitAction(p);              // the computer (and a hexed player) find out at once
             p.pendingAct = true; return true;
         }
-        function commitAction(p) { p.pendingAct = false; p.activatedAt = actStamp(); return activationTest(p); }
+        // one-off costs of an action (a star's once-a-half ability, a Desperate Measure) are only paid once the player commits
+        const onCommitFor = (p, fn) => ({ fn, act: p.actionTaken, at: actStamp() });   // only for this action, this turn
+        function payOnCommit(p) { const f = p.onCommit; p.onCommit = null; if (f && f.act === p.actionTaken && f.at === actStamp()) f.fn(); }
+        function commitAction(p) { p.pendingAct = false; p.activatedAt = actStamp(); payOnCommit(p); return activationTest(p); }
         // would this tap actually do something for the selected player (a step or a target), rather than just look around?
         function tapCommits(p, x, y) {
             if (x < 0 || x >= CFG.cols || y < 0 || y >= CFG.rows || (x === p.x && y === p.y)) return false;
@@ -14072,11 +14075,13 @@
         document.getElementById('btn-action-block').onclick = () => { let p = getPlayerById(state.selectedId); if (p.isDown && p.skills.includes('Jump Up')) { jumpUpBlock(p); return; } p.actionTaken='block'; state.mode=MODES.ACTION_BLOCK; if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-secure').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='secure_ball'; state.mode=MODES.ACTION_SECURE_BALL; state.secureUsed=true; log(`  ${p.type} declares Secure Ball.`); if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-blitz').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='blitz'; state.mode=MODES.ACTION_BLITZ; state.blitzUsed=true; log(`  ${p.type} BLITZ!`, 'text-amber-400 font-bold');
+            p.onCommit = onCommitFor(p, () => {
             if (starIs(p, 'glart') && starFree(p, 'rush' + state.half) && !p.skills.includes('Frenzy')) { starSpend(p, 'rush' + state.half, 'Frenzied Rush'); tempSkill(p, ['Frenzy'], ['Grab']); log(`  FRENZIED RUSH! Glart has Frenzy for this Blitz (no Grab this turn).`, 'text-yellow-300 font-bold'); }
             if (starIs(p, 'roxanna') && starFree(p, 'nails' + state.half) && !p.skills.includes('Claws')) { starSpend(p, 'nails' + state.half, 'Slashing Nails'); p.skills.push('Claws'); p.tempClaws = true; log(`  SLASHING NAILS! Roxanna has Claws for this Blitz.`, 'text-yellow-300 font-bold'); }
+            });
             if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-razzle').onclick = () => { const p = getPlayerById(state.selectedId); if (!p || !dmAvail(p.team, 2) || p.razzle) return; dmUse(p.team, 2, `${p.name || p.type} will take two Actions`); p.razzle = 'armed'; updateValidActions(p); };
-        document.getElementById('btn-action-foul').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='foul'; state.mode=MODES.ACTION_FOUL; if (state.foulUsed && dmAvail(p.team, 4) && !(starIs(p, 'blackgobbo') && (state.foulers || []).length < 2)) { dmUse(p.team, 4, `${p.name || p.type} fouls again, and can't be Sent-off for it`); p.grudge = true; } else if (state.foulUsed) log(`  SNEAKIEST OF THE LOT! A second Foul this turn.`, 'text-yellow-300 font-bold'); state.foulUsed=true; (state.foulers = state.foulers || []).push(p.id); log(`  ${p.type} declares a FOUL!`, 'text-stone-400 font-bold'); if(!declareAction(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-foul').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='foul'; state.mode=MODES.ACTION_FOUL; p.foulPrev = { used: state.foulUsed, n: (state.foulers || []).length }; if (state.foulUsed && dmAvail(p.team, 4) && !(starIs(p, 'blackgobbo') && (state.foulers || []).length < 2)) { p.onCommit = onCommitFor(p, () => { dmUse(p.team, 4, `${p.name || p.type} fouls again, and can't be Sent-off for it`); p.grudge = true; }); } else if (state.foulUsed) log(`  SNEAKIEST OF THE LOT! A second Foul this turn.`, 'text-yellow-300 font-bold'); state.foulUsed=true; (state.foulers = state.foulers || []).push(p.id); log(`  ${p.type} declares a FOUL!`, 'text-stone-400 font-bold'); if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-pass').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='pass'; state.mode=MODES.ACTION_PASS; state.passUsed=true; log(`  ${p.type} declares a Pass Action.`); if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-handoff').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='handoff'; state.mode=MODES.ACTION_HANDOFF; state.handoffUsed=true; log(`  ${p.type} declares Hand-off Action.`); if(!declareAction(p)) return; updateValidActions(p); };
         
@@ -14773,9 +14778,10 @@
                 p.actionTaken=null; 
                 if (state.mbPick && state.mbPick.atkId === p.id) state.mbPick = null;   // Multiple Block: drop the first pick too
                 if (p.pendingAct) p.pendingAct = false;   // nothing was rolled, so nothing to keep
+                p.onCommit = null;                        // ...and nothing spent
                 state.stabArmed = state.chainsawArmed = state.chompArmed = state.vomitArmed = false;
                 if(state.mode===MODES.ACTION_BLITZ) state.blitzUsed=false; 
-                if(state.mode===MODES.ACTION_FOUL) state.foulUsed=false; 
+                if(state.mode===MODES.ACTION_FOUL && p.foulPrev) { state.foulUsed = p.foulPrev.used; (state.foulers || []).length = p.foulPrev.n; } 
                 if(state.mode===MODES.ACTION_PASS || state.mode===MODES.TARGET_PASS) state.passUsed=false; 
                 if(state.mode===MODES.ACTION_HANDOFF || state.mode===MODES.TARGET_HANDOFF) state.handoffUsed=false; 
                 if(state.mode===MODES.ACTION_TTM || state.mode===MODES.TARGET_TTM) { if (state.ttmKick) state.ktmUsed=false; else state.ttmUsed=false; }
