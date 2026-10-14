@@ -765,6 +765,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
+        <span id="app-version" style="position:absolute; right:max(12px, env(safe-area-inset-right)); bottom:max(8px, env(safe-area-inset-bottom)); font-size:10px; letter-spacing:.08em; color:#64748b; pointer-events:none">v2.01</span>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -2062,7 +2063,10 @@
                     }
                 }
             }
+            const mvpNeed = rep => Math.min(6, rep.rows.filter(r => r.played).length);   // six nominees, or everyone who played if fewer
             function rollMVP(rep) {
+                const extra = rep.rows.filter(r => r.played && !rep.nominees.includes(r.rec.id)).sort(() => Math.random() - 0.5);
+                while (rep.nominees.length < mvpNeed(rep) && extra.length) rep.nominees.push(extra.pop().rec.id);   // top up to the full six
                 const noms = rep.nominees.slice(0, 6);
                 if (!noms.length) { rep.mvp = { none: true }; return; }
                 let r = d6(), tries = 0;
@@ -2202,9 +2206,9 @@
                     rep.res === 'W' ? `Won: rolled ${rep.fans.roll} against ${rep.fans.before} — ${rep.fans.after > rep.fans.before ? `Dedicated Fans rise to ${rep.fans.after}!` : `no new fans (stay at ${rep.fans.after}).`}`
                         : `Lost: rolled ${rep.fans.roll} against ${rep.fans.before} — ${rep.fans.after < rep.fans.before ? `Dedicated Fans drop to ${rep.fans.after}.` : `the fans stay loyal (${rep.fans.after}).`}`;
                 const mvp = rep.mvp ? (rep.mvp.none ? '<div class="pg-dim">Nobody played, so there is no MVP.</div>' : `<div class="pg-mvp">🏆 <b>${esc(rep.mvp.name)}</b> is MVP <span class="pg-dim">(rolled ${rep.mvp.roll} of ${rep.mvp.of} nominees)</span> <b class="pg-amber">+4 SPP</b></div>`)
-                    : `<div class="pg-dim">Tick the box by up to six players who played, in the Players list below. Then roll a D6 to pick the MVP (4 SPP) from them.</div>
-                       <div class="pg-chips"><button type="button" class="pg-btn pg-btn-go" data-mvp="1" ${rep.nominees.length ? '' : 'disabled'}>Roll for MVP (${rep.nominees.length} of 6 ticked)</button>
-                       <button type="button" class="pg-btn" data-nomrand="1">${rep.nominees.length ? 'Clear the ticks' : 'Tick six at random'}</button></div>`;
+                    : `<div class="pg-dim">Tick the box by ${mvpNeed(rep) < 6 ? `all ${mvpNeed(rep)} players who played` : 'six players who played'}, in the Players list below. Then roll a D6 to pick the MVP (4 SPP) from them.</div>
+                       <div class="pg-chips"><button type="button" class="pg-btn pg-btn-go" data-mvp="1" ${rep.nominees.length === mvpNeed(rep) ? '' : 'disabled'}>Roll for MVP (${rep.nominees.length} of ${mvpNeed(rep)} ticked)</button>
+                       <button type="button" class="pg-btn" data-nomrand="1">${rep.nominees.length ? 'Clear the ticks' : mvpNeed(rep) < 6 ? 'Tick them all' : 'Tick six at random'}</button></div>`;
                 const rows = rep.rows.slice().sort((a, b) => (b.spp - a.spp) || (+b.played - +a.played)).map(r => rowHtml(rep, r)).join('');
                 const emText = rep.em ? `Expensive Mistakes (treasury ${k(rep.em.before)}, rolled ${rep.em.r}): ${rep.em.text}` : (finished ? 'Treasury under 100k: no Expensive Mistakes roll.' : '');
                 el.innerHTML = `
@@ -7540,6 +7544,10 @@
                 
                 announce("TOUCHDOWN!", state.half === 3 ? `${teamName} score in extra time and win it!` : `${teamName} score!`, "bg-amber-600/90", () => {
                     if (state.half === 3) { triggerGameOver(); return; }   // sudden death
+                    if (state.turn[TEAMS.HUMAN] >= TURNS && state.turn[TEAMS.ORC] >= TURNS) {   // no turns left: straight to half time / full time, no new kick-off
+                        if (state.half === 1) endTeamTurn(); else triggerGameOver();
+                        return;
+                    }
                     resetPitch(recTeam);
                 }, 3500);
                 
