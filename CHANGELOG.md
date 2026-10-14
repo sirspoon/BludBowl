@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.53 (14 Oct 2026)
+- **Fixed:** a replay could get stuck panning over empty pitch, with no players or ball, and never finish. This happened in any match where the computer's turns had been sped up (4×), even when the replay was of your own throw. It could also happen on the second device in a two-device match. Replays now always run in real time.
+
 ## v2.52 (14 Oct 2026)
 - **Added:** replays. Once all the dice for a pass, Throw Team-mate or bomb are done, a close-up replay plays from low down behind the thrower. The camera follows the ball (or the thrown player, or the bomb) past the other players, in the style of an old 16-bit console.
   - **Passes:** catches, drops, interception attempts, inaccurate passes, passes into the crowd and fumbles.

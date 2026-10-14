@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.52</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.53</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -16092,9 +16092,11 @@
             }
 
             // ---- the timeline: segments of a set length, each moving things along as it goes (some in slow motion) ----
-            function tick(now) {
+            // timed in real time throughout: the game clock runs ahead after the computer's turns are sped up (and a guest's follows the host's),
+            // and the frame timestamps are real time, so mixing the two could make the replay's time run backwards and never get anywhere
+            function tick() {
                 raf = requestAnimationFrame(tick);
-                const cur = segs[si], dt = Math.min(60, now - lastReal) * ((cur && cur.slow) || 1); lastReal = now; clockMs += dt;
+                const now = CLOCK.real(), cur = segs[si], dt = Math.max(0, Math.min(60, now - lastReal)) * ((cur && cur.slow) || 1); lastReal = now; clockMs += dt;
                 while (si < segs.length && clockMs - segT0 >= segs[si].ms) { const s = segs[si]; if (!s._in) enter(s, now); s.fn(1); segT0 += s.ms; si++; }
                 if (si >= segs.length) { draw(now); finish(); return; }
                 const s = segs[si]; if (!s._in) enter(s, now); s.fn(Math.min(1, (clockMs - segT0) / s.ms));
@@ -16320,7 +16322,7 @@
                     root.classList.remove('hidden'); size();
                     if (!setup(r)) { root.classList.add('hidden'); if (done) done(); return; }
                     script = r; onDone = done;
-                    lastReal = performance.now(); draw(lastReal); raf = requestAnimationFrame(tick);
+                    lastReal = CLOCK.real(); draw(lastReal); raf = requestAnimationFrame(tick);
                 } catch (e) { console.error(e); if (root) root.classList.add('hidden'); script = null; if (done) done(); }
             }
             window.addEventListener('resize', () => { if (script) size(); });
