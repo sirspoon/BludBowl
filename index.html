@@ -825,7 +825,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.26</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.27</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -12122,9 +12122,14 @@
                 });
             }
             // the floor: a strip of the real pitch, a little darker towards the back
-            if (tex) {
-                const sw = Math.min(tex.width * 0.3, tex.height * (W / (H - hz)) * 0.55), sx0 = tex.width * 0.12, sh = sw * (H - hz) / W;   // (from one side, clear of the halfway line)
-                g.drawImage(tex, sx0, tex.height * 0.5 - sh / 2, sw, sh, 0, hz, W, H - hz);
+            if (tex) {   // laid flat in perspective: row by row, the further back the row the wider (and smaller) the patch of pitch it shows
+                const tile = tex.width / CFG.cols, cx = tex.width * 0.25, nearW = tile * 3.2, D = 3.6, depth = tile * 3.4, v0 = tex.height * 0.62;
+                const rows = Math.max(12, Math.round((H - hz) * dpr)), rh = (H - hz) / rows;
+                for (let i = 0; i < rows; i++) {
+                    const t = (i + 0.5) / rows, z = 1 / (1 / D + (1 - 1 / D) * t);   // z: 1 at the front edge, D at the back
+                    const sw = Math.min(tex.width, nearW * z), sy = Math.max(0, Math.min(tex.height - 1, v0 - (z - 1) / (D - 1) * depth));
+                    g.drawImage(tex, Math.max(0, Math.min(tex.width - sw, cx - sw / 2)), sy, sw, Math.max(1, depth / rows / 2), 0, hz + i * rh, W, rh + 0.6);
+                }
             } else { g.fillStyle = mix(base, 1); g.fillRect(0, hz, W, H - hz); }
             const fade = g.createLinearGradient(0, hz, 0, H); fade.addColorStop(0, 'rgba(0,0,0,0.45)'); fade.addColorStop(0.5, 'rgba(0,0,0,0.12)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
             g.fillStyle = fade; g.fillRect(0, hz, W, H - hz);

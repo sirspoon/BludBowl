@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.27 (14 Oct 2026)
+- **Changed:** the pitch under the players in the block clash animation is now laid flat in perspective, so it looks like ground stretching away behind them rather than a flat picture. ([#9](https://github.com/sirspoon/BludBowl/issues/9))
+
 ## v2.26 (14 Oct 2026)
 - **Changed:** the block clash animation now matches the pitch being played on. The players stand on a strip of the actual pitch (grass, muddy grass, flagstones, temple stones or graveyard grass), the sky takes the pitch's colours, and the scenery behind them fits: a grandstand of fans under floodlights for grass pitches, a castle wall for Mossy Flagstones, a stepped temple with vines for the Jungle Temple, and tombstones, crosses, a bare tree and the moon for the Graveyard. ([#9](https://github.com/sirspoon/BludBowl/issues/9))
 
