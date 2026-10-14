@@ -12,5 +12,8 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
 - With each version bump, add an entry at the top of `CHANGELOG.md` (version, date, what
   changed in plain words, linking any issue it closes). Pushing tags is blocked in cloud
   sessions, so the changelog is the version history.
+- When a change fixes an issue, comment on it saying which version fixed it and what changed
+  (`gh api -X POST repos/sirspoon/BludBowl/issues/N/comments -f body=...`). Leave the issue
+  open: the owner checks the fix on the live site and closes it themselves.
 - Use the GitHub REST API (`gh api repos/sirspoon/BludBowl/...`) for issues;
   `gh issue list` and other GraphQL-based commands are blocked in cloud sessions.
