@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.14 (14 Oct 2026)
+- **Changed:** a Journeyman you hire after a match (and a player Raised from the dead who joins) now gets a proper random name for their race instead of keeping "Journeyman 1". A name you've already changed is kept. ([#10](https://github.com/sirspoon/BludBowl/issues/10))
+
 ## v2.13 (14 Oct 2026)
 - **Changed:** after rolling the D8 for a Characteristic Improvement, you can take a Primary or Secondary skill instead of the rolled characteristic. The SPP for the characteristic is still spent.
 - **Changed:** a player with enough SPP for a Characteristic Improvement must now take an advancement before the post-game can be finished, as the rules require. Their row says "must advance".

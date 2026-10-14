@@ -794,7 +794,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.13</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.14</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -2116,6 +2116,11 @@
                 row.rec.spp += SPP.mvp; row.rec.stats.mvp++; row.rec.stats.sppTotal += SPP.mvp; row.spp += SPP.mvp; row.st.mvp = 1;
                 rep.mvp = { id: row.rec.id, name: row.rec.name, roll: r, of: noms.length };
             }
+            // a Journeyman (or a Raised player) who joins the roster swaps the stand-in name for a proper one of their race
+            function realName(t, p) {
+                if (p.name && !/^(journeyman|rookie)\b/i.test(p.name.trim())) return;
+                p.name = TB.randomName(t.race, new Set(t.players.map(x => x.name)));
+            }
             function autoTeam(rep) {   // a computer-run team looks after itself
                 const t = rep.t;
                 if (rep.sev) sevAuto(rep);
@@ -2124,7 +2129,7 @@
                     rep.rows.forEach(r => { if (!r.jm && !r.dead) { const got = autoAdvance(t.race, r.rec); if (got.length) r.autoAdv = got; } });
                 }
                 rep.rows.forEach(r => {   // Masters of Undeath: a Raised player joins for free if there's room
-                    if (r.raised && !r.dead && t.players.length < 16 && !t.players.some(x => x.id === r.rec.id)) { const p = norm(Object.assign({}, r.rec)); delete p.journeyman; p.id = uid(); r.rec.id = p.id; r.rec = p; t.players.push(p); rep.hired.push(p.name); }
+                    if (r.raised && !r.dead && t.players.length < 16 && !t.players.some(x => x.id === r.rec.id)) { const p = norm(Object.assign({}, r.rec)); delete p.journeyman; realName(t, p); p.id = uid(); r.rec.id = p.id; r.rec = p; t.players.push(p); rep.hired.push(p.name); }
                 });
                 // keep at least 11 (Sevens: 7) fit players if it can afford them
                 const jpos = JOURNEY[t.race], cost = RACES[t.race].positions[jpos].cost, XI = squadOf(t), MX = rep.sev ? SEV.MAXP : 16;
@@ -2352,6 +2357,8 @@
                         const row = rep.rows.find(r => r.rec.id === d.hirej), cost = row.raised ? 0 : RACES[rep.t.race].positions[row.rec.pos].cost;
                         if (rep.t.treasury >= cost && rep.t.players.length < (rep.sev ? SEV.MAXP : 16) && !rep.t.players.some(x => x.id === row.rec.id)) {
                             const p = norm(Object.assign({}, row.rec)); delete p.journeyman;
+                            const was = p.name; realName(rep.t, p);
+                            if (p.name !== was) log(`  ${was} signs for ${rep.t.name} as ${p.name}.`, 'text-emerald-300');
                             p.id = uid(); row.rec.id = p.id; row.rec = p; rep.t.players.push(p); rep.t.treasury -= cost;
                         }
                     }
