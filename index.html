@@ -95,6 +95,9 @@
         .th-inj, .pg-injtags { margin-top: 2px; font-size: 11px; }
         /* ---- interface size: --ui grows the panels and pop-ups on bigger screens (and with the Aa button) ---- */
         :root { --ui: 1; }
+        #log-grip { flex: none; height: 12px; display: flex; align-items: center; justify-content: center; cursor: ns-resize; touch-action: none; border-radius: 12px 12px 0 0; background: rgba(30,41,59,.6); }
+        #log-grip span { width: 34px; height: 4px; border-radius: 3px; background: #64748b; }
+        #log-grip:hover span, #log-grip.drag span { background: #fbbf24; }
         #top-bar-wrap, #panel-log-container, #panel-unit-container, #setup-controls-container, #event-panel,
         .modal-bg > div, #removal-toast > div, #skill-tip, #team-panel { zoom: var(--ui); }
         #skill-tip {
@@ -680,7 +683,8 @@
                 bottom: 0.5rem !important;
                 width: 28% !important;
                 max-width: 240px !important;
-                max-height: calc(48dvh / var(--ui)) !important;
+                height: var(--log-h, calc(30dvh / var(--ui)));   /* shorter to start with; drag the grip on top to resize */
+                max-height: calc(80dvh / var(--ui)) !important;
             }
             #panel-unit-container {
                 right: 0.5rem !important;
@@ -723,7 +727,8 @@
                 bottom: 0.35rem !important;
                 width: calc(47vw - 0.5rem) !important;
                 max-width: 200px !important;
-                max-height: calc(35dvh / var(--ui)) !important;
+                height: var(--log-h, calc(22dvh / var(--ui)));
+                max-height: calc(75dvh / var(--ui)) !important;
             }
             #panel-unit-container {
                 right: 0.35rem !important;
@@ -820,7 +825,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.24</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.25</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1144,10 +1149,11 @@
         </div>
 
         <div id="panel-log-container" class="fixed panel-glass rounded-xl flex flex-col pointer-events-auto">
+            <div id="log-grip" role="separator" aria-orientation="horizontal" aria-label="Resize the match log" title="Drag to make the log taller or shorter (double-tap to reset)"><span></span></div>
             <div class="bg-slate-800/80 px-2 py-0.5 border-b border-slate-700/80 shrink-0">
                 <h3 class="text-slate-300 font-bold uppercase text-[9px] tracking-wide m-0">Match Log</h3>
             </div>
-            <div id="message-log" class="overflow-y-auto p-1.5 text-[10px] text-slate-300 space-y-1 custom-scroll flex flex-col"></div>
+            <div id="message-log" class="overflow-y-auto p-1.5 text-[10px] text-slate-300 space-y-1 custom-scroll flex flex-col" style="flex: 1 1 auto; min-height: 0"></div>
         </div>
 
         <div id="panel-unit-container" class="fixed panel-glass rounded-xl flex flex-col pointer-events-auto">
@@ -1404,6 +1410,38 @@
             return Math.max(1, Math.min(2, Math.round(s * 20) / 20));
         }
         function uiScale() { return uiPref === 'auto' ? autoUiScale() : uiPref; }
+        // The match log: drag the grip on its top edge to make it taller or shorter. Remembered per orientation; double-tap resets.
+        (function logResize() {
+            const go = () => {
+                const box = document.getElementById('panel-log-container'), grip = document.getElementById('log-grip'), log = document.getElementById('message-log');
+                if (!box || !grip) return;
+                const key = () => 'bb-log-h-' + (innerWidth > innerHeight ? 'land' : 'port');
+                const apply = () => { let h = null; try { h = +localStorage.getItem(key()) || null; } catch (e) {} if (h) box.style.setProperty('--log-h', h + 'px'); else box.style.removeProperty('--log-h'); };
+                apply(); addEventListener('resize', apply);
+                let y0 = 0, h0 = 0, lastTap = 0, dragging = false;
+                grip.addEventListener('pointerdown', e => {
+                    e.preventDefault(); e.stopPropagation();
+                    const now = Date.now();
+                    if (now - lastTap < 350) { try { localStorage.removeItem(key()); } catch (er) {} apply(); lastTap = 0; return; }   // double-tap: back to the default
+                    lastTap = now; dragging = true; grip.classList.add('drag');
+                    y0 = e.clientY; h0 = box.getBoundingClientRect().height / uiScale();
+                    try { grip.setPointerCapture(e.pointerId); } catch (er) {}
+                });
+                grip.addEventListener('pointermove', e => {
+                    if (!dragging) return;
+                    const max = innerHeight * 0.8 / uiScale(), h = Math.round(Math.max(60, Math.min(max, h0 + (y0 - e.clientY) / uiScale())));
+                    box.style.setProperty('--log-h', h + 'px');
+                    if (log) log.scrollTop = log.scrollHeight;   // keep the newest lines in view
+                });
+                const stop = () => {
+                    if (!dragging) return; dragging = false; grip.classList.remove('drag');
+                    const v = parseFloat(box.style.getPropertyValue('--log-h'));
+                    if (v) try { localStorage.setItem(key(), String(v)); } catch (er) {}
+                };
+                grip.addEventListener('pointerup', stop); grip.addEventListener('pointercancel', stop);
+            };
+            document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', go) : go();
+        })();
         function applyUiScale() { document.documentElement.style.setProperty('--ui', String(uiScale())); }
         applyUiScale();
         window.addEventListener('resize', applyUiScale);

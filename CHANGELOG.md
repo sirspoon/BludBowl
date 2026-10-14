@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.25 (14 Oct 2026)
+- **Changed:** the match log starts shorter (about a fifth of the screen on a phone held upright, a third on a wider screen). Drag the grip on its top edge up to make it taller or down to make it shorter. The size you choose is remembered (separately for upright and sideways), and double-tapping the grip puts it back to the default. ([#4](https://github.com/sirspoon/BludBowl/issues/4))
+
 ## v2.24 (14 Oct 2026)
 - **Fixed:** with **Speed up** on, the computer's blocks (the dice panel, the clash animation and the computer picking its die) now run at the faster speed too. They were dropping back to normal speed because the game treated every dice panel as a question for you, even when the computer was the one choosing. The same applied to the computer's own re-roll and choice panels. Panels that really are for you still slow down.
 
