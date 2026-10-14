@@ -513,6 +513,16 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.8); border-radius: 4px; }
 
         .modal-bg { background-color: rgba(11, 15, 25, 0.85); backdrop-filter: blur(4px); }
+        #pick-banner { position: fixed; z-index: 35; left: 50%; top: 4.8rem; transform: translateX(-50%); width: min(92vw, 520px); display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 12px; border-radius: 10px;
+            background: rgba(15, 23, 42, .95); border: 1px solid #f59e0b; box-shadow: 0 8px 24px rgba(0,0,0,.5); font-family: Inter, system-ui, sans-serif; color: #e2e8f0; }
+        #pick-banner.hidden { display: none; }
+        #pick-banner .pb-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        #pick-banner .pb-title { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #fbbf24; }
+        #pick-banner .pb-hint { font-size: 12.5px; line-height: 1.35; color: #cbd5e1; }
+        #pick-banner .pb-btns { display: flex; flex-direction: column; gap: 5px; flex: none; }
+        #pick-banner button { border-radius: 7px; padding: 7px 12px; font: 800 11.5px/1 Inter, system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
+        #pick-banner .pb-go { background: #d97706; border: 0; color: #fff; } #pick-banner .pb-go:hover { background: #f59e0b; }
+        #pick-banner .pb-cancel { background: transparent; border: 1px solid #475569; color: #cbd5e1; } #pick-banner .pb-cancel:hover { border-color: #94a3b8; color: #fff; }
         #modal-ind-intro { position: fixed; inset: 0; z-index: 250; display: grid; place-items: center; padding: 16px; background: rgba(11, 15, 25, .72); font-family: Inter, system-ui, sans-serif; }
         #modal-ind-intro.hidden { display: none; }
         #modal-ind-intro .ii-card { width: min(460px, 100%); max-height: 86vh; overflow-y: auto; background: #1e1b2e; border: 1px solid #4c1d95; border-top: 4px solid #8b5cf6; border-radius: 12px; padding: 14px 16px 16px; box-shadow: 0 20px 50px rgba(0,0,0,.6); color: #e2e8f0; text-align: center; }
@@ -810,7 +820,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.19</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.20</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6942,12 +6952,24 @@
                 if (d.wizardArmed === 'theirs' && state.activeTeam === t) continue;
                 d.wizardArmed = false;
                 const nm = p => p.name || p.type;
-                const opts = [
-                    ...zapTargets(t).map(z => ({ label: `Zap! ${nm(z.p)} (${z.p.type}, ST ${z.p.st}: ${Math.round(zapChance(z.p) * 100)}%)${state.ball.carrierId === z.p.id ? ' — has the ball' : ''}`, fn: () => castZap(t, z.p, done) })),
-                    ...fireballSpots(t).map(f => ({ label: `Fireball at [${f.x}, ${f.y}]: ${f.opp} of theirs${f.own ? `, ${f.own} of yours` : ''} in the blast`, fn: () => castFireball(t, f, done) })),
-                    { label: 'Not now (keep the wizard)', fn: done }];
-                askOptions('SPORTS-WIZARD', `${ROSTERS[t].name}'s wizard is ready. Fireball: everyone in or next to the square is hit on a 4+ (knocked down, +1 armour). Zap!: a D6 equal to or over the target's ST (or a 6) turns them into a frog until the end of the drive.`, opts, { team: t, ai: 0 });
-                return true;
+                const menu = () => askOptions('SPORTS-WIZARD', `${ROSTERS[t].name}'s wizard is ready. Fireball: everyone in or next to the square you pick is hit on a 4+ (Knocked Down, +1 to the armour roll). Zap!: a D6 equal to or over the target's ST (or a 6) turns them into a frog.`, [
+                    { label: 'Zap! a player', fn: () => {
+                        const best = new Set(zapTargets(t).map(z => z.p.id));
+                        pitchPick({ title: 'ZAP!', hint: 'Tap the player to turn into a frog (the glowing ones are the best bets).', confirmLabel: 'Zap!',
+                            cells: state.players.filter(q => onPitchP(q) && !q.frog).map(q => ({ x: q.x, y: q.y, data: q, hint: best.has(q.id) })),
+                            describe: c => `${nm(c.data)} (${c.data.type}, ST ${c.data.st})${c.data.team === t ? ', one of yours' : ''}${state.ball.carrierId === c.data.id ? ', has the ball' : ''}: ${Math.round(zapChance(c.data) * 100)}% to turn them into a frog.`,
+                            onPick: q => castZap(t, q, done), onCancel: menu });
+                    } },
+                    { label: 'Fireball a square', fn: () => {
+                        const best = fireballSpots(t), cells = [];
+                        for (let x = 0; x < CFG.cols; x++) for (let y = 0; y < CFG.rows; y++) cells.push({ x, y, hint: best.some(b => b.x === x && b.y === y) });
+                        pitchPick({ title: 'FIREBALL', hint: 'Tap the square to aim at: everyone in it or next to it is hit on a 4+ (the glowing squares are the best bets).', blast: true, confirmLabel: 'Cast Fireball',
+                            cells, describe: c => { const hit = state.players.filter(q => onPitchP(q) && Math.abs(q.x - c.x) <= 1 && Math.abs(q.y - c.y) <= 1), opp = hit.filter(q => q.team !== t).length, own = hit.length - opp;
+                                return `Aimed at [${c.x}, ${c.y}]: ${opp} of theirs${own ? ` and ${own} of yours` : ''} in the blast.`; },
+                            onPick: c => castFireball(t, c, done), onCancel: menu });
+                    } },
+                    { label: 'Not now (keep the wizard)', fn: done }]);
+                menu(); return true;
             }
             return false;
         }
@@ -9134,9 +9156,69 @@
                 return { label: 'Beer Barrel Bash', fn: () => pickPlayer(p, 'BEER BARREL BASH', 'Pick an opponent within 3 squares: 3+ they go down, 2 nothing, 1 Thorsson falls over. His activation then ends.', ts, q => thorssonBash(p, q, key)) };
             }
         };
+        // Pick a square or a player on the pitch itself: the squares you can pick glow, a banner says what to do, a tap selects one
+        // (showing what would happen) and Confirm (or a second tap on it) goes ahead. Cancel goes back.
+        //   cells: [{ x, y, data, hint }]  (hint: a suggested pick, drawn brighter)   blast: also outline the 3x3 around the selection
+        //   describe(cell) -> text for the banner once a square is selected
+        function pitchPick({ title, hint, cells, onPick, onCancel, describe, blast, confirmLabel }) {
+            if (!cells.length) { if (onCancel) onCancel(); return; }
+            const prevMode = state.mode;
+            state.pitchPick = { title, hint, cells, onPick, onCancel, describe, blast, sel: null, prevMode };
+            state.mode = MODES.LOCKED;
+            let el = document.getElementById('pick-banner');
+            if (!el) {
+                el = document.createElement('div'); el.id = 'pick-banner'; el.setAttribute('role', 'status'); el.setAttribute('data-tip-pass', '');
+                el.innerHTML = `<div class="pb-text"><b class="pb-title"></b><span class="pb-hint"></span></div><div class="pb-btns"><button type="button" class="pb-go" hidden></button><button type="button" class="pb-cancel">Cancel</button></div>`;
+                document.body.appendChild(el);
+                el.querySelector('.pb-cancel').onclick = () => { const pp = state.pitchPick; if (!pp) return; endPitchPick(); if (pp.onCancel) pp.onCancel(); };
+                el.querySelector('.pb-go').onclick = () => { const pp = state.pitchPick; if (pp && pp.sel) { endPitchPick(); pp.onPick(pp.sel.data != null ? pp.sel.data : pp.sel); } };
+            }
+            el.querySelector('.pb-go').textContent = confirmLabel || 'Confirm';
+            paintPitchPick(); el.classList.remove('hidden');
+            followAction(cells.filter(c => c.hint).length ? cells.filter(c => c.hint) : cells.slice(0, 1));
+            render();
+        }
+        function paintPitchPick() {
+            const pp = state.pitchPick, el = document.getElementById('pick-banner'); if (!pp || !el) return;
+            el.querySelector('.pb-title').textContent = pp.title;
+            el.querySelector('.pb-hint').textContent = pp.sel ? (pp.describe ? pp.describe(pp.sel) : 'Tap Confirm, or tap it again.') : pp.hint;
+            el.querySelector('.pb-go').hidden = !pp.sel;
+        }
+        function endPitchPick() {
+            const pp = state.pitchPick; state.pitchPick = null;
+            const el = document.getElementById('pick-banner'); if (el) el.classList.add('hidden');
+            if (pp && state.mode === MODES.LOCKED) state.mode = pp.prevMode;
+            render();
+        }
+        function pitchPickTap(x, y) {   // true when the tap belonged to a pick in progress
+            const pp = state.pitchPick; if (!pp) return false;
+            const c = pp.cells.find(c => c.x === x && c.y === y);
+            if (!c) return true;   // off the list: ignore it, the pick stays open
+            if (pp.sel === c) { endPitchPick(); pp.onPick(c.data != null ? c.data : c); return true; }
+            pp.sel = c; paintPitchPick(); render(); return true;
+        }
+        function drawPitchPick(ts) {
+            const pp = state.pitchPick; if (!pp) return;
+            const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 260);
+            ctx.save();
+            pp.cells.forEach(c => {
+                const on = pp.sel === c;
+                ctx.fillStyle = on ? 'rgba(251,191,36,0.38)' : c.hint ? `rgba(251,191,36,${0.16 + 0.1 * pulse})` : 'rgba(255,255,255,0.07)';
+                ctx.fillRect(c.x * ts + 1, c.y * ts + 1, ts - 2, ts - 2);
+                if (on || c.hint || pp.cells.length < 60) { ctx.strokeStyle = on ? '#fbbf24' : c.hint ? 'rgba(251,191,36,0.85)' : 'rgba(255,255,255,0.35)'; ctx.lineWidth = on ? 3 : 1.5; ctx.strokeRect(c.x * ts + 2, c.y * ts + 2, ts - 4, ts - 4); }
+            });
+            if (pp.blast && pp.sel) {   // the 3x3 the spell would hit
+                const x0 = Math.max(0, pp.sel.x - 1), y0 = Math.max(0, pp.sel.y - 1), x1 = Math.min(CFG.cols - 1, pp.sel.x + 1), y1 = Math.min(CFG.rows - 1, pp.sel.y + 1);
+                ctx.fillStyle = `rgba(249,115,22,${0.18 + 0.12 * pulse})`; ctx.fillRect(x0 * ts, y0 * ts, (x1 - x0 + 1) * ts, (y1 - y0 + 1) * ts);
+                ctx.strokeStyle = '#f97316'; ctx.lineWidth = 3; ctx.setLineDash([8, 5]); ctx.strokeRect(x0 * ts, y0 * ts, (x1 - x0 + 1) * ts, (y1 - y0 + 1) * ts); ctx.setLineDash([]);
+            }
+            ctx.restore();
+        }
         function pickPlayer(p, title, text, list, fn) {
-            if (list.length === 1 && AI.isAI(p.team)) { fn(list[0]); return; }
-            askOptions(title, text, list.slice(0, 14).map(q => ({ label: `${q.name || q.type} (${q.type})${q.id === state.ball.carrierId ? ' · has the ball' : ''} [${q.x}, ${q.y}]`, fn: () => fn(q) })).concat([{ label: 'Not now', fn: () => refreshSelection(p) }]), { team: p.team, ai: 0 });
+            if (AI.isAI(p.team)) { fn(list[0]); return; }
+            pitchPick({ title, hint: `${text} Tap a highlighted player.`, cells: list.map(q => ({ x: q.x, y: q.y, data: q, hint: true })),
+                describe: c => `${c.data.name || c.data.type} (${c.data.type})${c.data.id === state.ball.carrierId ? ', has the ball' : ''}. Tap Confirm, or tap them again.`,
+                onPick: q => fn(q), onCancel: () => refreshSelection(p) });
         }
         function kirothInk(p, q) {
             starSpend(p, 'ink', 'Black Ink'); state.turnActed = true; q.isDistracted = true;
@@ -13884,6 +13966,7 @@
                     ctx.restore();
                 }
             }
+            drawPitchPick(ts);
             WFX.air(ctx, CFG.cols * ts, CFG.rows * ts, ts, performance.now(), wxFX, wxDim, wxStill());
             if (state.floaters && state.floaters.length) drawFloaters(ts);
 
@@ -14023,6 +14106,7 @@
         // a tap on a pitch square (people via the canvas, the computer coach directly)
         function handleGridClick(x, y) {
             if(x<-1 || x>CFG.cols || y<-1 || y>CFG.rows) return; 
+            if (pitchPickTap(x, y)) return;   // picking a square or player for a spell or ability
             if (isWalking()) return;   // taps while a player is still walking would start a second move on top of the first
             {   // the first real step or target: now roll for Bone Head and the like, then carry on with the tap
                 const sp = getPlayerById(state.selectedId);
@@ -17098,7 +17182,7 @@
             const placeOverlays = () => {
                 const tb = document.getElementById('top-bar-panel'); if (!tb) return;
                 const top = (Math.ceil(tb.getBoundingClientRect().bottom + 6) / uiScale()) + 'px';
-                ['setup-controls-container','event-panel'].forEach(id => {
+                ['setup-controls-container','event-panel','pick-banner'].forEach(id => {
                     const el = document.getElementById(id); if (el) el.style.setProperty('top', top, 'important');
                 });
             };
