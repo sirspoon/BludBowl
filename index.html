@@ -825,7 +825,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.30</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.31</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -12068,7 +12068,8 @@
         // a graveyard). Built once per pitch and size, then just copied every frame.
         let clashBg = { key: '', cv: null };
         function clashBackdrop(W, H, ground) {
-            const tex = PITCH.tex, style = PITCH.style || 'blades', key = [style, PITCH.seed, W, H, !!tex].join('|');
+            const home = (ROSTERS[0] && (ROSTERS[0].race || ROSTERS[0].key)) || '';
+            const tex = PITCH.tex, style = PITCH.style || 'blades', key = [style, PITCH.seed, W, H, !!tex, home].join('|');
             if (clashBg.key === key && clashBg.cv) return clashBg.cv;
             const cv = document.createElement('canvas'), dpr = window.devicePixelRatio || 1;
             cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
@@ -12077,8 +12078,9 @@
             let base = [47, 107, 42];
             if (tex) { try { const s1 = document.createElement('canvas'); s1.width = s1.height = 8; const sc = s1.getContext('2d'); sc.drawImage(tex, 0, 0, 8, 8); const d = sc.getImageData(0, 0, 8, 8).data; let r = 0, gg = 0, b = 0; for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; base = [r / n, gg / n, b / n].map(Math.round); } catch (e) {} }
             const mix = (a, k) => `rgb(${Math.round(a[0] * k + 11 * (1 - k))},${Math.round(a[1] * k + 15 * (1 - k))},${Math.round(a[2] * k + 25 * (1 - k))})`;   // towards the night sky
-            const sky = g.createLinearGradient(0, 0, 0, ground), grassy = style === 'blades' || style === 'worn';
+            const sky = g.createLinearGradient(0, 0, 0, ground), grassy = style === 'blades' || style === 'worn', elven = grassy && home === 'highelf';
             if (style === 'jungle') { sky.addColorStop(0, 'rgb(40,74,58)'); sky.addColorStop(0.7, 'rgb(104,140,98)'); sky.addColorStop(1, 'rgb(150,172,120)'); }   // misty jungle air
+            else if (elven) { sky.addColorStop(0, 'rgb(150,186,222)'); sky.addColorStop(0.65, 'rgb(214,226,236)'); sky.addColorStop(1, 'rgb(246,236,210)'); }   // a soft, luminous elven sky
             else if (grassy) { sky.addColorStop(0, 'rgb(74,138,206)'); sky.addColorStop(0.75, 'rgb(140,190,232)'); sky.addColorStop(1, 'rgb(176,210,236)'); }   // a daytime-blue sky over the grass
             else { sky.addColorStop(0, mix(base, 0.18)); sky.addColorStop(1, mix(base, 0.5)); }
             g.fillStyle = sky; g.fillRect(0, 0, W, H);
@@ -12128,6 +12130,35 @@
                 for (let r = 0; r < 4; r++) { const y = hz - 38 + r * 9.5; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
                     for (let x = (r % 2) * 14; x < W; x += 28) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 9.5); g.stroke(); } }
                 g.fillStyle = sil2; for (let x = 6; x < W; x += 26) g.fillRect(x, hz - 46, 14, 8);   // battlements
+            } else if (elven) {   // High Elves at home: a hidden valley of white towers, waterfalls and mountains (think Rivendell)
+                const sun = g.createRadialGradient(W * 0.7, 18, 2, W * 0.7, 18, 90); sun.addColorStop(0, 'rgba(255,244,214,0.75)'); sun.addColorStop(1, 'rgba(255,244,214,0)');
+                g.fillStyle = sun; g.fillRect(0, 0, W, hz);
+                const ridge = (pts, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(0, hz); pts.forEach(([x, y]) => g.lineTo(x * W, y)); g.lineTo(W, hz); g.closePath(); g.fill(); };
+                ridge([[0, 34], [0.12, 14], [0.22, 30], [0.34, 8], [0.46, 28], [0.6, 12], [0.72, 26], [0.86, 6], [1, 30]], 'rgb(150,168,190)');   // far peaks
+                g.fillStyle = 'rgba(250,252,255,0.85)';   // their snow
+                [[0.12, 14], [0.34, 8], [0.6, 12], [0.86, 6]].forEach(([x, y]) => { g.beginPath(); g.moveTo(x * W - 9, y + 9); g.lineTo(x * W, y); g.lineTo(x * W + 9, y + 9); g.closePath(); g.fill(); });
+                ridge([[0, 58], [0.1, 40], [0.2, 52], [0.32, 42], [0.42, 56], [0.58, 46], [0.7, 58], [0.82, 44], [1, 54]], 'rgb(118,140,150)');   // nearer cliffs
+                [[0.27, 44, 34], [0.77, 48, 30]].forEach(([x, y, h]) => {   // waterfalls down the cliffs
+                    const wf = g.createLinearGradient(0, y, 0, y + h); wf.addColorStop(0, 'rgba(255,255,255,0.95)'); wf.addColorStop(1, 'rgba(220,236,250,0.4)');
+                    g.fillStyle = wf; g.fillRect(x * W - 2.5, y, 5, h); g.fillStyle = 'rgba(255,255,255,0.35)'; g.beginPath(); g.ellipse(x * W, y + h, 10, 3, 0, 0, 7); g.fill();
+                });
+                const tower = (x, base, w, h, roof) => {   // a slender white tower with a pointed roof and a golden tip
+                    g.fillStyle = 'rgb(240,238,230)'; g.fillRect(x - w / 2, base - h, w, h);
+                    g.fillStyle = 'rgba(160,170,180,0.5)'; g.fillRect(x + w / 2 - 1.5, base - h, 1.5, h);   // a little shade on one side
+                    g.fillStyle = 'rgb(120,150,168)'; for (let y = base - h + 6; y < base - 4; y += 9) { g.beginPath(); g.moveTo(x - 1.2, y + 4); g.lineTo(x - 1.2, y + 1); g.arc(x, y + 1, 1.2, Math.PI, 0); g.lineTo(x + 1.2, y + 4); g.fill(); }   // arched windows
+                    g.fillStyle = roof; g.beginPath(); g.moveTo(x - w / 2 - 2, base - h); g.lineTo(x, base - h - w * 2.2); g.lineTo(x + w / 2 + 2, base - h); g.closePath(); g.fill();
+                    g.strokeStyle = 'rgb(214,178,90)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, base - h - w * 2.2); g.lineTo(x, base - h - w * 2.2 - 6); g.stroke();
+                };
+                const roofA = 'rgb(108,150,160)', roofB = 'rgb(196,170,110)';
+                tower(W * 0.36, hz - 4, 8, 50, roofA); tower(W * 0.44, hz - 4, 11, 66, roofB); tower(W * 0.52, hz - 4, 7, 40, roofA);
+                tower(W * 0.62, hz - 4, 9, 56, roofA); tower(W * 0.12, hz - 4, 7, 38, roofB); tower(W * 0.9, hz - 4, 8, 46, roofB);
+                g.strokeStyle = 'rgb(236,234,226)'; g.lineWidth = 2.4;   // an arched bridge between the towers
+                g.beginPath(); g.moveTo(W * 0.44 + 6, hz - 30); g.quadraticCurveTo(W * 0.53, hz - 18, W * 0.62 - 5, hz - 30); g.stroke();
+                { const mist = g.createLinearGradient(0, hz - 30, 0, hz); mist.addColorStop(0, 'rgba(244,246,248,0)'); mist.addColorStop(1, 'rgba(244,246,248,0.55)'); g.fillStyle = mist; g.fillRect(0, hz - 30, W, 30); }   // mist in the valley
+                for (let i = 0; i < 9; i++) {   // pale silver-green trees along the edge of the pitch
+                    const x = (i + 0.5) * W / 9 + ((i * 17) % 9) - 4, r = 9 + (i * 7) % 6;
+                    g.fillStyle = i % 2 ? 'rgb(120,152,112)' : 'rgb(140,170,124)'; g.beginPath(); g.ellipse(x, hz - r * 0.9, r * 0.75, r * 1.25, 0, 0, 7); g.fill();
+                }
             } else {   // grass and muddy grass: a grandstand full of fans, under the floodlights
                 g.fillStyle = sil; g.beginPath(); g.moveTo(0, hz); g.lineTo(0, hz - 30); g.lineTo(W, hz - 44); g.lineTo(W, hz); g.fill();
                 for (let i = 0; i < 70; i++) {   // heads in the crowd

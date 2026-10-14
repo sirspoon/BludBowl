@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.31 (14 Oct 2026)
+- **Added:** when High Elves are the home team on a grass pitch, the block clash backdrop becomes an elven valley: a soft golden sky, snowy mountains, waterfalls down the cliffs, slender white towers with pointed roofs and an arched bridge, mist and pale trees. Other home teams keep the stadium.
+
 ## v2.30 (14 Oct 2026)
 - **Changed:** the Jungle Temple's block clash backdrop is now properly jungly: misty green air, two layers of trees with tall palms, the temple overgrown with vines, hanging vines with leaves and big fern leaves curling in from the sides.
 
