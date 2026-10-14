@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.29 (14 Oct 2026)
+- **Changed:** the grass pitches' sky in the block clash animation is now a daytime blue, with a grey grandstand, a colourful crowd and the floodlights switched off.
+
 ## v2.28 (14 Oct 2026)
 - **Changed:** in the block clash animation, the grass pitches (Grass and Muddy Grass) now have an evening-blue sky, with the grandstand in a matching blue-grey.
 
