@@ -855,7 +855,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.35</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.36</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -5962,20 +5962,21 @@
                 });
             }
             // Start Match pressed: straight to kick-off when there's nothing to spend, otherwise the shopping screen
-            function start(k0, k1, career, fmt) {
+            function start(k0, k1, career, fmt, net) {
                 const sev = fmt === 'sevens', R = sev ? [sevensRace(k0), sevensRace(k1)] : [raceFor(k0), raceFor(k1)];
-                X = { keys: [k0, k1], R, tv: R.map(tvOf), mode: getMode(), ind: [{}, {}], mp: R.map(r => !!r.matched), career, fmt: sev ? 'sevens' : 'std' };
+                X = { keys: [k0, k1], R, tv: R.map(tvOf), mode: getMode(), ind: [{}, {}], mp: R.map(r => !!r.matched), career, fmt: sev ? 'sevens' : 'std', net: !!net, ready: [false, false], tabs: [0, 1] };
                 X.ind = [0, 1].map(i => X.mp[i] ? JSON.parse(JSON.stringify(R[i].mpInd || {})) : {});
                 // a few thousand gold (two standard teams' values often differ by 15k or so) isn't worth stopping for
                 if (X.mode === 'off' || ![0, 1].some(i => gold(i, X.mode) >= 50)) { go(); return; }
                 [0, 1].forEach(i => { if (!X.mp[i] && AI.isOn(i)) autoBuy(i); });
                 // open on the first side a person is shopping for (else the first side with gold)
-                X.tab = [0, 1].find(i => !AI.isOn(i) && !X.mp[i] && gold(i, X.mode) > 0) ?? [0, 1].find(i => gold(i, X.mode) > 0) ?? 0;
+                if (X.net) X.tab = 0; else X.tab = [0, 1].find(i => !AI.isOn(i) && !X.mp[i] && gold(i, X.mode) > 0) ?? [0, 1].find(i => gold(i, X.mode) > 0) ?? 0;
                 $('ex-ind').classList.remove('hidden'); $('ex-ind').scrollTop = 0;
                 render();
             }
             function go() {
                 const opts = { career: X.career, fmt: X.fmt };
+                if (X.net) { opts.replaceOk = true; NET.begin(); }
                 const any = X.ind.some(d => Object.keys(d).some(key => key === 'stars' ? (d.stars || []).length : d[key]));
                 if (any) opts.ind = X.ind.map(d => JSON.parse(JSON.stringify(d)));
                 $('ex-ind').classList.add('hidden');
@@ -6007,42 +6008,68 @@
                 }).join('');
                 return `<section class="pg-card">${head}${budget}${cpu ? `<div class="lg-cta" style="justify-content:flex-start"><button type="button" class="pg-btn" data-xauto="${i}">Let the computer choose again</button><button type="button" class="pg-btn" data-xclear="${i}">Clear</button></div>` : ''}${stars}${rows}</section>`;
             }
-            function render() {
+            // the shopping screen as one side sees it (a two-device match: each device shows its own tab and its own Ready button)
+            function body(tab, team) {
                 const opts = [...$('sel-ind').options].filter(o => o.value !== 'off').map(o => `<option value="${o.value}"${o.value === X.mode ? ' selected' : ''}>${esc(o.textContent)}</option>`).join('');
-                $('ex-body').innerHTML = `<section class="pg-card"><div class="pg-dim">${X.fmt === 'sevens' ? "Sevens exhibition: gold to spend on the Sevens inducements for this game only, Desperate Measures included. Saved teams' treasuries aren't touched." : "Exhibition match: gold to spend on inducements for this game only. Saved teams' treasuries aren't touched, and Star Players leave after the match."}</div>
-                        <label class="ex-gold"><span class="pg-dim">Gold</span><select id="ex-mode">${opts}</select></label></section>
-                    ${indTabsHtml([0, 1].map(i => ({ i, name: X.R[i].name, cpu: AI.isOn(i),
-                        sub: X.mp[i] ? 'Matched Play list' : gold(i, X.mode) > 0 ? `Gold ${k(gold(i, X.mode))} · left ${k(left(i))}` : 'No gold' })), X.tab, 'xtab')}
-                    <div class="ind-pane">${panel(X.tab)}</div>
-                    <div class="lg-cta"><button type="button" class="pg-btn" data-xact="none">Play without inducements</button><button type="button" class="pg-primary" data-xact="kickoff">Kick off →</button></div>`;
+                const net = X.net && team != null, me = team, them = 1 - team;
+                const cta = net
+                    ? `<div class="pg-dim" style="text-align:right">${X.ready[them] ? 'The other player is ready.' : 'The other player is still choosing.'}</div>
+                       <div class="lg-cta"><button type="button" class="pg-btn" data-xact="none" ${X.ready[me] ? 'disabled' : ''}>No inducements</button><button type="button" class="pg-primary" data-xact="kickoff" ${X.ready[me] ? 'disabled' : ''}>${X.ready[me] ? 'Ready ✓ Waiting…' : 'Ready →'}</button></div>`
+                    : `<div class="lg-cta"><button type="button" class="pg-btn" data-xact="none">Play without inducements</button><button type="button" class="pg-primary" data-xact="kickoff">Kick off →</button></div>`;
+                return `<section class="pg-card"><div class="pg-dim">${X.fmt === 'sevens' ? "Sevens exhibition: gold to spend on the Sevens inducements for this game only, Desperate Measures included. Saved teams' treasuries aren't touched." : "Exhibition match: gold to spend on inducements for this game only. Saved teams' treasuries aren't touched, and Star Players leave after the match."}${net ? ' You shop for your own team; the other player shops for theirs.' : ''}</div>
+                        <label class="ex-gold"><span class="pg-dim">Gold</span><select id="ex-mode" ${net && team !== 0 ? 'disabled title="The host sets the gold"' : ''}>${opts}</select></label></section>
+                    ${indTabsHtml([0, 1].map(i => ({ i, name: X.R[i].name + (net && i === me ? ' (you)' : ''), cpu: AI.isOn(i),
+                        sub: X.mp[i] ? 'Matched Play list' : gold(i, X.mode) > 0 ? `Gold ${k(gold(i, X.mode))} · left ${k(left(i))}` : 'No gold' })), tab, 'xtab')}
+                    <div class="ind-pane">${panel(tab)}</div>
+                    ${cta}`;
+            }
+            function render() {
+                if (X.net) X.tab = X.tabs[0];
+                $('ex-body').innerHTML = body(X.tab, X.net ? 0 : null);
+            }
+            // a tap on the shopping screen; team: whose device it came from in a two-device match (null otherwise)
+            function act(d, team) {
+                const net = X.net && team != null;
+                const own = str => { const i = +String(str).split('|')[0]; return !net || i === team; };
+                if (d.xind && own(d.xind)) { const [i, key, dv] = d.xind.split('|'); const it = LIST().find(x => x.key === key), n = (X.ind[+i][key] || 0) + +dv; X.ind[+i][key] = Math.max(0, Math.min(LEAGUE.indMax(it, raceOf(X.R[+i])), n)); if (left(+i) < 0) X.ind[+i][key]--; }
+                else if (d.xsadd && own(d.xsadd)) { const [i, sk] = d.xsadd.split('|'); if (!starWhyNot(+i, sk) && STARS[sk].cost <= left(+i)) (X.ind[+i].stars = X.ind[+i].stars || []).push(sk); }
+                else if (d.xsdel && own(d.xsdel)) { const [i, sk] = d.xsdel.split('|'); X.ind[+i].stars = (X.ind[+i].stars || []).filter(x => x !== sk); }
+                else if (d.xauto != null && own(d.xauto)) autoBuy(+d.xauto);
+                else if (d.xclear != null && own(d.xclear)) X.ind[+d.xclear] = {};
+                else if (d.xtab != null) { if (net) X.tabs[team] = +d.xtab; else X.tab = +d.xtab; render(); if (!net || team === 0) $('ex-ind').scrollTop = 0; return 'tab'; }
+                else if (d.xact === 'kickoff' || d.xact === 'none') {
+                    if (d.xact === 'none') { if (net) { if (!X.mp[team]) X.ind[team] = {}; } else X.ind = [0, 1].map(i => X.mp[i] ? X.ind[i] : {}); }
+                    if (!net) { go(true); return 'go'; }
+                    X.ready[team] = true;
+                    if (X.ready[0] && X.ready[1]) { go(true); return 'go'; }
+                    render(); return 'ready';
+                }
+                else return '';
+                if (net) X.ready[team] = false;   // changed their mind: not ready any more
+                try { sfx('menuClick'); } catch (er) {}
+                render(); return 'changed';
             }
             function wire() {
-                $('ex-back').onclick = () => { $('ex-ind').classList.add('hidden'); };
+                $('ex-back').onclick = () => { $('ex-ind').classList.add('hidden'); if (X && X.net) NET.cancelShop(); };
                 $('ex-ind').addEventListener('change', e => {
                     if (e.target.id !== 'ex-mode') return;
                     X.mode = e.target.value; setMode(X.mode); const sel = $('sel-ind'); if (sel) sel.value = X.mode;
                     [0, 1].forEach(i => { if (X.mp[i]) return; if (AI.isOn(i)) autoBuy(i); else trim(i); });
+                    if (X.net) X.ready = [false, false];
                     render();
                 });
                 $('ex-ind').addEventListener('click', e => {
                     const b = e.target.closest('button'); if (!b || b.disabled || !X) return;
-                    const d = b.dataset;
-                    if (d.xind) { const [i, key, dv] = d.xind.split('|'); const it = LIST().find(x => x.key === key), n = (X.ind[+i][key] || 0) + +dv; X.ind[+i][key] = Math.max(0, Math.min(LEAGUE.indMax(it, raceOf(X.R[+i])), n)); if (left(+i) < 0) X.ind[+i][key]--; }
-                    else if (d.xsadd) { const [i, sk] = d.xsadd.split('|'); if (!starWhyNot(+i, sk) && STARS[sk].cost <= left(+i)) (X.ind[+i].stars = X.ind[+i].stars || []).push(sk); }
-                    else if (d.xsdel) { const [i, sk] = d.xsdel.split('|'); X.ind[+i].stars = (X.ind[+i].stars || []).filter(x => x !== sk); }
-                    else if (d.xauto) autoBuy(+d.xauto);
-                    else if (d.xclear) X.ind[+d.xclear] = {};
-                    else if (d.xtab != null) { X.tab = +d.xtab; render(); $('ex-ind').scrollTop = 0; return; }
-                    else if (d.xact === 'kickoff') { go(true); return; }
-                    else if (d.xact === 'none') { X.ind = [0, 1].map(i => X.mp[i] ? X.ind[i] : {}); go(true); return; }
-                    else return;
-                    try { sfx('menuClick'); } catch (er) {}
-                    render();
+                    if (NET.guestShop()) return;   // the guest's device: NET passes the tap to the host
+                    act(b.dataset, X.net ? 0 : null);
                 });
                 const sel = $('sel-ind'); if (sel) { sel.value = getMode(); sel.addEventListener('change', () => setMode(sel.value)); }
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
-            return { start, get: () => X };
+            return { start, get: () => X,
+                open: () => !!X && X.net && !$('ex-ind').classList.contains('hidden'),
+                guestView: () => body(X.tabs[1], 1),
+                remote: d => { if (X && X.net && !$('ex-ind').classList.contains('hidden')) act(d, 1); } };
         })();
 
         // after a match: start the page afresh, straight onto the main menu (no splash or title screen)
@@ -6819,7 +6846,7 @@
                 document.body.appendChild(m);
             }
             const R = ROSTERS[entry.t], st = teamStyle(entry.t), esc2 = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-            m.querySelector('.ii-team').textContent = R.name;
+            m.querySelector('.ii-team').textContent = R.name; m.dataset.team = entry.t;
             m.querySelector('.ii-card').style.borderTopColor = st.fill || '#8b5cf6';
             m.querySelector('.ii-list').innerHTML = entry.items.map(it => `<span class="skill-tag ii-tag" data-skill="${esc2(it.label)}" data-tip="${esc2(it.tip || 'No description.')}">${esc2(it.label)}</span>`).join('');
             m.classList.remove('hidden');
@@ -15720,14 +15747,15 @@
             });
             refresh();
             // (between drives the computer's choice stays secret: its tab is hidden, see setTab)
-            setTab(!AI.isOn(0) || AI.isOn(1) ? 0 : 1);   // open on the team a person picks for
+            setTab(NET.on() ? NET.myTeam() : !AI.isOn(0) || AI.isOn(1) ? 0 : 1);   // open on the team a person picks for
             btn.textContent = drive ? 'Confirm Teams' : AI.isOn(0) && AI.isOn(1) ? 'Start Match' : 'Confirm Lineups';
-            btn.onclick = () => {
+            const finish = () => {
                 if (!drive) arrangeSquads();   // between drives the caller arranges the squads
                 modal.classList.add('hidden');
                 render();
                 onDone();
             };
+            btn.onclick = () => { if (NET.on()) NET.gate('lineup', finish); else finish(); };   // two devices: once both players have confirmed
             modal.classList.remove('hidden');
         }
 
@@ -15872,22 +15900,42 @@
                 if (common(m)) return;
                 if (m.t === 'team') { guestRace = m.race; guestName = m.name; paintLobby(); return; }
                 if (m.t === 'resync') { resetSent(); return; }
-                if (m.t === 'in' && live) guestInput(m);
+                if (m.t === 'in' && m.k === 'exind') { EXIND.remote(m.d); return; }
+                if (m.t === 'in' && live) { fromGuest = true; try { guestInput(m); } finally { fromGuest = false; } }
             }
             function start(hostKey) {
                 if (!link || !guestRace) return;
                 aiWas = [AI.isOn(0), AI.isOn(1)];
                 AI.set(0, false); AI.set(1, false);
-                live = true; resetSent();
                 $('net-lobby').classList.add('hidden');
-                link.send({ t: 'start' });
-                window.launchMatch(hostKey, 'net:1', { replaceOk: true });
+                link.send({ t: 'shop' }); shopSent = '';
+                EXIND.start(hostKey, 'net:1', false, 'std', true);   // each side shops for its own team (straight on if neither has gold)
+            }
+            // the shopping is done: the match itself starts
+            function begin() {
+                live = true; resetSent();
+                if (link) link.send({ t: 'start' });
                 paintChip();
+            }
+            // the host went back from the shopping screen: both devices return to the lobby
+            function cancelShop() {
+                if (aiWas) { AI.set(0, aiWas[0]); AI.set(1, aiWas[1]); aiWas = null; }
+                if (link) link.send({ t: 'lobby' });
+                openLobby();
+            }
+            let shopSent = '';
+            // a ready gate (both players confirm, e.g. their starting eleven): the host's own tap, or the guest's passed on
+            let fromGuest = false;
+            function gate(name, go) {
+                const r = state.netReady = state.netReady || {}, g = r[name] = r[name] || [false, false];
+                g[fromGuest ? 1 : 0] = true;
+                if (g[0] && g[1]) { delete r[name]; go(); }
             }
             // what has been sent already, so only the changes go each time
             let sent = null;
             function resetSent() { sent = { keys: {}, pl: new Map(), order: '', ui: {}, cv: {}, meta: '' }; logSent = -1; }
             function hostTick() {
+                if (role === 'host' && !live && link && EXIND.open()) { const h = EXIND.guestView(); if (h !== shopSent) { shopSent = h; link.send({ t: 'exind', html: h }); } return; }
                 if (role !== 'host' || !live || !link || !state.players) return;
                 const meta = JSON.stringify({ rosters: [ROSTERS[0], ROSTERS[1]], pitch: { style: PITCH.style, seed: PITCH.seed }, fmt: GEO.fmt });
                 if (meta !== sent.meta) { sent.meta = meta; link.send({ t: 'meta', d: JSON.parse(meta) }); }
@@ -15954,7 +16002,7 @@
                     AI.act(() => { if (typeof el.click === 'function') el.click(); else el.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
                 }
             }
-            const fingerprint = el => el.tagName + ':' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+            const fingerprint = el => el.id ? '#' + el.id : el.tagName + ':' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);   // (a button with an id may be labelled differently on each device)
             // sounds play on both devices
             const p0 = SFX.play, v0 = SFX.voice;
             SFX.play = (k, d, sz) => { if (role === 'host' && live && link) link.send({ t: 'sfx', k, d, sz }); return p0(k, d, sz); };
@@ -15962,10 +16010,13 @@
 
             // ---- the guest's side ----
             const raw = { keys: {}, pl: new Map(), order: [] };
-            let shown = false, followKey = '';
+            let shown = false, followKey = '', shopping = false, lineTab = 1;
             function guestMsg(m) {
                 if (common(m)) return;
-                if (m.t === 'start') { live = true; shown = false; raw.keys = {}; raw.pl = new Map(); raw.order = []; $('net-lobby').classList.add('hidden'); paintChip(); return; }
+                if (m.t === 'shop') { shopping = true; $('net-lobby').classList.add('hidden'); $('ex-body').innerHTML = '<p class="pg-dim">Opening the inducements…</p>'; $('ex-back').hidden = true; $('ex-ind').classList.remove('hidden'); return; }
+                if (m.t === 'exind') { if (shopping) $('ex-body').innerHTML = m.html; return; }
+                if (m.t === 'lobby') { shopping = false; $('ex-ind').classList.add('hidden'); openLobby(); status('The host went back to the lobby.', 'wait'); return; }
+                if (m.t === 'start') { live = true; shopping = false; $('ex-ind').classList.add('hidden'); shown = false; raw.keys = {}; raw.pl = new Map(); raw.order = []; $('net-lobby').classList.add('hidden'); paintChip(); return; }
                 if (!live) return;
                 if (m.t === 'meta') { applyMeta(m.d); return; }
                 if (m.t === 'snap') { applySnap(m); ownView(); return; }
@@ -16036,13 +16087,26 @@
                 el.innerHTML = src.innerHTML;
             }
             // the guest's copy of the block dice panel is red only when the host is choosing
+            // the starting eleven: the guest looks at its own team's tab unless it picks the other; both see who's confirmed
+            function lineupView() {
+                const md = $('modal-lineup'); if (!md || md.classList.contains('hidden')) return;
+                if (role === 'guest') [0, 1].forEach(k => {
+                    const pane = $('lineup-pane' + k), b = $('lineup-tab' + k); if (!pane || !b) return;
+                    pane.classList.toggle('hidden', k !== lineTab);
+                    const on = ['border-blue-500 text-blue-400 bg-blue-950/30', 'border-emerald-500 text-emerald-400 bg-emerald-950/30'][k], off = 'border-transparent text-slate-400';
+                    b.className = 'flex-1 py-2 text-center text-xs font-bold uppercase transition border-b-2 ' + (k === lineTab ? on : off);
+                });
+                const g = (state.netReady && state.netReady.lineup) || [false, false], btn = $('btn-lineup-confirm');
+                if (btn) { const txt = g[myTeam()] ? 'Waiting for the other player…' : g[1 - myTeam()] ? 'Confirm (the other player is ready)' : 'Confirm My Team'; if (btn.textContent !== txt) btn.textContent = txt; }
+            }
             function ownView() {
+                lineupView();
                 const m = $('modal-dice');
                 if (m && !m.classList.contains('hidden') && state.combat && state.combat.chooser != null) paintDiceChooser(state.combat.chooser, state.combat.chooser !== myTeam());
                 greyOut();
             }
             // on both devices: the buttons that are the other player's to press are greyed out
-            const THEIRS = '#btn-end-turn, #action-toolbar button, #modal-dice button, #modal-choice button, #modal-roll button, #modal-team-reroll button, #btn-confirm-setup, #event-panel button, #pick-banner button';
+            const THEIRS = '#modal-ind-intro button, #modal-lineup input, #btn-end-turn, #action-toolbar button, #modal-dice button, #modal-choice button, #modal-roll button, #modal-team-reroll button, #btn-confirm-setup, #event-panel button, #pick-banner button';
             function greyOut() {
                 const on = live && !!state.players;
                 document.querySelectorAll(THEIRS).forEach(b => {
@@ -16051,7 +16115,7 @@
                     if (b.classList.contains('net-theirs') !== theirs) b.classList.toggle('net-theirs', theirs);
                 });
             }
-            setInterval(() => { try { greyOut(); } catch (e) {} }, 150);
+            setInterval(() => { try { greyOut(); if (live && role === 'host') lineupView(); } catch (e) {} }, 150);
             // a faint pulsing banner over the bottom of the pitch whenever it's the other player's turn or choice
             function waitBanner() {
                 let el = $('net-wait');
@@ -16093,8 +16157,17 @@
             }
             // the guest's taps go to the host: the pitch as a square, a panel's button as where it sits in the panel
             document.addEventListener('click', e => {
-                if (role !== 'guest' || !live) return;
+                if (role !== 'guest') return;
                 const t = e.target; if (!t || !t.closest) return;
+                if (shopping && t.closest('#ex-ind')) {
+                    const b = t.closest('button'); if (!b || b.disabled || b.id === 'ex-back' || b.matches('[data-fs]')) return;
+                    e.stopImmediatePropagation(); e.preventDefault();
+                    if (link) link.send({ t: 'in', k: 'exind', d: Object.assign({}, b.dataset) });
+                    return;
+                }
+                if (!live) return;
+                const tab = t.closest('#lineup-tab0, #lineup-tab1');
+                if (tab) { e.stopImmediatePropagation(); e.preventDefault(); lineTab = +tab.id.slice(-1); lineupView(); return; }
                 if (t.closest('#net-chip, #net-lobby, #net-end, #modal-roster, #skill-tip, #whats-new')) return;
                 const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
                 if (t === canvas) {
@@ -16163,7 +16236,7 @@
             function sendTeam() {
                 if (role !== 'guest' || !link) return;
                 const key = teamOf($('nl-race'), $('nl-squad')), r = JSON.parse(JSON.stringify(raceFor(key)));
-                delete r.careerTeamId; delete r.mpInd;   // an exhibition: nothing is recorded, nothing is brought along
+                delete r.careerTeamId;   // an exhibition: nothing is recorded
                 guestName = r.name;
                 link.send({ t: 'team', race: r, name: r.name });
             }
@@ -16217,7 +16290,8 @@
             }
 
             return {
-                openLobby, matchOver,
+                openLobby, matchOver, begin, cancelShop, gate,
+                guestShop: () => role === 'guest' && shopping,
                 on: () => live,
                 guest: () => role === 'guest' && live,
                 isRemote: t => live && role === 'host' && t === remote(),
@@ -16275,6 +16349,8 @@
             // which team a prompt or piece on screen belongs to (null: anyone's)
             function ownerTeam(el) {
                 if (!el || !el.closest) return null;
+                const lp = el.closest('#lineup-pane0, #lineup-pane1'); if (lp) return +lp.id.slice(-1);
+                const ii = el.closest('#modal-ind-intro'); if (ii) return ii.dataset.team != null && ii.dataset.team !== '' ? +ii.dataset.team : null;
                 if (el.closest('#modal-roll')) return state.pendingRoll ? state.pendingRoll.player.team : null;
                 if (el.closest('#modal-team-reroll')) return state.activeTeam;
                 if (el.closest('#btn-combat-trr')) return state.activeTeam;
@@ -16288,7 +16364,7 @@
             }
             // stop a person clicking on the computer's prompts or pieces (or, in a two-device match, the other player's)
             function ownsTarget(el) {
-                if (!started || internal || !el || !el.closest) return false;
+                if ((!started && !NET.on()) || internal || !el || !el.closest) return false;
                 const t = ownerTeam(el);
                 return t != null && (isAI(t) || NET.isRemote(t));
             }

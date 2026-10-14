@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.36 (14 Oct 2026)
+- **Added:** in a two-device match, each player now makes their own pre-match choices on their own device. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+  - **Inducements:** when either team has gold to spend, both devices show the inducements screen, each opening on its own team. You can look at the other team's tab but only buy for your own. The host sets the gold option. When you're done, tap **Ready**; the match starts once both players are ready.
+  - **Starting eleven:** each player ticks their own team's players, then taps **Confirm My Team**. The button shows whether the other player has confirmed, and the match carries on once both have. The same applies when picking players between drives.
+  - **Inducement panels:** each team's inducement panel before kick-off (and any picks that come with it, such as You Dope!) is answered by that team's player.
+- **Note:** the guest can already play with a team saved on their own device: pick it in the second drop-down in the Two Devices lobby.
+
 ## v2.35 (14 Oct 2026)
 - **Added:** in a two-device match, a faint pulsing banner shows on your device whenever you're waiting for the other player. It says **Opponent's turn** during their turn, and **Opponent is choosing…** when they have a choice to make in your turn (such as picking the block dice). It sits just above the match log, or under the panel they're choosing on, and never blocks a tap. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 
