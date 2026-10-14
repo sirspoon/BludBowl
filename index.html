@@ -804,7 +804,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.17</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.18</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6695,7 +6695,7 @@
         function showInducementsPanel(entry, done) {
             let m = document.getElementById('modal-ind-intro');
             if (!m) {
-                m = document.createElement('div'); m.id = 'modal-ind-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+                m = document.createElement('div'); m.id = 'modal-ind-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('data-tip-pass', '');
                 m.innerHTML = `<div class="ii-card"><div class="ii-cap">Inducements</div><h2 class="ii-team"></h2><p class="ii-hint">Tap one to see what it does.</p><div class="ii-list"></div><button type="button" class="ii-ok">OK</button></div>`;
                 document.body.appendChild(m);
             }
@@ -8178,14 +8178,15 @@
             const startSwallow = () => { swallow = true; clearTimeout(swallowTimer); swallowTimer = setTimeout(() => { swallow = false; }, 700); };
             const block = e => { if (swallow) { e.stopImmediatePropagation(); e.preventDefault(); } };
             ['pointerup','mousedown','mouseup','touchstart','touchend','touchmove','click','dblclick','contextmenu'].forEach(ev =>
-                document.addEventListener(ev, e => { if (!swallow) return; block(e); if (ev === 'click') { swallow = false; clearTimeout(swallowTimer); } }, { capture: true, passive: false }));
+                document.addEventListener(ev, e => { if (!swallow || (e.target.closest && e.target.closest('[data-tip-pass] button'))) return; block(e); if (ev === 'click') { swallow = false; clearTimeout(swallowTimer); } }, { capture: true, passive: false }));
             document.addEventListener('pointerdown', e => {
                 const t = tagOf(e);
                 if (t) {
                     startSwallow(); e.stopImmediatePropagation();
                     if (e.pointerType !== 'mouse') { if (t === activeTag && tip) hide(); else show(t); } // touch: one tap opens it
                     else if (t !== activeTag) show(t);
-                } else if (tip) { startSwallow(); e.stopImmediatePropagation(); e.preventDefault(); hide(); } // any click elsewhere only closes it
+                } else if (tip && e.target.closest && e.target.closest('[data-tip-pass] button')) hide();   // a panel's own buttons (e.g. OK) work straight away
+                else if (tip) { startSwallow(); e.stopImmediatePropagation(); e.preventDefault(); hide(); } // any click elsewhere only closes it
             }, true);
             document.addEventListener('mouseover', e => { const t = tagOf(e); if (t && t !== activeTag && !swallow) show(t); });
             document.addEventListener('mouseout', e => { const t = tagOf(e); if (t && !(e.relatedTarget && t.contains(e.relatedTarget)) && !('ontouchstart' in window)) hide(); });

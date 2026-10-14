@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.18 (14 Oct 2026)
+- **Fixed:** after reading an inducement's description, the panel's OK button now works on the first tap. Before, the first tap only closed the description and taps straight after were ignored.
+
 ## v2.17 (14 Oct 2026)
 - **Changed:** before kick-off, each team's inducements now get their own panel, one team at a time, and stay up until you press **OK**. Any choices that team has to make (such as picking a player for You Dope! or a skill for Intensive Training) come straight after its own panel, before the other team's.
 - **Added:** tap any inducement on the panel to see what it does, including each Prayer to Nuffle, Desperate Measure and Star Player's special rule. The wording follows the 2025 rules.
