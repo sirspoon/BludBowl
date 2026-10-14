@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.57 (14 Oct 2026)
+- **Added:** team calls. Picking a team to play can now play a short sound of its own. The Ogres are the first: choosing them (or a saved Ogre team) in the match picker or the two-device lobby plays "Ogres, my lord!". If you flick through the list, only the latest call plays. More teams can get their own calls later.
+
 ## v2.56 (14 Oct 2026)
 - **Added:** in the block and blitz clash animation (the picture above the block dice), whoever has the ball is shown holding it at their front hand. It moves, leans and falls with them. If the carrier is knocked down, or a push with Strip Ball knocks it out of their hands, the ball pops loose at the moment of impact and bounces away past them.
 
