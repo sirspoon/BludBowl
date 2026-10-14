@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.41 (14 Oct 2026)
+- **Added:** a name for two-device matches. Type it in **Your name** at the top of the Two Devices screen; it's remembered on that device. The other player sees it in the lobby ("Connected to Sam", "Sam's team: Orcs"), in the connection chip ("⇄ vs Sam"), and in the waiting banner ("Sam's turn", "Sam is choosing…"). ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+- **Added:** chat in two-device matches. Double-tap (or double-click) the match log, type a message and press Enter or Send. It appears in both players' logs with the sender's name, in a different colour for each player, with a sound for the one receiving it.
+
 ## v2.40 (14 Oct 2026)
 - **Added:** reconnecting in two-device matches. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
   - **The guest's connection drops** (bad signal, or the phone's screen went off): the guest's device shows "Reconnecting…" and keeps trying by itself. When it gets back, it picks up the match exactly where the host is, including any question waiting for that player. The host can keep playing its own turn meanwhile.

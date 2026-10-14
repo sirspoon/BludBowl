@@ -815,6 +815,12 @@
 #net-lobby .nl-back { align-self: flex-end; }
 #net-lobby .nl-pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 #net-lobby #nl-resume, #net-lobby #nl-rejoin { flex: 1 1 100%; } #net-lobby #nl-resume.hidden, #net-lobby #nl-rejoin.hidden { display: none; }
+#net-lobby .nl-name { display: flex; align-items: center; gap: 8px; } #net-lobby .nl-name input { flex: 1; text-transform: none; letter-spacing: 0; }
+#net-chat { position: fixed; z-index: 70; display: flex; gap: 6px; padding: 6px; border-radius: 10px; background: #0b1220; border: 1px solid #38bdf8; box-shadow: 0 6px 24px rgba(0,0,0,.6); font-family: Inter, system-ui, sans-serif; }
+#net-chat.hidden { display: none; }
+#net-chat input { flex: 1; min-width: 0; background: #111a2e; border: 1px solid #475569; color: #e2e8f0; border-radius: 7px; padding: 7px 9px; font-size: 16px; }
+#net-chat button { border-radius: 7px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; font-weight: 700; padding: 0 10px; cursor: pointer; }
+#net-chat .nc-send { background: #075985; border-color: #38bdf8; }
 #net-lobby .nl-join { display: flex; gap: 6px; flex: 1 1 200px; }
 #net-lobby input, #net-lobby select { background: #0b1220; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 16px; min-width: 0; }
 #net-lobby input { flex: 1; text-transform: uppercase; letter-spacing: .08em; }
@@ -867,7 +873,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.40</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.41</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -15957,7 +15963,18 @@
             const rejoinRec = () => { try { const r = JSON.parse(localStorage.getItem(REJOIN) || 'null'); return r && Date.now() - r.at < 12 * 3600e3 ? r : null; } catch (e) { return null; } };
             const keepRejoin = () => { try { localStorage.setItem(REJOIN, JSON.stringify({ code, token, at: Date.now() })); } catch (e) {} };
             const forgetRejoin = () => { try { localStorage.removeItem(REJOIN); } catch (e) {} };
-            let token = '', guestToken = '', retryT = null, retryAt = 0;
+            let token = '', guestToken = '', retryT = null, retryAt = 0, oppName = '';
+            const NAME = 'bb-net-name';
+            const cleanName = n => String(n || '').replace(/\s+/g, ' ').trim().slice(0, 20);
+            const myName = () => { try { return cleanName(localStorage.getItem(NAME)); } catch (e) { return ''; } };
+            const them = () => oppName || (role === 'host' ? 'The guest' : 'The host');
+            const escH = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            function setOpp(n) {
+                n = cleanName(n); if (n === oppName) return;
+                const was = oppName; oppName = n;
+                if (live && role === 'host' && n) log(`  ${escH(was || 'The other player')} is now called ${escH(n)}.`, 'text-slate-400');
+                paintLobby(); paintChip();
+            }
             const inMatch = () => live || (role === 'guest' ? shopping : EXIND.open());
             function dropped(why) {
                 const was = !!link; link = null; rtt = null;
@@ -15976,7 +15993,7 @@
                     if (!ok) { try { c.send(JSON.stringify({ t: 'busy' })); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 400); return; }
                     const old = link; wire(c);
                     if (old && old.c !== c) { try { old.close(); } catch (e) {} }
-                    status('', ''); link.send({ t: 'hello', v: version, role });
+                    status('', ''); link.send({ t: 'hello', v: version, role, name: myName() });
                     onData(raw);
                     paintLobby(); paintChip();
                 });
@@ -15989,7 +16006,7 @@
                     if (link) { try { c.close(); } catch (e) {} return; }
                     wire(c); stopRetry();
                     status('', '');
-                    link.send({ t: 'hello', v: version, role, token });
+                    link.send({ t: 'hello', v: version, role, token, name: myName() });
                     keepRejoin();
                     if (!inMatch()) sendTeam();
                     paintLobby(); paintChip();
@@ -16076,7 +16093,7 @@
                 try { if (link) link.send({ t: 'bye' }); } catch (e) {}
                 try { if (link) link.close(); } catch (e) {}
                 try { if (peer) peer.destroy(); } catch (e) {}
-                link = null; peer = null; role = null; rtt = null; guestRace = null; guestName = ''; guestToken = '';
+                link = null; peer = null; role = null; rtt = null; guestRace = null; guestName = ''; guestToken = ''; oppName = '';
             }
             // ---- the guest getting back after a drop ----
             function startRetry() {
@@ -16108,11 +16125,13 @@
                 if (m.t === 'ping') { link && link.send({ t: 'pong', at: m.at }); return true; }
                 if (m.t === 'pong') { rtt = Math.round(real() - m.at); paintChip(); paintLobby(); return true; }
                 if (m.t === 'bye') { try { if (link) link.close(); } catch (e) {} dropped('The other device has left.'); return true; }
+                if (m.t === 'name') { setOpp(m.name); return true; }
                 if (m.t === 'hello') {
+                    if (m.name != null) setOpp(m.name);
                     if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
                     if (role === 'host') {
                         if (!inMatch()) guestToken = m.token || '';
-                        else if (live) { resetSent(); link.send({ t: 'start' }); log('  The other device is back.', 'text-emerald-300'); }
+                        else if (live) { resetSent(); link.send({ t: 'start' }); log(`  ${escH(them())} is back.`, 'text-emerald-300'); }
                         else if (EXIND.open()) { link.send({ t: 'shop' }); shopSent = ''; }
                     }
                     return true;
@@ -16125,6 +16144,7 @@
                 if (common(m)) return;
                 if (m.t === 'team') { if (!live && !EXIND.open()) { guestRace = m.race; guestName = m.name; paintLobby(); } return; }
                 if (m.t === 'resync') { resetSent(); return; }
+                if (m.t === 'chat' && live) { chatLine(them(), m.text, 1); return; }
                 if (m.t === 'in' && m.k === 'exind') { EXIND.remote(m.d); return; }
                 if (m.t === 'in' && m.k === 'squad' && live) {
                     const p = state.netLineup && state.players.find(q => q.id === m.id);
@@ -16146,6 +16166,7 @@
             // the shopping is done: the match itself starts
             function begin() {
                 live = true; resetSent();
+                setTimeout(() => { if (live) log(`  Playing ${escH(them())}. Double-tap the match log to send them a message.`, 'text-sky-300'); }, 2500);
                 if (link) link.send({ t: 'start' });
                 paintChip();
             }
@@ -16374,7 +16395,7 @@
                     else if (vis('modal-choice') && state.choice && state.choice.team != null) who = state.choice.team;
                     else if (vis('modal-roll') && state.pendingRoll && state.pendingRoll.player) who = state.pendingRoll.player.team;
                     else { try { who = AI.decider(); } catch (e) { who = state.activeTeam; } }
-                    if (who != null && who !== myTeam()) text = who === state.activeTeam && who === AI.decider() ? "Opponent's turn" : 'Opponent is choosing…';
+                    if (who != null && who !== myTeam()) { const n = oppName ? (oppName.length > 14 ? oppName.slice(0, 13) + '…' : oppName) : ''; text = who === state.activeTeam && who === AI.decider() ? (n ? `${n}'s turn` : "Opponent's turn") : `${n || 'Opponent'} is choosing…`; }
                 }
                 if (!text) { if (el) el.classList.add('hidden'); return; }
                 if (!el) { el = document.createElement('div'); el.id = 'net-wait'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
@@ -16399,7 +16420,10 @@
                 const lg = $('message-log'); if (!lg) return;
                 const atEnd = lg.scrollTop + lg.clientHeight >= lg.scrollHeight - 30;
                 if (m.all) lg.innerHTML = m.all.join('');
-                else if (m.add) lg.insertAdjacentHTML('beforeend', m.add.join(''));
+                else if (m.add) {
+                    lg.insertAdjacentHTML('beforeend', m.add.join(''));
+                    if (m.add.some(h => h.includes('net-chat-line') && h.includes('text-amber-200'))) { try { p0('menuClick'); } catch (e) {} lg.scrollTop = lg.scrollHeight; }
+                }
                 while (lg.children.length > 300) lg.firstElementChild.remove();
                 if (atEnd || m.all) lg.scrollTop = lg.scrollHeight;
             }
@@ -16415,7 +16439,7 @@
                 }
                 if (!live) return;
                 if (t.closest('#modal-lineup')) return;   // the guest's own starting-eleven screen
-                if (t.closest('#net-chip, #net-lobby, #net-end, #modal-roster, #skill-tip, #whats-new')) return;
+                if (t.closest('#net-chip, #net-chat, #net-lobby, #net-end, #modal-roster, #skill-tip, #whats-new')) return;
                 const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
                 if (t === canvas) {
                     stop();
@@ -16494,21 +16518,22 @@
                 const L = $('net-lobby'); if (!L) return;
                 L.dataset.role = role || '';
                 $('nl-code').textContent = role === 'host' ? code : '';
-                $('nl-ping').textContent = link ? `Connected${rtt != null ? ` · ${rtt} ms` : ''}` : '';
+                $('nl-ping').textContent = link ? `Connected${oppName ? ` to ${oppName}` : ''}${rtt != null ? ` · ${rtt} ms` : ''}` : '';
                 const opp = $('nl-opp');
-                opp.textContent = role === 'host' ? (guestRace ? `Opponent's team: ${guestName}` : link ? 'Waiting for the other player to pick a team…' : '') : role === 'guest' && link ? 'Pick your team. The host starts the match.' : '';
+                opp.textContent = role === 'host' ? (guestRace ? `${oppName ? oppName + "'s" : "The other player's"} team: ${guestName}` : link ? `Waiting for ${oppName || 'the other player'} to pick a team…` : '') : role === 'guest' && link ? `Pick your team. ${oppName || 'The host'} starts the match.` : '';
                 $('nl-start').disabled = !(role === 'host' && link && guestRace);
                 $('nl-teams').classList.toggle('hidden', !link);
                 // carrying on: the host's saved two-device match, or the match this device was the guest in
                 const sv = !role && SAVE.readNet(), rj = !role && rejoinRec();
                 const rb = $('nl-resume'), jb = $('nl-rejoin');
-                rb.classList.toggle('hidden', !sv); jb.classList.toggle('hidden', !rj || !!sv);
+                rb.classList.toggle('hidden', !sv); jb.classList.toggle('hidden', !rj);
                 if (sv) rb.textContent = `Resume hosted match ${sv.net.code}: ${sv.card.t[0]} ${sv.card.s[0]} – ${sv.card.s[1]} ${sv.card.t[1]}`;
                 if (rj) jb.textContent = `Rejoin match ${rj.code}`;
             }
             function openLobby() {
                 const L = $('net-lobby');
                 const rs = $('nl-race'), sq = $('nl-squad');
+                $('nl-name').value = myName();
                 if (!rs.options.length) { fillPicker(rs, sq); rs.value = 'human'; }
                 fillPicker(rs, sq);
                 L.classList.remove('hidden'); paintLobby();
@@ -16516,6 +16541,11 @@
             function bindLobby() {
                 const L = $('net-lobby'), rs = $('nl-race'), sq = $('nl-squad');
                 rs.onchange = () => { sq.value = ''; fillPicker(rs, sq); sendTeam(); };
+                $('nl-name').onchange = () => {
+                    const n = cleanName($('nl-name').value); $('nl-name').value = n;
+                    try { localStorage.setItem(NAME, n); } catch (e) {}
+                    if (link) link.send({ t: 'name', name: n });
+                };
                 sq.onchange = () => sendTeam();
                 $('nl-host').onclick = () => { open(true); paintLobby(); };
                 $('nl-resume').onclick = () => { L.classList.add('hidden'); SAVE.resumeNet(); };
@@ -16532,6 +16562,46 @@
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLobby); else bindLobby();
 
+            // ---- chat: double-tap the match log to send the other player a message (it goes in both logs) ----
+            function chatLine(name, text, side) {   // the host writes every message into its log; the guest's copy follows
+                text = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 200); if (!text) return;
+                log(`<span class="net-chat-line"><b>💬 ${escH(name)}:</b> ${escH(text)}</span>`, side ? 'text-sky-200' : 'text-amber-200');
+                if (side !== (role === 'host' ? 0 : 1)) { try { sfx('menuClick'); } catch (e) {} }
+            }
+            function say(text) {
+                text = String(text || '').trim(); if (!text || !live) return;
+                if (role === 'host') chatLine(myName() || 'Host', text, 0);
+                else if (link) link.send({ t: 'chat', text });
+            }
+            function chatBox() {
+                let el = $('net-chat');
+                if (!el) {
+                    el = document.createElement('div'); el.id = 'net-chat'; el.className = 'hidden';
+                    el.innerHTML = `<input type="text" maxlength="200" enterkeyhint="send" aria-label="Message"><button type="button" class="nc-send">Send</button><button type="button" class="nc-x" aria-label="Close">✕</button>`;
+                    document.body.appendChild(el);
+                    const inp = el.querySelector('input'), shut = () => { el.classList.add('hidden'); inp.blur(); };
+                    const go = () => { say(inp.value); inp.value = ''; shut(); };
+                    el.querySelector('.nc-send').onclick = go; el.querySelector('.nc-x').onclick = shut;
+                    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } else if (e.key === 'Escape') shut(); });
+                }
+                const box = ($('panel-log-container') || document.body).getBoundingClientRect(), z = uiScale();
+                const w = Math.max(260, Math.min(420, box.width));
+                el.style.left = (Math.max(8, Math.min(innerWidth - w - 8, box.left)) / z) + 'px';
+                el.style.width = (w / z) + 'px';
+                el.style.bottom = (Math.max(8, innerHeight - box.bottom + 8) / z) + 'px';
+                const inp = el.querySelector('input'); inp.placeholder = `Message to ${them()}`;
+                el.classList.remove('hidden'); inp.focus();
+            }
+            {   // a double tap (or double click) on the log
+                let lastT = 0, lastX = 0, lastY = 0;
+                document.addEventListener('pointerup', e => {
+                    if (!live || !link || !e.target.closest || !e.target.closest('#message-log')) return;
+                    const t = real(), near = Math.hypot(e.clientX - lastX, e.clientY - lastY) < 30;
+                    if (t - lastT < 380 && near) { lastT = 0; chatBox(); return; }
+                    lastT = t; lastX = e.clientX; lastY = e.clientY;
+                });
+            }
+
             // ---- the little connection chip in the top bar during a match ----
             document.addEventListener('click', e => {
                 if (!e.target.closest || !e.target.closest('#net-chip')) return;
@@ -16543,17 +16613,19 @@
                 c.classList.toggle('hidden', !on);
                 if (!on) return;
                 const ok = !!link;
-                c.textContent = ok ? `⇄ ${role === 'host' ? 'Host' : 'Guest'}${rtt != null ? ` · ${rtt} ms` : ''}` : '⚠ Disconnected';
+                const vs = oppName ? `vs ${oppName.length > 12 ? oppName.slice(0, 11) + '…' : oppName}` : role === 'host' ? 'Host' : 'Guest';
+                c.textContent = ok ? `⇄ ${vs}${rtt != null ? ` · ${rtt} ms` : ''}` : '⚠ Disconnected';
+                c.title = ok ? `Two-device match${oppName ? ' against ' + oppName : ''}. Double-tap the match log to send a message.` : 'The other device has disconnected';
                 c.classList.toggle('bad', !ok);
             }
 
             return {
                 openLobby, matchOver, begin, cancelShop, gate,
                 hosting: () => role === 'host' && live,
-                saveInfo: () => ({ code, token: guestToken, aiWas, guestName }),
+                saveInfo: () => ({ code, token: guestToken, aiWas, guestName, oppName }),
                 resumeHost(info) {   // the host's page was closed: the match is back from the save; open the same room again
                     open(true, null, info.code);
-                    guestToken = info.token || ''; aiWas = info.aiWas || null; guestName = info.guestName || '';
+                    guestToken = info.token || ''; aiWas = info.aiWas || null; guestName = info.guestName || ''; oppName = info.oppName || '';
                     live = true; resetSent(); paintChip();
                     log(`  Two-device match: the other device can rejoin with the code ${info.code} (Two Devices → Rejoin).`, 'text-sky-300');
                 },
@@ -18579,6 +18651,7 @@
     <div class="nl-card">
         <h2 id="nl-title">Two Devices</h2>
         <p class="nl-dim">Play a friend on another phone, tablet or computer. One of you hosts; the other joins with the host's room code. Both devices need an internet connection.</p>
+        <label class="nl-name"><span class="nl-dim">Your name</span><input id="nl-name" type="text" maxlength="20" autocomplete="nickname" spellcheck="false" placeholder="So they know who they're playing"></label>
         <div class="nl-pick">
             <button type="button" id="nl-resume" class="nl-btn nl-go hidden"></button>
             <button type="button" id="nl-rejoin" class="nl-btn nl-go hidden"></button>
