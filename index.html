@@ -647,6 +647,9 @@
             background: rgba(69, 10, 10, 0.4) !important;
         }
 
+        #top-bar-row-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+        #top-bar-row-status > * { margin: 0 !important; max-width: 100%; }
+        #top-bar-row-status:not(:has(> :not(.hidden))) { display: none; }   /* nothing to show: no extra row */
         @media (orientation: landscape) {
             #top-bar-panel {
                 flex-direction: row !important;
@@ -657,9 +660,11 @@
                 width: auto !important;
             }
             #top-bar-row-actions {
-                flex: 1 !important;
+                flex: 0 1 auto !important;
                 margin-left: 0.5rem !important;
+                order: 3;
             }
+            #top-bar-row-status { flex: 1 1 auto; order: 2; justify-content: center; margin-left: 0.5rem; }
             #panel-log-container {
                 left: 0.5rem !important;
                 bottom: 0.5rem !important;
@@ -699,9 +704,10 @@
                 width: 100% !important;
                 display: flex !important;
                 align-items: center !important;
-                justify-content: space-between !important;
+                justify-content: flex-end !important;
                 gap: 0.25rem !important;
             }
+            #top-bar-row-status { width: 100%; justify-content: center; }
             #panel-log-container {
                 left: 0.35rem !important;
                 bottom: 0.35rem !important;
@@ -804,7 +810,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.18</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.19</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1062,6 +1068,7 @@
                     </div>
                     
                     <div class="text-white px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded whitespace-nowrap">H<span id="half-indicator">1</span></div>
+                        <span id="weather-badge" class="cursor-pointer text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-600 bg-slate-800 text-slate-200 whitespace-nowrap inline-block align-middle" title="Perfect Conditions: tap for details" aria-label="Weather: Perfect Conditions" role="button">🌤️</span>
                     
                     <div id="ui-orc-turn" class="text-green-700 opacity-50 transition-opacity whitespace-nowrap">
                         <span id="lbl-team1">ORC</span>: <span id="turn-orc">0</span>/<span class="turns-max">8</span> <span class="text-[9px] text-amber-400">(<span id="orc-rr">3</span>)</span>
@@ -1069,12 +1076,6 @@
                 </div>
 
                 <div id="top-bar-row-actions" class="flex items-center justify-between gap-2 overflow-hidden w-full">
-                    <div class="flex-1 px-1 text-center overflow-hidden">
-                        <span id="weather-badge" class="cursor-pointer text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-600 bg-slate-800 text-slate-200 mr-1 whitespace-nowrap inline-block align-middle" title="Perfect Conditions: tap for details" aria-label="Weather: Perfect Conditions" role="button">🌤️</span>
-                        <button type="button" id="ind-chip" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-violet-500 bg-violet-950/70 text-violet-200 mr-1 whitespace-nowrap inline-block align-middle" onclick="indChipMenu()">🔮 Inducements</button>
-                        <span id="bribe-indicator" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-yellow-600 bg-yellow-950/70 text-yellow-200 mr-1 whitespace-nowrap inline-block align-middle"></span>
-                        <span id="kickoff-banner" class="hidden text-amber-400 font-bold text-[9px] sm:text-[10px] bg-amber-950/80 border border-amber-500 px-2 py-0.5 rounded animate-pulse truncate inline-block max-w-full"></span>
-                    </div>
 
                     <div class="flex items-center gap-1.5 whitespace-nowrap shrink-0 ml-auto">
                         <button id="btn-rosters" title="Team Rosters & Dugouts" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow flex items-center gap-1">
@@ -1099,6 +1100,12 @@
                             End Turn
                         </button>
                     </div>
+                </div>
+                <!-- the smaller status chips: inducements, bribes, the kick-off message (the row only shows when one does) -->
+                <div id="top-bar-row-status">
+                        <button type="button" id="ind-chip" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-violet-500 bg-violet-950/70 text-violet-200 mr-1 whitespace-nowrap inline-block align-middle" onclick="indChipMenu()">🔮 Inducements</button>
+                        <span id="bribe-indicator" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-yellow-600 bg-yellow-950/70 text-yellow-200 mr-1 whitespace-nowrap inline-block align-middle"></span>
+                        <span id="kickoff-banner" class="hidden text-amber-400 font-bold text-[9px] sm:text-[10px] bg-amber-950/80 border border-amber-500 px-2 py-0.5 rounded animate-pulse truncate inline-block max-w-full"></span>
                 </div>
                 
             </div>

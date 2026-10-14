@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.19 (14 Oct 2026)
+- **Changed:** the top bar is tidier on narrow screens. The weather symbol now sits in the score row next to the half, and the smaller status chips (inducements, bribes, the kick-off message) have their own centred row under the buttons instead of being squeezed beside them. That row only appears when one of them is showing.
+
 ## v2.18 (14 Oct 2026)
 - **Fixed:** after reading an inducement's description, the panel's OK button now works on the first tap. Before, the first tap only closed the description and taps straight after were ignored.
 
