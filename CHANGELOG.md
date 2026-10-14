@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.11 (14 Oct 2026)
+- **Fixed:** skill descriptions are now found even when a skill was saved with different capitals, spacing or punctuation (for example by an older version of the game), so learned skills such as Sure Feet show their description.
+- **Changed:** tapping a skill that has no description now says so, showing the exact skill name, instead of doing nothing.
+
 ## v2.10 (14 Oct 2026)
 - **Fixed:** tapping the Sure Feet skill tag now shows its description. It was the only skill missing one.
 

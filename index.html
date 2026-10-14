@@ -794,7 +794,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.10</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.11</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -8011,10 +8011,16 @@
             'Take Root': 'Roll a D6 when this player is activated (if Standing). On a 1 they become Rooted: they cannot move, follow up or be pushed back until the end of the Drive or until they are Knocked Down or Placed Prone. They can still block or throw a team-mate from where they stand.',
             'Pogo': 'While moving, this player can bounce over any one adjacent square, whatever is in it, into an empty square beyond. It costs 2 squares of movement and needs a plain Agility test with no negative modifiers (and no dodge). Failing means falling over in the target square, or in their own square on a natural 1.'
         };
+        // looked up loosely (case, spacing and punctuation don't matter), so a skill saved by an older version still finds its text
+        const skillKey = n => String(n || '').replace(/\s*\(.*\)\s*$/, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        let skillIndex = null;
         function skillInfoFor(name) {
+            name = String(name || '').trim();
             if (SKILL_INFO[name]) return SKILL_INFO[name];
             const base = name.replace(/\s*\(.*\)\s*$/, '');
-            return SKILL_INFO[base] || '';
+            if (SKILL_INFO[base]) return SKILL_INFO[base];
+            if (!skillIndex) { skillIndex = {}; Object.keys(SKILL_INFO).forEach(k => { skillIndex[skillKey(k)] = SKILL_INFO[k]; }); }
+            return skillIndex[skillKey(name)] || '';
         }
         // inducements: one team at a time, on tabs. Each tab shows that side's gold left so the other team is never a mystery.
         // sides: [{ name, cpu, sub }], attr: the data attribute the buttons carry (its value is the side index)
@@ -8042,8 +8048,7 @@
             const hide = () => { if (tip) { tip.remove(); tip = null; } if (activeTag) { activeTag.classList.remove('active'); activeTag = null; } };
             const show = tag => {
                 hide();
-                const name = tag.dataset.skill, text = tag.dataset.tip || skillInfoFor(name);
-                if (!text) return;
+                const name = tag.dataset.skill, text = tag.dataset.tip || skillInfoFor(name) || `No description found for "${name}".`;
                 tip = document.createElement('div'); tip.id = 'skill-tip';
                 const b = document.createElement('b'); b.textContent = name;
                 tip.appendChild(b); tip.appendChild(document.createTextNode(text));
