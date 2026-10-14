@@ -794,7 +794,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.12</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.13</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1773,7 +1773,11 @@
             const ELITE = new Set(['Block', 'Dodge', 'Guard', 'Mighty Blow']);
             // SPP cost of the next advancement, by how many the player already has
             const COST = { rp: [3, 4, 6, 8, 10, 15], cp: [6, 8, 12, 16, 20, 30], cs: [10, 12, 16, 20, 24, 34], ch: [14, 16, 20, 24, 28, 38] };
-            const KIND_NAME = { rp: 'Random primary skill', cp: 'Chosen primary skill', cs: 'Chosen secondary skill', ch: 'Characteristic' };
+            const KIND_NAME = { rp: 'Random primary skill', cp: 'Chosen primary skill', cs: 'Chosen secondary skill', ch: 'Characteristic',
+                chp: 'Primary skill instead of a characteristic', chs: 'Secondary skill instead of a characteristic' };
+            COST.chp = COST.ch; COST.chs = COST.ch;   // a characteristic roll the coach swaps for a skill: the D8's SPP is still spent
+            // a player with enough SPP for a Characteristic Improvement must take an advancement before the post-game ends
+            const mustAdvance = p => !p.journeyman && p.advs.length < 6 && p.spp >= COST.ch[p.advs.length];
             const LEVELS = ['Rookie', 'Experienced', 'Veteran', 'Emerging Star', 'Star', 'Superstar', 'Legend'];
             const STAT_VALUE = { av: 10, ma: 20, pa: 20, ag: 30, st: 60 };
             const STAT_NAME = { ma: 'MA', st: 'ST', ag: 'AG', pa: 'PA', av: 'AV' };
@@ -2189,7 +2193,7 @@
                         ${r.autoAdv ? `<div class="pg-good">Learned ${esc(r.autoAdv.join(', '))}</div>` : ''}</div>
                     <div class="pg-spp">${rep.sev ? `<div class="pg-dim">${got ? esc(got) : '&nbsp;'}</div><div class="pg-dim">${p.advs.length} skill${p.advs.length === 1 ? '' : 's'} gained</div>`
                         : `<div>${r.spp ? `<b class="pg-amber">+${r.spp}</b>` : '<span class="pg-dim">+0</span>'} <span class="pg-dim">SPP</span></div><div class="pg-dim">${got ? esc(got) : '&nbsp;'}</div><div class="pg-dim">${p.spp} to spend</div>`}</div>
-                    <div class="pg-act">${canAdv ? `<button type="button" class="pg-btn pg-btn-go" data-adv="${p.id}">${pend[p.id] ? 'Take your roll' : 'Advance'}</button>` : ''}
+                    <div class="pg-act">${canAdv ? `<button type="button" class="pg-btn pg-btn-go" data-adv="${p.id}">${pend[p.id] ? 'Take your roll' : 'Advance'}</button>${mustAdvance(p) && !pend[p.id] ? '<div class="pg-dim" style="font-size:10.5px">must advance</div>' : ''}` : ''}
                         ${r.jm && !r.dead && !finished && !rep.ai ? (hired ? '<span class="pg-good">Hired</span>' : `<button type="button" class="pg-btn" data-hirej="${p.id}" ${t.treasury < hireCost || t.players.length >= (rep.sev ? SEV.MAXP : 16) ? 'disabled' : ''}>${r.raised ? 'Keep (free)' : `Hire ${k(hireCost)}`}</button>`) : ''}</div>
                 </div>`;
             }
@@ -2216,8 +2220,9 @@
                 let ch;
                 if (adv.rolled && adv.rolled.kind === 'ch') {
                     const o = adv.rolled.opts;
-                    ch = `<div class="pg-dim">Rolled ${adv.rolled.r} on the D8${o.length ? ': tap one to read it, then take it.' : '.'}</div>` + (o.length ? `<div class="pg-chips">${o.map(st => chip('ch', st, '', `+1 ${STAT_NAME[st]}`)).join('')}</div>` : `<div class="pg-dim">None of those can improve any further: roll again.</div><div class="pg-chips"><button type="button" class="pg-chip" data-rollch="1">Roll D8 again</button></div>`);
-                } else if (adv.ask && adv.ask.kind === 'ch') ch = ask('Roll a D8?', `The roll decides which characteristics can go up, and ${esc(p.name)} must take one of them (if none can improve, you roll again). You can't change your mind once you've rolled.`, 'data-rollchgo="1"');
+                    const swap = `<div class="pg-dim" style="margin-top:8px">Or take a skill instead (the ${COST.ch[n]} SPP is still spent). Primary:</div>${pickList('P', 'chp')}${[...sec].length ? `<div class="pg-dim">Secondary:</div>${pickList('S', 'chs')}` : ''}`;
+                    ch = `<div class="pg-dim">Rolled ${adv.rolled.r} on the D8${o.length ? ': tap one to read it, then take it.' : '.'}</div>` + (o.length ? `<div class="pg-chips">${o.map(st => chip('ch', st, '', `+1 ${STAT_NAME[st]}`)).join('')}</div>` : `<div class="pg-dim">None of those can improve any further: roll again.</div><div class="pg-chips"><button type="button" class="pg-chip" data-rollch="1">Roll D8 again</button></div>`) + swap;
+                } else if (adv.ask && adv.ask.kind === 'ch') ch = ask('Roll a D8?', `The roll decides which characteristics can go up. ${esc(p.name)} then takes one of them, or a Primary or Secondary skill instead; either way the SPP is spent. You can't change your mind once you've rolled.`, 'data-rollchgo="1"');
                 else ch = `<div class="pg-dim">Roll a D8 to see which characteristics can go up (each can only improve twice).</div><div class="pg-chips"><button type="button" class="pg-chip" data-rollch="1">Roll D8</button></div>`;
                 let pickBox = '';
                 if (adv.sel) {
@@ -2278,9 +2283,11 @@
             }
             function footer() {
                 const needMvp = reports.some(r => !r.ai && !r.mvp), rolled = Object.keys(pend).length > 0, needSev = reports.some(r => !r.ai && r.sev && !r.sev.done);
+                const mustAdv = finished ? [] : reports.filter(r => !r.ai && !r.sev).flatMap(r => r.rows.filter(x => !x.jm && !x.dead && mustAdvance(x.rec)).map(x => x.rec.name));
                 $('pg-finish').classList.toggle('hidden', finished);
-                $('pg-finish').disabled = needMvp || rolled || needSev;
-                $('pg-finish').textContent = needMvp ? 'Roll for MVP first' : rolled ? 'Take your rolled advancement first' : needSev ? 'Finish the advancement first' : 'Finish & save';
+                $('pg-finish').disabled = needMvp || rolled || needSev || mustAdv.length > 0;
+                $('pg-finish').textContent = needMvp ? 'Roll for MVP first' : rolled ? 'Take your rolled advancement first' : needSev ? 'Finish the advancement first'
+                    : mustAdv.length ? `${mustAdv.length === 1 ? mustAdv[0] + ' has' : mustAdv.length + ' players have'} enough SPP and must advance first` : 'Finish & save';
                 $('pg-after').classList.toggle('hidden', !finished);
                 $('pg-again').textContent = state.league ? 'Back to the league' : 'Main Menu';
                 $('pg-note').textContent = finished ? (reports.some(r => !r.ai && r.t.emPending) ? 'Saved. Next: spend your treasury, then roll for Expensive Mistakes. If you leave now, it is rolled before this team\'s next match.' : 'Saved. Use the Team Builder to hire and fire, buy re-rolls (double cost after the first match) and staff.') : 'Advance players now, or keep their SPP for later. Finishing saves everything.';
@@ -2312,7 +2319,8 @@
                     }
                     else if (d.pick && adv) {
                         const [kind, val, grp] = d.pick.split('|');
-                        if (advLocked() && (kind !== adv.rolled.kind || !(adv.rolled.skills || adv.rolled.opts || []).includes(val))) return;
+                        const swapPick = advLocked() && adv.rolled.kind === 'ch' && (kind === 'chp' || kind === 'chs');
+                        if (advLocked() && !swapPick && (kind !== adv.rolled.kind || !(adv.rolled.skills || adv.rolled.opts || []).includes(val))) return;
                         adv.sel = { kind, val, grp }; adv.ask = null;
                     }
                     else if (d.unsel && adv) adv.sel = null;
@@ -2320,7 +2328,7 @@
                         const { kind, val, grp } = adv.sel, p = rep.rows.find(r => r.rec.id === adv.id).rec;
                         if (p.spp < costOf(p, kind)) return;
                         if (kind === 'ch') spend(p, kind, { stat: val });
-                        else spend(p, kind, { skill: val, kind: kind === 'cs' ? 'S' : 'P', grp, random: kind === 'rp' });
+                        else spend(p, kind, { skill: val, kind: kind === 'cs' || kind === 'chs' ? 'S' : 'P', grp, random: kind === 'rp' });
                         delete pend[p.id];
                         sfx('menuClick');
                         adv = canAdvance(p) ? { id: p.id } : null;
@@ -3019,6 +3027,7 @@
                     if (d.mpind) { const [key, dv] = d.mpind.split('|'); change(() => { const n2 = Math.max(0, (cur.mind[key] || 0) + +dv); if (n2) cur.mind[key] = n2; else delete cur.mind[key]; }); return; }
                     if (d.hire && isMP(cur) && cur.players.length + starN(cur) >= MAXP) { msg(`The roster is full (${MAXP}, counting Star Players).`, true); return; }
                     if (d.hire) { if (pay(R.positions[d.hire].cost, 'that player')) change(() => { const p = CAREER.norm({ pos: d.hire, name: randomName(cur.race, new Set(cur.players.map(p => p.name))) }); if (sev && sevLineman(cur.race, d.hire) && !cur.players.some(q => q.vet)) p.vet = true; cur.players.push(p); }); }
+                    else if (d.fire != null && car && cur.players.filter((q, j) => j !== +d.fire && !q.mng).length < 11) { msg(`You can't release ${cur.players[+d.fire].name}: that would leave fewer than 11 players able to play the next game.`, true); return; }
                     else if (d.fire != null) { const gone = cur.players[+d.fire]; change(() => { cur.players.splice(+d.fire, 1); }); if (car) msg(`Released ${gone.name}. Released players are not refunded.`); }
                     else if (d.inc) { if (cur[d.inc] < (d.inc === 'fans' && !sev ? 3 : maxOf(d.inc, cur.race, cur)) && pay(staffCost(d.inc), STAFF[d.inc].label.toLowerCase())) change(() => { cur[d.inc] = Math.min(maxOf(d.inc, cur.race, cur), cur[d.inc] + 1); }); }
                     else if (d.dec) {   // unused bribes go back to the treasury; staff and re-rolls let go are not refunded

@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.13 (14 Oct 2026)
+- **Changed:** after rolling the D8 for a Characteristic Improvement, you can take a Primary or Secondary skill instead of the rolled characteristic. The SPP for the characteristic is still spent.
+- **Changed:** a player with enough SPP for a Characteristic Improvement must now take an advancement before the post-game can be finished, as the rules require. Their row says "must advance".
+- **Changed:** in a team that has played, you can no longer release a player if it would leave fewer than 11 players able to play the next game.
+
 ## v2.12 (14 Oct 2026)
 - **Changed:** after a league or career match, Expensive Mistakes is no longer rolled as soon as you finish. The post-game screen now lets you spend your treasury first (Open Team Builder), then roll for Expensive Mistakes on what's left. If you leave without rolling, it's rolled before that team's next match. The computer team spends and rolls on its own as before. ([#27](https://github.com/sirspoon/BludBowl/issues/27))
 
