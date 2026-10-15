@@ -2,6 +2,16 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.89 (15 Oct 2026)
+- **Changed:** the Chaos Chosen look less like robots.
+  - **Face:** a snarling, bearded face with glowing eyes shows under an open, horned helm.
+  - **Arms:** bare and brawny, with red vambraces and dark gauntlets.
+  - **Body and legs:** a red breastplate with banded belly plates, bare thighs and red knee plates.
+  - **Pauldrons:** a little smaller, still flame-painted.
+- **Changed:** the Chosen's Big Guys now match the team.
+  - **Troll and Minotaur:** each wears a spiked black pauldron with red flames and a black belt.
+  - **Ogre:** flames run up his shoulder pads, and he has a black belt.
+
 ## v2.88 (15 Oct 2026)
 - **Changed:** the Chaos Renegades now all look like one team.
   - **Humans:** much less armoured. They wear an open helm (so you can see their faces), a kit breastplate over dark leathers, one Chaos-starred pauldron, bare arms with lime wraps and kit knee pads.
