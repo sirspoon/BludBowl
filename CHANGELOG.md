@@ -2,6 +2,20 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.97 (15 Oct 2026)
+- **Added:** the last two undead teams from the 2025 rules. Both play in the Sylvanian Spotlight and have Masters of Undeath.
+  - **Necromantic Horror** (grave indigo and ghost green):
+    - **Roster:** Zombie Linemen, Ghoul Runners, Wraiths, Flesh Golems and Werewolves. No Apothecary allowed.
+    - **Look:** new sprites for a floating, hooded Wraith with glowing eyes, a stitched patchwork Flesh Golem with neck bolts, and a snarling Werewolf. The Zombies and Ghouls use the Undead team's sprites.
+  - **Vampires** (black and blood red):
+    - **Roster:** Thrall Linemen, Vampire Runners, Throwers and Blitzers (Bloodlust, Hypnotic Gaze), and a Vargheist.
+    - **Look:** the Thralls are dazed, with a bandaged bite. The Vampires are pale and caped, with high collars, slicked hair and red eyes, and the Blitzer wears dark plate. The Vargheist is a bat-winged monster.
+  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
+- **Added:** a thirsty Vampire (failed Bloodlust) now bites an adjacent Thrall team-mate.
+  - **The bite:** an Injury roll, where a Casualty is only Badly Hurt.
+  - **Turnover:** only if the Thrall had the ball and drops it.
+  - **No Thrall adjacent:** it's still a Turnover, and the Vampire is Distracted.
+
 ## v2.96 (15 Oct 2026)
 - **Changed:** the Tomb Guardians wear the striped nemes headdress again, now in turquoise and gold with jackal ears.
 - **Changed:** the Tomb Kings' faces look more like skulls: deep sockets with a glint, a nasal hole and a row of teeth.
