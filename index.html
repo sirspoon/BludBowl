@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.03</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.04</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10068,9 +10068,10 @@
         }
         function zoatAsk(p) {
             const ts = zoatTargets(p).sort((a, b) => (b.id === state.ball.carrierId) - (a.id === state.ball.carrierId) || b.st - a.st);
-            askOptions('"EXCUSE ME, ARE YOU A ZOAT?"', `Pick an opposing player within 3 squares of ${p.name}. They become Distracted until their own turn: no Tackle Zone, no assists, and they can't catch.`,
-                ts.map(q => ({ label: `${q.name || q.type} (${q.type}) [${q.x}, ${q.y}]${q.id === state.ball.carrierId ? ' · has the ball' : ''}`, fn: () => zoat(p, q) })).concat([{ label: 'Not now', fn: () => {} }]),
-                { team: p.team, ai: 0 });
+            if (AI.isAI(p.team)) { zoat(p, ts[0]); return; }
+            pitchPick({ title: '"EXCUSE ME, ARE YOU A ZOAT?"', team: p.team, cancelLabel: 'Not now', hint: `Tap an opposing player within 3 squares of ${p.name}. They become Distracted until their own turn: no Tackle Zone, no assists, and they can't catch.`,
+                cells: ts.map(q => ({ x: q.x, y: q.y, data: q, hint: q.id === state.ball.carrierId })), describe: c => `${c.data.name || c.data.type} (${c.data.type})${c.data.id === state.ball.carrierId ? ', has the ball' : ''}. Tap Confirm, or tap them again.`,
+                onPick: q => zoat(p, q), onCancel: () => refreshSelection(p) });
         }
 
         // ---------- the rest of the Star Players ----------
@@ -10147,7 +10148,8 @@
             const p = getPlayerById(state.selectedId); if (!p) return;
             const go = () => { const ts = gazeTargets(p); if (!ts.length) return;
                 if (ts.length === 1 || AI.isAI(p.team)) { doGaze(p, ts.sort((a, b) => (b.id === state.ball.carrierId) - (a.id === state.ball.carrierId))[0]); return; }
-                askOptions('HYPNOTIC GAZE', `Who does ${p.name || p.type} stare down? On a 3+ they are Distracted.`, ts.map(q => ({ label: `${q.name || q.type} (${q.type})${q.id === state.ball.carrierId ? ' · has the ball' : ''}`, fn: () => doGaze(p, q) })), { team: p.team, ai: 0 }); };
+                pitchPick({ title: 'HYPNOTIC GAZE', team: p.team, hint: `Tap the opponent ${p.name || p.type} stares down: on a 3+ they are Distracted.`, cells: ts.map(q => ({ x: q.x, y: q.y, data: q, hint: q.id === state.ball.carrierId })),
+                    describe: c => `${c.data.name || c.data.type} (${c.data.type})${c.data.id === state.ball.carrierId ? ', has the ball' : ''}. Tap Confirm, or tap them again.`, onPick: q => doGaze(p, q), onCancel: () => doGaze(p, ts[0]) }); };
             if (state.mode === MODES.IDLE) { p.actionTaken = 'gaze'; activationTest(p, ok => { if (ok) go(); }); return; }
             if (p.pendingAct) { commitAction(p, ok => { if (ok && !p.hasActed) go(); else render(); }); return; }
             go();
@@ -10214,9 +10216,12 @@
                 const ms = state.players.filter(q => q.team === p.team && q.id !== p.id && standingOn(q) && cheb1(q, p) <= 5 && getTackleZones(q.x, q.y, 1 - q.team) === 0 && dest(q).length);
                 if (!starFree(p, key) || !ms.length) return null;
                 return { label: 'Raiding Party', fn: () => pickPlayer(p, 'RAIDING PARTY', 'Pick an Open team-mate within 5 squares to move 1 square next to an opponent.', ms, q => {
-                    askOptions('RAIDING PARTY', `Where does ${q.name || q.type} go?`, dest(q).map(([x, y]) => ({ label: `[${x}, ${y}]`, fn: () => {
+                    const moveTo = ([x, y]) => {
                         starSpend(p, key, 'Raiding Party'); state.turnActed = true; q.x = x; q.y = y; if (state.ball.carrierId === q.id) { state.ball.x = x; state.ball.y = y; }
-                        log(`  RAIDING PARTY! ${q.name || q.type} moves up to [${x}, ${y}].`, 'text-yellow-300 font-bold'); trapdoorFalls(q); refreshSelection(p); render(); } })), { team: p.team, ai: 0 }); }) };
+                        log(`  RAIDING PARTY! ${q.name || q.type} moves up to [${x}, ${y}].`, 'text-yellow-300 font-bold'); trapdoorFalls(q); refreshSelection(p); render(); };
+                    if (AI.isAI(p.team)) { moveTo(dest(q)[0]); return; }
+                    pitchPick({ title: 'RAIDING PARTY', team: p.team, hint: `Tap the square ${q.name || q.type} moves to (next to an opponent).`, cells: dest(q).map(d => ({ x: d[0], y: d[1], data: d, hint: true })),
+                        describe: c => `Move to [${c.data[0]}, ${c.data[1]}]. Tap Confirm, or tap it again.`, onPick: moveTo, onCancel: () => refreshSelection(p) }); }) };
             },
             jeremiah: p => {
                 const ts = state.players.filter(q => q.team !== p.team && standingOn(q) && cheb1(q, p) === 1);
@@ -10281,10 +10286,10 @@
         // (showing what would happen) and Confirm (or a second tap on it) goes ahead. Cancel goes back.
         //   cells: [{ x, y, data, hint }]  (hint: a suggested pick, drawn brighter)   blast: also outline the 3x3 around the selection
         //   describe(cell) -> text for the banner once a square is selected
-        function pitchPick({ title, hint, cells, onPick, onCancel, describe, blast, confirmLabel }) {
+        function pitchPick({ title, hint, cells, onPick, onCancel, describe, blast, confirmLabel, team, cancelLabel }) {
             if (!cells.length) { if (onCancel) onCancel(); return; }
             const prevMode = state.mode;
-            state.pitchPick = { title, hint, cells, onPick, onCancel, describe, blast, sel: null, prevMode };
+            state.pitchPick = { title, hint, cells, onPick, onCancel, describe, blast, sel: null, prevMode, team };
             state.mode = MODES.LOCKED;
             let el = document.getElementById('pick-banner');
             if (!el) {
@@ -10295,6 +10300,7 @@
                 el.querySelector('.pb-go').onclick = () => { const pp = state.pitchPick; if (pp && pp.sel) { endPitchPick(); pp.onPick(pp.sel.data != null ? pp.sel.data : pp.sel); } };
             }
             el.querySelector('.pb-go').textContent = confirmLabel || 'Confirm';
+            el.querySelector('.pb-cancel').textContent = cancelLabel || 'Cancel';
             paintPitchPick(); el.classList.remove('hidden');
             followAction(cells.filter(c => c.hint).length ? cells.filter(c => c.hint) : cells.slice(0, 1));
             render();
@@ -10337,7 +10343,7 @@
         }
         function pickPlayer(p, title, text, list, fn) {
             if (AI.isAI(p.team)) { fn(list[0]); return; }
-            pitchPick({ title, hint: `${text} Tap a highlighted player.`, cells: list.map(q => ({ x: q.x, y: q.y, data: q, hint: true })),
+            pitchPick({ title, team: p.team, hint: `${text} Tap a highlighted player.`, cells: list.map(q => ({ x: q.x, y: q.y, data: q, hint: true })),
                 describe: c => `${c.data.name || c.data.type} (${c.data.type})${c.data.id === state.ball.carrierId ? ', has the ball' : ''}. Tap Confirm, or tap them again.`,
                 onPick: q => fn(q), onCancel: () => refreshSelection(p) });
         }
@@ -10348,13 +10354,21 @@
         function zzhargBlast(p, q, key) {
             starSpend(p, key, "Blastin' Solves Everything"); state.turnActed = true; const r = d6();
             p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null; state.mode = MODES.IDLE;
-            let hit = q;
-            if (r === 2) hit = state.players.filter(o => o.team === p.team && o.id !== p.id && standingOn(o) && cheb1(o, q) <= 3).sort((a, b) => a.av - b.av)[0] || q;   // the other coach picks the victim
-            else if (r === 1) hit = p;
-            log(`  BLASTIN' SOLVES EVERYTHING! (${r}) ${hit === q ? `Zzharg's blast hits ${q.name || q.type}` : hit === p ? 'The blunderbuss backfires on Zzharg' : `The blast goes astray and hits ${hit.name || hit.type}`}: Armour roll.`, 'text-yellow-300 font-bold');
-            sfx('boom');
-            harm({ kind: 'blast', by: p }, () => checkArmor(hit, hit.team !== p.team ? p : null));
-            refreshSelection(p); render();
+            const blast = hit => {
+                log(`  BLASTIN' SOLVES EVERYTHING! (${r}) ${hit === q ? `Zzharg's blast hits ${q.name || q.type}` : hit === p ? 'The blunderbuss backfires on Zzharg' : `The blast goes astray and hits ${hit.name || hit.type}`}: Armour roll.`, 'text-yellow-300 font-bold');
+                sfx('boom');
+                harm({ kind: 'blast', by: p }, () => checkArmor(hit, hit.team !== p.team ? p : null));
+                refreshSelection(p); render();
+            };
+            if (r !== 2) { blast(r === 1 ? p : q); return; }
+            // a 2: the other coach picks who it hits instead - anyone (either team, not Zzharg) within 3 squares of the target
+            const alt = state.players.filter(o => o.id !== p.id && o.id !== q.id && !o.isReserve && !o.isCasualty && !o.isKO && !o.isEjected && o.x >= 0 && o.x < CFG.cols && cheb1(o, q) <= 3);
+            if (!alt.length) { blast(q); return; }
+            if (AI.isAI(q.team)) { blast(alt.sort((a, b) => (b.team === p.team) - (a.team === p.team) || a.av - b.av)[0]); return; }
+            log(`  Blastin': (2) the blast goes astray - ${ROSTERS[q.team].name} pick who it hits.`, 'text-yellow-300');
+            pitchPick({ title: "BLASTIN' GOES ASTRAY", team: q.team, hint: `Zzharg rolled a 2: pick the player (either team, within 3 squares of ${q.name || q.type}) the blast hits instead.`,
+                cells: alt.map(o => ({ x: o.x, y: o.y, data: o, hint: o.team === p.team })), describe: c => `${c.data.name || c.data.type} (${ROSTERS[c.data.team].name}) takes the Armour roll. Tap Confirm, or tap them again.`,
+                onPick: o => blast(o), onCancel: () => blast(alt.find(o => o.team === p.team) || alt[0]) });
         }
         function thorssonBash(p, q, key) {
             starSpend(p, key, 'Beer Barrel Bash'); state.turnActed = true; const r = d6();
@@ -10482,7 +10496,17 @@
         function feed(p, endingTurn) {
             p.hungry = false;
             if (p.isCasualty || p.isKO || p.isReserve || p.isEjected || p.x < 0 || p.x >= CFG.cols) return false;
-            const prey = starIs(p, 'karina') && starFree(p, 'morsel') ? state.players.filter(q => q.team !== p.team && !q.star && q.st <= 3 && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected
+            const preyAll = starIs(p, 'karina') && starFree(p, 'morsel') ? state.players.filter(q => q.team !== p.team && !q.star && q.st <= 3 && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected && q.x >= 0 && q.x < CFG.cols && cheb1(p, q) === 1) : [];
+            const thrallsAll = state.players.filter(q => q.team === p.team && q.id !== p.id && /Thrall/.test(q.type) && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected && q.x >= 0 && q.x < CFG.cols && cheb1(p, q) === 1);
+            if (!endingTurn && !p.biteChosen && preyAll.length + thrallsAll.length > 1 && !AI.isAI(p.team)) {   // the coach picks the victim
+                pitchPick({ title: 'BLOODLUST: FEED', team: p.team, hint: `${p.name || p.type} must feed: tap ${preyAll.length ? 'an adjacent Thrall, or an opponent with ST 3 or less (Tasty Morsel)' : 'an adjacent Thrall'} to bite.`,
+                    cells: [...thrallsAll, ...preyAll].map(q => ({ x: q.x, y: q.y, data: q, hint: q.team === p.team && state.ball.carrierId !== q.id })),
+                    describe: c => `Bite ${c.data.name || c.data.type}${c.data.team === p.team ? '' : ' (Tasty Morsel)'}${state.ball.carrierId === c.data.id ? ' - they have the ball!' : ''}. Tap Confirm, or tap them again.`,
+                    onPick: q => { p.hungry = true; p.biteChosen = q.id; feed(p, false); }, onCancel: () => { p.hungry = true; p.biteChosen = -1; feed(p, false); } });
+                return false;
+            }
+            const chosen = p.biteChosen != null && p.biteChosen >= 0 ? getPlayerById(p.biteChosen) : null; p.biteChosen = null;
+            const prey = chosen ? (chosen.team !== p.team ? chosen : null) : starIs(p, 'karina') && starFree(p, 'morsel') ? state.players.filter(q => q.team !== p.team && !q.star && q.st <= 3 && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected
                 && q.x >= 0 && q.x < CFG.cols && cheb1(p, q) === 1).sort((a, b) => ((state.ball.carrierId === b.id) - (state.ball.carrierId === a.id)) || (a.av - b.av))[0] : null;
             if (prey) {
                 starSpend(p, 'morsel', 'Tasty Morsel');
@@ -10494,7 +10518,7 @@
                 if (hadBall) dropBall(prey);
                 return true;
             }
-            const thrall = !prey && state.players.filter(q => q.team === p.team && q.id !== p.id && /Thrall/.test(q.type) && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected
+            const thrall = chosen && chosen.team === p.team ? chosen : !prey && state.players.filter(q => q.team === p.team && q.id !== p.id && /Thrall/.test(q.type) && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected
                 && q.x >= 0 && q.x < CFG.cols && cheb1(p, q) === 1).sort((a, b) => ((state.ball.carrierId === a.id) - (state.ball.carrierId === b.id)) || ((b.isDown ? 1 : 0) - (a.isDown ? 1 : 0)))[0];
             if (thrall) {
                 const hadBall = state.ball.carrierId === thrall.id, a = d6(), b = d6(), out = injuryOutcome(thrall, a + b).out;
@@ -12600,7 +12624,10 @@
         }
         // before a Special Action aimed at a player: their Foul Appearance, then their Dump-off. True if that takes over the flow.
         function specialGate(atk, def, again) {
-            if (def && atk && def.team !== atk.team) tricksterHop(atk, def);
+            if (def && atk && def.team !== atk.team && tricksterHop(atk, def, () => { if (!specialGateRest(atk, def, again)) again(); })) return true;
+            return specialGateRest(atk, def, again);
+        }
+        function specialGateRest(atk, def, again) {
             if (foulAppearanceStops(atk, def, () => { if (!dumpOffFirst(atk, def, again)) again(); })) return true;
             return dumpOffFirst(atk, def, again);
         }
@@ -12702,28 +12729,39 @@
         function canAssist(p, enemyTeam) { return !p.isDown && !p.isDistracted && !p.eyeGouged && ((p.skills.includes('Guard') && !defensiveOn(p)) || getTackleZones(p.x, p.y, enemyTeam) <= 1); }
         // Trickster (the Gnome Illusionist): before the block dice are counted, the target may vanish and reappear in another free square next to the blocker.
         // It picks the square that leaves the blocker the fewest assists (away from the sideline as a tie-break); never onto the ball, nor into an End Zone holding it
-        function tricksterHop(atk, def) {
-            if (!def.skills.includes('Trickster') || def.team === atk.team || def.isDown || def.isStunned || state.bncBlock) return;
+        // returns true when it takes over the flow (cont() carries on afterwards)
+        function tricksterHop(atk, def, cont) {
+            if (!def.skills.includes('Trickster') || def.team === atk.team || def.isDown || def.isStunned || state.bncBlock) return false;
             const helpers = (x, y) => { let n = 0; for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) { if (!dx && !dy) continue;
                 const q = getPlayer(x + dx, y + dy); if (q && q.team === atk.team && q.id !== atk.id && q.id !== def.id && canAssist(q, def.team)) n++; } return n; };
             const edge = (x, y) => Math.min(x, y, CFG.cols - 1 - x, CFG.rows - 1 - y) === 0 ? 1 : 0;
-            const carrying = state.ball.carrierId === def.id, score = (x, y) => helpers(x, y) * 10 + edge(x, y);
-            const sx = def.x, sy = def.y; let best = null, bestScore = score(sx, sy);
+            const carrying = state.ball.carrierId === def.id, sx = def.x, sy = def.y;
+            const score = (x, y) => { def.x = -99; const v = helpers(x, y) * 10 + edge(x, y); def.x = sx; return v; };
+            const sq = [];
             for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
                 const x = atk.x + dx, y = atk.y + dy;
                 if ((!dx && !dy) || (x === sx && y === sy) || x < 0 || y < 0 || x >= CFG.cols || y >= CFG.rows || getPlayer(x, y)) continue;
                 if (!carrying && state.ball.carrierId == null && state.ball.x === x && state.ball.y === y) continue;
                 if (carrying && (x === 0 || x === CFG.cols - 1)) continue;
-                def.x = -99; const sc = score(x, y); def.x = sx;
-                if (sc < bestScore) { bestScore = sc; best = { x, y }; }
+                sq.push({ x, y, v: score(x, y) });
             }
-            if (!best) return;
-            def.x = best.x; def.y = best.y;
-            log(`  TRICKSTER! ${def.name || def.type} vanishes in a puff of smoke and pops up at [${best.x}, ${best.y}].`, 'text-fuchsia-300 font-bold'); skillPop('Trickster');
-            render();
+            if (!sq.length) return false;
+            const move = c => { def.x = c.x; def.y = c.y; log(`  TRICKSTER! ${def.name || def.type} vanishes in a puff of smoke and pops up at [${c.x}, ${c.y}].`, 'text-fuchsia-300 font-bold'); skillPop('Trickster'); render(); };
+            if (AI.isAI(def.team)) { const cur = score(sx, sy), best = sq.sort((a, b) => a.v - b.v)[0]; if (best.v < cur) move(best); return false; }
+            const cur = score(sx, sy), lo = Math.min(...sq.map(c => c.v));
+            pitchPick({ title: 'TRICKSTER', team: def.team, cancelLabel: 'Stay put',
+                hint: `${atk.name || atk.type} is coming for ${def.name || def.type}. Tap a free square next to them to reappear in first (the glowing ones leave them the fewest helpers), or Stay put.`,
+                cells: sq.map(c => ({ x: c.x, y: c.y, data: c, hint: c.v === lo && c.v < cur })),
+                describe: c => `Reappear at [${c.data.x}, ${c.data.y}]: ${helpers(c.data.x, c.data.y)} of their team-mates could help there. Tap Confirm, or tap it again.`,
+                onPick: c => { move(c); cont(); }, onCancel: () => cont() });
+            return true;
         }
         function startBlock(atkId, defId, dauntR) {
-            if (dauntR == null) { const a = getPlayerById(atkId), d = getPlayerById(defId); if (a && d) tricksterHop(a, d); }
+            if (dauntR == null) {   // Trickster first (asked once per block)
+                const a = getPlayerById(atkId), d = getPlayerById(defId), k = atkId + '>' + defId;
+                if (state.trickDone === k) state.trickDone = null;
+                else if (a && d && tricksterHop(a, d, () => { state.trickDone = k; startBlock(atkId, defId); })) return;
+            }
             {   // Dauntless is rolled first (Akhorne's Blind Rage, then a team re-roll may be used on a fail)
                 const a = getPlayerById(atkId), d = getPlayerById(defId);
                 if (dauntR == null && a && d && a.skills.includes('Dauntless') && d.team !== a.team && d.st > a.st && !state.bncBlock) {
@@ -16350,8 +16388,8 @@
                     if (more.length) {
                         const go = q => { starSpend(atk, 'carnage', 'Maximum Carnage'); log(`  MAXIMUM CARNAGE! Max swings the chainsaw round at ${q.name || q.type}!`, 'text-yellow-300 font-bold'); setTimeout(() => chainsawAttack(atk, q), 600); };
                         if (AI.isAI(atk.team)) { go(more[0]); return; }
-                        askOptions('MAXIMUM CARNAGE', 'Max can make another Chainsaw Attack on a different opponent next to him (once per game).',
-                            [...more.map(q => ({ label: `Carve up ${q.name || q.type}`, fn: () => go(q) })), { label: 'No, that will do', fn: finish }], { team: atk.team, ai: 0 });
+                        pitchPick({ title: 'MAXIMUM CARNAGE', team: atk.team, cancelLabel: 'No, that will do', hint: 'Max can make another Chainsaw Attack (once per game): tap a different opponent next to him.',
+                            cells: more.map(q => ({ x: q.x, y: q.y, data: q, hint: true })), describe: c => `Carve up ${c.data.name || c.data.type}. Tap Confirm, or tap them again.`, onPick: q => go(q), onCancel: finish });
                         return;
                     }
                     finish();
@@ -18594,6 +18632,7 @@
             // which team a prompt or piece on screen belongs to (null: anyone's)
             function ownerTeam(el) {
                 if (!el || !el.closest) return null;
+                if (state.pitchPick && state.pitchPick.team != null && (el.closest('#pick-banner') || el.id === 'gameCanvas' || el.tagName === 'CANVAS')) return state.pitchPick.team;
                 const lp = el.closest('#lineup-pane0, #lineup-pane1'); if (lp) return +lp.id.slice(-1);
                 if (el.closest('#btn-announce-reload')) return NET.on() ? NET.hostSide() : null;   // the final whistle's summary: the host's device
                 const ii = el.closest('#modal-ind-intro'); if (ii) return ii.dataset.team != null && ii.dataset.team !== '' ? +ii.dataset.team : null;

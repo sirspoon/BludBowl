@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.04 (15 Oct 2026)
+- **Changed:** Star Player and Trickster choices are now made by tapping the pitch, instead of being decided automatically or picked from a list.
+  - **Trickster:** when your Gnome Illusionist is about to be blocked or hit by a Special Action, you tap the square they reappear in, even during the other coach's turn. The best squares glow, or you can choose to stay put. The computer still picks for its own Illusionists.
+  - **Zzharg Madeye:** on a roll of 2, the other coach taps who the blast hits instead (anyone within 3 squares, from either team).
+  - **Max Spleenripper:** you tap the victim of his second Chainsaw Attack, or decline it.
+  - **Other picks:** the Zoat question, Hypnotic Gaze and Ivar's Raiding Party (the square) are tapped too.
+  - **Bloodlust bites:** a Vampire who must feed lets you tap which Thrall to bite, or for Karina an opponent with Tasty Morsel, whenever there's more than one choice mid-turn.
+  - **Two-device play:** each of these picks goes to the coach who makes it.
+
 ## v3.03 (15 Oct 2026)
 - **Added:** the last nine Star Players from the 2025 rules, each with their special rule and a sprite. This works toward [#16](https://github.com/sirspoon/BludBowl/issues/16).
   - **Bilerot Vomitflesh** (Favoured of Nurgle): Putrid Regurgitation, Projectile Vomit once per half.
