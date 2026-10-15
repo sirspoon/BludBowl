@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.60</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.61</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9138,18 +9138,18 @@
   const bird = (B, t) => { const f0 = 2400 + Math.random() * 1600; for (let k = 0; k < 3; k++) { const o = ctx.createOscillator(), g = ctx.createGain(), tt = t + k * 0.09; o.type = 'sine';
     o.frequency.setValueAtTime(f0, tt); o.frequency.exponentialRampToValueAtTime(f0 * 1.5, tt + 0.05); g.gain.setValueAtTime(0.0001, tt); g.gain.linearRampToValueAtTime(0.022, tt + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.07);
     o.connect(g); g.connect(B.pad); const sv = ctx.createGain(); sv.gain.value = 0.5; g.connect(sv); sv.connect(verbIn); o.start(tt); o.stop(tt + 0.1); } };
-  function jgBar(kind, i, t, s, B, tense, fillNext, ph) {
+  // the quiet beat's far-off triplets, "duh da (gap)", for one bar at a loudness that follows env(0..1 through the bar)
+  const jgTriplets = (B, t, s, env) => { for (let k = 0; k < 24; k++) { if (k % 3 === 2) continue; farDrum(B, t + k * s / 6, k % 3 ? 60 : 55, (k % 3 ? 0.5 : 0.62) * env(k / 24)); } };
+  function jgBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
     const r = JG_ROOTS[i], q = s / 4, quiet = kind === 'calm' || kind === 'lull', pat = JG_DRUM[ph % 2];
-    if (kind === 'lull') {   // the quiet beat: nothing but the far-off drums in triplets, "duh da (gap) duh da (gap)", swelling in and fading away
-      const step = s / 6;
-      for (let k = 0; k < 24; k++) {
-        if (k % 3 === 2) continue;   // the little gap
-        const pos = (ph * 24 + k) / 96, env = Math.max(0.06, Math.min(1, pos / 0.35, (1 - pos) / 0.3));
-        farDrum(B, t + k * step, k % 3 ? 60 : 55, (k % 3 ? 0.5 : 0.62) * env);
-      }
+    if (kind === 'lull') {   // the quiet beat: nothing but the far-off drums in triplets, swelling in and fading away
+      jgTriplets(B, t, s, x => { const pos = (ph + x) / 4; return 0.3 + 0.7 * Math.max(0, Math.min(1, pos / 0.3, (1 - pos) / 0.3)); });
       if (Math.random() < 0.4) bird(B, t + Math.random() * s * 3.5);
       return;
     }
+    // ...and it creeps in under the bar before it, and fades out through the bar after
+    if (nextKind === 'lull' && fillNext) { jgTriplets(B, t, s, x => 0.3 * x); fillNext = false; }
+    if (prevKind === 'lull' && ph === 0) jgTriplets(B, t, s, x => 0.3 * (1 - x));
     // the far-off drums (louder and nearer in the drive, just the downbeats when it's calm)
     const dv = kind === 'drive' ? 0.75 : kind === 'breakdown' ? 0.4 : quiet ? (kind === 'calm' ? 0.45 : 0.5) : 0.6;
     for (let k = 0; k < 16; k++) {
@@ -9212,9 +9212,9 @@
       const jg = run.style === 'jungle', target = (jg ? JG_BPM : EL_BPM)[e.mode]; e.bpm += Math.max(-6, Math.min(6, target - e.bpm));
       const spb = 60 / e.bpm, kind = e.cur, tense = e.mode === 'tense', ph = e.bar, i = ph % 4, len = kind === 'chorus' ? 8 : 4;
       B.bus.gain.setTargetAtTime(LEVEL[kind] * (tense ? 1.05 : 1), run.next, .25);
-      try { (jg ? jgBar : elBar)(kind, i, run.next, spb, B, tense, ph === len - 1 && e.next !== 'calm', ph); } catch (x) { console.warn('music:', x && x.message); }
+      try { (jg ? jgBar : elBar)(kind, i, run.next, spb, B, tense, ph === len - 1 && e.next !== 'calm', ph, e.next, e.prev); } catch (x) { console.warn('music:', x && x.message); }
       run.next += spb * 4; e.bar++;
-      if (e.bar === len) { e.bar = 0; e.cur = e.next; e.next = elPick(e, e.cur); }
+      if (e.bar === len) { e.bar = 0; e.prev = e.cur; e.cur = e.next; e.next = elPick(e, e.cur); }
     }
   }
   function start() {
