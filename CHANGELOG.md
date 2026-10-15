@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.67 (15 Oct 2026)
+- **Changed:** a new look for the Ogre on the Human and Imperial Nobility teams. He's now hunched, with his bald, heavy-jawed head sitting low and forward between big spiked shoulder pads, long arms with bracers reaching down to big fists, a barrel body with a belly plate, and short legs. Before, he was upright with a square head on top. The Ogres team's own players are unchanged.
+- **Changed:** Imperial Nobility players now wear plumed helmets, with more plumes for the grander positions: one on a Retainer, two on a Thrower or Bodyguard, a fan of four on a Noble Blitzer. Their helmets are dark steel, their shoulder plates take the trim colour, and the team's default kit is now dark steel with orange-red.
+
 ## v2.66 (15 Oct 2026)
 - **Added:** two new teams from the 2025 rules.
   - **Halflings (Tier 4):** Halfling Hopefuls, Hefties and Catchers, and up to two Athel Forest Treemen. They play in the Halfling Thimble Cup and the Woodland League, and their Halfling Master Chef costs 100k instead of 300k. Puggy Baconbreath, Cindy Piewhistle and Grombrindal can now also be hired in the Halfling Thimble Cup.

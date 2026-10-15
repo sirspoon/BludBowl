@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.66</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.67</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1763,8 +1763,8 @@
         };
         RACES.imperial = { key: 'imperial', short: 'IMP', lineup: ['Retainer','Ogre','Bodyguard','Noble','Noble','Bodyguard','Retainer','Retainer','Bodyguard','Retainer','Thrower'],
             bench: [], rerolls: 2, specialRules: [],   // 830k players + 2 re-rolls 120k + apothecary 50k = 1,000k
-            name: "Imperial Nobility", color: "#7c3aed",
-            style: { fill: '#581c87', text: '#fde68a', endBg: '#3b0764', endText: '#fcd34d', shade: 'rgba(0,0,0,0.55)' },   // imperial purple with gold
+            name: "Imperial Nobility", color: "#ea580c",
+            style: { fill: '#3b3f48', text: '#ea580c', endBg: '#26292f', endText: '#fb923c', shade: 'rgba(0,0,0,0.55)' },   // dark steel with orange-red
             fans: 1, assistantCoaches: 0, cheerleaders: 0, apothecary: 1, tv: "1000k", treasury: "0 gp",
             types: {
                 Retainer:  { type: 'Imperial Retainer', label: 'L', ma: 6, st: 3, ag: 3, pa: 4, av: 8, skills: ['Fend'] },
@@ -2902,7 +2902,7 @@
             }
             function blank(race) {
                 const R = RACES[race];
-                const col = { halfling: ['#4d7c0f', '#fef3c7'], imperial: ['#581c87', '#fde68a'], chaosdwarf: ['#7f1d1d', '#d4a017'], darkelf: ['#4c1d95', '#e5e7eb'], amazon: ['#0f766e', '#fde047'], bretonnian: ['#1e40af', '#fef3c7'], human: ['#1d4ed8', '#f8fafc'], orc: ['#3f6212', '#facc15'], highelf: ['#f8fafc', '#1d4ed8'], lizardmen: ['#0f8b80', '#ff9a3c'], dwarf: ['#7f1d1d', '#fcd34d'], undead: ['#3b0764', '#f5f0dc'], skaven: ['#4a3424', '#b6f04a'], ogre: ['#8b2c1f', '#f3d58a'], goblin: ['#6f9f2c', '#2a0b3d'], woodelf: ['#1e5631', '#ffe8a3'], blackorc: ['#991b1b', '#fde047'] }[race] || ['#b91c1c', '#fde68a'];
+                const col = { halfling: ['#4d7c0f', '#fef3c7'], imperial: ['#3b3f48', '#ea580c'], chaosdwarf: ['#7f1d1d', '#d4a017'], darkelf: ['#4c1d95', '#e5e7eb'], amazon: ['#0f766e', '#fde047'], bretonnian: ['#1e40af', '#fef3c7'], human: ['#1d4ed8', '#f8fafc'], orc: ['#3f6212', '#facc15'], highelf: ['#f8fafc', '#1d4ed8'], lizardmen: ['#0f8b80', '#ff9a3c'], dwarf: ['#7f1d1d', '#fcd34d'], undead: ['#3b0764', '#f5f0dc'], skaven: ['#4a3424', '#b6f04a'], ogre: ['#8b2c1f', '#f3d58a'], goblin: ['#6f9f2c', '#2a0b3d'], woodelf: ['#1e5631', '#ffe8a3'], blackorc: ['#991b1b', '#fde047'] }[race] || ['#b91c1c', '#fde68a'];
                 return clean({ id: uid(), name: 'New ' + R.name, race, primary: col[0], secondary: col[1], players: [], rerolls: 2, apothecary: !noApo(race), coaches: 0, cheerleaders: 0, fans: 1, bribes: 0 });
             }
 
@@ -5293,7 +5293,7 @@
             undead: { fill: '#1c1917', text: '#a3e635', endBg: '#0c0a09', endText: '#a3e635', shade: 'rgba(0,0,0,0.55)' },
             amazon: { fill: '#fde047', text: '#0f766e', endBg: '#b59f20', endText: '#0b524c', shade: 'rgba(0,0,0,0.45)' },         // gold with teal
             halfling: { fill: '#4d7c0f', text: '#fef3c7', endBg: '#3f6212', endText: '#fde68a', shade: 'rgba(0,0,0,0.5)' },    // shire green with cream
-            imperial: { fill: '#581c87', text: '#fde68a', endBg: '#3b0764', endText: '#fcd34d', shade: 'rgba(0,0,0,0.55)' },  // imperial purple with gold
+            imperial: { fill: '#3b3f48', text: '#ea580c', endBg: '#26292f', endText: '#fb923c', shade: 'rgba(0,0,0,0.55)' },  // dark steel with orange-red
             bretonnian: { fill: '#f5f0dc', text: '#9f1239', endBg: '#c9c2a6', endText: '#7f0f2e', shade: 'rgba(80,90,110,0.45)' },  // cream with crimson
             chaosdwarf: { fill: '#111827', text: '#f97316', endBg: '#05070c', endText: '#fb923c', shade: 'rgba(0,0,0,0.55)' },     // black with orange
             darkelf: { fill: '#14532d', text: '#fca5a5', endBg: '#0d3a1f', endText: '#fecaca', shade: 'rgba(0,0,0,0.55)' }      // dark green with pink          // charcoal with grave-light green
@@ -13754,39 +13754,7 @@
                     "................................",
                     "................................",
                     "................................"],
-                "Ogre": [
-                    "............oooooooo............",
-                    "..........ooppppppppoo..........",
-                    ".........opppppSSpppppo.........",
-                    "........oPppppppppppppPo........",
-                    "........oPpPPPPPPPPPPpPo........",
-                    "........oPppeppppppeppPo........",
-                    "........oPpppppSSpppppPo........",
-                    "........oPppppPPPPppppPo........",
-                    "........oPppppooooppppPo........",
-                    ".....o...oPppppppppppPo...o.....",
-                    "....omo..oPppppppppppPo..omo....",
-                    "...omMmoooPppppppppppPooomMmo...",
-                    "...omMmMmoooooooooooooomMmMmo...",
-                    "..omMmmMmmoeokKkkKkoeommMmmMmo..",
-                    "..oMmgMmgMoeokKkkKkoeoMgmMgmMo..",
-                    "..oggggggoeeokkkkkkoeeoggggggo..",
-                    "..oppPpo.oeeokkkkkkoeeo.opPppo..",
-                    ".oppppppo.oeeodkkdoeeo.oppppppo.",
-                    ".opPpppo..oIeodkkdoeIo..opppPpo.",
-                    ".oppppo...oggggggggggo...oppppo.",
-                    ".okkkko...oktktkktktko...okkkko.",
-                    ".okkkko...oktktkktktko...okkkko.",
-                    "..oooo....oktktkktktko....oooo..",
-                    "..........oktktootktko..........",
-                    "..........opppo..opppo..........",
-                    "..........omMmo..omMmo..........",
-                    "..........oPppo..oppPo..........",
-                    ".........oppppo..oppppo.........",
-                    ".........occcco..occcco.........",
-                    "........occccco..occccco........",
-                    "........ooooooo..ooooooo........",
-                    "................................"]
+                "Ogre": ["................................", "................................", "......o.................o.......", ".....omo...............oMo......", ".....omMo......o......omMo......", "...o.omMo...ooofooo...omMo.o....", "..oMoomMMo.offfffFFo.ommMoomo...", "..oMoooooooffffffFFAooooooomo...", "..ooKKKKKKoFFFFFFFFAoKKKKKKoo...", "..oKKKKKKKoFAAFFFFAAoKKKKKKKo...", ".okkkkkkkkAFFeFAAFeAoAkkkkkkko..", ".okkkgkkkgoFFFFAAFFAogkkkgkkko..", "..odddddddoFFwFFFFwAodddddddo...", ".ofoddddddoFFooooooAoddddddoFo..", ".offooooooooAAAAAAAooooooooFFo..", ".offFFFFoiiiooAAAooIIIoffffFFo..", ".ofooFFFoiiiKKoooKKIIIofffooFo..", ".ooKKoFoIIIkkkkkkkkkIIIofoKKoo..", ".oKKKKooIIIkkkkkkkkkIIIooKKKKo..", ".oKKKKKoIIIkkkkkkkkkIIIoKKKKKo..", ".odooodoIIIdddddddddIIIodooodo..", ".oofffooIIIIdddddddIIIIoofffoo..", ".offfffoobbbbbbggbbbbbbofffffo..", "oFFFFFFooooIIIIIIIIIooIoFFFFFFo.", ".oFFFFFooKKooIIIIIooKKKoFFFFFo..", ".oAAAAo.oddddooooodddddooAAAAo..", "..oooo..oIIIIIo..oIIIIIo.oooo...", "........ooooooo..ooooooo........", ".......occcccco..occcccco.......", ".......occcccco..occcccco.......", ".......oBBBBBBo..oBBBBBBo.......", "........oooooo....oooooo........"]
             }
         };
         SPRITES.blackorc = { 'Black Orc': ["........o..............o........", ".......owo.oooooooooo.owo.......", ".......owooIIIIIIIIIIoowo.......", "........owIiIiiiiiiIiIwo........", ".........oIIIvIIIIvIIIo.........", ".........oIIvvvIIvvvIIo.........", ".........oIivvvvvvvviIo.........", ".........oIIVvvvvvvVIIo.........", ".........oIirvvvvvvriIo.........", ".........oIIvvVVVVvvIIo.........", ".........ovwvvvvvvvvwvo.........", ".........ovwoooooooowvo.........", "..........oeeeeeeeeeeo..........", "oooooooooooeeeeeeeeeeooooooooooo", "odddddddddoeIIIIIIIIeodddddddddo", "odkkdkkdkdoIemeIIemeIodkdkkdkkdo", "odkkkkkkkdoIIIIIIIIIIodkkkkkkkdo", "odkkdkkdkdoeImIeeImIeodkdkkdkkdo", "odddddddddoIIIIIIIIIIodddddddddo", "oooooooooooeeeeeeeeeeooooooooooo", ".oeIIIeo.okkkkkttkkkkko.oeIIIeo.", ".oIeIIIo.okkkkkttkkkkko.oIIIeIo.", ".oIIIIIo.oeeeeeeeeeeeeo.oIIIIIo.", ".oeeeeeo.okkkdkkkkdkkko.oeeeeeo.", ".oIIIIIo.okkkdkkkkdkkko.oIIIIIo.", "..ooooo..okkkdkookdkkko..ooooo..", "........oeIIIeo..oeIIIeo........", "........oIeIIIo..oIIIeIo........", "........oIIIIIo..oIIIIIo........", "........oeeeeeo..oeeeeeo........", ".......oeIIIIIo..oIIIIIeo.......", ".......oooooooo..oooooooo......."], 'Goblin Bruiser': SPRITES.orc['Goblin'], 'Trained Troll': SPRITES.orc['Troll'] };
@@ -13828,14 +13796,12 @@
                 'Halfling Catcher': edit(H['Halfling Hopeful'], set => { for (let x = 11; x <= 20; x++) set(12, x, 'r'); [19, 20].forEach(y => { set(y, 11, 'w'); set(y, 20, 'w'); }); }),
                 'Athel Forest Treeman': SPRITES.woodelf['Loren Forest Treeman']
             };
+            // plumed helmets (more plumes the grander the position), dark steel, shoulder plates in the trim colour; drawn in BludBowl's sprite palette
             SPRITES.imperial = {
-                // a gold crest on the helmet
-                'Imperial Retainer': swap(H.Lineman.slice(0, 7), { b: 'g' }).concat(H.Lineman.slice(7)),
-                'Imperial Thrower': H.Thrower,
-                // a big round shield on the left arm
-                'Bodyguard': edit(H.Lineman, set => { for (let y = 14; y <= 24; y++) for (let x = 2; x <= 9; x++) { const dy = (y - 19) / 5.5, dx = (x - 5.5) / 4, r = dy * dy + dx * dx; if (r <= 1) set(y, x, r > 0.62 ? 'o' : r < 0.12 ? 'g' : (x + y) % 5 ? 'M' : 'm'); } }),
-                // a red plume
-                'Noble Blitzer': edit(H.Blitzer, set => { ['..orro..', '.orrrro.', '.orrro..'].forEach((row, y) => row.split('').forEach((c, i) => { if (c !== '.') set(y, 12 + i, c); })); }),
+                'Imperial Retainer': ["...............oohHo............", "..............ohhHho............", "..............oHhHho............", "..............ohHhHo............", "..............ohHhho............", "............oooHHHoo............", "...........oiiiIIiiio...........", "..........oiiIiIIiIiio..........", "..........oiIiiIIiiIio..........", "..........oIIIIIIIIIIo..........", "..........oisessssesio..........", "..........omssssssssmo..........", "..........omiiiiiiiimo..........", "...........omssiissmo...........", ".......o....oiiiiiio....o.......", "......oto..ooommmmooo..oto......", "......ooooo.ommmmmmo.ooooo......", ".....otTTtgomkkkkkkmogtTTto.....", ".....otTttgoMkkKKkkMogttTto.....", ".....oggggooMkkkkkkMooggggo.....", ".....okkko.oMkkkkkkMo.okkko.....", ".....okkko.omkkkkkkmo.okkko.....", ".....otTto.oggggggggo.otTto.....", ".....osSso.okkkkkkkko.osSso.....", ".....oooo..otkkkkkkto..oooo.....", "..........oktkdkkdktko..........", "..........oktdo..odtko..........", "..........omMmo..omMmo..........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."],
+                'Imperial Thrower': ["...........oiWoo.ohHHo..........", "...........oWiWWohHHho..........", "...........oWiWWHhHho...........", "...........oiWiWhHhho...........", "............oWiWhHhho...........", "............ooWiHhho............", "...........oiiiIIiiio...........", "..........oiiIiIIiIiio..ooo.....", "..........oiIiiIIiiIio.oIwIo....", "..........oIIIIIIIIIIo.oIIwo....", "..........oisessssesio..oIo.....", "..........omssssssssmo..oSo.....", "..........omiiiiiiiimo..oso.....", "...........omssiissmo..oTo......", ".......o....oiiiiiio...oto......", "......oto..ooommmmooo.okoo......", "......ooooo.ommmmmmo.ooko.......", ".....otTTtgomkkkkkkmookko.......", ".....otTttgogkkKKkkgooko........", ".....oggggoogkkkkkkgoo..........", ".....okkko.oMkkkkkkMoo..........", ".....okkko.omkkkkkkmoo..........", ".....otTto.oggggggggoo..........", ".....osSso.okkkkkkkkoo..........", ".....oooo..otkkkkkktoo..........", "..........oktkdkkdktko..........", "..........oktdo..odtko..........", "..........omMmo..omMmo..........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."],
+                'Bodyguard': ["...........oHhhoooWio...........", "...........ohHhhWWiWo...........", "...........ohHHhWWiWo...........", "...........oHhHhWiWio...........", "............ohHWWiWo............", "............oohHiWoo............", "...........oiiiIIiiio...........", "..........oiiIiIIiIiio..........", "..........oiIiiIIiiIio..........", "..........oIIIIIIIIIIo..........", "..........oisessssesio..........", "..........omssssssssmo..........", "..........omiiiiiiiimo..........", "...........omssiissmo...........", ".......o....oiiiiiio....o.......", "......oto..ooommmmooo..oto......", "......ooooo.ommmmmmo.ooooo......", ".....otTTtgomkkkkkkmogtTTto.....", ".....otTttgoMkkKKkkMogttTto.....", ".....oggggooMkkkkkkMooggggo.....", ".....okkko.oMkkkkkkMo.okkko.....", ".....okkko.omkkkkkkmo.okkko.....", ".....otTto.oggggggggo.otTto.....", ".....osSso.okkkkkkkko.osSso.....", ".....oooo..otkkkkkkto..oooo.....", "..........oktkdkkdktko..........", "..........oktdo..odtko..........", "..........omMmo..omMmo..........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."],
+                'Noble Blitzer': ["...........oWiWoohHho...........", ".........oooWiWWhhHhooo.........", "........oHHhWWiHhHiWWiio........", "........ohhHiWihhWWiiWWo........", ".........ohhHWihHWiiWWo.........", "..........oHhHWiHiiWio..........", "...........oiHHIIiiio...........", "..........oiiIiIIiIiio..........", "..........oiIiiIIiiIio..........", "..........oIIIIIIIIIIo..........", "..........oisessssesio..........", "..........omssssssssmo..........", "..........omiiiiiiiimo..........", "...........omssiissmo...........", "......o...o.oiiiiiio.o...o......", "......ot.otooommmmoooto.to......", "......otootooommmmoootooto......", ".....otTTtgomkkkkkkmogtTTto.....", ".....otTttgoMkkKKkkMogttTto.....", ".....oggggooMkkkkkkMooggggo.....", "....ookkko.oMkkkkkkMo.okkkoo....", "...otoTtTo.omkkkkkkmo.oTtToto...", "..otTotTto.oggggggggo.otTtoTto..", "..otoosSso.oMmMmmMmMo.osSsooto..", "..oEooooo..omMmMMmMmo..oooooEo..", "..oEo.....ooggggggggoo.....oEo..", "...o......oktdo..odtko......o...", ".........oomMmo..omMmoo.........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."],
                 'Ogre': H.Ogre
             };
         }
