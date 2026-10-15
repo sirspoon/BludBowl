@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.82 (15 Oct 2026)
+- **Changed:** the Elven Union Blitzer now has dark hair.
+
 ## v2.81 (15 Oct 2026)
 - **Changed:** each Elven Union position now has its own build.
   - **Catchers:** slim and lightly kitted, with a short vest and no shoulder pads. They have bare arms, a bare midriff and thin legs.
