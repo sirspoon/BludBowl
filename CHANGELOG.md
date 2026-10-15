@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.81 (15 Oct 2026)
+- **Changed:** each Elven Union position now has its own build.
+  - **Catchers:** slim and lightly kitted, with a short vest and no shoulder pads. They have bare arms, a bare midriff and thin legs.
+  - **Throwers:** hold the ball up high in a raised arm.
+  - **Blitzers:** broader, with bigger spiked shoulder pads, steel bracers and knee guards.
+  - **Linemen:** unchanged, in between the Catchers and the Blitzers.
+
 ## v2.80 (15 Oct 2026)
 - **Changed:** the Norse and the Elven Union now look like their models.
   - **Norse:** they now play in sky blue and yellow.
