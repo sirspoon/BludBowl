@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.78</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.79</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1774,6 +1774,32 @@
                 Ogre:      { type: 'Ogre', label: 'OG', ma: 5, st: 5, ag: 4, pa: 5, av: 10, skills: ['Bone Head', 'Loner (3+)', 'Mighty Blow', 'Thick Skull', 'Throw Team Mate'] }
             }
         };
+        RACES.norse = { key: 'norse', short: 'NOR', lineup: ['Raider','Yhetee','Raider','Berserker','Berserker','Ulfwerener','Valkyrie','Valkyrie','Raider','Raider','Raider'],
+            bench: [], rerolls: 2, specialRules: [],   // 865k players + 2 re-rolls 120k = 985k
+            name: "Norse", color: "#9a3412",
+            style: { fill: '#9a3412', text: '#f1f5f9', endBg: '#6b240c', endText: '#fed7aa', shade: 'rgba(0,0,0,0.5)' },   // rust red with white
+            fans: 1, assistantCoaches: 0, cheerleaders: 0, apothecary: 0, tv: "985k", treasury: "15,000 gp",
+            types: {
+                Raider:     { type: 'Norse Raider', label: 'L', ma: 6, st: 3, ag: 3, pa: 4, av: 8, skills: ['Block', 'Drunkard', 'Thick Skull', 'Unsteady'] },
+                Boar:       { type: 'Beer Boar', label: 'BB', ma: 5, st: 1, ag: 3, pa: null, av: 6, skills: ['Dodge', 'No Ball', 'Pick-me-up', 'Stunty', 'Titchy'] },
+                Berserker:  { type: 'Norse Berserker', label: 'BZ', ma: 6, st: 3, ag: 3, pa: 5, av: 8, skills: ['Block', 'Frenzy', 'Jump Up'] },
+                Valkyrie:   { type: 'Valkyrie', label: 'VK', ma: 7, st: 3, ag: 3, pa: 3, av: 8, skills: ['Catch', 'Dauntless', 'Pass', 'Strip Ball'] },
+                Ulfwerener: { type: 'Ulfwerener', label: 'UW', ma: 6, st: 4, ag: 4, pa: 6, av: 9, skills: ['Frenzy', 'Unsteady'] },
+                Yhetee:     { type: 'Yhetee', label: 'YH', ma: 5, st: 5, ag: 4, pa: 6, av: 9, skills: ['Claws', 'Disturbing Presence', 'Frenzy', 'Loner (4+)', 'Unchannelled Fury'] }
+            }
+        };
+        RACES.elvenunion = { key: 'elvenunion', short: 'EUN', lineup: ['Lineman','Blitzer','Lineman','Blitzer','Lineman','Lineman','Catcher','Catcher','Lineman','Lineman','Thrower'],
+            bench: [], rerolls: 2, specialRules: [],   // 895k players + 2 re-rolls 100k = 995k
+            name: "Elven Union", color: "#0e7490",
+            style: { fill: '#0e7490', text: '#fef9c3', endBg: '#0b5466', endText: '#fde68a', shade: 'rgba(0,0,0,0.5)' },   // teal with cream
+            fans: 1, assistantCoaches: 0, cheerleaders: 0, apothecary: 0, tv: "995k", treasury: "5,000 gp",
+            types: {
+                Lineman: { type: 'Elf Lineman', label: 'L', ma: 6, st: 3, ag: 2, pa: 3, av: 8, skills: ['Fumblerooski'] },
+                Thrower: { type: 'Elf Thrower', label: 'T', ma: 6, st: 3, ag: 2, pa: 2, av: 8, skills: ['Hail Mary Pass', 'Pass'] },
+                Catcher: { type: 'Elf Catcher', label: 'C', ma: 8, st: 3, ag: 2, pa: 4, av: 8, skills: ['Catch', 'Diving Catch', 'Nerves of Steel'] },
+                Blitzer: { type: 'Elf Blitzer', label: 'B', ma: 7, st: 3, ag: 2, pa: 3, av: 9, skills: ['Block', 'Sidestep'] }
+            }
+        };
 
         // Chaos Dwarfs (BB2025, Tier 1, Badlands Brawl / Chaos Clash): Minotaur, 2 Bull Centaurs, 4 Blockers, 2 Flamesmiths, 2 Hobgoblins = 930k + 1 re-roll 70k = 1,000k
         RACES.chaosdwarf = { key: 'chaosdwarf', short: 'CDW', lineup: ['Blocker','Minotaur','Blocker','Centaur','Blocker','Blocker','Flamesmith','Centaur','Flamesmith','Hobgoblin','Hobgoblin'],
@@ -1810,10 +1836,10 @@
         const SEV = {
             BUDGET: 600, MAXP: 11, MINP: 7, RR: 100, STAFF: 20, APO: 80, FAN: 20, CAP: 750, MP_BUDGETS: [600, 650, 700],
             // Sevens Matched Play tiers: a team gets as many skill points as its tier number
-            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, imperial: 2, halfling: 4 },
+            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, imperial: 2, halfling: 4, norse: 1, elvenunion: 2 },
             // positions with the Lineman keyword (the Veteran is one of them; at most 4 players may be anything else)
             LINEMEN: { human: ['Lineman'], orc: ['Lineman'], highelf: ['Lineman'], lizardmen: ['Skink'], skaven: ['Clanrat'], ogre: ['Gnoblar'], goblin: ['Lineman'],
-                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'], halfling: ['Hopeful'], imperial: ['Retainer'] },
+                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'], halfling: ['Hopeful'], imperial: ['Retainer'], norse: ['Raider'], elvenunion: ['Lineman'] },
             NO_ADV: ['Leader', 'Pro']   // never gained by a Sevens player
         };
         const isSevT = t => !!t && (t.format === 'sevens' || t.format === 'sevens-mp');
@@ -1837,7 +1863,11 @@
         Object.assign(RACES.darkelf, { rerollCost: 50, positions: { Lineman: { max: 16, cost: 65 }, Runner: { max: 2, cost: 80 }, Assassin: { max: 2, cost: 90 }, Blitzer: { max: 2, cost: 105 }, Witch: { max: 2, cost: 110 } } });
         Object.assign(RACES.halfling, { rerollCost: 60, positions: { Hopeful: { max: 16, cost: 30 }, Hefty: { max: 2, cost: 50 }, Catcher: { max: 2, cost: 55 }, Treeman: { max: 2, cost: 120 } } });
         Object.assign(RACES.imperial, { rerollCost: 60, positions: { Retainer: { max: 16, cost: 45 }, Thrower: { max: 2, cost: 75 }, Bodyguard: { max: 4, cost: 85 }, Noble: { max: 2, cost: 90 }, Ogre: { max: 1, cost: 140 } } });
+        Object.assign(RACES.norse, { rerollCost: 60, positions: { Raider: { max: 16, cost: 50 }, Boar: { max: 2, cost: 20 }, Berserker: { max: 2, cost: 90 }, Valkyrie: { max: 2, cost: 95 }, Ulfwerener: { max: 2, cost: 105 }, Yhetee: { max: 1, cost: 140 } } });
+        Object.assign(RACES.elvenunion, { rerollCost: 50, positions: { Lineman: { max: 16, cost: 65 }, Thrower: { max: 2, cost: 75 }, Catcher: { max: 2, cost: 100 }, Blitzer: { max: 2, cost: 115 } } });
         Object.assign(RACES.bretonnian, { rerollCost: 60, positions: { Squire: { max: 16, cost: 50 }, Catcher: { max: 2, cost: 85 }, Thrower: { max: 2, cost: 80 }, Grail: { max: 2, cost: 95 } } });
+        // every list of teams is alphabetical: the races are kept in name order (pickers and menus list them in this order)
+        Object.keys(RACES).sort((a, b) => RACES[a].name.localeCompare(RACES[b].name)).forEach(key => { const r = RACES[key]; delete RACES[key]; RACES[key] = r; });
         Object.assign(RACES.undead, { rerollCost: 70, positions: { Skeleton: { max: 16, cost: 40 }, Zombie: { max: 16, cost: 40 }, Ghoul: { max: 2, cost: 75 }, Wight: { max: 2, cost: 95 }, Mummy: { max: 2, cost: 125 } } });
         Object.assign(RACES.lizardmen, { rerollCost: 70, positions: { Skink: { max: 16, cost: 60 }, Chameleon: { max: 2, cost: 70 }, Saurus: { max: 6, cost: 90 }, Kroxigor: { max: 1, cost: 140 } } });
 
@@ -1933,11 +1963,13 @@
                 amazon: { Eagle: ['G', 'AS'], Python: ['GP', 'AS'], Piranha: ['AG', 'S'], Jaguar: ['GS', 'A'] },
                 halfling: { Hopeful: ['A', 'DGS'], Hefty: ['AP', 'DGS'], Catcher: ['A', 'DGS'], Treeman: ['S', 'ADGP'] },
                 imperial: { Retainer: ['G', 'AS'], Thrower: ['GP', 'AS'], Bodyguard: ['GS', 'A'], Noble: ['AG', 'PS'], Ogre: ['S', 'AGM'] },
+                norse: { Raider: ['G', 'APS'], Boar: ['', 'A'], Berserker: ['GS', 'AP'], Valkyrie: ['AGP', 'S'], Ulfwerener: ['GS', 'A'], Yhetee: ['S', 'AG'] },
+                elvenunion: { Lineman: ['AG', 'S'], Thrower: ['AGP', 'S'], Catcher: ['AG', 'S'], Blitzer: ['AG', 'PS'] },
                 bretonnian: { Squire: ['G', 'AS'], Catcher: ['AG', 'S'], Thrower: ['GP', 'AS'], Grail: ['GS', 'A'] },
                 chaosdwarf: { Hobgoblin: ['D', 'AGS'], Stabba: ['DG', 'AS'], Blocker: ['GS', 'ADM'], Flamesmith: ['GS', 'ADM'], Centaur: ['GS', 'ADM'], Minotaur: ['MS', 'AG'] },
                 darkelf: { Lineman: ['AG', 'DS'], Runner: ['AGP', 'DS'], Assassin: ['AD', 'GS'], Blitzer: ['AG', 'DPS'], Witch: ['AG', 'DS'] }
             };
-            const JOURNEY = { blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman', halfling: 'Hopeful', imperial: 'Retainer' };
+            const JOURNEY = { blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman', halfling: 'Hopeful', imperial: 'Retainer', norse: 'Raider', elvenunion: 'Lineman' };
             const CATS = { A: 'Agility', D: 'Devious', G: 'General', M: 'Mutation', P: 'Passing', S: 'Strength' };
             const SKILLS = {
                 A: ['Catch', 'Diving Catch', 'Diving Tackle', 'Dodge', 'Defensive', 'Hit and Run', 'Jump Up', 'Leap', 'Safe Pair of Hands', 'Sidestep', 'Sprint', 'Sure Feet'],
@@ -2591,7 +2623,7 @@
 
         // ---- Star Players (BB2025): famous free agents hired for a single game ----
         const LEAGUE_NAMES = { OWC: 'Old World Classic', BB: 'Badlands Brawl', UC: 'Underworld Challenge', WESL: "Worlds Edge Superleague", SS: 'Sylvanian Spotlight', LSL: 'Lustrian Superleague', ELK: 'Elven Kingdoms League', WL: 'Woodland League', HTC: 'Halfling Thimble Cup' };
-        const RACE_LEAGUES = { halfling: ['HTC', 'WL'], imperial: ['OWC'], human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB'], darkelf: ['ELK'] };
+        const RACE_LEAGUES = { halfling: ['HTC', 'WL'], imperial: ['OWC'], norse: ['OWC'], elvenunion: ['ELK'], human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB'], darkelf: ['ELK'] };
         const STARS = {
             griff:   { name: 'Griff Oberwald', label: 'GO', cost: 300, mega: true, ma: 7, st: 4, ag: 2, pa: 3, av: 9, skills: ['Block', 'Dodge', 'Fend', 'Loner (3+)', 'Sprint', 'Sure Feet'],
                        rule: 'Consummate Professional', text: 'Once per game, Griff may add +1 to an Agility Test he has made, after seeing the roll.', leagues: ['OWC'] },
@@ -2716,7 +2748,7 @@
         const starsFor = (race, lg) => { const L = starLeagueOf(race, lg); return Object.keys(STARS).filter(k => STARS[k].leagues === 'any' || STARS[k].leagues.includes(L)); };
         // ---------- Matched Play (BB2025): team tiers (May 2026 list), skill points and Star Player limits ----------
         const MP = {
-            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2, imperial: 2, halfling: 4 },
+            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2, imperial: 2, halfling: 4, norse: 1, elvenunion: 2 },
             SP: { 1: 6, 2: 8, 3: 9, 4: 10 },
             ELITE: ['Block', 'Dodge', 'Guard', 'Mighty Blow'],   // each can be given to at most four players
             BUDGETS: [1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400],
@@ -2754,6 +2786,10 @@
                     ['the Dead', 'Coffinmaker', 'Gravedigger', 'Bonecrusher', 'Rotgut', 'von Grave', 'Deadeye', 'Ashgrave', 'the Pale', 'Wormwood', 'Bleakmoor', 'Cryptborn', 'Dustwalker', 'Nightshade', 'Mouldwell', 'Hollowell', 'Gristle', 'Morrow', 'Tombs', 'Blackbarrow', 'Cold', 'Mournful', 'the Unburied', 'Gallows', 'Shambles']],
                 amazon: [['Zaria', 'Itzel', 'Nayeli', 'Xochi', 'Yaretzi', 'Citlali', 'Amaru', 'Tala', 'Inti', 'Kiona', 'Ixchel', 'Tupaq', 'Maya', 'Ayita', 'Huyana', 'Nita', 'Sachi', 'Talia', 'Zyanya', 'Itza', 'Kalea', 'Mixtli', 'Nahui', 'Quilla', 'Sayri', 'Tecla', 'Yolotli', 'Ameyal'],
                     ['Jaguarclaw', 'Swiftspear', 'Riverborn', 'Sunfeather', 'Serpentsong', 'Stonejaw', 'Vinewhip', 'Moonhunter', 'Blackwater', 'Fangheart', 'Goldscale', 'Ironbark', 'Jadeeye', 'Leafrunner', 'Mistwalker', 'Nightclaw', 'Palmstrike', 'Quickfin', 'Redfeather', 'Skyhawk', 'Thornfoot', 'Tidecaller', 'Wildheart', 'Bloodlotus', 'Emberhide', 'Stormwing']],
+                norse: [['Bjorn', 'Ulf', 'Sigurd', 'Ragnar', 'Leif', 'Harald', 'Ivar', 'Thorvald', 'Gunnar', 'Erik', 'Halfdan', 'Sven', 'Olaf', 'Knut', 'Hrolf', 'Asgeir', 'Freya', 'Ingrid', 'Sigrid', 'Astrid', 'Hilda', 'Brynhild', 'Ragna', 'Thora'],
+                    ['Ironfist', 'Bloodaxe', 'Skullsplitter', 'the Red', 'Frostbeard', 'Wolfsbane', 'Mjodbelly', 'Stormborn', 'Hammerhand', 'Bonebreaker', 'Snowfang', 'the Mad', 'Aleswiller', 'Grimsson', 'Haraldsson', 'Eriksdottir', 'Bjornsson', 'Ironside', 'Longbeard', 'Shieldbiter']],
+                elvenunion: [['Aelion', 'Caledor', 'Elrion', 'Fyrion', 'Ithilmar', 'Lirael', 'Maedros', 'Naerith', 'Saelan', 'Taurion', 'Valandil', 'Yvraine', 'Aerith', 'Calithil', 'Eldira', 'Faenor', 'Ilyana', 'Laeril', 'Miriel', 'Nimriel', 'Silvaris', 'Thalion'],
+                    ['Swiftfoot', 'Goldleaf', 'Starfall', 'Moonwhisper', 'Silverbow', 'Dawnstrider', 'Windrunner', 'Brightspear', 'Sunfeather', 'Highwind', 'Quickhand', 'Lightstep', 'Skyreach', 'Glimmerfall', 'Fleetwing', 'Clearbrook']],
                 halfling: [['Bilbo', 'Merry', 'Pippin', 'Rosie', 'Hamfast', 'Lobelia', 'Bungo', 'Primula', 'Odo', 'Pansy', 'Tobold', 'Daisy', 'Fatty', 'Poppy', 'Mungo', 'Belba', 'Dudo', 'Lily', 'Ferdi', 'Myrtle', 'Wilcome', 'Tansy', 'Bodo', 'Marigold', 'Sancho', 'Hilda'],
                     ['Puddingfoot', 'Bramblebelly', 'Greenhill', 'Applebottom', 'Burrows', 'Took', 'Brandybuck', 'Proudfoot', 'Goodbody', 'Hornblower', 'Bolger', 'Cotton', 'Sackville', 'Underhill', 'Mugwort', 'Tunnelly', 'Whitfoot', 'Boffin', 'Chubb', 'Bracegirdle', 'Pieface', 'Muffinfeet', 'Buttercup', 'Honeypot']],
                 imperial: [['Heinrich', 'Ludwig', 'Otto', 'Konrad', 'Friedrich', 'Wilhelm', 'Maximilian', 'Albrecht', 'Dieter', 'Gunther', 'Leopold', 'Siegfried', 'Rupert', 'Ernst', 'Matthias', 'Felix', 'Karl', 'Johann', 'Klaus', 'Emmerich', 'Lothar', 'Valten', 'Wolfram', 'Augustus'],
@@ -3660,6 +3696,8 @@
                 blackorc: ['Blackrock', 'Ironcrag', 'Doomforge', 'Ashpeak', 'Grimhold', 'Cinderfang', 'Slagpit', 'Darkstone'],
                 lizardmen: ['Jade Temple', 'Sunken Pyramid', 'Serpent Pool', 'Golden Ziggurat', 'Mistmarsh', 'Emerald Falls', 'Starstone', 'Coldblood Bay'],
                 amazon: ['Skeggi', 'Lustria', 'Amazon River', 'Serpent Coast', 'Jaguar Falls', 'Temple Rock', 'Vine Hollow', 'Sunken Isle'],
+                norse: ['Norsca', 'Frostheim', 'Skeggi', 'Ice Fjord', 'Wolfhold', 'Bjornling Bay', 'Snowpeak', 'Grimfjord'],
+                elvenunion: ['Ulthuan', 'Lothern', 'Marienburg', 'Saphery', 'Tor Elyr', 'Cothique', 'Ellyrion', 'Yvresse'],
                 halfling: ['Mootland', 'Eicheschatten', 'Brambledown', 'Thimbleton', 'Pudding Hill', 'Little Mootley', 'Applecross', 'Barrowbank'],
                 imperial: ['Altdorf', 'Nuln', 'Talabheim', 'Middenheim', 'Averheim', 'Wissenburg', 'Carroburg', 'Ostland'],
                 bretonnian: ['Couronne', 'Bastonne', 'Quenelles', 'Lyonesse', 'Gisoreux', 'Parravon', 'Bordeleaux', 'Carcassonne'],
@@ -3679,6 +3717,8 @@
                 blackorc: ['Ironhides', 'Anvils', 'Brutes', 'Hammerz', 'Bosses', 'Gorgers', 'Klaws', 'Destroyas'],
                 lizardmen: ['Saurians', 'Skinks', 'Fangs', 'Scales', 'Raptors', 'Coldbloods', 'Stalkers', 'Sunscales'],
                 amazon: ['Valkyries', 'Huntresses', 'Jaguars', 'Serpents', 'Warrior Queens', 'Piranhas', 'Eagles', 'Spears'],
+                norse: ['Raiders', 'Reavers', 'Berserkers', 'Wolves', 'Bloodaxes', 'Icebreakers', 'Longships', 'Mead-Hounds'],
+                elvenunion: ['Pros', 'Starlights', 'Silverwings', 'Swifts', 'Galaxy', 'Glimmers', 'Highflyers', 'Dashers'],
                 halfling: ['Hotpots', 'Pie-Eaters', 'Thimbles', 'Nibblers', 'Second Breakfasts', 'Gobblers', 'Fat Ladies', 'Muffins'],
                 imperial: ['Nobles', 'Counts', 'Electors', 'Gryphons', 'Lancers', 'Halberdiers', 'Heralds', 'Barons'],
                 bretonnian: ['Lions', 'Lances', 'Chevaliers', 'Questing Knights', 'Grail Guard', 'Pegasi', 'Errants', 'Paladins'],
@@ -5202,6 +5242,8 @@
             bretonnian: { lineup: ['Squire', 'Grail', 'Squire', 'Grail', 'Catcher', 'Squire', 'Squire'], rerolls: 1 },
             halfling: { lineup: ['Hopeful', 'Treeman', 'Hopeful', 'Hefty', 'Catcher', 'Hopeful', 'Hopeful'], bench: ['Hopeful'], rerolls: 2 },
             imperial: { lineup: ['Retainer', 'Ogre', 'Retainer', 'Noble', 'Bodyguard', 'Retainer', 'Retainer'], rerolls: 1 },
+            norse: { lineup: ['Raider', 'Ulfwerener', 'Raider', 'Berserker', 'Valkyrie', 'Raider', 'Raider'], rerolls: 1 },
+            elvenunion: { lineup: ['Lineman', 'Blitzer', 'Lineman', 'Catcher', 'Lineman', 'Lineman', 'Lineman'], rerolls: 0 },
             chaosdwarf: { lineup: ['Blocker', 'Hobgoblin', 'Blocker', 'Centaur', 'Hobgoblin', 'Flamesmith', 'Hobgoblin'], rerolls: 1 },
             darkelf:   { lineup: ['Lineman', 'Lineman', 'Lineman', 'Assassin', 'Lineman', 'Lineman', 'Runner'], rerolls: 1 }
         };
@@ -5300,6 +5342,8 @@
             undead: { fill: '#1c1917', text: '#a3e635', endBg: '#0c0a09', endText: '#a3e635', shade: 'rgba(0,0,0,0.55)' },
             amazon: { fill: '#fde047', text: '#0f766e', endBg: '#b59f20', endText: '#0b524c', shade: 'rgba(0,0,0,0.45)' },         // gold with teal
             halfling: { fill: '#fef3c7', text: '#3f6212', endBg: '#d6c89a', endText: '#3f6212', shade: 'rgba(80,90,60,0.45)' },  // away: cream with shire green
+            norse: { fill: '#f1f5f9', text: '#9a3412', endBg: '#cbd5e1', endText: '#7c2d12', shade: 'rgba(80,90,110,0.45)' },  // away: white with rust red
+            elvenunion: { fill: '#fef9c3', text: '#0e7490', endBg: '#d9d2a0', endText: '#0b5466', shade: 'rgba(80,90,60,0.45)' }, // away: cream with teal
             imperial: { fill: '#ea580c', text: '#1f2937', endBg: '#9a3412', endText: '#111827', shade: 'rgba(0,0,0,0.5)' },     // away: orange-red with dark steel
             bretonnian: { fill: '#f5f0dc', text: '#9f1239', endBg: '#c9c2a6', endText: '#7f0f2e', shade: 'rgba(80,90,110,0.45)' },  // cream with crimson
             chaosdwarf: { fill: '#111827', text: '#f97316', endBg: '#05070c', endText: '#fb923c', shade: 'rgba(0,0,0,0.55)' },     // black with orange
@@ -8346,6 +8390,19 @@
             startTurnPhase();
         }
 
+        // Pick-me-up (the Norse Beer Boar): at the end of the opposition's team turn, each Prone (not Stunned) team-mate within 3 squares stands up on a 5+
+        function pickMeUp(team) {
+            const on = q => q.x >= 0 && q.x < CFG.cols && q.y >= 0 && q.y < CFG.rows && !q.isCasualty && !q.isKO && !q.isReserve && !q.isEjected;
+            const boars = state.players.filter(q => q.team === team && on(q) && q.skills.includes('Pick-me-up') && !q.isDown && !q.isStunned);
+            if (!boars.length) return;
+            const near = new Set();
+            boars.forEach(b => state.players.forEach(q => { if (q !== b && q.team === team && on(q) && q.isDown && !q.isStunned && Math.max(Math.abs(q.x - b.x), Math.abs(q.y - b.y)) <= 3) near.add(q); }));
+            if (!near.size) return;
+            let up = 0;
+            near.forEach(q => { const r = d6(); if (r >= 5) { q.isDown = false; up++; log(`  PICK-ME-UP! The Beer Boar perks up ${ROSTERS[team].name} ${q.type} (${r}): back on their feet.`, 'text-amber-300'); } else log(`    ${q.type} stays down (${r}).`, 'text-slate-400'); });
+            if (up) skillPop('Pick-me-up');
+            render();
+        }
         function endTeamTurn(skipStunRecovery = false) {
             if(state.isGameOver) return;
             starCarryDrop(true);
@@ -8353,6 +8410,7 @@
             if (wizardHook(() => endTeamTurn(skipStunRecovery))) return;
             resolveStalls(null, true);
             resolveHunger(null, true);
+            pickMeUp(1 - state.activeTeam);
             state.cheeringFans[state.activeTeam] = false;
             
             state.teamRRUsedThisTurn = false; 
@@ -8711,6 +8769,7 @@
             'Hatred (Troll)': 'Blocking a Troll, this player re-rolls one Player Down (Attacker Down) result.',
             'Hypnotic Gaze': 'Special Action (after an optional Move): pick an adjacent standing opponent and roll a D6. On a 3+ they are Distracted. The activation then ends.',
             'Drunkard': '-1 to Rush tests.',
+            'Pick-me-up': "At the end of the opposition's team turn, each Prone (not Stunned) team-mate within 3 squares stands up on a 5+.",
             'Timmm-ber!': 'Standing up with MA 2 or less needs a 4+ on a D6. This player gets +1 to that roll for each Open, Standing team-mate next to them (a 1 always fails).',
             'Titchy': 'Gets +1 when dodging. But opponents dodging into this player\'s Tackle Zone ignore it: it never makes their dodge harder.',
             'Sidestep': 'When this player is pushed back, their own coach picks the square: any empty square next to them.',
@@ -13814,6 +13873,10 @@
                 'Ogre': H.Ogre
             };
         }
+        // Norse (drawn from the human sprites and the Ogre, plus a Beer Boar) and the Elven Union (the High and Wood Elves' sprites, the Blitzer with a red crest)
+        SPRITES.norse = {"Norse Raider": ["................................", ".......o................o.......", "......ofo......oo......ofo......", "......ofo...oooMMooo...ofo......", ".......oFo.ommmMMmmmo.oFo.......", ".......oFoommMmMMmMmmooFo.......", "........oFomMmmMMmmMmoFo........", ".........ooMMMMMMMMMMoo.........", "..........omsessssesmo..........", "..........omssssssssmo..........", "..........ohHhHhHhHhHo..........", "...........oHhHhHhHho...........", ".......o....ohHhHhho....o.......", "......omo..ooommmmooo..omo......", "......ooooo.ommmmmmo.ooooo......", ".....omMMmgomkkkkkkmogmMMmo.....", ".....omMmmgoMkkKKkkMogmmMmo.....", ".....oggggooMkkkkkkMooggggo.....", ".....okkko.oMkkkkkkMo.okkko.....", ".....okkko.omkkkkkkmo.okkko.....", ".....omMmo.oggggggggo.omMmo.....", ".....osSso.okkkkkkkko.osSso.....", ".....oooo..otkkkkkkto..oooo.....", "..........oktkdkkdktko..........", "..........oktdo..odtko..........", "..........oktko..oktko..........", "..........omMmo..omMmo..........", "..........okkko..okkko..........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."], "Beer Boar": ["................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................ooo.............", "...............obkKo............", "..............obckKco...........", "..........o..obcckKcbo..........", ".........oBo.occbkKbco..........", "......oooBBococbckKcco..........", ".....obbbbbbbbbbbkKbbboo..o.....", "....obbbbbbbbbbbbbbbbbbbooBo....", "....obbebbbbbbbbbbbbbbbboBo.....", "...oDCBBBBBBbbbbbbbbbbbbbo......", "...oDCBBBBBBBBBBBBBBBBBBo.......", "....oowBBBBBBBBBBBBBBBBBo.......", ".....owoooBBBBBBBBBBBBBo........", "......o..oBBoBBBBBBBoBBo........", ".........oBBoBBoooBBoBBo........", ".........ooooooo.ooooooo........", "..........oo.oo...oo.oo.........", "................................", "................................"], "Norse Berserker": ["................................", "...........o.oo.o.o.o...........", "..........obBobBoBbobo..........", "..........oBbBbBbBbBbo..........", "..........obBssssssBbo..........", "..........oBsessssesBo..........", "..........obssssSsssbo..........", "..........obsyyooyysbo..........", "..........oyyyyyyyyyyo..........", "...........oyYyyyyYyo...........", "............oyYyyYyo............", ".............oyyyyo.............", "......o.......oooo.......o......", "......oc.ocooommmmoooco.co......", "......ocoocooommmmooocooco......", ".....ocBBcgomssssssmogcBBco.....", ".....ocBccgoMssSSssMogccBco.....", ".....oggggooMssssssMooggggo.....", "....ookkko.oMssssssMo.okkkoo....", "...ocoBcBo.omssssssmo.oBcBoco...", "..ocBocBco.oggggggggo.ocBcoBco..", "..ocoosSso.oMmMmmMmMo.osSsooco..", "..oEooooo..omMmMMmMmo..oooooEo..", "..oEo.....ooggggggggoo.....oEo..", "...o......oktdo..odtko......o...", ".........ooktko..oktkoo.........", ".........oomMmo..omMmoo.........", "..........okkko..okkko..........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."], "Valkyrie": ["................................", "......oo................oo......", ".....owwo......oo......owwo.....", "......owwo..oooggooo..owwo......", ".......oWo.ommmggmmmo.oWo.......", ".......oWWommMmggmMmmoWWo.......", "........oooBmmmggmmmBooo........", "..........oBMMMMMMMMBo..........", "........oHoBsessssesBoHo........", "........ohoBssssssssBoho........", "........oHoBsssSSsssBoHo........", "........oh.oBssssssBo.ho........", "........oH..oSssssSo..Ho........", "........oh.ooookkoooo.ho........", ".......oooo.okkkkkko.oooo.......", "......omMmoookkkkkkooomMmo......", "......oMmmookkkkkkkkoommMo......", "......ooooookkkkkkkkoooooo......", "......okko.okkkkkkkko.okko......", "......okko.okkkkkkkko.okko......", "......osso.oggggggggo.osso......", "......oSSo.okkkkkkkko.oSSo......", ".......oo..okkkkkkkko..oo.......", "..........okkkdkkdkkko..........", "..........okkdo..odkko..........", "..........okkko..okkko..........", "..........omMmo..omMmo..........", "..........okkko..okkko..........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."], "Ulfwerener": ["...........o........o...........", "..........oio......oio..........", "..........oiIo....oIio..........", "..........oiIiooooiIio..........", "...........oiiiiiiiio...........", "...........oiyiiiiyio...........", "...........oiiiWWiiio...........", "............oiWWWWio............", "............oiWeeWio............", ".............oWwwWo.............", ".............oiiiio.............", "..............oiio..............", "......o..................o......", "......om.omooommmmooomo.mo......", "......omoomooommmmooomoomo......", ".....omMMmgomkkkkkkmogmMMmo.....", ".....omMmmgoMkkKKkkMogmmMmo.....", ".....oggggooMkkkkkkMooggggo.....", "....ookkko.oMkkkkkkMo.okkkoo....", "...omoMmMo.omkkkkkkmo.oMmMomo...", "..omMomMmo.oggggggggo.omMmoMmo..", "..omoosSso.oMmMmmMmMo.osSsoomo..", "..oEooooo..omMmMMmMmo..oooooEo..", "..oEo.....ooggggggggoo.....oEo..", "...o......oktdo..odtko......o...", ".........ooktko..oktkoo.........", ".........oomMmo..omMmoo.........", "..........okkko..okkko..........", "..........okkko..okkko..........", "..........occco..occco..........", ".........occcco..occcco.........", ".........oooooo..oooooo........."], "Yhetee": ["................................", "................................", "................................", "................................", "...............o................", "............ooowooo.............", "...........owwwwwWWo............", "....ooooooowwwwwwWWiooooooo.....", "...owwwwwwoWWWWWWWWiowwwwwwo....", "..owwwwwwwoWiiWWWWiiowwwwwwwo...", ".oWWWWWWWWiWWeWiiWeioiWWWWWWWo..", ".oWWWgWWWgoWWWWiiWWiogWWWgWWWo..", "..oiiiiiiioWWWWWWWWioiiiiiiio...", ".owoiiiiiioWWooooooioiiiiiioWo..", ".owwooooooooiiiiiiiooooooooWWo..", ".owwWWWWoWWWooiiioommmowwwwWWo..", ".owooWWWoWWWwwooowwmmmowwwooWo..", ".oowwoWommmWWWWWWWWWmmmowowwoo..", ".owwwwoommmWWWWWWWWWmmmoowwwwo..", ".owwwwwommmWWWWWWWWWmmmowwwwwo..", ".omooomommmmmmmmmmmmmmmomooomo..", ".oowwwoommmmmmmmmmmmmmmoowwwoo..", ".owwwwwoobbbbbbggbbbbbbowwwwwo..", "oWWWWWWoooommmmmmmmmoomoWWWWWWo.", ".oWWWWWooKKoommmmmooKKKoWWWWWo..", ".oiiiio.oddddooooodddddooiiiio..", "..oMoM.Mommmmmo..ommmmmoMoMoM...", "........ooooooo..ooooooo........", ".......oWWWWWWo..oWWWWWWo.......", ".......oWWWWWWo..oWWWWWWo.......", ".......oBBBBBBo..oBBBBBBo.......", "........oooooo....oooooo........"]};
+        SPRITES.elvenunion = { 'Elf Lineman': SPRITES.highelf['Lineman'], 'Elf Thrower': SPRITES.woodelf['Wood Elf Thrower'], 'Elf Catcher': SPRITES.woodelf['Wood Elf Catcher'],
+            'Elf Blitzer': ["..............orro..............", "..............orro..............", ".............orRRro.............", "............orrRRrro............", ".............orRRro.............", "..............ommo..............", ".............omMMmo.............", "............ommMMmmo............", "............omMmmMmo............", "............omMMMMmo............", "...........oggGggGggo...........", "..........soMMMMMMMMos..........", "..........homEesseEmoh..........", "..........HomssssssmoH..........", "..........homssSSssmoh..........", "..........hHomssssmoHh..........", "..........hH.osSSso.Hh..........", "..........hHoommmmooHh..........", "..........oHommmmmmoHo..........", "........oMMoommmmmmooMMo........", "........omMoMmgttgmMoMmo........", "........osoMmMmttmMmMoso........", "........osomMmgttgmMmoso........", "........osoggGgttgGggoso........", "........oSokkdkkkkdkkoSo........", ".........ookkdkkkkdkkoo.........", ".........okkkdo..odkkko.........", "..........osso....osso..........", "..........osSo....oSso..........", "..........oSso....osSo..........", "..........occo....occo..........", "..........oooo....oooo.........."] };
         const spriteSetFor = (race, id) => (id && SPRITE_ALT[race] && SPRITE_ALT[race][id]) || SPRITES[race] || null;
         const SPRITE_FIXED = { o: '#1b1d2a', s: '#f1d3b5', S: '#d9b08f', h: '#f3e2a0', H: '#d8c178', m: '#cfd6e2', M: '#9aa6b8', g: '#e8c15a', G: '#b8892f',
             f: '#efe2c4', F: '#c9b183', r: '#d9452b', y: '#f7a33b', b: '#8a4b26', w: '#f8f4ea', e: '#2a2a3a', n: '#22408f', N: '#14285e', c: '#4a3b33', W: '#c9ced9', E: '#ffffff', A: '#a88d62', a: '#cdb98c',
@@ -13952,7 +14015,7 @@
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { highelf: 'elven', woodelf: 'blades', skaven: 'flagstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blades' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'blades', skaven: 'flagstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blades' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -17780,7 +17843,7 @@
                 if (!raceSel.options.length) Object.values(RACES).forEach(r => raceSel.appendChild(new Option(r.name, r.key)));
                 const keep = squadSel.value; squadSel.innerHTML = '';
                 squadSel.appendChild(new Option('Default team', ''));
-                TB.list().filter(t => t.race === raceSel.value && !t.cpu && !TB.isSev(t)).forEach(t => squadSel.appendChild(new Option(t.name, 'custom:' + t.id)));
+                TB.list().filter(t => t.race === raceSel.value && !t.cpu && !TB.isSev(t)).sort((a, b) => a.name.localeCompare(b.name)).forEach(t => squadSel.appendChild(new Option(t.name, 'custom:' + t.id)));
                 squadSel.value = [...squadSel.options].some(o => o.value === keep) ? keep : '';
                 squadSel.disabled = squadSel.options.length < 2;
             }
@@ -19702,7 +19765,7 @@
                 sq.innerHTML = '';
                 sq.appendChild(new Option('Default team', ''));
                 const sev = typeof sevensOn === 'function' && sevensOn();   // Sevens lists the saved Sevens teams; Blood Bowl the 11-a-side ones
-                TB.list().filter(t => t.race === race && !t.cpu && !!TB.isSev(t) === sev).forEach(t => sq.appendChild(new Option(t.name + (TB.isMP(t) ? ' (Matched Play)' : ''), 'custom:' + t.id)));
+                TB.list().filter(t => t.race === race && !t.cpu && !!TB.isSev(t) === sev).sort((a, b) => a.name.localeCompare(b.name)).forEach(t => sq.appendChild(new Option(t.name + (TB.isMP(t) ? ' (Matched Play)' : ''), 'custom:' + t.id)));
                 sq.value = keep && [...sq.options].some(o => o.value === keep) ? keep : '';
                 sq.disabled = sq.options.length < 2;
                 sq.title = sq.disabled ? 'No saved teams of this race yet - make one in the Team Builder' : '';

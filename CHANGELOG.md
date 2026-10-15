@@ -2,6 +2,16 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.79 (15 Oct 2026)
+- **Added:** two more teams from the 2025 rules.
+  - **Norse (Tier 1):** Norse Raiders, Beer Boars, Berserkers, Valkyries, Ulfwereners and a Yhetee, in the Old World Classic. A new skill comes with them, the Beer Boar's Pick-me-up: at the end of the opposition's turn, each Prone team-mate within 3 squares stands up on a 5+.
+  - **Elven Union (Tier 2):** Elf Linemen, Throwers, Catchers and Blitzers, in the Elven Kingdoms League. Their home pitch is the elven one.
+  - **Where they're available:** the match picker, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
+  - **Sprites:**
+    - **Norse:** horned helmets and beards for the Raiders, wild-haired bare-chested Berserkers, winged helmets and braids for the Valkyries, a wolf's head for the Ulfwerener, a shaggy white Yhetee, and a little boar carrying a barrel.
+    - **Elven Union:** built from the High and Wood Elves, the Blitzer with a red crest.
+- **Changed:** every list of teams is now in alphabetical order, both the races and the saved teams under each race.
+
 ## v2.78 (15 Oct 2026)
 - **Changed:** Halfling Hefties no longer have face masks, so you can see their faces, and their pink bellies hang out between their tops and their trousers.
 
