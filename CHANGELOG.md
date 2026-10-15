@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.65 (15 Oct 2026)
+- **Changed:** a race's default team now lists its positional players first, the most expensive first (Ogre, then Blitzers, Catchers, Thrower, Halfling), with the linemen at the bottom. This applies on the lineup screen and in the in-match Rosters panel. Computer-run league teams made from now on are set up in the same order.
+
 ## v2.64 (15 Oct 2026)
 - **Changed:** the Rosters panel during a match also lists a saved team's players in their Team Builder roster order, within each group (in play, reserves, knocked out, out of the match). Before, they were in starting-formation order.
 

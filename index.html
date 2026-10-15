@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.64</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.65</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -3654,13 +3654,13 @@
                 usedNames.add(name);
                 const kit = KITS.find(c => !usedKits.has(c[0])) || rnd(KITS); usedKits.add(kit[0]);
                 const used = new Set();
-                const players = [...R.lineup, ...(R.bench || [])].map(pos => { const n = TB.randomName(race, used); used.add(n); return { pos, name: n }; });
+                const players = positionalFirst(race, [...R.lineup, ...(R.bench || [])], p => p).map(pos => { const n = TB.randomName(race, used); used.add(n); return { pos, name: n }; });   // positional players first
                 const t = { id: uid(), name, race, primary: kit[0], secondary: kit[1], players, rerolls: R.rerolls != null ? R.rerolls : 2, apothecary: !!R.apothecary,
                     coaches: R.assistantCoaches || 0, cheerleaders: R.cheerleaders || 0, fans: R.fans || 1, bribes: R.bribes || 0, cpu: true, leagueId: lid };
                 while (TB.costs(t).spent > 1000 && t.players.length > 11) t.players.pop();
                 if (fmt === 'sevens') {   // a Sevens team: the race's standard Sevens squad on 600k (the first Lineman is the Veteran)
                     const S7 = SEVENS[race] || SEVENS.human, used7 = new Set();
-                    Object.assign(t, { format: 'sevens', players: [...S7.lineup, ...(S7.bench || [])].map(pos => { const n = TB.randomName(race, used7); used7.add(n); return { pos, name: n }; }),
+                    Object.assign(t, { format: 'sevens', players: positionalFirst(race, [...S7.lineup, ...(S7.bench || [])], p => p).map(pos => { const n = TB.randomName(race, used7); used7.add(n); return { pos, name: n }; }),
                         rerolls: S7.rerolls, apothecary: false, coaches: 0, cheerleaders: 0, fans: 1, bribes: 0 });
                     const v = t.players.find(p => sevLineman(race, p.pos)); if (v) v.vet = true;
                 }
@@ -5512,13 +5512,21 @@
             `;
         }
 
+        // a default team's roster order: the positional players first (dearest first), the linemen (the 0-12 / 0-16 position) last
+        function positionalRank(race, pos) {
+            const P = (RACES[race] && RACES[race].positions) || {}, q = P[pos];
+            if (!q) return 1e6;   // not one of the race's positions (a Star Player, say): after everyone
+            return (q.max >= 12 ? 1e5 : 0) - (q.cost || 0);
+        }
+        const positionalFirst = (race, list, posOf) => list.map((x, i) => [x, i]).sort((a, b) => (positionalRank(race, posOf(a[0])) - positionalRank(race, posOf(b[0]))) || (a[1] - b[1])).map(a => a[0]);
         // a team's players in its saved roster order (as arranged in the Team Builder); anyone not on it (Stars, Mercenaries, Journeymen) after.
-        // A race's default team keeps the match order.
+        // A race's default team: positional players first, linemen last.
         function rosterOrdered(t) {
             const ps = state.players.filter(p => p.team === t);
             try {
-                const tid = ROSTERS[t] && ROSTERS[t].careerTeamId, team = tid && TB.get(tid);
+                const R = ROSTERS[t], tid = R && R.careerTeamId, team = tid && TB.get(tid);
                 if (team) { const at = new Map(team.players.map((q, i) => [q.id, i])), ix = p => at.has(p.careerId) ? at.get(p.careerId) : 1e6; return [...ps].sort((a, b) => ix(a) - ix(b)); }
+                if (R && !R.custom) return positionalFirst(R.race || R.key, ps, p => p.posKey);
             } catch (e) {}
             return ps;
         }
