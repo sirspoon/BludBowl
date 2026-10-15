@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.85 (15 Oct 2026)
+- **Changed:** the Gnomes have been redrawn to look like their models.
+  - **Everyone:** a floppy pixie hood in the team's second colour, a huge nose, pointed ears, a big beard, a leaf-trimmed jacket, short trousers, steel knee pads and curly-toed shoes. Each gnome has one arm raised in a wave.
+  - **Lineman:** grey beard.
+  - **Beastmaster:** ginger beard, with a fur-lined hood and a whip.
+  - **Illusionist:** white beard, a tall bent hat and a gnarled staff sprouting leaves.
+  - **Woodland Fox:** now drawn at full stretch, with a stripy coat and a streaming tail.
+
 ## v2.84 (15 Oct 2026)
 - **Added:** two more teams from the 2025 rules.
   - **Old World Alliance:**
