@@ -2,6 +2,16 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.98 (15 Oct 2026)
+- **Changed:** the Vampires have been redrawn to look like their models.
+  - **Vampires:** pale, dressed in dark grey, with towering bat-wing collars, capes and knee guards in crimson.
+    - **Runner:** a great sweep of dark hair, a silver circlet and a purple bodice.
+    - **Thrower:** a white shirt, a crimson cravat and a dark breastplate.
+    - **Blitzer:** a bat-faced crimson helm with a spiked crest, and dark plate with crimson panels.
+  - **Thralls:** long straggly hair, big white shirts with puffed sleeves, a crimson sash and trousers, and brown boots.
+  - **Kit:** now crimson and charcoal. The away kit is bone grey and crimson.
+- **Fixed:** the Vargheist's wings are narrower, so they're no longer clipped at the sides.
+
 ## v2.97 (15 Oct 2026)
 - **Added:** the last two undead teams from the 2025 rules. Both play in the Sylvanian Spotlight and have Masters of Undeath.
   - **Necromantic Horror** (grave indigo and ghost green):
