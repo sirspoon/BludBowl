@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.65</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.66</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1749,6 +1749,31 @@
                 Grail:   { type: 'Grail Knight', label: 'GK', ma: 7, st: 3, ag: 3, pa: 4, av: 10, skills: ['Block', 'Dauntless', 'Steady Footing'] }
             }
         };
+        RACES.halfling = { key: 'halfling', short: 'HLF', lineup: ['Hopeful','Treeman','Hopeful','Hefty','Hefty','Treeman','Catcher','Catcher','Hopeful','Hopeful','Hopeful'],
+            bench: ['Hopeful','Hopeful','Hopeful'], rerolls: 3, specialRules: [],   // 690k players (14) + 3 re-rolls 180k + apothecary 50k + 2 coaches + 2 cheerleaders 40k = 960k
+            name: "Halflings", color: "#65a30d",
+            style: { fill: '#4d7c0f', text: '#fef3c7', endBg: '#3f6212', endText: '#fde68a', shade: 'rgba(0,0,0,0.5)' },   // shire green with cream
+            fans: 1, assistantCoaches: 2, cheerleaders: 2, apothecary: 1, tv: "960k", treasury: "40,000 gp",
+            types: {
+                Hopeful: { type: 'Halfling Hopeful', label: 'HH', ma: 5, st: 2, ag: 3, pa: 4, av: 7, skills: ['Dodge', 'Right Stuff', 'Stunty'] },
+                Hefty:   { type: 'Halfling Hefty', label: 'HF', ma: 5, st: 2, ag: 3, pa: 3, av: 8, skills: ['Dodge', 'Fend', 'Stunty'] },
+                Catcher: { type: 'Halfling Catcher', label: 'HC', ma: 5, st: 2, ag: 3, pa: 4, av: 7, skills: ['Catch', 'Dodge', 'Right Stuff', 'Sprint', 'Stunty'] },
+                Treeman: { type: 'Athel Forest Treeman', label: 'TM', ma: 2, st: 6, ag: 5, pa: 5, av: 11, skills: ['Mighty Blow', 'Stand Firm', 'Strong Arm', 'Take Root', 'Thick Skull', 'Throw Team Mate', 'Timmm-ber!'] }
+            }
+        };
+        RACES.imperial = { key: 'imperial', short: 'IMP', lineup: ['Retainer','Ogre','Bodyguard','Noble','Noble','Bodyguard','Retainer','Retainer','Bodyguard','Retainer','Thrower'],
+            bench: [], rerolls: 2, specialRules: [],   // 830k players + 2 re-rolls 120k + apothecary 50k = 1,000k
+            name: "Imperial Nobility", color: "#7c3aed",
+            style: { fill: '#581c87', text: '#fde68a', endBg: '#3b0764', endText: '#fcd34d', shade: 'rgba(0,0,0,0.55)' },   // imperial purple with gold
+            fans: 1, assistantCoaches: 0, cheerleaders: 0, apothecary: 1, tv: "1000k", treasury: "0 gp",
+            types: {
+                Retainer:  { type: 'Imperial Retainer', label: 'L', ma: 6, st: 3, ag: 3, pa: 4, av: 8, skills: ['Fend'] },
+                Thrower:   { type: 'Imperial Thrower', label: 'T', ma: 6, st: 3, ag: 3, pa: 2, av: 9, skills: ['Give and Go', 'Pass', 'Pro'] },
+                Bodyguard: { type: 'Bodyguard', label: 'BG', ma: 5, st: 3, ag: 3, pa: 4, av: 9, skills: ['Stand Firm', 'Wrestle'] },
+                Noble:     { type: 'Noble Blitzer', label: 'NB', ma: 7, st: 3, ag: 3, pa: 4, av: 9, skills: ['Block', 'Catch', 'Pro'] },
+                Ogre:      { type: 'Ogre', label: 'OG', ma: 5, st: 5, ag: 4, pa: 5, av: 10, skills: ['Bone Head', 'Loner (3+)', 'Mighty Blow', 'Thick Skull', 'Throw Team Mate'] }
+            }
+        };
 
         // Chaos Dwarfs (BB2025, Tier 1, Badlands Brawl / Chaos Clash): Minotaur, 2 Bull Centaurs, 4 Blockers, 2 Flamesmiths, 2 Hobgoblins = 930k + 1 re-roll 70k = 1,000k
         RACES.chaosdwarf = { key: 'chaosdwarf', short: 'CDW', lineup: ['Blocker','Minotaur','Blocker','Centaur','Blocker','Blocker','Flamesmith','Centaur','Flamesmith','Hobgoblin','Hobgoblin'],
@@ -1785,10 +1810,10 @@
         const SEV = {
             BUDGET: 600, MAXP: 11, MINP: 7, RR: 100, STAFF: 20, APO: 80, FAN: 20, CAP: 750, MP_BUDGETS: [600, 650, 700],
             // Sevens Matched Play tiers: a team gets as many skill points as its tier number
-            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4 },
+            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, imperial: 2, halfling: 4 },
             // positions with the Lineman keyword (the Veteran is one of them; at most 4 players may be anything else)
             LINEMEN: { human: ['Lineman'], orc: ['Lineman'], highelf: ['Lineman'], lizardmen: ['Skink'], skaven: ['Clanrat'], ogre: ['Gnoblar'], goblin: ['Lineman'],
-                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'] },
+                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'], halfling: ['Hopeful'], imperial: ['Retainer'] },
             NO_ADV: ['Leader', 'Pro']   // never gained by a Sevens player
         };
         const isSevT = t => !!t && (t.format === 'sevens' || t.format === 'sevens-mp');
@@ -1810,6 +1835,8 @@
         Object.assign(RACES.amazon, { rerollCost: 60, positions: { Eagle: { max: 16, cost: 50 }, Python: { max: 2, cost: 80 }, Piranha: { max: 2, cost: 90 }, Jaguar: { max: 2, cost: 110 } } });
         Object.assign(RACES.chaosdwarf, { rerollCost: 70, positions: { Hobgoblin: { max: 16, cost: 40 }, Stabba: { max: 2, cost: 60 }, Blocker: { max: 4, cost: 70 }, Flamesmith: { max: 2, cost: 80 }, Centaur: { max: 2, cost: 130 }, Minotaur: { max: 1, cost: 150 } } });
         Object.assign(RACES.darkelf, { rerollCost: 50, positions: { Lineman: { max: 16, cost: 65 }, Runner: { max: 2, cost: 80 }, Assassin: { max: 2, cost: 90 }, Blitzer: { max: 2, cost: 105 }, Witch: { max: 2, cost: 110 } } });
+        Object.assign(RACES.halfling, { rerollCost: 60, positions: { Hopeful: { max: 16, cost: 30 }, Hefty: { max: 2, cost: 50 }, Catcher: { max: 2, cost: 55 }, Treeman: { max: 2, cost: 120 } } });
+        Object.assign(RACES.imperial, { rerollCost: 60, positions: { Retainer: { max: 16, cost: 45 }, Thrower: { max: 2, cost: 75 }, Bodyguard: { max: 4, cost: 85 }, Noble: { max: 2, cost: 90 }, Ogre: { max: 1, cost: 140 } } });
         Object.assign(RACES.bretonnian, { rerollCost: 60, positions: { Squire: { max: 16, cost: 50 }, Catcher: { max: 2, cost: 85 }, Thrower: { max: 2, cost: 80 }, Grail: { max: 2, cost: 95 } } });
         Object.assign(RACES.undead, { rerollCost: 70, positions: { Skeleton: { max: 16, cost: 40 }, Zombie: { max: 16, cost: 40 }, Ghoul: { max: 2, cost: 75 }, Wight: { max: 2, cost: 95 }, Mummy: { max: 2, cost: 125 } } });
         Object.assign(RACES.lizardmen, { rerollCost: 70, positions: { Skink: { max: 16, cost: 60 }, Chameleon: { max: 2, cost: 70 }, Saurus: { max: 6, cost: 90 }, Kroxigor: { max: 1, cost: 140 } } });
@@ -1904,11 +1931,13 @@
                 dwarf: { Lineman: ['GD', 'S'], Runner: ['GP', 'AS'], Blitzer: ['GS', 'P'], Slayer: ['GS', 'D'], Deathroller: ['DS', 'G'] },
                 undead: { Skeleton: ['G', 'ADS'], Zombie: ['DG', 'AS'], Ghoul: ['AG', 'DPS'], Wight: ['GS', 'AD'], Mummy: ['S', 'AG'] },
                 amazon: { Eagle: ['G', 'AS'], Python: ['GP', 'AS'], Piranha: ['AG', 'S'], Jaguar: ['GS', 'A'] },
+                halfling: { Hopeful: ['A', 'DGS'], Hefty: ['AP', 'DGS'], Catcher: ['A', 'DGS'], Treeman: ['S', 'ADGP'] },
+                imperial: { Retainer: ['G', 'AS'], Thrower: ['GP', 'AS'], Bodyguard: ['GS', 'A'], Noble: ['AG', 'PS'], Ogre: ['S', 'AGM'] },
                 bretonnian: { Squire: ['G', 'AS'], Catcher: ['AG', 'S'], Thrower: ['GP', 'AS'], Grail: ['GS', 'A'] },
                 chaosdwarf: { Hobgoblin: ['D', 'AGS'], Stabba: ['DG', 'AS'], Blocker: ['GS', 'ADM'], Flamesmith: ['GS', 'ADM'], Centaur: ['GS', 'ADM'], Minotaur: ['MS', 'AG'] },
                 darkelf: { Lineman: ['AG', 'DS'], Runner: ['AGP', 'DS'], Assassin: ['AD', 'GS'], Blitzer: ['AG', 'DPS'], Witch: ['AG', 'DS'] }
             };
-            const JOURNEY = { blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman' };
+            const JOURNEY = { blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman', halfling: 'Hopeful', imperial: 'Retainer' };
             const CATS = { A: 'Agility', D: 'Devious', G: 'General', M: 'Mutation', P: 'Passing', S: 'Strength' };
             const SKILLS = {
                 A: ['Catch', 'Diving Catch', 'Diving Tackle', 'Dodge', 'Defensive', 'Hit and Run', 'Jump Up', 'Leap', 'Safe Pair of Hands', 'Sidestep', 'Sprint', 'Sure Feet'],
@@ -2561,8 +2590,8 @@
         };
 
         // ---- Star Players (BB2025): famous free agents hired for a single game ----
-        const LEAGUE_NAMES = { OWC: 'Old World Classic', BB: 'Badlands Brawl', UC: 'Underworld Challenge', WESL: "Worlds Edge Superleague", SS: 'Sylvanian Spotlight', LSL: 'Lustrian Superleague', ELK: 'Elven Kingdoms League', WL: 'Woodland League' };
-        const RACE_LEAGUES = { human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB'], darkelf: ['ELK'] };
+        const LEAGUE_NAMES = { OWC: 'Old World Classic', BB: 'Badlands Brawl', UC: 'Underworld Challenge', WESL: "Worlds Edge Superleague", SS: 'Sylvanian Spotlight', LSL: 'Lustrian Superleague', ELK: 'Elven Kingdoms League', WL: 'Woodland League', HTC: 'Halfling Thimble Cup' };
+        const RACE_LEAGUES = { halfling: ['HTC', 'WL'], imperial: ['OWC'], human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB'], darkelf: ['ELK'] };
         const STARS = {
             griff:   { name: 'Griff Oberwald', label: 'GO', cost: 300, mega: true, ma: 7, st: 4, ag: 2, pa: 3, av: 9, skills: ['Block', 'Dodge', 'Fend', 'Loner (3+)', 'Sprint', 'Sure Feet'],
                        rule: 'Consummate Professional', text: 'Once per game, Griff may add +1 to an Agility Test he has made, after seeing the roll.', leagues: ['OWC'] },
@@ -2599,7 +2628,7 @@
             bomber:  { name: 'Bomber Dribblesnot', label: 'BD', cost: 80, ma: 6, st: 2, ag: 3, pa: 3, av: 8, skills: ['Accurate', 'Bombardier', 'Dodge', 'Loner (4+)', 'Right Stuff', 'Secret Weapon', 'Stunty'],
                        rule: 'Kaboom!', text: 'Once per game, when an opposition player catches or intercepts one of his bombs, his coach may have it explode in their square instead of letting them throw it again.', leagues: ['BB', 'UC'] },
             cindy:   { name: 'Cindy Piewhistle', label: 'CP', cost: 100, ma: 5, st: 2, ag: 3, pa: 3, av: 7, skills: ['Accurate', 'Bombardier', 'Dodge', 'Loner (4+)', 'Secret Weapon', 'Stunty'],
-                       rule: 'All You Can Eat', text: 'Once per game, Cindy may throw two bombs in one activation (decided first). Afterwards, on a 1-3 she is Sent-off.', leagues: ['OWC'] },
+                       rule: 'All You Can Eat', text: 'Once per game, Cindy may throw two bombs in one activation (decided first). Afterwards, on a 1-3 she is Sent-off.', leagues: ['OWC', 'HTC'] },
             deeproot:{ name: 'Deeproot Strongbranch', label: 'DS', cost: 280, big: true, ma: 2, st: 7, ag: 5, pa: 4, av: 11, skills: ['Block', 'Bullseye', 'Loner (4+)', 'Mighty Blow', 'Stand Firm', 'Strong Arm', 'Thick Skull', 'Throw Team Mate', 'Timmm-ber!'],
                        rule: 'Reliable', text: 'If Deeproot fumbles a Throw Team-mate, the thrown player bounces as normal but lands safely.', leagues: ['WL'] },
             dribldrull: { name: 'Dribl & Drull', label: 'DD', cost: 230, leagues: ['LSL'], rule: 'A Sneaky Pair', text: 'Hired as a pair. Their Fouls and Stabs get +1 against an opponent both of them are marking.',
@@ -2621,7 +2650,7 @@
             grim:    { name: 'Grim Ironjaw', label: 'GI', cost: 190, ma: 5, st: 4, ag: 3, pa: 6, av: 9, skills: ['Block', 'Dauntless', 'Frenzy', 'Hatred (Big Guy)', 'Loner (4+)', 'Multiple Block', 'Thick Skull'],
                        rule: 'Slayer', text: 'Once per game, when his Block knocks down an opposition Big Guy, Grim adds +1 to the Armour or Injury roll after seeing it.', leagues: ['WESL'] },
             grombrindal: { name: 'Grombrindal', label: 'GW', cost: 170, ma: 5, st: 3, ag: 3, pa: 4, av: 10, skills: ['Block', 'Break Tackle', 'Dauntless', 'Loner (4+)', 'Mighty Blow', 'Stand Firm', 'Sure Feet', 'Thick Skull'],
-                       rule: 'Wisdom of the White Dwarf', text: 'Once per game, when activated, a team-mate within 2 squares gains Break Tackle, Dauntless, Mighty Blow or Sure Feet until the end of the turn.', leagues: ['OWC', 'WESL'] },
+                       rule: 'Wisdom of the White Dwarf', text: 'Once per game, when activated, a team-mate within 2 squares gains Break Tackle, Dauntless, Mighty Blow or Sure Feet until the end of the turn.', leagues: ['OWC', 'WESL', 'HTC'] },
             helmut:  { name: 'Helmut Wulf', label: 'HW', cost: 140, ma: 6, st: 3, ag: 3, pa: null, av: 9, skills: ['Chainsaw', 'Loner (4+)', 'No Ball', 'Pro', 'Secret Weapon', 'Stand Firm'],
                        rule: 'Old Pro', text: 'Once per game, Helmut may use Pro to re-roll one dice of an Armour roll (his Chainsaw Attacks).', leagues: ['OWC'] },
             hthark:  { name: "H'thark the Unstoppable", label: 'HU', cost: 300, mega: true, big: true, ma: 6, st: 6, ag: 4, pa: 6, av: 10, skills: ['Block', 'Break Tackle', 'Defensive', 'Juggernaut', 'Loner (4+)', 'Sprint', 'Sure Feet', 'Thick Skull', 'Unsteady'],
@@ -2641,7 +2670,7 @@
             nobbla:  { name: 'Nobbla Blackwart', label: 'NB', cost: 120, ma: 6, st: 2, ag: 3, pa: null, av: 8, skills: ['Block', 'Chainsaw', 'Dodge', 'Loner (4+)', 'No Ball', 'Saboteur', 'Secret Weapon', 'Stunty'],
                        rule: "Kick 'em While They're Down!", text: 'Once per game, Nobbla may make a Chainsaw Attack on a Prone or Stunned opponent (not a Foul).', leagues: ['BB', 'UC'] },
             puggy:   { name: 'Puggy Baconbreath', label: 'PB', cost: 130, ma: 5, st: 3, ag: 3, pa: 3, av: 8, skills: ['Block', 'Dodge', 'Loner (3+)', 'Nerves of Steel', 'Right Stuff', 'Stunty'],
-                       rule: 'Halfling Luck', text: 'Once per game, Puggy may re-roll a single dice (not an Armour, Injury or Casualty roll).', leagues: ['OWC'] },
+                       rule: 'Halfling Luck', text: 'Once per game, Puggy may re-roll a single dice (not an Armour, Injury or Casualty roll).', leagues: ['OWC', 'HTC'] },
             rashnak: { name: 'Rashnak Backstabber', label: 'RB', cost: 130, ma: 7, st: 3, ag: 3, pa: 5, av: 8, skills: ['Loner (4+)', 'Shadowing', 'Sidestep', 'Sneaky Git', 'Stab'],
                        rule: 'Toxin Connoisseur', text: 'Once per game, when his Stab breaks armour, Rashnak adds +1 to the Injury roll after seeing it.', leagues: ['BB'] },
             rodney:  { name: 'Rodney Roachbait', label: 'RR', cost: 70, ma: 6, st: 2, ag: 3, pa: 4, av: 7, skills: ['Catch', 'Diving Catch', 'Jump Up', 'Loner (4+)', 'On the Ball', 'Sidestep', 'Stunty', 'Wrestle'],
@@ -2687,7 +2716,7 @@
         const starsFor = (race, lg) => { const L = starLeagueOf(race, lg); return Object.keys(STARS).filter(k => STARS[k].leagues === 'any' || STARS[k].leagues.includes(L)); };
         // ---------- Matched Play (BB2025): team tiers (May 2026 list), skill points and Star Player limits ----------
         const MP = {
-            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2 },
+            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2, imperial: 2, halfling: 4 },
             SP: { 1: 6, 2: 8, 3: 9, 4: 10 },
             ELITE: ['Block', 'Dodge', 'Guard', 'Mighty Blow'],   // each can be given to at most four players
             BUDGETS: [1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400],
@@ -2725,6 +2754,10 @@
                     ['the Dead', 'Coffinmaker', 'Gravedigger', 'Bonecrusher', 'Rotgut', 'von Grave', 'Deadeye', 'Ashgrave', 'the Pale', 'Wormwood', 'Bleakmoor', 'Cryptborn', 'Dustwalker', 'Nightshade', 'Mouldwell', 'Hollowell', 'Gristle', 'Morrow', 'Tombs', 'Blackbarrow', 'Cold', 'Mournful', 'the Unburied', 'Gallows', 'Shambles']],
                 amazon: [['Zaria', 'Itzel', 'Nayeli', 'Xochi', 'Yaretzi', 'Citlali', 'Amaru', 'Tala', 'Inti', 'Kiona', 'Ixchel', 'Tupaq', 'Maya', 'Ayita', 'Huyana', 'Nita', 'Sachi', 'Talia', 'Zyanya', 'Itza', 'Kalea', 'Mixtli', 'Nahui', 'Quilla', 'Sayri', 'Tecla', 'Yolotli', 'Ameyal'],
                     ['Jaguarclaw', 'Swiftspear', 'Riverborn', 'Sunfeather', 'Serpentsong', 'Stonejaw', 'Vinewhip', 'Moonhunter', 'Blackwater', 'Fangheart', 'Goldscale', 'Ironbark', 'Jadeeye', 'Leafrunner', 'Mistwalker', 'Nightclaw', 'Palmstrike', 'Quickfin', 'Redfeather', 'Skyhawk', 'Thornfoot', 'Tidecaller', 'Wildheart', 'Bloodlotus', 'Emberhide', 'Stormwing']],
+                halfling: [['Bilbo', 'Merry', 'Pippin', 'Rosie', 'Hamfast', 'Lobelia', 'Bungo', 'Primula', 'Odo', 'Pansy', 'Tobold', 'Daisy', 'Fatty', 'Poppy', 'Mungo', 'Belba', 'Dudo', 'Lily', 'Ferdi', 'Myrtle', 'Wilcome', 'Tansy', 'Bodo', 'Marigold', 'Sancho', 'Hilda'],
+                    ['Puddingfoot', 'Bramblebelly', 'Greenhill', 'Applebottom', 'Burrows', 'Took', 'Brandybuck', 'Proudfoot', 'Goodbody', 'Hornblower', 'Bolger', 'Cotton', 'Sackville', 'Underhill', 'Mugwort', 'Tunnelly', 'Whitfoot', 'Boffin', 'Chubb', 'Bracegirdle', 'Pieface', 'Muffinfeet', 'Buttercup', 'Honeypot']],
+                imperial: [['Heinrich', 'Ludwig', 'Otto', 'Konrad', 'Friedrich', 'Wilhelm', 'Maximilian', 'Albrecht', 'Dieter', 'Gunther', 'Leopold', 'Siegfried', 'Rupert', 'Ernst', 'Matthias', 'Felix', 'Karl', 'Johann', 'Klaus', 'Emmerich', 'Lothar', 'Valten', 'Wolfram', 'Augustus'],
+                    ['von Holswig', 'von Liebwitz', 'von Bildhofen', 'von Carstein', 'Todbringer', 'von Raukov', 'Hertwig', 'von Tal', 'Haupt-Anderssen', 'von Aschaffen', 'Leitdorf', 'von Kesselring', 'Graf von Stir', 'von Middenheim', 'Grunwald', 'von Reikland', 'Steinhäuser', 'von Nuln', 'Edelweiss', 'von Blauberg']],
                 bretonnian: [['Gilles', 'Bertrand', 'Roland', 'Gaston', 'Lancelin', 'Thierry', 'Arnaud', 'Baudouin', 'Clovis', 'Denis', 'Enguerrand', 'Fulbert', 'Gauvain', 'Henri', 'Isembard', 'Jacques', 'Lothaire', 'Marcel', 'Odo', 'Perceval', 'Raoul', 'Tancred', 'Yvain', 'Aymeric', 'Bohemond', 'Childeric', 'Fernand', 'Guillaume'],
                     ['de Lyonesse', 'le Breton', 'de Quenelles', 'de Couronne', "d'Artois", 'de Bastonne', 'le Hardi', 'de Montfort', 'le Preux', 'de Carcassonne', 'de Mousillon', 'le Gros', 'de Brionne', "d'Aquitanie", 'le Bon', 'de Gisoreux', 'le Blanc', 'de Parravon', 'le Fier', "de l'Anguille", 'le Sage', 'de Bordeleaux', 'le Vaillant', 'de Montfort-sur-Mer', 'Coeur-de-Lion']],
                 chaosdwarf: [['Zhargun', 'Drazhkul', 'Hashrak', 'Gorduz', 'Ashnar', 'Rykarth', 'Zhatan', 'Bazhak', 'Vorghaz', 'Ghorth', 'Ulgrim', 'Khazrak', 'Morgruk', 'Thurzag', 'Dravhak', 'Uzkul', 'Snik', 'Grotsnag', 'Ratbag', 'Skabnit'],
@@ -2869,7 +2902,7 @@
             }
             function blank(race) {
                 const R = RACES[race];
-                const col = { chaosdwarf: ['#7f1d1d', '#d4a017'], darkelf: ['#4c1d95', '#e5e7eb'], amazon: ['#0f766e', '#fde047'], bretonnian: ['#1e40af', '#fef3c7'], human: ['#1d4ed8', '#f8fafc'], orc: ['#3f6212', '#facc15'], highelf: ['#f8fafc', '#1d4ed8'], lizardmen: ['#0f8b80', '#ff9a3c'], dwarf: ['#7f1d1d', '#fcd34d'], undead: ['#3b0764', '#f5f0dc'], skaven: ['#4a3424', '#b6f04a'], ogre: ['#8b2c1f', '#f3d58a'], goblin: ['#6f9f2c', '#2a0b3d'], woodelf: ['#1e5631', '#ffe8a3'], blackorc: ['#991b1b', '#fde047'] }[race] || ['#b91c1c', '#fde68a'];
+                const col = { halfling: ['#4d7c0f', '#fef3c7'], imperial: ['#581c87', '#fde68a'], chaosdwarf: ['#7f1d1d', '#d4a017'], darkelf: ['#4c1d95', '#e5e7eb'], amazon: ['#0f766e', '#fde047'], bretonnian: ['#1e40af', '#fef3c7'], human: ['#1d4ed8', '#f8fafc'], orc: ['#3f6212', '#facc15'], highelf: ['#f8fafc', '#1d4ed8'], lizardmen: ['#0f8b80', '#ff9a3c'], dwarf: ['#7f1d1d', '#fcd34d'], undead: ['#3b0764', '#f5f0dc'], skaven: ['#4a3424', '#b6f04a'], ogre: ['#8b2c1f', '#f3d58a'], goblin: ['#6f9f2c', '#2a0b3d'], woodelf: ['#1e5631', '#ffe8a3'], blackorc: ['#991b1b', '#fde047'] }[race] || ['#b91c1c', '#fde68a'];
                 return clean({ id: uid(), name: 'New ' + R.name, race, primary: col[0], secondary: col[1], players: [], rerolls: 2, apothecary: !noApo(race), coaches: 0, cheerleaders: 0, fans: 1, bribes: 0 });
             }
 
@@ -3620,6 +3653,8 @@
                 blackorc: ['Blackrock', 'Ironcrag', 'Doomforge', 'Ashpeak', 'Grimhold', 'Cinderfang', 'Slagpit', 'Darkstone'],
                 lizardmen: ['Jade Temple', 'Sunken Pyramid', 'Serpent Pool', 'Golden Ziggurat', 'Mistmarsh', 'Emerald Falls', 'Starstone', 'Coldblood Bay'],
                 amazon: ['Skeggi', 'Lustria', 'Amazon River', 'Serpent Coast', 'Jaguar Falls', 'Temple Rock', 'Vine Hollow', 'Sunken Isle'],
+                halfling: ['Mootland', 'Eicheschatten', 'Brambledown', 'Thimbleton', 'Pudding Hill', 'Little Mootley', 'Applecross', 'Barrowbank'],
+                imperial: ['Altdorf', 'Nuln', 'Talabheim', 'Middenheim', 'Averheim', 'Wissenburg', 'Carroburg', 'Ostland'],
                 bretonnian: ['Couronne', 'Bastonne', 'Quenelles', 'Lyonesse', 'Gisoreux', 'Parravon', 'Bordeleaux', 'Carcassonne'],
                 chaosdwarf: ['Zharr-Naggrund', 'Mingol Zharr', 'Uzkulak', 'Black Fortress', 'Gash Kadrak', 'Tower of Gorgoth', 'Ash Plains', 'Fireglow Pass'],
                 darkelf: ['Naggarond', 'Hag Graef', 'Har Ganeth', 'Clar Karond', 'Karond Kar', 'Ghrond', 'Har Kaldra', 'Black Ark']
@@ -3637,6 +3672,8 @@
                 blackorc: ['Ironhides', 'Anvils', 'Brutes', 'Hammerz', 'Bosses', 'Gorgers', 'Klaws', 'Destroyas'],
                 lizardmen: ['Saurians', 'Skinks', 'Fangs', 'Scales', 'Raptors', 'Coldbloods', 'Stalkers', 'Sunscales'],
                 amazon: ['Valkyries', 'Huntresses', 'Jaguars', 'Serpents', 'Warrior Queens', 'Piranhas', 'Eagles', 'Spears'],
+                halfling: ['Hotpots', 'Pie-Eaters', 'Thimbles', 'Nibblers', 'Second Breakfasts', 'Gobblers', 'Fat Ladies', 'Muffins'],
+                imperial: ['Nobles', 'Counts', 'Electors', 'Gryphons', 'Lancers', 'Halberdiers', 'Heralds', 'Barons'],
                 bretonnian: ['Lions', 'Lances', 'Chevaliers', 'Questing Knights', 'Grail Guard', 'Pegasi', 'Errants', 'Paladins'],
                 chaosdwarf: ['Bulls', 'Infernals', 'Hellsmiths', 'Fireguard', 'Slavers', 'Daemonsmiths', 'Ash Lords', 'Tallhats'],
                 darkelf: ['Corsairs', 'Executioners', 'Cold Ones', 'Shades', 'Witches', 'Reapers', 'Dreadlords', 'Assassins']
@@ -3901,7 +3938,7 @@
             const offered = (it, race) => !it.only || it.only(race);
             const mercCost = m => (RACES[m.race].positions[m.pos] || { cost: 0 }).cost + 30 + (m.skill ? 50 : 0);
             const corrupt = race => ((RACES[race] || {}).specialRules || []).includes('Bribery and Corruption');
-            const indCost = (it, race) => it.key === 'bribes' && corrupt(race) ? 50 : it.key === 'ref' && corrupt(race) ? 80 : it.key === 'chef' && it.sev && race === 'halfling' ? 100 : it.cost;
+            const indCost = (it, race) => it.key === 'bribes' && corrupt(race) ? 50 : it.key === 'ref' && corrupt(race) ? 80 : it.key === 'chef' && race === 'halfling' ? 100 : it.cost;
             const indMax = (it, race) => it.key === 'bribes' && corrupt(race) && !it.sev ? 6 : it.max;
             function liveTeam(id) {   // a league team with its treasury worked out (a team that hasn't played yet has what's left of its 1,000k)
                 const t = teamOf(id); if (!t) return null;
@@ -5156,6 +5193,8 @@
             undead:    { lineup: ['Mummy', 'Skeleton', 'Wight', 'Skeleton', 'Skeleton', 'Ghoul', 'Ghoul'], rerolls: 1 },
             amazon:    { lineup: ['Jaguar', 'Eagle', 'Eagle', 'Piranha', 'Eagle', 'Eagle', 'Eagle'], rerolls: 1 },
             bretonnian: { lineup: ['Squire', 'Grail', 'Squire', 'Grail', 'Catcher', 'Squire', 'Squire'], rerolls: 1 },
+            halfling: { lineup: ['Hopeful', 'Treeman', 'Hopeful', 'Hefty', 'Catcher', 'Hopeful', 'Hopeful'], bench: ['Hopeful'], rerolls: 2 },
+            imperial: { lineup: ['Retainer', 'Ogre', 'Retainer', 'Noble', 'Bodyguard', 'Retainer', 'Retainer'], rerolls: 1 },
             chaosdwarf: { lineup: ['Blocker', 'Hobgoblin', 'Blocker', 'Centaur', 'Hobgoblin', 'Flamesmith', 'Hobgoblin'], rerolls: 1 },
             darkelf:   { lineup: ['Lineman', 'Lineman', 'Lineman', 'Assassin', 'Lineman', 'Lineman', 'Runner'], rerolls: 1 }
         };
@@ -5253,6 +5292,8 @@
             dwarf: { fill: '#1e3a8a', text: '#fcd34d', endBg: '#172554', endText: '#fcd34d', shade: 'rgba(0,0,0,0.55)' },          // navy with gold
             undead: { fill: '#1c1917', text: '#a3e635', endBg: '#0c0a09', endText: '#a3e635', shade: 'rgba(0,0,0,0.55)' },
             amazon: { fill: '#fde047', text: '#0f766e', endBg: '#b59f20', endText: '#0b524c', shade: 'rgba(0,0,0,0.45)' },         // gold with teal
+            halfling: { fill: '#4d7c0f', text: '#fef3c7', endBg: '#3f6212', endText: '#fde68a', shade: 'rgba(0,0,0,0.5)' },    // shire green with cream
+            imperial: { fill: '#581c87', text: '#fde68a', endBg: '#3b0764', endText: '#fcd34d', shade: 'rgba(0,0,0,0.55)' },  // imperial purple with gold
             bretonnian: { fill: '#f5f0dc', text: '#9f1239', endBg: '#c9c2a6', endText: '#7f0f2e', shade: 'rgba(80,90,110,0.45)' },  // cream with crimson
             chaosdwarf: { fill: '#111827', text: '#f97316', endBg: '#05070c', endText: '#fb923c', shade: 'rgba(0,0,0,0.55)' },     // black with orange
             darkelf: { fill: '#14532d', text: '#fca5a5', endBg: '#0d3a1f', endText: '#fecaca', shade: 'rgba(0,0,0,0.55)' }      // dark green with pink          // charcoal with grave-light green
@@ -13774,6 +13815,30 @@
             goblin: { plain: Object.assign({}, SPRITES.goblin, {"Goblin Lineman": ["................................", "................................", "................................", "................................", "................................", "................................", "...............oo...............", "..............obbo..............", "..............oBBo..............", "...........oooooooooo...........", ".........oouuuuuuuuuuoo.........", "..o......ouuuuuuuuuuuuo......o..", "..oQoo..ouuuuuuuuuuuuuuo..ooQo..", "..oQQUoooUUUUuuuuuuUUUUoooUQQo..", "...oQUUUUUUXYRXuuXRYXuUUUUUQo...", "....ooUUUUUUUuuuuuuUUUUUUUoo....", "......oooooUUUuuuuUUUooooo......", "........oUUwowowwowowUUo........", "........oUUooooooooooUUo........", "........oooUowowwowoUUo.........", ".......omEmokkkkkkkkkkko........", "......ommmMMokkkkkkkkokdo.......", "......oMMMMokkkkkkkkdoUuo.......", ".......ooooKkkkkkkkkdoUuo.......", ".......ouuobbbGggGbbbouuo.......", "........oookkkkkkkkkkooo........", "..........oKkkkkkkkkdo..........", "..........okdkkddkkdko..........", "..........oouUo..oUuoo..........", "..........ommMo..ommMo..........", "..........ouuuo..ouuuo..........", "..........ooooo..ooooo.........."], "Looney": ["................................", "................................", "................................", "................................", "....oo..........................", "...omMo.........................", "..momMom.......oo...............", "...omMo.......obbo..............", "..momMom......oBBo..............", "...omMo....oooooooooo...........", "..momMom.oouuuuuuuuuuoo.........", "..oomMo..ouuuuuuuuuuuuo......o..", "..momMomouuuuuuuuuuuuuuo..ooQo..", "..oomMoooUUUUuuuuuuUUUUoooUQQo..", "..momMomUUUXYRXuuXRYXuUUUUUQo...", "...omMoUUUUUUuuuuuuUUUUUUUoo....", "..momMomoooUUUuuuuUUUooooo......", "...omMo.oUUwowowwowowUUo........", "..oooooooUUooooooooooUUo........", "..oRrrRooooUowowwowoUUo.........", "..orrrRomEmokkkkkkkkkkko........", "..oRrRommmMMokkkkkkkkokdo.......", "..oRRRoMMMMokkkkkkkkdoUuo.......", "..oooooooooKkkkkkkkkdoUuo.......", ".......ouuobbbGggGbbbouuo.......", "........oookkkkkkkkkkooo........", "..........oKkkkkkkkkdo..........", "..........okdkkddkkdko..........", "..........oouUo..oUuoo..........", "..........ommMo..ommMo..........", "..........ouuuo..ouuuo..........", "..........ooooo..ooooo.........."], "Bomma": ["................................", "................................", "................................", "................................", "................................", "................................", "...............oo...............", "..............obbo..............", "..............oBBo..............", "...........oooooooooo...........", ".........oouuuuuuuuuuoo........y", "..o......ouuuuuuuuuuuuo......oyY", "..oQoo..ouuuuuuuuuuuuuuo..ooQobr", "..oQQUoooUUUUuuuuuuUUUUoooUQQb..", "...oQUUUUUUXYRXuuXRYXuUUUUUQob..", "....ooUUUUUUUuuuuuuUUUUUUUoooo..", "......oooooUUUuuuuUUUooooooooo..", "........oUUwowowwowowUUo.oIIiwo.", "........oUUooooooooooUUooIIIIiio", "........oooUowowwowoUUo.oIIIIIio", ".......omEmokkkkkkkkkkkooIIIIIIo", "......ommmMMokkkkkkkkokdoeIIIIIo", "......oMMMMokkkkkkkkdoUu.oeeIIo.", ".......ooooKkkkkkkkkdoUuu.oooo..", ".......ouuobbbGggGbbbouu........", "........oookkkkkkkkkkooo........", "..........oKkkkkkkkkdo..........", "..........okdkkddkkdko..........", "..........oouUo..oUuoo..........", "..........ommMo..ommMo..........", "..........ouuuo..ouuuo..........", "..........ooooo..ooooo.........."], "'Ooligan": ["................................", "................................", "................................", "................................", "................................", "................................", "................................", "..........................m.....", ".........................mom....", "...........oooooooooo....obo....", ".........oouuuuuuuuuuoo.obbom...", "..o......ouuuuuuuuuuuuoobbo..o..", "..oQoo..ouuuuuuuuuuuuuubo.ooQo..", "..oQQUoooUUUUuuuuuuUUoboooUQQo..", "...oQUUUUUUXYRXuuXRYXuUUUUUQo...", "....ooUUUUUUUuuuuuuUUUUUUUoo....", "......oooooUUUuuuuUUUooooo......", "........oUUwowowwowowUUo........", "........oUUooooooooooUUo........", ".........oUUowowwowoUUo.........", ".......omEmottkkttkkttko........", "......ommmMMokkkkkkkkokdo.......", "......oMMMMokkkkkkkkdoUuo.......", ".......ooookkkkkkkkkdoUuo.......", ".......ouuobbbGggGbbbouuo.......", "........ooookkkkkkkkkooo........", "..........oKkkkkkkkkdo..........", "..........okdkkddkkdko..........", "..........oouUo..oUuoo..........", "..........ommMo..ommMo..........", "..........ouuuo..ouuuo..........", "..........ooooo..ooooo.........."], "Doom Diver": ["oco..........................oco", "oIco........................ocIo", "oIico......................ociIo", ".oIco......................ocIo.", "..oIco....................ocIo..", "..oibbo..................obbio..", "..oIbbo........oo........obbIo..", "ooIcIbbo......obbo......obbIcIoo", "iIcIibbo......oBBo......obbiIcIi", "IcIicIbbo..oooooooooo..obbIciIcI", "cIiIcIbbooouuuuuuuuuuooobbIcIiIc", "IiIIciIbbouuuomoomouuuobbIicIIiI", "oIIIcIIbbuuuuuuuuuuuuuubbIIcIIIo", ".ooicIIioUUUUuuuuuuUUUUoiIIcioo.", "...ocIiIUUUXYRXuuXRYXuUUIiIco...", "...ociIIUUUUUuuuuuuUUUUUIIico...", "...ocIIIoooUUUuuuuUUUoooIIIco...", "...ocIIioUUwowowwowowUUoiIIco...", "..ocIIiIoUUooooooooooUUoIiIIco..", "..ocIiIIoooUowowwowoUUoIIIiIco..", "..ociIIomEmokkkkkkkkkkkodIIico..", "..ocIIommmMMokkkkkkkkokdoIIIco..", "...ooooMMMMokkkkkkkkdoUuooooo...", ".......ooooKkkkkkkkkdoUuo.......", ".......ouuobbbGggGbbbouuo.......", "........oookkkkkkkkkkooo........", "..........oKkkkkkkkkdo..........", "..........okdkkddkkdko..........", "..........oouUo..oUuoo..........", "..........ommMo..ommMo..........", "..........ouuuo..ouuuo..........", "..........ooooo..ooooo.........."], "Fanatic": ["................................", "................................", "................................", "................................", "................................", "................................", "...............oo...............", "..............obbo..............", "..............oBBo..............", "...........oooooooooo...........", ".........oouuuuuuuuuuoo.........", "..o......ouuuuuuuuuuuuo......o..", "..oQoo..ouuuuuuuuuuuuuuo..ooQo..", "..oQQUoooUUUUuuuuuuUUUUoooUQQo..", "...oQUUUUUUXYRXuuXRYXuUUUUUQo...", "....ooUUUUUUUuuuuuuUUUUUUUoo....", "......oooooUUUuuuuUUUooooo......", "........oUUwowowwowowUUo.ooooo..", "........oUUjjooooooooUUooiiiiio.", "........ooojJoowwowoUUooiImiiIio", ".......omEmoJokkkkkkkkkoiiiiiiio", "......ommmMMookkkkkkkooidiiiiIio", "......oMMMMookkkkkkkdoMiiiiiiiio", ".......ooooKkkkkkkkkdMUoiIiiiIio", ".......ouuobbbGggGbuuouoiiiiiio.", "........oookkkkkkkkkkoo.oooooo..", "..........oKkkkkkkkkdo..........", "..........okdkkddkkdko..........", "..........oouUo..oUuoo..........", "..........ommMo..ommMo..........", "..........ouuuo..ouuuo..........", "..........ooooo..ooooo.........."], "Pogoer": ["................................", "................................", "...............oo...............", "..............obbo..............", "..............oBBo..............", "...........oooooooooo...........", ".........oouuuuuuuuuuoo.........", "..o......ouuuuuuuuuuuuo......o..", "..oQoo..ouuuuuuuuuuuuuuo..ooQo..", "..oQQUoooUUUUuuuuuuUUUUoooUQQo..", "...oQUUUUUUXYRXuuXRYXuUUUUUQo...", "....ooUUUUUUUuuuuuuUUUUUUUoo....", "......oooooUUUuuuuUUUooooo......", "........oUUwowowwowowUUo........", "........oUUooooooooooUUo........", "........oooUowowwowoUUo.........", ".......omEmokkkkkkkkkkko........", "......ommmMMokkkkkkkkokdo.......", "......oMMMMokkkkkkkkdoUuo.......", "......oooooooooooooooooooo......", "......kkurrrrrrrrrrrrrrukk......", "......oooooooooooooooooooo......", "..........oKkkkkkkkkdo..........", "..........okdkkddkkdko..........", "..........oouUorRoUuoo..........", "..........ommMorRommMo..........", "..........obbbbbbbbbbo..........", "..........ooooorRooooo..........", "............omMmMmMmM...........", ".............omMmMmM............", "............omMmMmMmM...........", "..............oeeo.............."]}) },
             lizardmen: { side: SPRITES_LIZ_34 }
         };
+        // Halflings and Imperial Nobility: drawn from the existing sprites, with a few pixels changed to tell the positions apart
+        {
+            const edit = (grid, fn) => { const g = grid.map(r => r.split('')); fn((y, x, c) => { if (g[y] && x >= 0 && x < 32) g[y][x] = c; }, g); return g.map(r => r.join('')); };
+            const swap = (grid, map) => grid.map(r => r.replace(/./g, c => map[c] || c));
+            const H = SPRITES.human;
+            SPRITES.halfling = {
+                'Halfling Hopeful': H['Halfling Hopeful'],
+                // a pot helmet and shoulder pads
+                'Halfling Hefty': edit(swap(H['Halfling Hopeful'].slice(0, 12), { b: 'm', B: 'M' }).concat(H['Halfling Hopeful'].slice(12)), set => { [18, 19, 20].forEach(y => { set(y, 9, 'o'); set(y, 10, 'm'); set(y, 21, 'm'); set(y, 22, 'o'); }); set(17, 10, 'o'); set(17, 21, 'o'); }),
+                // a red headband and white gloves
+                'Halfling Catcher': edit(H['Halfling Hopeful'], set => { for (let x = 11; x <= 20; x++) set(12, x, 'r'); [19, 20].forEach(y => { set(y, 11, 'w'); set(y, 20, 'w'); }); }),
+                'Athel Forest Treeman': SPRITES.woodelf['Loren Forest Treeman']
+            };
+            SPRITES.imperial = {
+                // a gold crest on the helmet
+                'Imperial Retainer': swap(H.Lineman.slice(0, 7), { b: 'g' }).concat(H.Lineman.slice(7)),
+                'Imperial Thrower': H.Thrower,
+                // a big round shield on the left arm
+                'Bodyguard': edit(H.Lineman, set => { for (let y = 14; y <= 24; y++) for (let x = 2; x <= 9; x++) { const dy = (y - 19) / 5.5, dx = (x - 5.5) / 4, r = dy * dy + dx * dx; if (r <= 1) set(y, x, r > 0.62 ? 'o' : r < 0.12 ? 'g' : (x + y) % 5 ? 'M' : 'm'); } }),
+                // a red plume
+                'Noble Blitzer': edit(H.Blitzer, set => { ['..orro..', '.orrrro.', '.orrro..'].forEach((row, y) => row.split('').forEach((c, i) => { if (c !== '.') set(y, 12 + i, c); })); }),
+                'Ogre': H.Ogre
+            };
+        }
         const spriteSetFor = (race, id) => (id && SPRITE_ALT[race] && SPRITE_ALT[race][id]) || SPRITES[race] || null;
         const SPRITE_FIXED = { o: '#1b1d2a', s: '#f1d3b5', S: '#d9b08f', h: '#f3e2a0', H: '#d8c178', m: '#cfd6e2', M: '#9aa6b8', g: '#e8c15a', G: '#b8892f',
             f: '#efe2c4', F: '#c9b183', r: '#d9452b', y: '#f7a33b', b: '#8a4b26', w: '#f8f4ea', e: '#2a2a3a', n: '#22408f', N: '#14285e', c: '#4a3b33', W: '#c9ced9', E: '#ffffff', A: '#a88d62', a: '#cdb98c',

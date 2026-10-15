@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.66 (15 Oct 2026)
+- **Added:** two new teams from the 2025 rules.
+  - **Halflings (Tier 4):** Halfling Hopefuls, Hefties and Catchers, and up to two Athel Forest Treemen. They play in the Halfling Thimble Cup and the Woodland League, and their Halfling Master Chef costs 100k instead of 300k. Puggy Baconbreath, Cindy Piewhistle and Grombrindal can now also be hired in the Halfling Thimble Cup.
+  - **Imperial Nobility (Tier 2):** Imperial Retainers and Throwers, Bodyguards, Noble Blitzers and an Ogre, in the Old World Classic.
+  - **Where they're available:** in exhibition matches, the Team Builder, leagues (as players' or computer teams), two-device play and Sevens.
+  - **Default teams:** both have a default team and a Sevens squad.
+  - **Sprites:** the new positions are built from the existing ones with their own touches: a pot helmet and shoulder pads for the Hefty, a red headband and white gloves for the Catcher, a gold crest for the Retainer, a big shield for the Bodyguard and a red plume for the Noble Blitzer.
+
 ## v2.65 (15 Oct 2026)
 - **Changed:** a race's default team now lists its positional players first, the most expensive first (Ogre, then Blitzers, Catchers, Thrower, Halfling), with the linemen at the bottom. This applies on the lineup screen and in the in-match Rosters panel. Computer-run league teams made from now on are set up in the same order.
 
