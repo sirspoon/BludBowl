@@ -83,3 +83,8 @@ python3 ai-training/compare.py --mincr 1700                                  # o
   confirms the format; its authors ask that nobody mass-downloads replays without first contacting Christer and
   SzieberthAdam on FUMBBL. The `.jnlp` file the FUMBBL site offers is only a launcher for their Java client.
 - Be polite to FUMBBL: it's run by volunteers. Fetch slowly and only keep summary data.
+- Before downloading replays in bulk, ask Christer (who runs FUMBBL) first, and say what it's for, roughly how many, and
+  that it runs slowly outside busy hours. In a 2019 forum thread
+  ([Developers' Den](https://fumbbl.com/index.php?name=PNphpBB2&file=viewtopic&t=30534)) he called the WebSocket method
+  "a supremely terrible way of downloading replays": it's tolerated, not welcome. A few replays by hand is fine. The
+  per-match stats above come from FUMBBL's ordinary web pages and API, which is fine as it is.
