@@ -1,0 +1,5 @@
+fumbbl-matches.jsonl
+fumbbl-seen.jsonl
+fumbbl-state.json
+replay-*.json
+node_modules/

@@ -32,3 +32,7 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
   and background chores pause), so a computer-vs-computer match takes ~10s. `node tools/ai-match.js` plays batches of them in
   parallel and compares AI settings (the `AIX` switches): e.g. `--races orc,human --n 20 --new all --old rr,blitz --par 4`.
   It prints the touchdown and win splits with the chance each is just luck. Judge AI changes on a few hundred matches, not a few dozen.
+- AI research: `ai-training/` compares the computer's play with strong human coaches on FUMBBL (300 of their matches,
+  stats per team) and keeps the scripts to re-run it. Main finding so far: the AI throws about half as many blocks as
+  good coaches (24 v 46 a match) and is too cautious generally (few 1-die blocks, hard dodges, rushes or re-rolls).
+  Read `ai-training/README.md` before working on the AI.
