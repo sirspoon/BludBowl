@@ -2,6 +2,19 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.87 (15 Oct 2026)
+- **Added:** two Chaos teams from the 2025 rules.
+  - **Chaos Chosen** (blood red and black):
+    - **Roster:** Beastman Linemen with Horns, armoured Chaos Chosen with Arm Bar, and a single Big Guy (a Troll, an Ogre or a Minotaur).
+    - **Look:** the Beastmen are bare-chested and goat-horned, in steel half-helms. The Chosen wear heavy plate, with flames painted up their pauldrons.
+  - **Chaos Renegades** (magenta and lime):
+    - **Roster:** Renegade Humans and a Thrower, one each of a Goblin, Orc, Skaven and Dark Elf, and up to three Big Guys (one each of a Troll, an Ogre, a Minotaur and a Rat Ogre).
+    - **Look:** the Humans wear grilled helmets and plate with a Chaos star on the pauldrons. The others wear their own races' sprites in the Renegade colours.
+  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
+- **Added:** the **Animosity (All)** trait, which every Renegade except the Big Guys has. When one passes or hands off to a team-mate, a 1 on a D6 means they refuse and their activation ends.
+- **Added:** a new league, the **Chaos Clash**, for the Chosen and the Renegades. The Norse and the Chaos Dwarfs can now pick it as well.
+- **Not yet in:** the **Favoured of...** rule (choosing a Chaos god), because none of the god-specific Star Players are in the game yet. Chaos Clash teams can hire the Star Players who play for anyone.
+
 ## v2.86 (15 Oct 2026)
 - **Changed:** each Gnome Beastmaster now brings an animal, picked at random for every player each match.
   - **Goose:** a big grey goose, side on, with its wings raised and spread and its beak open mid-honk.

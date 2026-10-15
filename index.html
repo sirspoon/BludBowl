@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.86</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.87</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1833,6 +1833,39 @@
                 Treeman:     { type: 'Altern Forest Treeman', label: 'TM', ma: 2, st: 6, ag: 5, pa: 5, av: 11, skills: ['Mighty Blow', 'Stand Firm', 'Strong Arm', 'Take Root', 'Thick Skull', 'Throw Team Mate', 'Timmm-ber!'] }
             }
         };
+        RACES.chaoschosen = { key: 'chaoschosen', short: 'CCH', lineup: ['Beastman','Minotaur','Beastman','Chosen','Chosen','Chosen','Chosen','Beastman','Beastman','Beastman','Beastman'],
+            bench: [], rerolls: 2, specialRules: [],   // 880k players + 2 re-rolls 100k = 980k
+            name: "Chaos Chosen", color: "#b91c1c",
+            style: { fill: '#b91c1c', text: '#1f2937', endBg: '#7f1414', endText: '#fca5a5', shade: 'rgba(0,0,0,0.55)' },   // blood red with black
+            fans: 1, assistantCoaches: 0, cheerleaders: 0, apothecary: 0, tv: "980k", treasury: "20,000 gp",
+            bigGuyMax: 1,   // a single Big Guy: a Troll, an Ogre or a Minotaur
+            types: {
+                Beastman: { type: 'Beastman Lineman', label: 'L', ma: 6, st: 3, ag: 3, pa: 3, av: 9, skills: ['Horns', 'Thick Skull'] },
+                Chosen:   { type: 'Chaos Chosen', label: 'CC', ma: 5, st: 4, ag: 3, pa: 5, av: 10, skills: ['Arm Bar'] },
+                Troll:    { type: 'Troll', label: 'TR', ma: 4, st: 5, ag: 5, pa: 5, av: 10, skills: ['Always Hungry', 'Loner (4+)', 'Mighty Blow', 'Projectile Vomit', 'Really Stupid', 'Regeneration', 'Throw Team Mate'] },
+                Ogre:     { type: 'Ogre', label: 'OG', ma: 5, st: 5, ag: 4, pa: 5, av: 10, skills: ['Bone Head', 'Loner (4+)', 'Mighty Blow', 'Thick Skull', 'Throw Team Mate'] },
+                Minotaur: { type: 'Minotaur', label: 'MI', ma: 5, st: 5, ag: 4, pa: 6, av: 9, skills: ['Frenzy', 'Horns', 'Loner (4+)', 'Mighty Blow', 'Thick Skull', 'Unchannelled Fury'] }
+            }
+        };
+        RACES.renegades = { key: 'renegades', short: 'REN', lineup: ['Human','Ogre','Orc','Human','Troll','Human','Skaven','DarkElf','Goblin','Human','Thrower'],
+            bench: [], rerolls: 3, specialRules: [],   // 735k players + 3 re-rolls 210k + apothecary 50k = 995k
+            name: "Chaos Renegades", color: "#a21caf",
+            style: { fill: '#a21caf', text: '#84cc16', endBg: '#701a75', endText: '#d9f99d', shade: 'rgba(0,0,0,0.5)' },   // magenta with lime
+            fans: 1, assistantCoaches: 0, cheerleaders: 0, apothecary: 1, tv: "995k", treasury: "5,000 gp",
+            bigGuyMax: 3,   // up to three Big Guys, one of each
+            types: {
+                Human:   { type: 'Renegade Human', label: 'L', ma: 6, st: 3, ag: 3, pa: 4, av: 9, skills: ['Animosity (All)'] },
+                Goblin:  { type: 'Renegade Goblin', label: 'G', ma: 6, st: 2, ag: 3, pa: 4, av: 8, skills: ['Animosity (All)', 'Dodge', 'Right Stuff', 'Stunty'] },
+                Orc:     { type: 'Renegade Orc', label: 'O', ma: 5, st: 3, ag: 3, pa: 4, av: 10, skills: ['Animosity (All)'] },
+                Skaven:  { type: 'Renegade Skaven', label: 'S', ma: 7, st: 3, ag: 3, pa: 4, av: 8, skills: ['Animosity (All)'] },
+                DarkElf: { type: 'Renegade Dark Elf', label: 'DE', ma: 6, st: 3, ag: 2, pa: 3, av: 9, skills: ['Animosity (All)'] },
+                Thrower: { type: 'Renegade Thrower', label: 'T', ma: 6, st: 3, ag: 3, pa: 3, av: 9, skills: ['Animosity (All)', 'Pass', 'Sure Hands'] },
+                Troll:   { type: 'Troll', label: 'TR', ma: 4, st: 5, ag: 5, pa: 5, av: 10, skills: ['Always Hungry', 'Loner (4+)', 'Mighty Blow', 'Projectile Vomit', 'Really Stupid', 'Regeneration', 'Throw Team Mate'] },
+                Ogre:    { type: 'Ogre', label: 'OG', ma: 5, st: 5, ag: 4, pa: 5, av: 10, skills: ['Bone Head', 'Loner (3+)', 'Mighty Blow', 'Thick Skull', 'Throw Team Mate'] },
+                Minotaur: { type: 'Minotaur', label: 'MI', ma: 5, st: 5, ag: 4, pa: 6, av: 9, skills: ['Frenzy', 'Horns', 'Loner (4+)', 'Mighty Blow', 'Thick Skull', 'Unchannelled Fury'] },
+                RatOgre: { type: 'Rat Ogre', label: 'RO', ma: 6, st: 5, ag: 4, pa: 6, av: 9, skills: ['Animal Savagery', 'Frenzy', 'Loner (4+)', 'Mighty Blow', 'Prehensile Tail'] }
+            }
+        };
 
         // Chaos Dwarfs (BB2025, Tier 1, Badlands Brawl / Chaos Clash): Minotaur, 2 Bull Centaurs, 4 Blockers, 2 Flamesmiths, 2 Hobgoblins = 930k + 1 re-roll 70k = 1,000k
         RACES.chaosdwarf = { key: 'chaosdwarf', short: 'CDW', lineup: ['Blocker','Minotaur','Blocker','Centaur','Blocker','Blocker','Flamesmith','Centaur','Flamesmith','Hobgoblin','Hobgoblin'],
@@ -1869,10 +1902,10 @@
         const SEV = {
             BUDGET: 600, MAXP: 11, MINP: 7, RR: 100, STAFF: 20, APO: 80, FAN: 20, CAP: 750, MP_BUDGETS: [600, 650, 700],
             // Sevens Matched Play tiers: a team gets as many skill points as its tier number
-            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 1, gnome: 4 },
+            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 1, gnome: 4, chaoschosen: 3, renegades: 3 },
             // positions with the Lineman keyword (the Veteran is one of them; at most 4 players may be anything else)
             LINEMEN: { human: ['Lineman'], orc: ['Lineman'], highelf: ['Lineman'], lizardmen: ['Skink'], skaven: ['Clanrat'], ogre: ['Gnoblar'], goblin: ['Lineman'],
-                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'], halfling: ['Hopeful'], imperial: ['Retainer'], norse: ['Raider'], elvenunion: ['Lineman'], oldworld: ['Lineman', 'Halfling', 'DwarfLineman'], gnome: ['Lineman'] },
+                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'], halfling: ['Hopeful'], imperial: ['Retainer'], norse: ['Raider'], elvenunion: ['Lineman'], oldworld: ['Lineman', 'Halfling', 'DwarfLineman'], gnome: ['Lineman'], chaoschosen: ['Beastman'], renegades: ['Human', 'Goblin', 'Orc', 'Skaven', 'DarkElf'] },
             NO_ADV: ['Leader', 'Pro']   // never gained by a Sevens player
         };
         const isSevT = t => !!t && (t.format === 'sevens' || t.format === 'sevens-mp');
@@ -1901,10 +1934,14 @@
         Object.assign(RACES.oldworld, { rerollCost: 70, positions: { Lineman: { max: 16, cost: 50 }, Halfling: { max: 3, cost: 30 }, Catcher: { max: 1, cost: 75 }, DwarfLineman: { max: 3, cost: 70 }, Thrower: { max: 1, cost: 75 },
             Runner: { max: 1, cost: 80 }, Blitzer: { max: 1, cost: 85 }, DwarfBlitzer: { max: 1, cost: 100 }, Slayer: { max: 1, cost: 95 }, Ogre: { max: 1, cost: 140 }, Treeman: { max: 1, cost: 120 } } });
         Object.assign(RACES.gnome, { rerollCost: 50, positions: { Lineman: { max: 16, cost: 40 }, Fox: { max: 2, cost: 50 }, Illusionist: { max: 2, cost: 50 }, Beastmaster: { max: 2, cost: 55 }, Treeman: { max: 2, cost: 120 } } });
+        Object.assign(RACES.chaoschosen, { rerollCost: 50, positions: { Beastman: { max: 16, cost: 55 }, Chosen: { max: 4, cost: 100 }, Troll: { max: 1, cost: 115 }, Ogre: { max: 1, cost: 140 }, Minotaur: { max: 1, cost: 150 } } });
+        Object.assign(RACES.renegades, { rerollCost: 70, positions: { Human: { max: 16, cost: 50 }, Goblin: { max: 1, cost: 40 }, Orc: { max: 1, cost: 50 }, Skaven: { max: 1, cost: 50 }, DarkElf: { max: 1, cost: 65 }, Thrower: { max: 1, cost: 75 },
+            Troll: { max: 1, cost: 115 }, Ogre: { max: 1, cost: 140 }, Minotaur: { max: 1, cost: 150 }, RatOgre: { max: 1, cost: 150 } } });
         Object.assign(RACES.bretonnian, { rerollCost: 60, positions: { Squire: { max: 16, cost: 50 }, Catcher: { max: 2, cost: 85 }, Thrower: { max: 2, cost: 80 }, Grail: { max: 2, cost: 95 } } });
-        // how many of a position a team may have, given how many of each it has (cnt): the Old World Alliance may have only one Big Guy between the Ogre and the Treeman
-        const posMax = (R, pos, cnt) => { const m = R.positions[pos].max; if (!R.bigGuyMax || !/Ogre|Treeman/.test(R.types[pos].type)) return m;
-            return Math.min(m, R.bigGuyMax - Object.keys(R.positions).filter(q => q !== pos && /Ogre|Treeman/.test(R.types[q].type)).reduce((a, q) => a + cnt(q), 0)); };
+        // how many of a position a team may have, given how many of each it has (cnt): some teams cap their Big Guys (the Old World Alliance and the Chaos Chosen one, the Renegades three)
+        const BIGRX = /Ogre|Treeman|Troll|Minotaur/;
+        const posMax = (R, pos, cnt) => { const m = R.positions[pos].max; if (!R.bigGuyMax || !BIGRX.test(R.types[pos].type)) return m;
+            return Math.min(m, R.bigGuyMax - Object.keys(R.positions).filter(q => q !== pos && BIGRX.test(R.types[q].type)).reduce((a, q) => a + cnt(q), 0)); };
         // every list of teams is alphabetical: the races are kept in name order (pickers and menus list them in this order)
         Object.keys(RACES).sort((a, b) => RACES[a].name.localeCompare(RACES[b].name)).forEach(key => { const r = RACES[key]; delete RACES[key]; RACES[key] = r; });
         Object.assign(RACES.undead, { rerollCost: 70, positions: { Skeleton: { max: 16, cost: 40 }, Zombie: { max: 16, cost: 40 }, Ghoul: { max: 2, cost: 75 }, Wight: { max: 2, cost: 95 }, Mummy: { max: 2, cost: 125 } } });
@@ -2003,6 +2040,8 @@
                 halfling: { Hopeful: ['A', 'DGS'], Hefty: ['AP', 'DGS'], Catcher: ['A', 'DGS'], Treeman: ['S', 'ADGP'] },
                 imperial: { Retainer: ['G', 'AS'], Thrower: ['GP', 'AS'], Bodyguard: ['GS', 'A'], Noble: ['AG', 'PS'], Ogre: ['S', 'AGM'] },
                 norse: { Raider: ['G', 'APS'], Boar: ['', 'A'], Berserker: ['GS', 'AP'], Valkyrie: ['AGP', 'S'], Ulfwerener: ['GS', 'A'], Yhetee: ['S', 'AG'] },
+                chaoschosen: { Beastman: ['GM', 'ADPS'], Chosen: ['GMS', 'AD'], Troll: ['MS', 'AGP'], Ogre: ['MS', 'AG'], Minotaur: ['MS', 'AG'] },
+                renegades: { Human: ['DGM', 'AS'], Goblin: ['ADM', 'GP'], Orc: ['DGM', 'AS'], Skaven: ['DGM', 'AS'], DarkElf: ['ADGM', 'S'], Thrower: ['DGMP', 'AS'], Troll: ['S', 'AGMP'], Ogre: ['S', 'AGM'], Minotaur: ['S', 'AGM'], RatOgre: ['S', 'AGM'] },
                 oldworld: { Lineman: ['G', 'AS'], Halfling: ['A', 'GS'], Catcher: ['AG', 'PS'], DwarfLineman: ['DG', 'S'], Thrower: ['GP', 'AS'], Runner: ['GP', 'AS'], Blitzer: ['GS', 'A'],
                     DwarfBlitzer: ['GS', 'P'], Slayer: ['GS', 'A'], Ogre: ['S', 'AG'], Treeman: ['S', 'AGP'] },
                 gnome: { Lineman: ['A', 'DGS'], Fox: ['', 'A'], Illusionist: ['AP', 'DG'], Beastmaster: ['A', 'DGS'], Treeman: ['S', 'AGP'] },
@@ -2011,7 +2050,7 @@
                 chaosdwarf: { Hobgoblin: ['D', 'AGS'], Stabba: ['DG', 'AS'], Blocker: ['GS', 'ADM'], Flamesmith: ['GS', 'ADM'], Centaur: ['GS', 'ADM'], Minotaur: ['MS', 'AG'] },
                 darkelf: { Lineman: ['AG', 'DS'], Runner: ['AGP', 'DS'], Assassin: ['AD', 'GS'], Blitzer: ['AG', 'DPS'], Witch: ['AG', 'DS'] }
             };
-            const JOURNEY = { blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman', halfling: 'Hopeful', imperial: 'Retainer', norse: 'Raider', elvenunion: 'Lineman', oldworld: 'Lineman', gnome: 'Lineman' };
+            const JOURNEY = { blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman', halfling: 'Hopeful', imperial: 'Retainer', norse: 'Raider', elvenunion: 'Lineman', oldworld: 'Lineman', gnome: 'Lineman', chaoschosen: 'Beastman', renegades: 'Human' };
             const CATS = { A: 'Agility', D: 'Devious', G: 'General', M: 'Mutation', P: 'Passing', S: 'Strength' };
             const SKILLS = {
                 A: ['Catch', 'Diving Catch', 'Diving Tackle', 'Dodge', 'Defensive', 'Hit and Run', 'Jump Up', 'Leap', 'Safe Pair of Hands', 'Sidestep', 'Sprint', 'Sure Feet'],
@@ -2664,8 +2703,8 @@
         };
 
         // ---- Star Players (BB2025): famous free agents hired for a single game ----
-        const LEAGUE_NAMES = { OWC: 'Old World Classic', BB: 'Badlands Brawl', UC: 'Underworld Challenge', WESL: "Worlds Edge Superleague", SS: 'Sylvanian Spotlight', LSL: 'Lustrian Superleague', ELK: 'Elven Kingdoms League', WL: 'Woodland League', HTC: 'Halfling Thimble Cup' };
-        const RACE_LEAGUES = { halfling: ['HTC', 'WL'], imperial: ['OWC'], norse: ['OWC'], elvenunion: ['ELK'], oldworld: ['OWC'], gnome: ['HTC', 'WL'], human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB'], darkelf: ['ELK'] };
+        const LEAGUE_NAMES = { OWC: 'Old World Classic', BB: 'Badlands Brawl', UC: 'Underworld Challenge', WESL: "Worlds Edge Superleague", SS: 'Sylvanian Spotlight', LSL: 'Lustrian Superleague', ELK: 'Elven Kingdoms League', WL: 'Woodland League', HTC: 'Halfling Thimble Cup', CC: 'Chaos Clash' };
+        const RACE_LEAGUES = { halfling: ['HTC', 'WL'], imperial: ['OWC'], norse: ['OWC', 'CC'], elvenunion: ['ELK'], oldworld: ['OWC'], gnome: ['HTC', 'WL'], chaoschosen: ['CC'], renegades: ['CC'], human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB', 'CC'], darkelf: ['ELK'] };
         const STARS = {
             griff:   { name: 'Griff Oberwald', label: 'GO', cost: 300, mega: true, ma: 7, st: 4, ag: 2, pa: 3, av: 9, skills: ['Block', 'Dodge', 'Fend', 'Loner (3+)', 'Sprint', 'Sure Feet'],
                        rule: 'Consummate Professional', text: 'Once per game, Griff may add +1 to an Agility Test he has made, after seeing the roll.', leagues: ['OWC'] },
@@ -2790,7 +2829,7 @@
         const starsFor = (race, lg) => { const L = starLeagueOf(race, lg); return Object.keys(STARS).filter(k => STARS[k].leagues === 'any' || STARS[k].leagues.includes(L)); };
         // ---------- Matched Play (BB2025): team tiers (May 2026 list), skill points and Star Player limits ----------
         const MP = {
-            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 2, gnome: 4 },
+            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 2, gnome: 4, chaoschosen: 3, renegades: 3 },
             SP: { 1: 6, 2: 8, 3: 9, 4: 10 },
             ELITE: ['Block', 'Dodge', 'Guard', 'Mighty Blow'],   // each can be given to at most four players
             BUDGETS: [1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400],
@@ -2828,6 +2867,10 @@
                     ['the Dead', 'Coffinmaker', 'Gravedigger', 'Bonecrusher', 'Rotgut', 'von Grave', 'Deadeye', 'Ashgrave', 'the Pale', 'Wormwood', 'Bleakmoor', 'Cryptborn', 'Dustwalker', 'Nightshade', 'Mouldwell', 'Hollowell', 'Gristle', 'Morrow', 'Tombs', 'Blackbarrow', 'Cold', 'Mournful', 'the Unburied', 'Gallows', 'Shambles']],
                 amazon: [['Zaria', 'Itzel', 'Nayeli', 'Xochi', 'Yaretzi', 'Citlali', 'Amaru', 'Tala', 'Inti', 'Kiona', 'Ixchel', 'Tupaq', 'Maya', 'Ayita', 'Huyana', 'Nita', 'Sachi', 'Talia', 'Zyanya', 'Itza', 'Kalea', 'Mixtli', 'Nahui', 'Quilla', 'Sayri', 'Tecla', 'Yolotli', 'Ameyal'],
                     ['Jaguarclaw', 'Swiftspear', 'Riverborn', 'Sunfeather', 'Serpentsong', 'Stonejaw', 'Vinewhip', 'Moonhunter', 'Blackwater', 'Fangheart', 'Goldscale', 'Ironbark', 'Jadeeye', 'Leafrunner', 'Mistwalker', 'Nightclaw', 'Palmstrike', 'Quickfin', 'Redfeather', 'Skyhawk', 'Thornfoot', 'Tidecaller', 'Wildheart', 'Bloodlotus', 'Emberhide', 'Stormwing']],
+                chaoschosen: [['Gorthak', 'Vrakk', 'Skarr', 'Khorvash', 'Bloodhoof', 'Ghorros', 'Urslak', 'Morghast', 'Varrog', 'Kharn', 'Zarbag', 'Thrask', 'Brakka', 'Gorehorn', 'Sigvald', 'Arkhar', 'Valkia', 'Esk'],
+                    ['the Despoiler', 'Goreclaw', 'Skullreaver', 'Blackhorn', 'the Chosen', 'Ironhide', 'Doomhoof', 'Bloodmane', 'the Damned', 'Hellbrand', 'Spinecleaver', 'Warptouched', 'Ruinbringer', 'Grimgore']],
+                renegades: [['Vex', 'Snikkit', 'Grukk', 'Malkor', 'Lothar', 'Skrit', 'Draz', 'Ulrich', 'Kaelith', 'Snotgob', 'Morven', 'Rask', 'Ivra', 'Brug', 'Severin', 'Nyx', 'Katarin', 'Gorza'],
+                    ['the Traitor', 'Turncoat', 'Backstab', 'the Fallen', 'Oathbreaker', 'Dark-Eye', 'Twistfang', 'the Cursed', 'Blackheart', 'the Unclean', 'Gutrot', 'Doomseeker', 'Shadowmark', 'Spitebrand']],
                 oldworld: [['Johann', 'Grimli', 'Bilbo', 'Konrad', 'Thorin', 'Rufus', 'Dieter', 'Gotrek', 'Merry', 'Heinrich', 'Bardin', 'Pippin', 'Klaus', 'Durak', 'Tobias', 'Gunnar', 'Otto', 'Hamfast', 'Ulrika', 'Helga', 'Rosie', 'Brunhilde'],
                     ['Stoutheart', 'Ironbrow', 'Underhill', 'von Altdorf', 'Oakenshield', 'Barrelbelly', 'Grimmsson', 'Hammerfall', 'Brandybuck', 'Steinmetz', 'Goldfoot', 'Kessler', 'Thunderbeard', 'Tallfellow', 'Marienburger', 'Ashdown']],
                 gnome: [['Fizzwick', 'Bimble', 'Nim', 'Tobble', 'Gimble', 'Pip', 'Wizzle', 'Dobbin', 'Fennick', 'Quill', 'Snibbet', 'Thistle', 'Bramble', 'Nettle', 'Tansy', 'Posy', 'Wren', 'Clover'],
@@ -3742,6 +3785,8 @@
                 blackorc: ['Blackrock', 'Ironcrag', 'Doomforge', 'Ashpeak', 'Grimhold', 'Cinderfang', 'Slagpit', 'Darkstone'],
                 lizardmen: ['Jade Temple', 'Sunken Pyramid', 'Serpent Pool', 'Golden Ziggurat', 'Mistmarsh', 'Emerald Falls', 'Starstone', 'Coldblood Bay'],
                 amazon: ['Skeggi', 'Lustria', 'Amazon River', 'Serpent Coast', 'Jaguar Falls', 'Temple Rock', 'Vine Hollow', 'Sunken Isle'],
+                chaoschosen: ['the Chaos Wastes', 'Zharr-Naggrund', 'the Eye of Chaos', 'Brass Keep', 'the Northern Wastes', 'Skullmount', 'Gorefield', 'the Realm of Ruin'],
+                renegades: ['Praag', 'the Shadowlands', 'Mordheim', 'Wolfenburg', 'Black Fire Pass', 'Kislev', 'the Dark Lands', 'Sylvania Gate'],
                 oldworld: ['Altdorf', 'Karak Azul', 'the Moot', 'Nuln', 'Middenheim', 'Barak Varr', 'Marienburg', 'Talabheim'],
                 gnome: ['Hollowoak', 'Mossy Glen', 'Toadstool Hill', 'Burrowdeep', 'the Altern Forest', 'Thimbledown', 'Glimmerwood', 'Under-the-Roots'],
                 norse: ['Norsca', 'Frostheim', 'Skeggi', 'Ice Fjord', 'Wolfhold', 'Bjornling Bay', 'Snowpeak', 'Grimfjord'],
@@ -3765,6 +3810,8 @@
                 blackorc: ['Ironhides', 'Anvils', 'Brutes', 'Hammerz', 'Bosses', 'Gorgers', 'Klaws', 'Destroyas'],
                 lizardmen: ['Saurians', 'Skinks', 'Fangs', 'Scales', 'Raptors', 'Coldbloods', 'Stalkers', 'Sunscales'],
                 amazon: ['Valkyries', 'Huntresses', 'Jaguars', 'Serpents', 'Warrior Queens', 'Piranhas', 'Eagles', 'Spears'],
+                chaoschosen: ['All-Stars', 'Warhounds', 'Ravagers', 'Despoilers', 'Bloodletters', 'Doombringers', 'Hellhorns', 'Reavers'],
+                renegades: ['Renegades', 'Turncoats', 'Outcasts', 'Rebels', 'Exiles', 'Backstabbers', 'Misfits', 'Raiders'],
                 oldworld: ['Alliance', 'Allies', 'Defenders', 'Old Guard', 'Standard-Bearers', 'Hammers', 'Union', 'Coalition'],
                 gnome: ['Tricksters', 'Toadstools', 'Foxes', 'Glimmers', 'Burrowers', 'Pranksters', 'Fizzbangs', 'Hatters'],
                 norse: ['Raiders', 'Reavers', 'Berserkers', 'Wolves', 'Bloodaxes', 'Icebreakers', 'Longships', 'Mead-Hounds'],
@@ -5292,6 +5339,8 @@
             bretonnian: { lineup: ['Squire', 'Grail', 'Squire', 'Grail', 'Catcher', 'Squire', 'Squire'], rerolls: 1 },
             halfling: { lineup: ['Hopeful', 'Treeman', 'Hopeful', 'Hefty', 'Catcher', 'Hopeful', 'Hopeful'], bench: ['Hopeful'], rerolls: 2 },
             imperial: { lineup: ['Retainer', 'Ogre', 'Retainer', 'Noble', 'Bodyguard', 'Retainer', 'Retainer'], rerolls: 1 },
+            chaoschosen: { lineup: ['Beastman', 'Chosen', 'Beastman', 'Chosen', 'Beastman', 'Beastman', 'Beastman'], rerolls: 1 },
+            renegades: { lineup: ['Human', 'Ogre', 'Orc', 'Skaven', 'DarkElf', 'Goblin', 'Thrower'], rerolls: 1 },
             oldworld: { lineup: ['Lineman', 'Slayer', 'DwarfLineman', 'Blitzer', 'Runner', 'Lineman', 'Lineman'], rerolls: 1 },
             gnome: { lineup: ['Lineman', 'Treeman', 'Lineman', 'Beastmaster', 'Fox', 'Illusionist', 'Lineman'], bench: ['Lineman'], rerolls: 1 },
             norse: { lineup: ['Raider', 'Ulfwerener', 'Raider', 'Berserker', 'Valkyrie', 'Raider', 'Raider'], rerolls: 1 },
@@ -5394,6 +5443,8 @@
             undead: { fill: '#1c1917', text: '#a3e635', endBg: '#0c0a09', endText: '#a3e635', shade: 'rgba(0,0,0,0.55)' },
             amazon: { fill: '#fde047', text: '#0f766e', endBg: '#b59f20', endText: '#0b524c', shade: 'rgba(0,0,0,0.45)' },         // gold with teal
             halfling: { fill: '#fef3c7', text: '#3f6212', endBg: '#d6c89a', endText: '#3f6212', shade: 'rgba(80,90,60,0.45)' },  // away: cream with shire green
+            chaoschosen: { fill: '#1f2937', text: '#ef4444', endBg: '#111827', endText: '#fca5a5', shade: 'rgba(0,0,0,0.55)' },   // away: black with red
+            renegades: { fill: '#84cc16', text: '#701a75', endBg: '#5f9410', endText: '#4a044e', shade: 'rgba(40,60,10,0.45)' }, // away: lime with magenta
             oldworld: { fill: '#fbbf24', text: '#991b1b', endBg: '#d39c12', endText: '#7f1d1d', shade: 'rgba(90,80,40,0.45)' },  // away: gold with crimson
             gnome: { fill: '#dc2626', text: '#f0fdf4', endBg: '#a51d1d', endText: '#dcfce7', shade: 'rgba(0,0,0,0.5)' },        // away: red with white
             norse: { fill: '#facc15', text: '#0369a1', endBg: '#d4a90f', endText: '#075985', shade: 'rgba(90,80,40,0.45)' },  // away: yellow with blue
@@ -8823,6 +8874,7 @@
             'Hatred (Troll)': 'Blocking a Troll, this player re-rolls one Player Down (Attacker Down) result.',
             'Hypnotic Gaze': 'Special Action (after an optional Move): pick an adjacent standing opponent and roll a D6. On a 3+ they are Distracted. The activation then ends.',
             'Drunkard': '-1 to Rush tests.',
+            'Animosity (All)': 'Passing or handing off to a team-mate, roll a D6: on a 1 this player refuses and their activation ends.',
             'Trickster': 'When an opponent is about to block this player, before the dice are counted they may reappear in any other free square next to the blocker.',
             'Pick-me-up': "At the end of the opposition's team turn, each Prone (not Stunned) team-mate within 3 squares stands up on a 5+.",
             'Timmm-ber!': 'Standing up with MA 2 or less needs a 4+ on a D6. This player gets +1 to that roll for each Open, Standing team-mate next to them (a 1 always fails).',
@@ -11721,6 +11773,14 @@
         }
 
         function executePassSequence(thrower, receiver, isHandoff, passPenalty = 0) {
+            if (thrower.skills.some(k => /^Animosity/.test(k)) && receiver && !receiver.isSquare && receiver.team === thrower.team) {
+                const r = d6();
+                if (r === 1) {
+                    log(`  ANIMOSITY! ${thrower.name || thrower.type} won't ${isHandoff ? 'hand the ball' : 'throw'} to ${receiver.name || receiver.type} (rolled a 1). Their activation ends.`, 'text-red-400 font-bold'); skillPop('Animosity');
+                    thrower.hasActed = true; thrower.remainingMA = 0; thrower.rushes = 0; state.mode = MODES.IDLE; refreshSelection(thrower); render(); return;
+                }
+                log(`  Animosity: ${thrower.type} grudgingly gives it up (${r}).`, 'text-slate-400');
+            }
             if (passPenalty && starIs(thrower, 'valen') && receiver && starIs(receiver, 'lucien')) { log(`  WORKING IN TANDEM! Valen's pass to Lucien ignores the range.`, 'text-yellow-300 font-bold'); skillPop('Working in Tandem'); passPenalty = 0; }
             const prevMode = state.mode; state.mode = MODES.LOCKED;
             state.hailMary = !!receiver.isSquare;
@@ -13960,6 +14020,13 @@
             'Troll Slayer': SPRITES.dwarf['Troll Slayer'], 'Ogre': SPRITES.human['Ogre'], 'Altern Forest Treeman': SPRITES.woodelf['Loren Forest Treeman'] };
         // Gnomes, after the 2025 models: floppy pixie hoods (the Illusionist a tall bent hat and a leafy staff), huge beards and noses, leafy jackets, short trousers, curly-toed shoes; a running Woodland Fox
         SPRITES.gnome = Object.assign({"Gnome Lineman": ["................................", "................................", "................................", "................................", "................................", ".......oooooooooooo.............", "......ottttttttttttoo...........", "......ottttttttttttTTo..o.......", "......ottttttttttttTToooso......", ".....otttttttttttttTTosooso.....", ".....otoootttttttttTTTosso......", "....oToo.oTToTTTTTooTTosso......", ".....oosooTTiissssiiTTokso......", ".......ossTTsesCssesTTssdo......", "........oSTTssSCDSssTTSkdo......", ".........ooIssCCDssoiookdo......", "..........oiiiiDiiioiookdo......", "....o....ooiIiiiiiiIqookdo......", "...osooooqQiiiiiIiiidqdkdo......", "...osskkkkkiiIiiiiiidoooo.......", "...ossdddddkiiiiiIiddo..........", "....oooooookKIIIIIkddo..........", ".........okccccggccccdo.........", "..........ooyyyooyyyoo..........", "..........oobbboobbboo..........", ".........omosMsoosMsomo.........", ".........omMMMMooMMMMmo.........", "..........ooooo..ooooo..........", "................................", "................................", "................................", "................................"], "Woodland Fox": ["................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", "................................", ".........o......................", "......o.oeo.....................", ".....oeooeo.....................", ".....obbbbo............oooooooo.", "....oyyyyyboooooooooo.oyyyyyyywo", "..ooyyeyyyyyyByyyByyyooyyyyyyywo", ".eyyyyyyyykkyByyyByyyBybbbbbbbwo", ".owwwyyyyykkyByyyByyyByybbbbbbo.", ".owwwwwwwwkkyByyyByyyByyoooooo..", "..oooooobbkgbbbbbbbbbbbo........", "........owkkwbbbbbbbbbo.........", ".......oyoyowbbbbbbobobo........", "......oyoyo.ooooooo.obobo.......", ".....oeoeo...........oeoeo......", "....oeoeo.............oeoeo.....", ".....o.o...............o.o......", "................................", "................................", "................................", "................................", "................................"], "Gnome Illusionist": [".....................o..........", "...................ooToo........", "..................oTooTTo.......", ".................otTo.oo........", "................ottTo...........", "...............otttTo..o........", "..............ottttTo.ouo.o.....", "............ootttttTo.oobouo....", "..........ootttttttTooUosoouo...", ".........otttttttttTTosoBsoo....", ".........otttttttttTToossoo.....", ".......o..ooTTTTTTToo.ossouo....", "......osoo.owwssssww..oksoo.....", ".......ossossesCssesoossdo......", "........oSosssSCDSssooSkdo......", ".........ooWssCCDssowookdo......", "..........owwwwDwwwowookdbo.....", "....o....oowWwwwwwwWqookdo......", "...osooooqQwwwwwWwwwdqdkdo......", "...osskkkkkwwWwwwwwwdooobo......", "...ossdddddkwwwwwWwddo.obo......", "....oooooookKWWWWWkddo.oBo......", ".........okccccggccccdoobo......", "..........ooyyyooyyyoo.obo......", "..........oobbboobbboo.oBo......", ".........omosMsoosMsomoobo......", ".........omMMMMooMMMMmoobo......", "..........ooooo..ooooo.oBo......", "........................o.......", "................................", "................................", "................................"], "Gnome Beastmaster": ["................................", "................................", "................................", "................................", "................................", ".......oooooooooooo.............", "......ottttttttttttoo...........", "......ottttttttttttTTo..o.......", "......ottttttttttttTToooso......", ".....otttttttttttttTTosooso.....", ".....otoootttttttttTTTosso......", "....oToo.oTAAAAAAAAAATosso......", ".....oosooTTyyssssyyTTokso......", ".......ossTTsesCssesTTssdo......", "........oSTTssSCDSssTTSkdo......", ".........oobssCCDssoyookdo......", "..........oyyyyDyyyoyookdo......", "....o....ooybyyyyyybqookdo......", "...osooooqQyyyyybyyydqdkdo......", "...osskkkkkyybyyyyyydoooo.......", "...ossdddddkyyyyybyddo..........", "...coooooookKbbbbbkddo..........", "..c......okccccggccccdo.........", "..c..c....ooyyyooyyyoo..........", "...cc.c...oobbboobbboo..........", ".......c.omosMsoosMsomo.........", ".........omMMMMooMMMMmo.........", "..........ooooo..ooooo..........", "................................", "................................", "................................", "................................"]}, { 'Altern Forest Treeman': SPRITES.woodelf['Loren Forest Treeman'] });
+        // Chaos Chosen: goat-horned Beastmen and heavily armoured Chosen (flames up their pauldrons); Chaos Renegades in grilled helmets and kit plate.
+        // Their Big Guys, and the Renegade Goblin, Orc, Skaven and Dark Elf, wear their own races' sprites in the team's colours
+        SPRITES.chaoschosen = { 'Beastman Lineman': ["........oWo.........oWo.........", "........oiWo........oio.........", ".........oo..ooooo..oo..........", "........oiWooiiiiIooWio.........", ".........oiWiiiiiIIWio..........", "..........oiiiiiiIIIo...........", "..........oWiiiiiIiWo...........", "...........ossssssSo............", "..........SSsrssssroSS..........", "...........ossssssso............", ".......ooooosssssssooooo........", "......okkkkoosessesokkkko.......", ".....okkkkkksSSSSSSkkkkkko......", ".....osddddsbsbbbbsbddddsSo.....", ".....ossSoSssbssssbssSossSo.....", ".....ossSoSssSssssSssSossSo.....", ".....ossSoSsssSssSsssSossSo.....", ".....okkkoSssssSSssssSokkko.....", ".....okkkoSssssssssssSokkko.....", ".....okkkoSSSSSSSSSSSSokkko.....", ".....oSSSocccccMMcccccoSSSo.....", ".....oSSSooIIIIooIIIIooSSSo.....", "......ooo.oIIIIooIIIIo.ooo......", "..........oIIIIooIIIIo..........", "..........oiiiiooiiiio..........", "..........oBbbBooBbbBo..........", "..........obbBboobbBbo..........", "..........obBbboobBbbo..........", "..........oBbbBooBbbBo..........", "..........oceccoocecco..........", "..........oceecooceeco..........", "...........oooo..oooo..........."], 'Chaos Chosen': ["................................", "................o...............", "...............oMo..............", "..........o...omMo..o...........", ".........oWo..omMo.oWo..........", ".........oWo.oiiio.oWo..........", "..........oWoiiiiIoWo...........", "...........oiiiiiIIo............", "....ooooo..oiiiiiIIo..ooooo.....", "...otttttoooirriirrooottttto....", "..otttttkttoiiieeIIotttttttto...", ".okttttkkttooiieeIoottkttttkko..", ".okTTTkkkTTKKKKKKKKKTkkTTTkkko..", "..okTkkkkTkkkkkkkkkkkkkkTkkko...", "..okkkkkkkkkkkkkkkkkkkkkkkkko...", "...ooykykkKkkiiiiiikkdkykySo....", "....oSSSSkKkkiikkiikkddSSSSo....", "....oKkkkkKkkiikkiikkddKkkko....", "....oKkkkkKkkiiiiiikkddKkkko....", "....okkkkkKkkIIIIIIkkddkkkko....", "....okkkkdKddddddddddddkkkko....", "....okkkkossssSoossssSokkkko....", "....oIIIIossssSoossssSoIIIIo....", "....oIIIIossssSoossssSoIIIIo....", ".....MooMoKKKKKooKKKKKoMooM.....", ".........okkkkkookkkkko.........", ".........odddddoodddddo.........", ".........obbbbboobbbbbo.........", ".........obbbbboobbbbbo.........", ".........obbbbboobbbbbo.........", ".........oBBBBBooBBBBBo.........", "..........ooooo..ooooo.........."],
+            'Troll': SPRITES.orc['Troll'], 'Ogre': SPRITES.human['Ogre'], 'Minotaur': SPRITES.chaosdwarf['Minotaur'] };
+        SPRITES.renegades = { 'Renegade Human': ["................................", "................................", "...............oo...............", "..............otto..............", ".............ootto..............", "............oiiiiIo.............", "...........oiiiiiIIo............", "...........oiiiiiIIo............", "...........oiMMMMMMo............", "...........oieeeeeeo............", ".......oooooiMMMMMMooooo........", "......oKKKKooieeeeooKKKKo.......", ".....oKKKtKKoooooooKKtKKKo......", ".....okktttkKKKKKKKktttkko......", ".....okkktkkKkkItkkkktkkko......", "......oddddkKkkItkkddddddo......", "......okkdokKkkItkkddokkdo......", "......otttokKkkItkkddottto......", "......okkdokKkkItkkddokkdo......", "......otttokKkkItkkddottto......", "......okkdodKddddddddokkdo......", "......okkdokkkdookkkdokkdo......", "......oIIIottttoottttoIIIo......", ".......MoMokkkdookkkdoMoM.......", "..........oKKKKooKKKKo..........", "..........okkkdookkkdo..........", "..........ottttootttto..........", "..........okkkdookkkdo..........", "..........oIIIIooIIIIo..........", "..........oIIIIooIIIIo..........", "..........oeeeeooeeeeo..........", "...........oooo..oooo..........."], 'Renegade Thrower': ["................................", "................................", "...............oo...............", "..............otto..............", ".............ootto..............", "............oiiiiIo.............", "...........oiiiiiIIo............", "...........otiiiiIIt............", "...........oiMMMMMMo............", "...........oieeeeeeo...oooo.....", "...........oiMMMMMMo..obbbbo....", "............oieeeeo...obwwbo....", "...........oooooooooo.oBBBBo....", ".......ooooKKKKKKKKKKooIIoo.....", "......okkdokKkkItkkddokIIo......", "......okkdokKkkItkkddokkdo......", "......okkdokKkkItkkddokkdo......", "......otttokKkkItkkddottto......", "......okkdokKkkItkkddokkdo......", "......otttokKkkItkkddottto......", "......okkdodKddddddddokkdo......", "......okkdokkkdookkkdokkdo......", "......oIIIottttoottttoIIIo......", ".......MoMokkkdookkkdoMoM.......", "..........oKKKKooKKKKo..........", "..........okkkdookkkdo..........", "..........ottttootttto..........", "..........okkkdookkkdo..........", "..........oIIIIooIIIIo..........", "..........oIIIIooIIIIo..........", "..........oeeeeooeeeeo..........", "...........oooo..oooo..........."],
+            'Renegade Goblin': SPRITES.orc['Goblin'], 'Renegade Orc': SPRITES.orc['Lineman'], 'Renegade Skaven': SPRITES.skaven['Clanrat'], 'Renegade Dark Elf': SPRITES.darkelf['Dark Elf Lineman'],
+            'Troll': SPRITES.orc['Troll'], 'Ogre': SPRITES.human['Ogre'], 'Minotaur': SPRITES.chaosdwarf['Minotaur'], 'Rat Ogre': SPRITES.skaven['Rat Ogre'] };
         // the Beastmaster brings an animal: a goose (wings up, honking) or a badger, picked at random for each player each match; the goose stands in elsewhere (the Team Builder)
         const SPRITE_VARIANTS = { gnome: { 'Gnome Beastmaster': [["................................", "................................", "................................", "................................", "................................", "....oooooooooooo................", "...ottttttttttttoo..............", "...ottttttttttttTTo..o..........", "...ottttttttttttTToooso.........", "..otttttttttttttTTosooso........", "..otoootttttttttTTTosso..ooo....", ".oToo.oTAAAAAAAAAATooooooIiIo...", "..oosooTTyyssssyyToIIiIiIIiIo...", "....ossTTsesCssesTooIiIIiIiIo...", ".....oSTTssSCDSssoiIoIiIiIiIoo..", "......oobssCCDssooIioIiIiIIoiio.", ".......oyyyyDyyyoiIIioIWWWoiiEeo", ".o....ooybyyyyyyoIiIioWWWWoWWWoy", "osooooqQyyyyybyyyoIiiioWWWWoWWoG", "osskkkkkyybyyyyyydooiioWWWoooooo", "ossdddddkyyyyybyddo.oiioWWoowWo.", "coooooookKbbbbbkddo..oiioooowWo.", "......okccccggccccdo.oooWWoowWo.", "..c....ooyyyooyyyoo.oWWWWWWWoo..", "cc.c...oobbboobbboo.oWWWWWWWWo..", "....c.omosMsoosMsomoowwwwwwwwo..", "......omMMMMooMMMMmo.owwwwwwo...", ".......ooooo..ooooo...ooooooo...", "......................oyyooyyo..", ".......................oo..oo...", "................................", "................................"], ["................................", "................................", "................................", "................................", "................................", ".......oooooooooooo.............", "......ottttttttttttoo...........", "......ottttttttttttTTo..o.......", "......ottttttttttttTToooso......", ".....otttttttttttttTTosooso.....", ".....otoootttttttttTTTosso......", "....oToo.oTAAAAAAAAAATosso......", ".....oosooTTyyssssyyTTokso......", ".......ossTTsesCssesTTssdo......", "........oSTTssSCDSssTTSkdo......", ".........oobssCCDssoyookdo......", "..........oyyyyDyyyoyookdo......", "....o....ooybyyyyyybqookdo......", "...osooooqQyyyyybyyydqdkdo......", "...osskkkkkyybyyyyyydoooo.......", "...ossdddddkyyyyybyddo..........", "...coooooookKbbbbbkddo..oooo....", "..c......okccccggcoooeooWWWWoo..", "..c..c....ooyyyooowwwooWWWWWWWo.", "...cc.c...oobbbooowwwwwoiiiiiiio", ".......c.omosMsoewoEeeeoiiiiiiio", ".........omMMMMoewowwwoIIIIIIIo.", "..........ooooo.ooooooooooooooo.", "....................oeooeooeoeo.", ".....................o..o..o.o..", "................................", "................................"]] } };
         SPRITES.gnome['Gnome Beastmaster'] = SPRITE_VARIANTS.gnome['Gnome Beastmaster'][0];
