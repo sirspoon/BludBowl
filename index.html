@@ -18608,6 +18608,9 @@
         })();
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
+        // switches for each AI improvement, per team (null: all on). Off in play until they've been tested against the old play;
+        // the automated tests turn them on for one side only to compare
+        const AIX = { flags: [[], []], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
         const AI = (function () {
             const on = { 0: false, 1: false };
             try { const s = JSON.parse(localStorage.getItem('bb-ai') || '{}'); on[0] = !!s[0]; on[1] = !!s[1]; } catch (e) {}
@@ -19014,7 +19017,9 @@
                 const receivers = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Hands') && !hasSk(r, 'No Ball'));
                 const spots = [{ x: c.x, y: c.y }, ...movesFor(c).filter(m => m.prob >= 100)];
                 let best = null;
+                const trouble = tzFor(c.x, c.y, me) > 0 || threatAt(c.x, c.y, me) >= 2;
                 receivers.forEach(r => {
+                    if (AIX.on(me, 'handback') && !trouble && toGo(r.x, me) > toGo(c.x, me) + 1) return;   // not backwards to someone deeper when the carrier is safe
                     const rv = bestSpotFor(r);
                     if (rv < stay + (agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
                     spots.forEach(s => {
@@ -19079,7 +19084,10 @@
             }
             function supportGoal(p, me) {
                 const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
-                if (c && c.team === me && onPitch(c)) return { pt: c, kind: 'cage' };
+                if (c && c.team === me && onPitch(c)) {
+                    if (AIX.on(me, 'screen') && toGo(c.x, me) > CFG.cols / 2 && threatAt(c.x, c.y, me) <= 1 && toGo(p.x, me) <= toGo(c.x, me) - 3) return { pt: { x: p.x, y: p.y }, kind: 'ball' };
+                    return { pt: c, kind: 'cage' };
+                }
                 if (c && onPitch(c)) {
                     // enough of us are already on their carrier: go and find space for the counter-attack instead
                     if (cheb(p, c) > 2 && huntersNear(c, me, p.id) >= huntNeed(c)) {
@@ -19505,10 +19513,12 @@
             function carrierBlitz(me, act, carrier) {
                 if (!carrier || carrier.team === me || !onPitch(carrier) || carrier.isDown || state.blitzUsed) return null;
                 let best = null;
+                const urg = AIX.on(me, 'blitz') && tdThreat(carrier);   // they could score next turn: knocking them over matters far more
+                const miss = urg ? 3 : 8, riskW = urg ? 1.5 : 4, bonus = urg ? 4 : 0;
                 act.forEach(p => {
                     if (cheb(p, carrier) === 1 && !p.isDown) {
                         const e = blockEval(p, carrier);
-                        const s = e.ev - e.pTurn * 4;
+                        const s = e.ev - e.pTurn * riskW + bonus;
                         if (!best || s > best.s) best = { p, s };
                         return;
                     }
@@ -19517,7 +19527,7 @@
                         const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
                         const pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
                         blitzCtx = true; const e = blockEval(p, carrier, m.x, m.y); blitzCtx = false;
-                        const s = pr * e.ev - (1 - pr) * 8 - e.pTurn * 4;
+                        const s = pr * (e.ev + bonus) - (1 - pr) * miss - e.pTurn * riskW;
                         if (!best || s > best.s) best = { p, s };
                     });
                 });
@@ -20126,7 +20136,9 @@
             }
             // Re-roll budget (from 'The Thousand Losses Playbook'): with few re-rolls left, keep them for the ball and for
             // turn 8; with plenty, spend roughly one a turn. 'critical' = losing this roll costs the ball (or theirs is at stake).
-            function rrWorth(ctx, critical) {
+            // a carrier who could reach the end zone next turn (a turn's move plus two Rushes)
+            function tdThreat(c) { return !!c && onPitch(c) && toGo(c.x, c.team) <= (c.ma || 6) + 2; }
+            function rrWorth(ctx, critical, decisive) {
                 const me = state.activeTeam, rr = state.rr[me] || 0, turn = state.turn[me] || 1, left = Math.max(0, TURNS - turn);
                 if (rr <= 0) return false;
                 if (critical === undefined && ctx) {
@@ -20136,6 +20148,12 @@
                         || (c && c.team === me && cheb(p, c) <= 1);   // a cage player going down next to our carrier
                 }
                 if (turn >= TURNS) return true;                                   // nothing left to save them for
+                if (AIX.on(me, 'rr')) {
+                    // a roll that decides a touchdown (our carrier on the way in this turn, or stopping theirs scoring next turn): always worth a re-roll
+                    if (decisive === undefined && ctx) { const p = ctx.player; decisive = !!(p && p.team === me && state.ball.carrierId === p.id && toGo(p.x, me) <= (p.remainingMA || 0) + 2); }
+                    if (decisive) return true;
+                    if (left <= 2 && rr >= 2) return true;                         // late in the half with re-rolls to spare: use them
+                }
                 if (rr >= 4 && turn <= 1) return true;                        // a big stock: the first turn is free
                 if (rr - 1 > left / 2) return true;                           // plenty: about one a turn, still one kept back
                 if (rr <= 1) return !!critical && left <= 2;                  // the last one: only to save the ball late on
@@ -20154,7 +20172,9 @@
                 const chosen = c.chooser === c.atk.team ? Math.max(...scores) : Math.min(...scores);
                 const trr = document.getElementById('btn-combat-trr');
                 const blockCritical = state.ball.carrierId === c.atk.id || state.ball.carrierId === c.def.id || (chosen <= -10 && (state.rr[state.activeTeam] || 0) >= 3);   // the ball at stake (or our blocker going down, with re-rolls to spare)
-                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical)) {
+                const blockDecisive = (state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && tdThreat(c.def))
+                    || (state.ball.carrierId === c.atk.id && toGo(c.atk.x, c.atk.team) <= (c.atk.remainingMA || 0) + 2);
+                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical, blockDecisive)) {
                     after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); });
                     return;
                 }
