@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.62</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.63</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -16955,7 +16955,13 @@
                 note.textContent = cpu ? `The computer coaches ${ROSTERS[t].name} and has picked its ${drive ? 'team for this drive' : 'starting eleven'}.` : '';
                 document.getElementById('lineup-name' + t).textContent = ROSTERS[t].name + (cpu ? ' (CPU)' : '');
                 const list = document.getElementById('lineup-list' + t); list.innerHTML = '';
-                state.players.filter(p => p.team === t).forEach(p => {
+                // a saved team is listed in its roster order (as arranged in the Team Builder); anyone not on it (Stars, Mercenaries, Journeymen) after
+                let ps = state.players.filter(p => p.team === t);
+                try {
+                    const tid = ROSTERS[t] && ROSTERS[t].careerTeamId, team = tid && TB.get(tid);
+                    if (team) { const at = new Map(team.players.map((q, i) => [q.id, i])), ix = p => at.has(p.careerId) ? at.get(p.careerId) : 1e6; ps = [...ps].sort((a, b) => ix(a) - ix(b)); }
+                } catch (e) {}
+                ps.forEach(p => {
                     const out = drive && !canField(p);
                     if (out && p.isCasualty && p.casualtyStatus === 'Dead') return;
                     const row = document.createElement('label');
