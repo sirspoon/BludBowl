@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.75 (15 Oct 2026)
+- **Changed:** Noble Blitzers' colours are the other way round from v2.74. The pauldrons and the eagle are in the team's secondary colour, and the chest, skirt and knee plates are in the primary colour instead of silver. With the default kit that's orange-red shoulders and eagle over a dark body.
+
 ## v2.74 (15 Oct 2026)
 - **Changed:** Noble Blitzers' pauldrons are back in the team's primary colour (dark steel by default). Their skirt plates and knee guards are now in the secondary colour instead of silver, and the eagle on the chest is a little smaller so it fits between the pauldrons.
 
