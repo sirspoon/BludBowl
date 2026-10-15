@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.01 (15 Oct 2026)
+- **Added:** the **Underworld Denizens** (deep purple and warpstone green, Underworld Challenge). This is the last team from the 2025 rules, so all 30 are now in the game.
+  - **Roster:** Goblin Linemen, up to 6 Snotlings (Insignificant), Skaven Clanrats, a Thrower, a Gutter Runner, a Blitzer, and a single Big Guy (a Troll or a Rat Ogre).
+  - **Special rule:** Bribery and Corruption.
+  - **Look:** everyone uses their own race's sprite in the team's colours.
+  - **Where they're available:** exhibition matches, the Team Builder, leagues, two-device play and Sevens, with a default team and a Sevens squad.
+- **Changed:** Animosity now checks who's on the receiving end. The Skaven's Animosity (Goblin) only applies when passing or handing off to a Goblin. The Renegades' Animosity (All) still applies to everyone.
+
 ## v3.00 (15 Oct 2026)
 - **Changed:** Necromantic Horror has been redrawn to look like the Wolfenburg team.
   - **Everyone:** orange-and-black striped jerseys, black pads with lime rims, dark shorts and rope belts.
