@@ -31,7 +31,10 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
 - AI testing: `?simtest` runs the game in test mode (the clock skips straight to the next event, there's almost no drawing,
   and background chores pause), so a computer-vs-computer match takes ~10s. `node tools/ai-match.js` plays batches of them in
   parallel and compares AI settings (the `AIX` switches): e.g. `--races orc,human --n 20 --new all --old rr,blitz --par 4`.
-  It prints the touchdown and win splits with the chance each is just luck. Judge AI changes on a few hundred matches, not a few dozen.
+  It prints the touchdown and win splits with the chance each is just luck.
+- The owner prefers a quick turnaround over big test runs. For an AI change: first measure the specific behaviour it targets
+  (~24 matches), then a quick results check of ~48 matches (`--n 4` over 12 races) to catch anything clearly worse. Only go to
+  ~100-150 matches when that's borderline or the change matters a lot, and say when a result is too close to call.
 - AI research: `ai-training/` compares the computer's play with strong human coaches on FUMBBL (300 of their matches,
   stats per team) and keeps the scripts to re-run it. Main finding so far: the AI throws about half as many blocks as
   good coaches (24 v 46 a match) and is too cautious generally (few 1-die blocks, hard dodges, rushes or re-rolls).
