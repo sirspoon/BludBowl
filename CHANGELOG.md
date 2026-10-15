@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.58 (15 Oct 2026)
+- **Added:** jungle music for the Jungle Temple pitch. It has the same seven sections as the usual match music (calm, quiet beat, main groove, breakdown, stab hook, half-time drive and chorus), and it follows the match's mood in the same way, from about 78 to 98 bpm.
+  - **Instruments:** tribal drums that sound far away across the jungle (no deep boom, lots of echo), a shaker, a log-drum riff, a low drone, short brassy horn stabs and a pan-flute tune.
+  - **Calm sections:** birds and buzzing insects.
+  - Every other pitch keeps the usual music.
+- **Found:** the usual match music has only ever played its drums. A missing piece of code silently stopped its bass, pads, arpeggios, chorus tune and stabs. The jungle music has the fix. The usual music still plays just its drums, as before, until we decide whether to switch the rest on.
+
 ## v2.57 (14 Oct 2026)
 - **Added:** team calls. Picking a team to play can now play a short sound of its own. The Ogres are the first: choosing them (or a saved Ogre team) in the match picker or the two-device lobby plays "Ogres, my lord!". If you flick through the list, only the latest call plays. More teams can get their own calls later.
 

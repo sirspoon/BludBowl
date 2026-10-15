@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.57</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.58</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9033,6 +9033,10 @@
     verb.buffer = ir; verbIn = ctx.createGain(); verbIn.gain.value = 0.9; const wet = ctx.createGain(); wet.gain.value = 0.3;
     verbIn.connect(verb); verb.connect(wet); wet.connect(out);
   }
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);   // midi note -> frequency
+  // The electro music's bass, pads, arpeggios, lead and stabs never sounded before v2.58 (hz was missing), so the game has only ever played
+  // its drums. They're kept off until it's decided whether to hear them: set this to true to play the electro music in full.
+  const ELECTRO_FULL = false;
   // ---------- instruments (all take a destination bus and an absolute time) ----------
   let nbuf = null;
   function noiseBuf() { if (nbuf) return nbuf; nbuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return nbuf; }
@@ -9085,6 +9089,7 @@
     for (let b = 0; b < 4; b++) hat(B.main, t + b * s + s / 2, quiet ? .1 : .2, !quiet && b % 2 && kind !== 'drive');
     if (!quiet && kind !== 'breakdown' && kind !== 'drive') for (let k = 0; k < 16; k++) { if (k % 4 === 0 || k % 4 === 2) continue; hat(B.main, t + k * q, tense ? .08 : .05); }
     if (tense && kind !== 'breakdown' && !quiet) for (let k = 0; k < 16; k += 2) hat(B.main, t + k * q + q / 2 * 0, .07);
+    if (!ELECTRO_FULL) return;   // (just the drums, as it has always sounded)
     // bass
     if (kind === 'main' || kind === 'chorus' || kind === 'stab') {
       const bp = 'x.xx.xx.x.xx.xx.'; for (let k = 0; k < 16; k++) if (bp[k] === 'x') note(B.sc, 'sawtooth', r + (k % 4 === 3 || (kind === 'chorus' && k % 8 === 6) ? 12 : 0), t + k * q, q * .9, .2, { cut: 350 + 500 * (tense ? 1.6 : 1) + (kind === 'chorus' ? 500 : 0), cutTo: 200, q: 4, a: .003, r: .03 });
@@ -9109,6 +9114,64 @@
     if (kind === 'breakdown' && i === 3) nz(B.pad, t, s * 4, .1, 'highpass', 300, 9000, .7, .3);
     if (fillNext) { for (let k = 0; k < 8; k++) snare(B.main, t + 3 * s + k * s / 8, .22 + k * .05, .2); nz(B.pad, t + 2 * s, 2 * s, .08, 'highpass', 500, 9000, .7, .3); }
   }
+
+  // ---------- JUNGLE (the Jungle Temple pitch): the same sections, played on far-off drums, log drums, horns and a pan flute ----------
+  // In C minor, around 86 bpm. The drums sit on the 'far' bus, which strips their low end and sends them deep into the reverb so they
+  // sound like they're coming from somewhere across the jungle.
+  const JG_ROOTS = [36, 36, 32, 34];   // C, C, A-flat, B-flat
+  const JG_DRUM = ['X...x.x.X..x.X.x', 'X.X.X.X.X.x.Xx..'];   // a two-bar tribal pattern (X loud, x soft)
+  const JG_LOG = [0, 7, 12, 10, 7, 3, 5, 7];   // the log-drum ostinato, on the minor pentatonic
+  const JG_LEAD = [[[72,0,1.5],[75,1.5,.5],[79,2,2]],[[77,0,1],[75,1,1],[72,2,2]],[[80,0,1.5],[79,1.5,.5],[75,2,2]],[[82,0,1],[79,1,1],[77,2,1],[75,3,1]]];
+  const JG_CALL = [[79, 0, 3], [75, 0, 3], [72, 0, 3], [74, 1, 3]];   // the breakdown's long, lonely flute notes
+  const JG_BPM = { calm: 78, normal: 86, tense: 98 };
+  const farDrum = (B, t, m, v) => {   // a deep drum heard from far away: pitch drop, a woody click, no sub, lots of room
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(hz(m) * 1.45, t); o.frequency.exponentialRampToValueAtTime(hz(m), t + 0.09);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42); o.connect(g); g.connect(B.far); o.start(t); o.stop(t + 0.45);
+    const o2 = ctx.createOscillator(), g2 = ctx.createGain(); o2.type = 'sine'; o2.frequency.setValueAtTime(hz(m) * 2.31, t);   // the skin's ring
+    g2.gain.setValueAtTime(v * 0.3, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.16); o2.connect(g2); g2.connect(B.far); o2.start(t); o2.stop(t + 0.2);
+    nz(B.far, t, 0.045, v * 0.85, 'bandpass', 1600, 1000, 1.0);
+  };
+  const logDrum = (B, t, m, v) => note(B.main, 'triangle', m, t, 0.16, v, { a: 0.002, r: 0.12, slideFrom: m + 0.6, slideTime: 0.03, verb: 0.35 });
+  const shaker = (B, t, v) => nz(B.main, t, 0.07, v * 2.8, 'bandpass', 6000, 4200, 1.0, 0.08);
+  const flute = (B, m, t, dur, v) => { note(B.main, 'sine', m, t, dur, v, { a: 0.06, r: 0.18, vib: 9, vibDelay: 0.2, verb: 0.8 }); nz(B.pad, t, Math.min(0.25, dur), v * 0.5, 'bandpass', hz(m) * 2, null, 6, 0.4); };
+  const horn = (B, m, t, dur, v) => [0, 7].forEach(x => [-6, 6].forEach(d => note(B.main, 'sawtooth', m + x, t, dur, v, { det: d, a: 0.02, r: 0.12, cut: 1300, cutTo: 380, q: 2, drive: 2, verb: 0.45 })));
+  const bird = (B, t) => { const f0 = 2400 + Math.random() * 1600; for (let k = 0; k < 3; k++) { const o = ctx.createOscillator(), g = ctx.createGain(), tt = t + k * 0.09; o.type = 'sine';
+    o.frequency.setValueAtTime(f0, tt); o.frequency.exponentialRampToValueAtTime(f0 * 1.5, tt + 0.05); g.gain.setValueAtTime(0.0001, tt); g.gain.linearRampToValueAtTime(0.022, tt + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.07);
+    o.connect(g); g.connect(B.pad); const sv = ctx.createGain(); sv.gain.value = 0.5; g.connect(sv); sv.connect(verbIn); o.start(tt); o.stop(tt + 0.1); } };
+  function jgBar(kind, i, t, s, B, tense, fillNext, ph) {
+    const r = JG_ROOTS[i], q = s / 4, quiet = kind === 'calm' || kind === 'lull', pat = JG_DRUM[ph % 2];
+    // the far-off drums (louder and nearer in the drive, just the downbeats when it's calm)
+    const dv = kind === 'drive' ? 0.75 : kind === 'breakdown' ? 0.4 : quiet ? (kind === 'calm' ? 0.45 : 0.5) : 0.6;
+    for (let k = 0; k < 16; k++) {
+      const c = pat[k]; if (c === '.') continue;
+      if (kind === 'calm' && k % 8) continue;
+      if (kind === 'breakdown' && k) continue;
+      farDrum(B, t + k * q, k % 8 === 0 ? 55 : k % 4 === 0 ? 59 : 62, dv * (c === 'X' ? 1 : 0.6));
+    }
+    if (kind === 'drive') for (let k = 0; k < 8; k++) tom(B.main, t + k * s / 2, k % 2 ? 45 : 41, 0.32 + (k % 4 === 0 ? 0.12 : 0), 0.3);   // war drums
+    // shaker: off-beats when it's quiet, a swung sixteenth groove otherwise
+    if (kind !== 'calm' && kind !== 'breakdown') for (let k = 0; k < 16; k++) { if (quiet && k % 4 !== 2) continue; shaker(B, t + k * q + (k % 2 ? q * 0.12 : 0), (k % 4 === 2 ? 0.1 : 0.05) * (tense ? 1.3 : 1)); }
+    // the low drone, swelling in
+    if (kind !== 'drive') [12, 19].forEach(x => [-7, 7].forEach(d => note(B.sc, 'sawtooth', r + x, t, s * 4, kind === 'breakdown' ? 0.022 : 0.013, { det: d, a: kind === 'breakdown' ? 1.2 : 0.4, r: 0.4, cut: kind === 'breakdown' ? 300 : 420, cutTo: kind === 'breakdown' ? 900 : null })));
+    else for (let k = 0; k < 4; k++) note(B.sc, 'sawtooth', r + 12, t + k * s, s * 0.9, 0.1, { cut: 700, cutTo: 260, q: 4, drive: 3, a: 0.004, r: 0.05 });
+    // log drums: the riff, in the main grooves
+    if (kind === 'main' || kind === 'chorus' || kind === 'stab' || (kind === 'lull' && i % 2)) for (let k = 0; k < 16; k += kind === 'lull' ? 2 : 1) {
+      if (kind !== 'chorus' && k % 4 === 3) continue;
+      logDrum(B, t + k * q, r + 36 + JG_LOG[k % 8] + (k >= 8 && i === 3 ? 2 : 0), (kind === 'lull' ? 0.065 : 0.09) * (k % 4 === 0 ? 1.3 : 1));
+    }
+    // horns: short, low stabs (the hook) or a held call at the top of the chorus
+    if (kind === 'stab') [0, 3, 6, 10, 12].forEach(k => horn(B, r + 12, t + k * q, q * 1.4, 0.03));
+    if (kind === 'chorus' && i % 2 === 0) horn(B, r + 12, t, s * 1.5, 0.026);
+    // the pan flute: the tune in the chorus, a lonely call in the breakdown
+    if (kind === 'chorus') JG_LEAD[i].forEach(([m, b, d]) => flute(B, m + (ph >= 4 ? 12 : 0), t + b * s, d * s * 0.95, 0.07));
+    if (kind === 'breakdown') { const [m, b, d] = JG_CALL[i]; flute(B, m, t + b * s, d * s, 0.065); }
+    // the jungle itself: birds, and insects buzzing when it's quiet
+    if (quiet || kind === 'breakdown') { if (Math.random() < 0.6) bird(B, t + Math.random() * s * 3.5); if (kind === 'calm') nz(B.pad, t, s * 4, 0.02, 'bandpass', 4700, 5200, 9, 0.2); }
+    // accents and transitions: a distant gong, rising wind, a drum roll into the next section
+    if (i === 0 && (kind === 'chorus' || kind === 'drive')) { nz(B.far, t, 2.4, 0.22, 'lowpass', 1400, 300, 0.7, 0.6); note(B.far, 'sine', 55, t, 2.2, 0.18, { a: 0.003, r: 1.5 }); }
+    if (kind === 'breakdown' && i === 3) nz(B.pad, t, s * 4, 0.08, 'bandpass', 400, 2400, 0.9, 0.4);
+    if (fillNext) for (let k = 0; k < 8; k++) farDrum(B, t + 3 * s + k * s / 8, 55 + (k % 2) * 4, 0.35 + k * 0.06);
+  }
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -9125,15 +9188,21 @@
   function buses() {
     const bus = ctx.createGain(), main = ctx.createGain(), pad = ctx.createGain(), sc = ctx.createGain();
     main.connect(bus); pad.connect(bus); sc.connect(bus); bus.connect(out); pad.gain.value = 0.9;
-    return { bus, main, pad, sc };
+    // far away: no low end, softened top, and mostly reverb
+    const far = ctx.createGain(), fh = ctx.createBiquadFilter(), fl = ctx.createBiquadFilter(), fwet = ctx.createGain();
+    fh.type = 'highpass'; fh.frequency.value = 170; fl.type = 'lowpass'; fl.frequency.value = 2400; far.gain.value = 0.8; fwet.gain.value = 1.1;
+    far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
+    return { bus, main, pad, sc, far };
   }
+  const styleNow = () => { try { return PITCH.style === 'jungle' ? 'jungle' : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
     while (run.next < ctx.currentTime + 0.7) {
-      const target = EL_BPM[e.mode]; e.bpm += Math.max(-6, Math.min(6, target - e.bpm));
+      if (e.bar === 0) run.style = styleNow();
+      const jg = run.style === 'jungle', target = (jg ? JG_BPM : EL_BPM)[e.mode]; e.bpm += Math.max(-6, Math.min(6, target - e.bpm));
       const spb = 60 / e.bpm, kind = e.cur, tense = e.mode === 'tense', ph = e.bar, i = ph % 4, len = kind === 'chorus' ? 8 : 4;
       B.bus.gain.setTargetAtTime(LEVEL[kind] * (tense ? 1.05 : 1), run.next, .25);
-      try { elBar(kind, i, run.next, spb, B, tense, ph === len - 1 && e.next !== 'calm', ph); } catch (x) {}
+      try { (jg ? jgBar : elBar)(kind, i, run.next, spb, B, tense, ph === len - 1 && e.next !== 'calm', ph); } catch (x) { console.warn('music:', x && x.message); }
       run.next += spb * 4; e.bar++;
       if (e.bar === len) { e.bar = 0; e.cur = e.next; e.next = elPick(e, e.cur); }
     }
@@ -9141,9 +9210,9 @@
   function start() {
     if (run || !enabled || !matchOn || SFX.isMuted()) return;
     init(); if (!ctx) return;
-    const B = buses(), el = { mode: mood, bpm: EL_BPM[mood] - 4, cur: 'main', next: null, bar: 0, mainRun: 0, lastSpecial: null, force: null };
+    const B = buses(), st = styleNow(), el = { mode: mood, bpm: (st === 'jungle' ? JG_BPM : EL_BPM)[mood] - 4, cur: 'main', next: null, bar: 0, mainRun: 0, lastSpecial: null, force: null };
     el.cur = el.mode === 'calm' ? 'calm' : 'main'; el.next = elPick(el, el.cur);
-    B.bus.gain.value = 0.0001; run = { B, el, next: ctx.currentTime + 0.3 };
+    B.bus.gain.value = 0.0001; run = { B, el, style: st, next: ctx.currentTime + 0.3 };
     tick(); timer = setInterval(tick, 90);
   }
   function stop(fade = 1.2) {
@@ -9176,7 +9245,8 @@
   function matchStart() { matchOn = true; sync(); }
   function matchEnd() { matchOn = false; sync(); }
   document.addEventListener('visibilitychange', () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (run) ctx.resume(); });
-  return { start, stop, sync, setMood, duck, pause, setEnabled, isEnabled: () => enabled, matchStart, matchEnd, state: () => run && { mood, kind: run.el.cur, next: run.el.next, bar: run.el.bar, bpm: Math.round(run.el.bpm) } };
+  return { start, stop, sync, setMood, duck, pause, setEnabled, isEnabled: () => enabled, matchStart, matchEnd, state: () => run && { mood, style: run.style, kind: run.el.cur, next: run.el.next, bar: run.el.bar, bpm: Math.round(run.el.bpm) },
+           _force: k => { if (run) run.el.next = k; } };   // (tests: play a given section next)
         })();
 
         // ---------- Skill pop-up graphics (only when a skill made the difference) ----------
