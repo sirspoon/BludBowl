@@ -32,7 +32,7 @@ async function play(browser, port, job) {
   const newHome = job.i % 2 === 0, f0 = newHome ? NEW : OLD, f1 = newHome ? OLD : NEW;
   const ctx = await browser.newContext({ viewport: { width: 900, height: 700 } }), p = await ctx.newPage();
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.addInitScript(() => { try { localStorage.setItem('bb-replays', '0'); localStorage.setItem('bb-ex-ind', 'off'); } catch (e) {} });
+  await p.addInitScript(() => { window.AI_TRACE = []; try { localStorage.setItem('bb-replays', '0'); localStorage.setItem('bb-ex-ind', 'off'); } catch (e) {} });
   await p.route(/cdn\.tailwindcss\.com/, r => r.fulfill({ body: '' }));   // styling only; keeps the run offline
   await p.goto(`http://localhost:${port}/index.html?simtest`);
   const t0 = Date.now();
@@ -42,13 +42,16 @@ async function play(browser, port, job) {
     await p.waitForTimeout(250);
     if (!clicked) clicked = await p.evaluate(() => { const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) { b.click(); return true; } return false; });
     res = await p.evaluate(() => ({ over: !!state.isGameOver, half: state.half, turn: [state.turn[0], state.turn[1]], score: [state.score[0], state.score[1]],
-      cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length) }));
+      cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length), to: MATCH.data ? MATCH.data.turnovers.slice() : [0, 0] }));
     if (res.over) break;
   }
+  let stuck = null;
+  if (!res || !res.over) stuck = await p.evaluate(() => ({ mode: state.mode, active: state.activeTeam, pending: CLOCK.pending(), sel: state.selectedId,
+    log: [...document.querySelectorAll('#message-log > *')].slice(-8).map(e => e.textContent.trim()), trace: (window.AI_TRACE || []).slice(-6) })).catch(e => String(e));
   await ctx.close();
   const n = newHome ? 0 : 1;
   return { ...job, newSide: newHome ? 'home' : 'away', secs: +((Date.now() - t0) / 1000).toFixed(1), ...res,
-    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], errs: errs.slice(0, 3) };
+    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], newTO: res.to[n], oldTO: res.to[1 - n], stuck, errs: errs.slice(0, 3) };
 }
 
 // two-sided binomial test: how likely a split at least this uneven is if both sides were equally good
@@ -79,4 +82,5 @@ server.listen(0, async () => {
   console.log(`touchdowns  new ${nt} - ${ot} old   (chance of a split this uneven by luck: ${(100 * luck(nt, nt + ot)).toFixed(0)}%)`);
   console.log(`results     new won ${w}, drew ${done.length - w - l}, lost ${l}   (luck: ${(100 * luck(w, w + l)).toFixed(0)}%)`);
   console.log(`casualties  new caused ${sum('newCas')} - ${sum('oldCas')} old`);
+  console.log(`turnovers   new ${sum('newTO')} - ${sum('oldTO')} old`);
 });

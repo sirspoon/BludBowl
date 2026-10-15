@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.04</title>
+    <title>BludBowl 3.05</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.04</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.05</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -18673,7 +18673,7 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
         const AI = (function () {
             const on = { 0: false, 1: false };
@@ -19180,6 +19180,7 @@
                 let best = null, bs = supportScore(p, p.x, p.y, g) + 0.9;
                 moves.forEach(m => {
                     if (m.prob < okProb(p) || (state.ball.x === m.x && state.ball.y === m.y && !state.ball.carrierId)) return;
+                    if (m.isRush && AIX.on(p.team, 'safepos')) return;
                     const s = supportScore(p, m.x, m.y, g) - (100 - m.prob) / 20;
                     if (s > bs) { bs = s; best = m; }
                 });
@@ -19243,8 +19244,13 @@
             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
             const CAPS = { cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, ballguard: 3, outlet: 2 };
+            // formation squares already given to someone this turn: a player sent towards a square they can't reach yet
+            // (it's still empty when the next player is chosen) mustn't have everyone else sent after them
+            let claims = { key: '', m: new Map() };
             function formationPlan(me, act, cageOnly, defending, safeOnly) {
                 const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                const ckey = state.half + ':' + me + ':' + state.turn[me];
+                if (claims.key !== ckey) claims = { key: ckey, m: new Map() };
                 let T = formationTargets(me, cageOnly);
                 if (!T.length) return null;
                 // safeOnly: just the moves with no dice at all (done first, so a failed dodge can't stop the rest)
@@ -19266,6 +19272,8 @@
                     if (!(occ && occ.team === me) && ['screen', 'screen2', 'mark', 'deep'].includes(t.role))
                         occ = state.players.find(q => q.team === me && onPitch(q) && !q.isDown && !q.isStunned && !taken.has(q.id) && (!c || q.id !== c.id) && cheb(q, t) === 1) || null;
                     if (occ && occ.team === me) { used.set(t.role, (used.get(t.role) || 0) + 1); taken.add(occ.id); continue; }
+                    const ck = t.x + ',' + t.y + ':' + t.role, cl = claims.m.get(ck), cp = cl != null ? getPlayerById(cl) : null;
+                    if (AIX.on(me, 'claim') && cp && cp.hasActed && onPitch(cp) && !cp.isDown && !taken.has(cp.id)) { used.set(t.role, (used.get(t.role) || 0) + 1); taken.add(cp.id); continue; }
                     if ((used.get(t.role) || 0) >= CAPS[t.role]) continue;
                     let best = null, bd = 99;
                     movers.forEach(p => {
@@ -19278,12 +19286,13 @@
                         if (d < bd) { bd = d; best = p; } });
                     if (!best) break;
                     if (window.AI_DEBUG) window.AI_DEBUG.push(`${t.role}@${t.x},${t.y} <- ${best.type}@${best.x},${best.y} (${bd.toFixed(1)})`);
-                    taken.add(best.id); used.set(t.role, (used.get(t.role) || 0) + 1);
+                    taken.add(best.id); used.set(t.role, (used.get(t.role) || 0) + 1); claims.m.set(ck, best.id);
                     const tx = t.x, ty = t.y, role = t.role;
                     const pick = (ms, p) => {
                         let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' ? 1.5 : 0.5)) - 0.5;
                         ms.forEach(m => {
                             if (m.prob < (safeOnly ? 100 : okProb(p)) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
+                            if (m.isRush && role !== 'hunt' && role !== 'mark' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
                             const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' ? 1.5 : 0.5)) + (100 - m.prob) / 10
                                 + edgeRisk(m.x, m.y, p.team, p.id) * (role === 'hunt' ? 1.5 : 3)   // keep off the sidelines
                                 + (['runner', 'outlet', 'deep'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
@@ -19855,7 +19864,8 @@
                     if (m) return { pid: carrier.id, kind: 'move', pick: carrierPick };
                     tried.add(carrier.id);
                 }
-                const cage = formationPlan(me, act, true);
+                // (safepos: every move with no dice at all goes first, so a failed dodge or rush can't stop the rest moving)
+                const cage = (AIX.on(me, 'safepos') && formationPlan(me, act, true, false, true)) || formationPlan(me, act, true);
                 if (cage) return cage;
 
                 // 8. a sly foul on someone already on the floor - saved for the end of the turn, so a sending-off
@@ -19867,7 +19877,8 @@
                 const bomb = ttmEndPlan(me, avail(me));
                 const late = bombPlan(me, avail(me), true);   // keep a Bomma back to throw at the end of the turn
                 const keep = new Set([...(bomb ? bomb.reserve : []), ...(late ? [late.pid] : []), ...(fl ? [fl.pid] : [])]);
-                const form = formationPlan(me, avail(me).filter(p => !keep.has(p.id)), false);
+                const formers = avail(me).filter(p => !keep.has(p.id));
+                const form = (AIX.on(me, 'safepos') && formationPlan(me, formers, false, false, true)) || formationPlan(me, formers, false);
                 if (form) return form;
 
                 // 10. anyone left: stand up and drift towards the action without any dice
@@ -20308,7 +20319,9 @@
                 const carrierA = state.ball.carrierId === a.id;
                 const forward = toGo(v.x, a.team) < toGo(a.x, a.team);
                 const edgeWorse = edgeRisk(v.x, v.y, a.team, a.id) > edgeRisk(a.x, a.y, a.team, a.id) + 0.2;
-                const go = !edgeWorse && (carrierA ? (there === 0 || (forward && there <= here)) : there <= here + (forward ? 1 : 0));
+                // their ball carrier pushed back and still on their feet: stay on them, so they have to dodge away next turn
+                const stick = AIX.on(a.team, 'stick') && !carrierA && c.def && c.def.team !== a.team && state.ball.carrierId === c.def.id && !c.def.isDown && cheb(v, c.def) === 1;
+                const go = stick || (!edgeWorse && (carrierA ? (there === 0 || (forward && there <= here)) : there <= here + (forward ? 1 : 0)));
                 if (go) grid(v.x, v.y); else click('btn-stay-put');
             }
             function interception() {
