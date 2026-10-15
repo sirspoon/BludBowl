@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.99 (15 Oct 2026)
+- **Fixed:** the Vampire Thrower no longer has two hands on one side. His right arm is raised, holding the ball.
+- **Changed:** the Vampire Blitzer now wears a bat-shaped half-mask with red eyes behind it, its ears and a spiked crest on top. His pale chin and fangs show below it.
+
 ## v2.98 (15 Oct 2026)
 - **Changed:** the Vampires have been redrawn to look like their models.
   - **Vampires:** pale, dressed in dark grey, with towering bat-wing collars, capes and knee guards in crimson.
