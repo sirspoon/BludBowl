@@ -2,6 +2,17 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.80 (15 Oct 2026)
+- **Changed:** the Norse and the Elven Union now look like their models.
+  - **Norse:** they now play in sky blue and yellow.
+    - Everyone has a bare chest with a strap and a round boss, blue-and-yellow shoulder pads, a round belt buckle, a loincloth, leg-wrapped trousers and brown boots.
+    - The Raiders wear horned, face-caged helmets. The Berserkers are bald with a ginger crest and a big roaring beard.
+    - The Ulfwerener wears a wolf pelt with the wolf's head on one shoulder, instead of having a wolf's head.
+    - The Beer Boar is dark and bristly, with a hooped barrel strapped on its back.
+  - **Elven Union:** they now play in purple and gold.
+    - Everyone has big swept-back blond hair, a white face mask, a padded top with red gems, gold trousers and gloves, and a white sash.
+    - The Catcher has a streaming ponytail, the Thrower holds a ball, and the Blitzer has spiked shoulder pads.
+
 ## v2.79 (15 Oct 2026)
 - **Added:** two more teams from the 2025 rules.
   - **Norse (Tier 1):** Norse Raiders, Beer Boars, Berserkers, Valkyries, Ulfwereners and a Yhetee, in the Old World Classic. A new skill comes with them, the Beer Boar's Pick-me-up: at the end of the opposition's turn, each Prone team-mate within 3 squares stands up on a 5+.
