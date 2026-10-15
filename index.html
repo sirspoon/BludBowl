@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.02</title>
+    <title>BludBowl 3.03</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.02</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.03</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -18609,7 +18609,7 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
         const AI = (function () {
             const on = { 0: false, 1: false };
@@ -19688,6 +19688,38 @@
                         }
                         if (!best || pr > best.pr || (pr === best.pr && m.path.length < best.m.path.length)) best = { p, m, pr, kind };
                     });
+                    if (AIX.on(me, 'loose') && (!best || best.pr < 75)) {
+                        // a hard pickup: first knock away the players marking the ball (each one makes the pickup harder),
+                        // keeping the player who will pick it up free
+                        const ballMarkers = state.players.filter(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && Math.max(Math.abs(q.x - bx), Math.abs(q.y - by)) === 1);
+                        const lim = !best || best.pr < 40 ? 0.17 : 0.12;
+                        let clr = null;
+                        standing.forEach(p => {
+                            if (best && p.id === best.p.id) return;
+                            ballMarkers.forEach(d => {
+                                if (cheb(p, d) !== 1) return;
+                                const e = blockEval(p, d), s = e.pMove - e.pTurn * 2;
+                                if (e.pTurn <= lim && e.pMove >= 0.5 && (!clr || s > clr.s)) clr = { p, d, s };
+                            });
+                        });
+                        if (clr) return { pid: clr.p.id, kind: 'block', target: clr.d.id };
+                        if (!state.blitzUsed && ballMarkers.length) {
+                            let bz = null;
+                            act.forEach(p => {
+                                if ((best && p.id === best.p.id) || p.isDown) return;
+                                ballMarkers.forEach(t => {
+                                    movesFor(p).forEach(m => {
+                                        if (Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y)) !== 1 || (m.x === bx && m.y === by)) return;
+                                        const left = p.remainingMA - m.path.length, pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
+                                        blitzCtx = true; const e = blockEval(p, t, m.x, m.y); blitzCtx = false;
+                                        const s = pr * e.pMove - (1 - pr) * 0.6 - e.pTurn * 2;
+                                        if (pr >= 0.8 && e.pTurn <= lim && e.pMove >= 0.5 && (!bz || s > bz.s)) bz = { p, t, s };
+                                    });
+                                });
+                            });
+                            if (bz) return blitzOn(bz.p, bz.t.id);
+                        }
+                    }
                     if (best && (best.pr >= 30 || lastTurn)) return { pid: best.p.id, kind: best.kind, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
                 }
 
@@ -19884,6 +19916,40 @@
                     else document.getElementById('btn-end-action').onclick();
                 });
             }
+            // Bloodlust: a thirsty player must end the activation next to a Thrall to bite one (or it's a Turnover),
+            // so the move ends next to a Thrall - one without the ball if possible - as close as it can to where it was going
+            const thrallsAt = (p, x, y) => state.players.filter(q => q.team === p.team && q.id !== p.id && /Thrall/.test(q.type) && onPitch(q) && Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) === 1);
+            function feedPick(ms, p, want) {
+                if (!p.hungry || !AIX.on(p.team, 'bloodlust')) return want;
+                const end = want || p;
+                if (thrallsAt(p, end.x, end.y).length) return want;
+                const t = plan && plan.target != null ? getPlayerById(plan.target) : null;
+                const r = plan && plan.receiver != null ? getPlayerById(plan.receiver) : null;
+                // a blitz, foul or hand-off still comes first: only a square that does the job and reaches a Thrall will do
+                // (otherwise the player feeds afterwards with any movement left). A plain move just heads for a Thrall.
+                const need = state.ball.carrierId === p.id && !(plan && plan.kind === 'handoff') ? null
+                    : plan && (plan.kind === 'blitz' || plan.kind === 'foul') && t ? t : plan && plan.kind === 'handoff' && r ? r : null;
+                if (plan && plan.kind === 'pass' && want) return want;
+                let best = null;
+                (ms || []).forEach(m => {
+                    const th = thrallsAt(p, m.x, m.y);
+                    if (!th.length || (need && Math.max(Math.abs(m.x - need.x), Math.abs(m.y - need.y)) !== 1)) return;
+                    const s = m.prob - (th.every(q => state.ball.carrierId === q.id) ? 40 : 0) - (want ? cheb(m, want) * 2 : 0)
+                        + (t && !t.isDown && Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y)) === 1 ? 15 : 0) + (m.x === endX(p.team) && state.ball.carrierId === p.id ? 50 : 0);
+                    if (!best || s > best.s) best = { m, s };
+                });
+                return best ? best.m : want;
+            }
+            // the last chance before a thirsty player's activation ends: walk to a Thrall with any movement left
+            function feedMove(p) {
+                if (!p.hungry || plan.fed || p.hasActed || !AIX.on(p.team, 'bloodlust') || thrallsAt(p, p.x, p.y).length) return false;
+                if (![MODES.ACTION_MOVE, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_TTM].includes(state.mode) || !state.moves || !state.moves.length) return false;
+                const m = feedPick(state.moves, p, null);
+                if (!m) return false;
+                plan.fed = true; plan.step = 2; plan.advanced = true;
+                act(() => startPath(p, m.path));
+                return true;
+            }
             function doBlock(p) {
                 plan.step = 3;
                 act(() => initBlock(p.id, plan.target));
@@ -19936,7 +20002,7 @@
                     if (plan.kind === 'blitz' && t && cheb(p, t) === 1 && !t.isDown) { doBlock(p); return; }
                     if (plan.kind === 'foul' && t && cheb(p, t) === 1) { doFoul(p); return; }
                     if ((plan.kind === 'pass' || plan.kind === 'handoff') && plan.stay) { doThrow(p); return; }
-                    const m = plan.pick(state.moves, p);
+                    const m = feedPick(state.moves, p, plan.pick(state.moves, p));
                     if (!m) { if (plan.kind === 'pass' || plan.kind === 'handoff') doThrow(p); else endAction(p); return; }
                     cameraFocus([p, m, plan.target != null ? getPlayerById(plan.target) : null, plan.receiver != null ? getPlayerById(plan.receiver) : null], 380);
                     plan.step = 2;
@@ -19951,14 +20017,15 @@
                     if (plan.kind === 'pass' || plan.kind === 'handoff') { doThrow(p); return; }
                     if (state.ball.carrierId === p.id && !plan.advanced && p.remainingMA > 0) {
                         plan.advanced = true;
-                        const m2 = carrierPick(state.moves, p);
+                        const m2 = feedPick(state.moves, p, carrierPick(state.moves, p));
                         if (m2) { act(() => startPath(p, m2.path)); return; }
                     }
+                    if (feedMove(p)) return;
                     endAction(p);
                     return;
                 }
                 if (plan.step === 3) {   // block, foul or throw done
-                    if ([MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_TTM].includes(state.mode) && !p.hasActed) { endAction(p); return; }
+                    if ([MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_TTM].includes(state.mode) && !p.hasActed) { if (feedMove(p)) return; endAction(p); return; }
                     plan = null;
                 }
             }

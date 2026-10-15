@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.03 (15 Oct 2026)
+- **Changed:** two more computer-coach fixes, found by watching the AI play itself in 64 test matches ([#19](https://github.com/sirspoon/BludBowl/issues/19)).
+  - **Loose ball:** before trying a hard pickup, it first blocks (or blitzes) away the opponents standing next to the ball. Failed 5+ and 6+ pickups dropped from 18 to 6 over 24 matches.
+  - **Vampires:** it now knows about Bloodlust. A thirsty Vampire finishes its move next to a Thrall to feed, after it has made its blitz, foul or hand-off. Bloodlust turnovers dropped from 7 to 2.
+
 ## v3.02 (15 Oct 2026)
 - **Changed:** the computer can hand off or pass backwards again. A team-mate further back who is better placed to carry the ball forward is a fine choice. The v3.01 rule that stopped it is gone, and the touchback fix stays.
 
