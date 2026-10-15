@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.03</title>
+    <title>BludBowl 3.04</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.03</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.04</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1464,7 +1464,48 @@
             // at 16x and above the purely decorative animations (walking glide, block clash, foul hop) are skipped
             let fastBase = window.FAST_ANIM;
             Object.defineProperty(window, 'FAST_ANIM', { configurable: true, get() { return fastBase || (k >= 16 ? 1 : fastBase); }, set(v) { fastBase = v; } });
+            // Test mode (?simtest in the address, for the automated computer-vs-computer matches): game time doesn't really pass.
+            // Every timer goes into a queue, and the clock jumps straight to the next one due, so nothing waits. The rules,
+            // the dice and the order things happen in are the same as in play. Microtasks still run between timers, and every
+            // ~10ms the queue lets the browser in (frames, real events) before carrying on.
+            const sim = /[?&]simtest\b/.test(location.search) || !!window.BB_SIMTEST;
+            if (sim) {
+                k = 1000;
+                let vt = rNow(), seq = 0, armed = false, slice = 0;
+                const q = [];   // a binary heap of timers, earliest first (ties in the order they were set)
+                const less = (a, b) => a.t < b.t || (a.t === b.t && a.s < b.s);
+                const push = e => { q.push(e); let i = q.length - 1; while (i > 0) { const j = (i - 1) >> 1; if (!less(q[i], q[j])) break; [q[i], q[j]] = [q[j], q[i]]; i = j; } };
+                const pop = () => {
+                    const top = q[0], last = q.pop();
+                    if (q.length) { q[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < q.length && less(q[l], q[m])) m = l; if (r < q.length && less(q[r], q[m])) m = r; if (m === i) break; [q[i], q[m]] = [q[m], q[i]]; i = m; } }
+                    return top;
+                };
+                const live = new Map();   // id -> the timer, while it's still wanted
+                const ch = new MessageChannel();
+                const step = () => {
+                    while (q.length && !live.has(q[0].id)) pop();
+                    if (!q.length) { armed = false; return; }
+                    if (rNow() - slice > 10) { ch.port2.postMessage(0); return; }   // let the browser in
+                    const e = pop();
+                    if (e.t > vt) vt = e.t;
+                    if (e.every == null) live.delete(e.id); else { e.t = vt + e.every; e.s = ++seq; push(e); }
+                    try { e.f(...e.a); } catch (err) { console.error(err); }
+                    queueMicrotask(step);   // after the microtasks this timer queued, like a real timer
+                };
+                ch.port1.onmessage = () => { slice = rNow(); step(); };
+                const wake = () => { if (!armed) { armed = true; slice = rNow(); ch.port2.postMessage(0); } };
+                const add = (f, ms, a, every) => { const id = 'st' + (++seq), e = { id, t: vt + Math.max(0, +ms || 0), s: seq, f, a, every }; live.set(id, e); push(e); wake(); return id; };
+                performance.now = () => vt;
+                Date.now = () => Math.round(d0 + (vt - start));
+                window.setTimeout = (f, ms, ...a) => typeof f === 'function' ? add(f, ms, a, null) : rST(f, ms, ...a);
+                window.clearTimeout = id => { live.delete(id); rCT(id); };
+                window.setInterval = (f, ms, ...a) => add(f, ms, a, Math.max(1, +ms || 0));
+                window.clearInterval = id => { live.delete(id); rCI(id); };
+                return { sim: true, get speed() { return k; }, pending: () => [...live.values()].filter(e => e.every == null).length,
+                    clearTimeouts() { live.forEach((e, id) => { if (e.every == null) live.delete(id); }); }, real: rNow, align() {}, set() {} };
+            }
             return {
+                sim: false,
                 get speed() { return k; },
                 pending: () => pend.size,
                 clearTimeouts() { pend.forEach(id => rCT(id)); pend.clear(); },
@@ -2116,7 +2157,7 @@
                 sync(sel, btn);
                 new MutationObserver(() => sync(sel, btn)).observe(sel, { childList: true, subtree: true, attributes: true });
                 sel.addEventListener('change', () => sync(sel, btn));
-                setInterval(() => sync(sel, btn), 400);   // code that sets .value directly fires no event
+                if (!CLOCK.sim) setInterval(() => sync(sel, btn), 400);   // code that sets .value directly fires no event
             }
             document.addEventListener('click', e => { if (open && !open.menu.contains(e.target) && !open.btn.contains(e.target)) close(); }, true);
             window.addEventListener('resize', close);
@@ -5755,7 +5796,20 @@
         };
         const STATE_FRESH = JSON.stringify(state);   // how a match starts out (a new match is set back to this)
 
-        function getPlayer(x, y) { return state.players.find(p => p.x === x && p.y === y && !p.isCasualty && !p.isEjected && !p.isReserve && !p.isKO && !p.isFading); }
+        // pitchFrozen: while a search runs over a pitch where nobody moves (the moves a player could make), who stands where
+        // is looked up from a grid made once, instead of going through every player each time
+        let pitchFrozen = null;
+        function getPlayer(x, y) {
+            if (pitchFrozen && x >= 0 && y >= 0 && x < CFG.cols && y < CFG.rows) return pitchFrozen[y * CFG.cols + x];
+            return state.players.find(p => p.x === x && p.y === y && !p.isCasualty && !p.isEjected && !p.isReserve && !p.isKO && !p.isFading);
+        }
+        function freezePitch(fn) {
+            if (pitchFrozen) return fn();
+            const g = new Array(CFG.cols * CFG.rows);
+            state.players.forEach(p => { if (p.isCasualty || p.isEjected || p.isReserve || p.isKO || p.isFading || p.x < 0 || p.y < 0 || p.x >= CFG.cols || p.y >= CFG.rows) return; const k = p.y * CFG.cols + p.x; if (!g[k]) g[k] = p; });
+            pitchFrozen = g;
+            try { return fn(); } finally { pitchFrozen = null; }
+        }
         function getPlayerById(id) { return state.players.find(p => p.id === id); }
         
         function log(msg, color='text-slate-300') {
@@ -6389,7 +6443,7 @@
                 }
                 last = g; return true;
             }
-            setInterval(() => { try { save(false); } catch (e) { console.error('autosave', e); } }, 700);
+            if (!CLOCK.sim) setInterval(() => { try { save(false); } catch (e) { console.error('autosave', e); } }, 700);
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') try { save(true); } catch (e) {} });
             window.addEventListener('pagehide', () => { try { save(true); } catch (e) {} });
 
@@ -7214,7 +7268,7 @@
                 document.body.appendChild(box);
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
-            setInterval(() => { try { paint(); } catch (e) {} }, 250);
+            if (!CLOCK.sim) setInterval(() => { try { paint(); } catch (e) {} }, 250);
             return { apply, slots };
         })();
 
@@ -11034,7 +11088,8 @@
             return player.st >= 4 ? 2 : 1;
         }
 
-        function getValidMoves(player) {
+        function getValidMoves(player) { return freezePitch(() => getValidMoves0(player)); }
+        function getValidMoves0(player) {
             if(player.isStunned || (player.remainingMA <= 0 && player.rushes <= 0) || player.hasActed) return [];
             if (chomped(player)) return [];   // held by a Monstrous Mouth
             if (player.rooted && !player.isDown) return [];   // Take Root
@@ -14690,7 +14745,7 @@
         function pitchTexCheck() { if (!pitchTexOk()) { try { buildPitchTexture(); render(); } catch (e) { console.error(e); } } }
         ['visibilitychange', 'fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, () => { if (document.visibilityState !== 'hidden') { setTimeout(pitchTexCheck, 300); setTimeout(pitchTexCheck, 1500); } }));
         window.addEventListener('resize', () => setTimeout(pitchTexCheck, 400));
-        setInterval(() => { if (document.visibilityState !== 'hidden' && state.live) pitchTexCheck(); }, 5000);
+        if (!CLOCK.sim) setInterval(() => { if (document.visibilityState !== 'hidden' && state.live) pitchTexCheck(); }, 5000);
         function buildPitchTexture() {
             const ts = CFG.tileSize, W = CFG.cols * ts, H = CFG.rows * ts, S = 1.5;
             if (PITCH.style === 'flagstone' || PITCH.style === 'jungle') {
@@ -14980,9 +15035,18 @@
             }
             if (act) { const bar = document.getElementById('top-bar-panel'); if (bar) { const r = bar.getBoundingClientRect(); el.style.top = (r.bottom > 0 && r.bottom < innerHeight * 0.35 ? Math.round(r.bottom + 8) : 70) + 'px'; } }
         }
-        function frameLoop() { try { actBannerPaint(); } catch (e) {} try { if (state.players) finishFades(); } catch (e) {} try { drawFrame(); } catch (e) { console.error(e); } try { SIMSPEED.paint(); } catch (e) {} requestAnimationFrame(frameLoop); }
+        // (in test mode the pitch is only drawn about once a second: nobody's watching)
+        let simDrawn = 0;
+        function frameLoop() {
+            try { if (state.players) finishFades(); } catch (e) {}
+            if (!CLOCK.sim || CLOCK.real() - simDrawn > 1000) {
+                simDrawn = CLOCK.real();
+                try { actBannerPaint(); } catch (e) {} try { drawFrame(); } catch (e) { console.error(e); } try { SIMSPEED.paint(); } catch (e) {}
+            }
+            requestAnimationFrame(frameLoop);
+        }
         function startFrameLoop() { if (frameLoopOn) return; frameLoopOn = true; requestAnimationFrame(frameLoop); }
-        function render() { drawFrame(); }
+        function render() { if (!CLOCK.sim) drawFrame(); }
         // While the kicking team sets up, the receiving team isn't shown: they set up afterwards, as in a real game
         function hiddenInSetup(p) {
             return state.mode === MODES.SETUP && !state.setup.eventSetup && !state.setup.kickingSetupDone
@@ -18251,7 +18315,7 @@
                     if (b.classList.contains('net-theirs') !== theirs) b.classList.toggle('net-theirs', theirs);
                 });
             }
-            setInterval(() => { try { greyOut(); if (live && role === 'host') lineupView(); } catch (e) {} }, 150);
+            if (!CLOCK.sim) setInterval(() => { try { greyOut(); if (live && role === 'host') lineupView(); } catch (e) {} }, 150);
             // a faint pulsing banner over the bottom of the pitch whenever it's the other player's turn or choice
             function waitBanner() {
                 let el = $('net-wait');
@@ -18287,7 +18351,7 @@
                 el.style.bottom = (bottom / uiScale()) + 'px';
                 el.classList.remove('hidden');
             }
-            setInterval(() => { try { waitBanner(); } catch (e) {} }, 200);
+            if (!CLOCK.sim) setInterval(() => { try { waitBanner(); } catch (e) {} }, 200);
             function applyLog(m) {
                 const lg = $('message-log'); if (!lg) return;
                 const atEnd = lg.scrollTop + lg.clientHeight >= lg.scrollHeight - 30;
@@ -20528,7 +20592,7 @@
             };
             if (window.ResizeObserver) new ResizeObserver(placeOverlays).observe(document.getElementById('top-bar-panel'));
             window.addEventListener('resize', placeOverlays);
-            setInterval(placeOverlays, 400);
+            if (!CLOCK.sim) setInterval(placeOverlays, 400);
             placeOverlays();
 
             // ---- sound button, interface clicks, and a watcher for falls, stuns and selection
@@ -20552,14 +20616,14 @@
                 if (c && ((c.team === TEAMS.HUMAN && c.x >= CFG.cols - 6) || (c.team === TEAMS.ORC && c.x <= 5))) return 'tense';
                 return 'normal';
             };
-            setInterval(() => { if (state.isGameOver) { MUSIC.matchEnd(); return; } MUSIC.setMood(musicMood()); }, 500);
+            if (!CLOCK.sim) setInterval(() => { if (state.isGameOver) { MUSIC.matchEnd(); return; } MUSIC.setMood(musicMood()); }, 500);
             document.addEventListener('pointerdown', () => SFX.unlock(), { once: true, capture: true });
             document.addEventListener('click', e => {
                 const b = e.target && e.target.closest ? e.target.closest('button') : null;
                 if (b && !['btn-sound', 'btn-splash', 'btn-play', 'btn-roll-confirm', 'btn-trr-yes', 'btn-trr-no'].includes(b.id)) sfx('menuClick');
             }, true);
             const seen = new Map(); let lastSel = null;
-            setInterval(() => {
+            if (!CLOCK.sim) setInterval(() => {
                 if (!state.players || !state.players.length) return;
                 let downs = 0, first = null;
                 state.players.forEach(p => {

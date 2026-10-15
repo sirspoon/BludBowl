@@ -28,3 +28,7 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
 - Two-device play (`NET` in `index.html`) uses PeerJS, which can't reach its server from a cloud session. Adding `?nettest`
   to the address swaps the network for a BroadcastChannel, so two tabs in one browser context can play each other.
   Add `&dev=A` (any letters) as well to give each tab its own saved data, like separate devices (needed to test shared leagues).
+- AI testing: `?simtest` runs the game in test mode (the clock skips straight to the next event, there's almost no drawing,
+  and background chores pause), so a computer-vs-computer match takes ~10s. `node tools/ai-match.js` plays batches of them in
+  parallel and compares AI settings (the `AIX` switches): e.g. `--races orc,human --n 20 --new all --old rr,blitz --par 4`.
+  It prints the touchdown and win splits with the chance each is just luck. Judge AI changes on a few hundred matches, not a few dozen.

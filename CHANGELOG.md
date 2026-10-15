@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.04 (15 Oct 2026)
+- **Changed:** the computer works out its moves about twice as fast, so its turns are snappier, especially on phones.
+- **Added:** a test mode for automated computer-vs-computer matches (add `?simtest` to the address). The game clock skips straight to the next event instead of waiting, the pitch is only redrawn once a second, and autosave, music and other background chores pause. The rules and dice are untouched. A match takes about 10 seconds instead of 90, so AI changes can be checked over hundreds of matches. It doesn't affect normal play.
+
 ## v3.03 (15 Oct 2026)
 - **Changed:** two more computer-coach fixes, found by watching the AI play itself in 64 test matches ([#19](https://github.com/sirspoon/BludBowl/issues/19)).
   - **Loose ball:** before trying a hard pickup, it first blocks (or blitzes) away the opponents standing next to the ball. Failed 5+ and 6+ pickups dropped from 18 to 6 over 24 matches.
