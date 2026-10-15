@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.90 (15 Oct 2026)
+- **Changed:** the Chaos Chosen wear closed, horned helms again, with a red-glowing visor and a grille over the mouth. Their bare arms and lighter armour from v2.89 stay.
+
 ## v2.89 (15 Oct 2026)
 - **Changed:** the Chaos Chosen look less like robots.
   - **Face:** a snarling, bearded face with glowing eyes shows under an open, horned helm.
