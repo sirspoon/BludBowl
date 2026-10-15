@@ -20114,16 +20114,22 @@
                     : late ? 5 + Math.floor(Math.random() * 5) : (Math.random() < 0.5 ? 3 + Math.floor(Math.random() * 2) : 10 + Math.floor(Math.random() * 2));
                 grid(x, y);
             }
-            function touchback() {
+            function touchback() { const best = touchbackPick(); if (best) grid(best.x, best.y); }
+            function touchbackPick() {
                 const r = state.kickoff.receivingTeam;
                 const ps = state.players.filter(p => p.team === r && onPitch(p) && !p.isDown && !p.isStunned && !hasSk(p, 'No Ball'));
                 let best = null, bs = -1;
                 ps.forEach(p => {
                     const d = Math.min(99, ...state.players.filter(q => q.team !== r && onPitch(q)).map(q => cheb(p, q)));
-                    const s = d * 10 + (7 - p.ag) + (hasSk(p, 'Sure Hands') ? 3 : 0);
+                    // the new way: not marked (they move first, so that's all the safety it needs), then well up the pitch, a sure pair of hands and some muscle;
+                    // never a Big Guy or someone who might stand there gawping. The old way simply took whoever was furthest from them.
+                    const s = AIX.on(r, 'touchback')
+                        ? (d >= 2 ? 10 : 0) + (d >= 3 ? 2 : 0) - toGo(p.x, r) * 0.7 + (7 - p.ag) * 1.5 + (hasSk(p, 'Sure Hands') ? 3 : 0) + (p.ma || 6) * 0.4 + Math.min(p.st, 4) * 1.2 - (hasSk(p, 'Stunty') ? 3 : 0)
+                            - (isBigGuy(p) ? 8 : 0) - (hasSk(p, 'Bone Head') || hasSk(p, 'Really Stupid') || hasSk(p, 'Animal Savagery') ? 6 : 0) - (hasSk(p, 'No Hands') ? 50 : 0) + 100
+                        : d * 10 + (7 - p.ag) + (hasSk(p, 'Sure Hands') ? 3 : 0);
                     if (s > bs) { bs = s; best = p; }
                 });
-                if (best) grid(best.x, best.y);
+                return best;
             }
             function pushChoice() {
                 const c = state.combat, pushed = c.currentPushed, sqs = c.pushSquares || [];
@@ -20355,7 +20361,7 @@
                 debugX: { choose: () => { moveMemo = new Map(); return choose(); }, rrWorth: (ctx, c, d) => rrWorth(ctx, c, d),
                     carrierBlitz: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const b = carrierBlitz(me, avail(me), c); return b && { pid: b.p.id, s: b.s }; },
                     switchPlay: () => { moveMemo = new Map(); const c = getPlayerById(state.ball.carrierId); const sw = c && switchPlay(c, c.team); return sw && { kind: sw.kind, rid: sw.r.id }; },
-                    supportGoal: id => { const p = getPlayerById(id); return supportGoal(p, p.team); } }
+                    supportGoal: id => { const p = getPlayerById(id); return supportGoal(p, p.team); }, touchback: () => { const b = touchbackPick(); return b && b.type + '@' + b.x + ',' + b.y; } }
             };
         })();
 
