@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.88 (15 Oct 2026)
+- **Changed:** the Chaos Renegades now all look like one team.
+  - **Humans:** much less armoured. They wear an open helm (so you can see their faces), a kit breastplate over dark leathers, one Chaos-starred pauldron, bare arms with lime wraps and kit knee pads.
+  - **Thrower:** goes bare-headed with a lime mohawk.
+  - **Goblin, Orc, Skaven and Dark Elf:** they get Renegade pauldrons with the Chaos star, lime wraps or belts and lime crests. The Dark Elf has a lime streak in her hair.
+  - **Troll, Minotaur and Rat Ogre:** each gets a big spiked pauldron.
+  - **Ogre:** his shoulder pads are now magenta with Chaos stars.
+
 ## v2.87 (15 Oct 2026)
 - **Added:** two Chaos teams from the 2025 rules.
   - **Chaos Chosen** (blood red and black):
