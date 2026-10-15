@@ -2,6 +2,24 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.03 (15 Oct 2026)
+- **Added:** the last nine Star Players from the 2025 rules, each with their special rule and a sprite. This works toward [#16](https://github.com/sirspoon/BludBowl/issues/16).
+  - **Bilerot Vomitflesh** (Favoured of Nurgle): Putrid Regurgitation, Projectile Vomit once per half.
+  - **Guffle Pusmaw** (Favoured of Nurgle): Quick Bite. When an opponent he marks catches the ball, Guffle makes an Armour roll, and takes the ball if it breaks.
+  - **Withergrasp Doubledrool** (Favoured of Nurgle): Watch Out!, Dodge the first time he's blocked each drive.
+  - **Max Spleenripper** (Favoured of Khorne): Maximum Carnage, a second Chainsaw Attack on another opponent.
+  - **Scyla Anfingrimm** (Favoured of Khorne): Fury of the Blood God. A 1 for Unchannelled Fury on a Block means he makes two Blocks instead.
+  - **Zzharg Madeye** (Favoured of Hashut): Blastin' Solves Everything, a blunderbuss blast within 3 squares once per half.
+  - **Grashnak Blackhoof** (Chaos Clash): Gored by the Bull, an extra Block dice on a Blitz.
+  - **Lord Borak the Despoiler** (Chaos Clash): Lord of Chaos, a Block dice re-roll.
+  - **Rumbelow Sheepskin** (Halfling Thimble Cup): Ram, +1 to the Armour or Injury roll.
+- **Added:** Favoured of...
+  - **Fixed gods:** Khorne and the Norse are Favoured of Khorne, Nurgle are Favoured of Nurgle, and the Chaos Dwarfs are Favoured of Hashut.
+  - **Chosen gods:** the Chaos Chosen and Chaos Renegades pick their god in the Team Builder.
+  - **Star Players:** those dedicated to a god only play for teams of that god. H'thark now plays for Favoured of Hashut teams.
+- **Changed:** Nurgle's Plague Ridden Rotter can now be hired after a league game, like a Journeyman.
+- **Changed:** Trickster now also works against Special Actions aimed at the Illusionist: Stab, Chainsaw, Projectile Vomit and Chomp.
+
 ## v3.02 (15 Oct 2026)
 - **Changed:** the Underworld Denizens' kit now matches the 2025 models: rust red plate with slate grey. The away kit is slate grey with red.
 
