@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.01</title>
+    <title>BludBowl 3.02</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.01</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.02</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -18609,7 +18609,7 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, handback, screen, babysit, pass, ttm, touchback
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
         const AI = (function () {
             const on = { 0: false, 1: false };
@@ -19017,9 +19017,7 @@
                 const receivers = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Hands') && !hasSk(r, 'No Ball'));
                 const spots = [{ x: c.x, y: c.y }, ...movesFor(c).filter(m => m.prob >= 100)];
                 let best = null;
-                const trouble = tzFor(c.x, c.y, me) > 0 || threatAt(c.x, c.y, me) >= 2;
                 receivers.forEach(r => {
-                    if (AIX.on(me, 'handback') && !trouble && toGo(r.x, me) > toGo(c.x, me) + 1) return;   // not backwards to someone deeper when the carrier is safe
                     const pt = AIX.on(me, 'pass') && passingTeam(me);
                     const rv = bestSpotFor(r) + (pt && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
                     if (rv < stay + (pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
