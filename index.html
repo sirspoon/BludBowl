@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.61</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.62</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9182,6 +9182,51 @@
     if (kind === 'breakdown' && i === 3) nz(B.pad, t, s * 4, 0.08, 'bandpass', 400, 2400, 0.9, 0.4);
     if (fillNext) for (let k = 0; k < 8; k++) farDrum(B, t + 3 * s + k * s / 8, 55 + (k % 2) * 4, 0.35 + k * 0.06);
   }
+
+  // ---------- ELVEN (the High Elf pitch): the same sections, played elegantly on harp, strings, flute, voices and bells ----------
+  // In D major (D, B minor, G, A), a gentle 84 bpm, the harp flowing in triplets.
+  const EF_ROOTS = [38, 35, 31, 33], EF_THIRD = [4, 3, 4, 4];
+  const EF_LEAD = [[[78,0,1.5],[76,1.5,.5],[74,2,2]],[[74,0,1],[78,1,1],[83,2,2]],[[81,0,1.5],[79,1.5,.5],[78,2,2]],[[76,0,1],[78,1,1],[79,2,1],[76,3,1]]];
+  const EF_BPM = { calm: 72, normal: 84, tense: 100 };
+  const harp = (B, m, t, v) => { note(B.main, 'triangle', m, t, 1.1, v, { a: 0.003, r: 0.9, sus: 0.35, verb: 0.7 }); note(B.main, 'sine', m + 12, t, 0.5, v * 0.3, { a: 0.002, r: 0.4, verb: 0.5 }); };
+  const bell = (B, m, t, v) => note(B.pad, 'sine', m, t, 1.4, v, { a: 0.002, r: 1.3, sus: 0.2, verb: 0.9 });
+  const strings = (B, rt, third, t, dur, v, cut = 1600) => [0, third, 7].forEach(x => [-9, 9].forEach(d => note(B.sc, 'sawtooth', rt + 24 + x, t, dur, v, { det: d, a: 0.5, r: 0.5, cut, verb: 0.6, vib: 6 })));
+  const voices = (B, rt, third, t, dur, v) => [0, third, 7, 12].forEach((x, j) => note(B.pad, 'triangle', rt + 36 + x, t, dur, v, { a: 1.0, r: 0.8, det: j % 2 ? 7 : -7, vib: 10, vibDelay: 0.3, verb: 0.9 }));
+  function efBar(kind, i, t, s, B, tense, fillNext, ph) {
+    const r = EF_ROOTS[i], th = EF_THIRD[i], quiet = kind === 'calm' || kind === 'lull', tri = s / 3;
+    const tones = [0, 7, 12, 12 + th, 19, 24, 19, 12 + th, 12, 7, th, 7];   // the harp's arpeggio, up and back down
+    // harp: flowing triplets in the grooves, slower and sparser when it's quiet, rippling through the breakdown
+    if (kind !== 'drive') {
+      const every = kind === 'calm' ? 3 : kind === 'lull' || kind === 'breakdown' ? 2 : 1;
+      for (let k = 0; k < 12; k += every) harp(B, r + 24 + tones[k], t + k * tri, (quiet ? 0.045 : 0.06) * (k % 3 === 0 ? 1.25 : 1));
+    }
+    // plucked bass and soft hand drum
+    if (!quiet && kind !== 'breakdown') {
+      [0, 2].forEach(b => note(B.sc, 'triangle', r + 12, t + b * s, s * 0.6, 0.11, { a: 0.003, r: 0.25 }));
+      note(B.sc, 'triangle', r + 19, t + 3 * s + tri * 2, s * 0.3, 0.07, { a: 0.003, r: 0.2 });
+      [0, 2].forEach(b => tom(B.main, t + b * s, 50, 0.16, 0.35)); [1, 3].forEach(b => nz(B.main, t + b * s, 0.12, 0.05, 'highpass', 8000, null, 0.7, 0.2));
+    }
+    if (kind === 'lull') tom(B.main, t, 50, 0.12, 0.4);
+    // strings underneath (held), or short and stately in the stab hook
+    if (kind === 'stab') [0, 1.5, 2, 3.5].forEach(b => strings(B, r, th, t + b * s, s * 0.35, 0.02, 2600));
+    else if (kind !== 'drive') strings(B, r, th, t, s * 4, kind === 'breakdown' ? 0.018 : quiet ? 0.01 : 0.014, kind === 'breakdown' ? 1100 : 1600);
+    // the drive: low strings pulsing in eighths, a timpani roll on the last beat
+    if (kind === 'drive') {
+      for (let k = 0; k < 8; k++) [0, 7].forEach(x => note(B.sc, 'sawtooth', r + 12 + x, t + k * s / 2, s * 0.42, 0.045, { a: 0.01, r: 0.08, cut: 1200, cutTo: 500, verb: 0.3 }));
+      [0, 2].forEach(b => tom(B.main, t + b * s, 38, 0.4, 0.4)); if (i === 3) for (let k = 0; k < 6; k++) tom(B.main, t + 3 * s + k * s / 6, 38, 0.18 + k * 0.04, 0.4);
+      for (let k = 0; k < 12; k += 2) harp(B, r + 36 + tones[k], t + k * tri, 0.04);
+    }
+    // voices: an airy choir swelling through the breakdown and under the chorus
+    if (kind === 'breakdown' || kind === 'chorus') voices(B, r, th, t, s * 4, kind === 'breakdown' ? 0.022 : 0.014);
+    // the flute: the tune in the chorus (an octave up the second time), a few long notes in the breakdown
+    if (kind === 'chorus') EF_LEAD[i].forEach(([m, b, d]) => flute(B, m + (ph >= 4 ? 12 : 0), t + b * s, d * s * 0.95, 0.065));
+    if (kind === 'breakdown' && i % 2 === 0) flute(B, [81, 78, 79, 76][i], t + s, s * 2.8, 0.055);
+    // bells: a sparkle at the top of each bar in the chorus and when it's calm
+    if (kind === 'chorus' || kind === 'calm' || (kind === 'main' && i === 3)) [0, 7, 12].forEach((x, j) => bell(B, r + 48 + x, t + j * tri * 0.5, 0.03));
+    // accents and transitions: a soft cymbal at the top of the chorus, a harp glissando into the next section
+    if (i === 0 && (kind === 'chorus' || kind === 'drive')) crash(B.main, t, 0.14);
+    if (fillNext) for (let k = 0; k < 12; k++) harp(B, r + 36 + [0, 2, 4, 7, 9, 12][k % 6] + (k >= 6 ? 12 : 0), t + 3 * s + k * s / 12, 0.04 + k * 0.003);
+  }
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -9204,15 +9249,17 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far };
   }
-  const styleNow = () => { try { return PITCH.style === 'jungle' ? 'jungle' : 'electro'; } catch (x) { return 'electro'; } };
+  // which music: the pitch's own style if it has one (jungle, elven), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 } };   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
     while (run.next < ctx.currentTime + 0.7) {
       if (e.bar === 0) run.style = styleNow();
-      const jg = run.style === 'jungle', target = (jg ? JG_BPM : EL_BPM)[e.mode]; e.bpm += Math.max(-6, Math.min(6, target - e.bpm));
+      const ST = STYLES[run.style] || STYLES.electro, target = ST.bpm[e.mode]; e.bpm += Math.max(-6, Math.min(6, target - e.bpm));
       const spb = 60 / e.bpm, kind = e.cur, tense = e.mode === 'tense', ph = e.bar, i = ph % 4, len = kind === 'chorus' ? 8 : 4;
-      B.bus.gain.setTargetAtTime(LEVEL[kind] * (tense ? 1.05 : 1), run.next, .25);
-      try { (jg ? jgBar : elBar)(kind, i, run.next, spb, B, tense, ph === len - 1 && e.next !== 'calm', ph, e.next, e.prev); } catch (x) { console.warn('music:', x && x.message); }
+      B.bus.gain.setTargetAtTime(LEVEL[kind] * (tense ? 1.05 : 1) * (ST.gain || 1), run.next, .25);
+      try { ST.bar(kind, i, run.next, spb, B, tense, ph === len - 1 && e.next !== 'calm', ph, e.next, e.prev); } catch (x) { console.warn('music:', x && x.message); }
       run.next += spb * 4; e.bar++;
       if (e.bar === len) { e.bar = 0; e.prev = e.cur; e.cur = e.next; e.next = elPick(e, e.cur); }
     }
@@ -9220,7 +9267,7 @@
   function start() {
     if (run || !enabled || !matchOn || SFX.isMuted()) return;
     init(); if (!ctx) return;
-    const B = buses(), st = styleNow(), el = { mode: mood, bpm: (st === 'jungle' ? JG_BPM : EL_BPM)[mood] - 4, cur: 'main', next: null, bar: 0, mainRun: 0, lastSpecial: null, force: null };
+    const B = buses(), st = styleNow(), el = { mode: mood, bpm: STYLES[st].bpm[mood] - 4, cur: 'main', next: null, bar: 0, mainRun: 0, lastSpecial: null, force: null };
     el.cur = el.mode === 'calm' ? 'calm' : 'main'; el.next = elPick(el, el.cur);
     B.bus.gain.value = 0.0001; run = { B, el, style: st, next: ctx.currentTime + 0.3 };
     tick(); timer = setInterval(tick, 90);

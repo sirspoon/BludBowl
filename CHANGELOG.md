@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.62 (15 Oct 2026)
+- **Added:** elegant music for the High Elf pitch. It has the same seven sections as the other match music and follows the match's mood, from about 72 to 100 bpm.
+  - **Main groove:** a harp flowing in triplets over held strings, with a plucked bass and a soft hand drum.
+  - **Stab hook:** short, stately string chords.
+  - **Half-time drive:** low strings pulsing, with timpani.
+  - **Breakdown:** an airy choir and a solo flute.
+  - **Chorus:** a flute tune with the choir and sparkling bells.
+  - **Between sections:** a harp glissando leads into each new one.
+
 ## v2.61 (15 Oct 2026)
 - **Changed:** the jungle music's quiet-beat drums now overlap the sections either side. They creep in quietly under the last bar of the section before and fade out through the first bar of the next, so the change is smoother.
 
