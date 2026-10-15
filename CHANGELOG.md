@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.00 (15 Oct 2026)
+- **Changed:** Necromantic Horror has been redrawn to look like the Wolfenburg team.
+  - **Everyone:** orange-and-black striped jerseys, black pads with lime rims, dark shorts and rope belts.
+  - **Zombies and Ghouls:** now have their own sprites. The Zombies are rotting and green-grey, and the Ghouls are grey, in grilled knight's helms with a lime stripe and blue boots.
+  - **Wraith:** a bedsheet ghost with holes and green eyes, a bony claw pointing up and boots dangling on ropes below.
+  - **Flesh Golem:** patched together, with green stitched-on parts, a black helm, spiked pads, a bare chest and a splinted leg.
+  - **Werewolf:** a shaggy grey wolf-man with a dark mane.
+  - **Kit:** now orange and lime. The away kit is lime and orange.
+
 ## v2.99 (15 Oct 2026)
 - **Fixed:** the Vampire Thrower no longer has two hands on one side. His right arm is raised, holding the ball.
 - **Changed:** the Vampire Blitzer now wears a bat-shaped half-mask with red eyes behind it, its ears and a spiked crest on top. His pale chin and fangs show below it.
