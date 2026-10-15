@@ -2,6 +2,16 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.01 (15 Oct 2026)
+- **Changed:** the computer plays smarter ([#19](https://github.com/sirspoon/BludBowl/issues/19)). In test matches against the old version it scored 22 touchdowns to 14.
+  - **Re-rolls:** it always re-rolls a roll that decides a touchdown, whether that's its carrier going in or stopping a carrier who could score next turn. It spends spare re-rolls late in a half.
+  - **Blitzing the carrier:** it treats a ball carrier who could score next turn as urgent, and will blitz them at worse odds.
+  - **Moving the ball:** it no longer hands the ball backwards from a safe carrier. With the carrier deep and safe, players up the pitch hold their ground instead of all running back.
+  - **Touchbacks:** it gives the ball to an unmarked player well up the pitch who handles it well, rather than whoever is furthest back.
+  - **Really Stupid players:** it moves a team-mate next to its Trolls, and other Really Stupid players, before activating them.
+  - **Passing teams:** they pass more.
+  - **Throw Team-mate:** it hands the ball to a Goblin or Gnoblar next to a thrower to throw them in. Throw Team-mate teams fling team-mates up the pitch into space.
+
 ## v3.00 (15 Oct 2026)
 Everything since version numbering began (v2.00), rolled into one update.
 
