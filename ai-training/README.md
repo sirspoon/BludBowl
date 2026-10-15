@@ -79,5 +79,7 @@ python3 ai-training/compare.py --mincr 1700                                  # o
   ([source](https://github.com/christerk/ffb)) streams them over a WebSocket from `fumbbl.com:22223/command`
   (send `clientReplay` with the `gameId` = the match's `replayId`; messages are LZString-compressed JSON). Cloud
   sessions' proxy can't carry WebSockets, so `fumbbl-fetch-replays.js` has to be run on a normal computer and the
-  files uploaded. The `.jnlp` file the FUMBBL site offers is only a launcher for their Java client.
+  files uploaded. [FUMBBLPlus/fumbblreplay](https://github.com/FUMBBLPlus/fumbblreplay) (Python, 2019) does the same and
+  confirms the format; its authors ask that nobody mass-downloads replays without first contacting Christer and
+  SzieberthAdam on FUMBBL. The `.jnlp` file the FUMBBL site offers is only a launcher for their Java client.
 - Be polite to FUMBBL: it's run by volunteers. Fetch slowly and only keep summary data.
