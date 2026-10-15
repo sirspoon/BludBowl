@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.06 (15 Oct 2026)
+- **Fixed:** a match could freeze after a Throw Team-mate. If the thrown player crash-landed onto the loose ball and someone then caught it, the game handed back control before the catch was rolled, and the catch left the game locked with nobody able to act. It now waits for the ball to settle first.
+
 ## v3.05 (15 Oct 2026)
 - **Changed:** the computer defends better and makes fewer careless turnovers ([#19](https://github.com/sirspoon/BludBowl/issues/19)). Over 240 test matches against v3.04 it scored 214 touchdowns to 173 and won 93 to 66, with 12% fewer turnovers.
   - **Staying on the ball carrier:** after pushing back an opposing ball carrier who stays on their feet, it follows up, so they're still marked and have to dodge away.

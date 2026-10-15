@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.05</title>
+    <title>BludBowl 3.06</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.05</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.06</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -12312,8 +12312,13 @@
         }
 
         // a Throw Team-mate that ends without a turnover: the team carries on with its turn
-        function ttmCarryOn() {
-            if (REPLAY.get()) { REPLAY.then(ttmCarryOn); return; }
+        function ttmCarryOn(key) {
+            if (REPLAY.get()) { REPLAY.then(() => ttmCarryOn(key)); return; }
+            // the ball may still be bouncing (a thrown player who falls on it knocks it loose) and someone may be rolling to
+            // catch it: carry on once that's over, or the catch puts the game back in its locked state with nobody to unlock it
+            const k = state.half + ':' + state.activeTeam + ':' + state.turn[state.activeTeam];
+            if (key != null && key !== k) return;   // the turn ended while the ball settled
+            if (!playSettled()) { afterSettled(120, () => ttmCarryOn(k)); return; }
             if (checkTouchdown()) return;
             state.mode = MODES.IDLE;
             refreshSelection(getPlayerById(state.selectedId));
