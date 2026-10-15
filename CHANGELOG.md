@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.76 (15 Oct 2026)
+- **Changed:** in the Team Builder, changing a team's race now changes its colours to that race's default team colours. Colours you've picked yourself are kept, the same way a team name you've typed is kept. New teams also start in their race's default team colours.
+- **Fixed:** the Halflings and Imperial Nobility now have proper away kits: cream with green, and orange-red with dark steel. Before, their away kit was the same as their home kit, so two of them meeting (or a clash with similar colours) left both teams in the same colours.
+
 ## v2.75 (15 Oct 2026)
 - **Changed:** Noble Blitzers' colours are the other way round from v2.74. The pauldrons and the eagle are in the team's secondary colour, and the chest, skirt and knee plates are in the primary colour instead of silver. With the default kit that's orange-red shoulders and eagle over a dark body.
 

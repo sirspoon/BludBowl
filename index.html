@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.75</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.76</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -2900,10 +2900,13 @@
                 }
                 return a[0] + ' ' + (used.size + 1);
             }
+            // a race's default team colours (its home kit on the pitch), as [primary, secondary]
+            const raceKit = race => { try { const k = (RACES[race] && RACES[race].style) || HOME_KIT[race]; return k ? [k.fill.slice(0, 7), k.text.slice(0, 7)] : null; } catch (e) { return null; } };
             function blank(race) {
                 const R = RACES[race];
                 const col = { halfling: ['#4d7c0f', '#fef3c7'], imperial: ['#3b3f48', '#ea580c'], chaosdwarf: ['#7f1d1d', '#d4a017'], darkelf: ['#4c1d95', '#e5e7eb'], amazon: ['#0f766e', '#fde047'], bretonnian: ['#1e40af', '#fef3c7'], human: ['#1d4ed8', '#f8fafc'], orc: ['#3f6212', '#facc15'], highelf: ['#f8fafc', '#1d4ed8'], lizardmen: ['#0f8b80', '#ff9a3c'], dwarf: ['#7f1d1d', '#fcd34d'], undead: ['#3b0764', '#f5f0dc'], skaven: ['#4a3424', '#b6f04a'], ogre: ['#8b2c1f', '#f3d58a'], goblin: ['#6f9f2c', '#2a0b3d'], woodelf: ['#1e5631', '#ffe8a3'], blackorc: ['#991b1b', '#fde047'] }[race] || ['#b91c1c', '#fde68a'];
-                return clean({ id: uid(), name: 'New ' + R.name, race, primary: col[0], secondary: col[1], players: [], rerolls: 2, apothecary: !noApo(race), coaches: 0, cheerleaders: 0, fans: 1, bribes: 0 });
+                const kit = raceKit(race) || col;
+                return clean({ id: uid(), name: 'New ' + R.name, race, primary: kit[0], secondary: kit[1], players: [], rerolls: 2, apothecary: !noApo(race), coaches: 0, cheerleaders: 0, fans: 1, bribes: 0 });
             }
 
             // ---- the team as the match engine wants it ----
@@ -3290,6 +3293,10 @@
                             // a name still on its default ("New Humans", or blank) follows the race
                             const nm = (cur.name || '').trim();
                             if (!nm || nm === 'My Team' || Object.values(RACES).some(r => r.name && nm === 'New ' + r.name)) { cur.name = 'New ' + RACES[el.value].name; $('tb-name').value = cur.name; }
+                            // colours still on the old race's defaults follow the new race's default team (colours picked by hand stay)
+                            const was = [raceKit(cur.race), blank(cur.race)].map(k => k && (Array.isArray(k) ? k : [k.primary, k.secondary]));
+                            const same = (a, b) => String(a || '').toLowerCase() === String(b || '').toLowerCase();
+                            if (was.some(k => k && same(k[0], cur.primary) && same(k[1], cur.secondary))) { const nk = raceKit(el.value); if (nk) { cur.primary = nk[0]; cur.secondary = nk[1]; } }
                             cur.race = el.value; cur.players = []; cur.bribes = Math.min(cur.bribes, maxOf('bribes', cur.race, cur));
                             if (isMP(cur)) { cur.stars = []; cur.mind = {}; }
                         });
@@ -5292,8 +5299,8 @@
             dwarf: { fill: '#1e3a8a', text: '#fcd34d', endBg: '#172554', endText: '#fcd34d', shade: 'rgba(0,0,0,0.55)' },          // navy with gold
             undead: { fill: '#1c1917', text: '#a3e635', endBg: '#0c0a09', endText: '#a3e635', shade: 'rgba(0,0,0,0.55)' },
             amazon: { fill: '#fde047', text: '#0f766e', endBg: '#b59f20', endText: '#0b524c', shade: 'rgba(0,0,0,0.45)' },         // gold with teal
-            halfling: { fill: '#4d7c0f', text: '#fef3c7', endBg: '#3f6212', endText: '#fde68a', shade: 'rgba(0,0,0,0.5)' },    // shire green with cream
-            imperial: { fill: '#3b3f48', text: '#ea580c', endBg: '#26292f', endText: '#fb923c', shade: 'rgba(0,0,0,0.55)' },  // dark steel with orange-red
+            halfling: { fill: '#fef3c7', text: '#3f6212', endBg: '#d6c89a', endText: '#3f6212', shade: 'rgba(80,90,60,0.45)' },  // away: cream with shire green
+            imperial: { fill: '#ea580c', text: '#1f2937', endBg: '#9a3412', endText: '#111827', shade: 'rgba(0,0,0,0.5)' },     // away: orange-red with dark steel
             bretonnian: { fill: '#f5f0dc', text: '#9f1239', endBg: '#c9c2a6', endText: '#7f0f2e', shade: 'rgba(80,90,110,0.45)' },  // cream with crimson
             chaosdwarf: { fill: '#111827', text: '#f97316', endBg: '#05070c', endText: '#fb923c', shade: 'rgba(0,0,0,0.55)' },     // black with orange
             darkelf: { fill: '#14532d', text: '#fca5a5', endBg: '#0d3a1f', endText: '#fecaca', shade: 'rgba(0,0,0,0.55)' }      // dark green with pink          // charcoal with grave-light green
