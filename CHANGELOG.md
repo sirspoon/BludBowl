@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.95 (15 Oct 2026)
+- **Changed:** the Tomb Kings have been redrawn to look like their models.
+  - **Everyone:** grinning skulls, gold helms, broad gold collars set with turquoise and red enamel, exposed ribs, black shorts, bandage wraps and a brown loincloth flap with a skull buckle.
+  - **Linemen and Throwers:** enamel-banded caps.
+  - **Blitzers:** a tall flame-crested helm, a winged breastplate and gold greaves.
+  - **Tomb Guardians:** hulking and bandaged, with a winged breastplate, a segmented steel apron and a gold fan-crest studded with skulls.
+  - **Kit:** now turquoise and red, with the armour always gold. The away kit is red and turquoise.
+
 ## v2.94 (15 Oct 2026)
 - **Added:** two more teams from the 2025 rules.
   - **Snotlings** (mud orange and yellow, Underworld Challenge):
