@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.96 (15 Oct 2026)
+- **Changed:** the Tomb Guardians wear the striped nemes headdress again, now in turquoise and gold with jackal ears.
+- **Changed:** the Tomb Kings' faces look more like skulls: deep sockets with a glint, a nasal hole and a row of teeth.
+
 ## v2.95 (15 Oct 2026)
 - **Changed:** the Tomb Kings have been redrawn to look like their models.
   - **Everyone:** grinning skulls, gold helms, broad gold collars set with turquoise and red enamel, exposed ribs, black shorts, bandage wraps and a brown loincloth flap with a skull buckle.
