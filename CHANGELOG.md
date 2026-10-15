@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.78 (15 Oct 2026)
+- **Changed:** Halfling Hefties no longer have face masks, so you can see their faces, and their pink bellies hang out between their tops and their trousers.
+
 ## v2.77 (15 Oct 2026)
 - **Changed:** Halfling Hefties look the part. They're chunkier, with a wider, rounder body and shoulder pads, and wear an American football helmet in the team colour with a stripe down the middle and a face mask.
 
