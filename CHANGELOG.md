@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.70 (15 Oct 2026)
+- **Changed:** the Human and Imperial Ogre no longer has tusks over his lip.
+
 ## v2.69 (15 Oct 2026)
 - **Changed:** the Imperial Bodyguard no longer carries a shield, since nobody does in Blood Bowl. He keeps his two plumes and trim-coloured pauldrons.
 
