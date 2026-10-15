@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.09 (15 Oct 2026)
+- **Changed:** the computer uses its team re-rolls to save a turn ([#19](https://github.com/sirspoon/BludBowl/issues/19)). When a failed dodge, rush, pick-up or block would end the turn and three or more team-mates still have to act, it re-rolls. Before, it often kept the re-roll and lost the rest of the turn. Early in a half it keeps its last re-roll back unless five or more players would lose their go. Over 96 test matches against v3.08 it scored 92 touchdowns to 56, won 41 to 18, and had about 20% fewer turnovers.
+
 ## v3.08 (15 Oct 2026)
 - **Fixed:** when the computer's ball carrier was deep in its own half with no opponent nearby, the whole team ran back to stand round them on their own goal line. Now two players stay with the carrier as an escort, and the rest set up further up the pitch, where the carrier is heading. It only does this when no opponent could reach the carrier with a blitz. Over 192 test matches it played as well as v3.07.
 

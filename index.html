@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.08</title>
+    <title>BludBowl 3.09</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.08</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.09</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -18682,7 +18682,7 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
         const AI = (function () {
             const on = { 0: false, 1: false };
@@ -20366,9 +20366,19 @@
             // turn 8; with plenty, spend roughly one a turn. 'critical' = losing this roll costs the ball (or theirs is at stake).
             // a carrier who could reach the end zone next turn (a turn's move plus two Rushes)
             function tdThreat(c) { return !!c && onPitch(c) && toGo(c.x, c.team) <= (c.ma || 6) + 2; }
-            function rrWorth(ctx, critical, decisive) {
+            function rrWorth(ctx, critical, decisive, endsTurn) {
                 const me = state.activeTeam, rr = state.rr[me] || 0, turn = state.turn[me] || 1, left = Math.max(0, TURNS - turn);
                 if (rr <= 0) return false;
+                // (rrturn) a failure that ends the turn costs everyone still to act their go: worth a re-roll when that's
+                // several players (the last re-roll is kept back early in the half unless most of the team would lose out)
+                if (AIX.on(me, 'rrturn')) {
+                    const p = ctx ? ctx.player : state.combat && state.combat.atk;
+                    if (endsTurn === undefined && ctx) endsTurn = p && p.team === me && ['DODGE', 'RUSH', 'PICKUP', 'JUMP', 'LEAP'].includes(ctx.type);
+                    if (endsTurn && p) {
+                        const still = state.players.filter(q => q.team === me && q.id !== p.id && onPitch(q) && !q.hasActed && !q.isStunned && !q.isDistracted).length;
+                        if (still >= 5 || (still >= 3 && (rr >= 2 || left <= 3))) return true;
+                    }
+                }
                 if (critical === undefined && ctx) {
                     const p = ctx.player, c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                     critical = (c && c.id === p.id) || ['PICKUP', 'CATCH', 'PASS', 'THROW TEAMMATE', 'HAND-OFF', 'HANDOFF'].includes(ctx.type)
@@ -20402,7 +20412,7 @@
                 const blockCritical = state.ball.carrierId === c.atk.id || state.ball.carrierId === c.def.id || (chosen <= -10 && (state.rr[state.activeTeam] || 0) >= 3);   // the ball at stake (or our blocker going down, with re-rolls to spare)
                 const blockDecisive = (state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && tdThreat(c.def))
                     || (state.ball.carrierId === c.atk.id && toGo(c.atk.x, c.atk.team) <= (c.atk.remainingMA || 0) + 2);
-                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical, blockDecisive)) {
+                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) {
                     after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); });
                     return;
                 }

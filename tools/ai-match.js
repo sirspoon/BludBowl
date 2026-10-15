@@ -42,7 +42,7 @@ async function play(browser, port, job) {
     await p.waitForTimeout(250);
     if (!clicked) clicked = await p.evaluate(() => { const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) { b.click(); return true; } return false; });
     res = await p.evaluate(() => ({ over: !!state.isGameOver, half: state.half, turn: [state.turn[0], state.turn[1]], score: [state.score[0], state.score[1]],
-      cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length), to: MATCH.data ? MATCH.data.turnovers.slice() : [0, 0], bl: MATCH.data ? MATCH.data.blocks.slice() : [0, 0] }));
+      cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length), to: MATCH.data ? MATCH.data.turnovers.slice() : [0, 0], bl: MATCH.data ? MATCH.data.blocks.slice() : [0, 0], rr: MATCH.data ? MATCH.data.rerolls.slice() : [0, 0] }));
     if (res.over) break;
   }
   const rec = await p.evaluate(() => window.BB_STALLS || []).catch(() => []);
@@ -52,7 +52,7 @@ async function play(browser, port, job) {
   await ctx.close();
   const n = newHome ? 0 : 1;
   return { ...job, newSide: newHome ? 'home' : 'away', secs: +((Date.now() - t0) / 1000).toFixed(1), ...res,
-    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], newTO: res.to[n], oldTO: res.to[1 - n], newBl: res.bl[n], oldBl: res.bl[1 - n], recovered: rec, stuck, errs: errs.slice(0, 3) };
+    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], newTO: res.to[n], oldTO: res.to[1 - n], newBl: res.bl[n], oldBl: res.bl[1 - n], newRR: res.rr[n], oldRR: res.rr[1 - n], recovered: rec, stuck, errs: errs.slice(0, 3) };
 }
 
 // two-sided binomial test: how likely a split at least this uneven is if both sides were equally good
@@ -86,5 +86,6 @@ server.listen(0, async () => {
   if (recs) console.log(`stuck games recovered by the safety net: ${recs} (details in --out)`);
   console.log(`casualties  new caused ${sum('newCas')} - ${sum('oldCas')} old`);
   console.log(`turnovers   new ${sum('newTO')} - ${sum('oldTO')} old`);
+  console.log(`re-rolls    new ${sum('newRR')} - ${sum('oldRR')} old (per team per match: ${(sum('newRR') / Math.max(1, done.length)).toFixed(1)} - ${(sum('oldRR') / Math.max(1, done.length)).toFixed(1)})`);
   console.log(`blocks      new ${sum('newBl')} - ${sum('oldBl')} old (per team per match: ${(sum('newBl') / Math.max(1, done.length)).toFixed(1)} - ${(sum('oldBl') / Math.max(1, done.length)).toFixed(1)})`);
 });
