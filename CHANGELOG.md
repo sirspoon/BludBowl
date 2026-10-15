@@ -2,6 +2,22 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.94 (15 Oct 2026)
+- **Added:** two more teams from the 2025 rules.
+  - **Snotlings** (mud orange and yellow, Underworld Challenge):
+    - **Roster:** tiny Snotling Linemen, Fun-hoppas (Pogo), Stilty Runnas, Fungus Flingas (Bombardier), Pump Wagons and Trained Trolls.
+    - **Look:** the Snotlings are new sprites, in oversized pot helmets and patched vests. The Fun-hoppa bounces on a red mushroom, the Stilty Runna walks on stilts and the Fungus Flinga holds a glowing toadstool. The Pump Wagon is a rickety cart with a spiked roller, pumped by two Snotlings. The Trained Troll uses the Orcs' Troll sprite.
+    - **Special rules:** Bribery and Corruption, Low Cost Linemen and Swarming.
+  - **Tomb Kings** (lapis blue and gold, Sylvanian Spotlight):
+    - **Roster:** Skeleton Linemen, Throwers, Blitzers and hulking Tomb Guardians. No Apothecary allowed.
+    - **Look:** skeletons in striped nemes headdresses and gold collars. The Blitzers wear bronze breastplates, and the Tomb Guardians are hulking and bandaged.
+    - **Special rule:** Masters of Undeath. When they raise an opponent, the new player is a Skeleton Lineman.
+  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
+- **Added:** two new rules.
+  - **Swarming:** after both teams set up for a drive, the Snotlings bring on 1 to 3 extra Snotling Linemen from their Reserves, placed in their own half.
+  - **Insignificant:** a team can't have more Snotling Linemen than other players.
+- **Fixed:** the Pump Wagon, Tomb Guardian, Bloodspawn and Rotspawn now count, and are drawn, as Big Guys.
+
 ## v2.93 (15 Oct 2026)
 - **Changed:** the Bloodspawn has been redrawn again from more photos of the model.
   - **Head:** its own big, lumpy crimson head, with a muzzle of steel chain wrapped over its face, fangs below and a loose end of chain hanging down.
