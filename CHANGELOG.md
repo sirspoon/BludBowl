@@ -2,6 +2,24 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.84 (15 Oct 2026)
+- **Added:** two more teams from the 2025 rules.
+  - **Old World Alliance:**
+    - **Roster:** Human Linemen, Catchers, Throwers and Blitzers; Dwarf Linemen, Runners and Blitzers; a Troll Slayer; Halfling Hopefuls; and a single Big Guy (an Ogre or an Altern Forest Treeman, never both).
+    - **League:** Old World Classic.
+    - **Look:** crimson and gold. Each player uses their own race's sprite, and the Dwarfs are drawn a little smaller, as on the Dwarf team.
+  - **Gnomes:**
+    - **Roster:** Gnome Linemen, Woodland Foxes, Gnome Illusionists, Gnome Beastmasters and Altern Forest Treemen.
+    - **League:** Halfling Thimble Cup or Woodland League.
+    - **Look:** forest green and red. The Gnomes are new sprites: big noses, white beards and tall pointed hats. The Illusionist wears a starry wizard's hat and carries a wand, and the Beastmaster wears a leather cap and carries a whip. The fox wears a kit-coloured collar.
+  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
+  - **New skill: Trickster (Gnome Illusionist).**
+    - **What it does:** when an opponent is about to block the Illusionist, before the dice are counted, it vanishes and reappears in another free square next to the blocker. It picks the square that leaves the blocker the fewest assists.
+    - **Limits:**
+      - It only triggers against Block actions, not against other actions aimed at the Illusionist.
+      - It never lands on the ball.
+      - It never jumps into an End Zone while holding the ball.
+
 ## v2.83 (15 Oct 2026)
 - **Changed:** the Elven Union no longer have the white sash at the waist, which looked like they were holding swords.
 
