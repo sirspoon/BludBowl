@@ -19020,8 +19020,9 @@
                 const trouble = tzFor(c.x, c.y, me) > 0 || threatAt(c.x, c.y, me) >= 2;
                 receivers.forEach(r => {
                     if (AIX.on(me, 'handback') && !trouble && toGo(r.x, me) > toGo(c.x, me) + 1) return;   // not backwards to someone deeper when the carrier is safe
-                    const rv = bestSpotFor(r);
-                    if (rv < stay + (agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
+                    const pt = AIX.on(me, 'pass') && passingTeam(me);
+                    const rv = bestSpotFor(r) + (pt && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
+                    if (rv < stay + (pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
                     spots.forEach(s => {
                         const opts = [];
                         if (!state.handoffUsed && Math.max(Math.abs(s.x - r.x), Math.abs(s.y - r.y)) === 1) opts.push(['handoff', catchProb(r)]);
@@ -19029,7 +19030,7 @@
                         opts.forEach(([kind, p]) => {
                             const pe = rr ? 1 - Math.pow(1 - p, 2) * 0.9 : p;          // a team re-roll softens a miss
                             const passer = agileTeam(me) || hasSk(c, 'Pass') || (c.pa != null && c.pa <= 3);   // a team that can throw
-                            if (pe < (kind === 'handoff' ? 0.7 : passer ? (agileTeam(me) ? 0.55 : 0.62) : 0.8)) return;
+                            if (pe < (kind === 'handoff' ? 0.7 : passer ? (agileTeam(me) ? 0.55 : 0.62) - (pt ? 0.06 : 0) : 0.8)) return;
                             const ev = pe * rv + (1 - pe) * (stay - 12);               // a dropped ball is a turnover
                             if (ev > stay + 1.2 && (!best || ev > best.ev)) best = { ev, kind, r, s };
                         });
@@ -19392,6 +19393,12 @@
             function ttmScorePlan(me, act, lastTurn) {
                 const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null, pair = ttmPair(act);
                 if (!c || c.team !== me || !pair || pair.g.id !== c.id) return null;
+                const best = ttmScoreBest(pair, c, me);
+                if (!best || (best.pr < 0.3 && !lastTurn)) return null;
+                return { pid: pair.t.id, kind: pair.kick ? 'ktm' : 'ttm', tx: best.x, ty: best.y };
+            }
+            // the best square to throw (or kick) a ball-carrying team-mate at to score, and the chance it works
+            function ttmScoreBest(pair, c, me) {
                 let best = null;
                 const ez = endX(me);
                 for (let x = 0; x < CFG.cols; x++) for (let y = 0; y < CFG.rows; y++) {
@@ -19401,8 +19408,23 @@
                     else pr = ttmValue(pair.t, c, x, y, (sx, sy, landP, q) => q ? 0 : sx === ez ? landP : 0);   // scatters 3 from the target square
                     if (pr > 0 && (!best || pr > best.pr)) best = { x, y, pr };
                 }
-                if (!best || (best.pr < 0.3 && !lastTurn)) return null;
-                return { pid: pair.t.id, kind: pair.kick ? 'ktm' : 'ttm', tx: best.x, ty: best.y };
+                return best;
+            }
+            // hand the ball to a Goblin (or Gnoblar, Halfling...) standing next to a thrower, so it can be thrown in to score
+            function ttmHandoffPlan(me, act, carrier, lastTurn) {
+                if (!carrier || carrier.team !== me || !act.includes(carrier) || state.handoffUsed || hasSk(carrier, 'My Ball')) return null;
+                const pair = ttmPair(act.filter(p => p.id !== carrier.id));
+                if (!pair || pair.g.id === carrier.id || hasSk(pair.g, 'No Hands') || hasSk(pair.g, 'No Ball')) return null;
+                const best = ttmScoreBest(pair, pair.g, me);
+                if (!best) return null;
+                const spot = [{ x: carrier.x, y: carrier.y }].concat(movesFor(carrier).filter(m => m.prob >= 100))
+                    .find(sp => Math.max(Math.abs(sp.x - pair.g.x), Math.abs(sp.y - pair.g.y)) === 1);
+                if (!spot) return null;
+                const pr = catchProb(pair.g) * best.pr;
+                const td = movesFor(carrier).filter(m => m.x === endX(me)).reduce((a, m) => Math.max(a, m.prob / 100), 0);
+                if (pr <= td || !(pr >= 0.4 || (lastTurn && pr >= 0.15))) return null;
+                const sx = spot.x, sy = spot.y, stay = sx === carrier.x && sy === carrier.y;
+                return { pid: carrier.id, kind: 'handoff', receiver: pair.g.id, stay, pick: ms => stay ? null : (ms.find(m => m.x === sx && m.y === sy) || null) };
             }
             // last thing in a turn: throw a team-mate onto an opponent (their ball carrier above all) or land them next to the carrier
             function ttmEndPlan(me, act) {
@@ -19419,6 +19441,15 @@
                         if (Math.hypot(x - t.x, y - t.y) > 6.4 || (x === t.x && y === t.y)) continue;
                         const ev = ttmValue(t, g, x, y, fin);
                         if (ev >= 0.6 && (!best || ev > best.ev)) best = { ev, x, y };
+                    }
+                    if (!best && AIX.on(me, 'ttm') && state.players.filter(q => q.team === me && onPitch(q) && hasSk(q, 'Right Stuff')).length >= 2) {
+                        const open = (x, y) => !state.players.some(q => q.team !== me && onPitch(q) && !q.isDown && Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) <= 1);
+                        const adv = (x, y, landP, q) => q ? 0 : landP * (open(x, y) ? Math.max(0, toGo(g.x, me) - toGo(x, me)) / 4 : 0) * (toGo(x, me) <= CFG.cols / 2 ? 1.3 : 0.7);
+                        for (let x = 0; x < CFG.cols; x++) for (let y = 1; y < CFG.rows - 1; y++) {
+                            if (Math.hypot(x - t.x, y - t.y) > 6.4 || toGo(x, me) >= toGo(g.x, me) - 2) continue;
+                            const ev = ttmValue(t, g, x, y, adv);
+                            if (ev >= 0.6 && (!best || ev > best.ev)) best = { ev, x, y };
+                        }
                     }
                     return best ? { pid: t.id, kind: 'ttm', tx: best.x, ty: best.y, reserve: [t.id, g.id] } : null;
                 }
@@ -19510,6 +19541,32 @@
                 });
                 return best && best.s >= 2 ? blitzOn(best.p, best.d.id) : null;
             }
+            function babysitPlan(me, act, carrier) {
+                const sitter = q => q && q.team === me && !q.isDown && !q.isStunned && !q.isDistracted && !hasSk(q, 'Really Stupid') && onPitch(q);
+                for (const rs of act.filter(p => hasSk(p, 'Really Stupid') && !p.isDistracted)) {
+                    if (state.players.some(q => sitter(q) && q.id !== rs.id && cheb(q, rs) === 1)) continue;   // already has company
+                    // only worth it when he has something to do: an opponent within reach, or the ball nearby
+                    const busy = state.players.some(q => q.team !== me && onPitch(q) && !q.isDown && cheb(q, rs) <= 3) || (carrier && cheb(carrier, rs) <= 4);
+                    if (!busy) continue;
+                    let best = null;
+                    act.forEach(q => {
+                        if (q.id === rs.id || !sitter(q) || q.isDown || isBigGuy(q) || (carrier && (q.id === carrier.id || (carrier.team === me && cheb(q, carrier) === 1)))) return;
+                        if (tzFor(q.x, q.y, me) > 0) return;   // a dodge to get there: not worth it
+                        movesFor(q).forEach(m => {
+                            if (m.prob < 100 || Math.max(Math.abs(m.x - rs.x), Math.abs(m.y - rs.y)) !== 1) return;
+                            const v = -m.path.length - tzFor(m.x, m.y, me) * 2 + (toGo(m.x, me) < toGo(rs.x, me) ? 0.5 : 0);
+                            if (!best || v > best.v) best = { q, m, v };
+                        });
+                    });
+                    if (best) { const bx = best.m.x, by = best.m.y; return { pid: best.q.id, kind: 'move', pick: ms => ms.find(m => m.x === bx && m.y === by) || null }; }
+                }
+                return null;
+            }
+            // a team built to pass the ball: a real passer with someone to throw to
+            function passingTeam(me) {
+                const mine = state.players.filter(q => q.team === me && onPitch(q));
+                return agileTeam(me) || (mine.some(q => hasSk(q, 'Pass') || (q.pa != null && q.pa <= 2)) && mine.some(q => hasSk(q, 'Catch')));
+            }
             function carrierBlitz(me, act, carrier) {
                 if (!carrier || carrier.team === me || !onPitch(carrier) || carrier.isDown || state.blitzUsed) return null;
                 let best = null;
@@ -19564,6 +19621,8 @@
                 // last turn: a goblin with the ball can still be thrown in
                 const tt = ttmScorePlan(me, act, lastTurn);
                 if (tt) return tt;
+                // or hand the ball to the goblin next to the thrower, then throw him in
+                if (AIX.on(me, 'ttm')) { const th = ttmHandoffPlan(me, act, carrier, lastTurn); if (th) return th; }
 
                 // our carrier, still to move this turn: blocks that open a lane for it are worth more
                 const ourC = carrier && carrier.team === me && act.includes(carrier) && onPitch(carrier) && !state.charge ? carrier : null;
@@ -19589,6 +19648,8 @@
                 blocks.sort((a, b) => (a.e.pTurn < 0.05) !== (b.e.pTurn < 0.05) ? (a.e.pTurn < 0.05 ? -1 : 1) : (b.v - b.e.pTurn * 10) - (a.v - a.e.pTurn * 10));
                 const blockPlan = b => ({ pid: b.p.id, kind: 'block', target: b.d.id });
 
+                // babysit a Really Stupid player before he goes: a team-mate next to him (not Really Stupid) adds 2 to his roll
+                if (AIX.on(me, 'babysit')) { const bs = babysitPlan(me, act, carrier); if (bs) return bs; }
                 // 3. blocks with almost no risk come first
                 const safe = blocks.find(b => b.e.pTurn < 0.05);
                 if (safe) return blockPlan(safe);
@@ -20289,7 +20350,12 @@
                 debug: () => ({ plan, tried: [...tried], turnKey, pk, started, on: [on[0], on[1]] }),
                 targets: (me) => formationTargets(me, false),
                 debugPlug: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const t = c && threatOf(c); const pl = plugPlan(me, avail(me), c); return { t, pl: pl && pl.pid }; },
-                debugTtm: () => { const me = state.activeTeam, a = avail(me), pr = ttmPair(a); return { pair: pr && [pr.t.type, pr.g.type], plan: ttmEndPlan(me, a) }; }
+                debugTtm: () => { const me = state.activeTeam, a = avail(me), pr = ttmPair(a); return { pair: pr && [pr.t.type, pr.g.type], plan: ttmEndPlan(me, a) }; },
+                // for the automated checks of each AI improvement
+                debugX: { choose: () => { moveMemo = new Map(); return choose(); }, rrWorth: (ctx, c, d) => rrWorth(ctx, c, d),
+                    carrierBlitz: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const b = carrierBlitz(me, avail(me), c); return b && { pid: b.p.id, s: b.s }; },
+                    switchPlay: () => { moveMemo = new Map(); const c = getPlayerById(state.ball.carrierId); const sw = c && switchPlay(c, c.team); return sw && { kind: sw.kind, rid: sw.r.id }; },
+                    supportGoal: id => { const p = getPlayerById(id); return supportGoal(p, p.team); } }
             };
         })();
 
