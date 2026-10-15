@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.64 (15 Oct 2026)
+- **Changed:** the Rosters panel during a match also lists a saved team's players in their Team Builder roster order, within each group (in play, reserves, knocked out, out of the match). Before, they were in starting-formation order.
+
 ## v2.63 (15 Oct 2026)
 - **Fixed:** when picking your starting team (or your team for the next drive), a saved team's players are now listed in the same order as its roster in the Team Builder. Before, they came in the order they're placed in the starting formation (strongest on the line, quickest at the back). Star Players, Mercenaries and Journeymen, who aren't on the saved roster, come after. Where players start on the pitch hasn't changed.
 
