@@ -2,348 +2,40 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
-## v3.05 (15 Oct 2026)
-- **Changed:** Swarming is now tap-to-place.
-  - **Your team:** when the Snotlings swarm, you tap a free square in your half for each extra Snotling Lineman. Squares just behind the line glow. You can press Done or Skip to place fewer.
-  - **The computer's team:** it still places its own.
-  - **Set-up rules:** they still apply, so there are no more than 2 in each wide zone.
-
-## v3.04 (15 Oct 2026)
-- **Changed:** Star Player and Trickster choices are now made by tapping the pitch, instead of being decided automatically or picked from a list.
-  - **Trickster:** when your Gnome Illusionist is about to be blocked or hit by a Special Action, you tap the square they reappear in, even during the other coach's turn. The best squares glow, or you can choose to stay put. The computer still picks for its own Illusionists.
-  - **Zzharg Madeye:** on a roll of 2, the other coach taps who the blast hits instead (anyone within 3 squares, from either team).
-  - **Max Spleenripper:** you tap the victim of his second Chainsaw Attack, or decline it.
-  - **Other picks:** the Zoat question, Hypnotic Gaze and Ivar's Raiding Party (the square) are tapped too.
-  - **Bloodlust bites:** a Vampire who must feed lets you tap which Thrall to bite, or for Karina an opponent with Tasty Morsel, whenever there's more than one choice mid-turn.
-  - **Two-device play:** each of these picks goes to the coach who makes it.
-
-## v3.03 (15 Oct 2026)
-- **Added:** the last nine Star Players from the 2025 rules, each with their special rule and a sprite. This works toward [#16](https://github.com/sirspoon/BludBowl/issues/16).
-  - **Bilerot Vomitflesh** (Favoured of Nurgle): Putrid Regurgitation, Projectile Vomit once per half.
-  - **Guffle Pusmaw** (Favoured of Nurgle): Quick Bite. When an opponent he marks catches the ball, Guffle makes an Armour roll, and takes the ball if it breaks.
-  - **Withergrasp Doubledrool** (Favoured of Nurgle): Watch Out!, Dodge the first time he's blocked each drive.
-  - **Max Spleenripper** (Favoured of Khorne): Maximum Carnage, a second Chainsaw Attack on another opponent.
-  - **Scyla Anfingrimm** (Favoured of Khorne): Fury of the Blood God. A 1 for Unchannelled Fury on a Block means he makes two Blocks instead.
-  - **Zzharg Madeye** (Favoured of Hashut): Blastin' Solves Everything, a blunderbuss blast within 3 squares once per half.
-  - **Grashnak Blackhoof** (Chaos Clash): Gored by the Bull, an extra Block dice on a Blitz.
-  - **Lord Borak the Despoiler** (Chaos Clash): Lord of Chaos, a Block dice re-roll.
-  - **Rumbelow Sheepskin** (Halfling Thimble Cup): Ram, +1 to the Armour or Injury roll.
-- **Added:** Favoured of...
-  - **Fixed gods:** Khorne and the Norse are Favoured of Khorne, Nurgle are Favoured of Nurgle, and the Chaos Dwarfs are Favoured of Hashut.
-  - **Chosen gods:** the Chaos Chosen and Chaos Renegades pick their god in the Team Builder.
-  - **Star Players:** those dedicated to a god only play for teams of that god. H'thark now plays for Favoured of Hashut teams.
-- **Changed:** Nurgle's Plague Ridden Rotter can now be hired after a league game, like a Journeyman.
-- **Changed:** Trickster now also works against Special Actions aimed at the Illusionist: Stab, Chainsaw, Projectile Vomit and Chomp.
-
-## v3.02 (15 Oct 2026)
-- **Changed:** the Underworld Denizens' kit now matches the 2025 models: rust red plate with slate grey. The away kit is slate grey with red.
-
-## v3.01 (15 Oct 2026)
-- **Added:** the **Underworld Denizens** (deep purple and warpstone green, Underworld Challenge). This is the last team from the 2025 rules, so all 30 are now in the game.
-  - **Roster:** Goblin Linemen, up to 6 Snotlings (Insignificant), Skaven Clanrats, a Thrower, a Gutter Runner, a Blitzer, and a single Big Guy (a Troll or a Rat Ogre).
-  - **Special rule:** Bribery and Corruption.
-  - **Look:** everyone uses their own race's sprite in the team's colours.
-  - **Where they're available:** exhibition matches, the Team Builder, leagues, two-device play and Sevens, with a default team and a Sevens squad.
-- **Changed:** Animosity now checks who's on the receiving end. The Skaven's Animosity (Goblin) only applies when passing or handing off to a Goblin. The Renegades' Animosity (All) still applies to everyone.
-
 ## v3.00 (15 Oct 2026)
-- **Changed:** Necromantic Horror has been redrawn to look like the Wolfenburg team.
-  - **Everyone:** orange-and-black striped jerseys, black pads with lime rims, dark shorts and rope belts.
-  - **Zombies and Ghouls:** now have their own sprites. The Zombies are rotting and green-grey, and the Ghouls are grey, in grilled knight's helms with a lime stripe and blue boots.
-  - **Wraith:** a bedsheet ghost with holes and green eyes, a bony claw pointing up and boots dangling on ropes below.
-  - **Flesh Golem:** patched together, with green stitched-on parts, a black helm, spiked pads, a bare chest and a splinted leg.
-  - **Werewolf:** a shaggy grey wolf-man with a dark mane.
-  - **Kit:** now orange and lime. The away kit is lime and orange.
+One big update rolling up everything from v2.52 onwards.
 
-## v2.99 (15 Oct 2026)
-- **Fixed:** the Vampire Thrower no longer has two hands on one side. His right arm is raised, holding the ball.
-- **Changed:** the Vampire Blitzer now wears a bat-shaped half-mask with red eyes behind it, its ears and a spiked crest on top. His pale chin and fangs show below it.
+**Every team from the 2025 rules (all 30)**
+- **Added:** 15 teams: Halflings, Imperial Nobility, Norse, Elven Union, Old World Alliance, Gnomes, Chaos Chosen, Chaos Renegades, Khorne, Nurgle, Snotlings, Tomb Kings, Necromantic Horror, Vampires and Underworld Denizens. Each has a default team, a Sevens squad, names, kits and away kits, and can be used in exhibition matches, the Team Builder, leagues, two-device play and Sevens.
+- **Sprites:** new for almost every new team, drawn to look like their official models.
+- **Leagues:** a new Chaos Clash league. The Norse and Chaos Dwarfs can choose it too.
+- **Big Guy limits:** one for the Old World Alliance, the Chaos Chosen and the Underworld Denizens, and up to three for the Renegades.
+- **New skills and rules:**
+  - Pick-me-up, Trickster, Animosity (All) and Animosity (Goblin), Decay and Plague Ridden.
+  - Swarming, which you place by tapping the pitch, and Insignificant.
+  - Thrall bites for Bloodlust, and Raise the Dead raising each team's own Lineman.
+  - No Apothecary for Nurgle, the Tomb Kings or Necromantic Horror.
+- **Favoured of...:** some teams are dedicated to a Chaos god. The Chaos Chosen and Renegades choose theirs in the Team Builder.
 
-## v2.98 (15 Oct 2026)
-- **Changed:** the Vampires have been redrawn to look like their models.
-  - **Vampires:** pale, dressed in dark grey, with towering bat-wing collars, capes and knee guards in crimson.
-    - **Runner:** a great sweep of dark hair, a silver circlet and a purple bodice.
-    - **Thrower:** a white shirt, a crimson cravat and a dark breastplate.
-    - **Blitzer:** a bat-faced crimson helm with a spiked crest, and dark plate with crimson panels.
-  - **Thralls:** long straggly hair, big white shirts with puffed sleeves, a crimson sash and trousers, and brown boots.
-  - **Kit:** now crimson and charcoal. The away kit is bone grey and crimson.
-- **Fixed:** the Vargheist's wings are narrower, so they're no longer clipped at the sides.
+**Star Players**
+- **Added:** the last nine 2025 Star Players, with their special rules: Bilerot Vomitflesh, Guffle Pusmaw, Withergrasp Doubledrool, Max Spleenripper, Scyla Anfingrimm, Zzharg Madeye, Grashnak Blackhoof, Lord Borak and Rumbelow Sheepskin ([#16](https://github.com/sirspoon/BludBowl/issues/16)).
+- **Favoured of...:** god-specific Star Players only play for that god's teams.
+- **Tap to choose:** Star Player and Trickster choices are now made by tapping the pitch. The defending coach picks Trickster squares, even on the other coach's turn.
 
-## v2.97 (15 Oct 2026)
-- **Added:** the last two undead teams from the 2025 rules. Both play in the Sylvanian Spotlight and have Masters of Undeath.
-  - **Necromantic Horror** (grave indigo and ghost green):
-    - **Roster:** Zombie Linemen, Ghoul Runners, Wraiths, Flesh Golems and Werewolves. No Apothecary allowed.
-    - **Look:** new sprites for a floating, hooded Wraith with glowing eyes, a stitched patchwork Flesh Golem with neck bolts, and a snarling Werewolf. The Zombies and Ghouls use the Undead team's sprites.
-  - **Vampires** (black and blood red):
-    - **Roster:** Thrall Linemen, Vampire Runners, Throwers and Blitzers (Bloodlust, Hypnotic Gaze), and a Vargheist.
-    - **Look:** the Thralls are dazed, with a bandaged bite. The Vampires are pale and caped, with high collars, slicked hair and red eyes, and the Blitzer wears dark plate. The Vargheist is a bat-winged monster.
-  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
-- **Added:** a thirsty Vampire (failed Bloodlust) now bites an adjacent Thrall team-mate.
-  - **The bite:** an Injury roll, where a Casualty is only Badly Hurt.
-  - **Turnover:** only if the Thrall had the ball and drops it.
-  - **No Thrall adjacent:** it's still a Turnover, and the Vampire is Distracted.
+**Replays**
+- **Added:** replays of passes, Throw Team-mates and bombs once the dice are done. They're close-ups in a 16-bit style, with slow-motion highlights, blood and a squelch, and chains of crash landings.
+- **Settings:** Settings → Replays turns them on or off.
+- **Blocks:** the block clash animation now shows the ball in the carrier's hand.
 
-## v2.96 (15 Oct 2026)
-- **Changed:** the Tomb Guardians wear the striped nemes headdress again, now in turquoise and gold with jackal ears.
-- **Changed:** the Tomb Kings' faces look more like skulls: deep sockets with a glint, a nasal hole and a row of teeth.
+**Music and sound**
+- **Pitch music:** the Jungle Temple and High Elf pitches have their own music.
+- **Team calls:** picking a team can play a call of its own ("Ogres, my lord!").
 
-## v2.95 (15 Oct 2026)
-- **Changed:** the Tomb Kings have been redrawn to look like their models.
-  - **Everyone:** grinning skulls, gold helms, broad gold collars set with turquoise and red enamel, exposed ribs, black shorts, bandage wraps and a brown loincloth flap with a skull buckle.
-  - **Linemen and Throwers:** enamel-banded caps.
-  - **Blitzers:** a tall flame-crested helm, a winged breastplate and gold greaves.
-  - **Tomb Guardians:** hulking and bandaged, with a winged breastplate, a segmented steel apron and a gold fan-crest studded with skulls.
-  - **Kit:** now turquoise and red, with the armour always gold. The away kit is red and turquoise.
-
-## v2.94 (15 Oct 2026)
-- **Added:** two more teams from the 2025 rules.
-  - **Snotlings** (mud orange and yellow, Underworld Challenge):
-    - **Roster:** tiny Snotling Linemen, Fun-hoppas (Pogo), Stilty Runnas, Fungus Flingas (Bombardier), Pump Wagons and Trained Trolls.
-    - **Look:** the Snotlings are new sprites, in oversized pot helmets and patched vests. The Fun-hoppa bounces on a red mushroom, the Stilty Runna walks on stilts and the Fungus Flinga holds a glowing toadstool. The Pump Wagon is a rickety cart with a spiked roller, pumped by two Snotlings. The Trained Troll uses the Orcs' Troll sprite.
-    - **Special rules:** Bribery and Corruption, Low Cost Linemen and Swarming.
-  - **Tomb Kings** (lapis blue and gold, Sylvanian Spotlight):
-    - **Roster:** Skeleton Linemen, Throwers, Blitzers and hulking Tomb Guardians. No Apothecary allowed.
-    - **Look:** skeletons in striped nemes headdresses and gold collars. The Blitzers wear bronze breastplates, and the Tomb Guardians are hulking and bandaged.
-    - **Special rule:** Masters of Undeath. When they raise an opponent, the new player is a Skeleton Lineman.
-  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
-- **Added:** two new rules.
-  - **Swarming:** after both teams set up for a drive, the Snotlings bring on 1 to 3 extra Snotling Linemen from their Reserves, placed in their own half.
-  - **Insignificant:** a team can't have more Snotling Linemen than other players.
-- **Fixed:** the Pump Wagon, Tomb Guardian, Bloodspawn and Rotspawn now count, and are drawn, as Big Guys.
-
-## v2.93 (15 Oct 2026)
-- **Changed:** the Bloodspawn has been redrawn again from more photos of the model.
-  - **Head:** its own big, lumpy crimson head, with a muzzle of steel chain wrapped over its face, fangs below and a loose end of chain hanging down.
-  - **Quills:** they now run along its head and spine.
-  - **Arms:** one wears a spiked brass gauntlet over the forearm. This replaces the gilded maw.
-
-## v2.92 (15 Oct 2026)
-- **Changed:** the Khorne Bloodspawn has been redrawn to look like its model.
-  - **Body and head:** a hunched, ribbed crimson brute, its head wrapped in steel chains, with blue-black quills bursting from its back.
-  - **Arms:** one ends in a brass-gilded, fanged maw, and the other is a brass-knuckled fist.
-  - **Belt:** hung with skulls and a brass star.
-  - **Legs:** one bare on a black hoof, the other in a brass-banded greave and boot with a blue knee pad.
-
-## v2.91 (15 Oct 2026)
-- **Added:** two more Chaos teams from the 2025 rules. Both play in the Chaos Clash and have Brawlin' Brutes.
-  - **Khorne** (crimson and brass):
-    - **Roster:** Bloodborn Marauders (Frenzy), Khorngors (Horns, Juggernaut, Jump Up), Bloodseekers (ST 4, Frenzy) and a Bloodspawn.
-    - **Look:** the Marauders are bare-chested in caged, horned helms. The Khorngors are snarling bull-beastmen in spiked red helms. The Bloodseekers wear huge red breastplates, with the great horned icon on their backs. The Bloodspawn is a hulking red beast with a fanged maw in its chest.
-  - **Nurgle** (plague green and orange):
-    - **Roster:** Rotters, Pestigors, Bloaters and a Rotspawn. Nurgle can't hire an Apothecary.
-    - **Look:** pale, sore-covered bellies, green dome helms with the Nurgle icon, orange shorts and gloves. The Pestigors have goat horns, the Bloaters are huge, and the Rotspawn has tentacles and antlers.
-  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
-- **Added:** two new traits.
-  - **Decay:** +1 to Casualty rolls against the player.
-  - **Plague Ridden:** once per game, when a Plague Ridden player kills an opponent, a new Rotter joins that team's Reserves for the rest of the match. In a league, they don't stay on the roster after the game yet.
-
-## v2.90 (15 Oct 2026)
-- **Changed:** the Chaos Chosen wear closed, horned helms again, with a red-glowing visor and a grille over the mouth. Their bare arms and lighter armour from v2.89 stay.
-
-## v2.89 (15 Oct 2026)
-- **Changed:** the Chaos Chosen look less like robots.
-  - **Face:** a snarling, bearded face with glowing eyes shows under an open, horned helm.
-  - **Arms:** bare and brawny, with red vambraces and dark gauntlets.
-  - **Body and legs:** a red breastplate with banded belly plates, bare thighs and red knee plates.
-  - **Pauldrons:** a little smaller, still flame-painted.
-- **Changed:** the Chosen's Big Guys now match the team.
-  - **Troll and Minotaur:** each wears a spiked black pauldron with red flames and a black belt.
-  - **Ogre:** flames run up his shoulder pads, and he has a black belt.
-
-## v2.88 (15 Oct 2026)
-- **Changed:** the Chaos Renegades now all look like one team.
-  - **Humans:** much less armoured. They wear an open helm (so you can see their faces), a kit breastplate over dark leathers, one Chaos-starred pauldron, bare arms with lime wraps and kit knee pads.
-  - **Thrower:** goes bare-headed with a lime mohawk.
-  - **Goblin, Orc, Skaven and Dark Elf:** they get Renegade pauldrons with the Chaos star, lime wraps or belts and lime crests. The Dark Elf has a lime streak in her hair.
-  - **Troll, Minotaur and Rat Ogre:** each gets a big spiked pauldron.
-  - **Ogre:** his shoulder pads are now magenta with Chaos stars.
-
-## v2.87 (15 Oct 2026)
-- **Added:** two Chaos teams from the 2025 rules.
-  - **Chaos Chosen** (blood red and black):
-    - **Roster:** Beastman Linemen with Horns, armoured Chaos Chosen with Arm Bar, and a single Big Guy (a Troll, an Ogre or a Minotaur).
-    - **Look:** the Beastmen are bare-chested and goat-horned, in steel half-helms. The Chosen wear heavy plate, with flames painted up their pauldrons.
-  - **Chaos Renegades** (magenta and lime):
-    - **Roster:** Renegade Humans and a Thrower, one each of a Goblin, Orc, Skaven and Dark Elf, and up to three Big Guys (one each of a Troll, an Ogre, a Minotaur and a Rat Ogre).
-    - **Look:** the Humans wear grilled helmets and plate with a Chaos star on the pauldrons. The others wear their own races' sprites in the Renegade colours.
-  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
-- **Added:** the **Animosity (All)** trait, which every Renegade except the Big Guys has. When one passes or hands off to a team-mate, a 1 on a D6 means they refuse and their activation ends.
-- **Added:** a new league, the **Chaos Clash**, for the Chosen and the Renegades. The Norse and the Chaos Dwarfs can now pick it as well.
-- **Not yet in:** the **Favoured of...** rule (choosing a Chaos god), because none of the god-specific Star Players are in the game yet. Chaos Clash teams can hire the Star Players who play for anyone.
-
-## v2.86 (15 Oct 2026)
-- **Changed:** each Gnome Beastmaster now brings an animal, picked at random for every player each match.
-  - **Goose:** a big grey goose, side on, with its wings raised and spread and its beak open mid-honk.
-  - **Badger:** a stocky grey badger with a black-and-white face.
-  - **Team Builder:** shows the goose.
-
-## v2.85 (15 Oct 2026)
-- **Changed:** the Gnomes have been redrawn to look like their models.
-  - **Everyone:** a floppy pixie hood in the team's second colour, a huge nose, pointed ears, a big beard, a leaf-trimmed jacket, short trousers, steel knee pads and curly-toed shoes. Each gnome has one arm raised in a wave.
-  - **Lineman:** grey beard.
-  - **Beastmaster:** ginger beard, with a fur-lined hood and a whip.
-  - **Illusionist:** white beard, a tall bent hat and a gnarled staff sprouting leaves.
-  - **Woodland Fox:** now drawn at full stretch, with a stripy coat and a streaming tail.
-
-## v2.84 (15 Oct 2026)
-- **Added:** two more teams from the 2025 rules.
-  - **Old World Alliance:**
-    - **Roster:** Human Linemen, Catchers, Throwers and Blitzers; Dwarf Linemen, Runners and Blitzers; a Troll Slayer; Halfling Hopefuls; and a single Big Guy (an Ogre or an Altern Forest Treeman, never both).
-    - **League:** Old World Classic.
-    - **Look:** crimson and gold. Each player uses their own race's sprite, and the Dwarfs are drawn a little smaller, as on the Dwarf team.
-  - **Gnomes:**
-    - **Roster:** Gnome Linemen, Woodland Foxes, Gnome Illusionists, Gnome Beastmasters and Altern Forest Treemen.
-    - **League:** Halfling Thimble Cup or Woodland League.
-    - **Look:** forest green and red. The Gnomes are new sprites: big noses, white beards and tall pointed hats. The Illusionist wears a starry wizard's hat and carries a wand, and the Beastmaster wears a leather cap and carries a whip. The fox wears a kit-coloured collar.
-  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
-  - **New skill: Trickster (Gnome Illusionist).**
-    - **What it does:** when an opponent is about to block the Illusionist, before the dice are counted, it vanishes and reappears in another free square next to the blocker. It picks the square that leaves the blocker the fewest assists.
-    - **Limits:**
-      - It only triggers against Block actions, not against other actions aimed at the Illusionist.
-      - It never lands on the ball.
-      - It never jumps into an End Zone while holding the ball.
-
-## v2.83 (15 Oct 2026)
-- **Changed:** the Elven Union no longer have the white sash at the waist, which looked like they were holding swords.
-
-## v2.82 (15 Oct 2026)
-- **Changed:** the Elven Union Blitzer now has dark hair.
-
-## v2.81 (15 Oct 2026)
-- **Changed:** each Elven Union position now has its own build.
-  - **Catchers:** slim and lightly kitted, with a short vest and no shoulder pads. They have bare arms, a bare midriff and thin legs.
-  - **Throwers:** hold the ball up high in a raised arm.
-  - **Blitzers:** broader, with bigger spiked shoulder pads, steel bracers and knee guards.
-  - **Linemen:** unchanged, in between the Catchers and the Blitzers.
-
-## v2.80 (15 Oct 2026)
-- **Changed:** the Norse and the Elven Union now look like their models.
-  - **Norse:** they now play in sky blue and yellow.
-    - Everyone has a bare chest with a strap and a round boss, blue-and-yellow shoulder pads, a round belt buckle, a loincloth, leg-wrapped trousers and brown boots.
-    - The Raiders wear horned, face-caged helmets. The Berserkers are bald with a ginger crest and a big roaring beard.
-    - The Ulfwerener wears a wolf pelt with the wolf's head on one shoulder, instead of having a wolf's head.
-    - The Beer Boar is dark and bristly, with a hooped barrel strapped on its back.
-  - **Elven Union:** they now play in purple and gold.
-    - Everyone has big swept-back blond hair, a white face mask, a padded top with red gems, gold trousers and gloves, and a white sash.
-    - The Catcher has a streaming ponytail, the Thrower holds a ball, and the Blitzer has spiked shoulder pads.
-
-## v2.79 (15 Oct 2026)
-- **Added:** two more teams from the 2025 rules.
-  - **Norse (Tier 1):** Norse Raiders, Beer Boars, Berserkers, Valkyries, Ulfwereners and a Yhetee, in the Old World Classic. A new skill comes with them, the Beer Boar's Pick-me-up: at the end of the opposition's turn, each Prone team-mate within 3 squares stands up on a 5+.
-  - **Elven Union (Tier 2):** Elf Linemen, Throwers, Catchers and Blitzers, in the Elven Kingdoms League. Their home pitch is the elven one.
-  - **Where they're available:** the match picker, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
-  - **Sprites:**
-    - **Norse:** horned helmets and beards for the Raiders, wild-haired bare-chested Berserkers, winged helmets and braids for the Valkyries, a wolf's head for the Ulfwerener, a shaggy white Yhetee, and a little boar carrying a barrel.
-    - **Elven Union:** built from the High and Wood Elves, the Blitzer with a red crest.
-- **Changed:** every list of teams is now in alphabetical order, both the races and the saved teams under each race.
-
-## v2.78 (15 Oct 2026)
-- **Changed:** Halfling Hefties no longer have face masks, so you can see their faces, and their pink bellies hang out between their tops and their trousers.
-
-## v2.77 (15 Oct 2026)
-- **Changed:** Halfling Hefties look the part. They're chunkier, with a wider, rounder body and shoulder pads, and wear an American football helmet in the team colour with a stripe down the middle and a face mask.
-
-## v2.76 (15 Oct 2026)
-- **Changed:** in the Team Builder, changing a team's race now changes its colours to that race's default team colours. Colours you've picked yourself are kept, the same way a team name you've typed is kept. New teams also start in their race's default team colours.
-- **Fixed:** the Halflings and Imperial Nobility now have proper away kits: cream with green, and orange-red with dark steel. Before, their away kit was the same as their home kit, so two of them meeting (or a clash with similar colours) left both teams in the same colours.
-
-## v2.75 (15 Oct 2026)
-- **Changed:** Noble Blitzers' colours are the other way round from v2.74. The pauldrons and the eagle are in the team's secondary colour, and the chest, skirt and knee plates are in the primary colour instead of silver. With the default kit that's orange-red shoulders and eagle over a dark body.
-
-## v2.74 (15 Oct 2026)
-- **Changed:** Noble Blitzers' pauldrons are back in the team's primary colour (dark steel by default). Their skirt plates and knee guards are now in the secondary colour instead of silver, and the eagle on the chest is a little smaller so it fits between the pauldrons.
-
-## v2.73 (15 Oct 2026)
-- **Changed:** Noble Blitzers now wear the Imperial eagle across their chest, with its wings spread up over the shoulders, in the team's secondary colour. Their pauldrons are dark steel so the eagle stands out.
-
-## v2.72 (15 Oct 2026)
-- **Changed:** Imperial Retainers' plume is now in the team's secondary colour, and a Bodyguard's yellow plume is in the primary colour (his grey one stays grey).
-
-## v2.71 (15 Oct 2026)
-- **Changed:** the Human and Imperial Ogre's shoulder pads are now in the team's secondary colour.
-- **Changed:** a Noble Blitzer's plumes now carry the team's colours: one in the primary colour and one in the secondary, alongside the two grey ones.
-
-## v2.70 (15 Oct 2026)
-- **Changed:** the Human and Imperial Ogre no longer has tusks over his lip.
-
-## v2.69 (15 Oct 2026)
-- **Changed:** the Imperial Bodyguard no longer carries a shield, since nobody does in Blood Bowl. He keeps his two plumes and trim-coloured pauldrons.
-
-## v2.68 (15 Oct 2026)
-- **Changed:** the Imperial positions are easier to tell apart.
-  - **Thrower:** no helmet now, just brown hair and a blond beard.
-  - **Retainers:** lower, plainer shoulder pads in dark steel.
-  - **Bodyguards:** their shield is back (v2.67 had dropped it), alongside the trim-coloured pauldrons.
-
-## v2.67 (15 Oct 2026)
-- **Changed:** a new look for the Ogre on the Human and Imperial Nobility teams. He's now hunched, with his bald, heavy-jawed head sitting low and forward between big spiked shoulder pads, long arms with bracers reaching down to big fists, a barrel body with a belly plate, and short legs. Before, he was upright with a square head on top. The Ogres team's own players are unchanged.
-- **Changed:** Imperial Nobility players now wear plumed helmets, with more plumes for the grander positions: one on a Retainer, two on a Thrower or Bodyguard, a fan of four on a Noble Blitzer. Their helmets are dark steel, their shoulder plates take the trim colour, and the team's default kit is now dark steel with orange-red.
-
-## v2.66 (15 Oct 2026)
-- **Added:** two new teams from the 2025 rules.
-  - **Halflings (Tier 4):** Halfling Hopefuls, Hefties and Catchers, and up to two Athel Forest Treemen. They play in the Halfling Thimble Cup and the Woodland League, and their Halfling Master Chef costs 100k instead of 300k. Puggy Baconbreath, Cindy Piewhistle and Grombrindal can now also be hired in the Halfling Thimble Cup.
-  - **Imperial Nobility (Tier 2):** Imperial Retainers and Throwers, Bodyguards, Noble Blitzers and an Ogre, in the Old World Classic.
-  - **Where they're available:** in exhibition matches, the Team Builder, leagues (as players' or computer teams), two-device play and Sevens.
-  - **Default teams:** both have a default team and a Sevens squad.
-  - **Sprites:** the new positions are built from the existing ones with their own touches: a pot helmet and shoulder pads for the Hefty, a red headband and white gloves for the Catcher, a gold crest for the Retainer, a big shield for the Bodyguard and a red plume for the Noble Blitzer.
-
-## v2.65 (15 Oct 2026)
-- **Changed:** a race's default team now lists its positional players first, the most expensive first (Ogre, then Blitzers, Catchers, Thrower, Halfling), with the linemen at the bottom. This applies on the lineup screen and in the in-match Rosters panel. Computer-run league teams made from now on are set up in the same order.
-
-## v2.64 (15 Oct 2026)
-- **Changed:** the Rosters panel during a match also lists a saved team's players in their Team Builder roster order, within each group (in play, reserves, knocked out, out of the match). Before, they were in starting-formation order.
-
-## v2.63 (15 Oct 2026)
-- **Fixed:** when picking your starting team (or your team for the next drive), a saved team's players are now listed in the same order as its roster in the Team Builder. Before, they came in the order they're placed in the starting formation (strongest on the line, quickest at the back). Star Players, Mercenaries and Journeymen, who aren't on the saved roster, come after. Where players start on the pitch hasn't changed.
-
-## v2.62 (15 Oct 2026)
-- **Added:** elegant music for the High Elf pitch. It has the same seven sections as the other match music and follows the match's mood, from about 72 to 100 bpm.
-  - **Main groove:** a harp flowing in triplets over held strings, with a plucked bass and a soft hand drum.
-  - **Stab hook:** short, stately string chords.
-  - **Half-time drive:** low strings pulsing, with timpani.
-  - **Breakdown:** an airy choir and a solo flute.
-  - **Chorus:** a flute tune with the choir and sparkling bells.
-  - **Between sections:** a harp glissando leads into each new one.
-
-## v2.61 (15 Oct 2026)
-- **Changed:** the jungle music's quiet-beat drums now overlap the sections either side. They creep in quietly under the last bar of the section before and fade out through the first bar of the next, so the change is smoother.
-
-## v2.60 (15 Oct 2026)
-- **Changed:** the jungle music's quiet-beat section now follows the drums in the example track more closely. It plays quick triplets, "duh da (gap) duh da (gap)", at the music's normal tempo. It swells in at the start and fades away at the end.
-
-## v2.59 (15 Oct 2026)
-- **Changed:** the jungle music's quiet-beat section is now just the far-off drums: a steady, slightly quicker low-high "duh da duh da" beat, with the odd bird call.
-
-## v2.58 (15 Oct 2026)
-- **Added:** jungle music for the Jungle Temple pitch. It has the same seven sections as the usual match music (calm, quiet beat, main groove, breakdown, stab hook, half-time drive and chorus), and it follows the match's mood in the same way, from about 78 to 98 bpm.
-  - **Instruments:** tribal drums that sound far away across the jungle (no deep boom, lots of echo), a shaker, a log-drum riff, a low drone, short brassy horn stabs and a pan-flute tune.
-  - **Calm sections:** birds and buzzing insects.
-  - Every other pitch keeps the usual music.
-- **Found:** the usual match music has only ever played its drums. A missing piece of code silently stopped its bass, pads, arpeggios, chorus tune and stabs. The jungle music has the fix. The usual music still plays just its drums, as before, until we decide whether to switch the rest on.
-
-## v2.57 (14 Oct 2026)
-- **Added:** team calls. Picking a team to play can now play a short sound of its own. The Ogres are the first: choosing them (or a saved Ogre team) in the match picker or the two-device lobby plays "Ogres, my lord!". If you flick through the list, only the latest call plays. More teams can get their own calls later.
-
-## v2.56 (14 Oct 2026)
-- **Added:** in the block and blitz clash animation (the picture above the block dice), whoever has the ball is shown holding it at their front hand. It moves, leans and falls with them. If the carrier is knocked down, or a push with Strip Ball knocks it out of their hands, the ball pops loose at the moment of impact and bounces away past them.
-
-## v2.55 (14 Oct 2026)
-- **Fixed:** in a Throw Team-mate replay, a thrown player who crash-lands on someone, bounces off and lands on someone else (and so on) now shows every crash. Each player landed on goes down and bleeds if they were hurt, and the thrown player tumbles on from one to the next before falling. The camera follows them. Before, only the first player landed on was shown. If a bounce sends them into the crowd, the replay now shows the crashes first and then "INTO THE CROWD!". Before, it showed them flying straight into the crowd.
-
-## v2.54 (14 Oct 2026)
-- **Added:** blood in Throw Team-mate replays. When a thrown player crash-lands on someone and hurts them, or is hurt themselves (a failed landing or a crash), a burst of chunky pixel blood sprays out with a wet squelch. The drops fly up and splat on the ground. A worse injury means a bigger burst. A Knocked Out or Casualty result then gets its own word: "KNOCKED OUT!" or "CASUALTY!", in gold or red depending on whose player it was.
-
-## v2.53 (14 Oct 2026)
-- **Fixed:** a replay could get stuck panning over empty pitch, with no players or ball, and never finish. This happened in any match where the computer's turns had been sped up (4×), even when the replay was of your own throw. It could also happen on the second device in a two-device match. Replays now always run in real time.
-
-## v2.52 (14 Oct 2026)
-- **Added:** replays. Once all the dice for a pass, Throw Team-mate or bomb are done, a close-up replay plays from low down behind the thrower. The camera follows the ball (or the thrown player, or the bomb) past the other players, in the style of an old 16-bit console.
-  - **Passes:** catches, drops, interception attempts, inaccurate passes, passes into the crowd and fumbles.
-  - **Throw Team-mate:** the thrown player somersaults through the air and lands on their feet, crash-lands, lands on someone or goes into the crowd.
-  - **Bombs:** interceptions and catches (with the throw on), and a pixel-art explosion that knocks down whoever was hit.
-  - **The moment itself:** a successful catch, interception or landing gets a brief slow-down, a flash and a golden glow.
-  - **The words** ("CAUGHT!", "INTERCEPTED!", "BOOM!") pop up like the skill pops: gold and white when it's good for your team, red when it's bad, and fiery for a bomb. In a two-device match each device colours them for its own team.
-  - **Settings → Replays** turns them on or off. They're skipped with Quick animations and in computer-v-computer matches. Tap a replay to skip it.
+**Teams and rosters**
+- **Roster order:** lineups and the Rosters panel follow the roster order, and the default teams list their positionals first.
+- **Alphabetical lists:** every list of teams is in alphabetical order.
+- **Team Builder colours:** changing a team's race also switches to that race's colours.
+- **Redrawn sprites:** the Human and Imperial Ogre, the Imperial Nobility and the Halfling Hefty.
 
 ## v2.51 (14 Oct 2026)
 - **Fixed:** the panels at the bottom of the screen (such as the team re-roll question) no longer slip off the bottom on a phone when the browser's address bar is showing. Pop-ups now fit the part of the screen you can actually see, and a tall panel scrolls instead.
