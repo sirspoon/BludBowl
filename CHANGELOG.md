@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.59 (15 Oct 2026)
+- **Changed:** the jungle music's quiet-beat section is now just the far-off drums: a steady, slightly quicker low-high "duh da duh da" beat, with the odd bird call.
+
 ## v2.58 (15 Oct 2026)
 - **Added:** jungle music for the Jungle Temple pitch. It has the same seven sections as the usual match music (calm, quiet beat, main groove, breakdown, stab hook, half-time drive and chorus), and it follows the match's mood in the same way, from about 78 to 98 bpm.
   - **Instruments:** tribal drums that sound far away across the jungle (no deep boom, lots of echo), a shaker, a log-drum riff, a low drone, short brassy horn stabs and a pan-flute tune.

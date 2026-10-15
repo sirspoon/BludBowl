@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.58</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.59</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9140,6 +9140,12 @@
     o.connect(g); g.connect(B.pad); const sv = ctx.createGain(); sv.gain.value = 0.5; g.connect(sv); sv.connect(verbIn); o.start(tt); o.stop(tt + 0.1); } };
   function jgBar(kind, i, t, s, B, tense, fillNext, ph) {
     const r = JG_ROOTS[i], q = s / 4, quiet = kind === 'calm' || kind === 'lull', pat = JG_DRUM[ph % 2];
+    if (kind === 'lull') {   // the quiet beat: nothing but the far-off drums, a quicker steady low-high "duh da duh da"
+      for (let k = 0; k < 8; k++) farDrum(B, t + k * s / 2, k % 2 ? 62 : 55, (k % 2 ? 0.42 : 0.6) * (k === 0 ? 1.15 : 1));
+      if (Math.random() < 0.4) bird(B, t + Math.random() * s * 3.5);
+      if (fillNext) for (let k = 0; k < 8; k++) farDrum(B, t + 3 * s + k * s / 8, 55 + (k % 2) * 4, 0.35 + k * 0.06);
+      return;
+    }
     // the far-off drums (louder and nearer in the drive, just the downbeats when it's calm)
     const dv = kind === 'drive' ? 0.75 : kind === 'breakdown' ? 0.4 : quiet ? (kind === 'calm' ? 0.45 : 0.5) : 0.6;
     for (let k = 0; k < 16; k++) {
@@ -9199,7 +9205,7 @@
     if (!run || !ctx) return; const e = run.el, B = run.B;
     while (run.next < ctx.currentTime + 0.7) {
       if (e.bar === 0) run.style = styleNow();
-      const jg = run.style === 'jungle', target = (jg ? JG_BPM : EL_BPM)[e.mode]; e.bpm += Math.max(-6, Math.min(6, target - e.bpm));
+      const jg = run.style === 'jungle', target = (jg ? JG_BPM : EL_BPM)[e.mode] + (jg && e.cur === 'lull' ? 10 : 0);   // (the jungle's quiet beat runs a bit quicker) e.bpm += Math.max(-6, Math.min(6, target - e.bpm));
       const spb = 60 / e.bpm, kind = e.cur, tense = e.mode === 'tense', ph = e.bar, i = ph % 4, len = kind === 'chorus' ? 8 : 4;
       B.bus.gain.setTargetAtTime(LEVEL[kind] * (tense ? 1.05 : 1), run.next, .25);
       try { (jg ? jgBar : elBar)(kind, i, run.next, spb, B, tense, ph === len - 1 && e.next !== 'calm', ph); } catch (x) { console.warn('music:', x && x.message); }
