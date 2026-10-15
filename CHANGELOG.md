@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.83 (15 Oct 2026)
+- **Changed:** the Elven Union no longer have the white sash at the waist, which looked like they were holding swords.
+
 ## v2.82 (15 Oct 2026)
 - **Changed:** the Elven Union Blitzer now has dark hair.
 
