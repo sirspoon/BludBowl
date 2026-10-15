@@ -2,6 +2,12 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.05 (15 Oct 2026)
+- **Changed:** Swarming is now tap-to-place.
+  - **Your team:** when the Snotlings swarm, you tap a free square in your half for each extra Snotling Lineman. Squares just behind the line glow. You can press Done or Skip to place fewer.
+  - **The computer's team:** it still places its own.
+  - **Set-up rules:** they still apply, so there are no more than 2 in each wide zone.
+
 ## v3.04 (15 Oct 2026)
 - **Changed:** Star Player and Trickster choices are now made by tapping the pitch, instead of being decided automatically or picked from a list.
   - **Trickster:** when your Gnome Illusionist is about to be blocked or hit by a Special Action, you tap the square they reappear in, even during the other coach's turn. The best squares glow, or you can choose to stay put. The computer still picks for its own Illusionists.

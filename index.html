@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.04</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.05</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -7230,24 +7230,46 @@
             if (state.players.some(p => p.skills.includes('Leader'))) state.leaderHalf = state.half;
             updateTopBar();
         }
-        function swarm() {
-            if (state.swarmDrive === state.driveId) return; state.swarmDrive = state.driveId;
-            [0, 1].forEach(t => {
-                const R = ROSTERS[t]; if (!(R.specialRules || []).includes('Swarming')) return;
-                const lin = (R.types && R.types.Lineman) ? R.types.Lineman.type : null;
+        // Swarming (Snotlings): after both teams have set up, D3 extra Linemen from the Reserves join in their own half (usual set-up rules: at most 2 in each wide zone).
+        // A person taps where each one goes (or Done); the computer places its own. True when it takes over the flow (cont() carries on afterwards).
+        function swarm(cont) {
+            if (state.swarmDrive === state.driveId) return false; state.swarmDrive = state.driveId;
+            const teams = [0, 1].filter(t => (ROSTERS[t].specialRules || []).includes('Swarming'));
+            if (!teams.length) return false;
+            let waiting = false;
+            const doTeam = k => {
+                if (k >= teams.length) { if (waiting) cont(); return; }
+                const t = teams[k], R = ROSTERS[t], lin = (R.types && R.types.Lineman) ? R.types.Lineman.type : null, los = GEO.los(t);
                 const res = state.players.filter(p => p.team === t && p.isReserve && !p.isCasualty && !p.isKO && !p.isEjected && p.type === lin);
-                if (!res.length) return;
-                const n = Math.min(res.length, Math.floor(Math.random() * 3) + 1), los = GEO.los(t);
-                const sq = [];
-                for (let x = 0; x < CFG.cols; x++) for (let y = GEO.wz; y < CFG.rows - GEO.wz; y++) if (GEO.inHalf(t, x) && x !== los && !getPlayer(x, y)) sq.push({ x, y, d: Math.abs(Math.abs(x - los) - 2) * 3 + Math.abs(y - GEO.midY()) + Math.random() });
-                sq.sort((a, b) => a.d - b.d);
-                const placed = res.slice(0, Math.min(n, sq.length));
-                placed.forEach((p, i) => { p.isReserve = false; p.x = sq[i].x; p.y = sq[i].y; p.isDown = false; p.isStunned = false; p.hasActed = false; });
-                if (placed.length) { log(`  SWARMING! ${placed.length} more ${lin}${placed.length > 1 ? 's' : ''} pour${placed.length > 1 ? '' : 's'} onto the pitch for ${R.name}.`, 'text-amber-300 font-bold'); skillPop('Swarming'); }
-            });
+                if (!res.length) { doTeam(k + 1); return; }
+                const n = Math.min(res.length, Math.ceil(d6() / 2));
+                const wideOk = y => !GEO.isWide(y) || state.players.filter(q => q.team === t && !q.isReserve && q.x >= 0 && q.x < CFG.cols && GEO.isWide(q.y) && GEO.wideSide(q.y) === GEO.wideSide(y)).length < GEO.maxWide;
+                const legal = () => { const out = []; for (let x = 0; x < CFG.cols; x++) for (let y = 0; y < CFG.rows; y++) if (GEO.inHalf(t, x) && !GEO.nml(x) && !getPlayer(x, y) && wideOk(y)) out.push({ x, y }); return out; };
+                const put = (p, c) => { p.isReserve = false; p.x = c.x; p.y = c.y; p.isDown = false; p.isStunned = false; p.hasActed = false; };
+                log(`  SWARMING! ${R.name} roll a D3: ${n} more ${lin}${n > 1 ? 's' : ''} can pour onto the pitch.`, 'text-amber-300 font-bold'); skillPop('Swarming');
+                if (AI.isAI(t)) {   // behind the line, in the middle
+                    legal().map(c => Object.assign(c, { d: Math.abs(Math.abs(c.x - los) - 2) * 3 + Math.abs(c.y - GEO.midY()) + (GEO.isWide(c.y) ? 20 : 0) + Math.random() })).sort((a, b) => a.d - b.d)
+                        .slice(0, n).forEach((c, i) => put(res[i], c));
+                    render(); doTeam(k + 1); return;
+                }
+                waiting = true;
+                let placed = 0;
+                const next = () => {
+                    const sq = legal();
+                    if (placed >= n || !sq.length) { render(); doTeam(k + 1); return; }
+                    pitchPick({ title: `SWARMING (${placed + 1} of ${n})`, team: t, cancelLabel: placed ? 'Done' : 'Skip',
+                        hint: `Tap a free square in your half for another ${lin} (no more than ${GEO.maxWide} in each wide zone).`,
+                        cells: sq.map(c => ({ x: c.x, y: c.y, data: c, hint: c.x !== los && !GEO.isWide(c.y) && Math.abs(c.x - los) <= 3 })),
+                        describe: c => `Put a ${lin} at [${c.data.x}, ${c.data.y}]. Tap Confirm, or tap it again.`,
+                        onPick: c => { put(res[placed], c); placed++; render(); next(); }, onCancel: () => { render(); doTeam(k + 1); } });
+                };
+                next();
+            };
+            doTeam(0);
+            return waiting;
         }
         function startKickoffSequence(kickingTeam, receivingTeam) {
-            swarm();
+            if (swarm(() => startKickoffSequence(kickingTeam, receivingTeam))) return;
             if (state.leaderHalf !== state.half) { state.leaderRR = [false, false]; leaderCheck(); }
             state.kickoff.kickingTeam = kickingTeam;
             state.kickoff.receivingTeam = receivingTeam;
