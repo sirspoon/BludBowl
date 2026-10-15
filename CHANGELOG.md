@@ -2,6 +2,12 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.93 (15 Oct 2026)
+- **Changed:** the Bloodspawn has been redrawn again from more photos of the model.
+  - **Head:** its own big, lumpy crimson head, with a muzzle of steel chain wrapped over its face, fangs below and a loose end of chain hanging down.
+  - **Quills:** they now run along its head and spine.
+  - **Arms:** one wears a spiked brass gauntlet over the forearm. This replaces the gilded maw.
+
 ## v2.92 (15 Oct 2026)
 - **Changed:** the Khorne Bloodspawn has been redrawn to look like its model.
   - **Body and head:** a hunched, ribbed crimson brute, its head wrapped in steel chains, with blue-black quills bursting from its back.
