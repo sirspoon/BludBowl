@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.60 (15 Oct 2026)
+- **Changed:** the jungle music's quiet-beat section now follows the drums in the example track more closely. It plays quick triplets, "duh da (gap) duh da (gap)", at the music's normal tempo. It swells in at the start and fades away at the end.
+
 ## v2.59 (15 Oct 2026)
 - **Changed:** the jungle music's quiet-beat section is now just the far-off drums: a steady, slightly quicker low-high "duh da duh da" beat, with the odd bird call.
 
