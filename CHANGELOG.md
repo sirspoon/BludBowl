@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.73 (15 Oct 2026)
+- **Changed:** Noble Blitzers now wear the Imperial eagle across their chest, with its wings spread up over the shoulders, in the team's secondary colour. Their pauldrons are dark steel so the eagle stands out.
+
 ## v2.72 (15 Oct 2026)
 - **Changed:** Imperial Retainers' plume is now in the team's secondary colour, and a Bodyguard's yellow plume is in the primary colour (his grey one stays grey).
 
