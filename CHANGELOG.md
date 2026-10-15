@@ -2,6 +2,12 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.05 (15 Oct 2026)
+- **Changed:** the computer defends better and makes fewer careless turnovers ([#19](https://github.com/sirspoon/BludBowl/issues/19)). Over 240 test matches against v3.04 it scored 214 touchdowns to 173 and won 93 to 66, with 12% fewer turnovers.
+  - **Staying on the ball carrier:** after pushing back an opposing ball carrier who stays on their feet, it follows up, so they're still marked and have to dodge away.
+  - **Defensive screen:** each defender now goes to a different spot. Before, everyone could be sent towards the same far-off square, leaving gaps for the carrier to run through.
+  - **Safe moves first:** players get into position with moves that need no dice before anyone dodges, and nobody rushes just to reach a formation square.
+
 ## v3.04 (15 Oct 2026)
 - **Changed:** the computer works out its moves about twice as fast, so its turns are snappier, especially on phones.
 - **Added:** a test mode for automated computer-vs-computer matches (add `?simtest` to the address). The game clock skips straight to the next event instead of waiting, the pitch is only redrawn once a second, and autosave, music and other background chores pause. The rules and dice are untouched. A match takes about 10 seconds instead of 90, so AI changes can be checked over hundreds of matches. It doesn't affect normal play.
