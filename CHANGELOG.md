@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.02 (15 Oct 2026)
+- **Changed:** the Underworld Denizens' kit now matches the 2025 models: rust red plate with slate grey. The away kit is slate grey with red.
+
 ## v3.01 (15 Oct 2026)
 - **Added:** the **Underworld Denizens** (deep purple and warpstone green, Underworld Challenge). This is the last team from the 2025 rules, so all 30 are now in the game.
   - **Roster:** Goblin Linemen, up to 6 Snotlings (Insignificant), Skaven Clanrats, a Thrower, a Gutter Runner, a Blitzer, and a single Big Guy (a Troll or a Rat Ogre).
