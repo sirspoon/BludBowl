@@ -4,6 +4,7 @@
 //   node tools/ai-match.js --pairs human:orc,dwarf:skaven --n 4
 //
 // --races  mirror matches (each race against itself); --pairs  fixed match-ups. --n matches per race or pair.
+// --newp '{"key":value}'  tuning values for the new side (the AIX.p settings in index.html), to try different tolerances.
 // --new / --old  which AI improvements (the AIX switches in index.html) each side has: 'all' (as in play), 'none',
 //                or a comma list. With the same setting on both sides it just plays matches (e.g. to read the stats).
 // The new AI takes the home side in even-numbered matches and the away side in odd ones, so kick-off order evens out.
@@ -13,7 +14,7 @@ let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { ({ chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright')); }
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
+const NEWP = JSON.parse(arg('newp', '{}')), N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
 const jobs = [];
 (arg('races', '') ? arg('races').split(',') : []).forEach(r => { for (let i = 0; i < N; i++) jobs.push({ a: r, b: r, i }); });
 (arg('pairs', '') ? arg('pairs').split(',') : []).forEach(pr => { const [a, b] = pr.split(':'); for (let i = 0; i < N; i++) jobs.push({ a, b, i }); });
@@ -36,7 +37,7 @@ async function play(browser, port, job) {
   await p.route(/cdn\.tailwindcss\.com/, r => r.fulfill({ body: '' }));   // styling only; keeps the run offline
   await p.goto(`http://localhost:${port}/index.html?simtest`);
   const t0 = Date.now();
-  await p.evaluate(([a, b, f0, f1]) => { AIX.flags[0] = f0; AIX.flags[1] = f1; AI.set(0, true); AI.set(1, true); window.launchMatch(a, b, { replaceOk: true }); }, [job.a, job.b, flags(f0), flags(f1)]);
+  await p.evaluate(([a, b, f0, f1, p0, p1]) => { window.AIP = [p0, p1]; AIX.flags[0] = f0; AIX.flags[1] = f1; AI.set(0, true); AI.set(1, true); window.launchMatch(a, b, { replaceOk: true }); }, [job.a, job.b, flags(f0), flags(f1), newHome ? NEWP : {}, newHome ? {} : NEWP]);
   let res = null, clicked = false;
   while (Date.now() - t0 < LIMIT) {
     await p.waitForTimeout(250);
