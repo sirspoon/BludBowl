@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.07 (15 Oct 2026)
+- **Fixed:** a match could freeze when a push knocked the ball loose onto a player while the Taunt question was showing. The catch roll then put the game back into its waiting state after the block had already finished. Taunt is now asked once the ball has settled.
+- **Added:** a safety net for freezes like these. If the game is ever waiting with nothing left to happen (no question or roll on screen, nothing moving), after 2 seconds the coach whose turn it is gets control back. It's not used in two-device play.
+
 ## v3.06 (15 Oct 2026)
 - **Fixed:** a match could freeze after a Throw Team-mate. If the thrown player crash-landed onto the loose ball and someone then caught it, the game handed back control before the catch was rolled, and the catch left the game locked with nobody able to act. It now waits for the ball to settle first.
 

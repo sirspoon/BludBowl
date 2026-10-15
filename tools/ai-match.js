@@ -45,13 +45,14 @@ async function play(browser, port, job) {
       cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length), to: MATCH.data ? MATCH.data.turnovers.slice() : [0, 0], bl: MATCH.data ? MATCH.data.blocks.slice() : [0, 0] }));
     if (res.over) break;
   }
+  const rec = await p.evaluate(() => window.BB_STALLS || []).catch(() => []);
   let stuck = null;
   if (!res || !res.over) stuck = await p.evaluate(() => ({ mode: state.mode, active: state.activeTeam, pending: CLOCK.pending(), sel: state.selectedId,
     log: [...document.querySelectorAll('#message-log > *')].slice(-8).map(e => e.textContent.trim()), trace: (window.AI_TRACE || []).slice(-6) })).catch(e => String(e));
   await ctx.close();
   const n = newHome ? 0 : 1;
   return { ...job, newSide: newHome ? 'home' : 'away', secs: +((Date.now() - t0) / 1000).toFixed(1), ...res,
-    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], newTO: res.to[n], oldTO: res.to[1 - n], newBl: res.bl[n], oldBl: res.bl[1 - n], stuck, errs: errs.slice(0, 3) };
+    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], newTO: res.to[n], oldTO: res.to[1 - n], newBl: res.bl[n], oldBl: res.bl[1 - n], recovered: rec, stuck, errs: errs.slice(0, 3) };
 }
 
 // two-sided binomial test: how likely a split at least this uneven is if both sides were equally good
@@ -81,6 +82,8 @@ server.listen(0, async () => {
   console.log(`\n${done.length} matches finished (${results.length - done.length} not), ${results.filter(r => r.errs && r.errs.length).length} with errors, ${((Date.now() - t0) / 1000).toFixed(0)}s in all`);
   console.log(`touchdowns  new ${nt} - ${ot} old   (chance of a split this uneven by luck: ${(100 * luck(nt, nt + ot)).toFixed(0)}%)`);
   console.log(`results     new won ${w}, drew ${done.length - w - l}, lost ${l}   (luck: ${(100 * luck(w, w + l)).toFixed(0)}%)`);
+  const recs = results.reduce((a, r) => a + (r.recovered ? r.recovered.length : 0), 0);
+  if (recs) console.log(`stuck games recovered by the safety net: ${recs} (details in --out)`);
   console.log(`casualties  new caused ${sum('newCas')} - ${sum('oldCas')} old`);
   console.log(`turnovers   new ${sum('newTO')} - ${sum('oldTO')} old`);
   console.log(`blocks      new ${sum('newBl')} - ${sum('oldBl')} old (per team per match: ${(sum('newBl') / Math.max(1, done.length)).toFixed(1)} - ${(sum('oldBl') / Math.max(1, done.length)).toFixed(1)})`);

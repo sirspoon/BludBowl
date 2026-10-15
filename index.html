@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.06</title>
+    <title>BludBowl 3.07</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.06</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.07</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -15971,6 +15971,9 @@
                     };
                     if (defHasTaunt && state.combat.vacatedSquare) {
                         state.mode = MODES.LOCKED;
+                        // a ball knocked loose by the push is still bouncing (maybe onto someone who must try to catch it):
+                        // ask once that's over, or the catch hands the game back to this locked moment after the block has finished
+                        afterSettled(0, () => {
                         try { camFocus(state.combat.def, 'modal-choice'); } catch (e) {}
                         askChoice('TAUNT', `${state.combat.def.type} taunts ${state.combat.atk.type}. Force them to follow up into the vacated square?`, 'Force Follow-up', 'No Thanks',
                             () => {
@@ -15982,6 +15985,7 @@
                                 if(checkTouchdown()) return;
                                 finalizeBlock();
                             }, showFollow, { team: state.combat.def.team, ai: 'yes' });
+                        });
                     } else {
                         showFollow();
                     }
@@ -20611,6 +20615,33 @@
             if (window.ResizeObserver) new ResizeObserver(placeOverlays).observe(document.getElementById('top-bar-panel'));
             window.addEventListener('resize', placeOverlays);
             if (!CLOCK.sim) setInterval(placeOverlays, 400);
+            // Safety net: a game locked (or waiting on a roll) with nothing at all left to happen - no question on screen, no
+            // roll, nothing moving, no timer - would wait for ever. After 2 seconds like that the active coach gets control back.
+            // (Seen when a ball knocked loose bounces onto someone while another prompt is still open, so the catch hands the
+            // game back to a moment that has already passed.) Each recovery is kept in window.BB_STALLS with the end of the log.
+            // Not in two-device play, where a question can be waiting on the other device.
+            (function stallGuard() {
+                let since = 0;
+                setInterval(() => {
+                    try {
+                        const idle = (state.mode === MODES.LOCKED || state.mode === MODES.ROLL_PROMPT) && state.players && state.players.length && !state.isGameOver
+                            && !state.pitchPick && !state.isResolvingKickoff && !NET.on() && !REPLAY.get() && playSettled() && CLOCK.pending() === 0
+                            && !document.querySelector('[id^="modal-"]:not(.hidden)') && !document.querySelector('#turn-banner:not(.hidden)');
+                        if (!idle) { since = 0; return; }
+                        const now = CLOCK.real();
+                        if (!since) { since = now; return; }
+                        if (now - since < 2000) return;
+                        since = 0;
+                        const lines = [...document.querySelectorAll('#message-log > *')].slice(-8).map(e => e.textContent.trim());
+                        (window.BB_STALLS = window.BB_STALLS || []).push({ mode: state.mode, half: state.half, turn: state.turn[state.activeTeam], team: state.activeTeam, log: lines });
+                        console.warn('BludBowl: the game was stuck with nothing left to happen; handing control back.', lines);
+                        state.mode = MODES.IDLE;
+                        const p = getPlayerById(state.selectedId);
+                        refreshSelection(p && p.team === state.activeTeam && !p.hasActed ? p : null);
+                        render();
+                    } catch (e) {}
+                }, 500);
+            })();
             placeOverlays();
 
             // ---- sound button, interface clicks, and a watcher for falls, stuns and selection
