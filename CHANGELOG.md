@@ -2,6 +2,19 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.91 (15 Oct 2026)
+- **Added:** two more Chaos teams from the 2025 rules. Both play in the Chaos Clash and have Brawlin' Brutes.
+  - **Khorne** (crimson and brass):
+    - **Roster:** Bloodborn Marauders (Frenzy), Khorngors (Horns, Juggernaut, Jump Up), Bloodseekers (ST 4, Frenzy) and a Bloodspawn.
+    - **Look:** the Marauders are bare-chested in caged, horned helms. The Khorngors are snarling bull-beastmen in spiked red helms. The Bloodseekers wear huge red breastplates, with the great horned icon on their backs. The Bloodspawn is a hulking red beast with a fanged maw in its chest.
+  - **Nurgle** (plague green and orange):
+    - **Roster:** Rotters, Pestigors, Bloaters and a Rotspawn. Nurgle can't hire an Apothecary.
+    - **Look:** pale, sore-covered bellies, green dome helms with the Nurgle icon, orange shorts and gloves. The Pestigors have goat horns, the Bloaters are huge, and the Rotspawn has tentacles and antlers.
+  - **Where they're available:** both teams can be picked in exhibition matches, the Team Builder, leagues, two-device play and Sevens, each with a default team and a Sevens squad.
+- **Added:** two new traits.
+  - **Decay:** +1 to Casualty rolls against the player.
+  - **Plague Ridden:** once per game, when a Plague Ridden player kills an opponent, a new Rotter joins that team's Reserves for the rest of the match. In a league, they don't stay on the roster after the game yet.
+
 ## v2.90 (15 Oct 2026)
 - **Changed:** the Chaos Chosen wear closed, horned helms again, with a red-glowing visor and a grille over the mouth. Their bare arms and lighter armour from v2.89 stay.
 
