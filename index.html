@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.07</title>
+    <title>BludBowl 3.08</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.07</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.08</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -18682,7 +18682,7 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
         const AI = (function () {
             const on = { 0: false, 1: false };
@@ -19206,18 +19206,28 @@
                 };
                 const fwd = me === TEAMS.HUMAN ? 1 : -1;            // towards the end zone we attack
                 if (c && onPitch(c) && c.team === me) {
+                    // (anchor) our carrier deep in our own half with nobody of theirs able to reach them: set up where the carrier
+                    // is heading (a full move up the pitch, no further than halfway), not round where they stand now - otherwise
+                    // the whole team runs back to our own goal line to stand round them
+                    let a = c;
+                    const far = !state.players.some(q => q.team !== me && onPitch(q) && !q.isStunned && cheb(q, c) <= (q.isDown ? q.ma - 3 : q.ma) + 4);   // out of any blitz's reach
+                    if (AIX.on(me, 'anchor') && toGo(c.x, me) > CFG.cols / 2 && far) {
+                        const k = Math.max(0, Math.min(c.ma, toGo(c.x, me) - Math.floor(CFG.cols / 2)));
+                        a = { x: c.x + fwd * k, y: Math.max(2, Math.min(CFG.rows - 3, c.y)) };
+                    }
                     if (mobileTeam(me)) {
                         // a loose escort behind the carrier and runners in the open spaces ahead, ready for a pass or hand-off
-                        [[-1, 1], [-1, -1]].forEach(([dx, dy]) => add(c.x + dx * fwd, c.y + dy, 'cage'));
+                        [[-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
                         if (cageOnly) return T;
-                        outletSquares(me, 1, toGo(c.x, me) - 2).filter(o => cheb(o, c) <= 9).forEach(o => add(o.x, o.y, 'runner'));
-                        [[5, 0], [4, -4], [4, 4], [6, -2], [6, 2]].forEach(([dx, dy]) => add(c.x + dx * fwd, Math.max(1, Math.min(CFG.rows - 2, c.y + dy)), 'runner'));
+                        outletSquares(me, 1, toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 9).forEach(o => add(o.x, o.y, 'runner'));
+                        [[5, 0], [4, -4], [4, 4], [6, -2], [6, 2]].forEach(([dx, dy]) => add(a.x + dx * fwd, Math.max(1, Math.min(CFG.rows - 2, a.y + dy)), 'runner'));
                         return T;
                     }
-                    [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([dx, dy]) => add(c.x + dx * fwd, c.y + dy, 'cage'));
+                    if (a !== c) [[1, 1], [1, -1]].forEach(([dx, dy]) => add(c.x + dx * fwd, c.y + dy, 'cage'));   // two stay with the carrier as an escort
+                    [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
                     if (cageOnly) return T;
-                    [0, -3, 3].forEach(dy => add(c.x + 3 * fwd, c.y + dy, 'front'));
-                    outletSquares(me, Math.max(1, toGo(c.x, me) - 8), toGo(c.x, me) - 2).filter(o => cheb(o, c) <= 7).slice(0, 2).forEach(o => add(o.x, o.y, 'runner'));
+                    [0, -3, 3].forEach(dy => add(a.x + 3 * fwd, a.y + dy, 'front'));
+                    outletSquares(me, Math.max(1, toGo(a.x, me) - 8), toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 7).slice(0, 2).forEach(o => add(o.x, o.y, 'runner'));
                 } else if (c && onPitch(c)) {
                     if (cageOnly) return T;
                     const back = -fwd;   // towards our own end zone

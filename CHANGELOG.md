@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.08 (15 Oct 2026)
+- **Fixed:** when the computer's ball carrier was deep in its own half with no opponent nearby, the whole team ran back to stand round them on their own goal line. Now two players stay with the carrier as an escort, and the rest set up further up the pitch, where the carrier is heading. It only does this when no opponent could reach the carrier with a blitz. Over 192 test matches it played as well as v3.07.
+
 ## v3.07 (15 Oct 2026)
 - **Fixed:** a match could freeze when a push knocked the ball loose onto a player while the Taunt question was showing. The catch roll then put the game back into its waiting state after the block had already finished. Taunt is now asked once the ball has settled.
 - **Added:** a safety net for freezes like these. If the game is ever waiting with nothing left to happen (no question or roll on screen, nothing moving), after 2 seconds the coach whose turn it is gets control back. It's not used in two-device play.
