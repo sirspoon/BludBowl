@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.92 (15 Oct 2026)
+- **Changed:** the Khorne Bloodspawn has been redrawn to look like its model.
+  - **Body and head:** a hunched, ribbed crimson brute, its head wrapped in steel chains, with blue-black quills bursting from its back.
+  - **Arms:** one ends in a brass-gilded, fanged maw, and the other is a brass-knuckled fist.
+  - **Belt:** hung with skulls and a brass star.
+  - **Legs:** one bare on a black hoof, the other in a brass-banded greave and boot with a blue knee pad.
+
 ## v2.91 (15 Oct 2026)
 - **Added:** two more Chaos teams from the 2025 rules. Both play in the Chaos Clash and have Brawlin' Brutes.
   - **Khorne** (crimson and brass):
