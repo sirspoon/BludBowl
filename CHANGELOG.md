@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.72 (15 Oct 2026)
+- **Changed:** Imperial Retainers' plume is now in the team's secondary colour, and a Bodyguard's yellow plume is in the primary colour (his grey one stays grey).
+
 ## v2.71 (15 Oct 2026)
 - **Changed:** the Human and Imperial Ogre's shoulder pads are now in the team's secondary colour.
 - **Changed:** a Noble Blitzer's plumes now carry the team's colours: one in the primary colour and one in the secondary, alongside the two grey ones.
