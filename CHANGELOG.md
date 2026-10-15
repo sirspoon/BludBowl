@@ -2,6 +2,12 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.68 (15 Oct 2026)
+- **Changed:** the Imperial positions are easier to tell apart.
+  - **Thrower:** no helmet now, just brown hair and a blond beard.
+  - **Retainers:** lower, plainer shoulder pads in dark steel.
+  - **Bodyguards:** their shield is back (v2.67 had dropped it), alongside the trim-coloured pauldrons.
+
 ## v2.67 (15 Oct 2026)
 - **Changed:** a new look for the Ogre on the Human and Imperial Nobility teams. He's now hunched, with his bald, heavy-jawed head sitting low and forward between big spiked shoulder pads, long arms with bracers reaching down to big fists, a barrel body with a belly plate, and short legs. Before, he was upright with a square head on top. The Ogres team's own players are unchanged.
 - **Changed:** Imperial Nobility players now wear plumed helmets, with more plumes for the grander positions: one on a Retainer, two on a Thrower or Bodyguard, a fan of four on a Noble Blitzer. Their helmets are dark steel, their shoulder plates take the trim colour, and the team's default kit is now dark steel with orange-red.
