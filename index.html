@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.76</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v2.77</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -13797,8 +13797,8 @@
             const H = SPRITES.human;
             SPRITES.halfling = {
                 'Halfling Hopeful': H['Halfling Hopeful'],
-                // a pot helmet and shoulder pads
-                'Halfling Hefty': edit(swap(H['Halfling Hopeful'].slice(0, 12), { b: 'm', B: 'M' }).concat(H['Halfling Hopeful'].slice(12)), set => { [18, 19, 20].forEach(y => { set(y, 9, 'o'); set(y, 10, 'm'); set(y, 21, 'm'); set(y, 22, 'o'); }); set(17, 10, 'o'); set(17, 21, 'o'); }),
+                // chunkier, with shoulder pads and an American football helmet (the team colour, a trim stripe, a face mask)
+                'Halfling Hefty': ["................................", "................................", "................................", "................................", "................................", "................................", "............oooooooo............", "..........ooKKKttKkkoo..........", ".........oKKKkkttkkkkdo.........", ".........oKkkkkttkkkkdo.........", "........oKkkkkkttkkkkkdo........", "........okkdoooooooodkdo........", "........okkosessssesokko........", "........okdossSssSssodko........", "........okdommmmmmmmodko........", "........okdosMssssMsodko........", ".........odommmmmmmmodo.........", "..........ooKKkkkkKKoo..........", ".........oKKKkkkkkkKKKo.........", "........oKKdkkkkkkkkdKKo........", "........ossokkkkkkkkosso........", "........ossokkkkkkkkosso........", ".........osokkkkkkkkoso.........", "..........oggggggggggo..........", "..........okkkkkkkkkko..........", "...........okkdoodkko...........", "...........osso..osso...........", "..........obBbo..obBbo..........", "..........oooo....oooo..........", "................................", "................................", "................................"],
                 // a red headband and white gloves
                 'Halfling Catcher': edit(H['Halfling Hopeful'], set => { for (let x = 11; x <= 20; x++) set(12, x, 'r'); [19, 20].forEach(y => { set(y, 11, 'w'); set(y, 20, 'w'); }); }),
                 'Athel Forest Treeman': SPRITES.woodelf['Loren Forest Treeman']

@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v2.77 (15 Oct 2026)
+- **Changed:** Halfling Hefties look the part. They're chunkier, with a wider, rounder body and shoulder pads, and wear an American football helmet in the team colour with a stripe down the middle and a face mask.
+
 ## v2.76 (15 Oct 2026)
 - **Changed:** in the Team Builder, changing a team's race now changes its colours to that race's default team colours. Colours you've picked yourself are kept, the same way a team name you've typed is kept. New teams also start in their race's default team colours.
 - **Fixed:** the Halflings and Imperial Nobility now have proper away kits: cream with green, and orange-red with dark steel. Before, their away kit was the same as their home kit, so two of them meeting (or a clash with similar colours) left both teams in the same colours.
