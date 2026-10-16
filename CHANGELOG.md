@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.20 (16 Oct 2026)
+- **Added:** a new pitch, **Brimstone**, the home ground of Khorne and the Chaos Renegades. It's cracked basalt columns with lava glowing up through the joints, pools of lava along the sidelines, skulls and bones, scorch marks and embers, with lines of pale ash. Behind the block clashes and replays stands its own scenery: smoking volcanoes, basalt spires and a brass throne on a pyramid of skulls under a red-black sky. It can also be picked from the Pitch menu.
+
 ## v3.19 (16 Oct 2026)
 - **Added:** the Muddy Grass pitch, home ground of most teams, has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): the supporters' band in the stands, with a big bass drum, a snare, a trumpet and an oom-pah brass bass, and the crowd clapping, roaring, shouting "Oi!" and singing along. The chorus is *When the Saints Go Marching In*.
   - **After a touchdown** the crowd sings "There's only one…" for the scorer, and the match log shows who.
