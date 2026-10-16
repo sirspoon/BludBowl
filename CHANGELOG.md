@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.27 (16 Oct 2026)
+- **Changed:** the Warped Flagstones are a darker, muddier brown.
+
 ## v3.26 (16 Oct 2026)
 - **Changed:** the Warped Flagstones are filthier, with darker, stained stone, murky puddles with an oily sheen, sludge trails, splintered planks, gnawed bones, straw and droppings. And the warpstone glow now pulses, slowly swelling and fading every few seconds.
 
