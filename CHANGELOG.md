@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.12 (16 Oct 2026)
+- **Added:** the two-device lobby has the same match settings as an exhibition. The host picks the **game** (11 a side or Sevens), the **pitch** and the **inducements**, and the other player sees what's been chosen. For Sevens, both players pick from their saved Sevens teams (or a standard Sevens squad). ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+
 ## v3.11 (16 Oct 2026)
 - **Fixed:** in two-device play the ball could vanish after an interception or a pass. A thrown ball only landed when the screen was redrawn, which stops while the host's phone is asleep or switched to another app. Thrown balls and players now always land on time. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 - **Changed:** the "Interception possible!" message now says which team chooses. Only the defending player's taps count, on either device.

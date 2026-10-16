@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.11</title>
+    <title>BludBowl 3.12</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -856,6 +856,9 @@
 #net-lobby #nl-status { margin: 0; font-size: 14px; } #net-lobby #nl-status:empty { display: none; }
 #net-lobby #nl-status[data-kind="bad"] { color: #fda4af; } #net-lobby #nl-status[data-kind="ok"] { color: #86efac; } #net-lobby #nl-status[data-kind="wait"] { color: #fde68a; }
 #net-lobby #nl-opp { margin: 0; font-size: 14px; color: #cbd5e1; }
+#net-lobby #nl-opts { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 1px solid #263247; } #net-lobby[data-league="1"] #nl-opts, #net-lobby[data-sync="1"] #nl-opts, #net-lobby:not([data-role="host"]) #nl-opts { display: none; }
+#net-lobby .nl-opt { display: flex; align-items: center; gap: 8px; } #net-lobby .nl-opt .nl-dim { flex: 0 0 92px; } #net-lobby .nl-opt select { flex: 1; }
+#net-lobby #nl-optsum { margin: 0; font-size: 13px; color: #fde68a; } #net-lobby #nl-optsum.hidden, #net-lobby[data-league="1"] #nl-optsum { display: none; }
 #net-lobby #nl-teams { display: flex; flex-direction: column; gap: 8px; } #net-lobby #nl-teams.hidden { display: none; }
 #net-end .ne-text { margin: 0; font-size: 15px; }
 #net-end .ne-btns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; } #net-end .ne-go { background: #075985; border-color: #38bdf8; }
@@ -903,7 +906,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.11</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.12</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -5619,8 +5622,9 @@
         const SEVENS_RR = 100;
         const sevensCost = (race, S) => [...S.lineup, ...(S.bench || [])].reduce((a, pos) => a + RACES[race].positions[pos].cost, 0) + S.rerolls * SEVENS_RR;
         function sevensRace(key) {
-            if (String(key).startsWith('custom:')) { const c = raceFor(key); if (c.sevens) return c; }   // a saved Sevens team brings its own squad
-            const race = String(key).startsWith('custom:') ? (raceFor(key).race || 'human') : (RACES[key] ? key : 'human');
+            const own = /^(custom|net):/.test(String(key));   // a saved team (or the other device's team in a two-device match)
+            if (own) { const c = raceFor(key); if (c.sevens) return c; }   // a saved Sevens team brings its own squad
+            const race = own ? (raceFor(key).race || raceFor(key).key || 'human') : (RACES[key] ? key : 'human');
             const R = RACES[race], S = SEVENS[race] || SEVENS.human, r = JSON.parse(JSON.stringify(R));
             Object.assign(r, { lineup: S.lineup.slice(), bench: (S.bench || []).slice(), rerolls: S.rerolls, apothecary: 0, assistantCoaches: 0, cheerleaders: 0, fans: 1, bribes: 0,
                 tv: sevensCost(race, S).toLocaleString('en-GB') + 'k', sevens: true, race });
@@ -18970,6 +18974,7 @@
             function open(asHost, joinCode, keepCode) {
                 close();
                 role = asHost ? 'host' : 'guest'; code = asHost ? (keepCode || newCode()) : joinCode;
+                if (!asHost && lobbyFmt !== 'std') { lobbyFmt = 'std'; optSum = ''; try { fillPicker($('nl-race'), $('nl-squad')); paintOpts(); } catch (e) {} }   // (until the host says otherwise)
                 version = (($('app-version') || {}).textContent || '').trim();
                 if (!asHost) { const r = rejoinRec(); token = r && r.code === code ? r.token : Math.random().toString(36).slice(2, 12); }
                 if (TEST) {
@@ -19047,7 +19052,8 @@
                         if (!inMatch()) {
                             guestToken = m.token || '';
                             if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false), side: guestSide, lid: league.fx && league.fx.lid });
-                            else if (syncLid) { const I = LEAGUE.info(syncLid); if (I) link.send({ t: 'syncroom', text: `${I.name}: ${myName() || 'The host'} is ${I.stage === 'setup' && I.comm === DEV.id ? 'inviting players' : 'syncing the league'}.` }); }
+                            else if (!syncLid) sendOpts();
+                            if (syncLid && !league) { const I = LEAGUE.info(syncLid); if (I) link.send({ t: 'syncroom', text: `${I.name}: ${myName() || 'The host'} is ${I.stage === 'setup' && I.comm === DEV.id ? 'inviting players' : 'syncing the league'}.` }); }
                         }
                         else if (live) { resetSent(); postSent = false; viewSent = ''; viewAt = 0; if (league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false), side: guestSide, lid: league.fx && league.fx.lid }); link.send({ t: 'start' }); log(`  ${escH(them())} is back.`, 'text-emerald-300'); }
                         else if (EXIND.open()) { link.send({ t: 'shop' }); shopSent = ''; }
@@ -19097,7 +19103,7 @@
                 $('net-lobby').classList.add('hidden');
                 link.send({ t: 'shop' }); shopSent = '';
                 netCareer = [wantCareer(), !!guestRace.careerTeamId];
-                EXIND.start(hostKey, 'net:1', netCareer[0] || netCareer[1], 'std', true);   // each side shops for its own team (straight on if neither has gold)
+                EXIND.start(hostKey, 'net:1', netCareer[0] || netCareer[1], lobbyFmt, true);   // each side shops for its own team (straight on if neither has gold)
             }
             // the shopping is done: the match itself starts
             let netCareer = [false, false];
@@ -19255,6 +19261,7 @@
                 if (common(m)) return;
                 if (m.t === 'busy') { forgetRejoin(); const was = inMatch(); stopRetry(); try { if (link) link.close(); } catch (e) {} link = null; status('That match already has two players.', 'bad'); if (was) { live = false; shopping = false; showEnd('The host is playing with another device now.'); } return; }
                 if (m.t === 'syncroom') { syncText = m.text; paintLobby(); return; }
+                if (m.t === 'opts') { const was = lobbyFmt; lobbyFmt = m.fmt === 'sevens' ? 'sevens' : 'std'; optSum = m.text || ''; if (was !== lobbyFmt) { fillPicker($('nl-race'), $('nl-squad')); sendTeam(); } paintOpts(); return; }
                 if (m.t === 'fixture') { league = { text: m.text, lid: m.lid }; guestSide = m.side === 0 ? 0 : 1; paintLobby(); paintLeagueBtn(); return; }
                 if (m.t === 'leagueview') { leagueHtml = m.html; paintLeagueBtn(); const lh = $('net-league'); if (lh && !lh.classList.contains('hidden')) leagueView(); return; }
                 if (m.t === 'postteam') { postTeam = m.team; if (!postOpen) { postAsked = false; postGame(); } return; }
@@ -19528,11 +19535,25 @@
                 el.textContent = text; el.dataset.kind = kind || '';
             }
             function teamOf(raceSel, squadSel) { return squadSel.value || raceSel.value; }
+            // the match settings, like an exhibition's: the host picks them, the other player sees them (and picks from their Sevens teams for Sevens)
+            let lobbyFmt = 'std', optSum = '';
+            const optLabel = id => { const e = $(id); return e && e.selectedOptions[0] ? e.selectedOptions[0].textContent : ''; };
+            function sendOpts() {
+                if (role !== 'host' || !link || league || syncLid) return;
+                link.send({ t: 'opts', fmt: lobbyFmt, text: `${lobbyFmt === 'sevens' ? 'Blood Bowl Sevens' : 'Blood Bowl'} · Pitch: ${optLabel('nl-pitch')} · Inducements: ${optLabel('nl-ind')}` });
+            }
+            function paintOpts() {
+                const f = $('nl-fmt'), p = $('nl-pitch'), i = $('nl-ind');
+                if (f) f.value = lobbyFmt;
+                if (p) p.value = pitchPref;
+                if (i) { let m = 'std'; try { m = localStorage.getItem('bb-ex-ind') || 'std'; } catch (e) {} i.value = m; }
+                const sum = $('nl-optsum'); if (sum) { sum.textContent = role === 'guest' && optSum ? `The host has set up: ${optSum}` : ''; sum.classList.toggle('hidden', !(role === 'guest' && optSum)); }
+            }
             function fillPicker(raceSel, squadSel) {
                 if (!raceSel.options.length) Object.values(RACES).forEach(r => raceSel.appendChild(new Option(r.name, r.key)));
                 const keep = squadSel.value; squadSel.innerHTML = '';
                 squadSel.appendChild(new Option('Default team', ''));
-                TB.list().filter(t => t.race === raceSel.value && !t.cpu && !TB.isSev(t)).sort((a, b) => a.name.localeCompare(b.name)).forEach(t => squadSel.appendChild(new Option(t.name, 'custom:' + t.id)));
+                TB.list().filter(t => t.race === raceSel.value && !t.cpu && !!TB.isSev(t) === (lobbyFmt === 'sevens')).sort((a, b) => a.name.localeCompare(b.name)).forEach(t => squadSel.appendChild(new Option(t.name, 'custom:' + t.id)));
                 squadSel.value = [...squadSel.options].some(o => o.value === keep) ? keep : '';
                 squadSel.disabled = squadSel.options.length < 2;
             }
@@ -19608,7 +19629,7 @@
                 const rs = $('nl-race'), sq = $('nl-squad');
                 $('nl-name').value = myName();
                 if (!rs.options.length) { fillPicker(rs, sq); rs.value = 'human'; }
-                fillPicker(rs, sq); paintCareer();
+                fillPicker(rs, sq); paintCareer(); paintOpts();
                 L.classList.remove('hidden'); paintLobby();
             }
             function bindLobby() {
@@ -19645,6 +19666,13 @@
                     if (lg && lg.cancel) { if (aiWas) { AI.set(0, aiWas[0]); AI.set(1, aiWas[1]); aiWas = null; } lg.cancel(); }
                 };
                 $('nl-career').onchange = () => sendTeam();
+                // the settings: the same choices as an exhibition match (and kept in step with it)
+                const copy = (from, to) => { const a = $(from), b = $(to); if (a && b && !b.options.length) [...a.options].forEach(o => b.appendChild(new Option(o.textContent, o.value))); };
+                copy('sel-pitch', 'nl-pitch'); copy('sel-ind', 'nl-ind');
+                $('nl-fmt').onchange = () => { lobbyFmt = $('nl-fmt').value === 'sevens' ? 'sevens' : 'std'; sq.value = ''; fillPicker(rs, sq); paintCareer(); sendOpts(); };
+                $('nl-pitch').onchange = () => { setPitchPref($('nl-pitch').value); const a = $('sel-pitch'), b = $('st-pitch'); if (a) a.value = pitchPref; if (b) b.value = pitchPref; sendOpts(); };
+                $('nl-ind').onchange = () => { const v = $('nl-ind').value; try { localStorage.setItem('bb-ex-ind', v); } catch (e) {} const a = $('sel-ind'); if (a) a.value = v; sendOpts(); };
+                paintOpts();
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindLobby); else bindLobby();
 
@@ -22089,9 +22117,15 @@
             <div class="nl-sel"><select id="nl-race" aria-label="Race"></select><select id="nl-squad" aria-label="Team"></select></div>
             <label id="nl-career-row" class="nl-check hidden"><input type="checkbox" id="nl-career" checked> Record this match in my team's career (SPP, injuries, winnings)</label>
             </div>
+            <div id="nl-opts" class="nl-hostonly">
+                <label class="nl-opt"><span class="nl-dim">Game</span><select id="nl-fmt"><option value="std">Blood Bowl (11 a side)</option><option value="sevens">Blood Bowl Sevens (7 a side)</option></select></label>
+                <label class="nl-opt"><span class="nl-dim">Pitch</span><select id="nl-pitch"></select></label>
+                <label class="nl-opt"><span class="nl-dim">Inducements</span><select id="nl-ind"></select></label>
+            </div>
+            <p id="nl-optsum" class="hidden"></p>
             <p id="nl-opp"></p>
             <button type="button" id="nl-start" class="nl-btn nl-go" disabled>Start match</button>
-            <p class="nl-dim nl-hostonly">You play the left-hand team and kick off the match from this device. The match isn't saved, and no SPP or injuries are kept.</p>
+            <p class="nl-dim nl-hostonly">You play the left-hand team and start the match from this device; the other player picks their own team on theirs.</p>
         </div>
         <button type="button" id="nl-leave" class="nl-btn nl-back">Close</button>
     </div>
