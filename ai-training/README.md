@@ -136,3 +136,16 @@ Also checked this session: no move ever crossed a loose ball's square (forced pi
   assists from behind on an opponent already locked up with ours -2, screening the carrier's lane -4, hunt+screen -2.
   All four together led by 11 over 48 matches (all of it on passing teams) but lost 40-46 on the 12 teams outside the
   sweep (passing teams 3-7). None released: two plain runners in space stays best.
+
+## Skills (v3.11)
+Before v3.11 the AI's decisions referred to about 32 of the game's 100+ skills: those that change a roll's odds (via the
+rules code) plus a few tactical ones. v3.11 adds (switches `hitskills`, `vomit`, `gaze`):
+- Block judgement: Wrestle (Both Down = both Prone, no Turnover), Mighty Blow / Claws (knockdowns worth more by the rise in
+  armour-break chance), Dauntless (dice as the real mix), crowd surfs (a push square off the pitch; with Frenzy, from one in).
+- Projectile Vomit for a Troll with no good block; Hypnotic Gaze on a marker of our ball carrier. The AI's turn loop also
+  had to learn to keep acting in the Vomit mode (it froze there at first).
+Results: 47-26 touchdowns, 24-12 wins on 12 teams with these skills; 42-38, 17-18 on the other 12. Blocks per team per
+match rose about 10% where the skills are present (24.5 to 27.0).
+Not done yet: Frenzy follow-up risk, Stand Firm / Sidestep / Fend when choosing whom to block, avoiding Diving Tackle /
+Shadowing when dodging, Sure Feet / Sprint in rush risk, Multiple Block, Grab, Leader, Pro, Dump-off.
+Seen once in testing (recovered by the safety net): a bomb caught and re-thrown, then scattering, left the game waiting.

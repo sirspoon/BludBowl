@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.10</title>
+    <title>BludBowl 3.11</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.10</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.11</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10223,7 +10223,7 @@
         { const b = document.getElementById('btn-action-gaze'); if (b) b.onclick = () => {
             const p = getPlayerById(state.selectedId); if (!p) return;
             const go = () => { const ts = gazeTargets(p); if (!ts.length) return;
-                if (ts.length === 1 || AI.isAI(p.team)) { doGaze(p, ts.sort((a, b) => (b.id === state.ball.carrierId) - (a.id === state.ball.carrierId))[0]); return; }
+                if (ts.length === 1 || AI.isAI(p.team)) { const pick = AI.isAI(p.team) && ts.find(q => q.id === state.aiGaze); state.aiGaze = null; doGaze(p, pick || ts.sort((a, b) => (b.id === state.ball.carrierId) - (a.id === state.ball.carrierId))[0]); return; }
                 pitchPick({ title: 'HYPNOTIC GAZE', team: p.team, hint: `Tap the opponent ${p.name || p.type} stares down: on a 3+ they are Distracted.`, cells: ts.map(q => ({ x: q.x, y: q.y, data: q, hint: q.id === state.ball.carrierId })),
                     describe: c => `${c.data.name || c.data.type} (${c.data.type})${c.data.id === state.ball.carrierId ? ', has the ball' : ''}. Tap Confirm, or tap them again.`, onPick: q => doGaze(p, q), onCancel: () => doGaze(p, ts[0]) }); };
             if (state.mode === MODES.IDLE) { p.actionTaken = 'gaze'; activationTest(p, ok => { if (ok) go(); }); return; }
@@ -18682,7 +18682,7 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
             p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
@@ -18702,7 +18702,7 @@
             const toGo = (x, t) => Math.abs(x - endX(t));
             const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
             const tzFor = (x, y, team) => getTackleZones(x, y, other(team));
-            const ACTION_MODES = () => [MODES.IDLE, MODES.ACTION_MOVE, MODES.ACTION_BLOCK, MODES.ACTION_BLITZ, MODES.ACTION_STAB, MODES.ACTION_CHAINSAW, MODES.TARGET_BOMB, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM, MODES.TARGET_PASS, MODES.TARGET_HANDOFF, MODES.TARGET_TTM];
+            const ACTION_MODES = () => [MODES.IDLE, MODES.ACTION_MOVE, MODES.ACTION_BLOCK, MODES.ACTION_BLITZ, MODES.ACTION_STAB, MODES.ACTION_CHAINSAW, MODES.ACTION_VOMIT, MODES.TARGET_BOMB, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM, MODES.TARGET_PASS, MODES.TARGET_HANDOFF, MODES.TARGET_TTM];
             // run a UI action as the computer (the input guard lets these through)
             const act = fn => { internal = true; try { fn(); } finally { internal = false; } };
             const click = id => act(() => document.getElementById(id).click());
@@ -18778,18 +18778,35 @@
                 const bonus = state.ball.carrierId === def.id ? 4 : 0;
                 const strip = bonus > 0 && hasSk(atk, 'Strip Ball') && !hasSk(def, 'Sure Hands');   // a push knocks the ball loose
                 if (f === FACES.BOTH_DOWN && hasSk(atk, 'Juggernaut') && (blitzCtx || atk.actionTaken === 'blitz') && !(hasSk(atk, 'Block') && !hasSk(def, 'Block'))) return 2;
+                // (hitskills) a knockdown is worth more when this attacker's Mighty Blow or Claws makes the armour likelier to break
+                const hx = AIX.on(atk.team, 'hitskills');
+                const hb = hx && (hasSk(atk, 'Mighty Blow') || hasSk(atk, 'Claws')) && def.team !== atk.team
+                    ? 4 * (armourBreakProb(hasSk(atk, 'Claws') ? Math.min(def.av, 8) : def.av, hasSk(atk, 'Mighty Blow') ? 1 : 0) - armourBreakProb(def.av, 0)) : 0;
                 switch (f) {
                     case FACES.SKULL: return -10;
                     case FACES.BOTH_DOWN:
-                        if (hasSk(atk, 'Block')) return hasSk(def, 'Block') ? 0 : 6 + bonus;
+                        if (hasSk(atk, 'Block') && !hasSk(def, 'Block')) return hx && hasSk(def, 'Wrestle') ? 1 + bonus / 2 : 6 + bonus + hb;
+                        // (hitskills) Wrestle: both players placed Prone, no armour roll and no Turnover (either side may choose it)
+                        if (hx && hasSk(atk, 'Wrestle')) return 2 + (bonus ? 3 : 0);
+                        if (hasSk(atk, 'Block')) return 0;
+                        if (hx && hasSk(def, 'Wrestle')) return -2;
                         return hasSk(def, 'Block') ? -10 : -7;
                     case FACES.PUSH1: case FACES.PUSH2: return strip ? 6 + bonus : 2;
-                    case FACES.STUMBLE: return hasSk(def, 'Dodge') && !hasSk(atk, 'Tackle') ? (strip ? 6 + bonus : 2) : 6 + bonus;
-                    case FACES.POW: return 6 + bonus;
+                    case FACES.STUMBLE: return hasSk(def, 'Dodge') && !hasSk(atk, 'Tackle') ? (strip ? 6 + bonus : 2) : 6 + bonus + hb;
+                    case FACES.POW: return 6 + bonus + hb;
                 }
                 return 0;
             }
+            let inDaunt = false;
             function blockEval(atk, def, fx, fy) {
+                // (hitskills) Dauntless: the dice are a mix of matching their Strength (a D6 + ST beating theirs) and not
+                if (!inDaunt && AIX.on(atk.team, 'hitskills') && hasSk(atk, 'Dauntless') && def.team !== atk.team && def.st > atk.st) {
+                    const pw = Math.max(0, Math.min(1, (6 - (def.st - atk.st)) / 6)), st0 = atk.st;
+                    inDaunt = true; let e1, e0;
+                    try { atk.st = def.st; e1 = blockEval(atk, def, fx, fy); atk.st = st0; e0 = blockEval(atk, def, fx, fy); } finally { atk.st = st0; inDaunt = false; }
+                    const mix = k => pw * e1[k] + (1 - pw) * e0[k];
+                    return { ev: mix('ev'), pTurn: mix('pTurn'), n: e0.n, chooser: e0.chooser, pDown: mix('pDown'), pMove: mix('pMove') };
+                }
                 const { n, chooser } = blockDice(atk, def, fx, fy), mine = chooser === atk.team;
                 let ev = 0, bad = 0, total = 0, down = 0, moved = 0;
                 const dodgy = hasSk(def, 'Dodge') && !hasSk(atk, 'Tackle'), blocky = hasSk(def, 'Block');
@@ -18805,7 +18822,18 @@
                     for (let f = 1; f <= 6; f++) rec(k + 1, [...picks, f]);
                 };
                 rec(0, []);
-                return { ev: ev / total, pTurn: bad / total, n, chooser, pDown: down / total, pMove: moved / total };
+                let surf = 0;
+                // (hitskills) a push that can go off the pitch is a crowd surf (an injury roll and out of the drive); with Frenzy
+                // the forced second block can finish the job from one square in
+                if (AIX.on(atk.team, 'hitskills') && def.team !== atk.team && !hasSk(def, 'Stand Firm') && !hasSk(def, 'Sidestep')) {
+                    const ax = fx == null ? atk.x : fx, ay = fy == null ? atk.y : fy, dx = Math.sign(def.x - ax), dy = Math.sign(def.y - ay);
+                    const pushSq = (x, y) => dx && dy ? [[x + dx, y + dy], [x + dx, y], [x, y + dy]] : dx ? [[x + dx, y], [x + dx, y - 1], [x + dx, y + 1]] : [[x, y + dy], [x - 1, y + dy], [x + 1, y + dy]];
+                    const off = (x, y) => pushSq(x, y).some(([px, py]) => !inPitch(px, py));
+                    const pm = moved / total;
+                    if (off(def.x, def.y)) surf = pm * 5;
+                    else if (hasSk(atk, 'Frenzy') && off(def.x + dx, def.y + dy)) surf = pm * pm * 4;
+                }
+                return { ev: ev / total + surf, pTurn: bad / total, n, chooser, pDown: down / total, pMove: moved / total };
             }
 
             // ---- planning a turn ----
@@ -19869,6 +19897,13 @@
                     if (best && best.s > 0) return blitzOn(best.p, best.t.id);
                 }
 
+                // (gaze) our carrier is marked: a Hypnotic Gaze (3+) on a marker takes their tackle zone away, so the carrier
+                // can walk off without a dodge
+                if (AIX.on(me, 'gaze') && carrier && carrier.team === me && act.includes(carrier) && tzFor(carrier.x, carrier.y, me) > 0) {
+                    const markers = state.players.filter(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && cheb(q, carrier) === 1);
+                    const gz = act.find(p => p.id !== carrier.id && !p.isDown && hasSk(p, 'Hypnotic Gaze') && markers.some(m => cheb(m, p) === 1));
+                    if (gz && markers.length <= 2) { const t = markers.find(m => cheb(m, gz) === 1); return { pid: gz.id, kind: 'gaze', target: t.id }; }
+                }
                 // 5c. line up an assist first, so a block that matters (opening a lane, freeing our carrier) gets an extra die
                 const ast = assistPlan(me, act, ourC, markersOf);
                 if (ast) return ast;
@@ -19886,6 +19921,19 @@
                     });
                 });
                 if (stab) return { pid: stab.p.id, kind: 'stab', target: stab.d.id };
+                // (vomit) Projectile Vomit: a 2+ hits an adjacent opponent with an armour roll, a 1 backfires (a Turnover) -
+                // for a player with no good block of their own
+                if (AIX.on(me, 'vomit')) {
+                    let vb = null;
+                    standing.forEach(p => {
+                        if (!hasSk(p, 'Projectile Vomit') || (carrier && carrier.id === p.id)) return;
+                        adjacentTargets(p).forEach(d => {
+                            const v = (5 / 6) * armourBreakProb(d.av, 0) * (state.ball.carrierId === d.id ? 1.6 : 1) * (d.st >= 4 || d.skills.length >= 2 ? 1.2 : 1) - (1 / 6) * 1.2;
+                            if (v >= 0.12 && (!vb || v > vb.v)) vb = { p, d, v };
+                        });
+                    });
+                    if (vb) return { pid: vb.p.id, kind: 'vomit', target: vb.d.id };
+                }
                 // a Looney's chainsaw: a big armour roll, but a 1 kicks back (a Turnover)
                 let saw = null;
                 standing.forEach(p => {
@@ -20096,12 +20144,13 @@
                 });
                 if ([MODES.TARGET_PASS, MODES.TARGET_HANDOFF].includes(state.mode)) endAction(p);   // could not target them after all
             }
-            const BUTTON = { bnc: 'btn-action-bnc', bomb: 'btn-action-bomb', chainsaw: 'btn-action-chainsaw', ktm: 'btn-action-ktm', stab: 'btn-action-stab', block: 'btn-action-block', blitz: 'btn-action-blitz', foul: 'btn-action-foul', pass: 'btn-action-pass', handoff: 'btn-action-handoff', secure: 'btn-action-secure', ttm: 'btn-action-ttm' };
+            const BUTTON = { vomit: 'btn-action-vomit', gaze: 'btn-action-gaze', bnc: 'btn-action-bnc', bomb: 'btn-action-bomb', chainsaw: 'btn-action-chainsaw', ktm: 'btn-action-ktm', stab: 'btn-action-stab', block: 'btn-action-block', blitz: 'btn-action-blitz', foul: 'btn-action-foul', pass: 'btn-action-pass', handoff: 'btn-action-handoff', secure: 'btn-action-secure', ttm: 'btn-action-ttm' };
             function runPlan() {
                 const p = getPlayerById(plan.pid);
                 if (!p || !onPitch(p) || p.team !== state.activeTeam) { plan = null; return; }
                 if (plan.step === 0) {
                     tried.add(p.id);
+                    if (plan.kind === 'gaze') state.aiGaze = plan.target;   // which marker to stare down
                     act(() => {
                         starAI(p);
                         refreshSelection(p);
@@ -20114,7 +20163,7 @@
                 if (plan.kind === 'bnc') { if (state.mode !== MODES.BALL_CHAIN && state.mode !== MODES.LOCKED) plan = null; return; }
                 if (plan.step === 1) {
                     if (plan.kind === 'block') { doBlock(p); return; }
-                    if (plan.kind === 'stab' || plan.kind === 'chainsaw') { const t = getPlayerById(plan.target); plan.step = 3; act(() => { updateValidActions(p); if (t && state.targets.includes(t.id)) handleGridClick(t.x, t.y); }); if (state.mode === MODES.ACTION_STAB || state.mode === MODES.ACTION_CHAINSAW) endAction(p); return; }
+                    if (plan.kind === 'stab' || plan.kind === 'chainsaw' || plan.kind === 'vomit') { const t = getPlayerById(plan.target); plan.step = 3; act(() => { updateValidActions(p); if (t && state.targets.includes(t.id)) handleGridClick(t.x, t.y); }); if (state.mode === MODES.ACTION_STAB || state.mode === MODES.ACTION_CHAINSAW || state.mode === MODES.ACTION_VOMIT) endAction(p); return; }
                     if (plan.kind === 'bomb') { plan.step = 3; act(() => handleGridClick(plan.tx, plan.ty)); if (state.mode === MODES.TARGET_BOMB) endAction(p); return; }
                     if (plan.kind === 'ttm' || plan.kind === 'ktm') {
                         plan.step = 3;

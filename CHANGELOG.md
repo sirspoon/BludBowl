@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.11 (16 Oct 2026)
+- **Changed:** the computer now makes use of its players' skills ([#19](https://github.com/sirspoon/BludBowl/issues/19)). Over 96 test matches against v3.10 it scored 25 more touchdowns and won 41 to 30, with most of the gain for teams that have these skills.
+  - **Blocking:** it values Wrestle properly (a Both Down becomes a safe knockdown, not a Turnover), aims Mighty Blow and Claws at players whose armour they can break, and works out the real odds of a Dauntless block.
+  - **Crowd surfing:** it looks for blocks that push an opponent off the pitch. With Frenzy, the forced second block can push them out from one square in.
+  - **Projectile Vomit:** Trolls with no good block now use it on an adjacent opponent.
+  - **Hypnotic Gaze:** a Vampire next to whoever is marking the ball carrier stares them down, so the carrier can walk away without a dodge.
+
 ## v3.10 (16 Oct 2026)
 - **Changed:** when the computer has the ball, two of its quicker players now work down the wings into the space behind the opposing line ([#19](https://github.com/sirspoon/BludBowl/issues/19)), one on each side, on unmarked squares few opponents can reach. That gives the carrier someone to hand off or pass to, and two more threats the defence has to cover. Over 96 test matches against v3.09 it scored 19 more touchdowns and won 37 to 23.
 
