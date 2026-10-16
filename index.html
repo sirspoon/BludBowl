@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.1</title>
+    <title>BludBowl 3.11</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -903,7 +903,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.1</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.11</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -7498,9 +7498,10 @@
                 isArc: isArc,
                 onComplete: onComplete
             };
-            if (CLOCK.speed > 1) timedFinish(state.ballAnimation, duration);
+            timedFinish(state.ballAnimation, duration);
         }
-        // a fast match: the flight finishes on the game clock (like everything else) rather than on the next screen frame
+        // a flight finishes on the game clock rather than on the screen being drawn, which stops when the page is in the background (a
+        // phone asleep, or the host's device switched away in a two-device match): otherwise the ball would hang in the air, held by nobody
         function timedFinish(a, duration) {
             a.timed = true;
             setTimeout(() => { if (!a.active) return; a.active = false; const cb = a.onComplete; a.onComplete = null; if (cb) cb(); }, duration);
@@ -7523,7 +7524,7 @@
                 onComplete: onComplete,
                 arc: opts.arc != null ? opts.arc : 2.8, spin: opts.spin != null ? opts.spin : 4
             };
-            if (CLOCK.speed > 1) timedFinish(state.flightAnimation, duration);
+            timedFinish(state.flightAnimation, duration);
         }
         // keep a thrown player (or the ball) visible and still on a square for a moment, so each bounce is easy to follow
         function holdFlight(player, x, y, ms, onComplete) { animatePlayerFlight(player, x, y, x, y, ms, onComplete, { silent: true, arc: 0, spin: 0 }); }
@@ -12915,7 +12916,7 @@
             if (interceptors.length > 0) {
                 state.interceptors = interceptors;
                 state.mode = MODES.INTERCEPT_CHOICE;
-                log(`  Interception possible! Select a highlighted player or click elsewhere to decline.`, 'text-purple-400 font-bold');
+                log(`  Interception possible! ${ROSTERS[oppTeam].name} can tap a highlighted player to try to intercept, or tap anywhere else to let it go.`, 'text-purple-400 font-bold');
                 render();
             } else {
                 continuePassFlight();

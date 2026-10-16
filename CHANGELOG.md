@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.11 (16 Oct 2026)
+- **Fixed:** in two-device play the ball could vanish after an interception or a pass. A thrown ball only landed when the screen was redrawn, which stops while the host's phone is asleep or switched to another app. Thrown balls and players now always land on time. ([#18](https://github.com/sirspoon/BludBowl/issues/18))
+- **Changed:** the "Interception possible!" message now says which team chooses. Only the defending player's taps count, on either device.
+
 ## v3.1 (16 Oct 2026)
 Everything since v3.00 (the updates numbered v3.01 to v3.38), rolled into one update.
 
