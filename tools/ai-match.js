@@ -7,6 +7,8 @@
 // --dev  developed teams: every player gets a typical extra skill or two for their position, the same on both sides
 //        (big guys and ST4+: Guard/Block, blitzers: Tackle/Mighty Blow, catchers: Dodge/Catch or Sure Hands, throwers:
 //        Sure Hands/Accurate, linemen in turn Block/Guard/Wrestle/Tackle plus Dodge on agile teams) - roughly mid-season teams.
+// --devnew / --devold '{"lineman":["Guard"],"catcher":["Dodge"],...}'  instead of --dev: the skills each side's players get by
+//        position (big, strong, blitzer, catcher, thrower, lineman; a missing position gets nothing) - to compare skills.
 // --newp '{"key":value}'  tuning values for the new side (the AIX.p settings in index.html), to try different tolerances.
 // --new / --old  which AI improvements (the AIX switches in index.html) each side has: 'all' (as in play), 'none',
 //                or a comma list. With the same setting on both sides it just plays matches (e.g. to read the stats).
@@ -17,7 +19,7 @@ let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { ({ chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright')); }
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const DEV = process.argv.includes('--dev'), NEWP = JSON.parse(arg('newp', '{}')), N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
+const DEV = process.argv.includes('--dev'), DEVNEW = JSON.parse(arg('devnew', 'null')), DEVOLD = JSON.parse(arg('devold', 'null')), NEWP = JSON.parse(arg('newp', '{}')), N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
 const jobs = [];
 (arg('races', '') ? arg('races').split(',') : []).forEach(r => { for (let i = 0; i < N; i++) jobs.push({ a: r, b: r, i }); });
 (arg('pairs', '') ? arg('pairs').split(',') : []).forEach(pr => { const [a, b] = pr.split(':'); for (let i = 0; i < N; i++) jobs.push({ a, b, i }); });
@@ -50,6 +52,12 @@ async function play(browser, port, job) {
   while (Date.now() - t0 < LIMIT) {
     await p.waitForTimeout(250);
     if (!clicked) clicked = await p.evaluate(() => { const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) { b.click(); return true; } return false; });
+    if (DEVNEW || DEVOLD) await p.evaluate(([m0, m1]) => {
+      if (window.__dev || !state.players || !state.players.length) return; window.__dev = 1;
+      const role = q => isBigGuy(q) || q.st >= 5 ? 'big' : q.st >= 4 ? 'strong' : /Blitzer|Wardancer|Witch|Berserker|Bloodseeker|Werewolf/.test(q.type) ? 'blitzer'
+        : /Catcher|Runner|Gutter|Eagle|Lion/.test(q.type) ? 'catcher' : /Thrower/.test(q.type) ? 'thrower' : 'lineman';
+      [m0, m1].forEach((m, t) => state.players.filter(q => q.team === t).forEach(q => ((m || {})[role(q)] || []).forEach(k => { if (!q.skills.includes(k)) q.skills.push(k); })));
+    }, newHome ? [DEVNEW, DEVOLD] : [DEVOLD, DEVNEW]);
     if (DEV) await p.evaluate(() => {
       if (window.__dev || !state.players || !state.players.length) return; window.__dev = 1;
       const add = (q, k) => { if (!q.skills.includes(k)) q.skills.push(k); };

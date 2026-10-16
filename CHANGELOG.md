@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.13 (16 Oct 2026)
+- **Changed:** the computer's league teams now pick level-up skills to suit each position ([#19](https://github.com/sirspoon/BludBowl/issues/19)), using the skills it was found to play best with in test matches. Big guys take Block first (in tests it beat Guard 59 touchdowns to 36), catchers, runners and throwers take Block or Sure Hands, and linemen take Wrestle. Before, every player picked from the same list.
+
 ## v3.12 (16 Oct 2026)
 - **Fixed:** the odds shown for a move now count an opponent's Diving Tackle (−2 on a dodge out of their tackle zone) and the moving player's Sure Feet (a free Rush re-roll). The computer plans with the same odds, and it no longer values pushing a player with Stand Firm, who can't be moved.
 

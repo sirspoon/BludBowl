@@ -164,3 +164,23 @@ teams). With it (48 matches each, against the AI without the change):
 - Assist setup (a spare player, Guards even when marked, steps in to make a 2-dice block): 34.6 v 30.5 blocks a match and
   87-60 casualties, but 37-42 touchdowns, 14-21 wins. Not released (same as on starting rosters).
 - Block-order look-ahead: 47-40, 17-16. Not released.
+
+### Which skills the AI plays best with (v3.13 league picks)
+`--devnew`/`--devold` give each side its own skills by role (JSON like `'{"big":["Block"]}'`; roles big, strong,
+blitzer, catcher, thrower, lineman), so two skills can be compared head to head. 48 matches each, new v old:
+
+| Role | New v old skill | Touchdowns | Wins |
+|---|---|---|---|
+| Big guys | Block v Guard | 59-36 | 21-7 |
+| Big guys | Block v Mighty Blow | 52-35 | 22-12 |
+| Linemen | Wrestle v Block (two runs) | 93-74 | 34-19 |
+| Linemen | Block v Guard | 45-47 | level |
+| Blitzers | Mighty Blow v Tackle | 40-41 | level |
+| Catchers | Sure Hands v Dodge | 49-30 | 23-12 |
+| Catchers | Dodge v Catch | 46-42 | level |
+| Throwers | Sure Hands v Accurate | 45-34 | 23-11 |
+| Ball handlers | Block v Sure Hands | 44-36 | about level |
+
+So in leagues the computer now picks by position (`aiPicks` in `CAREER`): big guys Block (even as a secondary skill),
+then Mighty Blow, Guard; catchers, runners and throwers Block, Sure Hands, Dodge; linemen Wrestle, Block; everyone
+else the old `AI_PICKS` order.

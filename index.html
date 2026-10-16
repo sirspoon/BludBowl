@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.12</title>
+    <title>BludBowl 3.13</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.12</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.13</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -2246,6 +2246,17 @@
             const AI_PICKS = ['Block', 'Dodge', 'Mighty Blow', 'Tackle', 'Wrestle', 'Sure Hands', 'Guard', 'Catch', 'Pass', 'Stand Firm', 'Sidestep', 'Strip Ball', 'Frenzy',
                 'Claws', 'Juggernaut', 'Break Tackle', 'Thick Skull', 'Sure Feet', 'Sprint', 'Leap', 'Safe Pair of Hands', 'Dirty Player', 'Shadowing', 'Strong Arm',
                 'Steady Footing', 'On the Ball', 'Safe Pass', 'Cloud Burster', 'Taunt', 'Disturbing Presence', 'Prehensile Tail'];
+            // ...adjusted by position, from computer-v-computer tests with developed teams (48-96 matches each): big guys do
+            // best with Block (beat Guard 59-36 and Mighty Blow 52-35 in touchdowns), ball handlers with Block or Sure Hands
+            // (Sure Hands beat Dodge 49-30 and Accurate 45-34), linemen with Wrestle (beat Block 93-74 over two runs)
+            const BIG_POS = /Ogre|Troll|Treeman|Minotaur|Kroxigor|Mummy|spawn|Yhetee|Tomb Guardian|Vargheist|Deathroller|Wagon/i;
+            function aiPicks(race, p) {
+                const t = (types(race) || {})[p.pos] || {}, nm = String(t.type || p.pos || ''), st = (eff(race, p) || {}).st || 0;
+                const head = st >= 5 || BIG_POS.test(nm) ? ['Block', 'Mighty Blow', 'Guard']
+                    : /Catcher|Runner|Thrower|Gutter|Eagle/.test(nm) ? ['Block', 'Sure Hands', 'Dodge']
+                    : /Lineman|Linemen|Retainer|Clanrat|Marauder|Rotter|Squire|Hopeful|Thrall/.test(nm) ? ['Wrestle', 'Block'] : [];
+                return [...new Set([...head, ...AI_PICKS])];
+            }
 
             const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
             const d6 = () => Math.floor(Math.random() * 6) + 1;
@@ -2308,7 +2319,7 @@
             function pickPrimary(race, pos, have) {   // the computer's pick of a primary skill (Intensive Training)
                 const c = [];
                 [...access(race, pos)[0]].forEach(g => SKILLS[g].forEach(sk => { if (PLAYABLE.has(sk) && !hasSkill(have, sk) && allowed(sk, have)) c.push(sk); }));
-                return AI_PICKS.find(x => c.includes(x)) || c[0] || null;
+                return aiPicks(race, { pos, advs: [] }).find(x => c.includes(x)) || c[0] || null;
             }
             function rollSkill(race, p, grp, not) {   // one random roll on a category's table; re-rolled if they have it or the game can't play it
                 const have = eff(race, p).skills, ok = SKILLS[grp].filter(sk => PLAYABLE.has(sk) && !hasSkill(have, sk) && sk !== not && allowed(sk, have));
@@ -2370,8 +2381,11 @@
                 const out = [];
                 for (let guard = 0; guard < 6 && p.advs.length < 6; guard++) {
                     let pick = null, kind = null;
-                    if (p.spp >= costOf(p, 'cp')) { const c = skillChoices(race, p, 'P'); pick = AI_PICKS.map(s => c.find(x => x.skill === s)).find(Boolean); kind = 'cp'; }
-                    if (!pick && p.spp >= costOf(p, 'cs')) { const c = skillChoices(race, p, 'S'); pick = AI_PICKS.map(s => c.find(x => x.skill === s)).find(Boolean); kind = 'cs'; }
+                    const order = aiPicks(race, p);
+                    // a big guy's first choice is Block even as a secondary skill (it's rarely primary for them)
+                    if (order[0] === 'Block' && p.spp >= costOf(p, 'cs') && !skillChoices(race, p, 'P').some(x => x.skill === 'Block')) { const b = skillChoices(race, p, 'S').find(x => x.skill === 'Block'); if (b) { pick = b; kind = 'cs'; } }
+                    if (!pick && p.spp >= costOf(p, 'cp')) { const c = skillChoices(race, p, 'P'); pick = order.map(s => c.find(x => x.skill === s)).find(Boolean); kind = 'cp'; }
+                    if (!pick && p.spp >= costOf(p, 'cs')) { const c = skillChoices(race, p, 'S'); pick = order.map(s => c.find(x => x.skill === s)).find(Boolean); kind = 'cs'; }
                     if (!pick) break;
                     spend(p, kind, { skill: pick.skill, kind: kind === 'cs' ? 'S' : 'P', grp: pick.grp });
                     out.push(pick.skill);
@@ -2844,7 +2858,7 @@
                 if (!$('post-game').classList.contains('hidden')) render();
             }
             const refresh = () => { if (!$('post-game').classList.contains('hidden')) render(); };
-            return { addReport, refresh, reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS,
+            return { addReport, refresh, reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS, aiPicks, autoAdvance,
                 started: t => (t.played || 0) > 0, statLine };
         })();
 
