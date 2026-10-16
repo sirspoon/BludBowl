@@ -33,9 +33,9 @@ async function play(browser, port, job) {
   const newHome = job.i % 2 === 0, f0 = newHome ? NEW : OLD, f1 = newHome ? OLD : NEW;
   const ctx = await browser.newContext({ viewport: { width: 900, height: 700 } }), p = await ctx.newPage();
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.addInitScript(() => { window.AI_TRACE = []; window.HO_COUNT = [0, 0];
+  await p.addInitScript(() => { window.AI_TRACE = []; window.HO_COUNT = [0, 0]; window.NEG_COUNT = [0, 0];
     const t = setInterval(() => { if (typeof log !== 'function' || window.__hoHook) return; window.__hoHook = 1; clearInterval(t); const L = log;
-      window.log = function (m) { try { if (/Handing off to/.test(String(m))) window.HO_COUNT[state.activeTeam]++; } catch (e) {} return L.apply(this, arguments); }; }, 50);
+      window.log = function (m) { try { if (/Handing off to/.test(String(m))) window.HO_COUNT[state.activeTeam]++; if (/becomes DISTRACTED|LASHES OUT|bellows and stamps/.test(String(m))) window.NEG_COUNT[state.activeTeam]++; } catch (e) {} return L.apply(this, arguments); }; }, 50);
     try { localStorage.setItem('bb-replays', '0'); localStorage.setItem('bb-ex-ind', 'off'); } catch (e) {} });
   await p.route(/cdn\.tailwindcss\.com/, r => r.fulfill({ body: '' }));   // styling only; keeps the run offline
   await p.goto(`http://localhost:${port}/index.html?simtest`);
@@ -46,7 +46,7 @@ async function play(browser, port, job) {
     await p.waitForTimeout(250);
     if (!clicked) clicked = await p.evaluate(() => { const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) { b.click(); return true; } return false; });
     res = await p.evaluate(() => ({ over: !!state.isGameOver, half: state.half, turn: [state.turn[0], state.turn[1]], score: [state.score[0], state.score[1]],
-      cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length), to: MATCH.data ? MATCH.data.turnovers.slice() : [0, 0], bl: MATCH.data ? MATCH.data.blocks.slice() : [0, 0], rr: MATCH.data ? MATCH.data.rerolls.slice() : [0, 0], cp: [0, 1].map(t => state.players.filter(q => q.team === t).reduce((a, q) => a + ((q.gStats || {}).cp || 0), 0)), ho: window.HO_COUNT || [0, 0] }));
+      cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length), to: MATCH.data ? MATCH.data.turnovers.slice() : [0, 0], bl: MATCH.data ? MATCH.data.blocks.slice() : [0, 0], rr: MATCH.data ? MATCH.data.rerolls.slice() : [0, 0], cp: [0, 1].map(t => state.players.filter(q => q.team === t).reduce((a, q) => a + ((q.gStats || {}).cp || 0), 0)), ho: window.HO_COUNT || [0, 0], neg: window.NEG_COUNT || [0, 0] }));
     if (res.over) break;
   }
   const rec = await p.evaluate(() => window.BB_STALLS || []).catch(() => []);
@@ -56,7 +56,7 @@ async function play(browser, port, job) {
   await ctx.close();
   const n = newHome ? 0 : 1;
   return { ...job, newSide: newHome ? 'home' : 'away', secs: +((Date.now() - t0) / 1000).toFixed(1), ...res,
-    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], newTO: res.to[n], oldTO: res.to[1 - n], newBl: res.bl[n], oldBl: res.bl[1 - n], newRR: res.rr[n], oldRR: res.rr[1 - n], newCP: res.cp[n], oldCP: res.cp[1 - n], newHO: res.ho[n], oldHO: res.ho[1 - n], recovered: rec, stuck, errs: errs.slice(0, 3) };
+    newTD: res.score[n], oldTD: res.score[1 - n], newCas: res.cas[n], oldCas: res.cas[1 - n], newTO: res.to[n], oldTO: res.to[1 - n], newBl: res.bl[n], oldBl: res.bl[1 - n], newRR: res.rr[n], oldRR: res.rr[1 - n], newCP: res.cp[n], oldCP: res.cp[1 - n], newHO: res.ho[n], oldHO: res.ho[1 - n], newNeg: res.neg[n], oldNeg: res.neg[1 - n], recovered: rec, stuck, errs: errs.slice(0, 3) };
 }
 
 // two-sided binomial test: how likely a split at least this uneven is if both sides were equally good
@@ -92,5 +92,6 @@ server.listen(0, async () => {
   console.log(`turnovers   new ${sum('newTO')} - ${sum('oldTO')} old`);
   console.log(`re-rolls    new ${sum('newRR')} - ${sum('oldRR')} old (per team per match: ${(sum('newRR') / Math.max(1, done.length)).toFixed(1)} - ${(sum('oldRR') / Math.max(1, done.length)).toFixed(1)})`);
   console.log(`passes      new ${sum('newCP')} - ${sum('oldCP')} old completed; hand-offs new ${sum('newHO')} - ${sum('oldHO')} old`);
+  console.log(`failed Bone Head / Really Stupid / Savagery / Fury rolls: new ${sum('newNeg')} - ${sum('oldNeg')} old`);
   console.log(`blocks      new ${sum('newBl')} - ${sum('oldBl')} old (per team per match: ${(sum('newBl') / Math.max(1, done.length)).toFixed(1)} - ${(sum('oldBl') / Math.max(1, done.length)).toFixed(1)})`);
 });
