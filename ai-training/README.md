@@ -88,3 +88,16 @@ python3 ai-training/compare.py --mincr 1700                                  # o
   ([Developers' Den](https://fumbbl.com/index.php?name=PNphpBB2&file=viewtopic&t=30534)) he called the WebSocket method
   "a supremely terrible way of downloading replays": it's tolerated, not welcome. A few replays by hand is fine. The
   per-match stats above come from FUMBBL's ordinary web pages and API, which is fine as it is.
+
+## Passing: what's been tried, and ideas (Oct 2026)
+
+- The AI hardly passes (about 0.1 completions a match against 0.4 for good FUMBBL coaches). Loosening its passing
+  tolerances (a dodge to reach the throw, a lower bar for scoring passes) changed nothing: it rarely has anyone to pass to.
+- On turns with the ball, a team-mate was open 3+ squares ahead only 13-41% of the time. A "receiver" role (best catchers
+  wait in open squares ahead, in pass range, out of reach of most opponents) raised that for some teams (Wood Elves 33% to
+  67%) but the AI still didn't throw, and an 8-setting sweep (16 mirror matches each) showed no gain. Kept as a patch, not in the game.
+- Why: switching the play values a spot mostly by squares gained (`ballSpotValue`), so a pass needs ~73% odds to beat
+  walking the ball up, and only passes that score this turn get extra credit.
+- Next idea: value where the ball would be by what it opens up next turn: the free run from there (`nextTurnLane`), how
+  few of their players can reach it, and our players nearby to support it. That would also reward a **sideways pass to the
+  weak side** when most players are bunched on one side (the owner's point) - a good play with no squares gained.
