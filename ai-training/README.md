@@ -109,3 +109,16 @@ python3 ai-training/compare.py --mincr 1700                                  # o
     `recvMin: 0` lets receiver squares be level with the carrier (a sideways switch).
   - Result over ~400 sweep matches: hand-offs and passes went up (about 25 a match-set of 16 against 18), but no setting
     beat the current AI by more than luck; taken together they were slightly worse. Not released.
+
+## Ideas from coaching guides, tested (Oct 2026)
+
+From creativetwilight.com, grumbbl.co.uk and Goonhammer's beginner-to-intermediate guides. Most of their advice the AI
+already follows (dice-free actions first, block order by dice, screens two squares apart, wide-zone defenders two back,
+cage in midfield, stalling, fouling last, re-rolls for what matters). It also always stands up every prone player it can
+(measured: none left lying down at the end of 342 turns). Tested with 48-match quick checks against v3.09, none released:
+- Don't activate Bone Head / Really Stupid / Savagery / Fury big guys just to reposition near the action: 19% fewer
+  failed rolls, but 31-41 touchdowns, 9-15 wins (they ended up out of position).
+- Big Guys and Loners block after everyone else's blocks: 26-38 touchdowns, 14-19 wins (their blocks are usually the best).
+- The passing play only when behind with 3 turns left (`latepass-experiment.patch`): came back 2 times in 14, against
+  4 in 18 without; passes barely rose. Overall 48-42.
+- A safety kept well behind the ball while attacking: 41-43, 16-17. Neutral.
