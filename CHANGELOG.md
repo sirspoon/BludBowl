@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.22 (16 Oct 2026)
+- **Added:** a new pitch, **Woodland**, the home ground of the Wood Elves and Gnomes. It's a forest glade with dappled sunlight and canopy shadow, moss, fallen leaves, tree roots creeping in from the sidelines, ferns, bluebells and daisies, mushrooms, red-and-white toadstools and a fairy ring. Behind the block clashes and replays: sunbeams through the trees, toadstool houses, and a great oak with a gnome's round red door and lit windows. It can also be picked from the Pitch menu.
+
 ## v3.21 (16 Oct 2026)
 - **Added:** the Brimstone pitch has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): epic rock, with distorted guitars galloping and crashing out power chords, a rock kit with double kick drums, a bass guitar, war drums, low brass and a war horn, a deep choir chanting "Blood for the Blood God!", an anvil and bubbling lava.
 

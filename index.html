@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.21</title>
+    <title>BludBowl 3.22</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.21</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.22</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -931,7 +931,7 @@
             <div class="st-row"><span>Music</span><button type="button" class="st-tog" id="st-music"></button></div>
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
-                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option></select></div>
+                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option></select></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
@@ -977,7 +977,7 @@
                 <option value="blades">Grass</option>
                 <option value="worn">Muddy Grass</option>
                 <option value="flagstone">Mossy Flagstones</option>
-                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option>
+                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option>
             </select>
         </div>
         <div class="flex items-center justify-center gap-2 mb-5 -mt-2 pointer-events-auto">
@@ -13842,6 +13842,7 @@
             const sky = g.createLinearGradient(0, 0, 0, ground), grassy = style === 'blades' || style === 'worn', elven = style === 'elven';
             if (style === 'jungle') { sky.addColorStop(0, 'rgb(40,74,58)'); sky.addColorStop(0.7, 'rgb(104,140,98)'); sky.addColorStop(1, 'rgb(150,172,120)'); }   // misty jungle air
             else if (elven) { sky.addColorStop(0, 'rgb(150,186,222)'); sky.addColorStop(0.65, 'rgb(214,226,236)'); sky.addColorStop(1, 'rgb(246,236,210)'); }   // a soft, luminous elven sky
+            else if (style === 'woodland') { sky.addColorStop(0, 'rgb(30,60,34)'); sky.addColorStop(0.5, 'rgb(96,140,80)'); sky.addColorStop(1, 'rgb(196,214,150)'); }   // green light under the canopy
             else if (style === 'brimstone') { sky.addColorStop(0, 'rgb(22,8,10)'); sky.addColorStop(0.55, 'rgb(88,20,14)'); sky.addColorStop(1, 'rgb(196,70,24)'); }   // a red-black sky, lit from below by the lava
             else if (grassy) { sky.addColorStop(0, 'rgb(74,138,206)'); sky.addColorStop(0.75, 'rgb(140,190,232)'); sky.addColorStop(1, 'rgb(176,210,236)'); }   // a daytime-blue sky over the grass
             else { sky.addColorStop(0, mix(base, 0.18)); sky.addColorStop(1, mix(base, 0.5)); }
@@ -13885,6 +13886,30 @@
                     for (let k = 0; k < 4; k++) { const a = dir > 0 ? -0.2 - k * 0.35 : Math.PI + 0.2 + k * 0.35; g.beginPath(); g.ellipse(x + Math.cos(a) * len * 0.5, y + Math.sin(a) * len * 0.5, len * 0.55, len * 0.14, a, 0, 7); g.fill(); }
                 };
                 frond(-4, hz + 4, 1, 46); frond(W + 4, hz + 4, -1, 46);
+            } else if (style === 'woodland') {   // deep in the forest: sunbeams through the canopy, and a great oak with a gnome's door
+                const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
+                for (let k = 0; k < 5; k++) {   // sunbeams slanting down through the leaves
+                    const x0 = W * (0.1 + k * 0.2 + R(k) * 0.08), beam = g.createLinearGradient(x0, 0, x0 + 40, hz); beam.addColorStop(0, 'rgba(255,248,200,0.32)'); beam.addColorStop(1, 'rgba(255,248,200,0)');
+                    g.fillStyle = beam; g.beginPath(); g.moveTo(x0, 0); g.lineTo(x0 + 14, 0); g.lineTo(x0 + 54, hz); g.lineTo(x0 + 26, hz); g.closePath(); g.fill();
+                }
+                const tree = (x, w, h, trunk, leaf) => {   // a trunk and a round, layered crown
+                    g.fillStyle = trunk; g.fillRect(x - w / 2, hz - h, w, h); g.beginPath(); g.moveTo(x - w, hz); g.quadraticCurveTo(x - w / 2, hz - 6, x - w / 2, hz - 12); g.lineTo(x + w / 2, hz - 12); g.quadraticCurveTo(x + w / 2, hz - 6, x + w, hz); g.fill();
+                    g.fillStyle = leaf; [[0, -h, 1], [-0.9, -h + 8, 0.75], [0.9, -h + 8, 0.75], [-0.4, -h - 10, 0.7], [0.5, -h - 8, 0.7]].forEach(([dx, dy, k]) => { g.beginPath(); g.arc(x + dx * w * 2.2, hz + dy, w * 1.6 * k, 0, 7); g.fill(); });
+                };
+                [[0.04, 8, 64], [0.24, 7, 58], [0.38, 6, 70], [0.64, 6, 66], [0.78, 7, 60], [0.96, 8, 68]].forEach(([fx, w, h]) => tree(fx * W, w, h, 'rgb(52,62,40)', 'rgb(56,92,52)'));   // the far trees, softened by the haze
+                // the great oak in the middle, with a gnome's round door and windows in its roots
+                const ox = W * 0.5; g.fillStyle = 'rgb(70,52,36)'; g.beginPath(); g.moveTo(ox - 34, hz); g.quadraticCurveTo(ox - 16, hz - 18, ox - 14, hz - 70); g.lineTo(ox + 14, hz - 70); g.quadraticCurveTo(ox + 16, hz - 18, ox + 34, hz); g.closePath(); g.fill();
+                g.fillStyle = 'rgb(46,92,44)'; [[0, -88, 34], [-30, -76, 26], [30, -76, 26], [-14, -102, 22], [16, -100, 22]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(ox + dx, hz + dy, rr, 0, 7); g.fill(); });
+                g.fillStyle = 'rgba(120,170,80,0.5)'; [[-8, -96, 10], [20, -84, 8], [-26, -80, 7]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(ox + dx, hz + dy, rr, 0, 7); g.fill(); });   // sunlit leaves
+                g.fillStyle = 'rgb(150,40,30)'; g.beginPath(); g.arc(ox, hz - 7, 7, Math.PI, 0); g.lineTo(ox + 7, hz); g.lineTo(ox - 7, hz); g.fill();   // the door
+                g.fillStyle = 'rgb(232,196,90)'; g.beginPath(); g.arc(ox + 4, hz - 6, 0.9, 0, 7); g.fill();
+                g.fillStyle = 'rgb(250,220,120)'; [[-12, -20], [12, -26]].forEach(([dx, dy]) => { g.beginPath(); g.arc(ox + dx, hz + dy, 2.6, 0, 7); g.fill(); });   // lit windows
+                const toad = (x, sc) => { g.fillStyle = 'rgb(232,222,200)'; g.fillRect(x - 3 * sc, hz - 9 * sc, 6 * sc, 9 * sc); g.fillStyle = 'rgb(196,44,34)'; g.beginPath(); g.ellipse(x, hz - 9 * sc, 9 * sc, 6 * sc, 0, Math.PI, 0); g.fill();
+                    g.fillStyle = 'rgb(250,246,236)'; [[-4, -12], [2, -13.5], [5, -10.5]].forEach(([dx, dy]) => { g.beginPath(); g.arc(x + dx * sc, hz + dy * sc, 1.1 * sc, 0, 7); g.fill(); }); g.fillStyle = 'rgb(110,70,40)'; g.fillRect(x - 1 * sc, hz - 4 * sc, 2 * sc, 4 * sc); };
+                toad(W * 0.3, 1.2); toad(W * 0.68, 1); toad(W * 0.74, 0.7);   // toadstool houses
+                g.fillStyle = 'rgb(34,64,34)'; g.beginPath(); g.moveTo(0, hz); for (let i = 0; i <= 16; i++) { const x = i * W / 16; g.arc(x, hz + 2, 6 + R(i + 40) * 6, Math.PI, 0); } g.lineTo(W, hz); g.closePath(); g.fill();   // undergrowth along the edge
+                g.fillStyle = 'rgb(28,54,30)';   // leaves hanging down from the canopy above
+                for (let i = 0; i < 18; i++) { const x = (i + R(i + 60)) * W / 18, y = 2 + R(i + 80) * 14; g.beginPath(); g.ellipse(x, y, 10, 5, R(i + 100) - 0.5, 0, 7); g.fill(); }
             } else if (style === 'brimstone') {   // the realm of Khorne: smoking volcanoes, basalt spires, and a brass throne on a pyramid of skulls
                 const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
                 for (let k = 0; k < 6; k++) {   // smoke drifting across the sky
@@ -15036,11 +15061,11 @@
         
         // ---------- pitch texture: painted once by the game itself (no image files) ----------
         // 'blades' = lush grass, 'worn' = the same with churned-up mud; one is picked at random each time the game loads
-        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone'];
+        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland'];
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'blades', skaven: 'flagstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blades', khorne: 'brimstone', renegades: 'brimstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'flagstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blades', khorne: 'brimstone', renegades: 'brimstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -15232,6 +15257,60 @@
                 x.beginPath(); x.arc(px * S, py * S, (hotOne ? 0.6 + r() * 0.6 : 0.5 + r() * 1.2) * S, 0, 7); x.fill(); }
             return { cv, x, r };
         }
+        // woodland (Wood Elves and Gnomes): a forest glade - dappled sunlight and canopy shadow, moss, fallen leaves, tree roots creeping
+        // in from the sidelines, ferns, bluebells and daisies, mushrooms, red-and-white toadstools and a fairy ring
+        function woodlandDressing(x, r, S, W, H, ts) {
+            for (let k = 0; k < 16; k++) {   // the canopy's shadow
+                const cx = r() * W, cy = r() * H, rr = 40 + r() * 60, g = x.createRadialGradient(cx * S, cy * S, 0, cx * S, cy * S, rr * S);
+                g.addColorStop(0, 'rgba(10,30,14,0.32)'); g.addColorStop(1, 'rgba(10,30,14,0)'); x.fillStyle = g; x.fillRect((cx - rr) * S, (cy - rr) * S, 2 * rr * S, 2 * rr * S);
+            }
+            for (let k = 0; k < 34; k++) {   // dappled sunlight coming through it
+                const cx = r() * W, cy = r() * H, rx = 14 + r() * 26, ry = rx * (0.5 + r() * 0.3), g = x.createRadialGradient(cx * S, cy * S, 0, cx * S, cy * S, rx * S);
+                g.addColorStop(0, 'rgba(236,240,150,0.22)'); g.addColorStop(1, 'rgba(236,240,150,0)'); x.save(); x.translate(cx * S, cy * S); x.scale(1, ry / rx); x.translate(-cx * S, -cy * S);
+                x.fillStyle = g; x.fillRect((cx - rx) * S, (cy - rx) * S, 2 * rx * S, 2 * rx * S); x.restore();
+            }
+            for (let k = 0; k < 2600; k++) {   // moss, in soft clumps
+                const px = r() * W, py = r() * H; if (Math.sin(px * 0.02 + py * 0.013) + Math.sin(py * 0.031 - px * 0.007) < 0.9) continue;
+                x.fillStyle = `rgba(${(70 + r() * 30) | 0},${(120 + r() * 40) | 0},${(40 + r() * 20) | 0},${(0.2 + r() * 0.3).toFixed(2)})`; x.beginPath(); x.arc(px * S, py * S, (0.8 + r() * 1.8) * S, 0, 7); x.fill();
+            }
+            x.lineCap = 'round';
+            for (let k = 0; k < 14; k++) {   // tree roots creeping in from the sidelines
+                const top = k % 2 === 0; let px = (0.5 + r() * (CFG.cols - 1)) * ts, py = top ? 0 : H, a = top ? Math.PI / 2 + (r() - 0.5) * 0.8 : -Math.PI / 2 + (r() - 0.5) * 0.8, wd = 8 + r() * 5;
+                const len = 16 + r() * 20;
+                for (let s2 = 0; s2 < len; s2++) {
+                    const nx = px + Math.cos(a) * 2.4, ny = py + Math.sin(a) * 2.4; a += (r() - 0.5) * 0.35; wd *= 0.955;
+                    x.strokeStyle = 'rgba(78,54,34,0.85)'; x.lineWidth = wd * S; x.beginPath(); x.moveTo(px * S, py * S); x.lineTo(nx * S, ny * S); x.stroke();
+                    x.strokeStyle = 'rgba(140,108,72,0.35)'; x.lineWidth = wd * 0.3 * S; x.beginPath(); x.moveTo((px - 0.6) * S, (py - 0.6) * S); x.lineTo((nx - 0.6) * S, (ny - 0.6) * S); x.stroke();
+                    px = nx; py = ny;
+                }
+            }
+            for (let k = 0; k < 520; k++) {   // fallen leaves: oak browns, autumn gold and the odd red
+                const px = r() * W, py = r() * H, col = ['rgba(176,112,40,0.85)', 'rgba(204,150,48,0.85)', 'rgba(140,84,40,0.8)', 'rgba(186,70,36,0.8)', 'rgba(120,130,46,0.8)'][Math.floor(r() * 5)], a = r() * 6.3, l = 3 + r() * 2.2;
+                x.fillStyle = col; x.beginPath(); x.ellipse(px * S, py * S, l * S, l * 0.55 * S, a, 0, 7); x.fill();
+                x.strokeStyle = 'rgba(80,50,24,0.5)'; x.lineWidth = 0.4 * S; x.beginPath(); x.moveTo((px - Math.cos(a) * l) * S, (py - Math.sin(a) * l) * S); x.lineTo((px + Math.cos(a) * l) * S, (py + Math.sin(a) * l) * S); x.stroke();
+            }
+            for (let k = 0; k < 60; k++) {   // ferns along the sidelines
+                const top = r() < 0.5, px = r() * W, py = top ? r() * ts * 0.7 : H - r() * ts * 0.7;
+                for (let j = 0; j < 6; j++) { const a = (top ? Math.PI / 2 : -Math.PI / 2) + (j - 2.5) * 0.45, l = 7 + r() * 5;
+                    x.strokeStyle = `rgba(${(60 + r() * 30) | 0},${(130 + r() * 40) | 0},50,0.85)`; x.lineWidth = 1 * S; x.beginPath(); x.moveTo(px * S, py * S); x.lineTo((px + Math.cos(a) * l) * S, (py + Math.sin(a) * l) * S); x.stroke();
+                    for (let f = 2; f < l; f += 1.6) { x.beginPath(); x.moveTo((px + Math.cos(a) * f) * S, (py + Math.sin(a) * f) * S); x.lineTo((px + Math.cos(a) * f + Math.cos(a + 1.2) * 2) * S, (py + Math.sin(a) * f + Math.sin(a + 1.2) * 2) * S); x.stroke(); }
+                }
+            }
+            for (let k = 0; k < 90; k++) {   // bluebells and daisies
+                const px = r() * W, py = r() * H, blue = r() < 0.55;
+                if (blue) { for (let j = 0; j < 3; j++) { x.fillStyle = 'rgba(96,104,214,0.85)'; x.beginPath(); x.arc((px + j * 1.4) * S, (py - j * 1.2) * S, 1 * S, 0, 7); x.fill(); } }
+                else { for (let p = 0; p < 6; p++) { const a = p * 1.047; x.fillStyle = 'rgba(248,248,240,0.9)'; x.beginPath(); x.arc((px + Math.cos(a) * 1.3) * S, (py + Math.sin(a) * 1.3) * S, 0.8 * S, 0, 7); x.fill(); } x.fillStyle = '#f4cf3a'; x.beginPath(); x.arc(px * S, py * S, 0.6 * S, 0, 7); x.fill(); }
+            }
+            const shroom = (cx, cy, sc, red) => {   // a toadstool: stalk, domed cap (red with white spots, or brown), and its shadow
+                x.fillStyle = 'rgba(0,0,0,0.3)'; x.beginPath(); x.ellipse((cx + 0.8 * sc) * S, (cy + 2.6 * sc) * S, 3 * sc * S, 1 * sc * S, 0, 0, 7); x.fill();
+                x.fillStyle = 'rgb(236,228,206)'; x.fillRect((cx - 0.8 * sc) * S, (cy - 0.4 * sc) * S, 1.6 * sc * S, 3 * sc * S);
+                x.fillStyle = red ? 'rgb(206,44,34)' : 'rgb(150,100,56)'; x.beginPath(); x.ellipse(cx * S, (cy - 0.4 * sc) * S, 3.2 * sc * S, 2.2 * sc * S, 0, Math.PI, 0); x.fill();
+                if (red) { x.fillStyle = 'rgba(250,246,236,0.95)'; [[-1.6, -1], [0.4, -1.8], [1.8, -0.8], [-0.4, -0.7]].forEach(([dx, dy]) => { x.beginPath(); x.arc((cx + dx * sc) * S, (cy + dy * sc) * S, 0.45 * sc * S, 0, 7); x.fill(); }); }
+            };
+            for (let k = 0; k < 30; k++) { const top = r() < 0.5, cx = r() * W, cy = r() < 0.6 ? (top ? 5 + r() * ts * 0.7 : H - 3 - r() * ts * 0.7) : r() * H; shroom(cx, cy, 1.5 + r() * 0.9, r() < 0.55); if (r() < 0.35) shroom(cx + 6, cy + 2, 1 + r() * 0.5, r() < 0.5); }
+            const fx = (3 + r() * 4) * ts, fy = (r() < 0.5 ? 2.5 : CFG.rows - 2.5) * ts;   // a fairy ring of little mushrooms
+            for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; shroom(fx + Math.cos(a) * 30, fy + Math.sin(a) * 22, 1, false); }
+        }
         // the halfway line and the lines either side of the line of scrimmage; Sevens: the two lines of scrimmage and a faint middle
         function chalkLines(chalk, ts) {
             if (GEO.sev) { chalk(7 * ts, 4, 0.95); chalk(13 * ts, 4, 0.95); chalk(10 * ts, 2, 0.3); }
@@ -15278,13 +15357,14 @@
             const cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
             const x = cv.getContext('2d'), r = pitchRng(PITCH.seed); watchPitchCanvas(cv);
             const img = x.createImageData(cv.width, cv.height), d = img.data;
-            const n1 = pitchNoise(r, cv.width, cv.height, 90 * S), n2 = pitchNoise(r, cv.width, cv.height, 14 * S), grave = PITCH.style === 'graveyard', elf = PITCH.style === 'elven';
+            const n1 = pitchNoise(r, cv.width, cv.height, 90 * S), n2 = pitchNoise(r, cv.width, cv.height, 14 * S), grave = PITCH.style === 'graveyard', elf = PITCH.style === 'elven', wood = PITCH.style === 'woodland';
             for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) {
                 const band = ((px / S / ts) >> 1) & 1;
                 const t = Math.min(1, n1(px, py) * (elf ? 0.45 : 0.8) + band * (elf ? 0.3 : 0.18)), t2 = n2(px, py) * (elf ? 0.18 : 0.35);
                 let R = 24 + 16 * t, G = 98 + 30 * t, B = 44 + 16 * t;
                 if (grave) { R = 66 + 22 * t; G = 70 + 20 * t; B = 44 + 10 * t; }   // dead, yellowing turf
                 if (elf) { R = 34 + 18 * t; G = 124 + 34 * t; B = 72 + 20 * t; }   // lush, emerald, immaculately mown
+                if (wood) { R = 40 + 20 * t; G = 92 + 26 * t; B = 34 + 12 * t; }   // a shady forest glade
                 R += ((grave ? 34 : elf ? 26 : 16) - R) * t2; G += ((grave ? 36 : elf ? 96 : 70) - G) * t2; B += ((grave ? 26 : elf ? 58 : 32) - B) * t2;
                 const j = (r() - 0.5) * 14, i = (py * cv.width + px) * 4;
                 d[i] = R + j * 0.5; d[i + 1] = G + j; d[i + 2] = B + j * 0.4; d[i + 3] = 255;
@@ -15315,6 +15395,7 @@
                 for (let k = 0; k < 70; k++) { x.fillStyle = 'rgba(60,40,22,0.55)'; x.beginPath(); x.ellipse(r() * cv.width, r() * cv.height, (2 + r() * 3) * S, (1 + r() * 1.5) * S, r() * 3, 0, Math.PI * 2); x.fill(); }
             }
             if (grave) graveyardDressing(x, r, S, W, H, ts);
+            if (wood) woodlandDressing(x, r, S, W, H, ts);
             if (elf) {   // an elven circle inlaid at the centre of the pitch: two gold rings and eight leaves
                 const cx = W / 2 * S, cy = H / 2 * S, R1 = ts * 1.9 * S;
                 x.strokeStyle = 'rgba(232,206,130,0.55)'; x.lineWidth = 2 * S; x.beginPath(); x.arc(cx, cy, R1, 0, 7); x.stroke();
