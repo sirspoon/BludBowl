@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.35 (16 Oct 2026)
+- **Changed:** when the ref spots a foul, the whistle blows and the referee jumps out first. The "ref spotted" message, the send-off and the Argue the Call choice only come once he's gone, so nothing gives it away beforehand. The whistle also no longer blows when a Desperate Measure (Grudge Match) keeps the fouler on the pitch. ([#11](https://github.com/sirspoon/BludBowl/issues/11))
+
 ## v3.34 (16 Oct 2026)
 - **New:** declaring a Block now shows a red "👊 Block" banner at the top of the pitch, like the ones for Blitz, Foul, Pass and Hand-off, so a misclick is easy to spot.
 

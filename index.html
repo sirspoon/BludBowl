@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.34</title>
+    <title>BludBowl 3.35</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -903,7 +903,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.34</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.35</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -13922,15 +13922,16 @@
             if (ihsCut && !armorBroke && armorRoll + ihsCut >= def.av) skillPop('Iron Hard Skin');
             if (armorBroke && dirty) { dirtyInj = dirty; }
             let sentOff = isDouble;
+            const spotted = [];   // news that the ref saw it, held back until the whistle's blown (see below)
             if (!sentOff && indOf(def.team, 'ref')) {   // Biased Referee: Close Scrutiny
                 const r = d6();
-                log(`  Close Scrutiny (${r}): the ${r >= 5 ? 'ref was watching!' : 'ref looks the other way.'}`, r >= 5 ? 'text-violet-300 font-bold' : 'text-slate-400');
+                if (r >= 5) spotted.push([`  Close Scrutiny (${r}): the ref was watching!`, 'text-violet-300 font-bold']); else log(`  Close Scrutiny (${r}): the ref looks the other way.`, 'text-slate-400');
                 if (r >= 5) sentOff = true;
             }
-            if (!sentOff && armorBroke && prayerOn(def.team, 15)) { sentOff = true; log(`  Under Scrutiny! The ref sees the boot go in.`, 'text-violet-300 font-bold'); }
+            if (!sentOff && armorBroke && prayerOn(def.team, 15)) { sentOff = true; spotted.push([`  Under Scrutiny! The ref sees the boot go in.`, 'text-violet-300 font-bold']); }
             if (sentOff && !armorBroke && atk.skills.includes('Sneaky Git')) { sentOff = false; log(`  Sneaky Git! The ref misses the double.`, 'text-lime-300 font-bold'); skillPop('Sneaky Git'); }
-            // whistle and boos only when the ref spots it (a double on either roll); otherwise the successful foul gets a laugh
-            const foulSnd = () => { if (sentOff) { sfx('whistle2', 650); sfx('crowdBoo', 900); refScare(650); } else if (armorBroke) sfx('foulLaugh', 1100); };   // (the referee jumps out as the whistle blows)
+            // a successful foul the ref misses gets a laugh (the whistle, the referee and the boos come once he's spotted it, below)
+            const foulSnd = () => { if (!sentOff && armorBroke) sfx('foulLaugh', 1100); };
             if (!armorBroke) foulSnd();
             if (armorBroke) {
                 let ir1 = Math.floor(Math.random()*6)+1, ir2 = Math.floor(Math.random()*6)+1;
@@ -13963,10 +13964,16 @@
                 log(`  Armor held.`);
             }
             
+            const tellSpotted = () => spotted.splice(0).forEach(([m, c]) => log(m, c));
+            if (!sentOff) tellSpotted();
             if (sentOff && !atk.grudge && dmAvail(atk.team, 4)) { dmUse(atk.team, 4, `the ref spots ${atk.name || atk.type}, but they can't be Sent-off for this one`); atk.grudge = true; }
-            if (sentOff && atk.grudge) { sentOff = false; log(`  Grudge Match: ${atk.name || atk.type} stays on the pitch.`, 'text-fuchsia-300 font-bold'); }
+            if (sentOff && atk.grudge) { tellSpotted(); sentOff = false; log(`  Grudge Match: ${atk.name || atk.type} stays on the pitch.`, 'text-fuchsia-300 font-bold'); }
             atk.grudge = false;
             if (sentOff) {
+                // the whistle blows and the referee jumps out first; the news and the send-off follow once he's had his moment
+                sfx('whistle2', 650); sfx('crowdBoo', 900); refScare(650);
+                const was = state.mode; state.mode = MODES.LOCKED;
+                setTimeout(() => { if (state.mode === MODES.LOCKED) state.mode = was; tellSpotted();
                 log(`  The ref spotted ${atk.type} fouling! (doubles rolled)`, 'text-red-500 font-bold');
                 resolveSendOff(atk, (result) => {
                     if (result === 'sent') {
@@ -13980,6 +13987,7 @@
                         triggerTurnover("Sent-off (argued the call, but it is still a Turnover)", 1000);
                     } else foulDone(atk);
                 });
+                }, CLOCK.sim ? 0 : 2200);
             } else foulDone(atk);
         }
         // after a Foul (not sent off): Pile Driver lays the fouler down; Quick Foul lets them carry on moving
