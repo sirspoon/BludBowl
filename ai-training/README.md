@@ -188,3 +188,17 @@ Tackle; everyone else the old `AI_PICKS` order. Since v3.14: no Block with Wrest
 and `aiChoose` takes the 1st/2nd/3rd available choice 60/25/15% of the time, so teams differ. Since v3.15 about a
 third of a lineman's advancements are random primary skills (two rolled, the better kept; fixed per player and
 advancement, so it doesn't get a fresh chance after every match).
+
+## Blocking more (Oct 2026, not released)
+Where the block gap comes from (`block-chances.js`, 12 mirror matches on v3.15, per team per match): turns start with
+about 22 players next to an opponent with a 2-dice block (about 12 taken; most of the rest move off once their opponent
+has been knocked down, about 2.5 just stand there), 1 with 3 dice (nearly all taken) and 31 with only 1 die (about 4
+taken, 20 left standing there at the end of the turn). So the AI rarely skips a good block; the gap is mostly 1-die
+blocks and blocks it never sets up.
+- `lateblk` (`late-blocks.patch`): once everyone else has acted, a player still next to an opponent blocks, even on one
+  die, since a Turnover costs nothing more than our player lying down (`lateDown` 4, +`lateScreen` 3 for a defender near
+  their carrier; `lateMin` 1; `lateOne` 0 for 2 dice only). Blocks rose from 24 to 31-32 a match, but results were level:
+  116-115 touchdowns over 192 matches with the default settings. Sweeps (48 matches each): `lateDown` 6 33-32, 10 33-45;
+  `lateMin` 2 42-46; 2 dice only 42-38. A 1-die block without Block is about an even trade (a third of the time their
+  player goes down, a third ours), and our player lying down leaves a gap for their turn, so it doesn't pay on starting
+  rosters. Its re-roll fix (no team re-roll on the last block of the turn unless spare) is in the patch too.

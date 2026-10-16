@@ -1,0 +1,82 @@
+diff --git a/index.html b/index.html
+index be8cdca..88c9d31 100644
+--- a/index.html
++++ b/index.html
+@@ -18737,7 +18737,7 @@
+ 
+         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
+         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
+-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
++        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2, lateblk
+         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
+             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
+             p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
+@@ -18828,9 +18828,12 @@
+                 return { n: 1, chooser: atk.team };
+             }
+             // value of a block die face from the attacker's side
+-            let blitzCtx = false;
++            let blitzCtx = false, lateCtx = 0, lateBlocker = null;   // lateBlocker: who is making the last block of the turn
+             function faceScore(f, atk, def) {
+                 const bonus = state.ball.carrierId === def.id ? 4 : 0;
++                // (lateblk) the last block of the turn: a Turnover costs nothing more, only our player lying down (worth -lateCtx)
++                if (lateCtx && (f === FACES.SKULL || (f === FACES.BOTH_DOWN && !hasSk(atk, 'Block') && !(AIX.on(atk.team, 'hitskills') && hasSk(atk, 'Wrestle')))))
++                    return f === FACES.SKULL ? -lateCtx : -lateCtx + (hasSk(def, 'Block') || (AIX.on(atk.team, 'hitskills') && hasSk(def, 'Wrestle')) ? 0 : 5 + bonus);
+                 const strip = bonus > 0 && hasSk(atk, 'Strip Ball') && !hasSk(def, 'Sure Hands');   // a push knocks the ball loose
+                 if (f === FACES.BOTH_DOWN && hasSk(atk, 'Juggernaut') && (blitzCtx || atk.actionTaken === 'blitz') && !(hasSk(atk, 'Block') && !hasSk(def, 'Block'))) return 2;
+                 // (hitskills) a knockdown is worth more when this attacker's Mighty Blow or Claws makes the armour likelier to break
+@@ -19794,7 +19797,7 @@
+                 return best && best.s > 0 ? best : null;
+             }
+             function choose() {
+-                moveMemo = new Map();
++                moveMemo = new Map(); lateBlocker = null;
+                 state.aiStalling = false;
+                 const me = state.activeTeam, them = other(me), act = avail(me);
+                 if (!act.length) return fanaticPlan(me);
+@@ -20040,6 +20043,22 @@
+                     if (m || p.isDown) return { pid: p.id, kind: 'move', pick: supportPick };
+                     tried.add(p.id);
+                 }
++                // 10b. (lateblk) everyone else has acted: a player still next to an opponent blocks, even on one die, as a
++                // Turnover now costs nothing more than our player lying down. Not our ball carrier or anyone next to them,
++                // and lying down costs more for a defender near their carrier (a gap in the screen)
++                if (AIX.on(me, 'lateblk') && !state.charge) {
++                    const oc = carrier && carrier.team === me ? carrier : null, tc = carrier && carrier.team === them ? carrier : null;
++                    let lb2 = null;
++                    avail(me).filter(p => !p.isDown && !keep.has(p.id) && p !== oc && !(oc && cheb(p, oc) === 1)).forEach(p => {
++                        const cost = AIX.p(me, 'lateDown', 4) + (tc && cheb(p, tc) <= 4 ? AIX.p(me, 'lateScreen', 3) : 0);
++                        adjacentTargets(p).forEach(d => {
++                            lateCtx = cost; let e; try { e = blockEval(p, d); } finally { lateCtx = 0; }
++                            if ((e.chooser !== me && e.n > 1) || (e.n === 1 && !AIX.p(me, 'lateOne', 1))) return;
++                            if (e.ev >= AIX.p(me, 'lateMin', 1) && (!lb2 || e.ev > lb2.ev)) lb2 = { p, d, ev: e.ev };
++                        });
++                    });
++                    if (lb2) { lateBlocker = lb2.p.id; return { pid: lb2.p.id, kind: 'block', target: lb2.d.id }; }
++                }
+                 // 11. the foul, then finally a bomb or a thrown team-mate at their ball carrier or cage
+                 const fl2 = foulPlan(me, avail(me));
+                 if (fl2) return fl2;
+@@ -20543,10 +20562,11 @@
+                 const scores = c.dice.map(f => friendly ? kind(f) : faceScore(f, c.atk, c.def));
+                 const chosen = c.chooser === c.atk.team ? Math.max(...scores) : Math.min(...scores);
+                 const trr = document.getElementById('btn-combat-trr');
+-                const blockCritical = state.ball.carrierId === c.atk.id || state.ball.carrierId === c.def.id || (chosen <= -10 && (state.rr[state.activeTeam] || 0) >= 3);   // the ball at stake (or our blocker going down, with re-rolls to spare)
++                const late = lateBlocker === c.atk.id;   // (lateblk) the last block of the turn: a failure costs little, so no re-roll unless they're spare
++                const blockCritical = !late && state.ball.carrierId === c.atk.id || state.ball.carrierId === c.def.id || (chosen <= -10 && (state.rr[state.activeTeam] || 0) >= 3);   // the ball at stake (or our blocker going down, with re-rolls to spare)
+                 const blockDecisive = (state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && tdThreat(c.def))
+                     || (state.ball.carrierId === c.atk.id && toGo(c.atk.x, c.atk.team) <= (c.atk.remainingMA || 0) + 2);
+-                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) {
++                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical, blockDecisive, !late && chosen <= -7)) {
+                     after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); });
+                     return;
+                 }
+@@ -20663,7 +20683,7 @@
+                 debugPlug: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const t = c && threatOf(c); const pl = plugPlan(me, avail(me), c); return { t, pl: pl && pl.pid }; },
+                 debugTtm: () => { const me = state.activeTeam, a = avail(me), pr = ttmPair(a); return { pair: pr && [pr.t.type, pr.g.type], plan: ttmEndPlan(me, a) }; },
+                 // for the automated checks of each AI improvement
+-                debugX: { choose: () => { moveMemo = new Map(); return choose(); }, rrWorth: (ctx, c, d) => rrWorth(ctx, c, d),
++                debugX: { choose: () => { moveMemo = new Map(); return choose(); }, blockEval: (a, d) => blockEval(a, d), rrWorth: (ctx, c, d) => rrWorth(ctx, c, d),
+                     carrierBlitz: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const b = carrierBlitz(me, avail(me), c); return b && { pid: b.p.id, s: b.s }; },
+                     switchPlay: () => { moveMemo = new Map(); const c = getPlayerById(state.ball.carrierId); const sw = c && switchPlay(c, c.team); return sw && { kind: sw.kind, rid: sw.r.id }; },
+                     supportGoal: id => { const p = getPlayerById(id); return supportGoal(p, p.team); }, touchback: () => { const b = touchbackPick(); return b && b.type + '@' + b.x + ',' + b.y; } }
