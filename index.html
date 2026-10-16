@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.35</title>
+    <title>BludBowl 3.36</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -903,7 +903,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.35</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.36</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9603,7 +9603,7 @@
   try { enabled = localStorage.getItem('bb-music-off') !== '1'; } catch (e) {}
   const LEVELMUL = 0.36;
   function init() {
-    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    if (ctx) { if (ctx.state !== 'running' && ctx.state !== 'closed') ctx.resume(); return; }   // (held back, or 'interrupted' on an iPhone by a call or another app)
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC(); out = ctx.createGain(); duckG = ctx.createGain(); const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -14; comp.ratio.value = 4; comp.attack.value = 0.01; comp.release.value = 0.25;
@@ -10416,9 +10416,12 @@
   function matchStart() { matchOn = true; sync(); }
   function matchEnd() { matchOn = false; sync(); }
   document.addEventListener('visibilitychange', () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (run) ctx.resume(); });
-  // a match resumed when the page loads (or joined from another device) starts the music before anyone has tapped, and the browser
-  // holds the sound back until a tap: wake it then (not while it's frozen for a big sound effect)
-  document.addEventListener('pointerdown', () => { try { if (ctx && run && ctx.state === 'suspended' && !document.hidden && !pauseTimer) ctx.resume(); } catch (e) {} }, true);
+  // Browsers (iPhones above all) only let sound start during a tap. The match music begins on a timer after the last tap (after the
+  // line-ups, or when a saved match is resumed), so its sound is set up during the taps before it, and any tap or key press wakes it
+  // if it's been held back or interrupted (not while it's frozen for a big sound effect). Phones don't all count the start of a
+  // touch as a tap for sound, hence the release and the click too.
+  const wake = () => { try { if (!enabled || SFX.isMuted() || document.hidden || pauseTimer) return; if (!ctx) init(); else if (ctx.state !== 'running') ctx.resume(); } catch (e) {} };
+  ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, wake, true));
   return { start, stop, sync, setMood, duck, pause, setEnabled, crowd, isEnabled: () => enabled, matchStart, matchEnd, state: () => run && { mood, style: run.style, kind: run.el.cur, next: run.el.next, bar: run.el.bar, bpm: Math.round(run.el.bpm) },
            _force: k => { if (run) run.el.next = k; } };   // (tests: play a given section next)
         })();
