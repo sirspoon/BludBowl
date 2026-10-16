@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.37 (16 Oct 2026)
+- **Fixed:** the referee could still come after other news when a foul was spotted. If the double was on the injury roll, the injury (knocked out, a casualty, the apothecary question) was shown before the whistle. Now the whistle and the referee come first in every case, then the injury, the "ref spotted" message and the send-off as he drops away. The whistle and the referee are also set off together, so they can't drift apart on a busy phone. ([#11](https://github.com/sirspoon/BludBowl/issues/11))
+
 ## v3.36 (16 Oct 2026)
 - **Fixed:** the match music could fail to start properly, especially on phones, until it was turned off and on again. The music begins just after your last tap before kick-off, and phones (iPhones above all) can hold back sound that doesn't start during a tap. Its sound is now set up during your taps, and any tap or key press wakes it if it's been held back or interrupted (by a phone call, say). ([#7](https://github.com/sirspoon/BludBowl/issues/7))
 
