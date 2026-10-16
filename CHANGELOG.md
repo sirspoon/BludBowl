@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.16 (16 Oct 2026)
+- **Fixed:** two ways a match could get stuck, both found in computer-vs-computer testing.
+  - **Bombs:** a bomb in flight only landed when the pitch was redrawn. In a background tab, or while a missed bomb scattered three times (about 2 seconds), the freeze safety net could hand control back with the bomb still in the air. Bombs now always land, and the safety net waits for them. Over 40 test matches with bomb and Frenzy teams, stuck games went from 3 to none.
+  - **A push that knocks the ball loose:** the block carried straight on while the ball was still bouncing. With Frenzy, the second block could start while a player was rolling to catch the bouncing ball, and the game was left waiting. The follow-up and any Frenzy block now wait for the ball to stop.
+
 ## v3.15 (16 Oct 2026)
 - **Changed:** the computer's linemen sometimes level up with a random skill ([#19](https://github.com/sirspoon/BludBowl/issues/19)). About a third of their advancements are now random primary skills, which cost fewer SPP. Like a coach, the computer rolls two skills (from General if the lineman has it) and keeps the more useful one, so its teams end up with more varied, less predictable skills.
 

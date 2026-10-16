@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.15</title>
+    <title>BludBowl 3.16</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.15</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.16</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -7032,7 +7032,7 @@
         // the turn only changes hands once whatever caused it has played out: a ball still bouncing, a catch roll still to
         // make, an Apothecary to decide on (on a slow phone, or a fast match, those can outlast the usual pause)
         function playSettled() {
-            return !state.pendingRoll && !state.ballAnimation.active && !state.flightAnimation.active && !PASSFX.busy()
+            return !state.pendingRoll && !state.ballAnimation.active && !state.flightAnimation.active && !PASSFX.busy() && !bombFx.flight
                 && ['modal-roll', 'modal-dice', 'modal-choice', 'modal-team-reroll'].every(id => { const e = document.getElementById(id); return !e || e.classList.contains('hidden'); });
         }
         function afterSettled(ms, fn) {
@@ -13855,7 +13855,7 @@
                 log(`  Frenzy! ${atk.type} must block ${def.type} again!`, 'text-red-300 font-bold');
                 skillPop('Frenzy');
                 state.mode = MODES.LOCKED;
-                setTimeout(() => payBlitzCost(atk, () => startBlock(atk.id, def.id)), 700);
+                afterSettled(700, () => payBlitzCost(atk, () => startBlock(atk.id, def.id)));   // (once any loose ball has stopped)
                 return;
             }
             atk.frenzyDone = false;
@@ -15985,6 +15985,7 @@
 
                     state.combat.pushSquares = [];
 
+                    let bounced = false;   // the push knocked the loose ball bouncing (perhaps onto someone who must try to catch it)
                     if (isCrowd) {
                         pushed.x = s.x; pushed.y = s.y;
                         log(`  ${pushed.type} is CROWD SURFED!`, 'text-fuchsia-400 font-bold');
@@ -15997,6 +15998,7 @@
 
                         if (!state.ball.carrierId && state.ball.x === s.x && state.ball.y === s.y) {
                             log(`  Ball bounced by pushed player!`, 'text-yellow-400');
+                            state.mode = MODES.LOCKED; bounced = true;
                             scatterBall(s.x, s.y);
                         }
                     }
@@ -16041,6 +16043,10 @@
                                 finalizeBlock();
                             }, showFollow, { team: state.combat.def.team, ai: 'yes' });
                         });
+                    } else if (bounced) {
+                        // the follow-up (and a Frenzy second block after it) waits until the ball has stopped: otherwise a catch
+                        // roll from the bounce can land in the middle of the next block and leave the game waiting for ever
+                        afterSettled(0, showFollow);
                     } else {
                         showFollow();
                     }
@@ -16601,7 +16607,11 @@
         }
         const bombFx = { flight: null, blasts: [] };
         function animateBomb(sx, sy, ex, ey, dur, arc, done) {
-            bombFx.flight = { sx, sy, ex, ey, t0: performance.now(), dur, arc, done };
+            // the drawing lands it; a timer makes sure it lands anyway (a hidden tab or test mode draws rarely or not at all)
+            let landed = false;
+            const f = { sx, sy, ex, ey, t0: performance.now(), dur, arc, done: () => { if (landed) return; landed = true; if (bombFx.flight === f) bombFx.flight = null; if (done) done(); } };
+            bombFx.flight = f;
+            setTimeout(f.done, dur + 60);
         }
         function drawBombLayer(ts) {
             const now = performance.now();

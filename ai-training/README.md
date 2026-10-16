@@ -148,7 +148,8 @@ Results: 47-26 touchdowns, 24-12 wins on 12 teams with these skills; 42-38, 17-1
 match rose about 10% where the skills are present (24.5 to 27.0).
 Not done yet: Frenzy follow-up risk, Stand Firm / Sidestep / Fend when choosing whom to block, avoiding Diving Tackle /
 Shadowing when dodging, Sure Feet / Sprint in rush risk, Multiple Block, Grab, Leader, Pro, Dump-off.
-Seen once in testing (recovered by the safety net): a bomb caught and re-thrown, then scattering, left the game waiting.
+Seen in testing (recovered by the safety net): a bomb scattering left the game waiting - fixed in v3.16 (bomb flights only
+landed when drawn, and test mode barely draws), as was a Frenzy second block starting while a pushed-loose ball bounced.
 - v3.12 (`skills2`): move odds count Diving Tackle and Sure Feet (also what a person sees); a push on a Stand Firm player is
   worth little. Neutral in a 48-match check (50-52), as these skills are rare on starting rosters. Tried and dropped: counting
   Frenzy's forced second block as extra risk - Frenzy players then blocked far less (23.7 to 19.3 blocks a match) and lost
