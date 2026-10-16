@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.19 (16 Oct 2026)
+- **Added:** the Muddy Grass pitch, home ground of most teams, has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): the supporters' band in the stands, with a big bass drum, a snare, a trumpet and an oom-pah brass bass, and the crowd clapping, roaring, shouting "Oi!" and singing along. The chorus is *When the Saints Go Marching In*.
+  - **After a touchdown** the crowd sings "There's only one…" for the scorer, and the match log shows who.
+  - **When the referee sends someone off** the band drops back and the crowd lets the referee know what they think of him, with the classic two-note taunt.
+
 ## v3.18 (16 Oct 2026)
 - **Added:** the Mossy Flagstones pitch, home of the underground teams (Skaven, Goblins, Dwarfs and Chaos Dwarfs), has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)). It's set deep in a cave: booming frame drums, a dwarf-forge anvil, knocking stones and gravel, a kalimba, an earth drone, a chanting choir, a low horn and an ocarina, all echoing off the walls, with water dripping and the odd rockfall.
 

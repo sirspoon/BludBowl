@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.18</title>
+    <title>BludBowl 3.19</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.18</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.19</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -7472,6 +7472,7 @@
                         p.isEjected = true; p.isKO = false; p.isStunned = false; p.isDown = false; p.inSquad = false; p.sub = false; p.x = -9; p.y = -9;
                         gone.push(`${ROSTERS[p.team].name.substring(0, 3)} ${p.type}`);
                         log(`  SENT OFF! ${p.type} is marched off with their secret weapon.`, 'text-red-500 font-bold');
+                        try { if (MUSIC.crowd('ref', 1.6)) log(`  The crowd lets the referee know exactly what they think of him.`, 'text-sky-300'); } catch (e) {}
                         sfx('whistle2'); sfx('crowdBoo', 400);
                     } else log(`  ${p.type} gets away with it this time!`, 'text-green-400 font-bold');
                     setTimeout(() => next(i + 1), 300);
@@ -8771,6 +8772,7 @@
                 let teamName = ROSTERS[carrier.team].name;
                 log(`  TOUCHDOWN by ${carrier.type}!`, 'text-amber-400 font-bold text-lg');
                 sfx('touchdown'); sfx('crowdBig', 150); sfx('applause', 400); sfx('whistle', 900);
+                try { if (MUSIC.crowd('one', 4.2)) log(`  The crowd sings: "There's only one ${carrier.name || carrier.type}!"`, 'text-sky-300'); } catch (e) {}
                 updateTopBar();
                 
                 state.mode = MODES.LOCKED;
@@ -9962,6 +9964,111 @@
     if (i === 0 && (kind === 'chorus' || kind === 'drive')) { frameDrum(B, t, 1, 28); rumble(B, t, s * 2, 0.22); }
     if (fillNext) rockfall(B, t + 3 * s, s);
   }
+  // ---------- TERRACES (the Muddy Grass pitch): the same sections, played by the supporters' band in the stands - a big bass drum, a
+  // snare, a trumpet and an oom-pah brass bass - with the crowd clapping, roaring and singing along, echoing off the stands. In C major
+  // (C, F, G, C), around 112 bpm. The chorus is "When the Saints Go Marching In" (traditional), as sung on terraces everywhere.
+  const TR_ROOTS = [48, 53, 55, 48];
+  const TR_SAINTS = [   // the first half of the tune, one bar of the song per bar (melody notes [midi, beat, beats] and the bar's chord root)
+    [[[72,1,1],[76,2,1],[77,3,1]], 48], [[[79,0,3.5]], 48], [[[72,1,1],[76,2,1],[77,3,1]], 48], [[[79,0,3.5]], 48],
+    [[[72,1,1],[76,2,1],[77,3,1]], 48], [[[79,0,2],[76,2,2]], 48], [[[72,0,2],[76,2,2]], 48], [[[74,0,3.5]], 55]];
+  const TR_CALL = [[79, 0, .5], [79, .5, .5], [79, 1, .5], [84, 1.5, 1.5]];   // the trumpet's rallying call ("da-da-da daaa")
+  const TR_RIFF = [[67,0,.5],[72,.5,.5],[76,1,.5],[79,1.5,1],[76,2.5,.5],[72,3,1]];
+  const TR_BPM = { calm: 96, normal: 112, tense: 126 };
+  // the stands: a short open-air echo off the far side of the ground
+  function standsOf(B) {
+    if (B.stands) return B.stands;
+    const inp = ctx.createGain(), dl = ctx.createDelay(1), fb = ctx.createGain(), lp = ctx.createBiquadFilter();
+    dl.delayTime.value = 0.27; fb.gain.value = 0.22; lp.type = 'lowpass'; lp.frequency.value = 2600;
+    inp.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); const ret = ctx.createGain(); ret.gain.value = 0.35; lp.connect(ret); ret.connect(B.bus); lp.connect(verbIn);
+    // the band runs through its own volume, so it can drop back while the crowd sings a chant; the chants have their own channel
+    const band = ctx.createGain(); B.bus.disconnect(); B.bus.connect(band); band.connect(out); B.band = band;
+    const ch = ctx.createGain(); ch.gain.value = 1; ch.connect(out); const cs = ctx.createGain(); cs.gain.value = 0.45; ch.connect(cs); cs.connect(verbIn); B.chant = ch;
+    B.stands = inp; return inp;
+  }
+  const echo = (B, node, amt) => { const g = ctx.createGain(); g.gain.value = amt; node.connect(g); g.connect(standsOf(B)); };
+  // the big marching bass drum, and a crisp snare
+  const bassDrum = (B, t, v) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.16);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55); o.connect(g); g.connect(B.main); echo(B, g, 0.3); o.start(t); o.stop(t + 0.6); nz(B.main, t, 0.05, v * 0.4, 'lowpass', 1200, 300); };
+  const sideDrum = (B, t, v) => { nz(B.main, t, 0.12, v, 'bandpass', 2400, 1400, 0.9, 0.1); note(B.main, 'triangle', 62, t, 0.06, v * 0.4, { slideFrom: 70, slideTime: 0.03 }); };
+  // a trumpet: a bright, brassy blare that opens up as it's blown, with a little vibrato on long notes
+  const trumpet = (B, m, t, dur, v) => {
+    [['sawtooth', 0, 1], ['square', 6, 0.35]].forEach(([ty, det, k]) => { const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = ty; o.detune.value = det;
+      o.frequency.setValueAtTime(hz(m - 0.5), t); o.frequency.exponentialRampToValueAtTime(hz(m), t + 0.04);
+      if (dur > 0.5) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 5.6; lg.gain.value = 14; l.connect(lg); lg.connect(o.detune); l.start(t + 0.25); l.stop(t + dur + 0.1); }
+      f.type = 'lowpass'; f.Q.value = 2; f.frequency.setValueAtTime(700, t); f.frequency.exponentialRampToValueAtTime(3400, t + 0.05); f.frequency.exponentialRampToValueAtTime(2200, t + Math.max(0.1, dur));
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v * k, t + 0.025); g.gain.setValueAtTime(v * k * 0.85, t + Math.max(0.03, dur - 0.06)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.04);
+      o.connect(f); f.connect(g); g.connect(B.main); echo(B, g, 0.4); const s2 = ctx.createGain(); s2.gain.value = 0.3; g.connect(s2); s2.connect(verbIn); o.start(t); o.stop(t + dur + 0.1); });
+  };
+  const brassBass = (B, m, t, dur, v) => note(B.sc, 'sawtooth', m, t, dur, v, { cut: 600, cutTo: 300, q: 1.5, a: 0.02, r: 0.08 });
+  // the crowd singing: lots of voices, a little out of time and tune with each other, mostly men an octave down, on an "aah"
+  const crowdSing = (B, m, t, dur, v, chant) => {
+    const f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(); f1.type = 'bandpass'; f1.frequency.value = 760; f1.Q.value = 2.2; f2.type = 'bandpass'; f2.frequency.value = 1180; f2.Q.value = 3;
+    g.gain.value = v; f1.connect(g); f2.connect(g); g.connect(chant ? B.chant : B.pad); if (!chant) { echo(B, g, 0.35); const s2 = ctx.createGain(); s2.gain.value = 0.5; g.connect(s2); s2.connect(verbIn); }
+    if (chant) {   // a chant: a firmer, clearer tone carrying the tune under the "aah" (a lowpassed chorus of voices, unfiltered by the vowel)
+      const lp = ctx.createBiquadFilter(), lg = ctx.createGain(); lp.type = 'lowpass'; lp.frequency.value = 1800; lg.gain.value = v * 0.55; lp.connect(lg); lg.connect(B.chant);
+      [-12, 0].forEach((x, j) => [-10, 10].forEach(d => { const o = ctx.createOscillator(), og = ctx.createGain(), dt = Math.random() * 0.025; o.type = 'sawtooth'; o.detune.value = d;
+        o.frequency.setValueAtTime(hz(m + x - 1), t + dt); o.frequency.exponentialRampToValueAtTime(hz(m + x), t + dt + 0.07);
+        og.gain.setValueAtTime(0.0001, t + dt); og.gain.linearRampToValueAtTime(j ? 0.18 : 0.3, t + dt + 0.04); og.gain.setValueAtTime(j ? 0.15 : 0.26, t + Math.max(dt + 0.05, dur - 0.06)); og.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.08);
+        o.connect(og); og.connect(lp); o.start(t + dt); o.stop(t + dur + 0.12); }));
+    }
+    for (let k = 0; k < (chant ? 10 : 6); k++) { const o = ctx.createOscillator(), og = ctx.createGain(), dt = Math.random() * 0.05, mm = m - (k < 4 ? 12 : 0); o.type = 'sawtooth';
+      o.detune.value = (Math.random() - 0.5) * 50; o.frequency.setValueAtTime(hz(mm - 1), t + dt); o.frequency.exponentialRampToValueAtTime(hz(mm), t + dt + 0.09);
+      og.gain.setValueAtTime(0.0001, t + dt); og.gain.linearRampToValueAtTime(0.35, t + dt + 0.06); og.gain.setValueAtTime(0.3, t + Math.max(dt + 0.07, dur - 0.08)); og.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.1);
+      o.connect(og); og.connect(f1); og.connect(f2); o.start(t + dt); o.stop(t + dur + 0.15); }
+  };
+  const crowdClap = (B, t, v) => { for (let k = 0; k < 7; k++) nz(B.main, t + Math.random() * 0.03, 0.06, v * (0.6 + Math.random() * 0.4), 'bandpass', 1100 + Math.random() * 900, null, 1.4, 0.15); };
+  const roar = (B, t, dur, v) => { nz(B.pad, t, dur, v, 'bandpass', 520, 820, 0.6, 0.4); nz(B.pad, t, dur * 0.8, v * 0.5, 'bandpass', 1500, 1100, 0.8, 0.3); };
+  const oi = (B, t, v) => { crowdSing(B, 62, t, 0.16, v); nz(B.pad, t, 0.14, v * 2, 'bandpass', 900, 600, 1.5, 0.3); };
+  // two terrace chants, sung by the whole crowd with claps on the beat. "There's on-ly one | Grim-gor Iron-hide", twice (a tune of our own
+  // in the chant's rhythm), and "The ref-er-ee's a ...". MUSIC.crowd() sings them after a touchdown and a sending-off.
+  const TR_ONE = [[[72,0,.5],[72,.5,.5],[74,1,.5],[76,1.5,1.4],[74,3,.5],[72,3.5,.5]], [[74,0,1],[71,1,2.5]], [[72,0,.5],[72,.5,.5],[74,1,.5],[76,1.5,1.4],[77,3,.5],[76,3.5,.5]], [[74,0,1],[72,1,2.5]]];
+  // "The REF-er-EE'S a WANK-er" - "duh-deeh-duh-deeh-duh-deeh-duuuhhhh": the playground taunt's two notes a minor third apart (E and
+  // G), each straight after the last, the high ones held a little longer and a long one to finish. [note, length in short syllables]
+  const TR_REF = [[64, 1], [67, 1.5], [64, 1], [67, 1.5], [64, 1], [67, 1.5], [64, 4]];
+  const chantBar = (B, line, t, s, v, beats = 4) => { line.forEach(([m, b, d]) => crowdSing(B, m, t + b * s, d * s * 0.95, v, true)); for (let b = 0; b < beats; b++) crowdClap(B, t + b * s, 0.16); };
+  // while the crowd sings, the band drops back to about a third, then comes back in
+  const bandBack = (B, t, dur) => { const g = B.band.gain; g.setTargetAtTime(0.32, t - 0.1, 0.12); g.setTargetAtTime(1, t + dur, 0.4); };
+  function trChantOne(B, t, s) { standsOf(B); bandBack(B, t, 16 * s); TR_ONE.forEach((line, k) => chantBar(B, line, t + k * 4 * s, s, 0.32)); roar(B, t + 16 * s, s * 3, 0.1); }
+  function trChantRef(B, t, s) {
+    standsOf(B); const n = s * 0.54, line = 14 * n;   // a short syllable is just under a third of a second; a line, with its breath, 14 of them
+    bandBack(B, t, line * 2);
+    for (let k = 0; k < 2; k++) { let at = t + k * line; TR_REF.forEach(([m, d]) => { crowdSing(B, m, at, d * n * 1.04, 0.32, true); if (m === 67) crowdClap(B, at, 0.16); at += d * n; }); }
+    roar(B, t + line * 2 - 2 * n, s * 2, 0.08);
+  }
+  function trBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    standsOf(B);
+    const chorus = kind === 'chorus', song = chorus ? TR_SAINTS[ph % 8] : null, r = song ? song[1] : TR_ROOTS[i], q = s / 4, quiet = kind === 'calm' || kind === 'lull';
+    const third = 4, fifth = 7;
+    // the crowd's background roar, louder as the music builds
+    roar(B, t, s * 4.2, quiet ? 0.03 : kind === 'breakdown' ? 0.06 : 0.045);
+    // the drums
+    if (kind === 'calm') { [0, 2].forEach(b => bassDrum(B, t + b * s, 0.5)); }
+    else if (kind === 'lull') { [0, 1, 2, 2.5, 3].forEach((b, j) => { bassDrum(B, t + b * s, j > 1 ? 0.55 : 0.65); crowdClap(B, t + b * s + 0.01, 0.07); }); }   // boom, boom, boom-boom-boom, and the crowd claps along
+    else if (kind === 'drive') { for (let k = 0; k < 8; k++) bassDrum(B, t + k * s / 2, k % 2 ? 0.6 : 0.85); for (let k = 0; k < 16; k++) sideDrum(B, t + k * q, k % 4 === 0 ? 0.3 : 0.16); }
+    else if (kind !== 'breakdown') {
+      [0, 2].forEach(b => bassDrum(B, t + b * s, 0.9)); if (i === 3 || tense) bassDrum(B, t + 3.5 * s, 0.6);
+      [0, 1, 1.5, 2, 3, 3.5].forEach(b => sideDrum(B, t + b * s, 0.2)); [1, 3].forEach(b => crowdClap(B, t + b * s, 0.09));
+    }
+    // the brass bass: oom-pah
+    if (!quiet && kind !== 'breakdown' && kind !== 'drive') [0, 1, 2, 3].forEach(b => brassBass(B, b % 2 ? r + fifth - 12 : r - 12, t + b * s, s * 0.45, 0.13));
+    if (kind === 'drive') for (let k = 0; k < 8; k++) brassBass(B, r - 12, t + k * s / 2, s * 0.35, 0.14);
+    // the trumpet: a rallying call, its riff in the groove, the tune in the chorus, stabs in the hook
+    if (kind === 'calm' && i === 0 && ph === 0) TR_CALL.forEach(([m, b, d]) => trumpet(B, m - 5, t + b * s, d * s * 0.9, 0.05));
+    if (kind === 'main' && i % 2 === 1) TR_RIFF.forEach(([m, b, d]) => trumpet(B, m + (r - 48), t + b * s, d * s * 0.85, 0.045));
+    if (kind === 'stab') [0, 0.5, 1].forEach(b => trumpet(B, r + 24 + fifth, t + b * s, s * 0.3, 0.05));
+    if (kind === 'drive' && i % 2 === 0) TR_CALL.forEach(([m, b, d]) => trumpet(B, m + (r - 48), t + b * s, d * s * 0.9, 0.05));
+    if (chorus) song[0].forEach(([m, b, d]) => { trumpet(B, m, t + b * s, d * s * 0.92, 0.05); crowdSing(B, m, t + b * s, d * s * 0.95, ph >= 4 ? 0.05 : 0.04); });
+    // the crowd: "Oi!" on the hook, swaying and singing long notes through the breakdown
+    if (kind === 'stab') [2, 3].forEach(b => oi(B, t + b * s, 0.05));
+    // (every other breakdown, the crowd sings "There's only one..." instead)
+    if (kind === 'breakdown' && B.trOne) chantBar(B, TR_ONE[i], t, s, 0.24);
+    else if (kind === 'breakdown') { crowdSing(B, r + 24 + [0, third, fifth, third][i], t, s * 3.8, 0.1); crowdSing(B, r + 24, t, s * 3.8, 0.065); if (i % 2 === 0) trumpet(B, r + 24 + fifth, t + s, s * 2.5, 0.05); }
+    if (kind === 'breakdown' && i === 3) B.trOne = !B.trOne;
+    if (kind === 'lull' && i % 2 === 1) [2, 2.5, 3].forEach(b => oi(B, t + b * s, 0.035));
+    // accents and transitions: a drum roll into the next section, a cheer at the top of the chorus
+    if (i === 0 && (chorus || kind === 'drive') && ph === 0) roar(B, t, s * 3, 0.12);
+    if (fillNext) { for (let k = 0; k < 12; k++) sideDrum(B, t + 3 * s + k * s / 12, 0.12 + k * 0.025); bassDrum(B, t + 3.75 * s, 0.7); }
+  }
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -9984,8 +10091,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM } };   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM } };   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -10009,8 +10116,8 @@
   }
   function stop(fade = 1.2) {
     if (!run) return; clearInterval(timer); timer = null; const r = run; run = null;
-    try { r.B.bus.gain.cancelScheduledValues(ctx.currentTime); r.B.bus.gain.setValueAtTime(r.B.bus.gain.value, ctx.currentTime); r.B.bus.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + fade); } catch (e) {}
-    setTimeout(() => { try { r.B.bus.disconnect(); } catch (e) {} }, fade * 1000 + 300);
+    [r.B.bus, r.B.chant].forEach(n => { if (!n) return; try { n.gain.cancelScheduledValues(ctx.currentTime); n.gain.setValueAtTime(n.gain.value, ctx.currentTime); n.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + fade); } catch (e) {} });
+    setTimeout(() => { try { r.B.bus.disconnect(); if (r.B.chant) r.B.chant.disconnect(); } catch (e) {} }, fade * 1000 + 300);
   }
   function sync() { const want = matchOn && enabled && !SFX.isMuted(); if (want && !run) start(); else if (!want && run) stop(matchOn ? 0.4 : 3); }
   function setMood(m) { if (m === mood) return; mood = m; if (run) { run.el.mode = m; run.el.force = null; run.el.next = elPick(run.el, run.el.cur); } }
@@ -10033,6 +10140,14 @@
     setTimeout(() => { try { if (run) ctx.suspend(); } catch (e) {} }, 140);
     pauseTimer = setTimeout(() => { pauseTimer = null; try { ctx.resume(); const t = ctx.currentTime; duckG.gain.cancelScheduledValues(t); duckG.gain.setTargetAtTime(1, t, 0.3); duckUntil = 0; } catch (e) {} }, Math.max(300, ms));
   }
+  // the terrace crowd (Muddy Grass pitch): 'one' after a touchdown ("There's only one..."), 'ref' after a sending-off; true if it sings
+  function crowd(kind, delay = 0) {
+    if (!run || !ctx || run.style !== 'worn' || ctx.state !== 'running' || ctx.currentTime < (run.chantUntil || 0)) return false;   // (one chant at a time)
+    const s = 60 / run.el.bpm;
+    try { (kind === 'ref' ? trChantRef : trChantOne)(run.B, ctx.currentTime + delay, s); } catch (e) { return false; }
+    run.chantUntil = ctx.currentTime + delay + (kind === 'ref' ? 28 * s * 0.54 : 16 * s) + 1;
+    return true;
+  }
   function setEnabled(v) { enabled = !!v; try { localStorage.setItem('bb-music-off', enabled ? '0' : '1'); } catch (e) {} sync(); }
   function matchStart() { matchOn = true; sync(); }
   function matchEnd() { matchOn = false; sync(); }
@@ -10040,7 +10155,7 @@
   // a match resumed when the page loads (or joined from another device) starts the music before anyone has tapped, and the browser
   // holds the sound back until a tap: wake it then (not while it's frozen for a big sound effect)
   document.addEventListener('pointerdown', () => { try { if (ctx && run && ctx.state === 'suspended' && !document.hidden && !pauseTimer) ctx.resume(); } catch (e) {} }, true);
-  return { start, stop, sync, setMood, duck, pause, setEnabled, isEnabled: () => enabled, matchStart, matchEnd, state: () => run && { mood, style: run.style, kind: run.el.cur, next: run.el.next, bar: run.el.bar, bpm: Math.round(run.el.bpm) },
+  return { start, stop, sync, setMood, duck, pause, setEnabled, crowd, isEnabled: () => enabled, matchStart, matchEnd, state: () => run && { mood, style: run.style, kind: run.el.cur, next: run.el.next, bar: run.el.bar, bpm: Math.round(run.el.bpm) },
            _force: k => { if (run) run.el.next = k; } };   // (tests: play a given section next)
         })();
 
@@ -13415,6 +13530,7 @@
                     if (result === 'sent') {
                         atk.isEjected = true;
                         log(`  SENT OFF! ${atk.type} is ejected for dirty play!`, 'text-red-600 font-bold');
+                        try { if (MUSIC.crowd('ref', 1.6)) log(`  The crowd lets the referee know exactly what they think of him.`, 'text-sky-300'); } catch (e) {}
                         if(state.ball.carrierId === atk.id) dropBall(atk);
                         removePlayerWithFade(atk, "SENT OFF", "Ejected by Ref for Dirty Play", false);
                         triggerTurnover("Player Sent Off for Fouling!", 2000);
