@@ -1,0 +1,79 @@
+diff --git a/index.html b/index.html
+index 4865af8..5f47ff8 100644
+--- a/index.html
++++ b/index.html
+@@ -18747,7 +18747,7 @@
+ 
+         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
+         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
+-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
++        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2, foulset
+         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
+             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
+             p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
+@@ -19481,6 +19481,26 @@
+                 const turn = state.turn[me] || 1;
+                 const minWorth = turn >= 7 ? 0 : squad <= 11 ? (turn >= 5 ? 1.3 : 1.6) : squad <= 13 ? (turn >= 4 ? 1 : 1.3) : 0.9;
+                 const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
++                // (foulset) team-mates who could step in, without dice, next to a player on the floor where nobody marks them:
++                // each adds +1 to the foul's armour roll
++                const setup = AIX.on(me, 'foulset'), maxHelp = AIX.p(me, 'foulHelp', 2);
++                const helpersFor = (v, fid) => {
++                    if (!setup) return [];
++                    const out = [], used = new Set();
++                    act.forEach(h => {
++                        if (h.id === fid || h.isDown || (c && (c.id === h.id || (c.team === me && cheb(h, c) === 1))) || tzFor(h.x, h.y, me) > 0 || cheb(h, v) === 1) return;
++                        let bm = null;
++                        movesFor(h).forEach(m => {
++                            if (m.prob < 100 || cheb(m, v) !== 1 || tzFor(m.x, m.y, me) > 0 || used.has(m.x + ',' + m.y)) return;
++                            if (!bm || m.path.length < bm.path.length) bm = m;
++                        });
++                        if (bm) out.push({ id: h.id, x: bm.x, y: bm.y, d: bm.path.length });
++                    });
++                    out.sort((a, b) => a.d - b.d);
++                    const pick = [];
++                    out.forEach(o => { if (pick.length < maxHelp && !used.has(o.x + ',' + o.y)) { used.add(o.x + ',' + o.y); pick.push(o); } });
++                    return pick;
++                };
+                 let best = null;
+                 act.forEach(p => {
+                     if ((c && c.id === p.id) || p.isDown) return;
+@@ -19491,16 +19511,17 @@
+                         if (cheb(p, v) === 1) pr = 1;
+                         else (ms = ms || movesFor(p)).forEach(m => { if (m.prob === 100 && Math.max(Math.abs(m.x - v.x), Math.abs(m.y - v.y)) === 1 && tzFor(m.x, m.y, me) <= 1) pr = 1; });
+                         if (!pr) return;
+-                        const brk = armourBreakProb(v.av, foulAssists(me, v, p.id));
++                        const helpers = helpersFor(v, p.id);
++                        const brk = armourBreakProb(v.av, foulAssists(me, v, p.id) + helpers.length);
+                         const worth = foulWorth(v);
+                         if (worth < minWorth) return;
+                         const s = brk * worth - (cheap ? 0.08 : 0.2);
+-                        if (!best || s > best.s) best = { p, v, s };
++                        if (!best || s > best.s) best = { p, v, s, helpers };
+                     });
+                 });
+                 if (!best || best.s < 0.25) return null;
+                 const vid = best.v.id;
+-                return { pid: best.p.id, kind: 'foul', target: vid, pick: (ms, p) => {
++                return { pid: best.p.id, kind: 'foul', target: vid, helpers: best.helpers || [], pick: (ms, p) => {
+                     const v = getPlayerById(vid); let bm = null, bs = -99;
+                     ms.forEach(m => {
+                         if (m.prob < 100 || Math.max(Math.abs(m.x - v.x), Math.abs(m.y - v.y)) !== 1) return;
+@@ -20038,7 +20059,7 @@
+                 // (keep a thrower and team-mate back if a Throw Team-mate is worth doing at the end of the turn)
+                 const bomb = ttmEndPlan(me, avail(me));
+                 const late = bombPlan(me, avail(me), true);   // keep a Bomma back to throw at the end of the turn
+-                const keep = new Set([...(bomb ? bomb.reserve : []), ...(late ? [late.pid] : []), ...(fl ? [fl.pid] : [])]);
++                const keep = new Set([...(bomb ? bomb.reserve : []), ...(late ? [late.pid] : []), ...(fl ? [fl.pid, ...(fl.helpers || []).map(h => h.id)] : [])]);
+                 const formers = avail(me).filter(p => !keep.has(p.id));
+                 const form = (AIX.on(me, 'safepos') && formationPlan(me, formers, false, false, true)) || formationPlan(me, formers, false);
+                 if (form) return form;
+@@ -20052,6 +20073,8 @@
+                 }
+                 // 11. the foul, then finally a bomb or a thrown team-mate at their ball carrier or cage
+                 const fl2 = foulPlan(me, avail(me));
++                // (foulset) the helpers step in next to the victim first, then the foul
++                if (fl2 && fl2.helpers && fl2.helpers.length) { const h = fl2.helpers[0], hx = h.x, hy = h.y; return { pid: h.id, kind: 'move', pick: ms => ms.find(m => m.x === hx && m.y === hy && m.prob >= 100) || null }; }
+                 if (fl2) return fl2;
+                 const bl = bombPlan(me, avail(me));
+                 if (bl) return bl;

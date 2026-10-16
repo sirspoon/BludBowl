@@ -237,3 +237,13 @@ of these measures see. Still untried: keeping one or two players goal-side of ev
   the carrier waits until the carrier has moved and the cage is built. Pickup part alone: 52-51 over 72 matches. Both:
   128-123 touchdowns, 46-47 wins over 144 matches; turnovers 7% down in the first 96, level in the last 48. Level.
 Hand-offs and passes weren't changed: the receiver runs on after the catch, so pre-placing a cage round them doesn't work.
+
+## Fouling (Oct 2026, not released)
+Top FUMBBL coaches foul 1.23 times per team per match (half of their teams not at all). `fouls.js` on v3.16 (24-36
+matches per run): the AI fouls about as often (1.25-1.4), nearly always a positional (about 90% of victims: Blitzers,
+Saurus, Gutter Runners, Witch Elves...; `foulWorth` rates hitting and ball skills, speed and ST 4+, and plain linemen
+low), with 1.0 assists on average; the armour broke on about 45% of fouls, and about 1 in 6 foulers was sent off.
+- `foulset` (`foul-setup.patch`): before the foul, up to two spare team-mates step in, without dice, next to the victim
+  where nobody marks them (+1 each), held back from the end-of-turn positioning for it. Assists rose to 1.2 a foul and
+  the armour broke on about 55% (two runs disagreed: 48/100 v 44/90, then 49/77 v 26/65), but over 48 matches: 41-36
+  touchdowns, 19-18 wins, casualties 46-47. Fouls are too rare (about one in a match) for this to show in results.
