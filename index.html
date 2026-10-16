@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.30</title>
+    <title>BludBowl 3.31</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.30</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.31</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10072,24 +10072,34 @@
   const KH_ROOTS = [40, 36, 38, 40];
   const KH_LEAD = [[[71,0,1],[74,1,1],[76,2,2]],[[72,0,1.5],[71,1.5,.5],[67,2,2]],[[74,0,1],[76,1,1],[78,2,1.5],[76,3.5,.5]],[[79,0,1.5],[78,1.5,.5],[76,2,2]]];
   const KH_BPM = { calm: 96, normal: 132, tense: 150 };
-  // a distorted electric guitar: two detuned saws through a hard overdrive, then a speaker cabinet (mid boost, no fizz, no mud)
+  // a distorted electric guitar. Like a real one, every note plays into a shared amplifier (made once per destination): a hard
+  // overdrive, then a speaker cabinet (mid boost, no fizz, no mud) - one for muted chugs, one for open chords, one for the lead.
+  // Each note is just its strings (two detuned saws, one for a chug) and a volume envelope going into it.
+  const khCurves = {}, khCurve = k => khCurves[k] || (khCurves[k] = drive(k));
+  function khAmp(B, kind, dest) {
+    B.khAmps = B.khAmps || new Map(); const key = kind + '|'; let m = B.khAmps.get(dest); if (!m) { m = {}; B.khAmps.set(dest, m); }
+    if (m[key]) return m[key];
+    const inp = ctx.createGain(), sh = ctx.createWaveShaper(), hp = ctx.createBiquadFilter(), mid = ctx.createBiquadFilter(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+    sh.curve = khCurve(kind === 'lead' ? 9 : 14); sh.oversample = kind === 'mute' ? 'none' : '2x'; hp.type = 'highpass'; hp.frequency.value = 90; mid.type = 'peaking'; mid.frequency.value = 900; mid.gain.value = 5; mid.Q.value = 0.8;
+    lp.type = 'lowpass'; lp.frequency.value = kind === 'mute' ? 950 : 4200; lp.Q.value = 0.9; g.gain.value = kind === 'mute' ? 0.09 : kind === 'lead' ? 0.08 : 0.1;
+    inp.connect(sh); sh.connect(hp); hp.connect(mid); mid.connect(lp); lp.connect(g); g.connect(dest);
+    if (kind !== 'mute') { const s2 = ctx.createGain(); s2.gain.value = kind === 'lead' ? 0.5 : 0.25; g.connect(s2); s2.connect(verbIn); }
+    return (m[key] = inp);
+  }
   function khGuitar(B, ms, t, dur, v, o = {}) {
-    const pre = ctx.createGain(), sh = ctx.createWaveShaper(), hp = ctx.createBiquadFilter(), mid = ctx.createBiquadFilter(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
-    pre.gain.value = 1; sh.curve = drive(o.gain || 14); sh.oversample = '2x'; hp.type = 'highpass'; hp.frequency.value = 90; mid.type = 'peaking'; mid.frequency.value = 900; mid.gain.value = 5; mid.Q.value = 0.8;
-    lp.type = 'lowpass'; lp.frequency.setValueAtTime(o.mute ? 1100 : 4200, t); if (o.mute) lp.frequency.exponentialRampToValueAtTime(400, t + dur); lp.Q.value = 0.9;
-    pre.connect(sh); sh.connect(hp); hp.connect(mid); mid.connect(lp); lp.connect(g); g.connect(o.bus || B.sc);
-    if (o.verb) { const s2 = ctx.createGain(); s2.gain.value = o.verb; g.connect(s2); s2.connect(verbIn); }
-    const r = o.mute ? 0.04 : (o.r ?? 0.15);
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.005); g.gain.setValueAtTime(v * (o.mute ? 0.5 : 0.9), t + Math.max(0.01, dur - r)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.03);
-    ms.forEach(m => [-7, 7].forEach(d => { const os = ctx.createOscillator(); os.type = 'sawtooth'; os.frequency.value = hz(m); os.detune.value = d;
+    const kind = o.mute ? 'mute' : o.lead ? 'lead' : 'open', amp = khAmp(B, kind, o.bus || B.sc), lvl = v / (o.mute ? 0.09 : o.lead ? 0.08 : 0.1);   // (v: how hard it's played)
+    const env = ctx.createGain(), r = o.mute ? 0.04 : (o.r ?? 0.15);
+    env.gain.setValueAtTime(0.0001, t); env.gain.linearRampToValueAtTime(lvl, t + 0.005); env.gain.setValueAtTime(lvl * (o.mute ? 0.4 : 0.9), t + Math.max(0.01, dur - r)); env.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.03);
+    env.connect(amp);
+    ms.forEach(m => (o.mute ? [0] : [-7, 7]).forEach(d => { const os = ctx.createOscillator(); os.type = 'sawtooth'; os.frequency.value = hz(m); os.detune.value = d;
       if (o.vib) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 5.5; lg.gain.value = o.vib; l.connect(lg); lg.connect(os.detune); l.start(t + 0.15); l.stop(t + dur + 0.1); }
       if (o.slideFrom) { os.frequency.setValueAtTime(hz(o.slideFrom), t); os.frequency.exponentialRampToValueAtTime(hz(m), t + 0.06); }
-      const og = ctx.createGain(); og.gain.value = 0.5 / ms.length; os.connect(og); og.connect(pre); os.start(t); os.stop(t + dur + 0.08); }));
+      const og = ctx.createGain(); og.gain.value = (o.mute ? 1 : 0.5) / ms.length; os.connect(og); og.connect(env); os.start(t); os.stop(t + dur + 0.08); }));
   }
   const power = r => [r, r + 7, r + 12];   // a power chord: root, fifth and octave
   const khChug = (B, r, t, dur, v) => khGuitar(B, power(r), t, dur, v, { mute: true });
-  const khLead = (B, m, t, dur, v, from) => khGuitar(B, [m], t, dur, v, { gain: 9, bus: B.main, vib: 22, verb: 0.5, r: 0.2, slideFrom: from });
-  const khBass = (B, m, t, dur, v) => note(B.sc, 'sawtooth', m, t, dur, v, { cut: 700, cutTo: 260, q: 2, drive: 2, a: 0.004, r: 0.05 });
+  const khLead = (B, m, t, dur, v, from) => khGuitar(B, [m], t, dur, v, { lead: true, bus: B.main, vib: 22, r: 0.2, slideFrom: from });
+  const khBass = (B, m, t, dur, v) => note(B.sc, 'sawtooth', m, t, dur, v * 1.15, { cut: 700, cutTo: 260, q: 4, a: 0.004, r: 0.05 });   // (no overdrive of its own: that was a lot of work for every note)
   const khSnare = (B, t, v) => { snare(B.main, t, v, 0.35); nz(B.main, t, 0.3, v * 0.3, 'bandpass', 1700, 700, 0.6, 0.45); };
   const khWarDrum = (B, t, v) => tom(B.main, t, 33, v, 0.5);
   const khAnvil = (B, t, v) => { [[1, 1, 0.6], [2.76, 0.6, 0.4], [5.4, 0.4, 0.3]].forEach(([r, k, d]) => note(B.main, 'sine', 79 + 12 * Math.log2(r), t, d, v * k, { a: 0.001, r: d * 0.9, sus: 0.2, verb: 0.5 })); nz(B.main, t, 0.03, v * 0.8, 'highpass', 3000); };
@@ -10097,12 +10107,13 @@
   const khLava = (B, t, dur, v) => { nz(B.pad, t, dur, v, 'lowpass', 160, 90, 0.7); for (let k = 0; k < 6; k++) nz(B.pad, t + Math.random() * dur, 0.03 + Math.random() * 0.05, v * 1.5, 'bandpass', 500 + Math.random() * 900, 200, 3); for (let k = 0; k < 10; k++) nz(B.pad, t + Math.random() * dur, 0.012, v * 0.9, 'highpass', 5000); };
   // "BLOOD for the BLOOD GOD!": a deep male choir chanting in rhythm on the root and fifth [semitones up, beat, beats]
   const KH_CHANT = [[0, 0, 1], [0, 1, .5], [0, 1.5, .5], [7, 2, 1], [5, 3, 1]];
-  function khChoir(B, m, t, dur, v) {
-    const f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(); f1.type = 'bandpass'; f1.frequency.value = 600; f1.Q.value = 2.5; f2.type = 'bandpass'; f2.frequency.value = 1000; f2.Q.value = 3;
-    g.gain.value = v; f1.connect(g); f2.connect(g); g.connect(B.pad); const s2 = ctx.createGain(); s2.gain.value = 0.6; g.connect(s2); s2.connect(verbIn);
-    for (let k = 0; k < 6; k++) { const o = ctx.createOscillator(), og = ctx.createGain(), dt = Math.random() * 0.02; o.type = 'sawtooth'; o.frequency.value = hz(m - (k < 4 ? 12 : 0)); o.detune.value = (Math.random() - 0.5) * 30;
-      og.gain.setValueAtTime(0.0001, t + dt); og.gain.linearRampToValueAtTime(0.4, t + dt + 0.03); og.gain.setValueAtTime(0.32, t + Math.max(dt + 0.04, dur - 0.06)); og.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.06);
-      o.connect(og); og.connect(f1); og.connect(f2); o.start(t + dt); o.stop(t + dur + 0.1); }
+  function khChoir(B, m, t, dur, v, voices = 4) {   // (the "ohh" vowel's filters are shared, made once per destination)
+    B.khAmps = B.khAmps || new Map(); const dest = B.pad; let mm = B.khAmps.get(dest); if (!mm) { mm = {}; B.khAmps.set(dest, mm); }
+    if (!mm.choir) { const inp = ctx.createGain(), f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(); f1.type = 'bandpass'; f1.frequency.value = 600; f1.Q.value = 2.5; f2.type = 'bandpass'; f2.frequency.value = 1000; f2.Q.value = 3;
+      inp.connect(f1); inp.connect(f2); f1.connect(g); f2.connect(g); g.connect(dest); const s2 = ctx.createGain(); s2.gain.value = 0.6; g.connect(s2); s2.connect(verbIn); mm.choir = inp; }
+    for (let k = 0; k < voices; k++) { const o = ctx.createOscillator(), og = ctx.createGain(), dt = Math.random() * 0.02; o.type = 'sawtooth'; o.frequency.value = hz(m - (k < voices * 0.66 ? 12 : 0)); o.detune.value = (Math.random() - 0.5) * 30;
+      og.gain.setValueAtTime(0.0001, t + dt); og.gain.linearRampToValueAtTime(0.4 * v, t + dt + 0.03); og.gain.setValueAtTime(0.32 * v, t + Math.max(dt + 0.04, dur - 0.06)); og.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.06);
+      o.connect(og); og.connect(mm.choir); o.start(t + dt); o.stop(t + dur + 0.1); }
   }
   const khChant = (B, r, t, s, v) => KH_CHANT.forEach(([x, b, d]) => khChoir(B, r + 12 + x, t + b * s, d * s * 0.9, v));
   function khBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
@@ -10309,11 +10320,11 @@
     elven: (B, t, s) => tauntPlay(B, t, 76, 2, (C, m, at, d, hi, last) => { flute(C, m, at, d * 0.95, 0.07); harp(C, m - 12, at, 0.06); if (last) bell(C, m + 12, at, 0.05); }, { n: tauntNote(s) }),
     // the organ's soft flute stops with a gentle tremulant, joined up, and the bell tolling quietly far off at the end
     graveyard: (B, t, s) => tauntPlay(B, t, 64, 1.8, (C, m, at, d, hi, last) => { [[0, 1], [12, 0.45], [19, 0.12]].forEach(([x, k]) => note(C.sc, 'sine', m + x, at, d * 1.02, 0.05 * k, { a: 0.03, r: 0.08, vib: 9, verb: 0.8 })); if (last) bellToll(C, 50, at + d * 0.3, 0.04); }, { n: tauntNote(s), dip: 0.6 }),
-    flagstone: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 52, 3.6, (C, m, at, d, hi) => { caveHorn(C, m, at, d * 0.95, 0.05); if (hi) anvil(C, at, 0.06); }, { n: tauntNote(s) }); },
-    warpstone: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 3, (C, m, at, d, hi, last) => { squeak(C, at, 0.12, hz(m + 12), d * 0.95); if (last) zap(C, at + d * 0.5, 0.15); }, { n: tauntNote(s) }); },
+    flagstone: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 76, 1.6, (C, m, at, d, hi) => { ocarina(C, m, at, d * 0.96, 0.07); if (hi) frameDrum(C, at, 0.5); }, { n: tauntNote(s) }); },
+    warpstone: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 3, (C, m, at, d, hi, last) => { squeak(C, at, 0.12, hz(m + 12), d * 0.95); if (last) chatter(C, at + d * 0.4, 0.1); }, { n: tauntNote(s) }); },
     worn: (B, t, s) => { trChantRef(B, t, s); return 28 * s * 0.54; },
     // the lead guitar's notes run into each other (no gaps to stutter), the choir under them, and the band keeps more of its weight
-    brimstone: (B, t, s) => tauntPlay(B, t, 64, 0.8, (C, m, at, d, hi, last, n) => { khGuitar(C, [m + 12], at, d + 0.08, 0.08, { gain: 9, bus: C.main, vib: 22, verb: 0.5, r: 0.06, slideFrom: m + 12 + (hi ? -3 : 3) }); khChoir(C, m, at, d * 1.02, 0.05); if (last) { khGuitar(C, power(40), at, d * 2, 0.1, { r: 0.8 }); crash(C.main, at, 0.25); } }, { n: tauntNote(s), dip: 0.65 }),
+    brimstone: (B, t, s) => tauntPlay(B, t, 64, 0.8, (C, m, at, d, hi, last, n) => { khGuitar(C, [m + 12], at, d + 0.08, 0.08, { lead: true, bus: C.main, vib: 22, r: 0.06, slideFrom: m + 12 + (hi ? -3 : 3) }); khChoir(C, m, at, d * 1.02, 0.06, 3); if (last) { khGuitar(C, power(40), at, d * 2, 0.1, { r: 0.8 }); crash(C.main, at, 0.25); } }, { n: tauntNote(s), dip: 0.65 }),
     woodland: (B, t, s) => tauntPlay(B, t, 76, 1.46, (C, m, at, d, hi) => { whistle(C, m, at, d * 0.95, 0.07); fiddle(C, m - 12, at, d * 0.95, 0.03); if (hi) bodhran(C, at, 0.5); }, { n: tauntNote(s) })
   };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };

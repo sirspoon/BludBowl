@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.31 (16 Oct 2026)
+- **Fixed:** the Brimstone music could cut out, especially on phones. It took about four times as much work to play as any other pitch's music, because every guitar note built its own amplifier. Now, like a real guitar, every note plays into a shared amp (and the choir into shared filters), so it takes about as much work as the others and sounds the same.
+- **Changed:** the referee taunt on the Mossy Flagstones is now played on the ocarina, echoing round the cave, with a soft frame drum. On the Warped Flagstones the rats finish it by chattering their teeth, with no warp-lightning zap.
+
 ## v3.30 (16 Oct 2026)
 - **Changed:** the referee taunt blends into the music. It now comes in on the music's next beat and in time with it, fading in over its first few notes, while the band eases down to about half (rather than dropping sharply) and eases back up afterwards. On Brimstone, the lead guitar slides smoothly between its notes instead of stuttering, and keeps more of the band playing. In the Graveyard, it's played more gently on the organ's soft flute stops, with a quiet, distant bell.
 
