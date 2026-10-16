@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.29</title>
+    <title>BludBowl 3.30</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.29</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.30</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10024,7 +10024,7 @@
   const TR_REF = [[64, 1], [67, 1.5], [64, 1], [67, 1.5], [64, 1], [67, 1.5], [64, 4]];
   const chantBar = (B, line, t, s, v, beats = 4) => { line.forEach(([m, b, d]) => crowdSing(B, m, t + b * s, d * s * 0.95, v, true)); for (let b = 0; b < beats; b++) crowdClap(B, t + b * s, 0.16); };
   // while the crowd sings, the band drops back to about a third, then comes back in
-  const bandBack = (B, t, dur) => { const g = B.band.gain; g.setTargetAtTime(0.32, t - 0.1, 0.12); g.setTargetAtTime(1, t + dur, 0.4); };
+  const bandBack = (B, t, dur) => { const g = B.band.gain; g.setTargetAtTime(0.4, t - 0.7, 0.35); g.setTargetAtTime(1, t + dur, 0.8); };
   function trChantOne(B, t, s) { standsOf(B); bandBack(B, t, 16 * s); TR_ONE.forEach((line, k) => chantBar(B, line, t + k * 4 * s, s, 0.32)); roar(B, t + 16 * s, s * 3, 0.1); }
   function trChantRef(B, t, s) {
     standsOf(B); const n = s * 0.54, line = 14 * n;   // a short syllable is just under a third of a second; a line, with its breath, 14 of them
@@ -10290,24 +10290,31 @@
   // ---------- the taunt at the referee after a sending-off, in every style: "duh-deeh-duh-deeh-duh-deeh-duuuhhhh", two notes a
   // minor third apart, each straight after the last, the high ones held a little longer and a long one to finish, played twice by
   // that style's own instruments (on the chant channel) while the rest of the band drops back. [semitones up, length in short notes]
-  const TAUNT = [[0, 1], [3, 1.5], [0, 1], [3, 1.5], [0, 1], [3, 1.5], [0, 4]], TAUNT_N = 0.29, TAUNT_LINE = 14 * TAUNT_N;
-  function tauntPlay(B, t, base, gain, play) {   // (gain: each style's instruments evened out to the terrace crowd's level)
-    const tg = ctx.createGain(); tg.gain.value = gain; tg.connect(B.chant);
+  const TAUNT = [[0, 1], [3, 1.5], [0, 1], [3, 1.5], [0, 1], [3, 1.5], [0, 4]];
+  // it starts on the music's next beat, its short notes an eighth of the music's beat (kept between a quarter and a third of a second),
+  // so it sits in time; the band eases down to about half as it comes in (and back up after), and it fades in over its first notes
+  const tauntNote = s => { let n = s / 2; while (n < 0.24) n *= 2; while (n > 0.36) n /= 2; return n; };
+  function tauntStart(t, next, spb) { if (!next || !spb) return t; const j = Math.floor((next - t) / spb); return Math.max(t, next - j * spb); }
+  function tauntPlay(B, t, base, gain, play, o = {}) {   // (gain: each style's instruments evened out to the terrace crowd's level)
+    const n = o.n || 0.29, line = 14 * n, len = line * 2;
+    const tg = ctx.createGain(); tg.connect(B.chant); tg.gain.setValueAtTime(gain * 0.3, t); tg.gain.linearRampToValueAtTime(gain, t + 4 * n);
     const C = Object.assign({}, B, { main: tg, pad: tg, sc: tg, far: tg });   // (the style's instruments, routed to the chant channel)
-    const g = B.band.gain; g.setTargetAtTime(0.32, t - 0.1, 0.12); g.setTargetAtTime(1, t + TAUNT_LINE * 2, 0.4);
-    for (let k = 0; k < 2; k++) { let at = t + k * TAUNT_LINE; TAUNT.forEach(([x, d], j) => { play(C, base + x, at, d * TAUNT_N, x > 0, j === TAUNT.length - 1); at += d * TAUNT_N; }); }
-    return TAUNT_LINE * 2;
+    const g = B.band.gain; g.setTargetAtTime(o.dip ?? 0.5, t - 0.7, 0.35); g.setTargetAtTime(1, t + len - n, 0.8);
+    for (let k = 0; k < 2; k++) { let at = t + k * line; TAUNT.forEach(([x, d], j) => { play(C, base + x, at, d * n, x > 0, j === TAUNT.length - 1, n); at += d * n; }); }
+    return len;
   }
   const TAUNTS = {
-    electro: (B, t) => tauntPlay(B, t, 76, 2.3, (C, m, at, d, hi) => { note(C.main, 'square', m, at, d * 0.95, 0.05, { cut: 2400, a: 0.005, r: 0.05, verb: 0.3 }); note(C.main, 'sawtooth', m + 12, at, d * 0.95, 0.02, { cut: 3000, a: 0.005, r: 0.05 }); if (hi) clap(C.main, at, 0.4); }),
-    jungle: (B, t) => tauntPlay(B, t, 76, 1.4, (C, m, at, d, hi) => { flute(C, m, at, d * 0.95, 0.08); if (hi) farDrum(C, at, 55, 0.5); }),
-    elven: (B, t) => tauntPlay(B, t, 76, 2, (C, m, at, d, hi, last) => { flute(C, m, at, d * 0.95, 0.07); harp(C, m - 12, at, 0.06); if (last) bell(C, m + 12, at, 0.05); }),
-    graveyard: (B, t) => tauntPlay(B, t, 64, 1.95, (C, m, at, d, hi, last) => { organ(C, [m, m + 12], at, d * 0.95, 0.03, { a: 0.02, r: 0.1, cut: 2400 }); if (last) bellToll(C, 50, at, 0.1); }),
-    flagstone: (B, t) => { caveOf(B, 0.6); return tauntPlay(B, t, 52, 3.6, (C, m, at, d, hi) => { caveHorn(C, m, at, d * 0.95, 0.05); if (hi) anvil(C, at, 0.06); }); },
-    warpstone: (B, t) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 3, (C, m, at, d, hi, last) => { squeak(C, at, 0.12, hz(m + 12), d * 0.95); if (last) zap(C, at + d * 0.5, 0.15); }); },
+    electro: (B, t, s) => tauntPlay(B, t, 76, 2.3, (C, m, at, d, hi) => { note(C.main, 'square', m, at, d * 0.95, 0.05, { cut: 2400, a: 0.005, r: 0.05, verb: 0.3 }); note(C.main, 'sawtooth', m + 12, at, d * 0.95, 0.02, { cut: 3000, a: 0.005, r: 0.05 }); if (hi) clap(C.main, at, 0.4); }, { n: tauntNote(s) }),
+    jungle: (B, t, s) => tauntPlay(B, t, 76, 1.4, (C, m, at, d, hi) => { flute(C, m, at, d * 0.95, 0.08); if (hi) farDrum(C, at, 55, 0.5); }, { n: tauntNote(s) }),
+    elven: (B, t, s) => tauntPlay(B, t, 76, 2, (C, m, at, d, hi, last) => { flute(C, m, at, d * 0.95, 0.07); harp(C, m - 12, at, 0.06); if (last) bell(C, m + 12, at, 0.05); }, { n: tauntNote(s) }),
+    // the organ's soft flute stops with a gentle tremulant, joined up, and the bell tolling quietly far off at the end
+    graveyard: (B, t, s) => tauntPlay(B, t, 64, 1.8, (C, m, at, d, hi, last) => { [[0, 1], [12, 0.45], [19, 0.12]].forEach(([x, k]) => note(C.sc, 'sine', m + x, at, d * 1.02, 0.05 * k, { a: 0.03, r: 0.08, vib: 9, verb: 0.8 })); if (last) bellToll(C, 50, at + d * 0.3, 0.04); }, { n: tauntNote(s), dip: 0.6 }),
+    flagstone: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 52, 3.6, (C, m, at, d, hi) => { caveHorn(C, m, at, d * 0.95, 0.05); if (hi) anvil(C, at, 0.06); }, { n: tauntNote(s) }); },
+    warpstone: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 3, (C, m, at, d, hi, last) => { squeak(C, at, 0.12, hz(m + 12), d * 0.95); if (last) zap(C, at + d * 0.5, 0.15); }, { n: tauntNote(s) }); },
     worn: (B, t, s) => { trChantRef(B, t, s); return 28 * s * 0.54; },
-    brimstone: (B, t) => tauntPlay(B, t, 64, 0.82, (C, m, at, d, hi, last) => { khLead(C, m + 12, at, d * 0.95, 0.08); khChoir(C, m, at, d * 0.9, 0.05); if (last) { khGuitar(C, power(40), at, d * 2, 0.1, { r: 0.6 }); crash(C.main, at, 0.3); } }),
-    woodland: (B, t) => tauntPlay(B, t, 76, 1.46, (C, m, at, d, hi) => { whistle(C, m, at, d * 0.95, 0.07); fiddle(C, m - 12, at, d * 0.95, 0.03); if (hi) bodhran(C, at, 0.5); })
+    // the lead guitar's notes run into each other (no gaps to stutter), the choir under them, and the band keeps more of its weight
+    brimstone: (B, t, s) => tauntPlay(B, t, 64, 0.8, (C, m, at, d, hi, last, n) => { khGuitar(C, [m + 12], at, d + 0.08, 0.08, { gain: 9, bus: C.main, vib: 22, verb: 0.5, r: 0.06, slideFrom: m + 12 + (hi ? -3 : 3) }); khChoir(C, m, at, d * 1.02, 0.05); if (last) { khGuitar(C, power(40), at, d * 2, 0.1, { r: 0.8 }); crash(C.main, at, 0.25); } }, { n: tauntNote(s), dip: 0.65 }),
+    woodland: (B, t, s) => tauntPlay(B, t, 76, 1.46, (C, m, at, d, hi) => { whistle(C, m, at, d * 0.95, 0.07); fiddle(C, m - 12, at, d * 0.95, 0.03); if (hi) bodhran(C, at, 0.5); }, { n: tauntNote(s) })
   };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
@@ -10388,7 +10395,7 @@
   function crowd(kind, delay = 0) {
     if (!run || !ctx || ctx.state !== 'running' || ctx.currentTime < (run.chantUntil || 0)) return false;   // (one at a time)
     if (kind !== 'ref' && run.style !== 'worn') return false;
-    const s = 60 / run.el.bpm, t = ctx.currentTime + delay; let len;
+    const s = 60 / run.el.bpm, t = tauntStart(ctx.currentTime + delay, run.next, s); let len;   // (on the music's next beat)
     try { len = kind === 'ref' ? (TAUNTS[run.style] || TAUNTS.electro)(run.B, t, s) : (trChantOne(run.B, t, s), 16 * s); } catch (e) { console.warn('music:', e && e.message); return false; }
     run.chantUntil = t + len + 1;
     return true;
