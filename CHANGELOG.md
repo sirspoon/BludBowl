@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.34 (16 Oct 2026)
+- **New:** declaring a Block now shows a red "👊 Block" banner at the top of the pitch, like the ones for Blitz, Foul, Pass and Hand-off, so a misclick is easy to spot.
+
 ## v3.33 (16 Oct 2026)
 - **Changed:** when the referee jumps out after a sending-off, the pitch stays in view behind him, darkened, with the red flash round the edges. ([#11](https://github.com/sirspoon/BludBowl/issues/11))
 
