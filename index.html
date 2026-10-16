@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.31</title>
+    <title>BludBowl 3.32</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.31</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.32</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10546,6 +10546,184 @@
                 ctx.restore();
             });
         }
+        // ---------- the referee's jump scare when a foul is spotted (issue #11) ----------
+        // Five pixel-art referees - halfling, goblin, dwarf, elf and a troll (on a coarser grid, shown twice the size) - in black shorts,
+        // a striped shirt and a cap, red card held up, whistle in the mouth. Drawn pixel by pixel once, then a random one slams onto the
+        // screen as the whistle blows, shakes against the edges, and drops away.
+        const REFPIX = (function () {
+          const OUT = '#14151f';
+          function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; return { c, g, w, h }; }
+          function P(k) {   // pixel helpers on a context
+            const g = k.g;
+            const rect = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
+            const px = (x, y, c) => rect(x, y, 1, 1, c);
+            const ell = (cx, cy, rx, ry, c) => { for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) { const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry; if (dx * dx + dy * dy <= 1) px(x, y, c); } };
+            const tri = (pts, c) => { const ys = pts.map(p => p[1]), y0 = Math.floor(Math.min(...ys)), y1 = Math.ceil(Math.max(...ys));
+              for (let y = y0; y <= y1; y++) { const xs = []; for (let i = 0; i < pts.length; i++) { const [ax, ay] = pts[i], [bx, by] = pts[(i + 1) % pts.length]; if ((ay <= y + 0.5 && by > y + 0.5) || (by <= y + 0.5 && ay > y + 0.5)) xs.push(ax + (y + 0.5 - ay) / (by - ay) * (bx - ax)); }
+                xs.sort((a, b) => a - b); for (let i = 0; i + 1 < xs.length; i += 2) for (let x = Math.round(xs[i]); x < Math.round(xs[i + 1]); x++) px(x, y, c); } };
+            const line = (x0, y0, x1, y1, c, wdt = 1) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) * 2 + 1; for (let i = 0; i <= n; i++) { const t = i / n; rect(x0 + (x1 - x0) * t - (wdt - 1) / 2, y0 + (y1 - y0) * t - (wdt - 1) / 2, wdt, wdt, c); } };
+            return { rect, px, ell, tri, line };
+          }
+          // a dark outline round everything drawn
+          function outline(k) {
+            const d = k.g.getImageData(0, 0, k.w, k.h), a = i => d.data[i * 4 + 3] > 0, o = new Uint8Array(k.w * k.h);
+            for (let y = 0; y < k.h; y++) for (let x = 0; x < k.w; x++) { const i = y * k.w + x; if (a(i)) continue;
+              if ((x > 0 && a(i - 1)) || (x < k.w - 1 && a(i + 1)) || (y > 0 && a(i - k.w)) || (y < k.h - 1 && a(i + k.w))) o[i] = 1; }
+            k.g.fillStyle = OUT; for (let i = 0; i < o.length; i++) if (o[i]) k.g.fillRect(i % k.w, Math.floor(i / k.w), 1, 1);
+          }
+          // the referee's kit: a black and white vertically striped shirt, black shorts, a black cap; a red card held up; a whistle in the mouth
+          function shirt(p, x, y, w, h, stripe = 2) { for (let i = 0; i < w; i++) p.rect(x + i, y, 1, h, Math.floor(i / stripe) % 2 ? '#f4f4f0' : '#22232c'); p.rect(x, y + h - 1, w, 1, '#16171e'); }
+          function sleeve(p, x, y, w, h, stripe = 2) { for (let i = 0; i < w; i++) p.rect(x + i, y, 1, h, Math.floor(i / stripe) % 2 ? '#22232c' : '#f4f4f0'); }
+          function redCard(p, x, y, w, h) { p.rect(x, y, w, h, '#e3262b'); p.rect(x, y, w, 1, '#ff6a5e'); p.rect(x, y, 1, h, '#ff6a5e'); p.rect(x + w - 1, y + 1, 1, h - 1, '#a3121a'); p.rect(x + 1, y + h - 1, w - 1, 1, '#a3121a'); }
+          function whistle(p, x, y, s = 1) { p.rect(x, y, 5 * s, 3 * s, '#c9ced8'); p.rect(x, y, 5 * s, 1, '#f4f6fa'); p.rect(x + 4 * s, y + 2 * s, 1 * s, 1 * s, '#8a93a3'); p.ell(x + 1.5 * s, y + 1.8 * s, 1.2 * s, 1.2 * s, '#aeb5c2'); }
+          function cap(p, cx, top, w, h, peak) { p.ell(cx, top + h, w / 2, h, '#1e1f28'); p.rect(cx - w / 2, top + h, w, Math.ceil(h * 0.5), '#1e1f28'); p.rect(cx - w * 0.15, top + h * 0.6, w * 0.3, 1, '#3a3c4a'); p.rect(cx - w / 2 - peak * 0.2, top + h * 1.4, w + peak * 1.2, 2, '#121219'); p.px(cx, top + 1, '#4a4c5a'); }
+          function face(p, cx, cy, sz, skin, shade, o = {}) {   // angry brows, eyes, puffed cheeks round the whistle
+            const ex = Math.round(sz * 0.32), ey = Math.round(cy - sz * 0.12), es = Math.max(1, Math.round(sz / 20));   // es: how big the eyes are
+            [-1, 1].forEach(sd => { p.rect(cx + sd * ex - es, ey, 3 * es, 2 * es, '#ffffff'); p.rect(cx + sd * ex - (sd < 0 ? 0 : es) + (sd < 0 ? es : 0) - es / 2, ey, es + 1, 2 * es, '#14151f');
+              p.line(cx + sd * (ex + 2 * es), ey - 3 * es, cx + sd * (ex - 2 * es), ey - es, o.brow || '#3b2a1e', es); });   // brows down in the middle
+            [-1, 1].forEach(sd => p.ell(cx + sd * sz * 0.36, cy + sz * 0.22, sz * 0.2, sz * 0.16, o.cheek || '#e98b78'));   // puffed cheeks
+            return { mouthX: cx, mouthY: Math.round(cy + sz * 0.3) };
+          }
+          // ---- the five ----
+          const R = {};
+          R.halfling = () => {   // short and round, curly hair, big hairy feet
+            const k = canvas(64, 80), p = P(k), skin = '#f2c7a1', sh = '#d9a07c';
+            p.ell(16, 70, 6, 3, skin); p.ell(44, 70, 6, 3, skin); [12, 15, 18, 40, 43, 46].forEach(x => p.px(x, 68, '#8a5a2c'));   // feet
+            p.rect(19, 56, 7, 12, skin); p.rect(36, 56, 7, 12, skin); p.rect(19, 56, 2, 12, sh);   // legs
+            p.rect(16, 50, 30, 9, '#1b1c24'); p.rect(30, 52, 2, 7, '#101016');   // shorts
+            // a stocky, rounded body with a bit of a belly (not a ball): a rounded block with a gentle bulge at the front
+            const inBody = (x, y) => { const cx = x + 0.5, cy = y + 0.5, r = 6;   // a rounded block (16..46 x 30..53) or the belly's bulge
+              const qx = Math.max(16 + r - cx, 0, cx - (46 - r)), qy = Math.max(30 + r - cy, 0, cy - (53 - r));
+              return (cx >= 16 && cx <= 46 && cy >= 30 && cy <= 53 && qx * qx + qy * qy <= r * r) || ((cx - 31) / 15.5) ** 2 + ((cy - 45) / 8) ** 2 <= 1; };
+            // the shirt has ridden up: striped down to its hem, then a strip of round belly hanging a little over the shorts, with a belly button
+            for (let y = 28; y < 55; y++) for (let x = 13; x < 50; x++) if (inBody(x, y)) p.px(x, y, y > 46 ? (y >= 51 && (x < 19 || x > 43) ? null : skin) : y === 46 ? '#16171e' : Math.floor((x - 13) / 3) % 2 ? '#f4f4f0' : '#22232c');
+            p.rect(17, 51, 28, 8, '#1b1c24'); p.rect(30, 53, 2, 6, '#101016');   // the shorts' waistband, under the belly
+            for (let x = 18; x < 45; x++) { const cy = 45 + 8 * Math.sqrt(Math.max(0, 1 - ((x + 0.5 - 31) / 15.5) ** 2)); if (cy > 51) p.rect(x, 51, 1, Math.round(cy - 51), skin); }   // the belly over the waistband
+            p.rect(18, 47, 27, 1, sh); p.px(31, 49, '#9a6a4c'); p.px(31, 50, '#b98564'); p.px(30, 49, sh);   // the shadow under the hem, and the belly button
+            sleeve(p, 9, 33, 6, 6); p.rect(8, 39, 6, 9, skin); p.ell(10, 49, 3, 3, skin);   // arm at the side
+            p.ell(31, 22, 12, 11, skin); p.ell(31, 26, 10, 6, skin);   // head
+            [[20, 14], [23, 11], [27, 9], [32, 9], [37, 10], [41, 13], [43, 17], [19, 18]].forEach(([x, y]) => p.ell(x, y, 3.2, 3, '#7a4a22'));   // curls
+            p.ell(19, 23, 2, 3, skin); p.ell(43, 23, 2, 3, skin);   // ears
+            cap(p, 31, 4, 22, 5, 6);
+            const m = face(p, 31, 22, 22, skin, sh, { brow: '#5a3416' }); whistle(p, m.mouthX - 2, m.mouthY - 1); p.line(31, m.mouthY + 2, 29, 31, '#c9ced8');
+            sleeve(p, 46, 25, 6, 7); p.rect(48, 10, 5, 16, skin); p.ell(50, 9, 4, 3, skin); redCard(p, 46, 0, 10, 13);   // arm up, red card   // (the raised arm and card last, in front of the ears and cap)
+            outline(k); return k.c;
+          };
+          R.goblin = () => {   // small and green, huge ears, long pointy nose, grin of teeth
+            const k = canvas(64, 80), p = P(k), skin = '#7fae3e', sh = '#5d8a2a';
+            p.tri([[14, 72], [26, 72], [24, 66], [18, 67]], skin); p.tri([[36, 72], [48, 72], [44, 67], [38, 66]], skin);   // feet
+            p.rect(19, 56, 5, 11, skin); p.rect(38, 56, 5, 11, skin);
+            p.rect(17, 49, 28, 9, '#1b1c24'); p.rect(30, 51, 2, 7, '#101016');
+            shirt(p, 18, 30, 26, 21, 2);
+            sleeve(p, 13, 31, 6, 6); p.rect(12, 37, 4, 12, skin); p.ell(13, 50, 3, 2.5, skin);
+            p.tri([[22, 18], [4, 8], [8, 20], [21, 25]], skin); p.tri([[40, 18], [58, 8], [54, 20], [41, 25]], skin);   // ears
+            p.tri([[9, 12], [19, 19], [10, 18]], '#b5536a'); p.tri([[53, 12], [43, 19], [52, 18]], '#b5536a');
+            p.ell(31, 21, 11, 10, skin); p.ell(31, 25, 9, 6, skin);
+            cap(p, 31, 5, 20, 5, 5);
+            const m = face(p, 31, 20, 20, skin, sh, { brow: '#2e4416', cheek: '#9cc65a' });
+            p.tri([[30, 22], [33, 22], [39, 27], [31, 26]], sh);   // long pointy nose
+            p.rect(24, m.mouthY + 1, 15, 2, '#3a1c1c'); for (let x = 24; x < 39; x += 2) p.px(x, m.mouthY + 1, '#f4f0d8');   // grin of teeth
+            whistle(p, m.mouthX - 6, m.mouthY - 1); p.line(26, m.mouthY + 2, 27, 32, '#c9ced8');
+            p.rect(44, 8, 6, 18, '#2f4a14'); p.ell(47, 8, 4.5, 4, '#2f4a14');   // a dark green edge round the arm and hand, so they stand out against the ear
+            sleeve(p, 43, 25, 6, 7); p.rect(45, 9, 4, 17, skin); p.ell(47, 8, 3.5, 3, skin); redCard(p, 42, 0, 10, 13);   // (in front of the ear)
+            outline(k); return k.c;
+          };
+          R.dwarf = () => {   // stocky, a huge braided beard over the shirt
+            const k = canvas(64, 80), p = P(k), skin = '#e8b490', sh = '#c98f6c', hair = '#c0612a', hs = '#8f421b';
+            p.rect(13, 70, 13, 5, '#3a2a1e'); p.rect(37, 70, 13, 5, '#3a2a1e');   // boots
+            p.rect(16, 58, 8, 12, skin); p.rect(39, 58, 8, 12, skin);
+            p.rect(12, 50, 39, 10, '#1b1c24'); p.rect(30, 52, 2, 8, '#101016');
+            shirt(p, 11, 28, 41, 24, 3);
+            sleeve(p, 4, 29, 8, 7); p.rect(4, 36, 7, 12, skin); p.ell(7, 49, 4, 3.5, skin);
+            p.ell(31, 19, 12, 11, skin);
+            p.tri([[19, 22], [43, 22], [40, 40], [35, 50], [27, 50], [22, 40]], hair);   // the beard, down over the shirt
+            [[24, 30], [31, 33], [38, 30], [28, 42], [34, 42]].forEach(([x, y]) => p.line(x, y, x + 1, y + 6, hs));
+            p.rect(26, 49, 3, 3, '#d6b24a'); p.rect(33, 49, 3, 3, '#d6b24a');   // braid rings
+            p.ell(31, 21, 8, 3, hair);   // moustache
+            p.ell(19, 18, 2, 3, skin); p.ell(43, 18, 2, 3, skin);
+            cap(p, 31, 3, 24, 5, 6);
+            const m = face(p, 31, 16, 22, skin, sh, { brow: hs });
+            p.ell(31, 18, 2.5, 2.5, sh);   // big nose
+            whistle(p, m.mouthX - 2, m.mouthY - 3); p.line(31, m.mouthY, 31, 26, '#c9ced8');
+            sleeve(p, 51, 22, 8, 8); p.rect(52, 9, 6, 14, skin); p.ell(55, 8, 4.5, 3.5, skin); redCard(p, 49, 0, 11, 12);   // (the raised arm and card last, in front of the ears and cap)
+            outline(k); return k.c;
+          };
+          R.elf = () => {   // tall and slim, pointed ears, long fair hair
+            const k = canvas(64, 96), p = P(k), skin = '#f5dcc2', sh = '#dcbb9c', hair = '#f1dc8a', hs = '#c9ae5c';
+            p.rect(21, 89, 9, 4, '#2c2f3a'); p.rect(34, 89, 9, 4, '#2c2f3a');
+            p.rect(24, 64, 4, 25, skin); p.rect(36, 64, 4, 25, skin);
+            p.rect(21, 57, 22, 9, '#1b1c24'); p.rect(31, 59, 2, 7, '#101016');
+            p.rect(20, 28, 4, 7, hair); p.rect(40, 28, 4, 7, hair);   // hair down to the shoulders
+            shirt(p, 22, 30, 20, 29, 2);
+            // the other hand on his waist, elbow sticking out
+            p.line(19, 36, 10, 45, skin, 2); p.line(10, 45, 21, 53, skin, 2);
+            p.tri([[17, 30], [24, 30], [23, 36], [15, 37]], '#f4f4f0'); [[18, 31], [20, 31], [22, 31]].forEach(([x, y]) => p.rect(x, y, 1, 6, '#22232c'));   // the sleeve
+            p.ell(22, 53, 2.2, 2, skin);   // the hand on the hip
+            p.tri([[24, 15], [13, 8], [16, 14], [24, 23]], skin); p.tri([[40, 15], [51, 8], [48, 14], [40, 23]], skin);   // pointed ears
+            p.tri([[22, 16], [16, 11], [22, 20]], sh); p.tri([[42, 16], [48, 11], [42, 20]], sh);
+            p.ell(32, 18, 9, 11, skin);
+            p.ell(32, 11, 10, 4, hair); p.rect(22, 10, 3, 20, hair); p.rect(39, 10, 3, 20, hair); p.line(25, 12, 31, 14, hs); p.line(34, 12, 38, 13, hs);
+            cap(p, 32, 2, 20, 5, 5);
+            const m = face(p, 32, 18, 18, skin, sh, { brow: hs, cheek: '#f0a898' });
+            whistle(p, m.mouthX - 2, m.mouthY - 1); p.line(32, m.mouthY + 2, 31, 31, '#c9ced8');
+            sleeve(p, 41, 24, 6, 7); p.rect(43, 6, 4, 19, skin); p.ell(45, 5, 3, 3, skin); redCard(p, 40, 0, 10, 12);   // (the raised arm and card last, in front of the ears and cap)
+            outline(k); return k.c;
+          };
+          R.troll = () => {   // massive, grey-green, tusks, a tiny cap on a huge head; on a coarser grid than the others (drawn at 56 x 64, shown twice the size)
+            const k = canvas(56, 64), p = P(k), skin = '#7f9a86', sh = '#5f7866', dk = '#4a5e50';
+            p.ell(14, 61, 7, 3, skin); p.ell(42, 61, 7, 3, skin); [10, 13, 16, 38, 41, 44].forEach(x => p.rect(x, 59, 2, 1, '#d9d4bf'));   // feet, claws
+            p.rect(11, 48, 8, 11, skin); p.rect(37, 48, 8, 11, skin); p.rect(11, 48, 2, 11, sh);
+            p.rect(8, 43, 40, 7, '#1b1c24'); p.rect(27, 44, 2, 6, '#101016');
+            shirt(p, 8, 25, 40, 19, 3);
+            sleeve(p, 2, 26, 7, 6, 2); p.rect(1, 32, 7, 11, skin); p.rect(1, 32, 2, 11, sh); p.ell(4, 44, 4, 3.5, skin);   // huge arm at the side
+            p.ell(28, 14, 15, 13.5, skin); p.ell(28, 20, 13, 8, skin); p.ell(28, 23, 11, 5, sh);   // the huge head and jaw
+            p.ell(13, 13, 2.5, 4, skin); p.ell(43, 13, 2.5, 4, skin);
+            cap(p, 28, -1, 12, 3, 3);   // a tiny cap perched on top
+            const m = face(p, 28, 13, 20, skin, sh, { brow: dk, cheek: '#93ad97' });
+            p.ell(28, 16, 3, 2, dk);   // squashed nose
+            p.rect(20, 23, 16, 2, '#2e1e1e'); p.tri([[21, 25], [23, 25], [22, 20]], '#ece6cc'); p.tri([[33, 25], [35, 25], [34, 20]], '#ece6cc');   // tusks
+            whistle(p, m.mouthX - 2, 22); p.line(28, 25, 26, 30, '#c9ced8');
+            sleeve(p, 47, 20, 7, 7, 2); p.rect(48, 7, 6, 14, skin); p.ell(51, 6, 4.5, 3.5, skin); redCard(p, 46, 0, 9, 11);   // arm up with the card
+            outline(k); return k.c;
+          };
+          R.troll.scale = 2;   // (shown twice as big as the others)
+          return R;
+        })();
+        let refCache = null;
+        function refScare(delay = 0) {
+            if (CLOCK.sim) return;
+            setTimeout(() => {
+                try {
+                    if (!refCache) refCache = ['halfling', 'goblin', 'dwarf', 'elf', 'troll'].map(n => ({ n, c: REFPIX[n](), k: REFPIX[n].scale || 1 }));
+                    const ref = refCache[Math.floor(Math.random() * refCache.length)];
+                    const still = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+                    const cv = document.createElement('canvas'), dpr = window.devicePixelRatio || 1, W = window.innerWidth, H = window.innerHeight;
+                    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+                    cv.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;';
+                    document.body.appendChild(cv);
+                    const g = cv.getContext('2d'); g.imageSmoothingEnabled = false;
+                    const base = Math.max(3, Math.floor(H * 0.86 / 96)), px = ref.k > 1 ? Math.round(base * ref.k * 0.95) : base;   // screen pixels per sprite pixel (the troll nearly twice as big, so his card and cap go off the top)
+                    const sw = ref.c.width * px, sh = ref.c.height * px, t0 = performance.now(), DUR = 1900;
+                    const frame = now => {
+                        const t = now - t0; if (t > DUR) { cv.remove(); return; }
+                        g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.imageSmoothingEnabled = false;
+                        const fade = t < 90 ? t / 90 : t > DUR - 300 ? (DUR - t) / 300 : 1;
+                        g.fillStyle = `rgba(0,0,0,${0.4 * fade})`; g.fillRect(0, 0, W, H);   // the pitch dims
+                        const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.max(W, H) * 0.75);
+                        const flash = t < 400 ? 0.75 - 0.3 * (t / 400) : 0.45; v.addColorStop(0, 'rgba(220,30,30,0)'); v.addColorStop(1, `rgba(220,30,30,${flash * fade})`); g.fillStyle = v; g.fillRect(0, 0, W, H);   // a red flash round the edges
+                        // up from below with a bounce, then shaking hard (bumping the edges), then dropping away
+                        let y = 0; if (t < 140) { const u = t / 140; y = (1 - u) * sh * 0.9 - Math.sin(u * Math.PI) * 30; } else if (t > DUR - 300) y = ((t - (DUR - 300)) / 300) ** 2 * sh;
+                        const shake = still || t < 120 || t > DUR - 300 ? 0 : 1, a = (Math.random() - 0.5) * 0.08 * shake, dx = (Math.random() - 0.5) * 34 * shake, dy = (Math.random() - 0.5) * 18 * shake;
+                        g.save(); g.translate(W / 2 + dx, H + 10 + y + dy); g.rotate(a); g.drawImage(ref.c, -sw / 2, -sh, sw, sh); g.restore();
+                        if (shake) { g.strokeStyle = 'rgba(255,255,255,0.75)'; g.lineWidth = 5; [-1, 1].forEach(sd => [0, 1, 2].forEach(k => { const x = W / 2 + sd * (sw / 2 + 14 + k * 12); g.beginPath(); g.moveTo(x, H * 0.45 - k * 26); g.lineTo(x + sd * 22, H * 0.43 - k * 30); g.stroke(); })); }   // shake lines
+                        const fs = Math.round(Math.min(W / 9, 72)); g.font = `bold ${fs}px Teko, Impact, sans-serif`; g.textAlign = 'center'; g.lineWidth = Math.max(4, fs / 9); g.strokeStyle = '#14151f';
+                        g.globalAlpha = fade; g.strokeText('SENT OFF!', W / 2 + dx * 0.3, H - fs * 0.45); g.fillStyle = '#ffde3b'; g.fillText('SENT OFF!', W / 2 + dx * 0.3, H - fs * 0.45); g.globalAlpha = 1;
+                        requestAnimationFrame(frame);
+                    };
+                    requestAnimationFrame(frame);
+                } catch (e) { console.warn('ref:', e && e.message); }
+            }, delay);
+        }
         function skillPop(name, sub) {
             if (SFX.has && !SFX.has(name) && SKILL_POP_STYLES[name]) sfx('skillPop'); else sfx(name);
             state.lastSkillPop = name;
@@ -13751,7 +13929,7 @@
             if (!sentOff && armorBroke && prayerOn(def.team, 15)) { sentOff = true; log(`  Under Scrutiny! The ref sees the boot go in.`, 'text-violet-300 font-bold'); }
             if (sentOff && !armorBroke && atk.skills.includes('Sneaky Git')) { sentOff = false; log(`  Sneaky Git! The ref misses the double.`, 'text-lime-300 font-bold'); skillPop('Sneaky Git'); }
             // whistle and boos only when the ref spots it (a double on either roll); otherwise the successful foul gets a laugh
-            const foulSnd = () => { if (sentOff) { sfx('whistle2', 650); sfx('crowdBoo', 900); } else if (armorBroke) sfx('foulLaugh', 1100); };
+            const foulSnd = () => { if (sentOff) { sfx('whistle2', 650); sfx('crowdBoo', 900); refScare(650); } else if (armorBroke) sfx('foulLaugh', 1100); };   // (the referee jumps out as the whistle blows)
             if (!armorBroke) foulSnd();
             if (armorBroke) {
                 let ir1 = Math.floor(Math.random()*6)+1, ir2 = Math.floor(Math.random()*6)+1;
