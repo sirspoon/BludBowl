@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.33 (16 Oct 2026)
+- **Changed:** when the referee jumps out after a sending-off, the pitch stays in view behind him, darkened, with the red flash round the edges. ([#11](https://github.com/sirspoon/BludBowl/issues/11))
+
 ## v3.32 (16 Oct 2026)
 - **New:** when a foul gets a player sent off, a referee jumps out at you as the whistle blows: a big pixel-art ref in a striped shirt, black shorts and a cap, with the whistle in his mouth and a red card held up, shaking against the screen for a couple of seconds. There are five of them, picked at random: a halfling, a goblin, a dwarf, an elf and a troll (so big his card and cap go off the top of the screen). If your device is set to reduce motion, he appears without the shaking. ([#11](https://github.com/sirspoon/BludBowl/issues/11))
 

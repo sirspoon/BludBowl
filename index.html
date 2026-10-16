@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.32</title>
+    <title>BludBowl 3.33</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.32</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.33</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10708,7 +10708,7 @@
                         const t = now - t0; if (t > DUR) { cv.remove(); return; }
                         g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.imageSmoothingEnabled = false;
                         const fade = t < 90 ? t / 90 : t > DUR - 300 ? (DUR - t) / 300 : 1;
-                        g.fillStyle = `rgba(0,0,0,${0.4 * fade})`; g.fillRect(0, 0, W, H);   // the pitch dims
+                        g.fillStyle = `rgba(0,0,0,${0.55 * fade})`; g.fillRect(0, 0, W, H);   // the pitch stays in view, darkened
                         const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.max(W, H) * 0.75);
                         const flash = t < 400 ? 0.75 - 0.3 * (t / 400) : 0.45; v.addColorStop(0, 'rgba(220,30,30,0)'); v.addColorStop(1, `rgba(220,30,30,${flash * fade})`); g.fillStyle = v; g.fillRect(0, 0, W, H);   // a red flash round the edges
                         // up from below with a bounce, then shaking hard (bumping the edges), then dropping away
