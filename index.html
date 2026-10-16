@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.11</title>
+    <title>BludBowl 3.12</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.11</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.12</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -11096,7 +11096,9 @@
             
             let visited = new Map(), bestP = new Map();
             let initialCanDodge = (!player.usedSkills.includes('Dodge') && player.skills.includes('Dodge'));
-            let q = [{ x: player.x, y: player.y, dist: 0, path: [], prob: 1.0, canDodge: initialCanDodge }];
+            // (skills2) the odds count an opponent's Diving Tackle (-2 after the dodge roll) and this player's Sure Feet (a Rush re-roll)
+            const sk2 = AIX.on(player.team, 'skills2'), sureFeet = sk2 && player.skills.includes('Sure Feet') && !player.usedSkills.includes('Sure Feet');
+            let q = [{ x: player.x, y: player.y, dist: 0, path: [], prob: 1.0, canDodge: initialCanDodge, canSF: sureFeet }];
             visited.set(`${player.x},${player.y}`, 0);
             
             const valid = [];
@@ -11141,6 +11143,7 @@
                             if(tzG[curr.y * W + curr.x] > 0) {
                                 let landingTZs = player.skills.includes('Stunty') ? 0 : tzNT[ny * W + nx];
                                 let target = Math.max(2, Math.min(6, player.ag + landingTZs + tailG[curr.y * W + curr.x] - (player.skills.includes('Titchy') ? 1 : 0) - (player.skills.includes('Two Heads') ? 1 : 0))); 
+                                if (sk2 && divingTackler(player, curr.x, curr.y)) target = Math.min(6, target + 2);   // a natural 6 still makes it
                                 let baseProb = (7 - target) / 6;
 
                                 let markedByTackle = tackG[curr.y * W + curr.x] > 0;
@@ -11150,8 +11153,11 @@
                                 }
                                 stepProb *= baseProb;
                             }
+                            let newCanSF = curr.canSF;
                             if (curr.dist + 1 > player.remainingMA) {
-                                stepProb *= (7 - Math.min(6, 2 + weatherTargetMod('RUSH'))) / 6; 
+                                let rp = (7 - Math.min(6, 2 + weatherTargetMod('RUSH'))) / 6;
+                                if (newCanSF) { rp = 1 - Math.pow(1 - rp, 2); newCanSF = false; }
+                                stepProb *= rp; 
                             }
                             if (!state.ball.carrierId && nx === state.ball.x && ny === state.ball.y) {
                                 let target = Math.min(6, getPickupTarget(player, nx, ny) + weatherTargetMod('PICKUP'));
@@ -11166,7 +11172,7 @@
                             if (bp === undefined || np > bp + 1e-9 || nd < bd) {
                                 if (bp === undefined || np > bp) bestP.set(key, np);
                                 if (bd === undefined || nd < bd) visited.set(key, nd);
-                                q.push({ x: nx, y: ny, dist: nd, path: [...curr.path, {x:nx, y:ny, prevX: curr.x, prevY: curr.y}], prob: np, canDodge: newCanDodge });
+                                q.push({ x: nx, y: ny, dist: nd, path: [...curr.path, {x:nx, y:ny, prevX: curr.x, prevY: curr.y}], prob: np, canDodge: newCanDodge, canSF: newCanSF });
                             }
                         }
                     }
@@ -18682,7 +18688,7 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
             p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
@@ -18791,7 +18797,7 @@
                         if (hasSk(atk, 'Block')) return 0;
                         if (hx && hasSk(def, 'Wrestle')) return -2;
                         return hasSk(def, 'Block') ? -10 : -7;
-                    case FACES.PUSH1: case FACES.PUSH2: return strip ? 6 + bonus : 2;
+                    case FACES.PUSH1: case FACES.PUSH2: return strip ? 6 + bonus : AIX.on(atk.team, 'skills2') && hasSk(def, 'Stand Firm') && !def.isDistracted ? 0.5 : 2;   // (skills2) Stand Firm: a push moves nobody
                     case FACES.STUMBLE: return hasSk(def, 'Dodge') && !hasSk(atk, 'Tackle') ? (strip ? 6 + bonus : 2) : 6 + bonus + hb;
                     case FACES.POW: return 6 + bonus + hb;
                 }

@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.12 (16 Oct 2026)
+- **Fixed:** the odds shown for a move now count an opponent's Diving Tackle (−2 on a dodge out of their tackle zone) and the moving player's Sure Feet (a free Rush re-roll). The computer plans with the same odds, and it no longer values pushing a player with Stand Firm, who can't be moved.
+
 ## v3.11 (16 Oct 2026)
 - **Changed:** the computer now makes use of its players' skills ([#19](https://github.com/sirspoon/BludBowl/issues/19)). Over 96 test matches against v3.10 it scored 25 more touchdowns and won 41 to 30, with most of the gain for teams that have these skills.
   - **Blocking:** it values Wrestle properly (a Both Down becomes a safe knockdown, not a Turnover), aims Mighty Blow and Claws at players whose armour they can break, and works out the real odds of a Dauntless block.
