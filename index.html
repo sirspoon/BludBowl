@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.09</title>
+    <title>BludBowl 3.10</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.09</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.10</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -18682,8 +18682,10 @@
 
         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn
-        const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
+        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank
+        const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
+            // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
+            p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
         const AI = (function () {
             const on = { 0: false, 1: false };
             try { const s = JSON.parse(localStorage.getItem('bb-ai') || '{}'); on[0] = !!s[0]; on[1] = !!s[1]; } catch (e) {}
@@ -19092,7 +19094,7 @@
                 let best = null;
                 receivers.forEach(r => {
                     const pt = AIX.on(me, 'pass') && passingTeam(me);
-                    const rv = bestSpotFor(r) + (pt && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
+                    const rv = bestSpotFor(r) + ((pt || AIX.p(me, 'nextAll', 0)) && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
                     if (rv < stay + (pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
                     spots.forEach(s => {
                         const opts = [];
@@ -19101,7 +19103,7 @@
                         opts.forEach(([kind, p]) => {
                             const pe = rr ? 1 - Math.pow(1 - p, 2) * 0.9 : p;          // a team re-roll softens a miss
                             const passer = agileTeam(me) || hasSk(c, 'Pass') || (c.pa != null && c.pa <= 3);   // a team that can throw
-                            if (pe < (kind === 'handoff' ? 0.7 : passer ? (agileTeam(me) ? 0.55 : 0.62) - (pt ? 0.06 : 0) : 0.8)) return;
+                            if (pe < (kind === 'handoff' ? 0.7 : passer ? (agileTeam(me) ? 0.55 : 0.62) - (pt ? 0.06 : 0) - AIX.p(me, 'passEase', 0) : 0.8)) return;
                             const ev = pe * rv + (1 - pe) * (stay - 12);               // a dropped ball is a turnover
                             if (ev > stay + 1.2 && (!best || ev > best.ev)) best = { ev, kind, r, s };
                         });
@@ -19113,23 +19115,25 @@
                 if (hasSk(c, 'My Ball')) return null;
                 const receivers = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Ball'));
                 const runIn = new Map(receivers.map(r => [r.id, runInProb(r)]));
-                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob === 100)];
+                const minMove = AIX.p(me, 'passMove', 100), bar = AIX.p(me, 'scoreBar', null);   // (tuning) the carrier's move to the throw; the odds needed
+                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= minMove)];
                 let best = null;
                 receivers.forEach(r => {
                     const ri = runIn.get(r.id); if (ri <= 0) return;
                     spots.forEach(s => {
+                        const sp = s.prob / 100;   // a dodge or Rush on the way there
                         if (!state.handoffUsed && Math.max(Math.abs(s.x - r.x), Math.abs(s.y - r.y)) === 1) {
-                            const v = catchProb(r) * ri;
+                            const v = catchProb(r) * ri * sp;
                             if (!best || v > best.v) best = { v, kind: 'handoff', r, s };
                         }
                         if (!state.passUsed && c.pa != null) {
-                            const v = passOdds(c, s.x, s.y, r) * ri * 0.97;
+                            const v = passOdds(c, s.x, s.y, r) * ri * 0.97 * sp;
                             if (!best || v > best.v) best = { v, kind: 'pass', r, s };
                         }
                     });
                 });
                 if (!best) return null;
-                return best.v >= (lastTurn ? 0.08 : best.kind === 'handoff' ? 0.45 : 0.4) ? best : null;
+                return best.v >= (lastTurn ? 0.08 : bar != null ? bar : best.kind === 'handoff' ? 0.45 : 0.4) ? best : null;
             }
             // how many of our players should be busy with their ball carrier (more as they near our end zone)
             function huntNeed(c) { return toGo(c.x, c.team) <= 4 ? 5 : 4; }
@@ -19198,6 +19202,29 @@
 
             // ---- formation squares: cage, screen, markers, deep safety ----
             const inPitch = (x, y) => x >= 0 && x < CFG.cols && y >= 0 && y < CFG.rows;
+            // (flank) with the ball, a couple of quick players work down the wings into the space behind their line (level with
+            // the deepest but one of their players, or the end-zone corners if they've dropped deep): somewhere to pass or hand off to,
+            // and two more threats the defence has to cover instead of crowding the ball
+            function flankSquares(me, k) {
+                if (k <= 0) return [];
+                const fwd = me === TEAMS.HUMAN ? 1 : -1, ez = endX(me), past = AIX.p(me, 'flankPast', 0);
+                const opp = state.players.filter(q => q.team !== me && onPitch(q) && !q.isDown).map(q => toGo(q.x, me)).sort((a, b) => a - b);
+                const line = opp.length > 1 ? opp[1] : CFG.cols;   // squares to go of their second-deepest player
+                const depth = Math.max(1, line - past);
+                const out = [];
+                [[1, 2, 3], [CFG.rows - 2, CFG.rows - 3, CFG.rows - 4]].forEach(rows => {
+                    let best = null;
+                    rows.forEach(y => { for (let d = depth - 2; d <= depth + 2; d++) {
+                        if (d < 0) continue;
+                        const x = ez - d * fwd;
+                        if (!inPitch(x, y) || getPlayer(x, y) || tzFor(x, y, me) > 0) continue;
+                        const s = -Math.abs(d - depth) * 0.5 - Math.min(4, reachers(x, y, me)) * 0.8 - (y === 1 || y === CFG.rows - 2 ? 0.4 : 0);
+                        if (!best || s > best.s) best = { x, y, s };
+                    } });
+                    if (best) out.push(best);
+                });
+                return out.sort((a, b) => b.s - a.s).slice(0, k);
+            }
             function formationTargets(me, cageOnly) {
                 const T = [], c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                 const add = (x, y, role) => {
@@ -19219,6 +19246,7 @@
                         // a loose escort behind the carrier and runners in the open spaces ahead, ready for a pass or hand-off
                         [[-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
                         if (cageOnly) return T;
+                        if (AIX.on(me, 'flank')) flankSquares(me, AIX.p(me, 'flankN', 2)).forEach(o => add(o.x, o.y, 'flank'));
                         outletSquares(me, 1, toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 9).forEach(o => add(o.x, o.y, 'runner'));
                         [[5, 0], [4, -4], [4, 4], [6, -2], [6, 2]].forEach(([dx, dy]) => add(a.x + dx * fwd, Math.max(1, Math.min(CFG.rows - 2, a.y + dy)), 'runner'));
                         return T;
@@ -19226,6 +19254,7 @@
                     if (a !== c) [[1, 1], [1, -1]].forEach(([dx, dy]) => add(c.x + dx * fwd, c.y + dy, 'cage'));   // two stay with the carrier as an escort
                     [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
                     if (cageOnly) return T;
+                    if (AIX.on(me, 'flank')) flankSquares(me, AIX.p(me, 'flankN', 2)).forEach(o => add(o.x, o.y, 'flank'));
                     [0, -3, 3].forEach(dy => add(a.x + 3 * fwd, a.y + dy, 'front'));
                     outletSquares(me, Math.max(1, toGo(a.x, me) - 8), toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 7).slice(0, 2).forEach(o => add(o.x, o.y, 'runner'));
                 } else if (c && onPitch(c)) {
@@ -19262,7 +19291,7 @@
             }
             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
-            const CAPS = { cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, ballguard: 3, outlet: 2 };
+            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, ballguard: 3, outlet: 2 };
             // formation squares already given to someone this turn: a player sent towards a square they can't reach yet
             // (it's still empty when the next player is chosen) mustn't have everyone else sent after them
             let claims = { key: '', m: new Map() };
@@ -19301,20 +19330,21 @@
                         // how close they can really get this turn (a straight-line distance can hide a wall of opponents)
                         let got = cheb(p, t);
                         if (got > 0 && got <= 14) movesFor(p).forEach(m => { if (m.prob >= okProb(p)) got = Math.min(got, Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y))); });
-                        const d = got * 3 + cheb(p, t) * 0.2 - (t.role === 'runner' ? (p.ma - 6) * 0.7 : 0);   // send the quick players into space
+                        const d = got * 3 + cheb(p, t) * 0.2 - (t.role === 'runner' ? (p.ma - 6) * 0.7 : 0)   // send the quick players into space
+                            - (t.role === 'flank' ? (p.ma - 6) * 1 + (hasSk(p, 'Catch') ? 1 : 0) - (isBigGuy(p) ? 6 : 0) : 0);   // quick ones down the wings
                         if (d < bd) { bd = d; best = p; } });
                     if (!best) break;
                     if (window.AI_DEBUG) window.AI_DEBUG.push(`${t.role}@${t.x},${t.y} <- ${best.type}@${best.x},${best.y} (${bd.toFixed(1)})`);
                     taken.add(best.id); used.set(t.role, (used.get(t.role) || 0) + 1); claims.m.set(ck, best.id);
                     const tx = t.x, ty = t.y, role = t.role;
                     const pick = (ms, p) => {
-                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' ? 1.5 : 0.5)) - 0.5;
+                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'flank' ? 1.5 : 0.5)) - 0.5;
                         ms.forEach(m => {
                             if (m.prob < (safeOnly ? 100 : okProb(p)) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
                             if (m.isRush && role !== 'hunt' && role !== 'mark' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
-                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' ? 1.5 : 0.5)) + (100 - m.prob) / 10
+                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' ? 1.5 : 0.5)) + (100 - m.prob) / 10
                                 + edgeRisk(m.x, m.y, p.team, p.id) * (role === 'hunt' ? 1.5 : 3)   // keep off the sidelines
-                                + (['runner', 'outlet', 'deep'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
+                                + (['runner', 'outlet', 'deep', 'flank'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
                             if (s < bs) { bs = s; bm = m; }
                         });
                         return bm;

@@ -122,3 +122,12 @@ cage in midfield, stalling, fouling last, re-rolls for what matters). It also al
 - The passing play only when behind with 3 turns left (`latepass-experiment.patch`): came back 2 times in 14, against
   4 in 18 without; passes barely rose. Overall 48-42.
 - A safety kept well behind the ball while attacking: 41-43, 16-17. Neutral.
+
+## Flank runners (v3.10)
+The owner's idea: get a couple of players round the sides, behind the opposing team. Before, a team holding the ball had
+someone in behind on a flank (wide rows, past all but one opponent) 21% of its turns, two players 4%. The `flank` role
+sends two quick players to unmarked wide squares level with the opponents' second-deepest player (33% / 13% after).
+Sweep: two players level with the line and one player one square past both led by 14 touchdowns over 48 matches;
+three squares past was level. Released with two players, level (`flankN` 2, `flankPast` 0): +19 touchdowns, 37-23 wins
+over 96 matches including 48 on teams not used in the sweep.
+Also checked this session: no move ever crossed a loose ball's square (forced pickups); pickups fail 16%, hand-off catches 11%.
