@@ -2,6 +2,12 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.13 (16 Oct 2026)
+- **Improved:** dropped connections in two-device play ([#18](https://github.com/sirspoon/BludBowl/issues/18)).
+  - **Host:** when the other player drops, the banner says the game is waiting for them to reconnect. If it's been their move for 20 seconds, a panel gives the code to rejoin with and offers Keep waiting or Computer takes over. It asks again every couple of minutes, and goes away when they're back. It no longer uses the game's question panel, so a question the other player still has to answer isn't lost.
+  - **Joining player:** after 10 minutes of trying to reach the host, the game stops and offers Try again or Leave the match, instead of trying forever.
+  - **Host's page closed during the inducements:** Two Devices now offers to reopen the same room. The other player's device rejoins it, and both go back to the lobby to start again.
+
 ## v3.12 (16 Oct 2026)
 - **Added:** the two-device lobby has the same match settings as an exhibition. The host picks the **game** (11 a side or Sevens), the **pitch** and the **inducements**, and the other player sees what's been chosen. For Sevens, both players pick from their saved Sevens teams (or a standard Sevens squad). ([#18](https://github.com/sirspoon/BludBowl/issues/18))
 
