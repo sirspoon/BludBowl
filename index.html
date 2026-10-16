@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.16</title>
+    <title>BludBowl 3.17</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.16</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.17</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9653,7 +9653,7 @@
   const ROOTS = [33, 29, 36, 31];
   const LEAD2 = [[[81,0,1],[84,1,1],[88,2,1.5],[84,3.5,.5]],[[84,0,1.5],[80,1.5,.5],[77,2,2]],[[87,0,1],[84,1,1],[79,2,1],[84,3,1]],[[86,0,1],[82,1,1],[79,2,.5],[82,2.5,.5],[86,3,1]]];
   const LEAD = [[[76,0,1.5],[81,1.5,1.5],[79,3,1]],[[80,0,1.5],[77,1.5,1.5],[72,3,1]],[[79,0,1.5],[75,1.5,.5],[84,2,2]],[[82,0,1],[79,1,1],[74,2,2]]];
-  const LEVEL = { calm: .6, lull: .6, breakdown: .78, main: 1, stab: 1, drive: 1.02, chorus: 1.12 };
+  const LEVEL = { calm: 1.1, lull: .6, breakdown: .78, main: 1, stab: 1, drive: 1.02, chorus: 1.12 };
   const LABEL = { calm: 'Calm', lull: 'Quiet beat', breakdown: 'Breakdown', main: 'Main groove', stab: 'Stab hook', drive: 'Half-time drive', chorus: 'Chorus' };
   function elBar(kind, i, t, s, B, tense, fillNext, ph) {
     const r = ROOTS[i], q = s / 4, quiet = kind === 'calm' || kind === 'lull';
@@ -9804,6 +9804,71 @@
     if (i === 0 && (kind === 'chorus' || kind === 'drive')) crash(B.main, t, 0.14);
     if (fillNext) for (let k = 0; k < 12; k++) harp(B, r + 36 + [0, 2, 4, 7, 9, 12][k % 6] + (k >= 6 ? 12 : 0), t + 3 * s + k * s / 12, 0.04 + k * 0.003);
   }
+  // ---------- GRAVEYARD (the Graveyard pitch): the same sections, played on a pipe organ, with a deep beat, a tolling bell, a ghostly
+  // choir and a theremin. In D minor (D minor, B-flat, G minor, A major - the A major chord's C-sharp is the spooky turn), around 104 bpm.
+  const GY_ROOTS = [38, 34, 31, 33], GY_THIRD = [3, 4, 3, 4];
+  const GY_LEAD = [[[74,0,1.5],[77,1.5,.5],[81,2,2]],[[82,0,1],[81,1,1],[77,2,2]],[[79,0,1.5],[82,1.5,.5],[86,2,2]],[[85,0,1],[81,1,1],[76,2,1],[73,3,1]]];
+  const GY_TOCC = [[81,0,.25],[79,.25,.25],[81,.5,1.25],[79,2,.25],[77,2.25,.25],[76,2.5,.25],[74,2.75,.25],[73,3,.5],[74,3.5,.5]];   // after Bach's Toccata in D minor
+  const GY_BOX = [0, 7, 12, 15, 19, 15, 12, 7];   // the music box's little tune over each chord
+  const GY_BPM = { calm: 92, normal: 104, tense: 118 };
+  // a pipe organ: each note sounds on three stops (8', 4' and a quiet 16'), a little out of tune with each other, into a big church
+  const organ = (B, ms, t, dur, v, o = {}) => ms.forEach(m => {
+    [[0, 1, 'square'], [12, 0.5, 'sine'], [-12, o.pedal ? 0.8 : 0.35, 'sine'], [19, 0.18, 'sine']].forEach(([x, k, ty], j) =>
+      note(o.bus || B.sc, ty, m + x, t, dur, v * k, { det: j % 2 ? 4 : -4, a: o.a ?? 0.04, r: o.r ?? 0.25, cut: ty === 'square' ? (o.cut || 1700) : null, verb: o.verb ?? 0.7 }));
+  });
+  // a church bell: a low hum, the strike tone and a cluster of out-of-tune partials, ringing for a long time
+  const bellToll = (B, m, t, v) => [[0.5, 1, 4], [1, 0.8, 3], [1.19, 0.5, 2.2], [1.56, 0.35, 1.8], [2, 0.4, 1.5], [2.51, 0.22, 1.1], [3.01, 0.15, 0.8]].forEach(([r, k, d]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = hz(m) * r;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v * k, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(B.pad); const s = ctx.createGain(); s.gain.value = 0.8; g.connect(s); s.connect(verbIn); o.start(t); o.stop(t + d + 0.05);
+  });
+  // a theremin: a pure tone sliding between notes, with a wide, slow wobble
+  const theremin = (B, m, t, dur, v, from) => note(B.main, 'sine', m, t, dur, v, { a: 0.08, r: 0.3, vib: 28, vibDelay: 0.12, slideFrom: from, slideTime: 0.12, verb: 0.9 });
+  const choir = (B, rt, third, t, dur, v) => [0, third, 7, 12].forEach((x, j) => { note(B.pad, 'sawtooth', rt + 24 + x, t, dur, v, { a: 1.2, r: 1, det: j % 2 ? 9 : -9, cut: 900, q: 3, vib: 8, vibDelay: 0.4, verb: 1 }); });
+  const musicBox = (B, m, t, v) => { note(B.pad, 'sine', m, t, 0.7, v, { a: 0.002, r: 0.6, sus: 0.2, verb: 0.6 }); note(B.pad, 'sine', m + 24, t, 0.25, v * 0.35, { a: 0.001, r: 0.2, verb: 0.4 }); };
+  const heartbeat = (B, t, s, v) => { kick(B.main, t, v); kick(B.main, t + s * 0.36, v * 0.7); };
+  const clockTick = (B, t, v) => { nz(B.main, t, 0.025, v, 'highpass', 6000, null, 2); note(B.main, 'sine', 96, t, 0.03, v * 0.5, { a: 0.001, r: 0.02 }); };
+  const bones = (B, t, v) => { for (let k = 0; k < 3; k++) nz(B.main, t + k * 0.022 + Math.random() * 0.008, 0.03, v * (1 - k * 0.25), 'bandpass', 2600 + Math.random() * 1400, null, 4, 0.15); };
+  const wind = (B, t, dur, v) => nz(B.pad, t, dur, v, 'bandpass', 380 + Math.random() * 200, 900 + Math.random() * 500, 3, 0.6);
+  const bigSnare = (B, t, v) => { snare(B.main, t, v, 0.45); nz(B.main, t, 0.4, v * 0.35, 'bandpass', 1200, 500, 0.5, 0.6); };
+  function gyBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    const r = GY_ROOTS[i], th = GY_THIRD[i], q = s / 4, quiet = kind === 'calm' || kind === 'lull';
+    const chord = [r + 24, r + 24 + th, r + 31];
+    // the beat
+    if (kind === 'calm') heartbeat(B, t, s, 0.38);
+    else if (kind === 'lull') { heartbeat(B, t, s, 0.45); heartbeat(B, t + 2 * s, s, 0.4); }
+    else if (kind === 'drive') { [0, 2.5].forEach(b => kick(B.main, t + b * s, 1)); bigSnare(B, t + 2 * s, 0.7); }
+    else if (kind !== 'breakdown') {
+      [0, 1.5, 2, 3.5].forEach((b, j) => { if (j === 3 && !tense && i % 2 === 0) return; kick(B.main, t + b * s, j % 2 ? 0.7 : 0.95); dip(B.sc, t + b * s, 0.45, s * 0.5); });
+      [1, 3].forEach(b => bigSnare(B, t + b * s, 0.55));
+    }
+    // the ticking clock (and rattling bones on the off-beats when it's busy)
+    if (kind !== 'breakdown') for (let k = 0; k < 8; k++) { if (kind === 'calm' && k % 2) continue; clockTick(B, t + k * s / 2, (k % 2 ? 0.07 : 0.11) * (quiet ? 0.7 : 1)); }
+    if (kind === 'main' || kind === 'chorus' || kind === 'stab' || kind === 'drive') for (let k = 0; k < 16; k++) if (k % 4 === 3 || (tense && k % 4 === 1)) bones(B, t + k * q, 0.07);
+    // the bass: a deep pulse on the root
+    if (kind === 'drive') for (let k = 0; k < 8; k++) note(B.sc, 'sawtooth', r, t + k * s / 2, s * 0.42, 0.16, { cut: 520, cutTo: 160, q: 6, drive: 3, a: 0.004, r: 0.05 });
+    else if (!quiet && kind !== 'breakdown') [0, 1.5, 2, 3, 3.5].forEach((b, j) => note(B.sc, 'sine', r + (j === 4 ? 12 : 0), t + b * s, s * (j === 2 ? 0.9 : 0.4), 0.22, { a: 0.005, r: 0.08 }));
+    // the organ: held chords (swelling in when it's quiet), stabs in the hook, pedal notes pulsing in the drive
+    if (kind === 'stab') { [0, 0.75, 1.5, 2.5, 3.25].forEach(b => organ(B, chord, t + b * s, s * 0.35, 0.024, { a: 0.01, r: 0.1, cut: 2600 }));
+      if (i % 2 === 0) GY_TOCC.forEach(([m, b, d]) => organ(B, [m - 12], t + b * s, d * s * 0.95, 0.03, { a: 0.008, r: 0.08, bus: B.main, cut: 3200 })); }
+    else if (kind === 'drive') for (let k = 0; k < 4; k++) organ(B, [r + 12], t + k * s, s * 0.8, 0.05, { pedal: true, a: 0.01, r: 0.15, cut: 900 });
+    else organ(B, chord, t, s * 4, kind === 'breakdown' ? 0.03 : quiet ? 0.016 : 0.02, { a: quiet || kind === 'breakdown' ? 1.2 : 0.06, r: 0.6, cut: kind === 'breakdown' ? 2200 : 1500 });
+    if (kind === 'main' && i % 2 === 1) organ(B, [r + 36 + th, r + 43], t + 2.5 * s, s * 1.4, 0.016, { a: 0.03, cut: 2400 });
+    // the music box when it's quiet (and over the main groove's last bar)
+    if (quiet || (kind === 'main' && i === 3)) for (let k = 0; k < 8; k += kind === 'calm' ? 2 : 1) musicBox(B, r + 48 + GY_BOX[k] - (GY_BOX[k] === 15 && th === 4 ? 1 : 0), t + k * s / 2, quiet ? 0.035 : 0.025);
+    // the choir: swelling through the breakdown and under the chorus
+    if (kind === 'breakdown' || kind === 'chorus') choir(B, r, th, t, s * 4, kind === 'breakdown' ? 0.02 : 0.012);
+    // the theremin: the tune in the chorus (an octave up the second time round), long wailing notes in the breakdown
+    if (kind === 'chorus') GY_LEAD[i].forEach(([m, b, d], j, a) => theremin(B, m + (ph >= 4 ? 12 : 0), t + b * s, d * s * 0.97, 0.07, j ? a[j - 1][0] + (ph >= 4 ? 12 : 0) : null));
+    if (kind === 'breakdown' && i % 2 === 0) theremin(B, [86, 82][i / 2], t + 0.5 * s, s * 3.2, 0.055, [81, 79][i / 2]);
+    // wind through the graves when it's quiet
+    if (quiet || kind === 'breakdown') if (i % 2 === 0) wind(B, t, s * 4, 0.05);
+    // accents and transitions: the bell tolls at the top of the chorus and the drive (and once at the start of a calm spell),
+    // a rising wind and a tom roll into the next section
+    if (i === 0 && (kind === 'chorus' || kind === 'drive' || (kind === 'calm' && prevKind !== 'calm'))) bellToll(B, 50, t, kind === 'calm' ? 0.08 : 0.11);
+    if (kind === 'breakdown' && i === 3) nz(B.pad, t, s * 4, 0.07, 'bandpass', 300, 2600, 1.2, 0.5);
+    if (fillNext) for (let k = 0; k < 8; k++) tom(B.main, t + 3 * s + k * s / 8, 43 - (k >> 1) * 2, 0.22 + k * 0.05, 0.35);
+  }
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -9826,8 +9891,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far };
   }
-  // which music: the pitch's own style if it has one (jungle, elven), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 } };   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM } };   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -9873,12 +9938,15 @@
     const now = ctx.currentTime; duckG.gain.cancelScheduledValues(now); duckG.gain.setTargetAtTime(0.0001, now, 0.03);
     clearTimeout(pauseTimer);
     setTimeout(() => { try { if (run) ctx.suspend(); } catch (e) {} }, 140);
-    pauseTimer = setTimeout(() => { try { ctx.resume(); const t = ctx.currentTime; duckG.gain.cancelScheduledValues(t); duckG.gain.setTargetAtTime(1, t, 0.3); duckUntil = 0; } catch (e) {} }, Math.max(300, ms));
+    pauseTimer = setTimeout(() => { pauseTimer = null; try { ctx.resume(); const t = ctx.currentTime; duckG.gain.cancelScheduledValues(t); duckG.gain.setTargetAtTime(1, t, 0.3); duckUntil = 0; } catch (e) {} }, Math.max(300, ms));
   }
   function setEnabled(v) { enabled = !!v; try { localStorage.setItem('bb-music-off', enabled ? '0' : '1'); } catch (e) {} sync(); }
   function matchStart() { matchOn = true; sync(); }
   function matchEnd() { matchOn = false; sync(); }
   document.addEventListener('visibilitychange', () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (run) ctx.resume(); });
+  // a match resumed when the page loads (or joined from another device) starts the music before anyone has tapped, and the browser
+  // holds the sound back until a tap: wake it then (not while it's frozen for a big sound effect)
+  document.addEventListener('pointerdown', () => { try { if (ctx && run && ctx.state === 'suspended' && !document.hidden && !pauseTimer) ctx.resume(); } catch (e) {} }, true);
   return { start, stop, sync, setMood, duck, pause, setEnabled, isEnabled: () => enabled, matchStart, matchEnd, state: () => run && { mood, style: run.style, kind: run.el.cur, next: run.el.next, bar: run.el.bar, bpm: Math.round(run.el.bpm) },
            _force: k => { if (run) run.el.next = k; } };   // (tests: play a given section next)
         })();

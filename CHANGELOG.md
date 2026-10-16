@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.17 (16 Oct 2026)
+- **Added:** the Graveyard pitch has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): haunting pipe organ in D minor over a deep beat, with a ticking clock, rattling bones, a tolling church bell, a ghostly choir and a theremin carrying the tune. Like the Jungle and Elven music, it changes section as the match goes on, and speeds up when the game gets tense.
+- **Fixed:** the music was very quiet at the start of a match. During the line-up, set-up and kick-off it plays its calm section, which was only about a quarter as loud as the main beat; it's now about twice as loud. Also, a match resumed after reloading the page, or joined from another device, could start with no music at all until the screen was switched away and back; it now starts at the first tap.
+
 ## v3.16 (16 Oct 2026)
 - **Fixed:** two ways a match could get stuck, both found in computer-vs-computer testing.
   - **Bombs:** a bomb in flight only landed when the pitch was redrawn. In a background tab, or while a missed bomb scattered three times (about 2 seconds), the freeze safety net could hand control back with the bomb still in the air. Bombs now always land, and the safety net waits for them. Over 40 test matches with bomb and Frenzy teams, stuck games went from 3 to none.
