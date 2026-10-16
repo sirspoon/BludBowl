@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.14</title>
+    <title>BludBowl 3.15</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.14</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.15</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -2254,9 +2254,13 @@
             // three team-mates have gained one, it drops to the back for everyone else.
             const BIG_POS = /Ogre|Troll|Treeman|Minotaur|Kroxigor|Mummy|spawn|Yhetee|Tomb Guardian|Vargheist|Deathroller|Wagon/i;
             const LINE_POS = /Lineman|Linemen|Retainer|Clanrat|Marauder|Rotter|Squire|Hopeful|Thrall/;
+            function aiLine(race, p) {   // a lineman (not a big guy)
+                const nm = String(((types(race) || {})[p.pos] || {}).type || p.pos || ''), st = (eff(race, p) || {}).st || 0;
+                return !(st >= 5 || BIG_POS.test(nm)) && LINE_POS.test(nm);
+            }
             function aiPicks(race, p, team) {
                 const t = (types(race) || {})[p.pos] || {}, nm = String(t.type || p.pos || ''), e = eff(race, p) || {}, st = e.st || 0, have = e.skills || [];
-                const line = !(st >= 5 || BIG_POS.test(nm)) && LINE_POS.test(nm);
+                const line = aiLine(race, p);
                 const head = st >= 5 || BIG_POS.test(nm) ? ['Block', 'Mighty Blow', 'Guard']
                     : /Catcher|Runner|Thrower|Gutter|Eagle/.test(nm) ? ['Block', 'Sure Hands', 'Dodge']
                     : line ? ['Wrestle', 'Tackle'] : [];
@@ -2394,6 +2398,20 @@
                 for (let guard = 0; guard < 6 && p.advs.length < 6; guard++) {
                     let pick = null, kind = null;
                     const order = aiPicks(race, p, team), avail = c => order.map(s => c.find(x => x.skill === s)).filter(Boolean);
+                    // about a third of a lineman's advancements are random primary skills (cheaper in SPP, and more variety):
+                    // roll two on one of their primary tables (General if they have it) and keep the better one
+                    const id = String(p.id || p.name || '').split('').reduce((h, c) => h + c.charCodeAt(0), 0);
+                    if (aiLine(race, p) && (id + p.advs.length * 7) % 3 === 0) {
+                        if (p.spp < costOf(p, 'rp')) break;
+                        const cats = [...access(race, p.pos)[0]].filter(g => SKILLS[g] && SKILLS[g].some(sk => PLAYABLE.has(sk) && !hasSkill(eff(race, p).skills, sk)));
+                        const grp = cats.includes('G') ? 'G' : cats[Math.floor(Math.random() * cats.length)];
+                        const a = grp && rollSkill(race, p, grp), b = a && rollSkill(race, p, grp, a);
+                        if (a) {
+                            const rank = x => order.includes(x) ? order.indexOf(x) : x === 'Block' || x === 'Wrestle' ? 200 : 99;   // (left out of order: overlaps a skill they have)
+                            const sk = !b || rank(a) <= rank(b) ? a : b;
+                            spend(p, 'rp', { skill: sk, kind: 'P', grp, random: true }); out.push(sk); continue;
+                        }
+                    }
                     // a big guy's first choice is usually Block, even as a secondary skill (it's rarely primary for them)
                     // (three in four of them save their SPP for it rather than take a primary skill first)
                     if (order[0] === 'Block' && !skillChoices(race, p, 'P').some(x => x.skill === 'Block') && skillChoices(race, p, 'S').some(x => x.skill === 'Block')

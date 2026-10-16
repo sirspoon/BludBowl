@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.15 (16 Oct 2026)
+- **Changed:** the computer's linemen sometimes level up with a random skill ([#19](https://github.com/sirspoon/BludBowl/issues/19)). About a third of their advancements are now random primary skills, which cost fewer SPP. Like a coach, the computer rolls two skills (from General if the lineman has it) and keeps the more useful one, so its teams end up with more varied, less predictable skills.
+
 ## v3.14 (16 Oct 2026)
 - **Changed:** the computer's league teams pick level-up skills more like a real coach ([#19](https://github.com/sirspoon/BludBowl/issues/19)).
   - **No doubling up:** a player with Block doesn't take Wrestle, and the other way round, since they do much the same job.

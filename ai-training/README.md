@@ -185,4 +185,6 @@ So in leagues the computer now picks by position (`aiPicks` in `CAREER`): big gu
 secondary skill), then Mighty Blow, Guard; catchers, runners and throwers Block, Sure Hands, Dodge; linemen Wrestle,
 Tackle; everyone else the old `AI_PICKS` order. Since v3.14: no Block with Wrestle (they overlap); the Elite skills
 (Block, Dodge, Guard, Mighty Blow, +10k value each) come last for linemen and once three team-mates have gained one;
-and `aiChoose` takes the 1st/2nd/3rd available choice 60/25/15% of the time, so teams differ.
+and `aiChoose` takes the 1st/2nd/3rd available choice 60/25/15% of the time, so teams differ. Since v3.15 about a
+third of a lineman's advancements are random primary skills (two rolled, the better kept; fixed per player and
+advancement, so it doesn't get a fresh chance after every match).
