@@ -287,3 +287,22 @@ one costing `rushFail` 2 + 1 per team-mate still to act; a second chance to blit
 for blitzing (`blitzMin` 1.5). Rushes only rose from 3.1 to 3.6 a match (coaches 9), blitzes from 8 to 10.5 in a 30-match
 stats run, but over 48 matches against v3.16: 41-43 touchdowns, 15-14 wins, casualties 47-59, blocks level. The
 formation-only version swept over 5 settings (16 matches each) was 59-74 in all. Not released.
+
+## Pick-ups (Oct 2026)
+`pickups.js` (36 mirror matches on v3.16, about 3.5 pick-ups per team per match; note the roll is set up just before the
+player steps onto the ball, so measure at the ball's square):
+
+| Pick-up | Tries | Failed | Opponents next to the ball |
+|---|---|---|---|
+| 2+ (nearly all Secure the Ball) | 91 | 1% | 0 |
+| 3+ | 94-102 | 13-16% | 0.1 |
+| 4+ | 42-54 | 24-41% | 0.9 |
+| 5+ | 14-15 | 33-64% | 1.7 |
+
+- Secure the Ball (2+, allowed in the game when no standing opponent is within 2 squares, once a turn, not for big
+  guys) is already used about 2 times a match and almost never fails (1 in 67). It was allowed but not used for about
+  15 Agility 3 pick-ups without Sure Hands in 36 matches; using it there would save roughly one turnover in 15 matches.
+  With Sure Hands an ordinary 3+ pick-up (89%) beats it (83%) and the player can carry on moving.
+- The losses are the 4+ and 5+ pick-ups next to opponents (about 0.45 turnovers a team a match), where Secure the Ball
+  isn't allowed. A team-mate with an easier roll was almost never available; a marker could have been blocked first in
+  about 1 in 4 (the `loose` switch already clears markers first when it can, under 75%).
