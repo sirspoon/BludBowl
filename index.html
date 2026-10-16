@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.17</title>
+    <title>BludBowl 3.18</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.17</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.18</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9869,6 +9869,99 @@
     if (kind === 'breakdown' && i === 3) nz(B.pad, t, s * 4, 0.07, 'bandpass', 300, 2600, 1.2, 0.5);
     if (fillNext) for (let k = 0; k < 8; k++) tom(B.main, t + 3 * s + k * s / 8, 43 - (k >> 1) * 2, 0.22 + k * 0.05, 0.35);
   }
+  // ---------- CAVERN (the Mossy Flagstones pitch, home of the underground teams): the same sections, deep in a cave - frame drums,
+  // an anvil, stones and gravel, a kalimba, an earth drone, a chanting choir and a low horn, all echoing off the walls. In E Phrygian
+  // (E minor, C, D, F major - the F is the old, earthy flattened second), around 92 bpm.
+  const CV_ROOTS = [40, 36, 38, 41], CV_THIRD = [3, 4, 4, 4];
+  const CV_KAL = [0, 7, 12, 7, 15, 12, 7, 3];   // the kalimba's ostinato over each chord
+  const CV_LEAD = [[[76,0,1.5],[77,1.5,.5],[79,2,2]],[[76,0,1],[72,1,1],[71,2,2]],[[74,0,1.5],[72,1.5,.5],[71,2,2]],[[72,0,1],[71,1,1],[69,2,1],[71,3,1]]];
+  const CV_BPM = { calm: 80, normal: 92, tense: 106 };
+  // the cave: a long, dark reverb and an echo that repeats in time with the music (made once per run, on the run's buses)
+  function caveOf(B, s) {
+    if (B.cave) return B.cave;
+    const inp = ctx.createGain(), dl = ctx.createDelay(2), fb = ctx.createGain(), lp = ctx.createBiquadFilter(), hp = ctx.createBiquadFilter(), ret = ctx.createGain();
+    dl.delayTime.value = Math.min(1.9, s * 0.75); fb.gain.value = 0.42; lp.type = 'lowpass'; lp.frequency.value = 1700; hp.type = 'highpass'; hp.frequency.value = 160; ret.gain.value = 0.55;
+    inp.connect(dl); dl.connect(lp); lp.connect(hp); hp.connect(fb); fb.connect(dl); hp.connect(ret); ret.connect(B.bus);
+    const vb = ctx.createConvolver(), len = Math.floor(ctx.sampleRate * 3.6), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); let lpv = 0; for (let i = 0; i < len; i++) { lpv += ((Math.random() * 2 - 1) - lpv) * 0.18; d[i] = lpv * 2.2 * Math.pow(1 - i / len, 1.8); } }   // a darker, longer tail than the stadium's
+    vb.buffer = ir; const vg = ctx.createGain(); vg.gain.value = 0.5; inp.connect(vb); vb.connect(vg); vg.connect(B.bus); hp.connect(vb);
+    B.cave = inp; return inp;
+  }
+  const toCave = (B, node, amt) => { const g = ctx.createGain(); g.gain.value = amt; node.connect(g); g.connect(B.cave); };
+  // pitched voices routed into the cave as well
+  const cnote = (B, bus, type, m, t, dur, vol, o, cave) => {
+    const osc = ctx.createOscillator(), g = ctx.createGain(); osc.type = type; osc.frequency.setValueAtTime(hz(m), t); if (o.det) osc.detune.value = o.det;
+    if (o.slideFrom) { osc.frequency.setValueAtTime(hz(o.slideFrom), t); osc.frequency.exponentialRampToValueAtTime(hz(m), t + (o.slideTime || 0.08)); }
+    let node = osc; if (o.cut) { const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = o.q || 0.8; f.frequency.setValueAtTime(o.cut, t); if (o.cutTo) f.frequency.exponentialRampToValueAtTime(o.cutTo, t + dur); node.connect(f); node = f; }
+    const a = o.a ?? 0.01, r = o.r ?? 0.08;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + a); g.gain.setValueAtTime(vol * (o.sus ?? 1), t + Math.max(a, dur - r)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.02);
+    node.connect(g); g.connect(bus); if (cave) toCave(B, g, cave);
+    if (o.vib) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = o.vibRate || 5; lg.gain.value = o.vib; l.connect(lg); lg.connect(osc.detune); l.start(t); l.stop(t + dur + 0.1); }
+    osc.start(t); osc.stop(t + dur + 0.1);
+  };
+  const cnz = (B, bus, t, dur, vol, ftype, f0, f1, q, cave) => {
+    const sN = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter(); sN.buffer = noiseBuf(); sN.loop = true;
+    f.type = ftype; f.Q.value = q; f.frequency.setValueAtTime(f0, t); if (f1) f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); sN.connect(f); f.connect(g); g.connect(bus); if (cave) toCave(B, g, cave);
+    sN.start(t, Math.random()); sN.stop(t + dur + 0.05);
+  };
+  // a big frame drum: a deep thud with a skin buzz, booming round the cave
+  const frameDrum = (B, t, v, m = 36) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(hz(m) * 1.6, t); o.frequency.exponentialRampToValueAtTime(hz(m), t + 0.1);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6); o.connect(g); g.connect(B.main); toCave(B, g, 0.35); o.start(t); o.stop(t + 0.65);
+    cnz(B, B.main, t, 0.06, v * 0.35, 'lowpass', 900, 300, 0.7, 0.3); };
+  // hammer on an anvil: a bright metallic ring of out-of-tune partials, dying away down the tunnels
+  const anvil = (B, t, v) => { [[1, 1, 0.5], [2.76, 0.6, 0.35], [5.4, 0.4, 0.25], [8.93, 0.25, 0.15]].forEach(([r, k, d]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = 620 * r;
+    g.gain.setValueAtTime(v * k, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(B.main); toCave(B, g, 0.5); o.start(t); o.stop(t + d + 0.05); });
+    cnz(B, B.main, t, 0.03, v * 0.8, 'highpass', 3000, null, 0.7, 0.3); };
+  const stone = (B, t, v) => cnz(B, B.main, t, 0.035, v, 'bandpass', 700 + Math.random() * 300, null, 3, 0.45);   // two stones knocked together
+  const gravel = (B, t, v) => cnz(B, B.main, t, 0.06, v, 'bandpass', 3600 + Math.random() * 900, 2400, 1.2, 0.15);
+  const drip = (B, t, v) => { const m = 84 + Math.floor(Math.random() * 8); cnote(B, B.pad, 'sine', m, t, 0.07, v, { a: 0.002, r: 0.05, slideFrom: m - 7, slideTime: 0.025 }, 0.9); };
+  const kalimba = (B, m, t, v) => { cnote(B, B.main, 'sine', m, t, 0.9, v, { a: 0.002, r: 0.8, sus: 0.25 }, 0.5); cnote(B, B.main, 'sine', m + 31, t, 0.12, v * 0.25, { a: 0.001, r: 0.1 }, 0.2); };
+  const drone = (B, rt, t, dur, v) => [0, 7, 12].forEach((x, j) => cnote(B, B.sc, 'sawtooth', rt - 12 + x, t, dur, v * (j ? 0.6 : 1), { det: j % 2 ? 6 : -6, a: 0.8, r: 0.6, cut: 260, cutTo: 420, vib: 4, vibRate: 0.3 }, 0.25));
+  const chant = (B, rt, third, t, dur, v) => [0, 7, 12, 12 + third].forEach((x, j) => cnote(B, B.pad, 'sawtooth', rt + x, t, dur, v, { det: j % 2 ? 8 : -8, a: 0.7, r: 0.6, cut: 700, q: 4, vib: 7, vibRate: 4.6 }, 0.45));   // deep male voices on "ohh"
+  const caveHorn = (B, m, t, dur, v) => [-7, 7].forEach(d => cnote(B, B.main, 'sawtooth', m, t, dur, v, { det: d, a: 0.09, r: 0.25, cut: 900, cutTo: 600, q: 1.5, vib: 6, vibRate: 4.8 }, 0.55));
+  const ocarina = (B, m, t, dur, v) => cnote(B, B.main, 'triangle', m, t, dur, v, { a: 0.05, r: 0.2, vib: 10, vibRate: 5.2, cut: 2200 }, 0.6);
+  const rumble = (B, t, dur, v) => cnz(B, B.pad, t, dur, v, 'lowpass', 140, 60, 0.7, 0.3);
+  const rockfall = (B, t, s) => { rumble(B, t, s * 1.6, 0.25); for (let k = 0; k < 9; k++) stone(B, t + Math.random() * s * 0.9, 0.12 + Math.random() * 0.1); };
+  function cvBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    caveOf(B, s);
+    const r = CV_ROOTS[i], th = CV_THIRD[i], q = s / 4, quiet = kind === 'calm' || kind === 'lull';
+    // the beat: the frame drum, the anvil on the backbeat, stones and gravel
+    if (kind === 'calm') { if (i % 2 === 0) frameDrum(B, t, 0.45); }
+    else if (kind === 'lull') [0, 2.5].forEach(b => frameDrum(B, t + b * s, 0.5));
+    else if (kind === 'drive') { for (let k = 0; k < 8; k++) tom(B.main, t + k * s / 2, k % 2 ? 40 : 36, 0.4 + (k % 4 === 0 ? 0.15 : 0), 0.4); [0, 2].forEach(b => frameDrum(B, t + b * s, 0.9, 33)); }
+    else if (kind !== 'breakdown') {
+      [0, 0.75, 2, 2.5].forEach((b, j) => { if (j === 1 && i % 2) return; frameDrum(B, t + b * s, j % 2 ? 0.6 : 0.9); dip(B.sc, t + b * s, 0.55, s * 0.5); });
+      [1, 3].forEach(b => anvil(B, t + b * s, 0.07));
+    }
+    if (kind === 'stab') { [0.5, 1, 1.25, 2.5, 3, 3.25].forEach(b => anvil(B, t + b * s, 0.06)); }   // the forge: hammer, hammer-hammer
+    if (kind !== 'breakdown' && kind !== 'calm') for (let k = 0; k < 16; k++) { if (kind === 'lull' && k % 4 !== 2) continue; if (k % 4 === 1 || k % 4 === 3) gravel(B, t + k * q + (k % 2 ? q * 0.1 : 0), (tense ? 0.09 : 0.065)); else if (k % 4 === 2) stone(B, t + k * q, 0.12); }
+    // the bass: plucked, deep and round
+    if (kind === 'drive') for (let k = 0; k < 8; k++) cnote(B, B.sc, 'sawtooth', r - 12, t + k * s / 2, s * 0.42, 0.14, { cut: 480, cutTo: 160, q: 6, a: 0.004, r: 0.05 }, 0.1);
+    else if (!quiet && kind !== 'breakdown') [0, 0.75, 2, 2.5, 3.5].forEach((b, j) => cnote(B, B.sc, 'triangle', r - 12 + (j === 4 ? 12 : 0), t + b * s, s * 0.45, 0.26, { a: 0.003, r: 0.2 }, 0.1));
+    // the earth drone underneath everything but the drive
+    if (kind !== 'drive') drone(B, r, t, s * 4, kind === 'breakdown' ? 0.04 : quiet ? 0.022 : 0.016);
+    // the kalimba: its ostinato in the grooves, sparser when it's quiet
+    if (kind === 'main' || kind === 'chorus' || kind === 'lull' || kind === 'calm' || kind === 'stab') for (let k = 0; k < 8; k += kind === 'calm' ? 2 : 1) {
+      if (kind === 'stab' && k % 2) continue;
+      kalimba(B, r + 24 + CV_KAL[k] - (CV_KAL[k] === 15 && th === 4 ? 1 : 0) + (CV_KAL[k] === 3 && th === 4 ? 1 : 0), t + k * s / 2, (quiet ? 0.06 : 0.05) * (k % 4 === 0 ? 1.2 : 1));
+    }
+    // the low horn: short stabs in the hook, a held call at the top of the chorus
+    if (kind === 'stab') [0, 1.5, 3].forEach(b => caveHorn(B, r + 12, t + b * s, s * 0.4, 0.035));
+    if (kind === 'chorus' && i % 2 === 0) caveHorn(B, r + 12, t, s * 1.6, 0.03);
+    // the chanting choir: through the breakdown, under the chorus, and on the beat in the drive
+    if (kind === 'breakdown' || kind === 'chorus') chant(B, r, th, t, s * 4, kind === 'breakdown' ? 0.03 : 0.014);
+    if (kind === 'drive') [0, 2].forEach(b => chant(B, r, th, t + b * s, s * 0.8, 0.02));
+    // the tune: an ocarina in the chorus (an octave up the second time round), the horn's long notes in the breakdown
+    if (kind === 'chorus') CV_LEAD[i].forEach(([m, b, d]) => ocarina(B, m + (ph >= 4 ? 12 : 0), t + b * s, d * s * 0.95, 0.06));
+    if (kind === 'breakdown' && i % 2 === 0) caveHorn(B, [64, 62][i / 2], t + 0.5 * s, s * 3, 0.03);
+    // the cave itself: water dripping, and the rock groaning when it's quiet
+    if (quiet || kind === 'breakdown') { const n = kind === 'calm' ? 3 : 2; for (let k = 0; k < n; k++) if (Math.random() < 0.8) drip(B, t + Math.random() * s * 4, 0.05); if (i === 1) rumble(B, t, s * 3, 0.12); }
+    else if (Math.random() < 0.35) drip(B, t + Math.random() * s * 4, 0.035);
+    // accents and transitions: a deep boom at the top of the chorus and the drive, a rockfall into the next section
+    if (i === 0 && (kind === 'chorus' || kind === 'drive')) { frameDrum(B, t, 1, 28); rumble(B, t, s * 2, 0.22); }
+    if (fillNext) rockfall(B, t + 3 * s, s);
+  }
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -9891,8 +9984,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM } };   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM } };   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
