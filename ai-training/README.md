@@ -51,6 +51,30 @@ with players who could still block?), fix it behind an `AIX` switch, and test it
 - Passes aren't comparable: FUMBBL counts completions, `bb-stats.js` counts accurate pass rolls.
 - A good coach rating isn't perfect play; it's a yardstick, not a target to copy exactly.
 
+## Progress check: v3.16 (Oct 2026)
+The same 180 matches (`data/bludbowl-v3.16.jsonl.gz`), per team per match:
+
+| | FUMBBL top coaches | v3.04 | v3.16 |
+|---|---|---|---|
+| Touchdowns | 1.08 | 0.74 | **0.88** |
+| Casualties caused | 2.39 | 1.37 | 1.45 |
+| Blocks thrown | 46.2 | 23.8 | 25.4 |
+| 1-die blocks | 5.05 | 0.97 | 1.14 |
+| Dodges tried (at 4+ or harder) | 13.7 (1.42) | 10.5 (0.23) | 10.3 (0.23) |
+| Rushes tried | 9.0 | 5.5 | **3.1** |
+| Team re-rolls used | 4.67 | 2.63 | 3.21 |
+| Turnovers | 5.25 | 4.04 | 3.57 |
+| Passes (accurate) | 0.40 | 0.06 | 0.12 |
+| Pick-up turnovers (incl. Secure the Ball) | about 0.47 | 0.76 | 0.80 |
+
+- Touchdowns closed about 40% of the gap (0.74 to 0.88), turnovers fell 12% and re-rolls rose 22%: it plays safer
+  and smarter, not bolder. Blocks, hard dodges and casualties barely moved.
+- Rushes fell from 5.5 to 3.1 a match (good coaches 9.0), mostly since v3.05 (nobody rushes just to reach a formation
+  square). Trips while rushing fell from 0.48 to 0.19 turnovers a match. Coaches rush to reach blocks, blitzes and the
+  carrier's support; the AI now almost never does. The biggest single gap left in how it plays.
+- Pick-ups are now its third biggest cause of turnovers (22%; good coaches 9%): about 0.8 a match against 0.47. A 4+
+  pick-up fails a third of the time (83 of 248); it picks up more often than before (1268 tries v 1175).
+
 ## How to re-run
 
 ```
