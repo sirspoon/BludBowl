@@ -217,5 +217,10 @@ moves with no dice. Tried (`defence-screen.patch`, every change behind `plug2` /
 - Screen shape (`scrMax`, `scrFrac`, `scr2Gap`, `deepDz`), 16 mirror matches each: screen up to 6 squares ahead 10-16,
   further out too 11-17, second line 3 back 15-14, a deep safety from 3 squares out 15-15, all three 15-10. The
   combination over 112 matches: 98-86 touchdowns, 37-33 wins - too close to call.
-Next idea: the leak starts a turn or two earlier, so judge the screen by the carrier's chance over two turns, or keep
-one or two players goal-side of every opponent who could receive a hand-off.
+- Two turns ahead (`plugTwo`, `twoW`; now in the same patch): plugs also count the squares the carrier could reach this
+  turn from which it could score next turn (each worth `twoW` 0.5 x how close it is, divided by 1 + our players who
+  could get there), with candidate squares out to twice its reach. 22-23 over 24 matches against v3.15, and matches ran
+  three times slower. Leaky turns (carrier 60%+ to run it in) with both sides on it: 29 (23 scored) against 23 (19)
+  with the old defence over 24 matches each. No better.
+So a better plug alone doesn't stop the leaks; their blockers knock screeners over before the carrier runs, which none
+of these measures see. Still untried: keeping one or two players goal-side of every opponent who could take a hand-off.

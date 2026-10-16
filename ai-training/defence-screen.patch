@@ -1,5 +1,5 @@
 diff --git a/index.html b/index.html
-index be8cdca..5775d7f 100644
+index be8cdca..f8b2c65 100644
 --- a/index.html
 +++ b/index.html
 @@ -18737,7 +18737,7 @@
@@ -11,18 +11,25 @@ index be8cdca..5775d7f 100644
          const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
              // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
              p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
-@@ -18977,9 +18977,22 @@
+@@ -18977,9 +18977,29 @@
                  finally { c.remainingMA = ma; c.rushes = ru; c.hasActed = ha; }
                  return { go, area, run: g0 - go };
              }
 +            // their carrier's chance of scoring next turn by running it in, dodges and Rushes included, if nobody else moved
 +            // (a team re-roll, if they have one, is counted as saving one failed roll)
-+            function scoreChance(c, raw) {   // raw: without the re-roll
++            // two: also count the squares it could reach this turn from which it could score next turn (worth less the more of
++            // our players could get to it in between), so a screen is judged a turn ahead
++            function scoreChance(c, raw, two) {   // raw: without the re-roll
 +                if (!c || !onPitch(c) || c.isStunned) return 0;
 +                const sv = { ma: c.remainingMA, ru: c.rushes, ha: c.hasActed, dn: c.isDown, us: c.usedSkills, at: c.actionTaken };
 +                c.remainingMA = c.isDown ? Math.max(0, c.ma - 3) : c.ma; c.rushes = 2; c.hasActed = false; c.isDown = false; c.usedSkills = []; c.actionTaken = null;
 +                let p = 0;
-+                try { getValidMoves0(c).forEach(m => { if (m.x === endX(c.team) && m.prob / 100 > p) p = m.prob / 100; }); }
++                const ez = endX(c.team), w = two ? AIX.p(c.team === 0 ? 1 : 0, 'twoW', 0.5) : 0, near = (c.ma || 6) + 2;
++                try { getValidMoves0(c).forEach(m => {
++                    let v = m.prob / 100;
++                    if (m.x !== ez) { const g = two ? toGo(m.x, c.team) : 99; v = g <= near ? v * w * (1 - g / (near + 2)) / (1 + reachers(m.x, m.y, c.team)) : 0; }
++                    if (v > p) p = v;
++                }); }
 +                finally { c.remainingMA = sv.ma; c.rushes = sv.ru; c.hasActed = sv.ha; c.isDown = sv.dn; c.usedSkills = sv.us; c.actionTaken = sv.at; }
 +                return !raw && (state.rr[c.team] || 0) > 0 ? p * (2 - p) : p;
 +            }
@@ -35,7 +42,7 @@ index be8cdca..5775d7f 100644
                  const base = threatOf(c);
                  if (base.run <= 2) return null;   // no real lane
                  let best = null;
-@@ -19000,6 +19013,52 @@
+@@ -19000,6 +19020,52 @@
                  const tx = best.m.x, ty = best.m.y;
                  return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
              }
@@ -44,9 +51,9 @@ index be8cdca..5775d7f 100644
 +            // cuts that chance most, so they build the screen together. risky: a Rush or a dodge to get there, when the
 +            // touchdown it stops is worth more than a failure (a Turnover, costing everyone still to act their go)
 +            function plugPlan2(me, act, c, risky) {
-+                const base = scoreChance(c);
++                const two = AIX.p(me, 'plugTwo', 1), base = scoreChance(c, false, two);
 +                if (base < AIX.p(me, 'plugMin', 0.1)) return risky ? null : undefined;   // (not near scoring: the free-run plug)
-+                const still = act.length - 1, g0 = toGo(c.x, c.team), reach = (c.ma || 6) + 3;
++                const still = act.length - 1, g0 = toGo(c.x, c.team), reach = ((c.ma || 6) + 2) * (two ? 2 : 1) + 1;
 +                const risk = (m, n) => (1 - m.prob / 100) * ((still - n) * AIX.p(me, 'plugTurn', 0.5) + 1);   // a failed Rush/dodge: a Turnover
 +                const cost = (p, m) => edgeRisk(m.x, m.y, me, p.id) * 1.5 + m.path.length * 0.03;
 +                const at = (list, f) => { const sv = list.map(([p]) => [p.x, p.y, p.isDown]); list.forEach(([p, m]) => { p.x = m.x; p.y = m.y; p.isDown = false; });
@@ -60,11 +67,12 @@ index be8cdca..5775d7f 100644
 +                    movesFor(p).forEach(m => {
 +                        if (m.prob < (risky ? AIX.p(me, 'plugProb', 45) : 100)) return;
 +                        if ((!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y) || cheb(m, c) > reach || toGo(m.x, c.team) > g0 + 1) return;
-+                        mine.push({ p, m, t: at([[p, m]], () => scoreChance(c, true)) });
++                        mine.push({ p, m, t: at([[p, m]], () => scoreChance(c, true, two)) });
 +                    });
 +                    mine.sort((a, b) => a.t - b.t || b.m.prob - a.m.prob);
 +                    cands.push(...mine.slice(0, 6));
 +                });
++                cands.sort((a, b) => a.t - b.t); cands.length = Math.min(cands.length, 24);   // (pairs from the most promising only)
 +                let best = null;
 +                const consider = (list, t) => {
 +                    if (risky && list.every(x => x.m.prob >= 100)) return;   // (all dice-free: the safe pass does it)
@@ -73,14 +81,13 @@ index be8cdca..5775d7f 100644
 +                    const sc = pm * gain * 10 - list.reduce((a, x, i) => a + risk(x.m, i) + cost(x.p, x.m), 0) - (list.length - 1) * 0.5;
 +                    if (sc >= 0.8 && (!best || sc > best.sc)) best = { sc, first: list.slice().sort((a, b) => b.m.prob - a.m.prob)[0] };   // the safer move first
 +                };
-+                cands.forEach(x => consider([x], at([[x.p, x.m]], () => scoreChance(c))));
++                cands.forEach(x => consider([x], at([[x.p, x.m]], () => scoreChance(c, false, two))));
 +                // ...and in pairs: one defender alone can often be dodged round, two together can close the gap
 +                for (let i = 0; i < cands.length; i++) for (let j = i + 1; j < cands.length; j++) {
 +                    const a = cands[i], b = cands[j];
 +                    if (a.p === b.p || cheb(a.m, b.m) === 0) continue;
-+                    consider([a, b], at([[a.p, a.m], [b.p, b.m]], () => scoreChance(c)));
++                    consider([a, b], at([[a.p, a.m], [b.p, b.m]], () => scoreChance(c, false, two)));
 +                }
-+                if (window.__pd) window.__pd.push({ risky: !!risky, base: +base.toFixed(2), n: act.length, cands: cands.length, best: best && +best.sc.toFixed(2) });
 +                if (!best) return risky ? null : undefined;
 +                const pid = best.first.p.id, tx = best.first.m.x, ty = best.first.m.y;
 +                return { pid, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && (risky || m.prob >= 100)) || null };
@@ -88,7 +95,7 @@ index be8cdca..5775d7f 100644
              // how much further the carrier could run if this opponent were knocked over
              let laneCache = null;
              function laneGain(c, d) {
-@@ -19349,9 +19408,9 @@
+@@ -19349,9 +19415,9 @@
                      // a column defence: two lines across the pitch between the carrier and our end zone, players three rows apart
                      // (two empty squares between them, so slipping through means a hard dodge), the second line staggered two
                      // squares further back. The lines lean towards the middle, squeezing the attack out towards the sideline.
@@ -100,7 +107,7 @@ index be8cdca..5775d7f 100644
                      // the screen runs right across the pitch (rows 1, 4, 7, 10, 13: every square of the column is in someone's
                      // tackle zone), nearest the carrier first, so nobody can run past it without a dodge
                      SCREEN_ROWS.slice().sort((a, b) => Math.abs(a - c.y) - Math.abs(b - c.y)).forEach(y => add(fx, y, 'screen'));
-@@ -19359,7 +19418,7 @@
+@@ -19359,7 +19425,7 @@
                      state.players.filter(q => q.team === c.team && q.id !== c.id && onPitch(q) && !q.isDown && !q.isStunned && toGo(q.x, c.team) < toGo(fx, c.team) && tzFor(q.x, q.y, c.team) === 0)
                          .sort((a, b) => toGo(a.x, c.team) - toGo(b.x, c.team)).forEach(q => add(q.x + back, q.y, 'mark'));
                      if (toGo(bx, c.team) >= 1 || bx === ownEZ) [-2, 2, -5, 5].forEach(dy => add(bx, cy + dy, 'screen2'));
@@ -109,7 +116,7 @@ index be8cdca..5775d7f 100644
                      // everyone else: find space up the pitch, ready for the counter-attack when the ball is won back
                      outletSquares(me).forEach(o => add(o.x, o.y, 'outlet'));
                  } else if (state.ball.x >= 0) {
-@@ -19931,6 +19990,8 @@
+@@ -19931,6 +19997,8 @@
                  // 5. blitz the opposing ball carrier
                  const cb = carrierBlitz(me, act, carrier);
                  if (cb) return blitzOn(cb.p, carrier.id);
@@ -118,7 +125,7 @@ index be8cdca..5775d7f 100644
  
                  // 5b. our carrier is marked: blitz a marker away rather than make the carrier dodge (a block can be
                  // re-rolled and doesn't put the ball on the floor)
-@@ -20663,7 +20724,7 @@
+@@ -20663,7 +20731,7 @@
                  debugPlug: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const t = c && threatOf(c); const pl = plugPlan(me, avail(me), c); return { t, pl: pl && pl.pid }; },
                  debugTtm: () => { const me = state.activeTeam, a = avail(me), pr = ttmPair(a); return { pair: pr && [pr.t.type, pr.g.type], plan: ttmEndPlan(me, a) }; },
                  // for the automated checks of each AI improvement
