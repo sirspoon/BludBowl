@@ -2,6 +2,12 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.14 (16 Oct 2026)
+- **Changed:** the computer's league teams pick level-up skills more like a real coach ([#19](https://github.com/sirspoon/BludBowl/issues/19)).
+  - **No doubling up:** a player with Block doesn't take Wrestle, and the other way round, since they do much the same job.
+  - **Elite skills:** Block, Dodge, Guard and Mighty Blow add 10k more to a player's value, so they now go mostly to positionals. Linemen take them only when nothing else useful is left. Once three players on a team have gained one, the rest of the team moves on to other skills.
+  - **Variety:** it doesn't always take its first choice, so its teams don't all end up the same. Most big guys save up for Block, and the rest take Guard or another primary skill.
+
 ## v3.13 (16 Oct 2026)
 - **Changed:** the computer's league teams now pick level-up skills to suit each position ([#19](https://github.com/sirspoon/BludBowl/issues/19)), using the skills it was found to play best with in test matches. Big guys take Block first (in tests it beat Guard 59 touchdowns to 36), catchers, runners and throwers take Block or Sure Hands, and linemen take Wrestle. Before, every player picked from the same list.
 
