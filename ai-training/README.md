@@ -224,3 +224,15 @@ moves with no dice. Tried (`defence-screen.patch`, every change behind `plug2` /
   with the old defence over 24 matches each. No better.
 So a better plug alone doesn't stop the leaks; their blockers knock screeners over before the carrier runs, which none
 of these measures see. Still untried: keeping one or two players goal-side of every opponent who could take a hand-off.
+
+## Turn order (Oct 2026, not released)
+`turnover-cost.js` (24 mirror matches on v3.15, 189 turnovers): at a turnover 4.5 players on average were still to act.
+- Safe blocks (under 5% risk) were almost never lost (4 in 189): the AI already throws them first.
+- The costliest turnovers were ball actions early in the turn: failed catches/passes (20, 7.6 players still to act
+  each, 73 of them free to move without dice) and failed pickups (24, about 7 each, 63 free). In attack, risky blocks
+  thrown before the carrier and cage had moved (19, 65 free movers lost). Dodges and Rushes came late (under 3 left).
+- `order` (`turn-order.patch`): before a pickup under 95%, up to three team-mates take the ball's diagonal squares
+  without dice (cage corners if it works, round the loose ball if not); with the ball, a risky block that doesn't help
+  the carrier waits until the carrier has moved and the cage is built. Pickup part alone: 52-51 over 72 matches. Both:
+  128-123 touchdowns, 46-47 wins over 144 matches; turnovers 7% down in the first 96, level in the last 48. Level.
+Hand-offs and passes weren't changed: the receiver runs on after the catch, so pre-placing a cage round them doesn't work.

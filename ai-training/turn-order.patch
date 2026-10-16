@@ -1,0 +1,80 @@
+diff --git a/index.html b/index.html
+index be8cdca..a0155cf 100644
+--- a/index.html
++++ b/index.html
+@@ -18737,7 +18737,7 @@
+ 
+         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
+         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
+-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
++        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2, order
+         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
+             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
+             p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
+@@ -19837,7 +19837,7 @@
+                     const freesC = ourC && cheb(d, ourC) === 1 ? 2 : 0;   // knocking a marker off our carrier
+                     const limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? 0.05 : 0.12) + (gain >= 3 || freesC ? 0.08 : 0);   // agile teams only take near-safe blocks
+                     const v = e.ev + laneValue(e, gain + freesC);
+-                    return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : 2.5), v, gain };
++                    return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : 2.5), v, gain, lane: gain > 0 || freesC > 0 };
+                 };
+                 // block candidates
+                 const blocks = [];
+@@ -19845,7 +19845,7 @@
+                     if (state.charge) return;
+                     adjacentTargets(p).forEach(d => {
+                         const e = blockEval(p, d), k = blockOK(p, d, e);
+-                        if (k.ok) blocks.push({ p, d, e, v: k.v });
++                        if (k.ok) blocks.push({ p, d, e, v: k.v, lane: k.lane });
+                     });
+                 });
+                 blocks.sort((a, b) => (a.e.pTurn < 0.05) !== (b.e.pTurn < 0.05) ? (a.e.pTurn < 0.05 ? -1 : 1) : (b.v - b.e.pTurn * 10) - (a.v - a.e.pTurn * 10));
+@@ -19925,6 +19925,23 @@
+                             if (bz) return blitzOn(bz.p, bz.t.id);
+                         }
+                     }
++                    // (order) before a pickup that might fail, team-mates who can get there without dice stand on the squares
++                    // diagonally next to the ball: the cage corners if it works (the carrier stays on the ball's square), round
++                    // the loose ball if it doesn't - instead of the Turnover leaving them where they started
++                    if (best && (best.pr >= 30 || lastTurn) && AIX.on(me, 'order') && best.pr < AIX.p(me, 'ordPick', 95) && !lastTurn) {
++                        const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([dx, dy]) => ({ x: bx + dx, y: by + dy })).filter(q => inPitch(q.x, q.y));
++                        const have = corners.filter(q => { const o = getPlayer(q.x, q.y); return o && o.team === me && !o.isDown; }).length;
++                        let g = null;
++                        if (have < AIX.p(me, 'ordGuards', 3)) act.forEach(p => {
++                            if (p.id === best.p.id || p.isDown || cheb(p, { x: bx, y: by }) === 1 || tzFor(p.x, p.y, me) > 0) return;
++                            movesFor(p).forEach(m => {
++                                if (m.prob < 100 || !corners.some(q => q.x === m.x && q.y === m.y) || m.path.some(st => st.x === bx && st.y === by)) return;
++                                const sc = m.path.length + tzFor(m.x, m.y, me) * 2 + edgeRisk(m.x, m.y, me, p.id) * 3;
++                                if (!g || sc < g.sc) g = { p, m, sc };
++                            });
++                        });
++                        if (g) { const tx = g.m.x, ty = g.m.y; return { pid: g.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
++                    }
+                     if (best && (best.pr >= 30 || lastTurn)) return { pid: best.p.id, kind: best.kind, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
+                 }
+ 
+@@ -19963,7 +19980,14 @@
+                 const ast = assistPlan(me, act, ourC, markersOf);
+                 if (ast) return ast;
+                 // 6. other good blocks, then a blitz that opens a lane for our carrier, then a blitz where it hurts
+-                if (blocks.length) return blockPlan(blocks[0]);
++                // (order) with the ball: a risky block that doesn't help the carrier waits until the carrier has moved and the
++                // cage is built (dice-free), so a Turnover doesn't leave them standing where they started
++                let blk = blocks;
++                if (AIX.on(me, 'order') && carrier && carrier.team === me && onPitch(carrier) && !state.charge) {
++                    const later = b => !b.lane && b.e.pTurn >= 0.05 && b.p.id !== carrier.id && cheb(b.d, carrier) > 1;
++                    if (blocks.some(later) && (act.includes(carrier) || formationPlan(me, act, true, false, true))) blk = blocks.filter(b => !later(b));
++                }
++                if (blk.length) return blockPlan(blk[0]);
+                 const lb = laneBlitz(me, act, ourC);
+                 if (lb) return lb;
+                 // a Gutter Runner's Stab: free damage with no risk of a Turnover
+@@ -20663,7 +20687,7 @@
+                 debugPlug: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const t = c && threatOf(c); const pl = plugPlan(me, avail(me), c); return { t, pl: pl && pl.pid }; },
+                 debugTtm: () => { const me = state.activeTeam, a = avail(me), pr = ttmPair(a); return { pair: pr && [pr.t.type, pr.g.type], plan: ttmEndPlan(me, a) }; },
+                 // for the automated checks of each AI improvement
+-                debugX: { choose: () => { moveMemo = new Map(); return choose(); }, rrWorth: (ctx, c, d) => rrWorth(ctx, c, d),
++                debugX: { choose: () => { moveMemo = new Map(); return choose(); }, blockEval: (a, d) => blockEval(a, d), rrWorth: (ctx, c, d) => rrWorth(ctx, c, d),
+                     carrierBlitz: () => { moveMemo = new Map(); const me = state.activeTeam, c = state.ball.carrierId && getPlayerById(state.ball.carrierId); const b = carrierBlitz(me, avail(me), c); return b && { pid: b.p.id, s: b.s }; },
+                     switchPlay: () => { moveMemo = new Map(); const c = getPlayerById(state.ball.carrierId); const sw = c && switchPlay(c, c.team); return sw && { kind: sw.kind, rid: sw.r.id }; },
+                     supportGoal: id => { const p = getPlayerById(id); return supportGoal(p, p.team); }, touchback: () => { const b = touchbackPick(); return b && b.type + '@' + b.x + ',' + b.y; } }
