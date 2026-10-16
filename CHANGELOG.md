@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.21 (16 Oct 2026)
+- **Added:** the Brimstone pitch has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): epic rock, with distorted guitars galloping and crashing out power chords, a rock kit with double kick drums, a bass guitar, war drums, low brass and a war horn, a deep choir chanting "Blood for the Blood God!", an anvil and bubbling lava.
+
 ## v3.20 (16 Oct 2026)
 - **Added:** a new pitch, **Brimstone**, the home ground of Khorne and the Chaos Renegades. It's cracked basalt columns with lava glowing up through the joints, pools of lava along the sidelines, skulls and bones, scorch marks and embers, with lines of pale ash. Behind the block clashes and replays stands its own scenery: smoking volcanoes, basalt spires and a brass throne on a pyramid of skulls under a red-black sky. It can also be picked from the Pitch menu.
 
