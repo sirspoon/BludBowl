@@ -4,6 +4,9 @@
 //   node tools/ai-match.js --pairs human:orc,dwarf:skaven --n 4
 //
 // --races  mirror matches (each race against itself); --pairs  fixed match-ups. --n matches per race or pair.
+// --dev  developed teams: every player gets a typical extra skill or two for their position, the same on both sides
+//        (big guys and ST4+: Guard/Block, blitzers: Tackle/Mighty Blow, catchers: Dodge/Catch or Sure Hands, throwers:
+//        Sure Hands/Accurate, linemen in turn Block/Guard/Wrestle/Tackle plus Dodge on agile teams) - roughly mid-season teams.
 // --newp '{"key":value}'  tuning values for the new side (the AIX.p settings in index.html), to try different tolerances.
 // --new / --old  which AI improvements (the AIX switches in index.html) each side has: 'all' (as in play), 'none',
 //                or a comma list. With the same setting on both sides it just plays matches (e.g. to read the stats).
@@ -14,7 +17,7 @@ let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { ({ chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright')); }
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const NEWP = JSON.parse(arg('newp', '{}')), N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
+const DEV = process.argv.includes('--dev'), NEWP = JSON.parse(arg('newp', '{}')), N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
 const jobs = [];
 (arg('races', '') ? arg('races').split(',') : []).forEach(r => { for (let i = 0; i < N; i++) jobs.push({ a: r, b: r, i }); });
 (arg('pairs', '') ? arg('pairs').split(',') : []).forEach(pr => { const [a, b] = pr.split(':'); for (let i = 0; i < N; i++) jobs.push({ a, b, i }); });
@@ -47,6 +50,19 @@ async function play(browser, port, job) {
   while (Date.now() - t0 < LIMIT) {
     await p.waitForTimeout(250);
     if (!clicked) clicked = await p.evaluate(() => { const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) { b.click(); return true; } return false; });
+    if (DEV) await p.evaluate(() => {
+      if (window.__dev || !state.players || !state.players.length) return; window.__dev = 1;
+      const add = (q, k) => { if (!q.skills.includes(k)) q.skills.push(k); };
+      [0, 1].forEach(t => state.players.filter(q => q.team === t).sort((a, b) => a.id - b.id).forEach((q, i) => {
+        const ty = q.type;
+        if (isBigGuy(q) || q.st >= 5) { add(q, 'Guard'); add(q, 'Block'); }
+        else if (q.st >= 4) { add(q, 'Guard'); if (i % 2) add(q, 'Mighty Blow'); }
+        else if (/Blitzer|Wardancer|Witch|Berserker|Bloodseeker|Werewolf/.test(ty)) { add(q, 'Tackle'); add(q, 'Mighty Blow'); }
+        else if (/Catcher|Runner|Gutter|Eagle|Lion/.test(ty)) { add(q, 'Dodge'); add(q, i % 2 ? 'Sure Hands' : 'Catch'); }
+        else if (/Thrower/.test(ty)) { add(q, 'Sure Hands'); add(q, 'Accurate'); }
+        else { add(q, ['Block', 'Guard', 'Wrestle', 'Tackle'][i % 4]); if (q.ag <= 2) add(q, 'Dodge'); }
+      }));
+    });
     res = await p.evaluate(() => ({ over: !!state.isGameOver, half: state.half, turn: [state.turn[0], state.turn[1]], score: [state.score[0], state.score[1]],
       cas: [0, 1].map(t => state.players.filter(q => q.team !== t && q.isCasualty).length), to: MATCH.data ? MATCH.data.turnovers.slice() : [0, 0], bl: MATCH.data ? MATCH.data.blocks.slice() : [0, 0], rr: MATCH.data ? MATCH.data.rerolls.slice() : [0, 0], cp: [0, 1].map(t => state.players.filter(q => q.team === t).reduce((a, q) => a + ((q.gStats || {}).cp || 0), 0)), ho: window.HO_COUNT || [0, 0], neg: window.NEG_COUNT || [0, 0], late: window.LATE || [null, null], skx: window.SKX || null }));
     if (res.over) break;

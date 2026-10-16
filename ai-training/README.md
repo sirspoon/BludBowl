@@ -154,3 +154,13 @@ Seen once in testing (recovered by the safety net): a bomb caught and re-thrown,
   Frenzy's forced second block as extra risk - Frenzy players then blocked far less (23.7 to 19.3 blocks a match) and lost
   37-51. The rest (Multiple Block, Pile Driver, Hit and Run) keep their fixed answers (declined); Dump-off is used when the
   receiver is unmarked, Stand Firm and Diving Tackle always.
+
+## Developed teams (`tools/ai-match.js --dev`)
+Starting rosters have few skills, so skill work barely shows in tests. `--dev` gives every player a typical extra skill or
+two for their position, the same on both sides (big guys and ST4+: Guard/Block; blitzers: Tackle/Mighty Blow; catchers:
+Dodge/Catch or Sure Hands; throwers: Sure Hands/Accurate; linemen in turn Block/Guard/Wrestle/Tackle, plus Dodge on agile
+teams). With it (48 matches each, against the AI without the change):
+- The v3.11/v3.12 skill awareness: 49-35 touchdowns, 21-10 wins (level on starting rosters for the same teams).
+- Assist setup (a spare player, Guards even when marked, steps in to make a 2-dice block): 34.6 v 30.5 blocks a match and
+  87-60 casualties, but 37-42 touchdowns, 14-21 wins. Not released (same as on starting rosters).
+- Block-order look-ahead: 47-40, 17-16. Not released.
