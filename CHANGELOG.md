@@ -2,8 +2,8 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
-## v3.1 (v3.01 to v3.38, 15–16 Oct 2026)
-Everything since v3.00, rolled into one update.
+## v3.1 (16 Oct 2026)
+Everything since v3.00 (the updates numbered v3.01 to v3.38), rolled into one update.
 
 **New pitches**
 - **Brimstone:** for Khorne, the Chaos Renegades and Chaos Chosen. Cracked basalt with lava glowing through the joints, lava pools, skulls and embers, with volcanoes and a brass throne on a pyramid of skulls behind the block clashes.
