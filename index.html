@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.23</title>
+    <title>BludBowl 3.24</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.23</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.24</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10148,6 +10148,73 @@
     if (i === 0 && (kind === 'chorus' || kind === 'drive' || kind === 'stab')) { crash(B.main, t, 0.3); khWarDrum(B, t, 0.8); }
     if (fillNext) for (let k = 0; k < 8; k++) tom(B.main, t + 3 * s + k * s / 8, 45 - (k >> 1) * 3, 0.35 + k * 0.05, 0.3);
   }
+  // ---------- WOODLAND (the Wood Elves and Gnomes): the same sections as a folk jig in the woods - a tin whistle, a fiddle, a lute,
+  // a bodhran, claps and stomps, a tambourine and a glockenspiel, with birdsong and a cuckoo. In G major (G, E minor, C, D), in a
+  // skipping 12/8 (each beat is three quick notes), around 100 beats a minute. Note times are in eighths of a bar of 12.
+  const WL_ROOTS = [43, 40, 36, 38], WL_THIRD = [4, 3, 4, 4];
+  const WL_JIG = [[74,71,67,71,74,79,78,74,71,74,72,71], [76,71,67,71,76,79,76,71,67,71,69,67], [76,72,67,72,76,79,76,72,69,72,71,69], [78,74,69,74,78,81,79,78,76,74,72,69]];   // the fiddle's jig, one note per eighth
+  const WL_AIR = [[[79,0,2],[81,2,1],[83,3,2],[79,5,1],[86,6,3],[83,9,2],[81,11,1]], [[83,0,2],[81,2,1],[79,3,2],[76,5,1],[79,6,3],[71,9,3]],
+                  [[76,0,2],[79,2,1],[84,3,2],[83,5,1],[81,6,2],[79,8,1],[76,9,3]], [[78,0,2],[79,2,1],[81,3,2],[83,5,1],[81,6,3],[74,9,3]]];   // the whistle's tune [note, eighth, eighths]
+  const WL_BPM = { calm: 72, normal: 100, tense: 116 };
+  // a tin whistle: a pure, breathy tone with a little chiff at the start, vibrato on long notes, and an optional flick of a grace note
+  const whistle = (B, m, t, dur, v, grace) => {
+    if (grace) note(B.main, 'sine', m + 2, t - 0.035, 0.035, v * 0.8, { a: 0.003, r: 0.01, verb: 0.4 });
+    note(B.main, 'sine', m, t, dur, v, { a: 0.02, r: 0.08, vib: dur > 0.4 ? 14 : 0, vibDelay: 0.18, verb: 0.45 });
+    note(B.main, 'triangle', m + 12, t, dur, v * 0.12, { a: 0.02, r: 0.08 });
+    nz(B.main, t, Math.min(0.06, dur), v * 0.6, 'bandpass', hz(m) * 2, null, 4); nz(B.pad, t, dur, v * 0.12, 'bandpass', hz(m), null, 6);
+  };
+  // a fiddle: a bowed saw through the violin body's resonances, with vibrato and a little bow noise
+  const fiddle = (B, m, t, dur, v, o = {}) => {
+    const os = ctx.createOscillator(), b1 = ctx.createBiquadFilter(), b2 = ctx.createBiquadFilter(), lp = ctx.createBiquadFilter(), g = ctx.createGain(); os.type = 'sawtooth'; os.frequency.value = hz(m);
+    b1.type = 'peaking'; b1.frequency.value = 560; b1.gain.value = 6; b1.Q.value = 1.2; b2.type = 'peaking'; b2.frequency.value = 2600; b2.gain.value = 5; b2.Q.value = 1.5; lp.type = 'lowpass'; lp.frequency.value = 4200;
+    if (dur > 0.3) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 6; lg.gain.value = 16; l.connect(lg); lg.connect(os.detune); l.start(t + 0.12); l.stop(t + dur + 0.1); }
+    const a = o.a ?? 0.03;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.setValueAtTime(v * 0.85, t + Math.max(a + 0.01, dur - 0.05)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.05);
+    os.connect(b1); b1.connect(b2); b2.connect(lp); lp.connect(g); g.connect(o.bus || B.main); const s2 = ctx.createGain(); s2.gain.value = 0.35; g.connect(s2); s2.connect(verbIn);
+    os.start(t); os.stop(t + dur + 0.1); nz(B.main, t, Math.min(0.05, dur), v * 0.25, 'bandpass', 3000, null, 1);
+  };
+  // a lute strum: the chord's strings plucked one after another, quickly
+  const lute = (B, ms, t, v, down = true) => (down ? ms : ms.slice().reverse()).forEach((m, k) => note(B.sc, 'triangle', m, t + k * 0.012, 0.5, v, { a: 0.002, r: 0.4, sus: 0.3, verb: 0.3 }));
+  const luteChord = (r, th) => [r + 12, r + 19, r + 24, r + 24 + th];
+  // a bodhran: a deep thump (or a light tap near the rim)
+  const bodhran = (B, t, v, rim) => { if (rim) { nz(B.main, t, 0.06, v, 'bandpass', 1300, 900, 1.5, 0.15); return; }
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(62, t + 0.08);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3); o.connect(g); g.connect(B.main); o.start(t); o.stop(t + 0.32); nz(B.main, t, 0.04, v * 0.4, 'lowpass', 700, 300); };
+  const tambo = (B, t, v) => nz(B.main, t, 0.12, v, 'highpass', 7000, null, 0.7, 0.1);
+  const stomp = (B, t, v) => { kick(B.main, t, v); nz(B.main, t, 0.08, v * 0.4, 'lowpass', 400); };
+  const glock = (B, m, t, v) => note(B.pad, 'sine', m, t, 0.9, v, { a: 0.001, r: 0.8, sus: 0.2, verb: 0.6 });
+  const cuckoo = (B, t, v) => { note(B.pad, 'sine', 76, t, 0.22, v, { a: 0.02, r: 0.12, verb: 0.8 }); note(B.pad, 'sine', 72, t + 0.3, 0.32, v, { a: 0.02, r: 0.2, verb: 0.8 }); };
+  function wlBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    const r = WL_ROOTS[i], th = WL_THIRD[i], e = s / 3, quiet = kind === 'calm' || kind === 'lull', ch = luteChord(r, th);
+    // the bodhran: DUM-da-da on each beat in the jig, rolling through every note in the drive
+    if (kind === 'lull') [0, 2].forEach(b => bodhran(B, t + b * s, 0.45));
+    else if (kind === 'drive') for (let k = 0; k < 12; k++) bodhran(B, t + k * e, k % 3 ? 0.3 : 0.6, k % 3 === 2);
+    else if (!quiet && kind !== 'breakdown') for (let k = 0; k < 12; k++) { if (k % 3 === 1 && !tense) continue; bodhran(B, t + k * e, k % 6 === 0 ? 0.65 : k % 3 === 0 ? 0.5 : 0.25, k % 3 === 2); }
+    // stomps and claps: the hook, and on the backbeat in the chorus
+    if (kind === 'stab') { [0, 1, 2, 3].forEach(b => stomp(B, t + b * s, 0.6)); [1, 3].forEach(b => { clap(B.main, t + b * s, 0.5); clap(B.main, t + b * s + 2 * e, 0.35); }); }
+    if (kind === 'chorus') [1, 3].forEach(b => clap(B.main, t + b * s, 0.4));
+    if (kind === 'chorus' || kind === 'drive' || (tense && kind === 'main')) for (let k = 0; k < 4; k++) tambo(B, t + k * s + 2 * e, 0.06);
+    // the lute: soft arpeggios when it's calm, strums on each beat otherwise (a chop on the off-beat in the jig)
+    if (kind === 'calm') for (let k = 0; k < 12; k += 3) note(B.sc, 'triangle', ch[(k / 3) % 4], t + k * e, 0.8, 0.07, { a: 0.002, r: 0.6, sus: 0.3, verb: 0.4 });
+    else if (kind !== 'breakdown') for (let b = 0; b < 4; b++) { lute(B, ch, t + b * s, quiet ? 0.04 : 0.05); if (!quiet && kind !== 'stab') lute(B, ch.slice(1), t + b * s + 2 * e, 0.03, false); }
+    // the bass: plucked on the first and third beats
+    if (!quiet && kind !== 'breakdown') [0, 2].forEach(b => note(B.sc, 'triangle', r - 12 + (b ? 7 : 0), t + b * s, s * 0.9, 0.18, { a: 0.003, r: 0.2 }));
+    // the fiddle: the jig in the groove and the drive, short stabs in the hook, a held drone in the breakdown
+    if (kind === 'main' || kind === 'drive') WL_JIG[i].forEach((m, k) => fiddle(B, m, t + k * e, e * 0.95, 0.03 * (k % 3 === 0 ? 1.15 : 1), { a: 0.012 }));
+    if (kind === 'stab') [0, 1.5, 2, 3.5].forEach(b => { fiddle(B, r + 24, t + b * s, e * 0.9, 0.035, { a: 0.008 }); fiddle(B, r + 31, t + b * s, e * 0.9, 0.025, { a: 0.008 }); });
+    if (kind === 'breakdown') { fiddle(B, r + 12, t, s * 4, 0.022, { a: 0.4 }); fiddle(B, r + 19, t, s * 4, 0.016, { a: 0.4 }); }
+    // the whistle: the tune in the chorus (the fiddle joins it a third below the second time), a slow air in the breakdown, a phrase when it's calm
+    if (kind === 'chorus') WL_AIR[i].forEach(([m, k, d], j) => { whistle(B, m, t + k * e, d * e * 0.96, 0.06, j % 3 === 0); if (ph >= 4) fiddle(B, m - (m % 12 === 7 || m % 12 === 0 || m % 12 === 2 ? 4 : 3), t + k * e, d * e * 0.96, 0.025); });
+    if (kind === 'breakdown') { const [m, k, d] = WL_AIR[i][0]; whistle(B, m, t + s, s * 2.6, 0.055, true); }
+    if (kind === 'calm' && i === 2) whistle(B, [79, 81, 83][ph % 3] || 79, t + s, s * 2, 0.04, true);
+    // the glockenspiel: a sparkle at the top of the chorus bars and running up into the next section
+    if (kind === 'chorus' && i % 2 === 0) [0, th, 7, 12].forEach((x, k) => glock(B, r + 48 + x, t + k * e, 0.03));
+    // the woods: birdsong and a cuckoo when it's quiet
+    if (quiet || kind === 'breakdown') { if (Math.random() < 0.7) bird(B, t + Math.random() * s * 3.5); if (Math.random() < 0.5) bird(B, t + Math.random() * s * 3.5); if (i === 1 && kind !== 'lull') cuckoo(B, t + s * 1.5, 0.04); }
+    // accents and transitions: a bodhran roll and a glockenspiel run into the next section
+    if (i === 0 && (kind === 'chorus' || kind === 'drive')) crash(B.main, t, 0.12);
+    if (fillNext) { for (let k = 0; k < 6; k++) bodhran(B, t + 3 * s + k * e / 2, 0.3 + k * 0.06); [0, 2, 4, 7, 9, 12].forEach((x, k) => glock(B, 79 + x, t + 3 * s + k * e / 2, 0.025)); }
+  }
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -10170,8 +10237,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 } };   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 } };   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -15067,7 +15134,7 @@
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'flagstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blades', khorne: 'brimstone', renegades: 'brimstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'flagstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blades', khorne: 'brimstone', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };

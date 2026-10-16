@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.24 (16 Oct 2026)
+- **Added:** the Woodland pitch has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): a folk jig with a tin whistle, a fiddle, a lute, a bodhrán, claps and stomps, a tambourine and a glockenspiel, with birdsong and a cuckoo.
+- **Changed:** more teams play on a home pitch that suits them: Necromantic Horror, Vampires and Tomb Kings on the Graveyard, Underworld Denizens on the Mossy Flagstones, and Chaos Chosen on Brimstone.
+
 ## v3.23 (16 Oct 2026)
 - **Changed:** the great oak behind the Woodland pitch looked like a face (two lit windows above a round door). The windows are gone, and the gnome's door now sits off to one side in a root, with a lantern glowing beside it.
 
