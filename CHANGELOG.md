@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.28 (16 Oct 2026)
+- **Added:** the Warped Flagstones have their own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): the cave music, with the Skaven all around it. Big rats squeal, hiss and snarl, teeth chatter and claws scurry over the stone, while warp-powered machinery hums, crackles and throws out zaps of warp-lightning, all echoing round the cave.
+
 ## v3.27 (16 Oct 2026)
 - **Changed:** the Warped Flagstones are a darker, muddier brown.
 

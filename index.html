@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.27</title>
+    <title>BludBowl 3.28</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.27</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.28</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10215,6 +10215,81 @@
     if (i === 0 && (kind === 'chorus' || kind === 'drive')) crash(B.main, t, 0.12);
     if (fillNext) { for (let k = 0; k < 6; k++) bodhran(B, t + 3 * s + k * e / 2, 0.3 + k * 0.06); [0, 2, 4, 7, 9, 12].forEach((x, k) => glock(B, 79 + x, t + 3 * s + k * e / 2, 0.025)); }
   }
+  // ---------- WARPED FLAGSTONES (the Skaven): the cave music, with the ratmen all around it - squeaks swooping up and down, chattering
+  // trills, claws scurrying over the stone and the odd fizz of warpstone, all echoing round the cave
+  // a big rat's squeal: low for a squeak and raspy - a buzzy tone through a nasal resonance, roughened by a fast flutter, with breath
+  // noise in it - rising and falling (sometimes twice, a wobbly squeal)
+  const squeak = (B, t, v, f0 = 900 + Math.random() * 1000, dur = 0.12 + Math.random() * 0.14) => {
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), bp = ctx.createBiquadFilter(), am = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain(), g = ctx.createGain();
+    o.type = 'sawtooth'; o2.type = 'square'; o2.detune.value = 18; bp.type = 'bandpass'; bp.frequency.value = f0 * 1.6; bp.Q.value = 2.2;
+    const wob = Math.random() < 0.4;
+    [o, o2].forEach(os => { os.frequency.setValueAtTime(f0 * 0.78, t); os.frequency.exponentialRampToValueAtTime(f0 * 1.15, t + dur * (wob ? 0.25 : 0.4));
+      if (wob) { os.frequency.exponentialRampToValueAtTime(f0 * 0.9, t + dur * 0.5); os.frequency.exponentialRampToValueAtTime(f0 * 1.1, t + dur * 0.7); } os.frequency.exponentialRampToValueAtTime(f0 * 0.7, t + dur); });
+    lfo.frequency.value = 55 + Math.random() * 35; lg.gain.value = 0.45; am.gain.value = 0.6; lfo.connect(lg); lg.connect(am.gain);   // the rasp
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.015); g.gain.setValueAtTime(v * 0.8, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(bp); o2.connect(bp); bp.connect(am); am.connect(g); g.connect(B.pad); toCave(B, g, 0.6);
+    [o, o2, lfo].forEach(n => { n.start(t); n.stop(t + dur + 0.03); });
+    cnz(B, B.pad, t, dur, v * 0.5, 'bandpass', f0 * 2.2, f0 * 1.6, 2, 0.4);   // breath in it
+  };
+  // chattering: teeth clattering fast, with a muttered squeal or two
+  const chatter = (B, t, v, n = 8 + Math.floor(Math.random() * 10)) => { const gap = 0.03 + Math.random() * 0.012;
+    for (let k = 0; k < n; k++) cnz(B, B.pad, t + k * gap + Math.random() * 0.006, 0.012, v * (0.7 + Math.random() * 0.5), 'bandpass', 1800 + Math.random() * 900, null, 2.5, 0.35);
+    if (Math.random() < 0.6) squeak(B, t + n * gap * 0.4, v * 0.8, 800 + Math.random() * 500, 0.1); };
+  // a hiss, and a snarl: a short, rough growl
+  const hiss = (B, t, v) => cnz(B, B.pad, t, 0.35 + Math.random() * 0.25, v, 'bandpass', 4200, 3000, 0.9, 0.4);
+  const snarl = (B, t, v) => { const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), am = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain(), g = ctx.createGain(), f = 95 + Math.random() * 50, d = 0.35 + Math.random() * 0.2;
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(f, t); o.frequency.linearRampToValueAtTime(f * 1.3, t + d * 0.3); o.frequency.linearRampToValueAtTime(f * 0.85, t + d);
+    lp.type = 'lowpass'; lp.frequency.value = 900; lp.Q.value = 3; lfo.frequency.value = 24 + Math.random() * 10; lg.gain.value = 0.5; am.gain.value = 0.5; lfo.connect(lg); lg.connect(am.gain);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(lp); lp.connect(am); am.connect(g); g.connect(B.pad); toCave(B, g, 0.5); [o, lfo].forEach(n => { n.start(t); n.stop(t + d + 0.03); }); cnz(B, B.pad, t, d, v * 0.4, 'bandpass', 700, 400, 1.2, 0.3); };
+  // claws scurrying over stone: a quick run of little scratches
+  const scurry = (B, t, v) => { const n = 8 + Math.floor(Math.random() * 8); for (let k = 0; k < n; k++) cnz(B, B.pad, t + k * (0.028 + Math.random() * 0.02), 0.015, v * (0.5 + Math.random() * 0.5), 'bandpass', 3500 + Math.random() * 3000, null, 3, 0.35); };
+  // a fizz of warpstone: a crackle of tiny sparks
+  const warpFizz = (B, t, v) => { for (let k = 0; k < 10; k++) cnz(B, B.pad, t + Math.random() * 0.4, 0.008 + Math.random() * 0.01, v * Math.random(), 'highpass', 6000, null, 0.7, 0.4); note(B.pad, 'sine', 30 + Math.floor(Math.random() * 3), t, 0.5, v * 0.5, { a: 0.05, r: 0.3, vib: 40, cut: 300 }); };
+  // warp-powered machinery: an electric hum (a mains buzz and its harmonics) that swells in and out, stuttering now and then, with
+  // crackles of sparks; and a zap - an arc of warp-lightning, a burst of buzz and a sweeping fizz
+  const warpHum = (B, t, dur, v) => {
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), fl = ctx.createGain(); o.type = 'sawtooth'; o2.type = 'square'; o.frequency.value = 55; o2.frequency.value = 110.4;
+    bp.type = 'bandpass'; bp.frequency.value = 340; bp.Q.value = 1.1; fl.gain.value = 1;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + dur * 0.35); g.gain.setValueAtTime(v, t + dur * 0.65); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    for (let k = 0; k < 3; k++) if (Math.random() < 0.6) { const at = t + dur * (0.3 + Math.random() * 0.5); fl.gain.setValueAtTime(1, at); fl.gain.setValueAtTime(0.15, at + 0.02); fl.gain.setValueAtTime(1, at + 0.06 + Math.random() * 0.06); }   // the stutter
+    o.connect(bp); o2.connect(bp); bp.connect(fl); fl.connect(g); g.connect(B.pad); toCave(B, g, 0.25); [o, o2].forEach(n => { n.start(t); n.stop(t + dur + 0.05); });
+    for (let k = 0; k < 6; k++) { const at = t + dur * (0.25 + Math.random() * 0.55); cnz(B, B.pad, at, 0.01 + Math.random() * 0.02, v * (1 + Math.random() * 2), 'highpass', 4000 + Math.random() * 3000, null, 0.8, 0.4); }   // crackles
+  };
+  const zap = (B, t, v) => {
+    const d = 0.18 + Math.random() * 0.2, o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'square';
+    for (let k = 0; k * 0.015 < d; k++) o.frequency.setValueAtTime(80 + Math.random() * 260, t + k * 0.015);   // a jittery buzz
+    g.gain.setValueAtTime(v * 1.2, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d); const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3600;
+    o.connect(lp); lp.connect(g); g.connect(B.pad); toCave(B, g, 0.4); o.start(t); o.stop(t + d + 0.02);
+    cnz(B, B.main, t, 0.02, v * 2.5, 'highpass', 1500, null, 0.7, 0.5);   // the crack as it strikes
+    cnz(B, B.pad, t, d, v * 1.6, 'bandpass', 6000, 1200, 1.5, 0.5);   // the fizz sweeping down
+    for (let k = 0; k < 5; k++) cnz(B, B.pad, t + Math.random() * d, 0.008, v * 1.5, 'highpass', 5000, null, 0.7, 0.3);
+  };
+  function wpBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    cvBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind);
+    const quiet = kind === 'calm' || kind === 'lull', rnd = () => t + Math.random() * s * 3.8;
+    if (quiet || kind === 'breakdown') {   // all around in the dark: squeaks, chatter and scurrying
+      for (let k = 0; k < 2; k++) if (Math.random() < 0.7) squeak(B, rnd(), 0.06);
+      if (Math.random() < 0.6) chatter(B, rnd(), 0.05);
+      if (Math.random() < 0.5) scurry(B, rnd(), 0.06);
+      if (Math.random() < 0.3) hiss(B, rnd(), 0.04);
+      if (Math.random() < 0.3) snarl(B, rnd(), 0.07);
+      if (i % 2 === 0) warpHum(B, t + Math.random() * s, s * (3 + Math.random() * 3), 0.1);   // the machinery humming somewhere in the dark
+      if (Math.random() < 0.35) zap(B, rnd(), 0.15);
+      if (Math.random() < 0.25) warpFizz(B, rnd(), 0.05);
+    } else if (kind === 'stab') {   // squeaks calling and answering on the hook
+      [1.5, 3.5].forEach((b, j) => { squeak(B, t + b * s, 0.07, j ? 1700 : 1200); squeak(B, t + b * s + 0.18, 0.06, j ? 1300 : 1500); });
+    } else if (kind === 'drive') {   // a frenzy of chattering
+      for (let b = 0; b < 4; b++) chatter(B, t + b * s + s * 0.5, 0.05, 5); if (Math.random() < 0.6) scurry(B, rnd(), 0.06); if (i % 2 === 0) snarl(B, t + s * 2, 0.07);
+      if (i === 0) warpHum(B, t, s * 8, 0.08);
+    } else {   // the grooves: chatter on the off-beat now and then, the odd squeak
+      if (Math.random() < 0.55) chatter(B, t + (1 + 2 * Math.floor(Math.random() * 2)) * s + s * 0.5, 0.045);
+      if (Math.random() < 0.5) squeak(B, rnd(), 0.05);
+      if (kind === 'chorus' && i === 0 && ph === 0) { warpFizz(B, t, 0.08); zap(B, t, 0.2); zap(B, t + 0.25, 0.16); }
+      else if (Math.random() < 0.3) zap(B, rnd(), 0.13);
+    }
+    if (fillNext && Math.random() < 0.7) scurry(B, t + 3 * s, 0.07);
+  }
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -10238,7 +10313,7 @@
     return { bus, main, pad, sc, far };
   }
   // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM } };   // (warped flagstones: the cave music, like the mossy flagstones)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM } };   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
