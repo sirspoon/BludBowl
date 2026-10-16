@@ -1,0 +1,62 @@
+diff --git a/index.html b/index.html
+index 0b2035b..a77e8d9 100644
+--- a/index.html
++++ b/index.html
+@@ -19211,19 +19211,40 @@
+                 const opp = state.players.filter(q => q.team !== me && onPitch(q) && !q.isDown).map(q => toGo(q.x, me)).sort((a, b) => a - b);
+                 const line = opp.length > 1 ? opp[1] : CFG.cols;   // squares to go of their second-deepest player
+                 const depth = Math.max(1, line - past);
+-                const out = [];
+-                [[1, 2, 3], [CFG.rows - 2, CFG.rows - 3, CFG.rows - 4]].forEach(rows => {
+-                    let best = null;
++                // (tuning) extra jobs for a flank player: near a fragile opponent to hit next turn, an assist on an opponent
++                // already locked up with one of ours, or standing between their players and our carrier's lane up the pitch
++                const wHunt = AIX.p(me, 'flankHunt', 0), wAssist = AIX.p(me, 'flankAssist', 0), wScreen = AIX.p(me, 'flankScreen', 0);
++                const foes = state.players.filter(q => q.team !== me && onPitch(q) && !q.isDown && !q.isStunned);
++                const weak = foes.filter(q => q.st <= 3 && q.av <= 8);
++                const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
++                const lane = c && c.team === me ? [2, 3, 4, 5, 6, 7].map(i => ({ x: c.x + i * fwd, y: c.y })).filter(l => inPitch(l.x, l.y)) : [];
++                const cands = [];
++                [[1, 2, 3], [CFG.rows - 2, CFG.rows - 3, CFG.rows - 4]].forEach((rows, side) => {
+                     rows.forEach(y => { for (let d = depth - 2; d <= depth + 2; d++) {
+                         if (d < 0) continue;
+                         const x = ez - d * fwd;
+-                        if (!inPitch(x, y) || getPlayer(x, y) || tzFor(x, y, me) > 0) continue;
+-                        const s = -Math.abs(d - depth) * 0.5 - Math.min(4, reachers(x, y, me)) * 0.8 - (y === 1 || y === CFG.rows - 2 ? 0.4 : 0);
+-                        if (!best || s > best.s) best = { x, y, s };
++                        if (!inPitch(x, y) || getPlayer(x, y)) continue;
++                        const tz = tzFor(x, y, me);
++                        let bonus = 0;
++                        if (tz > 0) {   // only for an assist: one marker, already busy with one of ours
++                            if (!wAssist || tz > 1) continue;
++                            const m = foes.find(q => cheb(q, { x, y }) === 1);
++                            if (!m || !state.players.some(o => o.team === me && onPitch(o) && !o.isDown && cheb(o, m) === 1)) continue;
++                            bonus += wAssist;
++                        }
++                        if (wHunt && weak.some(q => cheb(q, { x, y }) <= 2)) bonus += wHunt;
++                        if (wScreen && lane.length) bonus += wScreen * Math.min(2, foes.filter(q => { const l = lane.reduce((b, sq) => cheb(q, sq) < cheb(q, b) ? sq : b, lane[0]);
++                            return cheb(q, l) <= 7 && cheb(q, { x, y }) < cheb(q, l) && cheb({ x, y }, l) <= 3; }).length);
++                        cands.push({ x, y, side, s: -Math.abs(d - depth) * 0.5 - Math.min(4, reachers(x, y, me)) * 0.8 - (y === 1 || y === CFG.rows - 2 ? 0.4 : 0) + bonus });
+                     } });
+-                    if (best) out.push(best);
+                 });
+-                return out.sort((a, b) => b.s - a.s).slice(0, k);
++                // the best square on each wing first, then (for a third player) the next best anywhere, spread out
++                cands.sort((a, b) => b.s - a.s);
++                const out = [];
++                [0, 1].forEach(sd => { const b = cands.find(q => q.side === sd); if (b) out.push(b); });
++                out.sort((a, b) => b.s - a.s);
++                for (const q of cands) { if (out.length >= k) break; if (out.every(o => cheb(o, q) >= 3)) out.push(q); }
++                return out.slice(0, k);
+             }
+             function formationTargets(me, cageOnly) {
+                 const T = [], c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+@@ -19291,7 +19312,7 @@
+             }
+             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
+             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
+-            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, ballguard: 3, outlet: 2 };
++            const CAPS = { flank: 3, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, ballguard: 3, outlet: 2 };
+             // formation squares already given to someone this turn: a player sent towards a square they can't reach yet
+             // (it's still empty when the next player is chosen) mustn't have everyone else sent after them
+             let claims = { key: '', m: new Map() };

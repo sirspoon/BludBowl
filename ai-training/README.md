@@ -131,3 +131,8 @@ Sweep: two players level with the line and one player one square past both led b
 three squares past was level. Released with two players, level (`flankN` 2, `flankPast` 0): +19 touchdowns, 37-23 wins
 over 96 matches including 48 on teams not used in the sweep.
 Also checked this session: no move ever crossed a loose ball's square (forced pickups); pickups fail 16%, hand-off catches 11%.
+- Flank options tested against v3.10 (`flank-options.patch`; settings `flankN`, `flankHunt`, `flankAssist`, `flankScreen`),
+  16 mirror matches each: three runners -5, hunting fragile opponents (ST<=3, AV<=8) -7 (1-7: it runs them into contact),
+  assists from behind on an opponent already locked up with ours -2, screening the carrier's lane -4, hunt+screen -2.
+  All four together led by 11 over 48 matches (all of it on passing teams) but lost 40-46 on the 12 teams outside the
+  sweep (passing teams 3-7). None released: two plain runners in space stays best.
