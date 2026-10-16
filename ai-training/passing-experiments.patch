@@ -1,0 +1,211 @@
+diff --git a/index.html b/index.html
+index bcad88d..69da9a1 100644
+--- a/index.html
++++ b/index.html
+@@ -18682,8 +18682,10 @@
+ 
+         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
+         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
+-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn
+-        const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); } };
++        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, recv, passv, recvfirst
++        const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
++            // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
++            p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
+         const AI = (function () {
+             const on = { 0: false, 1: false };
+             try { const s = JSON.parse(localStorage.getItem('bb-ai') || '{}'); on[0] = !!s[0]; on[1] = !!s[1]; } catch (e) {}
+@@ -19083,16 +19085,30 @@
+                 return best;
+             }
+             // switch the play: hand off or pass to a team-mate in space who can take the ball further than the carrier can
++            // (passv) what holding the ball at (x, y) sets up for next turn: the free run from there, how few of their players
++            // can get at it, and our players beside it. A pass into open space then counts - forwards, or sideways to the
++            // empty side of the pitch when everyone is bunched on the other - not just the squares it gains.
++            function futureValue(p, x, y) {
++                const me = p.team;
++                return AIX.p(me, 'laneW', 0.6) * nextTurnLane(p, x, y) - AIX.p(me, 'reachW', 0.8) * Math.min(4, reachers(x, y, me))
++                    + AIX.p(me, 'supW', 0.3) * Math.min(2, allyAdj(x, y, me, p.id));
++            }
+             function switchPlay(c, me) {
+                 if (hasSk(c, 'My Ball') || (state.passUsed && state.handoffUsed)) return null;
+-                const stay = bestSpotFor(c);
++                const pv = AIX.on(me, 'passv'), failCost = AIX.p(me, 'failCost', 12);
++                let stay = bestSpotFor(c);
++                if (pv) {   // the carrier's own best: where they could walk it this turn, and what that sets up
++                    const opts = [{ x: c.x, y: c.y }, ...movesFor(c).filter(m => m.prob >= 100)].map(m => ({ m, v: ballSpotValue(me, m.x, m.y) }))
++                        .sort((a, b) => b.v - a.v).slice(0, 8);
++                    stay = Math.max(...opts.map(o => o.v + futureValue(c, o.m.x, o.m.y)));
++                }
+                 const rr = state.rr[me] > 0 && !state.teamRRUsedThisTurn;
+                 const receivers = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Hands') && !hasSk(r, 'No Ball'));
+                 const spots = [{ x: c.x, y: c.y }, ...movesFor(c).filter(m => m.prob >= 100)];
+                 let best = null;
+                 receivers.forEach(r => {
+                     const pt = AIX.on(me, 'pass') && passingTeam(me);
+-                    const rv = bestSpotFor(r) + (pt && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
++                    const rv = (pv ? Math.max(bestSpotFor(r), ballSpotValue(me, r.x, r.y)) + futureValue(r, r.x, r.y) : bestSpotFor(r)) + ((pt || AIX.p(me, 'nextAll', 0)) && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
+                     if (rv < stay + (pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
+                     spots.forEach(s => {
+                         const opts = [];
+@@ -19101,8 +19117,8 @@
+                         opts.forEach(([kind, p]) => {
+                             const pe = rr ? 1 - Math.pow(1 - p, 2) * 0.9 : p;          // a team re-roll softens a miss
+                             const passer = agileTeam(me) || hasSk(c, 'Pass') || (c.pa != null && c.pa <= 3);   // a team that can throw
+-                            if (pe < (kind === 'handoff' ? 0.7 : passer ? (agileTeam(me) ? 0.55 : 0.62) - (pt ? 0.06 : 0) : 0.8)) return;
+-                            const ev = pe * rv + (1 - pe) * (stay - 12);               // a dropped ball is a turnover
++                            if (pe < (kind === 'handoff' ? 0.7 : passer ? (agileTeam(me) ? 0.55 : 0.62) - (pt ? 0.06 : 0) - AIX.p(me, 'passEase', 0) : 0.8)) return;
++                            const ev = pe * rv + (1 - pe) * (stay - (pv ? failCost : 12));   // a dropped ball is a turnover
+                             if (ev > stay + 1.2 && (!best || ev > best.ev)) best = { ev, kind, r, s };
+                         });
+                     });
+@@ -19113,23 +19129,25 @@
+                 if (hasSk(c, 'My Ball')) return null;
+                 const receivers = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Ball'));
+                 const runIn = new Map(receivers.map(r => [r.id, runInProb(r)]));
+-                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob === 100)];
++                const minMove = AIX.p(me, 'passMove', 100), bar = AIX.p(me, 'scoreBar', null);   // (tuning) the carrier's move to the throw; the odds needed
++                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= minMove)];
+                 let best = null;
+                 receivers.forEach(r => {
+                     const ri = runIn.get(r.id); if (ri <= 0) return;
+                     spots.forEach(s => {
++                        const sp = s.prob / 100;   // a dodge or Rush on the way there
+                         if (!state.handoffUsed && Math.max(Math.abs(s.x - r.x), Math.abs(s.y - r.y)) === 1) {
+-                            const v = catchProb(r) * ri;
++                            const v = catchProb(r) * ri * sp;
+                             if (!best || v > best.v) best = { v, kind: 'handoff', r, s };
+                         }
+                         if (!state.passUsed && c.pa != null) {
+-                            const v = passOdds(c, s.x, s.y, r) * ri * 0.97;
++                            const v = passOdds(c, s.x, s.y, r) * ri * 0.97 * sp;
+                             if (!best || v > best.v) best = { v, kind: 'pass', r, s };
+                         }
+                     });
+                 });
+                 if (!best) return null;
+-                return best.v >= (lastTurn ? 0.08 : best.kind === 'handoff' ? 0.45 : 0.4) ? best : null;
++                return best.v >= (lastTurn ? 0.08 : bar != null ? bar : best.kind === 'handoff' ? 0.45 : 0.4) ? best : null;
+             }
+             // how many of our players should be busy with their ball carrier (more as they near our end zone)
+             function huntNeed(c) { return toGo(c.x, c.team) <= 4 ? 5 : 4; }
+@@ -19198,6 +19216,48 @@
+ 
+             // ---- formation squares: cage, screen, markers, deep safety ----
+             const inPitch = (x, y) => x >= 0 && x < CFG.cols && y >= 0 && y < CFG.rows;
++            // (recv) open squares ahead of the ball for our best catchers to wait in: within pass range of where the carrier is
++            // heading, not marked, out of reach of all but a few of their players, and ideally near enough to score from next turn
++            function recvSquares(me, a, k) {
++                if (k <= 0) return [];
++                const fwd = me === TEAMS.HUMAN ? 1 : -1, ahead = AIX.p(me, 'recvAhead', 6), range = AIX.p(me, 'recvRange', 6.4), safe = AIX.p(me, 'recvSafe', 1);
++                const cand = [];
++                for (let dx = AIX.p(me, 'recvMin', 3); dx <= 11; dx++) for (let dy = -6; dy <= 6; dy++) {
++                    const x = a.x + dx * fwd, y = a.y + dy;
++                    if (!inPitch(x, y) || y < 1 || y > CFG.rows - 2 || Math.hypot(dx, dy) > range) continue;
++                    const q = getPlayer(x, y); if (q && q.team !== me) continue;
++                    if (tzFor(x, y, me) > 0) continue;
++                    const rch = reachers(x, y, me); if (rch > safe) continue;
++                    cand.push({ x, y, s: -Math.abs(dx - ahead) * 0.5 - rch * 1.5 - edgeRisk(x, y, me) * 2 + (toGo(x, me) <= 8 ? 1.5 : 0) });
++                }
++                cand.sort((p, q) => q.s - p.s);
++                const out = [];
++                for (const c of cand) { if (out.length >= k) break; if (out.every(o => Math.max(Math.abs(o.x - c.x), Math.abs(o.y - c.y)) >= 3)) out.push(c); }
++                return out;
++            }
++            // (recvfirst) our carrier still to act: send the best catchers into open squares in pass range of them first, so
++            // the carrier can throw to them this turn (instead of placing them after the carrier has moved, for next turn)
++            function recvPlan(me, act, c) {
++                const n = AIX.p(me, 'recvN', passingTeam(me) ? 2 : 1);
++                const sq = recvSquares(me, c, n + 1);
++                if (!sq.length) return null;
++                const okR = q => !hasSk(q, 'No Hands') && !hasSk(q, 'No Ball') && !isBigGuy(q);
++                const ready = state.players.filter(q => q.team === me && q.id !== c.id && onPitch(q) && !q.isDown && okR(q) && tzFor(q.x, q.y, me) === 0 && sq.some(s => cheb(q, s) <= 1)).length;
++                if (ready >= n) return null;
++                let best = null;
++                act.forEach(p => {
++                    if (p.id === c.id || p.isDown || !okR(p) || !canReposition(p, me)) return;
++                    const q = (hasSk(p, 'Catch') ? 4 : 0) + (3 - p.ag) * 1.5 + (p.ma - 6) * 0.5;
++                    movesFor(p).forEach(m => {
++                        if (m.prob < 100) return;
++                        const s = sq.find(s => s.x === m.x && s.y === m.y);
++                        if (s && (!best || q + s.s > best.v)) best = { p, m, v: q + s.s };
++                    });
++                });
++                if (!best) return null;
++                const tx = best.m.x, ty = best.m.y;
++                return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
++            }
+             function formationTargets(me, cageOnly) {
+                 const T = [], c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                 const add = (x, y, role) => {
+@@ -19215,10 +19275,12 @@
+                         const k = Math.max(0, Math.min(c.ma, toGo(c.x, me) - Math.floor(CFG.cols / 2)));
+                         a = { x: c.x + fwd * k, y: Math.max(2, Math.min(CFG.rows - 3, c.y)) };
+                     }
++                    const nRecv = AIX.on(me, 'recv') ? AIX.p(me, 'recvN', passingTeam(me) ? 2 : 1) : 0;
+                     if (mobileTeam(me)) {
+                         // a loose escort behind the carrier and runners in the open spaces ahead, ready for a pass or hand-off
+                         [[-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
+                         if (cageOnly) return T;
++                        recvSquares(me, a, nRecv).forEach(o => add(o.x, o.y, 'recv'));
+                         outletSquares(me, 1, toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 9).forEach(o => add(o.x, o.y, 'runner'));
+                         [[5, 0], [4, -4], [4, 4], [6, -2], [6, 2]].forEach(([dx, dy]) => add(a.x + dx * fwd, Math.max(1, Math.min(CFG.rows - 2, a.y + dy)), 'runner'));
+                         return T;
+@@ -19226,6 +19288,7 @@
+                     if (a !== c) [[1, 1], [1, -1]].forEach(([dx, dy]) => add(c.x + dx * fwd, c.y + dy, 'cage'));   // two stay with the carrier as an escort
+                     [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
+                     if (cageOnly) return T;
++                    recvSquares(me, a, nRecv).forEach(o => add(o.x, o.y, 'recv'));
+                     [0, -3, 3].forEach(dy => add(a.x + 3 * fwd, a.y + dy, 'front'));
+                     outletSquares(me, Math.max(1, toGo(a.x, me) - 8), toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 7).slice(0, 2).forEach(o => add(o.x, o.y, 'runner'));
+                 } else if (c && onPitch(c)) {
+@@ -19262,7 +19325,7 @@
+             }
+             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
+             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
+-            const CAPS = { cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, ballguard: 3, outlet: 2 };
++            const CAPS = { recv: 3, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, ballguard: 3, outlet: 2 };
+             // formation squares already given to someone this turn: a player sent towards a square they can't reach yet
+             // (it's still empty when the next player is chosen) mustn't have everyone else sent after them
+             let claims = { key: '', m: new Map() };
+@@ -19298,23 +19361,25 @@
+                     movers.forEach(p => {
+                         if (taken.has(p.id)) return;
+                         if (t.role === 'outlet' && c && c.team !== me && cheb(p, c) <= 1) return;   // don't stop marking their carrier
++                        if (t.role === 'recv' && (hasSk(p, 'No Hands') || hasSk(p, 'No Ball') || isBigGuy(p))) return;
+                         // how close they can really get this turn (a straight-line distance can hide a wall of opponents)
+                         let got = cheb(p, t);
+                         if (got > 0 && got <= 14) movesFor(p).forEach(m => { if (m.prob >= okProb(p)) got = Math.min(got, Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y))); });
+-                        const d = got * 3 + cheb(p, t) * 0.2 - (t.role === 'runner' ? (p.ma - 6) * 0.7 : 0);   // send the quick players into space
++                        const d = got * 3 + cheb(p, t) * 0.2 - (t.role === 'runner' ? (p.ma - 6) * 0.7 : 0)   // send the quick players into space
++                            - (t.role === 'recv' ? (hasSk(p, 'Catch') ? 4 : 0) + (3 - p.ag) * 1.5 + (p.ma - 6) * 0.5 : 0);   // and the best catchers to wait for a pass
+                         if (d < bd) { bd = d; best = p; } });
+                     if (!best) break;
+                     if (window.AI_DEBUG) window.AI_DEBUG.push(`${t.role}@${t.x},${t.y} <- ${best.type}@${best.x},${best.y} (${bd.toFixed(1)})`);
+                     taken.add(best.id); used.set(t.role, (used.get(t.role) || 0) + 1); claims.m.set(ck, best.id);
+                     const tx = t.x, ty = t.y, role = t.role;
+                     const pick = (ms, p) => {
+-                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' ? 1.5 : 0.5)) - 0.5;
++                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'recv' ? 1.5 : 0.5)) - 0.5;
+                         ms.forEach(m => {
+                             if (m.prob < (safeOnly ? 100 : okProb(p)) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
+                             if (m.isRush && role !== 'hunt' && role !== 'mark' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
+-                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' ? 1.5 : 0.5)) + (100 - m.prob) / 10
++                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'recv' ? 1.5 : 0.5)) + (100 - m.prob) / 10
+                                 + edgeRisk(m.x, m.y, p.team, p.id) * (role === 'hunt' ? 1.5 : 3)   // keep off the sidelines
+-                                + (['runner', 'outlet', 'deep'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
++                                + (['runner', 'outlet', 'deep', 'recv'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
+                             if (s < bs) { bs = s; bm = m; }
+                         });
+                         return bm;
+@@ -19869,6 +19934,10 @@
+                 const bz = blitzPlan(me, act);
+                 if (bz) return bz;
+ 
++                if (AIX.on(me, 'recvfirst') && carrier && carrier.team === me && act.includes(carrier) && !state.charge && !state.aiStalling && !(state.passUsed && state.handoffUsed)) {
++                    const rp = recvPlan(me, act, carrier);
++                    if (rp) return rp;
++                }
+                 // 7. switch the play to a team-mate in space if they can take it further, otherwise run it
+                 if (carrier && carrier.team === me && act.includes(carrier) && !state.charge && !state.aiStalling) {
+                     const sw = switchPlay(carrier, me);

@@ -101,3 +101,11 @@ python3 ai-training/compare.py --mincr 1700                                  # o
 - Next idea: value where the ball would be by what it opens up next turn: the free run from there (`nextTurnLane`), how
   few of their players can reach it, and our players nearby to support it. That would also reward a **sideways pass to the
   weak side** when most players are bunched on one side (the owner's point) - a good play with no squares gained.
+- Tried next (Oct 2026), all kept in `passing-experiments.patch` (apply with `git apply`; every change sits behind an `AIX`
+  switch, and the tuning values behind `AIX.p`, so `tools/ai-match.js --newp` can sweep them):
+  - `passv`: judge the ball's spot by the next-turn value above (free run, how many opponents can reach it, support).
+  - `recvfirst`: with the carrier still to act, move the receivers into open squares in pass range first, so the pass can
+    happen this turn (before, receivers only got into place after the carrier had acted, and were marked by next turn).
+    `recvMin: 0` lets receiver squares be level with the carrier (a sideways switch).
+  - Result over ~400 sweep matches: hand-offs and passes went up (about 25 a match-set of 16 against 18), but no setting
+    beat the current AI by more than luck; taken together they were slightly worse. Not released.
