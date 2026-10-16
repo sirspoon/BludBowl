@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.28</title>
+    <title>BludBowl 3.29</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.28</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.29</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9980,10 +9980,7 @@
     const inp = ctx.createGain(), dl = ctx.createDelay(1), fb = ctx.createGain(), lp = ctx.createBiquadFilter();
     dl.delayTime.value = 0.27; fb.gain.value = 0.22; lp.type = 'lowpass'; lp.frequency.value = 2600;
     inp.connect(dl); dl.connect(lp); lp.connect(fb); fb.connect(dl); const ret = ctx.createGain(); ret.gain.value = 0.35; lp.connect(ret); ret.connect(B.bus); lp.connect(verbIn);
-    // the band runs through its own volume, so it can drop back while the crowd sings a chant; the chants have their own channel
-    const band = ctx.createGain(); B.bus.disconnect(); B.bus.connect(band); band.connect(out); B.band = band;
-    const ch = ctx.createGain(); ch.gain.value = 1; ch.connect(out); const cs = ctx.createGain(); cs.gain.value = 0.45; ch.connect(cs); cs.connect(verbIn); B.chant = ch;
-    B.stands = inp; return inp;
+    B.stands = inp; return inp;   // (the band's own volume and the chant channel come with every style's buses)
   }
   const echo = (B, node, amt) => { const g = ctx.createGain(); g.gain.value = amt; node.connect(g); g.connect(standsOf(B)); };
   // the big marching bass drum, and a crisp snare
@@ -10290,6 +10287,28 @@
     }
     if (fillNext && Math.random() < 0.7) scurry(B, t + 3 * s, 0.07);
   }
+  // ---------- the taunt at the referee after a sending-off, in every style: "duh-deeh-duh-deeh-duh-deeh-duuuhhhh", two notes a
+  // minor third apart, each straight after the last, the high ones held a little longer and a long one to finish, played twice by
+  // that style's own instruments (on the chant channel) while the rest of the band drops back. [semitones up, length in short notes]
+  const TAUNT = [[0, 1], [3, 1.5], [0, 1], [3, 1.5], [0, 1], [3, 1.5], [0, 4]], TAUNT_N = 0.29, TAUNT_LINE = 14 * TAUNT_N;
+  function tauntPlay(B, t, base, gain, play) {   // (gain: each style's instruments evened out to the terrace crowd's level)
+    const tg = ctx.createGain(); tg.gain.value = gain; tg.connect(B.chant);
+    const C = Object.assign({}, B, { main: tg, pad: tg, sc: tg, far: tg });   // (the style's instruments, routed to the chant channel)
+    const g = B.band.gain; g.setTargetAtTime(0.32, t - 0.1, 0.12); g.setTargetAtTime(1, t + TAUNT_LINE * 2, 0.4);
+    for (let k = 0; k < 2; k++) { let at = t + k * TAUNT_LINE; TAUNT.forEach(([x, d], j) => { play(C, base + x, at, d * TAUNT_N, x > 0, j === TAUNT.length - 1); at += d * TAUNT_N; }); }
+    return TAUNT_LINE * 2;
+  }
+  const TAUNTS = {
+    electro: (B, t) => tauntPlay(B, t, 76, 2.3, (C, m, at, d, hi) => { note(C.main, 'square', m, at, d * 0.95, 0.05, { cut: 2400, a: 0.005, r: 0.05, verb: 0.3 }); note(C.main, 'sawtooth', m + 12, at, d * 0.95, 0.02, { cut: 3000, a: 0.005, r: 0.05 }); if (hi) clap(C.main, at, 0.4); }),
+    jungle: (B, t) => tauntPlay(B, t, 76, 1.4, (C, m, at, d, hi) => { flute(C, m, at, d * 0.95, 0.08); if (hi) farDrum(C, at, 55, 0.5); }),
+    elven: (B, t) => tauntPlay(B, t, 76, 2, (C, m, at, d, hi, last) => { flute(C, m, at, d * 0.95, 0.07); harp(C, m - 12, at, 0.06); if (last) bell(C, m + 12, at, 0.05); }),
+    graveyard: (B, t) => tauntPlay(B, t, 64, 1.95, (C, m, at, d, hi, last) => { organ(C, [m, m + 12], at, d * 0.95, 0.03, { a: 0.02, r: 0.1, cut: 2400 }); if (last) bellToll(C, 50, at, 0.1); }),
+    flagstone: (B, t) => { caveOf(B, 0.6); return tauntPlay(B, t, 52, 3.6, (C, m, at, d, hi) => { caveHorn(C, m, at, d * 0.95, 0.05); if (hi) anvil(C, at, 0.06); }); },
+    warpstone: (B, t) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 3, (C, m, at, d, hi, last) => { squeak(C, at, 0.12, hz(m + 12), d * 0.95); if (last) zap(C, at + d * 0.5, 0.15); }); },
+    worn: (B, t, s) => { trChantRef(B, t, s); return 28 * s * 0.54; },
+    brimstone: (B, t) => tauntPlay(B, t, 64, 0.82, (C, m, at, d, hi, last) => { khLead(C, m + 12, at, d * 0.95, 0.08); khChoir(C, m, at, d * 0.9, 0.05); if (last) { khGuitar(C, power(40), at, d * 2, 0.1, { r: 0.6 }); crash(C.main, at, 0.3); } }),
+    woodland: (B, t) => tauntPlay(B, t, 76, 1.46, (C, m, at, d, hi) => { whistle(C, m, at, d * 0.95, 0.07); fiddle(C, m - 12, at, d * 0.95, 0.03); if (hi) bodhran(C, at, 0.5); })
+  };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -10305,12 +10324,15 @@
 
   function buses() {
     const bus = ctx.createGain(), main = ctx.createGain(), pad = ctx.createGain(), sc = ctx.createGain();
-    main.connect(bus); pad.connect(bus); sc.connect(bus); bus.connect(out); pad.gain.value = 0.9;
+    main.connect(bus); pad.connect(bus); sc.connect(bus); pad.gain.value = 0.9;
+    // the band runs through its own volume, so it can drop back while a chant or taunt plays on its own channel
+    const band = ctx.createGain(); bus.connect(band); band.connect(out);
+    const chant = ctx.createGain(); chant.connect(out); const cs = ctx.createGain(); cs.gain.value = 0.45; chant.connect(cs); cs.connect(verbIn);
     // far away: no low end, softened top, and mostly reverb
     const far = ctx.createGain(), fh = ctx.createBiquadFilter(), fl = ctx.createBiquadFilter(), fwet = ctx.createGain();
     fh.type = 'highpass'; fh.frequency.value = 170; fl.type = 'lowpass'; fl.frequency.value = 2400; far.gain.value = 0.8; fwet.gain.value = 1.1;
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
-    return { bus, main, pad, sc, far };
+    return { bus, main, pad, sc, far, band, chant };
   }
   // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland), otherwise the electro track
   const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM } };   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
@@ -10362,11 +10384,13 @@
     pauseTimer = setTimeout(() => { pauseTimer = null; try { ctx.resume(); const t = ctx.currentTime; duckG.gain.cancelScheduledValues(t); duckG.gain.setTargetAtTime(1, t, 0.3); duckUntil = 0; } catch (e) {} }, Math.max(300, ms));
   }
   // the terrace crowd (Muddy Grass pitch): 'one' after a touchdown ("There's only one..."), 'ref' after a sending-off; true if it sings
+  // (the touchdown chant only on the terraces; the taunt at the referee in every style)
   function crowd(kind, delay = 0) {
-    if (!run || !ctx || run.style !== 'worn' || ctx.state !== 'running' || ctx.currentTime < (run.chantUntil || 0)) return false;   // (one chant at a time)
-    const s = 60 / run.el.bpm;
-    try { (kind === 'ref' ? trChantRef : trChantOne)(run.B, ctx.currentTime + delay, s); } catch (e) { return false; }
-    run.chantUntil = ctx.currentTime + delay + (kind === 'ref' ? 28 * s * 0.54 : 16 * s) + 1;
+    if (!run || !ctx || ctx.state !== 'running' || ctx.currentTime < (run.chantUntil || 0)) return false;   // (one at a time)
+    if (kind !== 'ref' && run.style !== 'worn') return false;
+    const s = 60 / run.el.bpm, t = ctx.currentTime + delay; let len;
+    try { len = kind === 'ref' ? (TAUNTS[run.style] || TAUNTS.electro)(run.B, t, s) : (trChantOne(run.B, t, s), 16 * s); } catch (e) { console.warn('music:', e && e.message); return false; }
+    run.chantUntil = t + len + 1;
     return true;
   }
   function setEnabled(v) { enabled = !!v; try { localStorage.setItem('bb-music-off', enabled ? '0' : '1'); } catch (e) {} sync(); }
