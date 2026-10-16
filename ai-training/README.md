@@ -202,3 +202,20 @@ blocks and blocks it never sets up.
   `lateMin` 2 42-46; 2 dice only 42-38. A 1-die block without Block is about an even trade (a third of the time their
   player goes down, a third ours), and our player lying down leaves a gap for their turn, so it doesn't pay on starting
   rosters. Its re-roll fix (no team re-roll on the last block of the turn unless spare) is in the patch too.
+
+## Defence leaks (Oct 2026, not released)
+`defence-leaks.js` (24 mirror matches on v3.15): about 23 of 28 touchdowns conceded came the turn after a defensive turn
+that ended with their carrier having a 60%+ chance of simply running it in (dodges and Rushes counted, a team re-roll
+as saving one roll). In most of those turns the chance was already ~100% when our turn began, and the players still
+able to act had nowhere useful to go: the carrier was already past them. Why the AI misjudges: its screen and plug
+treat any tackle zone as a wall (`threatOf` uses the dice-free run), so half a screen looks complete; and plugs only use
+moves with no dice. Tried (`defence-screen.patch`, every change behind `plug2` / `AIX.p`):
+- `plug2`: plugs judged by the carrier's real chance of scoring (`scoreChance`, via the game's own move odds), with pairs
+  of defenders tried together (one alone is often dodged round), then a Rush/dodge into the way after the carrier blitz
+  when worth the Turnover risk. With dodges allowed (marked players dodging away to plug): 32-46, 10-20 over 48 - it
+  freed whoever they were holding up. Rushes only, from unmarked players: 48-44. Dice-free plugs only: 43-39. Level.
+- Screen shape (`scrMax`, `scrFrac`, `scr2Gap`, `deepDz`), 16 mirror matches each: screen up to 6 squares ahead 10-16,
+  further out too 11-17, second line 3 back 15-14, a deep safety from 3 squares out 15-15, all three 15-10. The
+  combination over 112 matches: 98-86 touchdowns, 37-33 wins - too close to call.
+Next idea: the leak starts a turn or two earlier, so judge the screen by the carrier's chance over two turns, or keep
+one or two players goal-side of every opponent who could receive a hand-off.
