@@ -1,0 +1,100 @@
+diff --git a/index.html b/index.html
+index 4865af8..48835d7 100644
+--- a/index.html
++++ b/index.html
+@@ -18747,7 +18747,7 @@
+ 
+         // ---------- Computer coach: plays either team through the same rules code a person uses ----------
+         // switches for each AI improvement, per team (null: all on, as in play). The automated tests turn them off for one side,
+-        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
++        // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2, rush2
+         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
+             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
+             p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
+@@ -19280,13 +19280,20 @@
+                 if (g.kind === 'hunt') return -Math.max(0, d - 1) + (d === 1 ? 2.5 : 0) - tz * 0.4 - edgeRisk(x, y, p.team, p.id) * 1.2;
+                 return -d - tz * 1.2 - edgeRisk(x, y, p.team, p.id) * 2 - Math.min(3, reachers(x, y, p.team)) * 0.25 * exposureCost(p);
+             }
++            // (rush2) a Rush to reach a square is worth it when a trip costs little: few team-mates still to act (a Turnover
++            // only costs them their go), or team re-rolls to spare
++            function rushOK(p) {
++                if (!AIX.on(p.team, 'rush2')) return false;
++                const left = avail(p.team).filter(q => q.id !== p.id).length;
++                return left <= AIX.p(p.team, 'rushLeft', 3) || (state.rr[p.team] || 0) >= AIX.p(p.team, 'rushRR', 2);
++            }
+             function supportPick(moves, p) {
+                 const g = supportGoal(p, p.team);
+                 if (!g) return null;
+                 let best = null, bs = supportScore(p, p.x, p.y, g) + 0.9;
+                 moves.forEach(m => {
+                     if (m.prob < okProb(p) || (state.ball.x === m.x && state.ball.y === m.y && !state.ball.carrierId)) return;
+-                    if (m.isRush && AIX.on(p.team, 'safepos')) return;
++                    if (m.isRush && AIX.on(p.team, 'safepos') && !(AIX.p(p.team, 'rushSupport', 0) && rushOK(p))) return;
+                     const s = supportScore(p, m.x, m.y, g) - (100 - m.prob) / 20;
+                     if (s > bs) { bs = s; best = m; }
+                 });
+@@ -19422,7 +19429,8 @@
+                         if (t.role === 'outlet' && c && c.team !== me && cheb(p, c) <= 1) return;   // don't stop marking their carrier
+                         // how close they can really get this turn (a straight-line distance can hide a wall of opponents)
+                         let got = cheb(p, t);
+-                        if (got > 0 && got <= 14) movesFor(p).forEach(m => { if (m.prob >= okProb(p)) got = Math.min(got, Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y))); });
++                        const rk = AIX.on(me, 'rush2') && !safeOnly && rushOK(p);   // (rush2) a square a Rush away counts as reachable
++                        if (got > 0 && got <= 14) movesFor(p).forEach(m => { if (m.prob >= okProb(p) || (rk && m.isRush && m.prob >= AIX.p(me, 'rushProb', 65))) got = Math.min(got, Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y))); });
+                         const d = got * 3 + cheb(p, t) * 0.2 - (t.role === 'runner' ? (p.ma - 6) * 0.7 : 0)   // send the quick players into space
+                             - (t.role === 'flank' ? (p.ma - 6) * 1 + (hasSk(p, 'Catch') ? 1 : 0) - (isBigGuy(p) ? 6 : 0) : 0);   // quick ones down the wings
+                         if (d < bd) { bd = d; best = p; } });
+@@ -19432,9 +19440,10 @@
+                     const tx = t.x, ty = t.y, role = t.role;
+                     const pick = (ms, p) => {
+                         let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'flank' ? 1.5 : 0.5)) - 0.5;
++                        const rok = !safeOnly && rushOK(p);
+                         ms.forEach(m => {
+                             if (m.prob < (safeOnly ? 100 : okProb(p)) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
+-                            if (m.isRush && role !== 'hunt' && role !== 'mark' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
++                            if (m.isRush && role !== 'hunt' && role !== 'mark' && AIX.on(p.team, 'safepos') && !rok) return;   // not worth a Turnover to reach a formation square (unless rush2 says a trip costs little)
+                             const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' ? 1.5 : 0.5)) + (100 - m.prob) / 10
+                                 + edgeRisk(m.x, m.y, p.team, p.id) * (role === 'hunt' ? 1.5 : 3)   // keep off the sidelines
+                                 + (['runner', 'outlet', 'deep', 'flank'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
+@@ -19515,23 +19524,29 @@
+             function blitzPlan(me, act) {
+                 if (state.blitzUsed) return null;
+                 let best = null;
++                // (rush2) a blitz may Rush to reach its target when a trip costs little; the cost of failing is counted by the
++                // team-mates still to act (who'd lose their go), not as if the whole turn were at stake
++                const r2 = AIX.on(me, 'rush2'), still = act.length - 1;
+                 act.forEach(p => {
+                     const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                     if (c && c.id === p.id) return;
++                    const rok = r2 && rushOK(p);
+                     movesFor(p).forEach(m => {
+-                        if (m.prob < 90) return;
++                        if (m.prob < (rok ? AIX.p(me, 'rushProb', 65) : 90)) return;
+                         const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
+                         state.players.forEach(d => {
+                             if (d.team === me || !onPitch(d) || d.isDown || Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) !== 1) return;
+                             blitzCtx = true; const e = blockEval(p, d, m.x, m.y); blitzCtx = false;
+-                            if (e.pTurn > 0.12) return;
++                            if (e.pTurn > (r2 ? AIX.p(me, 'blitzTurn', 0.12) : 0.12)) return;
+                             const pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
+-                            const s = pr * e.ev - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0);
++                            const fail = rok ? AIX.p(me, 'rushFail', 2) + still * AIX.p(me, 'rushPer', 1) : 8;
++                            if (rok && pr < AIX.p(me, 'rushProb', 65) / 100) return;
++                            const s = pr * e.ev - (1 - pr) * Math.min(8, fail) - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0);
+                             if (!best || s > best.s) best = { p, d, s };
+                         });
+                     });
+                 });
+-                if (!best || best.s < 3) return null;
++                if (!best || best.s < (r2 ? AIX.p(me, 'blitzMin', 1.5) : 3)) return null;
+                 return blitzOn(best.p, best.d.id);
+             }
+             function blitzOn(p, tid) {
+@@ -20050,6 +20065,8 @@
+                     if (m || p.isDown) return { pid: p.id, kind: 'move', pick: supportPick };
+                     tried.add(p.id);
+                 }
++                // (rush2) a blitz still unused: now that nearly everyone has acted, one that needs a Rush costs little
++                if (AIX.on(me, 'rush2') && !state.charge) { const bz2 = blitzPlan(me, avail(me).filter(p => !keep.has(p.id))); if (bz2) return bz2; }
+                 // 11. the foul, then finally a bomb or a thrown team-mate at their ball carrier or cage
+                 const fl2 = foulPlan(me, avail(me));
+                 if (fl2) return fl2;

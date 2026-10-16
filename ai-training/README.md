@@ -271,3 +271,14 @@ low), with 1.0 assists on average; the armour broke on about 45% of fouls, and a
   where nobody marks them (+1 each), held back from the end-of-turn positioning for it. Assists rose to 1.2 a foul and
   the armour broke on about 55% (two runs disagreed: 48/100 v 44/90, then 49/77 v 26/65), but over 48 matches: 41-36
   touchdowns, 19-18 wins, casualties 46-47. Fouls are too rare (about one in a match) for this to show in results.
+
+## Rushing (Oct 2026, not released)
+Where the rush gap comes from: since v3.05 (`safepos`) nobody rushes to reach a formation square except to mark or hunt,
+plugs never rush, and the general blitz (`blitzPlan`) ignores any route under 90% (one Rush is 83%) and needs a score of
+3, which a blitz needing a Rush (or a 1-die blitz) never reaches. So it rushes mostly with its carrier and carrier blitzes.
+`rush2` (`rushing.patch`): Rushes allowed to formation squares (and counted when choosing who goes where) when few
+team-mates are still to act (`rushLeft` 3) or re-rolls are spare (`rushRR` 2); a blitz may Rush (`rushProb` 65%), a failed
+one costing `rushFail` 2 + 1 per team-mate still to act; a second chance to blitz at the end of the turn; and a lower bar
+for blitzing (`blitzMin` 1.5). Rushes only rose from 3.1 to 3.6 a match (coaches 9), blitzes from 8 to 10.5 in a 30-match
+stats run, but over 48 matches against v3.16: 41-43 touchdowns, 15-14 wins, casualties 47-59, blocks level. The
+formation-only version swept over 5 settings (16 matches each) was 59-74 in all. Not released.
