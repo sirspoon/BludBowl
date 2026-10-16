@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.25 (16 Oct 2026)
+- **Added:** a new pitch, **Warped Flagstones**, the Skaven's home ground. It's the mossy flagstones with warpstone glowing green: its light seeping up between the stones and through glowing cracks, clusters of glowing shards, and patches washed in green. Behind the block clashes and replays stands a ramshackle wooden stadium, all uneven planks, patches and crooked props, lit by green warpstone lanterns, with rat eyes glinting in the crowd and a leaning bell tower. It plays the cave music, and can also be picked from the Pitch menu. The other underground teams keep the Mossy Flagstones.
+
 ## v3.24 (16 Oct 2026)
 - **Added:** the Woodland pitch has its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)): a folk jig with a tin whistle, a fiddle, a lute, a bodhrán, claps and stomps, a tambourine and a glockenspiel, with birdsong and a cuckoo.
 - **Changed:** more teams play on a home pitch that suits them: Necromantic Horror, Vampires and Tomb Kings on the Graveyard, Underworld Denizens on the Mossy Flagstones, and Chaos Chosen on Brimstone.
