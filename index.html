@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.25</title>
+    <title>BludBowl 3.26</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.25</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.26</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -15357,37 +15357,66 @@
         }
         // warped flagstones (the Skaven): the mossy flagstones, with warpstone glowing green - cracks with its light coming up through
         // them, clusters of glowing shards, and patches of the stone washed in green light
+        // (the glow is painted on a layer of its own, returned here, which is drawn over the pitch each frame with a slow pulse)
         function warpstoneDressing(o, S) {
-            const { x, r } = o, ts = CFG.tileSize, W = CFG.cols * ts, H = CFG.rows * ts;
-            const glow = (cx, cy, rr, al) => { const g = x.createRadialGradient(cx * S, cy * S, 0, cx * S, cy * S, rr * S); g.addColorStop(0, `rgba(120,255,90,${al})`); g.addColorStop(1, 'rgba(80,255,60,0)'); x.fillStyle = g; x.fillRect((cx - rr) * S, (cy - rr) * S, 2 * rr * S, 2 * rr * S); };
-            for (let k = 0; k < 11; k++) glow(r() * W, r() * H, 50 + r() * 60, 0.2);   // green light washing over the stones
-            x.lineCap = 'round'; x.lineJoin = 'round';
-            for (let k = 0; k < 30; k++) {   // warpstone light glowing up through the joints between the flagstones (soft, and broken off part-way, so it doesn't read as a highlighted square)
-                const horiz = r() < 0.5, len = 0.4 + r() * 1.2, gx = Math.floor(r() * CFG.cols), gy = Math.floor(r() * CFG.rows);
-                const x0 = (horiz ? gx : gx + 1) * ts, y0 = (horiz ? gy + 1 : gy) * ts, x1 = horiz ? x0 + len * ts : x0, y1 = horiz ? y0 : y0 + len * ts;
-                const seg = () => { x.beginPath(); x.moveTo(x0 * S, y0 * S); x.lineTo(x1 * S, y1 * S); };
-                x.save(); x.shadowColor = 'rgba(110,255,80,0.9)'; x.shadowBlur = 16 * S; x.strokeStyle = 'rgba(100,230,70,0.5)'; x.lineWidth = 3 * S; seg(); x.stroke(); x.restore();
-                x.strokeStyle = 'rgba(200,255,170,0.55)'; x.lineWidth = 1 * S; seg(); x.stroke();
-                glow((x0 + x1) / 2, (y0 + y1) / 2, 16 + len * 10, 0.22);
+            const { cv, x, r } = o, ts = CFG.tileSize, W = CFG.cols * ts, H = CFG.rows * ts;
+            // filth first: grime, murky puddles, sludge trails, rubbish, bones, straw and droppings
+            for (let k = 0; k < 46; k++) { const cx = r() * W, cy = r() * H, rr = 10 + r() * 28, g = x.createRadialGradient(cx * S, cy * S, 0, cx * S, cy * S, rr * S);
+                g.addColorStop(0, `rgba(${(36 + r() * 16) | 0},${(28 + r() * 12) | 0},18,${(0.35 + r() * 0.25).toFixed(2)})`); g.addColorStop(1, 'rgba(36,28,18,0)'); x.fillStyle = g; x.fillRect((cx - rr) * S, (cy - rr) * S, 2 * rr * S, 2 * rr * S); }
+            for (let k = 0; k < 13; k++) {   // murky puddles with an oily sheen
+                const cx = r() * W, cy = r() * H, rx = 8 + r() * 12, ry = rx * (0.45 + r() * 0.25), an = r() * 3;
+                x.fillStyle = 'rgba(44,46,30,0.85)'; x.beginPath(); x.ellipse(cx * S, cy * S, rx * S, ry * S, an, 0, 7); x.fill();
+                x.strokeStyle = 'rgba(120,130,90,0.35)'; x.lineWidth = 0.8 * S; x.beginPath(); x.ellipse((cx - rx * 0.2) * S, (cy - ry * 0.2) * S, rx * 0.55 * S, ry * 0.4 * S, an, 3.6, 5.6); x.stroke();
             }
-            for (let k = 0; k < 12; k++) {   // glowing cracks: a dark split, a green halo, a bright core
+            x.lineCap = 'round'; x.lineJoin = 'round';
+            for (let k = 0; k < 12; k++) {   // sludge trails
+                let px = r() * W, py = r() * H, a = r() * 6.3; x.strokeStyle = 'rgba(58,48,26,0.55)'; x.lineWidth = (2 + r() * 3) * S; x.beginPath(); x.moveTo(px * S, py * S);
+                for (let s2 = 0; s2 < 12; s2++) { a += (r() - 0.5) * 0.7; px += Math.cos(a) * 5; py += Math.sin(a) * 5; x.lineTo(px * S, py * S); } x.stroke();
+            }
+            for (let k = 0; k < 60; k++) {   // rubbish: splintered planks and scraps
+                const cx = r() * W, cy = r() * H; x.save(); x.translate(cx * S, cy * S); x.rotate(r() * 3.2);
+                x.fillStyle = r() < 0.6 ? `rgba(${(90 + r() * 30) | 0},${(66 + r() * 20) | 0},40,0.85)` : 'rgba(60,58,52,0.8)'; x.fillRect(-(2 + r() * 3) * S, -0.8 * S, (4 + r() * 5) * S, (1.2 + r()) * S); x.restore();
+            }
+            for (let k = 0; k < 35; k++) {   // gnawed bones
+                const cx = r() * W, cy = r() * H, a = r() * 6.3, l = 2.5 + r() * 2.5, dx = Math.cos(a) * l, dy = Math.sin(a) * l;
+                x.strokeStyle = 'rgba(200,190,160,0.7)'; x.lineWidth = 1.1 * S; x.beginPath(); x.moveTo((cx - dx) * S, (cy - dy) * S); x.lineTo((cx + dx) * S, (cy + dy) * S); x.stroke();
+            }
+            for (let k = 0; k < 220; k++) { const cx = r() * W, cy = r() * H, a = r() * 6.3, l = 2 + r() * 3;   // straw
+                x.strokeStyle = `rgba(${(170 + r() * 40) | 0},${(140 + r() * 30) | 0},70,0.55)`; x.lineWidth = 0.5 * S; x.beginPath(); x.moveTo(cx * S, cy * S); x.lineTo((cx + Math.cos(a) * l) * S, (cy + Math.sin(a) * l) * S); x.stroke(); }
+            for (let k = 0; k < 500; k++) { x.fillStyle = 'rgba(24,18,12,0.7)'; x.beginPath(); x.ellipse(r() * W * S, r() * H * S, (0.5 + r() * 0.6) * S, 0.4 * S, r() * 3, 0, 7); x.fill(); }   // droppings
+            // the glow, on its own layer
+            const gcv = document.createElement('canvas'); gcv.width = cv.width; gcv.height = cv.height; const gx = gcv.getContext('2d'); gx.lineCap = 'round'; gx.lineJoin = 'round';
+            const glow = (cx, cy, rr, al) => { const g = gx.createRadialGradient(cx * S, cy * S, 0, cx * S, cy * S, rr * S); g.addColorStop(0, `rgba(120,255,90,${al})`); g.addColorStop(1, 'rgba(80,255,60,0)'); gx.fillStyle = g; gx.fillRect((cx - rr) * S, (cy - rr) * S, 2 * rr * S, 2 * rr * S); };
+            for (let k = 0; k < 11; k++) glow(r() * W, r() * H, 50 + r() * 60, 0.24);   // green light washing over the stones
+            for (let k = 0; k < 30; k++) {   // warpstone light glowing up through the joints between the flagstones (soft, and broken off part-way, so it doesn't read as a highlighted square)
+                const horiz = r() < 0.5, len = 0.4 + r() * 1.2, gxx = Math.floor(r() * CFG.cols), gy = Math.floor(r() * CFG.rows);
+                const x0 = (horiz ? gxx : gxx + 1) * ts, y0 = (horiz ? gy + 1 : gy) * ts, x1 = horiz ? x0 + len * ts : x0, y1 = horiz ? y0 : y0 + len * ts;
+                const seg = () => { gx.beginPath(); gx.moveTo(x0 * S, y0 * S); gx.lineTo(x1 * S, y1 * S); };
+                gx.save(); gx.shadowColor = 'rgba(110,255,80,0.9)'; gx.shadowBlur = 16 * S; gx.strokeStyle = 'rgba(100,230,70,0.55)'; gx.lineWidth = 3 * S; seg(); gx.stroke(); gx.restore();
+                gx.strokeStyle = 'rgba(200,255,170,0.6)'; gx.lineWidth = 1 * S; seg(); gx.stroke();
+                glow((x0 + x1) / 2, (y0 + y1) / 2, 16 + len * 10, 0.24);
+            }
+            for (let k = 0; k < 12; k++) {   // glowing cracks: a dark split in the stone, and on the glow layer a green halo and a bright core
                 const pts = []; let cx = r() * W, cy = r() * H, a = r() * 6.3; pts.push([cx, cy]);
                 for (let s2 = 0; s2 < 9 + r() * 8; s2++) { a += (r() - 0.5) * 1.1; cx += Math.cos(a) * (4 + r() * 4); cy += Math.sin(a) * (4 + r() * 4); pts.push([cx, cy]); if (r() < 0.12) { const b = a + (r() < 0.5 ? 1 : -1) * (0.8 + r() * 0.6); pts.push([cx + Math.cos(b) * 9, cy + Math.sin(b) * 9], [cx, cy]); } }
-                const path = () => { x.beginPath(); pts.forEach(([px, py], i) => i ? x.lineTo(px * S, py * S) : x.moveTo(px * S, py * S)); };
-                x.strokeStyle = 'rgba(14,20,12,0.85)'; x.lineWidth = 4.5 * S; path(); x.stroke();
-                x.save(); x.shadowColor = 'rgba(110,255,80,1)'; x.shadowBlur = 14 * S; x.strokeStyle = 'rgba(110,235,80,0.85)'; x.lineWidth = 2.6 * S; path(); x.stroke(); x.restore();
-                x.strokeStyle = 'rgba(214,255,190,0.95)'; x.lineWidth = 1 * S; path(); x.stroke();
-                const [ex, ey] = pts[Math.floor(pts.length / 2)]; glow(ex, ey, 18, 0.22);
+                const path = c => { c.beginPath(); pts.forEach(([px, py], i) => i ? c.lineTo(px * S, py * S) : c.moveTo(px * S, py * S)); };
+                x.strokeStyle = 'rgba(14,20,12,0.9)'; x.lineWidth = 4.5 * S; path(x); x.stroke();
+                x.strokeStyle = 'rgba(60,110,40,0.8)'; x.lineWidth = 1.2 * S; path(x); x.stroke();   // (a faint green in the crack even when the glow is at its lowest)
+                gx.save(); gx.shadowColor = 'rgba(110,255,80,1)'; gx.shadowBlur = 14 * S; gx.strokeStyle = 'rgba(110,235,80,0.85)'; gx.lineWidth = 2.6 * S; path(gx); gx.stroke(); gx.restore();
+                gx.strokeStyle = 'rgba(214,255,190,0.95)'; gx.lineWidth = 1 * S; path(gx); gx.stroke();
+                const [ex, ey] = pts[Math.floor(pts.length / 2)]; glow(ex, ey, 18, 0.24);
             }
-            for (let k = 0; k < 10; k++) {   // clusters of warpstone shards, glowing
-                const bx = r() * W, by = r() * H; glow(bx, by, 30, 0.45);
+            for (let k = 0; k < 10; k++) {   // clusters of warpstone shards (the stone itself in the pitch, its glow on the layer)
+                const bx = r() * W, by = r() * H; glow(bx, by, 30, 0.5);
                 for (let j = 0; j < 3 + Math.floor(r() * 4); j++) {
-                    const cx = bx + (r() - 0.5) * 14, cy = by + (r() - 0.5) * 10, sz = 2.4 + r() * 3, a0 = r() * 6.3;
-                    x.save(); x.shadowColor = 'rgba(120,255,80,0.9)'; x.shadowBlur = 6 * S; x.fillStyle = `rgb(${(70 + r() * 50) | 0},${(200 + r() * 55) | 0},${(60 + r() * 40) | 0})`;
-                    x.beginPath(); for (let v = 0; v < 5; v++) { const an = a0 + v * 1.256, rad = sz * (0.6 + r() * 0.6); const px = cx + Math.cos(an) * rad, py = cy + Math.sin(an) * rad; v ? x.lineTo(px * S, py * S) : x.moveTo(px * S, py * S); } x.closePath(); x.fill(); x.restore();
-                    x.fillStyle = 'rgba(230,255,210,0.8)'; x.beginPath(); x.arc((cx - sz * 0.25) * S, (cy - sz * 0.25) * S, sz * 0.25 * S, 0, 7); x.fill();
+                    const cx = bx + (r() - 0.5) * 14, cy = by + (r() - 0.5) * 10, sz = 2.4 + r() * 3, a0 = r() * 6.3, col = `rgb(${(70 + r() * 50) | 0},${(200 + r() * 55) | 0},${(60 + r() * 40) | 0})`;
+                    const shard = c => { c.beginPath(); for (let v = 0; v < 5; v++) { const an = a0 + v * 1.256, rad = sz * (0.6 + 0.3 * Math.sin(v * 2.3 + k)); const px = cx + Math.cos(an) * rad, py = cy + Math.sin(an) * rad; v ? c.lineTo(px * S, py * S) : c.moveTo(px * S, py * S); } c.closePath(); };
+                    x.fillStyle = 'rgb(54,110,44)'; shard(x); x.fill();
+                    gx.save(); gx.shadowColor = 'rgba(120,255,80,0.9)'; gx.shadowBlur = 6 * S; gx.fillStyle = col; shard(gx); gx.fill(); gx.restore();
+                    gx.fillStyle = 'rgba(230,255,210,0.85)'; gx.beginPath(); gx.arc((cx - sz * 0.25) * S, (cy - sz * 0.25) * S, sz * 0.25 * S, 0, 7); gx.fill();
                 }
             }
+            return gcv;
         }
         // woodland (Wood Elves and Gnomes): a forest glade - dappled sunlight and canopy shadow, moss, fallen leaves, tree roots creeping
         // in from the sidelines, ferns, bluebells and daisies, mushrooms, red-and-white toadstools and a fairy ring
@@ -15468,6 +15497,7 @@
         if (!CLOCK.sim) setInterval(() => { if (document.visibilityState !== 'hidden' && state.live) pitchTexCheck(); }, 5000);
         function buildPitchTexture() {
             const ts = CFG.tileSize, W = CFG.cols * ts, H = CFG.rows * ts, S = 1.5;
+            PITCH.glow = null;   // (a layer drawn over the pitch with a pulse: the warpstone's glow)
             if (PITCH.style === 'brimstone') {   // lines of pale ash on the basalt
                 const o = brimstonePitch(S), x = o.x, r = o.r;
                 const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(232,222,206,${(al * (0.6 + r() * 0.35)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5)) * S, py * S, w * S, 2 * S); } };
@@ -15476,12 +15506,12 @@
                 return;
             }
             if (PITCH.style === 'flagstone' || PITCH.style === 'jungle' || PITCH.style === 'warpstone') {
-                const o = PITCH.style === 'warpstone' ? stonePitch(S, { seed: 41, stone: [104, 108, 102], mortar: [36, 40, 34], vary: 0.22, moss: 160, stain: 'rgba(30,30,22,0.3)' })
+                const o = PITCH.style === 'warpstone' ? stonePitch(S, { seed: 41, stone: [90, 90, 80], mortar: [30, 30, 24], vary: 0.26, moss: 190, stain: 'rgba(34,28,16,0.42)' })
                     : PITCH.style === 'flagstone'
                     ? stonePitch(S, { seed: 41, stone: [118, 120, 116], mortar: [44, 44, 40], vary: 0.22, moss: 160, stain: 'rgba(30,26,22,0.28)' })
                     : stonePitch(S, { seed: 63, stone: [178, 152, 108], mortar: [70, 62, 40], vary: 0.2, moss: 260, stain: 'rgba(40,70,30,0.30)' });
                 if (PITCH.style === 'jungle') jungleOvergrowth(o, S);
-                if (PITCH.style === 'warpstone') warpstoneDressing(o, S);
+                if (PITCH.style === 'warpstone') PITCH.glow = warpstoneDressing(o, S);
                 const x = o.x, r = o.r;
                 const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(245,245,235,${(al * (0.65 + r() * 0.35)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5)) * S, py * S, w * S, 2 * S); } };
                 chalkLines(chalk, ts);
@@ -15791,6 +15821,10 @@
             
             if (PITCH.tex) ctx.drawImage(PITCH.tex, 0, 0, CFG.cols*ts, CFG.rows*ts);
             else { ctx.fillStyle = '#166534'; ctx.fillRect(0,0, CFG.cols*ts, CFG.rows*ts); }
+            if (PITCH.glow) {   // the warpstone glow pulses: swelling and fading over about three seconds
+                const k = 0.5 + 0.5 * Math.sin(performance.now() / 480);
+                ctx.save(); ctx.globalAlpha = 0.3 + 0.7 * k; ctx.drawImage(PITCH.glow, 0, 0, CFG.cols*ts, CFG.rows*ts); ctx.restore();
+            }
             
             drawEndZone(0, 0, ts, CFG.rows*ts, teamStyle(0).endBg, teamStyle(0).endText, ROSTERS[0].baseName.toUpperCase() + ' END ZONE', 'left'); 
             drawEndZone((CFG.cols-1)*ts, 0, ts, CFG.rows*ts, teamStyle(1).endBg, teamStyle(1).endText, ROSTERS[1].baseName.toUpperCase() + ' END ZONE', 'right'); 

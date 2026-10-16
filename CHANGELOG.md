@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.26 (16 Oct 2026)
+- **Changed:** the Warped Flagstones are filthier, with darker, stained stone, murky puddles with an oily sheen, sludge trails, splintered planks, gnawed bones, straw and droppings. And the warpstone glow now pulses, slowly swelling and fading every few seconds.
+
 ## v3.25 (16 Oct 2026)
 - **Added:** a new pitch, **Warped Flagstones**, the Skaven's home ground. It's the mossy flagstones with warpstone glowing green: its light seeping up between the stones and through glowing cracks, clusters of glowing shards, and patches washed in green. Behind the block clashes and replays stands a ramshackle wooden stadium, all uneven planks, patches and crooked props, lit by green warpstone lanterns, with rat eyes glinting in the crowd and a leaning bell tower. It plays the cave music, and can also be picked from the Pitch menu. The other underground teams keep the Mossy Flagstones.
 
