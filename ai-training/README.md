@@ -252,8 +252,8 @@ moves with no dice. Tried (`defence-screen.patch`, every change behind `plug2` /
   block or blitz, knocked over with chance `robP` - with the 8 most promising plugs rescored that way. Over 24 matches
   each (both sides on it, then both on v3.16): 37 v 36 touchdowns scored the turn after a defensive turn, 31 v 37 turns
   ending with the carrier 60%+ to run it in; matches ran 2.5 times slower. No better.
-So a better plug alone doesn't stop the leaks; their blockers knock screeners over before the carrier runs, which none
-of these measures see. Still untried: keeping one or two players goal-side of every opponent who could take a hand-off.
+So a better plug alone doesn't stop the leaks, even allowing for their blocks: in most leaky turns the carrier was
+already past everyone still able to act, so the screen has to be in the right place a turn or more earlier. Still untried: keeping one or two players goal-side of every opponent who could take a hand-off.
 
 ## Turn order (Oct 2026, not released)
 `turnover-cost.js` (24 mirror matches on v3.15, 189 turnovers): at a turnover 4.5 players on average were still to act.
