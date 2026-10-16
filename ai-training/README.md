@@ -247,6 +247,11 @@ moves with no dice. Tried (`defence-screen.patch`, every change behind `plug2` /
   could get there), with candidate squares out to twice its reach. 22-23 over 24 matches against v3.15, and matches ran
   three times slower. Leaky turns (carrier 60%+ to run it in) with both sides on it: 29 (23 scored) against 23 (19)
   with the old defence over 24 matches each. No better.
+- Screens that hold up against blocks (`plugRobust`, `robP` 0.5, `robTop` 8; in the same patch, with `plugTwo` now off
+  by default): a screen judged by its worst case - each of our players in the carrier's way whom one of theirs could
+  block or blitz, knocked over with chance `robP` - with the 8 most promising plugs rescored that way. Over 24 matches
+  each (both sides on it, then both on v3.16): 37 v 36 touchdowns scored the turn after a defensive turn, 31 v 37 turns
+  ending with the carrier 60%+ to run it in; matches ran 2.5 times slower. No better.
 So a better plug alone doesn't stop the leaks; their blockers knock screeners over before the carrier runs, which none
 of these measures see. Still untried: keeping one or two players goal-side of every opponent who could take a hand-off.
 
