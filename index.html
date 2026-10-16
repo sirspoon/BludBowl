@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.22</title>
+    <title>BludBowl 3.23</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -902,7 +902,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.22</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.23</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -13901,9 +13901,11 @@
                 const ox = W * 0.5; g.fillStyle = 'rgb(70,52,36)'; g.beginPath(); g.moveTo(ox - 34, hz); g.quadraticCurveTo(ox - 16, hz - 18, ox - 14, hz - 70); g.lineTo(ox + 14, hz - 70); g.quadraticCurveTo(ox + 16, hz - 18, ox + 34, hz); g.closePath(); g.fill();
                 g.fillStyle = 'rgb(46,92,44)'; [[0, -88, 34], [-30, -76, 26], [30, -76, 26], [-14, -102, 22], [16, -100, 22]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(ox + dx, hz + dy, rr, 0, 7); g.fill(); });
                 g.fillStyle = 'rgba(120,170,80,0.5)'; [[-8, -96, 10], [20, -84, 8], [-26, -80, 7]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(ox + dx, hz + dy, rr, 0, 7); g.fill(); });   // sunlit leaves
-                g.fillStyle = 'rgb(150,40,30)'; g.beginPath(); g.arc(ox, hz - 7, 7, Math.PI, 0); g.lineTo(ox + 7, hz); g.lineTo(ox - 7, hz); g.fill();   // the door
-                g.fillStyle = 'rgb(232,196,90)'; g.beginPath(); g.arc(ox + 4, hz - 6, 0.9, 0, 7); g.fill();
-                g.fillStyle = 'rgb(250,220,120)'; [[-12, -20], [12, -26]].forEach(([dx, dy]) => { g.beginPath(); g.arc(ox + dx, hz + dy, 2.6, 0, 7); g.fill(); });   // lit windows
+                const dx0 = ox + 19;   // the gnome's door, off to one side in a root, with a lantern glowing beside it
+                g.fillStyle = 'rgb(150,40,30)'; g.beginPath(); g.arc(dx0, hz - 11, 7, Math.PI, 0); g.lineTo(dx0 + 7, hz); g.lineTo(dx0 - 7, hz); g.fill();
+                g.fillStyle = 'rgb(232,196,90)'; g.beginPath(); g.arc(dx0 + 4, hz - 8, 0.9, 0, 7); g.fill();
+                const lg = g.createRadialGradient(dx0 + 13, hz - 16, 0, dx0 + 13, hz - 16, 11); lg.addColorStop(0, 'rgba(255,220,120,0.7)'); lg.addColorStop(1, 'rgba(255,220,120,0)'); g.fillStyle = lg; g.fillRect(dx0 + 2, hz - 27, 22, 22);
+                g.fillStyle = 'rgb(60,44,30)'; g.fillRect(dx0 + 12.6, hz - 16, 0.9, 16); g.fillStyle = 'rgb(255,214,110)'; g.fillRect(dx0 + 11.4, hz - 19, 3.2, 3.6);
                 const toad = (x, sc) => { g.fillStyle = 'rgb(232,222,200)'; g.fillRect(x - 3 * sc, hz - 9 * sc, 6 * sc, 9 * sc); g.fillStyle = 'rgb(196,44,34)'; g.beginPath(); g.ellipse(x, hz - 9 * sc, 9 * sc, 6 * sc, 0, Math.PI, 0); g.fill();
                     g.fillStyle = 'rgb(250,246,236)'; [[-4, -12], [2, -13.5], [5, -10.5]].forEach(([dx, dy]) => { g.beginPath(); g.arc(x + dx * sc, hz + dy * sc, 1.1 * sc, 0, 7); g.fill(); }); g.fillStyle = 'rgb(110,70,40)'; g.fillRect(x - 1 * sc, hz - 4 * sc, 2 * sc, 4 * sc); };
                 toad(W * 0.3, 1.2); toad(W * 0.68, 1); toad(W * 0.74, 0.7);   // toadstool houses

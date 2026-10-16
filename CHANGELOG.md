@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.23 (16 Oct 2026)
+- **Changed:** the great oak behind the Woodland pitch looked like a face (two lit windows above a round door). The windows are gone, and the gnome's door now sits off to one side in a root, with a lantern glowing beside it.
+
 ## v3.22 (16 Oct 2026)
 - **Added:** a new pitch, **Woodland**, the home ground of the Wood Elves and Gnomes. It's a forest glade with dappled sunlight and canopy shadow, moss, fallen leaves, tree roots creeping in from the sidelines, ferns, bluebells and daisies, mushrooms, red-and-white toadstools and a fairy ring. Behind the block clashes and replays: sunbeams through the trees, toadstool houses, and a great oak with a gnome's round red door and lit windows. It can also be picked from the Pitch menu.
 
