@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown in the bottom-right corner of the title screen.
 
+## v3.38 (16 Oct 2026)
+- **Fixed:** on a phone the version number on the title screen sat on top of the main menu (over the Settings button). It now sits below everything else on the screen and scrolls with the menu.
+
 ## v3.37 (16 Oct 2026)
 - **Fixed:** the referee could still come after other news when a foul was spotted. If the double was on the injury roll, the injury (knocked out, a casualty, the apothecary question) was shown before the whistle. Now the whistle and the referee come first in every case, then the injury, the "ref spotted" message and the send-off as he drops away. The whistle and the referee are also set off together, so they can't drift apart on a busy phone. ([#11](https://github.com/sirspoon/BludBowl/issues/11))
 

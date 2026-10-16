@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.37</title>
+    <title>BludBowl 3.38</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -818,7 +818,7 @@
 #star-hover .sh-pill.used { background: #3f1d1d; color: #fca5a5; border: 1px solid #b91c1c; }
 #star-hover .sh-text { color: #cbd5e1; margin-top: 4px; }
 /* version number on the title screen: opens the changelog */
-#app-version { position: absolute; z-index: 5; right: max(12px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); padding: 3px 9px; border-radius: 999px;
+#app-version { order: 99; align-self: flex-end; flex-shrink: 0; margin: 10px max(4px, env(safe-area-inset-right)) max(2px, env(safe-area-inset-bottom)) 0; padding: 3px 9px;   /* (below everything else on the screen, so it never sits on top of the menu) */ border-radius: 999px;
     border: 1px solid #a16207; background: rgba(120,53,15,.35); color: #fbbf24; font: 700 11px/1.2 Inter, system-ui, sans-serif; letter-spacing: .08em; cursor: pointer; transition: background .15s, border-color .15s; }
 #app-version.hidden { display: none; }
 #app-version:hover, #app-version:focus-visible { background: rgba(180,83,9,.5); border-color: #f59e0b; color: #fde68a; outline: none; }
@@ -903,7 +903,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.37</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.38</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
