@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.13</title>
+    <title>BludBowl 3.14</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -910,7 +910,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.13</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.14</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -19897,7 +19897,8 @@
                 if (state.pitchPick && state.pitchPick.team != null && (el.closest('#pick-banner') || el.id === 'gameCanvas' || el.tagName === 'CANVAS')) return state.pitchPick.team;
                 const lp = el.closest('#lineup-pane0, #lineup-pane1'); if (lp) return +lp.id.slice(-1);
                 if (el.closest('#btn-announce-reload')) return NET.on() ? NET.hostSide() : null;   // the final whistle's summary: the host's device
-                const ii = el.closest('#modal-ind-intro'); if (ii) return ii.dataset.team != null && ii.dataset.team !== '' ? +ii.dataset.team : null;
+                // one team's inducements, shown to the other side: in a two-device match the opponent reads it and presses OK; on one device, whoever is playing
+                const ii = el.closest('#modal-ind-intro'); if (ii) return NET.on() && ii.dataset.team != null && ii.dataset.team !== '' ? 1 - +ii.dataset.team : null;
                 if (el.closest('#modal-roll')) return state.pendingRoll ? state.pendingRoll.player.team : null;
                 if (el.closest('#modal-team-reroll')) return state.activeTeam;
                 if (el.closest('#btn-combat-trr')) return state.activeTeam;

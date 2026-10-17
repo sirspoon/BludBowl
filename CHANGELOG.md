@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.14 (17 Oct 2026)
+- **Fixed:** before kick-off, the panel showing the computer's inducements couldn't be closed: its OK button counted as the computer's to press, and the computer never pressed it, so the match was stuck. You can now close it. In two-device play, each team's panel is closed by the other player, who's the one reading it.
+
 ## v3.13 (16 Oct 2026)
 - **Improved:** dropped connections in two-device play ([#18](https://github.com/sirspoon/BludBowl/issues/18)).
   - **Host:** when the other player drops, the banner says the game is waiting for them to reconnect. If it's been their move for 20 seconds, a panel gives the code to rejoin with and offers Keep waiting or Computer takes over. It asks again every couple of minutes, and goes away when they're back. It no longer uses the game's question panel, so a question the other player still has to answer isn't lost.
