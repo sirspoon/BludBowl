@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.17 (21 Oct 2026)
+- **Changed:** on a phone held upright, the main action buttons are two to a row, as in landscape, instead of one per row, so the bigger buttons take up about half the space.
+
 ## v3.16 (21 Oct 2026)
 - **Changed:** the action buttons (Move, Block, Blitz, Pass and the rest) are bigger and further apart, so they're harder to mis-tap: about half as tall again, with larger text.
 
