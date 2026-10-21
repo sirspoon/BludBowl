@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.16 (21 Oct 2026)
+- **Changed:** the action buttons (Move, Block, Blitz, Pass and the rest) are bigger and further apart, so they're harder to mis-tap: about half as tall again, with larger text.
+
 ## v3.15 (21 Oct 2026)
 - **Fixed:** league and tournament matches followed the Pitch setting from Exhibition and Settings, so once it had been set to a particular pitch (the Jungle Temple, say), every league match was played there. They're now always at the home team's ground, whatever the setting. Exhibition matches still use the setting.
 
