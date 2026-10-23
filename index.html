@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.22</title>
+    <title>BludBowl 3.23</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.22</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.23</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -957,7 +957,7 @@
             <div class="st-row"><span>Music</span><button type="button" class="st-tog" id="st-music"></button></div>
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
-                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="warpstone">Warped Flagstones</option></select></div>
+                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="warpstone">Warped Flagstones</option></select></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
@@ -1004,7 +1004,7 @@
                 <option value="blades">Grass</option>
                 <option value="worn">Muddy Grass</option>
                 <option value="flagstone">Mossy Flagstones</option>
-                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="warpstone">Warped Flagstones</option>
+                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="warpstone">Warped Flagstones</option>
             </select>
         </div>
         <div class="flex items-center justify-center gap-2 mb-5 -mt-2 pointer-events-auto">
@@ -10339,6 +10339,94 @@
     }
     if (fillNext && Math.random() < 0.7) scurry(B, t + 3 * s, 0.07);
   }
+  // ---------- BLACK ARK (the Dark Elves): a dark sea shanty on the deck of a floating fortress at night - a wheezing concertina, the
+  // crew chanting "heave... ho", an oar-drum beating time, chains, the hull creaking, waves, gulls and a distant ship's bell, in D minor
+  const BA_BPM = { calm: 58, normal: 76, tense: 90 };
+  const BA_ROOTS = [50, 46, 48, 45], BA_THIRD = [3, 4, 4, 4];   // D minor, B flat, C, A (the A major pulling back to D minor)
+  // the shanty's tune, a line a bar: [note, start, length] in thirds of a beat (a slow, rolling 12/8)
+  const BA_TUNE = [
+    [[69, 0, 3], [69, 3, 1], [74, 4, 2], [72, 6, 3], [69, 9, 3]],
+    [[70, 0, 3], [69, 3, 1], [67, 4, 2], [65, 6, 3], [62, 9, 3]],
+    [[64, 0, 3], [67, 3, 1], [72, 4, 2], [70, 6, 2], [69, 8, 1], [67, 9, 3]],
+    [[69, 0, 2], [67, 2, 1], [65, 3, 3], [64, 6, 3], [61, 9, 1], [64, 10, 2]]];
+  // the concertina: pairs of reeds (a buzzy and a hollow one, a little out of tune with each other), the bellows giving a slow wobble
+  function concertina(B, notes, t, dur, v, o = {}) {
+    const lp = ctx.createBiquadFilter(), hp = ctx.createBiquadFilter(), g = ctx.createGain(), trem = ctx.createOscillator(), tg = ctx.createGain();
+    lp.type = 'lowpass'; lp.frequency.value = o.bright ? 2600 : 1700; lp.Q.value = 0.7; hp.type = 'highpass'; hp.frequency.value = 220;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + (o.a || 0.05)); g.gain.setValueAtTime(v * 0.85, t + Math.max((o.a || 0.05) + 0.01, dur - 0.08)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.05);
+    trem.frequency.value = 5.2; tg.gain.value = v * 0.16; trem.connect(tg); tg.connect(g.gain);
+    lp.connect(hp); hp.connect(g); g.connect(o.dest || B.main); const sv = ctx.createGain(); sv.gain.value = 0.35; g.connect(sv); sv.connect(verbIn);
+    notes.forEach(m => [['sawtooth', -7, 0.7], ['square', 7, 0.45]].forEach(([ty, d, k]) => { const os = ctx.createOscillator(), og = ctx.createGain(); os.type = ty; os.frequency.value = hz(m); os.detune.value = d; og.gain.value = k; os.connect(og); og.connect(lp); os.start(t); os.stop(t + dur + 0.1); }));
+    trem.start(t); trem.stop(t + dur + 0.1);
+  }
+  // the crew: a handful of deep voices together, the vowel moving as they sing ("ee" to "eh" for HEAVE, "oh" to "oo" for HO), an 'h' of breath first
+  const BA_VOW = { ee: [300, 2300], eh: [530, 1840], oh: [450, 800], ah: [700, 1150], oo: [320, 760] };
+  function crew(B, m, t, dur, v, from = 'oh', to = from, o = {}) {
+    const f1 = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter(), g = ctx.createGain(); f1.type = 'bandpass'; f2.type = 'bandpass'; f1.Q.value = 4; f2.Q.value = 6;
+    const [a1, a2] = BA_VOW[from], [b1, b2] = BA_VOW[to];
+    f1.frequency.setValueAtTime(a1, t); f2.frequency.setValueAtTime(a2, t); f1.frequency.linearRampToValueAtTime(b1, t + dur * 0.7); f2.frequency.linearRampToValueAtTime(b2, t + dur * 0.7);
+    g.gain.value = v; f1.connect(g); f2.connect(g); const dest = o.dest || B.pad; g.connect(dest); const sv = ctx.createGain(); sv.gain.value = 0.5; g.connect(sv); sv.connect(verbIn);
+    const voices = o.voices || 5;
+    for (let k = 0; k < voices; k++) { const os = ctx.createOscillator(), og = ctx.createGain(), dt = Math.random() * 0.03; os.type = 'sawtooth'; os.frequency.value = hz(m - (k % 2 ? 12 : 0)); os.detune.value = (Math.random() - 0.5) * 28;
+      og.gain.setValueAtTime(0.0001, t + dt); og.gain.linearRampToValueAtTime(0.35, t + dt + (o.a || 0.06)); og.gain.setValueAtTime(0.3, t + Math.max(dt + (o.a || 0.06) + 0.01, dur - 0.08)); og.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.1);
+      os.connect(og); og.connect(f1); og.connect(f2); os.start(t + dt); os.stop(t + dur + 0.15); }
+    if (o.h) nz(dest, Math.max(0, t - 0.03), 0.09, v * 0.7, 'bandpass', 1800, 1400, 1.2);
+  }
+  const heave = (B, r, t, s, v) => { crew(B, r + 12, t, s * 1.4, v, 'ee', 'eh', { h: 1 }); crew(B, r + 7, t + s * 2, s * 1.2, v * 1.15, 'oh', 'oo', { h: 1 }); };   // "HEAVE... HO!"
+  // the oar-drum: a deep, booming stroke
+  const oarDrum = (B, t, v) => { note(B.main, 'sine', 40, t, 0.55, v * 0.9, { slideFrom: 47, slideTime: 0.08, a: 0.003, r: 0.4, verb: 0.35 }); nz(B.main, t, 0.06, v * 0.25, 'lowpass', 900, 300, 0.8); };
+  // the hull creaking: wood straining (a slow buzz through a narrow, shifting resonance)
+  const creak = (B, t, v) => {
+    const o = ctx.createOscillator(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), d = 0.5 + Math.random() * 0.7;
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(28 + Math.random() * 10, t); o.frequency.linearRampToValueAtTime(55 + Math.random() * 25, t + d * 0.6); o.frequency.linearRampToValueAtTime(35, t + d);
+    bp.type = 'bandpass'; bp.frequency.setValueAtTime(650 + Math.random() * 200, t); bp.frequency.linearRampToValueAtTime(1100, t + d); bp.Q.value = 6;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.08); g.gain.setValueAtTime(v * 0.8, t + d * 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(bp); bp.connect(g); g.connect(B.pad); const sv = ctx.createGain(); sv.gain.value = 0.3; g.connect(sv); sv.connect(verbIn); o.start(t); o.stop(t + d + 0.05);
+  };
+  // a wave: a swell of sea-noise rising and falling
+  const wave = (B, t, dur, v) => {
+    const src = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g = ctx.createGain(); src.buffer = noiseBuf(); src.loop = true;
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(260, t); lp.frequency.linearRampToValueAtTime(1300, t + dur * 0.45); lp.frequency.linearRampToValueAtTime(240, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + dur * 0.45); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    src.connect(lp); lp.connect(g); g.connect(B.pad); const sv = ctx.createGain(); sv.gain.value = 0.4; g.connect(sv); sv.connect(verbIn); src.start(t, Math.random() * 1.5); src.stop(t + dur + 0.05);
+  };
+  // gulls overhead: "kee-ow", twice or three times
+  const gull = (B, t, v) => { const n = 2 + (Math.random() < 0.5 ? 1 : 0); for (let k = 0; k < n; k++) { const at = t + k * 0.34, m = 88 + Math.floor(Math.random() * 3); note(B.far, 'sawtooth', m, at, 0.28, v, { slideFrom: m + 4, slideTime: 0.22, cut: 2600, a: 0.02, r: 0.1 }); } };
+  // chains: a rattle of iron links
+  const chains = (B, t, v) => { for (let k = 0; k < 4; k++) { const at = t + k * 0.035 + Math.random() * 0.02; nz(B.main, at, 0.05, v * (1 - k * 0.2), 'bandpass', 3200 + Math.random() * 1500, 2600, 6); note(B.main, 'square', 96 + Math.floor(Math.random() * 6), at, 0.04, v * 0.05, { a: 0.001, r: 0.03, cut: 6000 }); } };
+  function baBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    const r = BA_ROOTS[i], th = BA_THIRD[i], e = s / 3, quiet = kind === 'calm' || kind === 'lull';
+    const ch = [r + 12, r + 12 + th, r + 19];   // the chord, in the concertina's middle
+    // the sea: a wave every bar or two, the hull creaking, gulls when it's quiet
+    if (i % 2 === 0 || quiet) wave(B, t + Math.random() * s, s * (3 + Math.random() * 2), quiet ? 0.13 : 0.06);
+    if (Math.random() < (quiet ? 0.6 : 0.35)) creak(B, t + Math.random() * s * 3, 0.05);
+    if ((quiet || kind === 'breakdown') && Math.random() < 0.35) gull(B, t + Math.random() * s * 3, 0.022);
+    // the ship's bell, far off, at the top of the calm and the breakdown
+    if ((kind === 'calm' || kind === 'breakdown') && i === 0) bellToll(B, 57, t + s * 0.5, 0.035);
+    // the oar-drum: slow and heavy - both oars on beats 1 and 3, a lighter stroke between (pounding on every beat in the drive)
+    if (kind === 'lull') oarDrum(B, t, 0.5);
+    else if (kind === 'drive') for (let b = 0; b < 4; b++) { oarDrum(B, t + b * s, b % 2 ? 0.6 : 0.85); chains(B, t + b * s + 2 * e, 0.05); }
+    else if (!quiet && kind !== 'breakdown') { [0, 2].forEach(b => oarDrum(B, t + b * s, 0.8)); [1, 3].forEach(b => oarDrum(B, t + b * s + (tense ? 0 : 2 * e), 0.4)); }
+    // the low strings: a dark drone under everything
+    if (kind !== 'stab') note(B.sc, 'sawtooth', r - 12, t, s * 4, quiet ? 0.05 : 0.07, { cut: 420, a: 0.5, r: 0.5, vib: 5, det: -5 });
+    // the concertina: breathing chords when it's calm, a rocking oom-pah in the groove, the tune in the chorus, stabs in the hook
+    if (kind === 'calm') concertina(B, ch, t, s * 3.8, 0.045, { a: 0.9 });
+    else if (kind === 'lull') [0, 2].forEach(b => concertina(B, ch, t + b * s, s * 1.6, 0.025, { a: 0.15 }));
+    else if (kind === 'main' || kind === 'drive') for (let b = 0; b < 4; b++) { concertina(B, [r], t + b * s, e * 1.6, 0.03); concertina(B, ch, t + b * s + e * 1.5, e * 1.4, 0.025); }
+    else if (kind === 'chorus') { for (let b = 0; b < 4; b++) concertina(B, ch, t + b * s, e * 2.6, 0.018); BA_TUNE[i].forEach(([m, k, d]) => concertina(B, [m], t + k * e, d * e * 0.95, 0.045, { bright: 1, a: 0.03 })); }
+    else if (kind === 'stab') [0, 1.5, 2, 3.5].forEach(b => concertina(B, ch.concat(r + 24), t + b * s, e * 0.9, 0.04, { bright: 1, a: 0.01 }));
+    // the crew: "HEAVE... HO!" in the groove, the drive and the hook; humming in the breakdown; singing the tune in the chorus
+    if (kind === 'main' && i % 2 === 0) heave(B, r, t, s, 0.05);
+    if (kind === 'drive') heave(B, r, t, s, 0.06);
+    if (kind === 'stab') [1.5, 3.5].forEach(b => crew(B, r + 7, t + b * s, e * 1.2, 0.06, 'oh', 'oh', { h: 1 }));
+    if (kind === 'breakdown') { crew(B, r + 12, t, s * 4, 0.16, 'oo', 'oh', { a: 0.6, voices: 6 }); concertina(B, ch, t, s * 3.8, 0.03, { a: 1.2 }); }
+    if (kind === 'breakdown' && i === 2) BA_TUNE[0].slice(0, 3).forEach(([m, k, d]) => concertina(B, [m], t + k * e * 2, d * e * 1.9, 0.03, { a: 0.1 }));
+    if (kind === 'chorus' && ph >= 4) BA_TUNE[i].forEach(([m, k, d]) => crew(B, m - 12, t + k * e, d * e * 0.95, 0.045, 'ah', 'oh'));
+    if (kind === 'chorus' && ph < 4 && i % 2 === 1) heave(B, r, t, s, 0.04);
+    // accents and transitions: a crash of chains at the top of the drive and the chorus, and a drum roll into the next section
+    if (i === 0 && (kind === 'chorus' || kind === 'drive')) { chains(B, t, 0.09); crash(B.main, t, 0.07); }
+    if (fillNext) for (let k = 0; k < 6; k++) oarDrum(B, t + 3 * s + k * e / 2, 0.3 + k * 0.08);
+  }
   // ---------- the taunt at the referee after a sending-off, in every style: "duh-deeh-duh-deeh-duh-deeh-duuuhhhh", two notes a
   // minor third apart, each straight after the last, the high ones held a little longer and a long one to finish, played twice by
   // that style's own instruments (on the chant channel) while the rest of the band drops back. [semitones up, length in short notes]
@@ -10366,7 +10454,9 @@
     worn: (B, t, s) => { trChantRef(B, t, s); return 28 * s * 0.54; },
     // the lead guitar's notes run into each other (no gaps to stutter), the choir under them, and the band keeps more of its weight
     brimstone: (B, t, s) => tauntPlay(B, t, 64, 0.8, (C, m, at, d, hi, last, n) => { khGuitar(C, [m + 12], at, d + 0.08, 0.08, { lead: true, bus: C.main, vib: 22, r: 0.06, slideFrom: m + 12 + (hi ? -3 : 3) }); khChoir(C, m, at, d * 1.02, 0.06, 3); if (last) { khGuitar(C, power(40), at, d * 2, 0.1, { r: 0.8 }); crash(C.main, at, 0.25); } }, { n: tauntNote(s), dip: 0.65 }),
-    woodland: (B, t, s) => tauntPlay(B, t, 76, 1.46, (C, m, at, d, hi) => { whistle(C, m, at, d * 0.95, 0.07); fiddle(C, m - 12, at, d * 0.95, 0.03); if (hi) bodhran(C, at, 0.5); }, { n: tauntNote(s) })
+    woodland: (B, t, s) => tauntPlay(B, t, 76, 1.46, (C, m, at, d, hi) => { whistle(C, m, at, d * 0.95, 0.07); fiddle(C, m - 12, at, d * 0.95, 0.03); if (hi) bodhran(C, at, 0.5); }, { n: tauntNote(s) }),
+    // the concertina with the crew singing along, the oar-drum on the high notes, and the ship's bell at the end
+    blackark: (B, t, s) => tauntPlay(B, t, 74, 1.6, (C, m, at, d, hi, last) => { concertina(C, [m], at, d * 0.95, 0.05, { bright: 1, a: 0.02 }); crew(C, m - 12, at, d * 0.95, 0.04, 'ah', 'oh'); if (hi) oarDrum(C, at, 0.5); if (last) bellToll(C, 57, at + d * 0.4, 0.03); }, { n: tauntNote(s) })
   };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
@@ -10393,8 +10483,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far, band, chant };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM } };   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 } };   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -14269,6 +14359,7 @@
             else if (elven) { sky.addColorStop(0, 'rgb(150,186,222)'); sky.addColorStop(0.65, 'rgb(214,226,236)'); sky.addColorStop(1, 'rgb(246,236,210)'); }   // a soft, luminous elven sky
             else if (style === 'warpstone') { sky.addColorStop(0, 'rgb(8,14,10)'); sky.addColorStop(0.6, 'rgb(22,40,24)'); sky.addColorStop(1, 'rgb(60,96,48)'); }   // a dark night, lit green from below
             else if (style === 'woodland') { sky.addColorStop(0, 'rgb(30,60,34)'); sky.addColorStop(0.5, 'rgb(96,140,80)'); sky.addColorStop(1, 'rgb(196,214,150)'); }   // green light under the canopy
+            else if (style === 'blackark') { sky.addColorStop(0, 'rgb(5,5,12)'); sky.addColorStop(0.6, 'rgb(22,18,40)'); sky.addColorStop(1, 'rgb(52,40,72)'); }   // a moonlit night at sea
             else if (style === 'brimstone') { sky.addColorStop(0, 'rgb(22,8,10)'); sky.addColorStop(0.55, 'rgb(88,20,14)'); sky.addColorStop(1, 'rgb(196,70,24)'); }   // a red-black sky, lit from below by the lava
             else if (grassy) { sky.addColorStop(0, 'rgb(74,138,206)'); sky.addColorStop(0.75, 'rgb(140,190,232)'); sky.addColorStop(1, 'rgb(176,210,236)'); }   // a daytime-blue sky over the grass
             else { sky.addColorStop(0, mix(base, 0.18)); sky.addColorStop(1, mix(base, 0.5)); }
@@ -14312,6 +14403,35 @@
                     for (let k = 0; k < 4; k++) { const a = dir > 0 ? -0.2 - k * 0.35 : Math.PI + 0.2 + k * 0.35; g.beginPath(); g.ellipse(x + Math.cos(a) * len * 0.5, y + Math.sin(a) * len * 0.5, len * 0.55, len * 0.14, a, 0, 7); g.fill(); }
                 };
                 frond(-4, hz + 4, 1, 46); frond(W + 4, hz + 4, -1, 46);
+            } else if (style === 'blackark') {   // the night sea, a pale moon, and the Ark's black spires with violet-lit windows
+                const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
+                const mg = g.createRadialGradient(W * 0.78, 22, 2, W * 0.78, 22, 34); mg.addColorStop(0, 'rgba(230,226,240,0.9)'); mg.addColorStop(0.3, 'rgba(200,196,226,0.35)'); mg.addColorStop(1, 'rgba(200,196,226,0)');
+                g.fillStyle = mg; g.fillRect(W * 0.78 - 40, -18, 80, 80); g.fillStyle = 'rgba(236,232,246,0.95)'; g.beginPath(); g.arc(W * 0.78, 22, 8, 0, 7); g.fill();
+                for (let i = 0; i < 26; i++) { g.fillStyle = `rgba(220,220,240,${(0.3 + R(i) * 0.5).toFixed(2)})`; g.fillRect(R(i + 50) * W, R(i + 90) * (hz - 50), 1, 1); }   // stars
+                // the sea at the horizon, with the moon's path on it
+                g.fillStyle = 'rgb(14,18,30)'; g.fillRect(0, hz - 16, W, 18);
+                g.strokeStyle = 'rgba(120,130,170,0.35)'; g.lineWidth = 1;
+                for (let i = 0; i < 18; i++) { const wx = R(i + 7) * W, wy = hz - 14 + R(i + 3) * 12; g.beginPath(); g.moveTo(wx, wy); g.quadraticCurveTo(wx + 5, wy - 2, wx + 10, wy); g.stroke(); }
+                g.fillStyle = 'rgba(220,216,240,0.25)'; for (let i = 0; i < 6; i++) g.fillRect(W * 0.78 - 8 + R(i + 30) * 10, hz - 14 + i * 2, 6 + R(i) * 6, 1);
+                // the Ark: a black fortress with tall spires
+                const ark = 'rgb(10,8,16)', arkHi = 'rgb(26,20,38)';
+                const spire = (sx, w, h) => {
+                    g.fillStyle = ark; g.beginPath(); g.moveTo(sx - w / 2, hz - 10); g.lineTo(sx - w / 2, hz - h * 0.62); g.lineTo(sx - w * 0.32, hz - h * 0.66); g.lineTo(sx, hz - h); g.lineTo(sx + w * 0.32, hz - h * 0.66); g.lineTo(sx + w / 2, hz - h * 0.62); g.lineTo(sx + w / 2, hz - 10); g.closePath(); g.fill();
+                    g.fillStyle = arkHi; g.fillRect(sx - w / 2, hz - h * 0.62, 1.5, h * 0.6);   // moonlit edge
+                    g.fillStyle = ark; g.beginPath(); g.moveTo(sx - w * 0.7, hz - h * 0.45); g.lineTo(sx, hz - h * 0.52); g.lineTo(sx + w * 0.7, hz - h * 0.45); g.lineTo(sx + w * 0.55, hz - h * 0.4); g.lineTo(sx - w * 0.55, hz - h * 0.4); g.fill();   // a jutting ring of blades
+                    for (let k = 0; k < 3; k++) { if (R(sx + k) < 0.75) { g.fillStyle = `rgba(${R(k + sx) < 0.3 ? '220,60,90' : '176,96,255'},0.9)`; g.fillRect(sx - 1.5, hz - h * (0.2 + k * 0.14), 3, 4); } }   // lit windows
+                };
+                g.fillStyle = ark; g.fillRect(0, hz - 40, W, 32);   // the curtain wall
+                for (let x0 = 0; x0 < W; x0 += 9) { g.beginPath(); g.moveTo(x0, hz - 40); g.lineTo(x0 + 3, hz - 47); g.lineTo(x0 + 6, hz - 40); g.fill(); }   // spiked battlements
+                g.fillStyle = 'rgba(176,96,255,0.75)'; for (let i = 0; i < 14; i++) if (R(i + 200) < 0.6) g.fillRect(R(i + 210) * W, hz - 34 + R(i + 220) * 18, 2, 3);   // slit windows in the wall
+                [[0.06, 14, 86], [0.14, 18, 108], [0.26, 14, 76], [0.38, 22, 140], [0.5, 28, 178], [0.62, 22, 132], [0.74, 14, 84], [0.86, 18, 112], [0.95, 12, 70]].forEach(([fx, w, h]) => spire(W * fx, w, Math.min(h, hz - 8)));
+                g.strokeStyle = 'rgba(30,24,44,0.9)'; g.lineWidth = 0.8;   // chains and rigging slung between the spires
+                [[0.14, 0.26, 56], [0.38, 0.5, 96], [0.5, 0.62, 92], [0.74, 0.86, 60]].forEach(([a, b, h]) => { g.beginPath(); g.moveTo(W * a, hz - h); g.quadraticCurveTo(W * (a + b) / 2, hz - h + 12, W * b, hz - h); g.stroke(); });
+                g.fillStyle = 'rgba(126,34,206,0.85)';   // pennants from the tallest spires
+                [[0.5, 178], [0.38, 140], [0.62, 132]].forEach(([fx, h]) => { const px = W * fx, top = Math.min(h, hz - 8); g.beginPath(); g.moveTo(px, hz - top); g.lineTo(px + 14, hz - top + 4); g.lineTo(px, hz - top + 8); g.fill(); });
+                // the deck rail in front, with its posts
+                g.fillStyle = 'rgb(18,14,22)'; g.fillRect(0, hz - 6, W, 4);
+                for (let x0 = 4; x0 < W; x0 += 22) g.fillRect(x0, hz - 6, 3, 8);
             } else if (style === 'warpstone') {   // a ramshackle wooden stadium lit by warpstone lanterns, rat eyes in the crowd, and a crooked bell tower
                 const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
                 const wood = ['rgb(96,74,50)', 'rgb(80,60,40)', 'rgb(108,84,56)'];
@@ -15517,11 +15637,11 @@
         
         // ---------- pitch texture: painted once by the game itself (no image files) ----------
         // 'blades' = lush grass, 'worn' = the same with churned-up mud; one is picked at random each time the game loads
-        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone'];
+        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark'];
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blades', khorne: 'brimstone', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blackark', khorne: 'brimstone', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -15649,6 +15769,76 @@
         }
         // brimstone (Khorne and the Chaos Renegades): cracked basalt columns, lava glowing up through the joints, pools of it along the
         // sidelines, skulls and bones, scorch marks and embers
+        // the Black Ark (the Dark Elves): the deck of a floating fortress - blackened planks running the length of the pitch, iron nails and
+        // gratings, coiled ropes and mooring rings, chains along the sidelines, salt streaks and wet patches, and faint violet runes in the end zones
+        function blackArkPitch(S) {
+            const ts = CFG.tileSize, COLS = CFG.cols, ROWS = CFG.rows, W = COLS * ts, H = ROWS * ts;
+            const cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
+            const x = cv.getContext('2d'), r = pitchRng(PITCH.seed + 131); watchPitchCanvas(cv);
+            const img = x.createImageData(cv.width, cv.height), d = img.data;
+            const ph = ts * 0.5 * S, rows = Math.ceil(cv.height / ph) + 1;   // planks half a square wide, running along the pitch
+            const off = [], lens = [], tones = [];
+            for (let j = 0; j < rows; j++) { off.push(r() * 6 * ts * S); lens.push((3.5 + r() * 3) * ts * S); tones.push([]); for (let k = 0; k < 20; k++) tones[j].push((r() - 0.5) * 0.35); }
+            const grain = pitchNoise(r, cv.width, cv.height, 3 * S), big = pitchNoise(r, cv.width, cv.height, 80 * S), wet = pitchNoise(r, cv.width, cv.height, 46 * S);
+            for (let py = 0; py < cv.height; py++) {
+                const j = Math.floor(py / ph), inRow = py - j * ph;
+                for (let px = 0; px < cv.width; px++) {
+                    const u = px + off[j], k = Math.floor(u / lens[j]), along = u - k * lens[j];
+                    const g1 = grain(px * 0.08, py * 1.0), g2 = grain(px * 0.02 + 300, py * 0.6);   // long streaks of grain
+                    let t = 0.45 + tones[j][k % 20] + (g1 - 0.5) * 0.5 + (g2 - 0.5) * 0.35 + (big(px, py) - 0.5) * 0.25;
+                    let R = 34 + 34 * t, G = 30 + 28 * t, B = 32 + 28 * t;   // tarred black wood, charred grey-brown (light enough for purple players to stand out)
+                    const w = wet(px, py); if (w > 0.66) { const k2 = Math.min(1, (w - 0.66) * 4); R -= 10 * k2; G -= 8 * k2; B -= 4 * k2; }   // damp, darker
+                    if (inRow < 1.3 * S || along < 1.2 * S) { R = 8; G = 6; B = 11; }   // the seams and the joints between planks
+                    else if (inRow < 2.4 * S) { R *= 0.7; G *= 0.7; B *= 0.72; }
+                    const jit = (r() - 0.5) * 8, i = (py * cv.width + px) * 4;
+                    d[i] = R + jit; d[i + 1] = G + jit * 0.9; d[i + 2] = B + jit; d[i + 3] = 255;
+                }
+            }
+            x.putImageData(img, 0, 0);
+            // nails at the end of every plank, and a pair here and there along it
+            x.fillStyle = 'rgba(120,118,130,0.55)';
+            for (let j = 0; j < rows; j++) for (let u = -off[j]; u < cv.width; u += lens[j]) {
+                [[3, 0.3], [3, 0.7]].forEach(([dx, fy]) => { x.beginPath(); x.arc(u + dx * S, (j + fy) * ph, 0.9 * S, 0, 7); x.fill(); });
+                if (r() < 0.5) { const m = u + lens[j] * (0.3 + r() * 0.4); x.beginPath(); x.arc(m, (j + 0.3) * ph, 0.8 * S, 0, 7); x.arc(m, (j + 0.7) * ph, 0.8 * S, 0, 7); x.fill(); }
+            }
+            // salt streaks, dried white on the black wood
+            for (let k = 0; k < 26; k++) {
+                const sx = r() * cv.width, sy = r() * cv.height, len = (20 + r() * 70) * S;
+                const gr = x.createLinearGradient(sx, sy, sx + len, sy); gr.addColorStop(0, 'rgba(190,200,210,0)'); gr.addColorStop(0.5, `rgba(190,200,210,${(0.05 + r() * 0.07).toFixed(2)})`); gr.addColorStop(1, 'rgba(190,200,210,0)');
+                x.fillStyle = gr; x.fillRect(sx, sy, len, (2 + r() * 5) * S);
+            }
+            // wet sheen: soft blue-grey highlights where the sea has washed over
+            for (let k = 0; k < 9; k++) {
+                const cx = r() * cv.width, cy = r() * cv.height, rr = (14 + r() * 26) * S;
+                const gr = x.createRadialGradient(cx, cy, 0, cx, cy, rr); gr.addColorStop(0, 'rgba(120,140,170,0.10)'); gr.addColorStop(1, 'rgba(120,140,170,0)');
+                x.fillStyle = gr; x.beginPath(); x.ellipse(cx, cy, rr * 1.6, rr * 0.7, 0, 0, 7); x.fill();
+            }
+            const sq = (gx, gy) => [gx * ts * S, gy * ts * S], Z = ts * S;
+            // iron gratings over the hold (in the wide zones, clear of the middle)
+            [[6, 1], [19, 12], [9, 12.2], [16, 0.8]].forEach(([gx, gy]) => {
+                const [cx, cy] = sq(gx, gy), w = Z * 1.6, h = Z * 0.9;
+                x.fillStyle = 'rgba(6,5,9,0.92)'; x.fillRect(cx, cy, w, h);
+                x.strokeStyle = 'rgba(88,84,96,0.85)'; x.lineWidth = 1.4 * S; x.strokeRect(cx, cy, w, h);
+                x.lineWidth = 1.1 * S; for (let k = 1; k < 7; k++) { x.beginPath(); x.moveTo(cx + k * w / 7, cy); x.lineTo(cx + k * w / 7, cy + h); x.stroke(); }
+                for (let k = 1; k < 4; k++) { x.beginPath(); x.moveTo(cx, cy + k * h / 4); x.lineTo(cx + w, cy + k * h / 4); x.stroke(); }
+            });
+            // coiled ropes and iron mooring rings by the sidelines
+            const coil = (cx, cy, rr) => { x.lineWidth = 1.6 * S; for (let k = 0; k < 5; k++) { x.strokeStyle = k % 2 ? 'rgba(110,92,64,0.9)' : 'rgba(84,68,46,0.9)'; x.beginPath(); x.arc(cx, cy, rr - k * 1.8 * S, 0, 7); x.stroke(); } x.fillStyle = 'rgba(40,32,22,0.9)'; x.beginPath(); x.arc(cx, cy, rr - 9 * S, 0, 7); x.fill(); };
+            [[3.4, 0.55], [22.6, 14.4], [12.5, 14.45]].forEach(([gx, gy]) => { const [cx, cy] = sq(gx, gy); coil(cx, cy, 10 * S); });
+            [[8.5, 0.35], [17.5, 14.65], [2, 14.6], [24, 0.4]].forEach(([gx, gy]) => { const [cx, cy] = sq(gx, gy); x.strokeStyle = 'rgba(96,92,104,0.9)'; x.lineWidth = 2 * S; x.beginPath(); x.arc(cx, cy, 5 * S, 0, 7); x.stroke(); x.fillStyle = 'rgba(70,66,78,0.9)'; x.fillRect(cx - 3 * S, cy - 7 * S, 6 * S, 3 * S); });
+            // heavy chains along both sidelines
+            const chain = y0 => { for (let cx = 0; cx < cv.width; cx += 9 * S) { const odd = Math.round(cx / (9 * S)) % 2; x.strokeStyle = odd ? 'rgba(70,68,80,0.95)' : 'rgba(104,100,114,0.95)'; x.lineWidth = 1.8 * S; x.beginPath(); if (odd) x.ellipse(cx, y0, 1.6 * S, 4.2 * S, Math.PI / 2, 0, 7); else x.ellipse(cx, y0, 5.6 * S, 2.6 * S, 0, 0, 7); x.stroke(); } };
+            chain(4 * S); chain(cv.height - 4 * S);
+            // faint violet runes in each end zone
+            const rune = (cx, cy) => {
+                x.save(); x.translate(cx, cy); x.strokeStyle = 'rgba(168,85,247,0.22)'; x.lineWidth = 1.8 * S;
+                x.beginPath(); x.arc(0, 0, Z * 1.1, 0, 7); x.stroke(); x.beginPath(); x.arc(0, 0, Z * 0.85, 0, 7); x.stroke();
+                for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; x.beginPath(); x.moveTo(Math.cos(a) * Z * 0.85, Math.sin(a) * Z * 0.85); x.lineTo(Math.cos(a + 2.1) * Z * 0.85, Math.sin(a + 2.1) * Z * 0.85); x.stroke(); }
+                x.restore();
+            };
+            rune(Z * 0.5, cv.height / 2); rune(cv.width - Z * 0.5, cv.height / 2);
+            return { cv, x, r };
+        }
         function brimstonePitch(S) {
             const ts = CFG.tileSize, COLS = CFG.cols, ROWS = CFG.rows, W = COLS * ts, H = ROWS * ts;
             const cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
@@ -15856,6 +16046,13 @@
         function buildPitchTexture() {
             const ts = CFG.tileSize, W = CFG.cols * ts, H = CFG.rows * ts, S = 1.5;
             PITCH.glow = null;   // (a layer drawn over the pitch with a pulse: the warpstone's glow)
+            if (PITCH.style === 'blackark') {   // lines painted pale grey-violet on the black deck
+                const o = blackArkPitch(S), x = o.x, r = o.r;
+                const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(206,198,224,${(al * (0.6 + r() * 0.3)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5) * 0.6) * S, py * S, w * S, 2 * S); } };
+                chalkLines(chalk, ts);
+                PITCH.tex = o.cv;
+                return;
+            }
             if (PITCH.style === 'brimstone') {   // lines of pale ash on the basalt
                 const o = brimstonePitch(S), x = o.x, r = o.r;
                 const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(232,222,206,${(al * (0.6 + r() * 0.35)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5)) * S, py * S, w * S, 2 * S); } };

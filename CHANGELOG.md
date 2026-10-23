@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.23 (23 Oct 2026)
+- **Added:** a new pitch, **Black Ark**, the Dark Elves' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** the deck of a floating fortress at night. Blackened planks run the length of the pitch, with iron nails, gratings over the hold, coiled ropes, mooring rings, chains along the sidelines, salt streaks and wet patches, and faint violet runes in the end zones.
+  - **Behind the block clashes:** a moonlit sea, and the Ark's black spires with violet-lit windows and purple pennants.
+  - **The music:** a dark sea shanty in D minor. A wheezing concertina, the crew chanting "heave… ho" and singing the tune, a booming oar-drum, rattling chains and low strings, with the hull creaking, waves, gulls and a distant ship's bell. Its referee taunt is played on the concertina with the crew singing along.
+  - **Pitch menus:** Black Ark can also be picked from the Pitch menus. The Dark Elves were on Grass before.
+
 ## v3.22 (23 Oct 2026)
 - **Added:** keyboard shortcuts ([#34](https://github.com/sirspoon/BludBowl/issues/34)). **Space** or **Enter** confirms: a roll, an announcement, the inducements panel, a kick-off event, the set-up, or the planned move. **Esc** cancels the planned route, a roll that can be cancelled, or the action. **M** Move, **B** Block, **L** Blitz, **F** Foul, **P** Pass, **H** Hand-off and **E** End activation pick from the action buttons. W A S D still scroll the view.
 - **Changed:** a saved team's players are now numbered in their Team Builder order ([#2](https://github.com/sirspoon/BludBowl/issues/2)). The in-match Rosters list and the line-up screen already followed that order. Only the formation decides where the starters stand.
