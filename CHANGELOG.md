@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.49 (23 Oct 2026)
+- **Improved:** the Tomb Kings have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), all with broad gold collars and white linen kilts.
+  - **Skeleton:** a striped team headdress over a glowing-eyed skull.
+  - **Thrower:** a tall white crown with a golden cobra, the ball held up.
+  - **Blitzer:** a tall gold war-helm with a crest and cheek plates, and a gold breastplate banded in the team colours.
+  - **Tomb Guardian:** a towering cracked sandstone statue with glowing eyes, a striped headdress and a braided beard.
+
 ## v3.48 (23 Oct 2026)
 - **Improved:** the Chaos Dwarfs have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
   - **Hobgoblin:** lanky and grey-green, with big ears, a long nose, a floppy pointed hat and a ragged tunic.
