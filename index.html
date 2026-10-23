@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.30</title>
+    <title>BludBowl 3.31</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.30</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.31</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10785,7 +10785,7 @@
     // the concertina with the crew singing along, the oar-drum on the high notes, and the ship's bell at the end
     blackark: (B, t, s) => tauntPlay(B, t, 74, 1.6, (C, m, at, d, hi, last) => { concertina(C, [m], at, d * 0.95, 0.05, { bright: 1, a: 0.02 }); crew(C, m - 12, at, d * 0.95, 0.04, 'ah', 'oh'); if (hi) oarDrum(C, at, 0.5); if (last) bellToll(C, 57, at + d * 0.4, 0.03); }, { n: tauntNote(s) }),
     // power-chord stabs with the gang shouting OI! on the high notes, and a WAAAGH! to finish
-    shanty: (B, t, s) => tauntPlay(B, t, 64, 1.2, (C, m, at, d, hi, last) => { khGuitar(C, power(m - 24), at, d * 0.9, 0.05); if (hi) oi(C, at, 0.14); if (last) waagh(C, at + d * 0.2, d * 0.9, 0.1); }, { n: tauntNote(s) }),
+    shanty: (B, t, s) => tauntPlay(B, t, 64, 1.2, (C, m, at, d, hi, last) => { khGuitar(C, power(m - 24), at, d * 0.9, 0.05); if (hi) oi(C, at, 0.14); if (last) waagh(C, at + d * 0.2, d * 0.9, 0.1); }, { n: s / 2, dip: 0.8 }),
     dwarfhold: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 1.6, (C, m, at, d, hi, last) => { crew(C, m - 12, at, d * 0.95, 0.09, 'ah', 'oh', { voices: 6 }); if (hi) smith(C, at, 0.1, 840); if (last) caveHorn(C, m - 12, at, d * 1.4, 0.03); }, { n: tauntNote(s) }); },
     wastes: (B, t, s) => tauntPlay(B, t, 64, 1.4, (C, m, at, d, hi, last) => { khuur(C, m, at, d * 0.95, 0.06); taiko(C, at, 0.6); if (hi) hur(C, at, 0.14); if (last) gong(C, at, 0.08); }, { n: tauntNote(s) }),
     plague: (B, t, s) => tauntPlay(B, t, 62, 2, (C, m, at, d, hi, last) => { harmonium(C, [m, m - 12], at, d * 0.95, 0.1); khChoir(C, m - 12, at, d * 0.95, 0.4, 4); if (hi) bubble(C, at, 0.1); if (last) { bellToll(C, 49, at, 0.1); khGuitar(C, power(m - 24), at, d * 1.5, 0.05, { r: 0.8 }); } }, { n: tauntNote(s) }),

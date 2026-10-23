@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.31 (23 Oct 2026)
+- **Fixed:** on Orc Shantytown, the music's taunt at the referee after a sending-off dropped to half speed, because the music is so fast. It now plays at the music's own pace, and the band keeps driving underneath it instead of dropping back.
+
 ## v3.30 (23 Oct 2026)
 - **Added:** a new pitch, **Altdorf**, the home ground of the Humans, Imperial Nobility and the Old World Alliance ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** Muddy Grass, with Sigmar's twin-tailed comet painted in the middle in white and gold.
