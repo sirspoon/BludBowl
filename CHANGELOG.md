@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.48 (23 Oct 2026)
+- **Improved:** the Chaos Dwarfs have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
+  - **Hobgoblin:** lanky and grey-green, with big ears, a long nose, a floppy pointed hat and a ragged tunic.
+  - **Sneaky Stabba:** crouched and hooded, sly eyes and a grin under the hood, a curved knife held low.
+  - **Blocker:** a tall flared iron hat with gold bands, a curled black beard with gold rings and dark iron armour.
+  - **Flamesmith:** fire roaring from his hands and the top of his hat, embers smouldering in his beard.
+  - **Bull Centaur:** an armoured Chaos Dwarf rising from a bull's body, with bull horns on his hat.
+  - **Minotaur:** a huge muscled bull-man with great horns, red eyes and a gold nose ring.
+
 ## v3.47 (23 Oct 2026)
 - **Improved:** the Necromantic Horror team has new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
   - **Zombie** and **Ghoul Runner:** the same looks as the Undead team's.
