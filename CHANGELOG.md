@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.42 (23 Oct 2026)
+- **Improved:** the Skaven have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), and the Underworld team shares them. They're hunched rat-men with long snouts, beady red eyes, small swept-back ears, grey-brown fur, crouched legs and long pink tails.
+  - **Clanrat:** a ragged team-coloured tunic, a rope belt and iron shoulder pads.
+  - **Thrower:** a leather cap and a sash, the ball held high.
+  - **Gutter Runner:** dark rag wrappings and goggles, a team-coloured cloak over his shoulder and a dagger.
+  - **Blitzer:** dark iron armour: a spiked helm, spiked shoulder plates with team-coloured rims, a layered breastplate and spiked rings on his tail.
+  - **Rat Ogre:** a hulking, muscled beast with scarred pink chest muscles, an iron collar and warpstone growths.
+
 ## v3.41 (23 Oct 2026)
 - **Improved:** the Dwarfs have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)): squat and broad with big braided beards. The Old World Alliance shares them.
   - **Lineman:** a banded steel helm with a nose guard and a brown beard with a gold ring.
