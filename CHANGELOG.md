@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.38 (23 Oct 2026)
+- **Improved:** the Black Orc has a new figure in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)): darker, murkier green skin than ordinary orcs, a black iron helm with great curved horns and a spike, spiked team-coloured shoulder plates, the jaw glyph down his front and a gold belt buckle. The Goblin Bruiser and Trained Troll already use the new Goblin and light blue Troll.
+
 ## v3.37 (23 Oct 2026)
 - **Improved:** the Orcs have all-new player figures in the detailed style of the elves ([#13](https://github.com/sirspoon/BludBowl/issues/13)): hunched, shaded green brutes with heavy brows, red eyes and tusks, in riveted iron and the team's colours.
   - **Lineman:** a riveted iron helm, team-coloured shoulder plates and tabard.
