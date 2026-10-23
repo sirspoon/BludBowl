@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.30 (23 Oct 2026)
+- **Added:** a new pitch, **Altdorf**, the home ground of the Humans, Imperial Nobility and the Old World Alliance ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** Muddy Grass, with Sigmar's twin-tailed comet painted in the middle in white and gold.
+  - **Behind the block clashes:** the city stadium in Altdorf. A covered timber grandstand is packed with fans in feathered caps and bobble hats, some singing and holding up scarves, with Imperial griffon and comet banners hanging from the roof and coloured boards along the front. Behind it rise the timber-framed houses of the city with smoking chimneys, the spire of the Temple of Sigmar topped by a golden comet, and the palace tower flying the Imperial flag.
+  - **The music:** the same as Muddy Grass: the supporters' band, the terraces chanting, and their taunt at the referee.
+  - **Pitch menus:** Altdorf can also be picked from the Pitch menus. These teams were on Muddy Grass before.
+
 ## v3.29 (23 Oct 2026)
 - **Added:** a new pitch, **Ziggurat**, the Chaos Dwarfs' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** a temple court of fired-clay tiles, one a square, blackened with soot and dusted with ash, a few cracked and glowing. Blue glazed brick bands with gold rosettes run along the sides, and Hashut's bronze bull head sits in the middle in a ring of rosettes.
