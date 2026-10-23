@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.25 (23 Oct 2026)
+- **Added:** a new pitch, **Dwarf Hold**, the Dwarfs' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** the polished stone floor of a great hall deep underground. Each square is its own slab, dark granite and veined marble in turn, edged with bronze. Bands of gold runes run along each end, and in the middle is a gold rune circle with an ancestor's face in a winged helm.
+  - **Behind the block clashes:** a vast hall with carved pillars, burning braziers and red banners with gold hammers. Two dwarf king statues stand either side of a rune-lit great gate. Stone stands of dwarf fans (helmets, horns, beards of every colour, a few tankards raised) fill each side, and an ale stall with kegs, a barkeep and a foaming-tankard sign stands at the end of one.
+  - **The music:** a deep dwarf choir, anvils ringing out a smith's rhythm, war drums, horns and the forge's bellows, all echoing round the hall. The choir hums when it's calm, chants HUM… HA! on the march and sings a hymn in the chorus. Its referee taunt is sung by the choir, with anvil strikes and a horn to finish.
+  - **Pitch menus:** Dwarf Hold can also be picked from the Pitch menus. The Dwarfs were on Mossy Flagstones before. Chaos Dwarfs stay there.
+
 ## v3.24 (23 Oct 2026)
 - **Added:** a new pitch, **Orc Shantytown**, the home ground of the Orcs and Black Orcs, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** trampled almost bare and thick with mud, strewn with bones, skulls, broken planks, scraps of rusty iron and dried blood. A great cream-painted orc glyph covers the middle: a lopsided skull with a zig-zag jaw.

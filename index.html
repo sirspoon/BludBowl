@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.24</title>
+    <title>BludBowl 3.25</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.24</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.25</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -957,7 +957,7 @@
             <div class="st-row"><span>Music</span><button type="button" class="st-tog" id="st-music"></button></div>
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
-                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="warpstone">Warped Flagstones</option></select></div>
+                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="warpstone">Warped Flagstones</option></select></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
@@ -1004,7 +1004,7 @@
                 <option value="blades">Grass</option>
                 <option value="worn">Muddy Grass</option>
                 <option value="flagstone">Mossy Flagstones</option>
-                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="warpstone">Warped Flagstones</option>
+                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="warpstone">Warped Flagstones</option>
             </select>
         </div>
         <div class="flex items-center justify-center gap-2 mb-5 -mt-2 pointer-events-auto">
@@ -10476,6 +10476,53 @@
     // into the next section: a snare roll and a WAAAGH
     if (fillNext) { for (let k = 0; k < 8; k++) khSnare(B, t + 3 * s + k * e / 4, 0.3 + k * 0.07); if (nextKind === 'chorus' || nextKind === 'drive') waagh(B, t + 3 * s, s, 0.1); }
   }
+  // ---------- DWARF HOLD (the Dwarfs): grand music for a great hall deep underground - a deep dwarf choir, anvils ringing out a smith's
+  // rhythm, war drums, dwarf horns and the forge's bellows, all echoing round the hall
+  const DH_BPM = { calm: 66, normal: 92, tense: 108 };
+  const DH_ROOTS = [50, 46, 41, 48], DH_THIRD = [3, 4, 4, 4];   // D minor, B flat, F, C
+  // the hymn the choir sings in the chorus, a line a bar: [note, beat, beats]
+  const DH_HYMN = [[[62, 0, 1.5], [65, 1.5, 0.5], [69, 2, 2]], [[70, 0, 1], [69, 1, 1], [65, 2, 2]], [[65, 0, 1], [69, 1, 1], [72, 2, 1.5], [70, 3.5, 0.5]], [[69, 0, 1], [67, 1, 1], [64, 2, 2]]];
+  // the smith's anvil, at three pitches (each a little different), ringing round the hall
+  const smith = (B, t, v, f = 620) => { [[1, 1, 0.6], [2.76, 0.55, 0.4], [5.4, 0.35, 0.3], [8.93, 0.2, 0.18]].forEach(([r, k, d]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * r;
+    g.gain.setValueAtTime(v * k, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(B.main); toCave(B, g, 0.55); o.start(t); o.stop(t + d + 0.05); });
+    cnz(B, B.main, t, 0.03, v * 0.8, 'highpass', 3000, null, 0.7, 0.3); };
+  // the forge's bellows: a slow breath of air
+  const bellows = (B, t, dur, v) => cnz(B, B.pad, t, dur, v, 'bandpass', 300, 900, 0.8, 0.4);
+  // the choir: a big chord of deep voices on "oh" or "ah", the low voices doubled an octave down
+  const DH_CH = 6, DH_DR = 0.7;   // DH_DR: the war drums, a little back so the choir carries   // how loud the choir sits against the anvils and drums
+  const holdChoir = (B, r, th, t, dur, v, vow = 'oh', to = vow, a = 0.25) => [0, th, 7, 12].forEach((x, j) => crew(B, r + x, t, dur, DH_CH * v * (j ? 0.75 : 1), vow, to, { a, voices: 2 }));
+  function dhBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    caveOf(B, s);
+    const r = DH_ROOTS[i], th = DH_THIRD[i], e = s / 2, quiet = kind === 'calm' || kind === 'lull';
+    // the hall: the bellows breathing and a drone under everything
+    if (quiet || kind === 'breakdown') bellows(B, t + s * 0.5, s * 2.5, 0.05);
+    if (kind !== 'stab') drone(B, r, t, s * 4, quiet ? 0.05 : 0.06);
+    // the anvils: a single ring far off when it's calm, a smith's rhythm in the groove (high and low hammers answering), on the off-beats in the march
+    if (kind === 'calm' && i % 2 === 0) smith(B, t + s, 0.08, 520);
+    else if (kind === 'lull') [1, 3].forEach(b => smith(B, t + b * s, 0.08, 700));
+    else if (kind === 'main' || kind === 'chorus') { [[0, 620], [1, 840], [1.5, 840], [2, 620], [3, 840], [3.5, 520]].forEach(([b, f]) => smith(B, t + b * s, kind === 'chorus' ? 0.07 : 0.09, f)); }
+    else if (kind === 'drive') for (let b = 0; b < 4; b++) { smith(B, t + b * s + e, 0.09, b % 2 ? 840 : 700); if (tense) smith(B, t + b * s, 0.07, 520); }
+    else if (kind === 'stab') [0, 1.5, 2, 3.5].forEach(b => smith(B, t + b * s, 0.14, 620));
+    else if (kind === 'breakdown' && i === 0) smith(B, t, 0.1, 520);
+    // the war drums
+    if (kind === 'lull') [0, 2].forEach(b => frameDrum(B, t + b * s, DH_DR * (0.5), 33));
+    else if (kind === 'main' || kind === 'chorus') { [0, 2].forEach(b => frameDrum(B, t + b * s, DH_DR * (0.75), 31)); frameDrum(B, t + 2.5 * s, DH_DR * (0.4), 36); }
+    else if (kind === 'drive') for (let b = 0; b < 4; b++) frameDrum(B, t + b * s, DH_DR * (b % 2 ? 0.55 : 0.8), 31);
+    else if (kind === 'stab') [0, 1.5, 2, 3.5].forEach(b => frameDrum(B, t + b * s, DH_DR * (0.8), 31));
+    // the choir: humming when it's calm, a held chord in the groove, the great chords in the breakdown, HUM-HA in the march, the hymn in the chorus
+    if (kind === 'calm') holdChoir(B, r, th, t, s * 3.8, 0.025, 'oo', 'oh', 0.9);
+    else if (kind === 'main') holdChoir(B, r, th, t, s * 3.8, 0.028, 'oh', 'ah', 0.3);
+    else if (kind === 'breakdown') holdChoir(B, r, th, t, s * 3.9, 0.05, 'ah', 'oh', 0.6);
+    else if (kind === 'drive') [0, 2].forEach(b => { crew(B, r + 12, t + b * s, s * 0.7, DH_CH * 0.06, 'oo', 'oo', { voices: 5 }); crew(B, r + 7, t + b * s + s, s * 0.5, DH_CH * 0.07, 'ah', 'ah', { voices: 5, h: 1 }); });   // "HUM... HA!"
+    else if (kind === 'chorus') { [0, 7].forEach(x => crew(B, r - 12 + x, t, s * 3.8, DH_CH * 0.026, 'oh', 'oh', { a: 0.3, voices: 2 })); DH_HYMN[i].forEach(([m, b, d]) => { crew(B, m - 12, t + b * s, d * s * 0.95, DH_CH * 0.06, 'ah', 'oh', { voices: 4 }); if (ph >= 4) crew(B, m - 12 - (m % 12 === 2 || m % 12 === 9 ? 3 : 4), t + b * s, d * s * 0.95, DH_CH * 0.035, 'ah', 'oh', { voices: 3 }); }); }
+    else if (kind === 'stab') [0, 2].forEach(b => crew(B, r + 7, t + b * s, s * 0.6, DH_CH * 0.07, 'ah', 'ah', { voices: 6, h: 1 }));
+    // the horns: a call in the hook and at the top of the chorus, low and long in the breakdown
+    if (kind === 'stab') [0, 1.5, 2, 3.5].forEach(b => caveHorn(B, r + 12, t + b * s, e * 0.9, 0.035));
+    if (kind === 'chorus' && i === 0) caveHorn(B, r + 12, t, s * 2, 0.03);
+    if (kind === 'breakdown' && i % 2 === 1) caveHorn(B, r, t + s, s * 2.5, 0.03);
+    // into the next section: a roll on the war drums and a ring of the anvil
+    if (fillNext) { for (let k = 0; k < 6; k++) frameDrum(B, t + 3 * s + k * e / 3, 0.3 + k * 0.08, 33); smith(B, t + 3.83 * s, 0.1, 840); }
+  }
   // ---------- the taunt at the referee after a sending-off, in every style: "duh-deeh-duh-deeh-duh-deeh-duuuhhhh", two notes a
   // minor third apart, each straight after the last, the high ones held a little longer and a long one to finish, played twice by
   // that style's own instruments (on the chant channel) while the rest of the band drops back. [semitones up, length in short notes]
@@ -10507,7 +10554,8 @@
     // the concertina with the crew singing along, the oar-drum on the high notes, and the ship's bell at the end
     blackark: (B, t, s) => tauntPlay(B, t, 74, 1.6, (C, m, at, d, hi, last) => { concertina(C, [m], at, d * 0.95, 0.05, { bright: 1, a: 0.02 }); crew(C, m - 12, at, d * 0.95, 0.04, 'ah', 'oh'); if (hi) oarDrum(C, at, 0.5); if (last) bellToll(C, 57, at + d * 0.4, 0.03); }, { n: tauntNote(s) }),
     // power-chord stabs with the gang shouting OI! on the high notes, and a WAAAGH! to finish
-    shanty: (B, t, s) => tauntPlay(B, t, 64, 1.2, (C, m, at, d, hi, last) => { khGuitar(C, power(m - 24), at, d * 0.9, 0.05); if (hi) oi(C, at, 0.14); if (last) waagh(C, at + d * 0.2, d * 0.9, 0.1); }, { n: tauntNote(s) })
+    shanty: (B, t, s) => tauntPlay(B, t, 64, 1.2, (C, m, at, d, hi, last) => { khGuitar(C, power(m - 24), at, d * 0.9, 0.05); if (hi) oi(C, at, 0.14); if (last) waagh(C, at + d * 0.2, d * 0.9, 0.1); }, { n: tauntNote(s) }),
+    dwarfhold: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 1.6, (C, m, at, d, hi, last) => { crew(C, m - 12, at, d * 0.95, 0.09, 'ah', 'oh', { voices: 6 }); if (hi) smith(C, at, 0.1, 840); if (last) caveHorn(C, m - 12, at, d * 1.4, 0.03); }, { n: tauntNote(s) }); },
   };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
@@ -10534,8 +10582,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far, band, chant };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM } };   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 } };   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -14410,6 +14458,7 @@
             else if (elven) { sky.addColorStop(0, 'rgb(150,186,222)'); sky.addColorStop(0.65, 'rgb(214,226,236)'); sky.addColorStop(1, 'rgb(246,236,210)'); }   // a soft, luminous elven sky
             else if (style === 'warpstone') { sky.addColorStop(0, 'rgb(8,14,10)'); sky.addColorStop(0.6, 'rgb(22,40,24)'); sky.addColorStop(1, 'rgb(60,96,48)'); }   // a dark night, lit green from below
             else if (style === 'woodland') { sky.addColorStop(0, 'rgb(30,60,34)'); sky.addColorStop(0.5, 'rgb(96,140,80)'); sky.addColorStop(1, 'rgb(196,214,150)'); }   // green light under the canopy
+            else if (style === 'dwarfhold') { sky.addColorStop(0, 'rgb(14,12,12)'); sky.addColorStop(0.55, 'rgb(46,36,28)'); sky.addColorStop(1, 'rgb(118,82,44)'); }   // the hall's vault, lit by firelight from below
             else if (style === 'shanty') { sky.addColorStop(0, 'rgb(38,30,28)'); sky.addColorStop(0.6, 'rgb(112,74,46)'); sky.addColorStop(1, 'rgb(176,118,64)'); }   // a smoky, rust-coloured dusk
             else if (style === 'blackark') { sky.addColorStop(0, 'rgb(5,5,12)'); sky.addColorStop(0.6, 'rgb(22,18,40)'); sky.addColorStop(1, 'rgb(52,40,72)'); }   // a moonlit night at sea
             else if (style === 'brimstone') { sky.addColorStop(0, 'rgb(22,8,10)'); sky.addColorStop(0.55, 'rgb(88,20,14)'); sky.addColorStop(1, 'rgb(196,70,24)'); }   // a red-black sky, lit from below by the lava
@@ -14455,6 +14504,97 @@
                     for (let k = 0; k < 4; k++) { const a = dir > 0 ? -0.2 - k * 0.35 : Math.PI + 0.2 + k * 0.35; g.beginPath(); g.ellipse(x + Math.cos(a) * len * 0.5, y + Math.sin(a) * len * 0.5, len * 0.55, len * 0.14, a, 0, 7); g.fill(); }
                 };
                 frond(-4, hz + 4, 1, 46); frond(W + 4, hz + 4, -1, 46);
+            } else if (style === 'dwarfhold') {   // a great hall: carved pillars and arches, red banners with gold hammers, braziers, and two dwarf kings carved in stone either side of the hold's great rune gate
+                const K = Math.min(1, (hz - 12) / 190), V = v => v * K, top = 0;
+                const st = 'rgb(84,74,64)', stDk = 'rgb(56,48,42)', stLt = 'rgb(122,108,92)', gold = 'rgb(214,170,70)';
+                // the back wall: great blocks of stone
+                g.fillStyle = stDk; g.fillRect(0, hz - V(150), W, V(150));
+                g.strokeStyle = 'rgba(20,16,12,0.5)'; g.lineWidth = 1;
+                for (let row = 0, y = hz; y > hz - V(150); y -= V(16), row++) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); for (let x0 = (row % 2) * 18; x0 < W; x0 += 36) { g.beginPath(); g.moveTo(x0, y); g.lineTo(x0, y - V(16)); g.stroke(); } }
+                // the great gate: a round-topped door ringed with glowing runes
+                const gx = W * 0.5, gw = V(46), gh = V(104);
+                g.fillStyle = 'rgb(40,32,26)'; g.beginPath(); g.moveTo(gx - gw, hz); g.lineTo(gx - gw, hz - gh + gw); g.arc(gx, hz - gh + gw, gw, Math.PI, 0); g.lineTo(gx + gw, hz); g.fill();
+                g.strokeStyle = gold; g.lineWidth = 2; g.beginPath(); g.arc(gx, hz - gh + gw, gw - 4, Math.PI, 0); g.stroke(); g.beginPath(); g.moveTo(gx, hz); g.lineTo(gx, hz - gh + 4); g.stroke();
+                g.fillStyle = 'rgba(255,200,90,0.85)'; for (let k = 0; k < 9; k++) { const a = Math.PI + k * Math.PI / 8; g.fillRect(gx + Math.cos(a) * (gw - 9) - 1.5, hz - gh + gw + Math.sin(a) * (gw - 9) - 1.5, 3, 3); }
+                const rg = g.createRadialGradient(gx, hz - gh * 0.6, 4, gx, hz - gh * 0.6, gw * 1.6); rg.addColorStop(0, 'rgba(255,190,90,0.18)'); rg.addColorStop(1, 'rgba(255,190,90,0)'); g.fillStyle = rg; g.fillRect(gx - gw * 1.6, hz - gh * 1.4, gw * 3.2, gh * 1.4);
+                // the stands: stone terraces either side of the gate, packed with dwarfs in helmets, beards of every colour, some raising tankards
+                const hsh = n => { const v = Math.sin(n * 12.9898) * 43758.5453; return v - Math.floor(v); };
+                const stand = (x0, x1, seed) => {
+                    const th = V(17), tiers = 3;
+                    for (let k = tiers - 1; k >= 0; k--) {   // back tier first, each a step lower and nearer
+                        const ty = hz - k * th, inset = k * V(5);
+                        g.fillStyle = k % 2 ? 'rgb(70,61,53)' : 'rgb(78,68,58)'; g.fillRect(x0 + inset, ty - th, x1 - x0 - inset * 2, th);
+                        // the dwarfs sitting on this tier
+                        const step = V(12);
+                        for (let dx = x0 + inset + step * 0.6, n = 0; dx < x1 - inset - step * 0.4; dx += step, n++) {
+                            const q = hsh(seed + k * 97 + n * 7.3), u = V(1), by = ty - th + V(3) + (q > 0.8 ? -V(2) : 0);
+                            const cloak = ['rgb(40,62,120)', 'rgb(120,34,30)', 'rgb(52,84,52)', 'rgb(96,70,40)', 'rgb(70,70,78)'][Math.floor(q * 5)];
+                            const beard = ['rgb(176,84,36)', 'rgb(92,58,34)', 'rgb(214,210,200)', 'rgb(34,28,24)', 'rgb(196,150,70)'][Math.floor(hsh(seed + n * 3.1 + k) * 5)];
+                            const helm = hsh(seed + n * 5.7 + k * 2) < 0.3 ? gold : 'rgb(150,150,156)';
+                            g.fillStyle = cloak; g.fillRect(dx - 5 * u, by - 6 * u, 10 * u, 9 * u);   // broad shoulders
+                            g.fillStyle = 'rgb(214,164,128)'; g.fillRect(dx - 3 * u, by - 12 * u, 6 * u, 5 * u);   // the face
+                            g.fillStyle = beard; g.beginPath(); g.moveTo(dx - 4 * u, by - 9 * u); g.lineTo(dx + 4 * u, by - 9 * u); g.lineTo(dx + 2 * u, by + 1 * u); g.lineTo(dx, by + 3 * u); g.lineTo(dx - 2 * u, by + 1 * u); g.fill();   // the beard
+                            g.fillStyle = helm; g.beginPath(); g.arc(dx, by - 12 * u, 4 * u, Math.PI, 0); g.fill(); g.fillRect(dx - 4.5 * u, by - 12.5 * u, 9 * u, 1.5 * u);   // the helmet
+                            if (hsh(seed + n * 9.1 + k * 4) < 0.25) { g.fillStyle = 'rgb(230,226,214)'; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(dx + sd * 3 * u, by - 14 * u); g.lineTo(dx + sd * 6 * u, by - 19 * u); g.lineTo(dx + sd * 4.5 * u, by - 13 * u); g.fill(); }); }   // horns
+                            if (q > 0.72) { const sd = q > 0.86 ? 1 : -1; g.fillStyle = cloak; g.fillRect(dx + sd * 5 * u - 1.5 * u, by - 14 * u, 3 * u, 9 * u); g.fillStyle = 'rgb(200,140,50)'; g.fillRect(dx + sd * 5 * u - 2.5 * u, by - 20 * u, 5 * u, 6 * u); g.fillStyle = 'rgb(246,240,226)'; g.fillRect(dx + sd * 5 * u - 3 * u, by - 21.5 * u, 6 * u, 2 * u); }   // an arm up with a foaming tankard
+                        }
+                        g.fillStyle = 'rgb(96,84,72)'; g.fillRect(x0 + inset, ty - V(6), x1 - x0 - inset * 2, V(6)); g.fillStyle = gold; g.fillRect(x0 + inset, ty - V(6), x1 - x0 - inset * 2, 1.5);   // the stone front of the tier, gold-trimmed
+                    }
+                };
+                stand(W * 0.205, W * 0.37, 3); stand(W * 0.63, W * 0.745, 11);
+                // the ale stall at the end of the right stand: a counter, kegs, a barkeep, a striped awning and a sign with a great foaming tankard
+                const sx = W * 0.775, sw2 = Math.min(W * 0.06, V(64)) / 2, u = V(1);
+                g.fillStyle = 'rgb(84,54,30)'; g.fillRect(sx - sw2 - 2 * u, hz - 52 * u, 3 * u, 52 * u); g.fillRect(sx + sw2 - 1 * u, hz - 52 * u, 3 * u, 52 * u);   // the posts
+                [-0.55, 0.55].forEach(f => { const kx = sx + f * sw2; g.fillStyle = 'rgb(120,78,40)'; g.beginPath(); g.ellipse(kx, hz - 34 * u, 8 * u, 7 * u, 0, 0, 7); g.fill(); g.fillStyle = 'rgb(60,56,52)'; g.fillRect(kx - 8 * u, hz - 37 * u, 16 * u, 1.5 * u); g.fillRect(kx - 8 * u, hz - 32 * u, 16 * u, 1.5 * u); g.fillStyle = 'rgb(180,170,150)'; g.fillRect(kx - 1 * u, hz - 34 * u, 2 * u, 3 * u); });   // kegs on the back shelf
+                g.fillStyle = 'rgb(214,164,128)'; g.fillRect(sx - 3 * u, hz - 36 * u, 6 * u, 6 * u); g.fillStyle = 'rgb(176,84,36)'; g.beginPath(); g.moveTo(sx - 5 * u, hz - 32 * u); g.lineTo(sx + 5 * u, hz - 32 * u); g.lineTo(sx, hz - 18 * u); g.fill(); g.fillStyle = 'rgb(60,40,24)'; g.beginPath(); g.arc(sx, hz - 36 * u, 4 * u, Math.PI, 0); g.fill();   // the barkeep, ginger-bearded and bald-capped
+                g.fillStyle = 'rgb(110,72,38)'; g.fillRect(sx - sw2 - 4 * u, hz - 20 * u, sw2 * 2 + 8 * u, 20 * u); g.fillStyle = 'rgb(140,96,52)'; g.fillRect(sx - sw2 - 4 * u, hz - 22 * u, sw2 * 2 + 8 * u, 3 * u);   // the counter
+                g.strokeStyle = 'rgba(40,24,12,0.6)'; g.lineWidth = 1; for (let y = hz - 14 * u; y < hz; y += 6 * u) { g.beginPath(); g.moveTo(sx - sw2 - 4 * u, y); g.lineTo(sx + sw2 + 4 * u, y); g.stroke(); }
+                [-0.6, 0.15].forEach(f => { const mx = sx + f * sw2; g.fillStyle = 'rgb(200,140,50)'; g.fillRect(mx, hz - 28 * u, 4 * u, 6 * u); g.fillStyle = 'rgb(246,240,226)'; g.fillRect(mx - 0.5 * u, hz - 29.5 * u, 5 * u, 2 * u); });   // tankards on the counter
+                for (let k = 0, n = 6, aw = (sw2 * 2 + 10 * u) / n; k < n; k++) { g.fillStyle = k % 2 ? 'rgb(230,214,170)' : 'rgb(140,30,26)'; g.beginPath(); g.moveTo(sx - sw2 - 5 * u + k * aw, hz - 54 * u); g.lineTo(sx - sw2 - 5 * u + (k + 1) * aw, hz - 54 * u); g.lineTo(sx - sw2 - 5 * u + (k + 1) * aw, hz - 46 * u); g.quadraticCurveTo(sx - sw2 - 5 * u + (k + 0.5) * aw, hz - 42 * u, sx - sw2 - 5 * u + k * aw, hz - 46 * u); g.fill(); }   // the striped awning
+                // the sign, hung from a bracket above: a board with a big foaming tankard
+                const sgx = sx, sgy = hz - 82 * u, sgw = 24 * u, sgh = 22 * u;
+                g.fillStyle = 'rgb(84,54,30)'; g.fillRect(sx - 1.5 * u, hz - 92 * u, 3 * u, 40 * u); g.fillRect(sx - 14 * u, hz - 92 * u, 28 * u, 2.5 * u);
+                g.strokeStyle = 'rgb(60,56,52)'; g.beginPath(); g.moveTo(sgx - 10 * u, hz - 90 * u); g.lineTo(sgx - 10 * u, sgy - sgh / 2); g.moveTo(sgx + 10 * u, hz - 90 * u); g.lineTo(sgx + 10 * u, sgy - sgh / 2); g.stroke();
+                g.fillStyle = 'rgb(66,40,22)'; g.fillRect(sgx - sgw / 2 - 2 * u, sgy - sgh / 2 - 2 * u, sgw + 4 * u, sgh + 4 * u); g.fillStyle = 'rgb(122,82,44)'; g.fillRect(sgx - sgw / 2, sgy - sgh / 2, sgw, sgh);
+                g.fillStyle = gold; g.fillRect(sgx - 6 * u, sgy - 5 * u, 10 * u, 13 * u); g.strokeStyle = gold; g.lineWidth = 2 * u; g.beginPath(); g.arc(sgx + 5 * u, sgy + 1.5 * u, 3.5 * u, -Math.PI / 2, Math.PI / 2); g.stroke(); g.lineWidth = 1;   // the tankard and its handle
+                g.fillStyle = 'rgb(250,246,234)'; [[-5, -6, 4], [-1, -7.5, 4.5], [3, -6, 3.5]].forEach(([fx, fy, fr]) => { g.beginPath(); g.arc(sgx + fx * u, sgy + fy * u, fr * u, 0, 7); g.fill(); });   // its foam, spilling over
+                g.fillStyle = 'rgba(80,50,20,0.6)'; [-3, 0, 3].forEach(fx => g.fillRect(sgx + (fx - 0.5) * u, sgy - 2 * u, 1, 9 * u));
+                const sl = g.createRadialGradient(sx, hz - 30 * u, 2, sx, hz - 30 * u, 50 * u); sl.addColorStop(0, 'rgba(255,190,100,0.16)'); sl.addColorStop(1, 'rgba(255,190,100,0)'); g.fillStyle = sl; g.fillRect(sx - 50 * u, hz - 80 * u, 100 * u, 80 * u);   // a warm lantern glow over the stall
+                // the dwarf kings: helmed, long-bearded, resting on great hammers
+                const king = kx => {
+                    const u = V(1);
+                    g.fillStyle = st; g.fillRect(kx - 26 * u, hz - 14 * u, 52 * u, 14 * u);   // the plinth
+                    g.beginPath(); g.moveTo(kx - 24 * u, hz - 14 * u); g.lineTo(kx - 28 * u, hz - 96 * u); g.lineTo(kx + 28 * u, hz - 96 * u); g.lineTo(kx + 24 * u, hz - 14 * u); g.fill();   // the robed body
+                    g.fillStyle = stLt; g.beginPath(); g.moveTo(kx - 16 * u, hz - 112 * u); g.lineTo(kx + 16 * u, hz - 112 * u); g.lineTo(kx + 10 * u, hz - 30 * u); g.lineTo(kx, hz - 18 * u); g.lineTo(kx - 10 * u, hz - 30 * u); g.fill();   // the long beard
+                    g.strokeStyle = stDk; g.lineWidth = 1; [-6, 0, 6].forEach(bx => { g.beginPath(); g.moveTo(kx + bx * u, hz - 108 * u); g.lineTo(kx + bx * 0.6 * u, hz - 34 * u); g.stroke(); });
+                    g.fillStyle = st; g.fillRect(kx - 14 * u, hz - 126 * u, 28 * u, 16 * u);   // the face
+                    g.fillStyle = stDk; g.fillRect(kx - 9 * u, hz - 120 * u, 6 * u, 2.5 * u); g.fillRect(kx + 3 * u, hz - 120 * u, 6 * u, 2.5 * u);   // stern brows
+                    g.fillStyle = stLt; g.beginPath(); g.moveTo(kx - 17 * u, hz - 124 * u); g.lineTo(kx - 14 * u, hz - 142 * u); g.lineTo(kx, hz - 150 * u); g.lineTo(kx + 14 * u, hz - 142 * u); g.lineTo(kx + 17 * u, hz - 124 * u); g.fill();   // the helm
+                    [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(kx + sd * 15 * u, hz - 136 * u); g.lineTo(kx + sd * 34 * u, hz - 152 * u); g.lineTo(kx + sd * 24 * u, hz - 130 * u); g.fill(); });   // its wings
+                    g.fillStyle = gold; g.fillRect(kx - 2 * u, hz - 148 * u, 4 * u, 22 * u);   // a gold crest
+                    g.fillStyle = stDk; g.fillRect(kx - 2.5 * u, hz - 96 * u, 5 * u, 82 * u);   // the hammer's haft, standing in front
+                    g.fillStyle = st; g.fillRect(kx - 15 * u, hz - 34 * u, 30 * u, 18 * u); g.fillStyle = stLt; g.fillRect(kx - 15 * u, hz - 34 * u, 30 * u, 4 * u);   // its head on the floor
+                    [-1, 1].forEach(sd => { g.fillStyle = st; g.beginPath(); g.ellipse(kx + sd * 6 * u, hz - 92 * u, 7 * u, 5 * u, 0, 0, 7); g.fill(); });   // hands on the haft
+                };
+                king(W * 0.4); king(W * 0.6);
+                // the pillars, massive and carved, rising out of sight, with arches between them
+                [0.06, 0.18, 0.82, 0.94].forEach(fx => {
+                    const px = W * fx, pw = V(20);
+                    g.fillStyle = st; g.fillRect(px - pw / 2, 0, pw, hz); g.fillStyle = stLt; g.fillRect(px - pw / 2, 0, 3, hz); g.fillStyle = stDk; g.fillRect(px + pw / 2 - 3, 0, 3, hz);
+                    g.fillStyle = stLt; g.fillRect(px - pw / 2 - 4, hz - V(10), pw + 8, V(10));   // the base
+                    for (let y = hz - V(40); y > 10; y -= V(40)) { g.fillStyle = gold; g.fillRect(px - pw / 2, y, pw, 2); }   // gold bands
+                    // a brazier at its foot
+                    g.fillStyle = 'rgb(60,46,30)'; g.fillRect(px - 2, hz - V(30), 4, V(20)); g.beginPath(); g.moveTo(px - V(10), hz - V(30)); g.lineTo(px + V(10), hz - V(30)); g.lineTo(px + V(6), hz - V(24)); g.lineTo(px - V(6), hz - V(24)); g.fill();
+                    const fg = g.createRadialGradient(px, hz - V(34), 1, px, hz - V(34), V(30)); fg.addColorStop(0, 'rgba(255,170,60,0.5)'); fg.addColorStop(1, 'rgba(255,120,40,0)'); g.fillStyle = fg; g.fillRect(px - V(30), hz - V(64), V(60), V(60));
+                    g.fillStyle = 'rgba(255,196,90,0.95)'; g.beginPath(); g.moveTo(px - V(6), hz - V(30)); g.quadraticCurveTo(px - V(3), hz - V(40), px, hz - V(46)); g.quadraticCurveTo(px + V(3), hz - V(40), px + V(6), hz - V(30)); g.fill();
+                });
+                g.fillStyle = 'rgba(14,12,10,0.65)'; [[0.06, 0.18], [0.82, 0.94]].forEach(([a, b]) => { const ax = W * (a + b) / 2, aw = W * (b - a) / 2 - V(10); g.beginPath(); g.moveTo(ax - aw, hz - V(10)); g.lineTo(ax - aw, hz - V(70)); g.arc(ax, hz - V(70), aw, Math.PI, 0); g.lineTo(ax + aw, hz - V(10)); g.fill(); });   // dark arches between them
+                // banners hanging from the vault: red, with a gold hammer
+                [0.12, 0.42, 0.58, 0.88].forEach(fx => {
+                    const bx = W * fx, bw = V(16), bh = V(56), by = V(6);
+                    g.fillStyle = 'rgb(130,26,24)'; g.beginPath(); g.moveTo(bx - bw / 2, by); g.lineTo(bx + bw / 2, by); g.lineTo(bx + bw / 2, by + bh); g.lineTo(bx, by + bh - V(8)); g.lineTo(bx - bw / 2, by + bh); g.fill();
+                    g.fillStyle = gold; g.fillRect(bx - bw / 2, by, bw, V(3)); g.fillRect(bx - 1, by + V(14), 2, V(24)); g.fillRect(bx - V(6), by + V(12), V(12), V(7));   // the hammer
+                });
             } else if (style === 'shanty') {   // a two-tier orc stadium of rusty corrugated iron and planks, packed with green orcs, stone idols of Gork and Mork, a scrap watchtower, skull totems and smoke
                 const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
                 const K = Math.min(1, (hz - 12) / 190), V = v => v * K;   // (everything scaled to the space above the pitch)
@@ -15755,11 +15895,11 @@
         
         // ---------- pitch texture: painted once by the game itself (no image files) ----------
         // 'blades' = lush grass, 'worn' = the same with churned-up mud; one is picked at random each time the game loads
-        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty'];
+        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty', 'dwarfhold'];
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'flagstone', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -15943,6 +16083,59 @@
             path([[0.2, -0.47], [0.6, -0.72], [0.65, -0.45]]); x.fill();   // the squint
             path([[-0.12, -0.08], [0.13, -0.1], [0.01, -0.36]]); x.fill();   // the nose
             x.restore();
+        }
+        // the Dwarf Hold (the Dwarfs): a great hall deep in a hold - polished slabs of warm grey marble and darker granite set with bronze
+        // inlay, long soft sheens of light across the polish, a band of gold runes along each sideline and an ancestor's face in gold in the middle
+        function dwarfHoldPitch(S) {
+            const ts = CFG.tileSize, COLS = CFG.cols, ROWS = CFG.rows, W = COLS * ts, H = ROWS * ts;
+            const cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
+            const x = cv.getContext('2d'), r = pitchRng(PITCH.seed + 211); watchPitchCanvas(cv);
+            const img = x.createImageData(cv.width, cv.height), d = img.data;
+            const sw = ts * S, sh = ts * S, vein = pitchNoise(r, cv.width, cv.height, 26 * S), vein2 = pitchNoise(r, cv.width, cv.height, 9 * S), cloud = pitchNoise(r, cv.width, cv.height, 70 * S);
+            const tone = []; for (let k = 0; k < 400; k++) tone.push((r() - 0.5) * 0.12);
+            for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) {
+                const i = Math.floor(px / sw), j = Math.floor(py / sh), ex = Math.min(px - i * sw, (i + 1) * sw - px), ey = Math.min(py - j * sh, (j + 1) * sh - py), e = Math.min(ex, ey);
+                let R, G, B;
+                if (e < 1.6 * S) { const k = e < 0.6 * S ? 1.15 : 0.9; R = 168 * k; G = 124 * k; B = 60 * k; }   // the bronze inlay between the slabs
+                else {
+                    const dark = (i + j) % 2 === 1, t = tone[(i * 31 + j * 17) % 400] + (cloud(px, py) - 0.5) * 0.18;
+                    if (dark) { R = 118 + 40 * t; G = 110 + 38 * t; B = 102 + 36 * t; const sp = r(); if (sp < 0.04) { R += 26; G += 24; B += 22; } else if (sp < 0.07) { R -= 18; G -= 18; B -= 16; } }   // granite, speckled
+                    else { R = 142 + 50 * t; G = 134 + 46 * t; B = 122 + 40 * t; const v = Math.abs(vein(px, py) - 0.5) + Math.abs(vein2(px, py) - 0.5) * 0.5; if (v < 0.035) { const k = 1 - v / 0.035; R -= 40 * k; G -= 40 * k; B -= 36 * k; } }   // marble, veined
+                    const sheen = Math.exp(-Math.pow(((px + py * 0.6) % (220 * S)) / (26 * S) - 4, 2)) * 22;   // long soft sheens across the polish
+                    R += sheen; G += sheen; B += sheen * 0.9;
+                }
+                const k2 = (py * cv.width + px) * 4, jit = (r() - 0.5) * 5;
+                d[k2] = R + jit; d[k2 + 1] = G + jit; d[k2 + 2] = B + jit; d[k2 + 3] = 255;
+            }
+            x.putImageData(img, 0, 0);
+            // a band of gold runes along each sideline
+            const runeBand = y0 => {
+                x.strokeStyle = 'rgba(214,170,70,0.7)'; x.lineWidth = 1.4 * S; x.beginPath(); x.moveTo(0, y0 - 6 * S); x.lineTo(cv.width, y0 - 6 * S); x.moveTo(0, y0 + 6 * S); x.lineTo(cv.width, y0 + 6 * S); x.stroke();
+                x.lineWidth = 1.2 * S;
+                for (let gx = 6 * S, k = 0; gx < cv.width - 6 * S; gx += 13 * S, k++) {   // angular runes, each a few straight strokes
+                    const R2 = n => (Math.sin((k + 1) * 12.9898 + n * 78.233) * 43758.5453) % 1, st = [[0, -4, 0, 4], [-3, -4, 3, 0], [-3, 0, 3, 4], [-3, -4, 3, 4], [3, -4, -3, 4], [-3, 0, 3, 0]];
+                    x.beginPath(); x.moveTo(gx, y0 - 4 * S); x.lineTo(gx, y0 + 4 * S);
+                    for (let n = 0; n < 2; n++) { const q = st[Math.floor(Math.abs(R2(n)) * st.length)]; x.moveTo(gx + q[0] * S * 0.8, y0 + q[1] * S); x.lineTo(gx + q[2] * S * 0.8, y0 + q[3] * S); }
+                    x.stroke();
+                }
+            };
+            runeBand(9 * S); runeBand(cv.height - 9 * S);
+            // the ancestor's face in the middle: a gold rune circle with spokes, a winged helm, stern eyes and a great plaited beard
+            const cx = cv.width / 2, cy = cv.height / 2, U = ts * S;
+            x.save(); x.translate(cx, cy); x.strokeStyle = 'rgba(222,178,74,0.78)'; x.fillStyle = 'rgba(222,178,74,0.32)'; x.lineJoin = 'round';
+            x.lineWidth = 2.6 * S; x.beginPath(); x.arc(0, 0, U * 2.3, 0, 7); x.stroke(); x.lineWidth = 1.4 * S; x.beginPath(); x.arc(0, 0, U * 2.05, 0, 7); x.stroke();
+            for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8; x.beginPath(); x.moveTo(Math.cos(a) * U * 2.05, Math.sin(a) * U * 2.05); x.lineTo(Math.cos(a) * U * 2.3, Math.sin(a) * U * 2.3); x.stroke(); }
+            const L = pts => { x.beginPath(); pts.forEach(([px, py], n) => n ? x.lineTo(px * U, py * U) : x.moveTo(px * U, py * U)); x.closePath(); x.fill(); x.stroke(); };
+            x.lineWidth = 2 * S;
+            L([[-0.75, -0.55], [-0.6, -1.15], [0, -1.4], [0.6, -1.15], [0.75, -0.55]]);   // the helm
+            L([[-0.75, -0.95], [-1.7, -1.45], [-1.3, -0.7]]); L([[0.75, -0.95], [1.7, -1.45], [1.3, -0.7]]);   // its wings
+            L([[-0.62, -0.5], [0.62, -0.5], [0.55, -0.05], [-0.55, -0.05]]);   // the brow and face
+            x.fillStyle = 'rgba(60,40,16,0.75)'; [-1, 1].forEach(sd => { x.beginPath(); x.moveTo(sd * 0.12 * U, -0.36 * U); x.lineTo(sd * 0.45 * U, -0.42 * U); x.lineTo(sd * 0.42 * U, -0.24 * U); x.lineTo(sd * 0.14 * U, -0.24 * U); x.fill(); });   // stern eyes
+            x.fillStyle = 'rgba(222,178,74,0.32)';
+            L([[-0.75, -0.05], [0.75, -0.05], [0.55, 0.9], [0, 1.65], [-0.55, 0.9]]);   // the great beard
+            x.lineWidth = 1.4 * S; [-0.3, 0, 0.3].forEach(bx => { x.beginPath(); x.moveTo(bx * U, 0.05 * U); x.lineTo(bx * 0.8 * U, 1.3 * U); x.stroke(); for (let k = 0.3; k < 1.2; k += 0.25) { x.beginPath(); x.moveTo((bx - 0.07) * U, k * U); x.lineTo((bx + 0.07) * U, (k + 0.08) * U); x.stroke(); } });   // its plaits
+            x.restore();
+            return { cv, x, r };
         }
         // the Black Ark (the Dark Elves): the deck of a floating fortress - blackened planks running the length of the pitch, iron nails and
         // gratings, coiled ropes and mooring rings, chains along the sidelines, salt streaks and wet patches, and faint violet runes in the end zones
@@ -16221,6 +16414,13 @@
         function buildPitchTexture() {
             const ts = CFG.tileSize, W = CFG.cols * ts, H = CFG.rows * ts, S = 1.5;
             PITCH.glow = null;   // (a layer drawn over the pitch with a pulse: the warpstone's glow)
+            if (PITCH.style === 'dwarfhold') {   // lines inlaid in pale gold on the polished stone
+                const o = dwarfHoldPitch(S), x = o.x, r = o.r;
+                const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(232,206,140,${(al * (0.75 + r() * 0.2)).toFixed(2)})`; x.fillRect((lx - w / 2) * S, py * S, w * S, 2 * S); } };
+                chalkLines(chalk, ts);
+                PITCH.tex = o.cv;
+                return;
+            }
             if (PITCH.style === 'blackark') {   // lines painted pale grey-violet on the black deck
                 const o = blackArkPitch(S), x = o.x, r = o.r;
                 const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(206,198,224,${(al * (0.6 + r() * 0.3)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5) * 0.6) * S, py * S, w * S, 2 * S); } };
