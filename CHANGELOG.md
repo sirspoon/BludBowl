@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.32 (23 Oct 2026)
+- **Added:** a new pitch, **Frozen Fjord**, the Norse home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** snow, trampled to slush in places with frozen grass showing through, with glassy ice sheets, footprints and glittering frost. The lines are painted red, with a red valknut in a ring of runes in the middle.
+  - **Behind the block clashes:** a frozen fjord at dusk, with a green and violet aurora that slowly shimmers and drifts, snowy peaks and falling snow. Longships are moored either side. A snow-roofed longhouse grandstand carved with dragon heads is packed with horned, bearded Norse waving axes and drinking horns, behind a row of painted round shields, with raven banners and braziers.
+  - **The music:** death metal. Blast beats and double kick, tremolo-picked guitars, guttural growls and raspy shrieks, war horns, the gang roaring HEY! and the wind howling. Its referee taunt is power-chord stabs with HEYs, ending on a growl and a war horn, at the music's own pace.
+  - **Pitch menus:** Frozen Fjord can also be picked from the Pitch menus. The Norse were on Muddy Grass before.
+
 ## v3.31 (23 Oct 2026)
 - **Fixed:** on Orc Shantytown, the music's taunt at the referee after a sending-off dropped to half speed, because the music is so fast. It now plays at the music's own pace, and the band keeps driving underneath it instead of dropping back.
 
