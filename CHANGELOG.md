@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.41 (23 Oct 2026)
+- **Improved:** the Dwarfs have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)): squat and broad with big braided beards. The Old World Alliance shares them.
+  - **Lineman:** a banded steel helm with a nose guard and a brown beard with a gold ring.
+  - **Runner:** a padded cap, a leather jerkin and a ginger beard in two braids.
+  - **Blitzer:** a horned, gold-rimmed helm and a great grey-white beard over a dark iron breastplate.
+  - **Troll Slayer:** bare-chested and tattooed, with a towering orange crest and a huge orange beard.
+  - **Deathroller:** a spiked iron roller under a riveted team-coloured boiler with a glowing furnace, a smoking chimney and a goggled driver.
+
 ## v3.40 (23 Oct 2026)
 - **Improved:** the Humans have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), and the Old World Alliance shares them.
   - **Lineman:** a round steel helm with a team-coloured crest and nose guard, round shoulder pads and a breastplate.
