@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.47 (23 Oct 2026)
+- **Improved:** the Necromantic Horror team has new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
+  - **Zombie** and **Ghoul Runner:** the same looks as the Undead team's.
+  - **Wraith:** a pale, glowing spectre with a wailing face and green eyes, its body thinning into a curling wisp, and a tattered team scarf.
+  - **Flesh Golem:** a huge patchwork giant of mismatched stitched skin, with neck bolts, odd eyes, a team-coloured harness and a bolted iron plate.
+  - **Werewolf:** a crouching grey wolf with yellow eyes, bared fangs, big claws and a shredded team shirt.
+
 ## v3.46 (23 Oct 2026)
 - **Changed:** the Undead Ghoul Runner is back to his previous look ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
 
