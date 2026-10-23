@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.26 (23 Oct 2026)
+- **Added:** a new pitch, **Ogre Wastes**, the Ogres' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** sun-baked sand and grit, scattered with rocks and pebbles, cracked dry earth, dead scrub and bleached bones. The Great Maw is painted in red ochre across the middle: a gaping round mouth ringed with fangs.
+  - **Behind the block clashes:** a two-tier wooden palisade stadium under a hazy sun and snowy mountains, packed with ogres (some with long droopy moustaches) and gnoblars squeezed in between or riding on shoulders. Tall red, gold and black banners in the eastern style hang from crossbars, with horsetail standards, yurts at each end, heaps of roast haunches and beer barrels, and a whole beast turning on a spit, with gnoblars raiding the food.
+  - **The music:** loud eastern folk-metal from the steppes. Great war drums and gongs, a horsehead fiddle, a throat singer droning with a whistling melody in his overtones, distorted guitars and a kit at a gallop, and the ogres grunting HUR! and bellowing the chorus. Its referee taunt is played on the fiddle over war drums, with HURs and a gong to finish.
+  - **Pitch menus:** Ogre Wastes can also be picked from the Pitch menus. The Ogres were on Muddy Grass before.
+
 ## v3.25 (23 Oct 2026)
 - **Added:** a new pitch, **Dwarf Hold**, the Dwarfs' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** the polished stone floor of a great hall deep underground. Each square is its own slab, dark granite and veined marble in turn, edged with bronze. Bands of gold runes run along each end, and in the middle is a gold rune circle with an ancestor's face in a winged helm.
