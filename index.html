@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.26</title>
+    <title>BludBowl 3.27</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.26</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.27</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -957,7 +957,7 @@
             <div class="st-row"><span>Music</span><button type="button" class="st-tog" id="st-music"></button></div>
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
-                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="warpstone">Warped Flagstones</option></select></div>
+                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="warpstone">Warped Flagstones</option></select></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
@@ -1004,7 +1004,7 @@
                 <option value="blades">Grass</option>
                 <option value="worn">Muddy Grass</option>
                 <option value="flagstone">Mossy Flagstones</option>
-                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="warpstone">Warped Flagstones</option>
+                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="warpstone">Warped Flagstones</option>
             </select>
         </div>
         <div class="flex items-center justify-center gap-2 mb-5 -mt-2 pointer-events-auto">
@@ -10592,6 +10592,65 @@
     // into the next section: a roll on the war drums and a HUR
     if (fillNext) { [0, 0.25, 0.5, 0.75].forEach((b, k) => taiko(B, t + (3 + b) * s, 0.45 + k * 0.12)); if (nextKind === 'chorus' || nextKind === 'drive' || nextKind === 'stab') hur(B, t + 3.75 * s, 0.15); }
   }
+  // ---------- PLAGUE GARDEN (Nurgle): slow, gloomy doom in a rotting garden - sludgy down-tuned guitars, a wheezing out-of-tune harmonium,
+  // a cracked plague bell, plague monks droning, bubbling slime and squelching, and swarms of flies buzzing round
+  const PG_BPM = { calm: 56, normal: 68, tense: 76 };
+  const PG_ROOTS = [38, 39, 36, 34];   // D, E flat, C, B flat: a dark, sliding phrygian doom
+  // the monks' dirge in the chorus, a line a bar: [note, beat, beats]
+  const PG_CHANT = [[[62, 0, 2], [63, 2, 1], [62, 3, 1]], [[65, 0, 1.5], [63, 1.5, 0.5], [62, 2, 2]], [[60, 0, 1], [62, 1, 1], [63, 2, 1.5], [65, 3.5, 0.5]], [[62, 0, 3], [58, 3, 1]]];
+  // flies: a buzzing swarm circling, wandering in pitch and drifting from side to side
+  const flies = (B, t, dur, v, o2 = {}) => {
+    const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    o.type = 'sawtooth'; o.frequency.value = o2.m ? hz(o2.m) : 180 + Math.random() * 70;
+    if (o2.swoop) { const f0 = 150 + Math.random() * 40; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * 2.1, t + dur * 0.45); o.frequency.exponentialRampToValueAtTime(f0 * 1.1, t + dur); }   // one flying right past f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 1.4;
+    const w = ctx.createOscillator(), wg = ctx.createGain(); w.frequency.value = 0.5 + Math.random() * 0.8; wg.gain.value = o2.m ? hz(o2.m) * 0.04 : 26; w.connect(wg); wg.connect(o.frequency);   // circling
+    const fl = ctx.createOscillator(), fg = ctx.createGain(); fl.frequency.value = 11; fg.gain.value = 7; fl.connect(fg); fg.connect(o.frequency);   // the wing flutter
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + dur * 0.35); g.gain.linearRampToValueAtTime(v * 0.6, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f); f.connect(g);
+    if (p) { const pl = ctx.createOscillator(), pg = ctx.createGain(); pl.frequency.value = o2.swoop ? 0.5 / dur : 0.25 + Math.random() * 0.3; pg.gain.value = 0.7; pl.connect(pg); pg.connect(p.pan); g.connect(p); p.connect(B.pad); pl.start(t); pl.stop(t + dur + 0.05); } else g.connect(B.pad);
+    [o, w, fl].forEach(n => { n.start(t); n.stop(t + dur + 0.05); });
+  };
+  // slime: a bubble popping, and a wet squelch
+  const bubble = (B, t, v) => note(B.pad, 'sine', 80 + Math.random() * 6, t, 0.07, v, { slideFrom: 58 + Math.random() * 6, slideTime: 0.06, a: 0.003, r: 0.04, verb: 0.3 });
+  const squelch = (B, t, v) => nz(B.pad, t, 0.28, v, 'lowpass', 1100, 140, 5, 0.2);
+  // the harmonium: reedy, wheezing and a little out of tune, every reed drifting its own way
+  const harmonium = (B, ms, t, dur, v) => { ms.forEach(m => note(B.pad, 'sawtooth', m, t, dur, v, { det: (Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 10), a: 0.25, r: 0.4, cut: 1100, q: 0.7, vib: 9, vibDelay: 0.2, verb: 0.4 })); nz(B.pad, t, Math.min(dur, 1.2), v * 0.25, 'bandpass', 1400, 900, 0.8); };
+  const minor = (r, flat5) => [r, r + 3, r + (flat5 ? 6 : 7)];
+  function pgBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    const r = PG_ROOTS[i], e = s / 2, quiet = kind === 'calm' || kind === 'lull';
+    // the garden: flies always about, slime bubbling and squelching
+    for (let k = 0; k < (quiet || kind === 'breakdown' ? 2 : 1); k++) flies(B, t + Math.random() * s * 2, s * (2 + Math.random() * 2), kind === 'calm' ? 0.3 : quiet ? 0.38 : 0.34);
+    if (kind !== 'stab') flies(B, t, s * 4, kind === 'calm' ? 0.08 : quiet ? 0.12 : 0.16, { m: r + 24 });   // the swarm's drone, buzzing on the chord
+    if (kind === 'stab' || kind === 'chorus' && i === 0 || kind === 'drive' && i === 2) flies(B, t + s * (kind === 'stab' ? 2 : 0.5), s * 1.6, 0.45, { swoop: 1 });
+    for (let k = 0; k < (quiet || kind === 'breakdown' ? 6 : 4); k++) bubble(B, t + Math.random() * s * 4, 0.16 + Math.random() * 0.1);
+    if (Math.random() < (quiet || kind === 'breakdown' ? 0.7 : 0.4)) squelch(B, t + Math.random() * s * 3, 0.2);
+    // the plague bell: cracked and slow
+    if (i === 0 && kind !== 'drive') bellToll(B, 49, t, kind === 'calm' ? 0.07 : kind === 'breakdown' ? 0.09 : 0.1);
+    if (kind === 'stab') bellToll(B, 49, t + 1.5 * s, 0.08);
+    // the drums: a slow, heavy half-time beat; a thudding heartbeat when it's quiet
+    if (kind === 'lull') [0, 0.4, 2, 2.4].forEach((b, k) => kick(B.main, t + b * s, k % 2 ? 0.45 : 0.7));
+    else if (kind === 'breakdown') { if (i % 2 === 0) tom(B.main, t, 33, 0.6, 0.5); }
+    else if (kind === 'stab') { [0, 1.5].forEach(b => { kick(B.main, t + b * s, 0.95); crash(B.main, t + b * s, 0.11); }); khSnare(B, t + 3 * s, 0.8); }
+    else if (kind === 'drive') { for (let k = 0; k < 8; k++) if (k % 4 !== 2) kick(B.main, t + k * e, k % 2 ? 0.6 : 0.85); [2, 3.5].forEach(b => khSnare(B, t + b * s, 0.75)); for (let k = 0; k < 4; k++) tom(B.main, t + k * s + e, 40 - k, 0.4, 0.3); }
+    else if (kind === 'main' || kind === 'chorus') { kick(B.main, t, 0.95); kick(B.main, t + 2.5 * s, 0.75); if (tense) kick(B.main, t + 1.5 * s, 0.6); khSnare(B, t + 2 * s, 0.8); for (let b = 0; b < 4; b++) hat(B.main, t + b * s, 0.08, b % 2 === 1); if (i === 0 || kind === 'chorus' && i === 2) crash(B.main, t, 0.1); }
+    // the guitars: huge, slow, sustained chords; chugging in the drive; crushing hits in the hook
+    if (kind === 'main' || kind === 'chorus') { if (i % 2) { khGuitar(B, power(r), t, s * 2.9, 0.06, { r: 0.6 }); khGuitar(B, power(r + 1), t + 3 * s, s * 0.9, 0.06); } else [0, 2].forEach(b => khGuitar(B, power(r), t + b * s, s * 1.9, 0.06, { r: 0.6 })); }
+    else if (kind === 'drive') for (let k = 0; k < 8; k++) k % 4 === 0 ? khGuitar(B, power(r), t + k * e, e * 0.95, 0.055) : khGuitar(B, [r], t + k * e, e * 0.8, 0.05, { mute: true });
+    else if (kind === 'stab') [0, 1.5].forEach(b => khGuitar(B, power(r), t + b * s, s * 1.4, 0.07, { r: 0.8 }));
+    else if (kind === 'calm' && i === 2) khGuitar(B, power(r + 12), t, s * 3.8, 0.025, { r: 1.5 });   // feedback ringing out
+    // the bass: long, low notes following the guitars
+    if (kind === 'main' || kind === 'chorus' || kind === 'lull') [0, 2].forEach(b => khBass(B, r - 12, t + b * s, s * 1.9, kind === 'lull' ? 0.08 : 0.11));
+    else if (kind === 'drive') for (let k = 0; k < 8; k++) khBass(B, r - 12, t + k * e, e * 0.85, 0.1);
+    else if (kind === 'stab') [0, 1.5].forEach(b => khBass(B, r - 12, t + b * s, s * 1.3, 0.12));
+    // the harmonium: wheezing chords under everything except the drive; the dirge an octave up the second time round in the chorus
+    if (kind !== 'drive' && kind !== 'stab') harmonium(B, minor(r + 12, i === 1), t, s * 3.9, quiet ? 0.04 : kind === 'breakdown' ? 0.05 : 0.045);
+    if (kind === 'chorus' && ph >= 4) PG_CHANT[i].forEach(([m, b, d]) => harmonium(B, [m + 12], t + b * s, d * s * 0.95, 0.03));
+    // the plague monks: humming in the breakdown and when it's calm, the dirge in the chorus
+    if (kind === 'breakdown' || kind === 'calm') khChoir(B, r + 12, t, s * 3.8, kind === 'calm' ? 0.16 : 0.24, 4);
+    if (kind === 'chorus') PG_CHANT[i].forEach(([m, b, d]) => khChoir(B, m - 12, t + b * s, d * s * 0.95, 0.4, 4));
+    // into the next section: a slow roll down the toms and a squelch
+    if (fillNext) { [0, 0.33, 0.66].forEach((b, k) => tom(B.main, t + (3 + b) * s, 40 - k * 3, 0.5 + k * 0.1, 0.3)); squelch(B, t + 3.5 * s, 0.15); flies(B, t + 2.6 * s, s * 1.4, 0.42, { swoop: 1 }); }
+  }
   // ---------- the taunt at the referee after a sending-off, in every style: "duh-deeh-duh-deeh-duh-deeh-duuuhhhh", two notes a
   // minor third apart, each straight after the last, the high ones held a little longer and a long one to finish, played twice by
   // that style's own instruments (on the chant channel) while the rest of the band drops back. [semitones up, length in short notes]
@@ -10626,6 +10685,7 @@
     shanty: (B, t, s) => tauntPlay(B, t, 64, 1.2, (C, m, at, d, hi, last) => { khGuitar(C, power(m - 24), at, d * 0.9, 0.05); if (hi) oi(C, at, 0.14); if (last) waagh(C, at + d * 0.2, d * 0.9, 0.1); }, { n: tauntNote(s) }),
     dwarfhold: (B, t, s) => { caveOf(B, 0.6); return tauntPlay(B, t, 64, 1.6, (C, m, at, d, hi, last) => { crew(C, m - 12, at, d * 0.95, 0.09, 'ah', 'oh', { voices: 6 }); if (hi) smith(C, at, 0.1, 840); if (last) caveHorn(C, m - 12, at, d * 1.4, 0.03); }, { n: tauntNote(s) }); },
     wastes: (B, t, s) => tauntPlay(B, t, 64, 1.4, (C, m, at, d, hi, last) => { khuur(C, m, at, d * 0.95, 0.06); taiko(C, at, 0.6); if (hi) hur(C, at, 0.14); if (last) gong(C, at, 0.08); }, { n: tauntNote(s) }),
+    plague: (B, t, s) => tauntPlay(B, t, 62, 2, (C, m, at, d, hi, last) => { harmonium(C, [m, m - 12], at, d * 0.95, 0.1); khChoir(C, m - 12, at, d * 0.95, 0.4, 4); if (hi) bubble(C, at, 0.1); if (last) { bellToll(C, 49, at, 0.1); khGuitar(C, power(m - 24), at, d * 1.5, 0.05, { r: 0.8 }); } }, { n: tauntNote(s) }),
   };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
@@ -10652,8 +10712,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far, band, chant };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold, wastes), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 } };   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold, wastes, plague), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 }, plague: { bar: (...a) => pgBar(...a), bpm: PG_BPM } };   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -14530,6 +14590,7 @@
             else if (style === 'woodland') { sky.addColorStop(0, 'rgb(30,60,34)'); sky.addColorStop(0.5, 'rgb(96,140,80)'); sky.addColorStop(1, 'rgb(196,214,150)'); }   // green light under the canopy
             else if (style === 'dwarfhold') { sky.addColorStop(0, 'rgb(14,12,12)'); sky.addColorStop(0.55, 'rgb(46,36,28)'); sky.addColorStop(1, 'rgb(118,82,44)'); }   // the hall's vault, lit by firelight from below
             else if (style === 'wastes') { sky.addColorStop(0, 'rgb(112,146,178)'); sky.addColorStop(0.55, 'rgb(196,184,160)'); sky.addColorStop(1, 'rgb(234,196,146)'); }   // a hot, dusty sky, hazy at the horizon
+            else if (style === 'plague') { sky.addColorStop(0, 'rgb(30,36,24)'); sky.addColorStop(0.55, 'rgb(82,94,50)'); sky.addColorStop(1, 'rgb(150,158,86)'); }   // a sickly, fog-yellowed gloom
             else if (style === 'shanty') { sky.addColorStop(0, 'rgb(38,30,28)'); sky.addColorStop(0.6, 'rgb(112,74,46)'); sky.addColorStop(1, 'rgb(176,118,64)'); }   // a smoky, rust-coloured dusk
             else if (style === 'blackark') { sky.addColorStop(0, 'rgb(5,5,12)'); sky.addColorStop(0.6, 'rgb(22,18,40)'); sky.addColorStop(1, 'rgb(52,40,72)'); }   // a moonlit night at sea
             else if (style === 'brimstone') { sky.addColorStop(0, 'rgb(22,8,10)'); sky.addColorStop(0.55, 'rgb(88,20,14)'); sky.addColorStop(1, 'rgb(196,70,24)'); }   // a red-black sky, lit from below by the lava
@@ -14772,6 +14833,64 @@
                     gnob(px + V(2), hz - V(44), V(3.4), 100 + k, true);   // on top of the heap
                     gnob(px - V(40), hz - V(8), V(3.6), 110 + k, false); haunch(px - V(46), hz - V(4), V(4.5), 2.6);   // dragging one away
                     gnob(px + V(38), hz - V(25), V(3.2), 120 + k, true); });   // sat on the barrel
+            } else if (style === 'plague') {   // Nurgle's garden in the fog: giant toadstools and dead trees, a sagging rotten stand of plaguebearers and bloated cultists with nurglings on the rail, tattered banners, a bubbling cauldron, a plague bell and swarms of flies
+                const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
+                const K = Math.min(1, (hz - 12) / 190), V = v => v * K;
+                const fogBand = (y, h, a) => { const fg = g.createLinearGradient(0, y - h, 0, y + h); fg.addColorStop(0, 'rgba(176,186,120,0)'); fg.addColorStop(0.5, `rgba(176,186,120,${a})`); fg.addColorStop(1, 'rgba(176,186,120,0)'); g.fillStyle = fg; g.fillRect(0, y - h, W, h * 2); };
+                // far off: dead trees and giant toadstools, faded by the fog
+                const tree = (tx, h, col, seed) => { g.strokeStyle = col; g.lineCap = 'round'; const br = (x0, y0, a, l, w, n) => { if (n === 0 || l < 3) return; const x1 = x0 + Math.cos(a) * l, y1 = y0 + Math.sin(a) * l; g.lineWidth = w; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); br(x1, y1, a - 0.5 - R(seed + n) * 0.4, l * 0.7, w * 0.65, n - 1); br(x1, y1, a + 0.4 + R(seed + n + 5) * 0.4, l * 0.62, w * 0.6, n - 1); }; br(tx, hz, -Math.PI / 2 + (R(seed) - 0.5) * 0.3, h * 0.45, V(6), 5); g.lineCap = 'butt'; };
+                const toad = (tx, h, cr, cap, seed) => { g.fillStyle = 'rgb(190,186,150)'; g.beginPath(); g.moveTo(tx - cr * 0.16, hz); g.quadraticCurveTo(tx - cr * 0.05 + (R(seed) - 0.5) * cr * 0.4, hz - h * 0.5, tx - cr * 0.1, hz - h); g.lineTo(tx + cr * 0.1, hz - h); g.quadraticCurveTo(tx + cr * 0.05 + (R(seed) - 0.5) * cr * 0.4, hz - h * 0.5, tx + cr * 0.16, hz); g.fill();
+                    g.fillStyle = cap; g.beginPath(); g.ellipse(tx, hz - h, cr, cr * 0.55, 0, Math.PI, 0); g.quadraticCurveTo(tx, hz - h + cr * 0.25, tx - cr, hz - h); g.fill();
+                    g.fillStyle = 'rgba(230,236,190,0.75)'; for (let q = 0; q < 6; q++) { const a = Math.PI + 0.3 + R(seed + q) * (Math.PI - 0.6), dd = cr * (0.35 + R(seed + q + 9) * 0.5); g.beginPath(); g.arc(tx + Math.cos(a) * dd, hz - h + Math.sin(a) * dd * 0.55, cr * 0.07, 0, 7); g.fill(); } };
+                [[0.08, 150], [0.33, 120], [0.6, 160], [0.9, 130]].forEach(([fx, h], k) => tree(W * fx, V(h), 'rgba(52,58,38,0.55)', k * 11));
+                [[0.2, 110, 34], [0.47, 140, 44], [0.74, 120, 38]].forEach(([fx, h, cr], k) => toad(W * fx, V(h), V(cr), 'rgba(88,128,50,0.6)', k * 7));
+                fogBand(hz - V(80), V(40), 0.45);
+                // the stand: a sagging, rotten timber terrace, mossy and patched
+                const wood = ['rgb(74,68,46)', 'rgb(64,60,40)', 'rgb(84,76,50)'];
+                for (let i = 0; i < 12; i++) { const x0 = i * W / 12 - 2, w2 = W / 12 + 4, top = hz - V(70) - R(i + 3) * V(10) + Math.sin(i * 0.9) * V(4);
+                    g.fillStyle = wood[i % 3]; g.beginPath(); g.moveTo(x0, hz); g.lineTo(x0, top + R(i) * V(4)); g.lineTo(x0 + w2, top - R(i + 1) * V(5)); g.lineTo(x0 + w2, hz); g.fill();
+                    g.strokeStyle = 'rgba(30,26,16,0.6)'; g.lineWidth = 1; for (let y = hz - V(10); y > top; y -= V(10)) { g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + w2, y + (R(i + y) - 0.5) * 3); g.stroke(); }
+                    if (R(i + 20) < 0.5) { g.fillStyle = 'rgba(96,130,44,0.55)'; g.beginPath(); g.ellipse(x0 + w2 * R(i + 21), top + V(6), V(10), V(4), 0, 0, 7); g.fill(); } }   // moss
+                // the crowd: bloated green cultists and one-horned, one-eyed plaguebearers, three rows of them
+                const fan = (cx, cy, sz, seed) => { const q = R(seed), skin = q < 0.35 ? 'rgb(120,140,70)' : q < 0.7 ? 'rgb(140,150,90)' : 'rgb(104,120,64)';
+                    g.fillStyle = R(seed + 1) < 0.5 ? 'rgb(70,64,44)' : 'rgb(90,96,58)'; g.beginPath(); g.ellipse(cx, cy + sz * 1.3, sz * 1.5, sz * 1.1, 0, Math.PI, 0); g.fill();   // a bloated body
+                    g.fillStyle = skin; g.beginPath(); g.arc(cx, cy, sz, 0, 7); g.fill();
+                    if (R(seed + 2) < 0.45) {   // a plaguebearer: a single horn and a single great eye
+                        g.fillStyle = 'rgb(214,206,170)'; g.beginPath(); g.moveTo(cx - sz * 0.25, cy - sz * 0.8); g.quadraticCurveTo(cx + sz * 0.1, cy - sz * 1.8, cx + sz * 0.35, cy - sz * 2.1); g.lineTo(cx + sz * 0.25, cy - sz * 0.8); g.fill();
+                        g.fillStyle = 'rgb(240,236,190)'; g.beginPath(); g.arc(cx, cy - sz * 0.1, sz * 0.38, 0, 7); g.fill(); g.fillStyle = 'rgb(180,40,30)'; g.beginPath(); g.arc(cx, cy - sz * 0.1, sz * 0.16, 0, 7); g.fill();
+                    } else { g.fillStyle = 'rgba(20,24,10,0.8)'; g.fillRect(cx - sz * 0.45, cy - sz * 0.2, sz * 0.25, sz * 0.2); g.fillRect(cx + sz * 0.2, cy - sz * 0.2, sz * 0.25, sz * 0.2); g.fillStyle = 'rgba(160,170,90,0.9)'; g.beginPath(); g.arc(cx + sz * 0.45, cy + sz * 0.3, sz * 0.22, 0, 7); g.fill(); }   // a cultist, with a boil
+                    g.fillStyle = 'rgba(40,30,16,0.8)'; g.beginPath(); g.ellipse(cx, cy + sz * 0.5, sz * 0.45, sz * 0.14, 0, 0, Math.PI); g.fill(); };   // a slack grin
+                [[hz - V(66), 4.4, 50], [hz - V(52), 4.8, 80], [hz - V(38), 5.2, 110], [hz - V(24), 5.6, 140]].forEach(([y, sz, seed]) => { const n = Math.round(W / V(sz * 2.7)); for (let i = 0; i < n; i++) fan((i + 0.5 + (R(i + seed) - 0.5) * 0.5) * W / n, y - R(i + seed + 3) * V(4), V(sz), i + seed); });
+                // the front rail, rotten and leaning, with nurglings clambering along it
+                g.fillStyle = 'rgb(58,52,34)'; g.fillRect(0, hz - V(14), W, V(4)); for (let x0 = 4; x0 < W; x0 += V(26)) { g.save(); g.translate(x0, hz); g.rotate((R(x0) - 0.5) * 0.15); g.fillRect(-1.5, -V(16), 3, V(16)); g.restore(); }
+                for (let i = 0; i < Math.round(W / V(22)); i++) { if (R(i + 300) < 0.45) continue; const nx = (i + R(i + 301)) * V(22), ny = hz - V(16), ns = V(3.2);
+                    g.fillStyle = 'rgb(130,170,60)'; g.beginPath(); g.ellipse(nx, ny, ns * 1.2, ns, 0, 0, 7); g.fill();   // a little green blob
+                    g.fillStyle = 'rgb(214,206,170)'; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(nx + sd * ns * 0.3, ny - ns * 0.85); g.lineTo(nx + sd * ns * 0.42, ny - ns * 1.3); g.lineTo(nx + sd * ns * 0.55, ny - ns * 0.8); g.fill(); }); g.fillStyle = 'rgb(160,190,90)'; g.beginPath(); g.arc(nx - ns * 0.7, ny + ns * 0.1, ns * 0.22, 0, 7); g.fill();   // tiny horns and a boil
+                    g.fillStyle = 'rgb(20,24,10)'; g.fillRect(nx - ns * 0.5, ny - ns * 0.25, ns * 0.3, ns * 0.3); g.fillRect(nx + ns * 0.2, ny - ns * 0.25, ns * 0.3, ns * 0.3); g.fillStyle = 'rgb(40,20,14)'; g.beginPath(); g.ellipse(nx, ny + ns * 0.35, ns * 0.6, ns * 0.25, 0, 0, Math.PI); g.fill();
+                    g.fillStyle = 'rgb(200,80,90)'; g.beginPath(); g.ellipse(nx + ns * 0.1, ny + ns * 0.62, ns * 0.18, ns * 0.22, 0, 0, 7); g.fill(); }   // its tongue out
+                // tattered banners: rotten green-brown cloth with the three rings
+                [0.13, 0.37, 0.63, 0.87].forEach((fx, k) => { const bx = W * fx, top = Math.max(6, hz - V(150)), bw = V(20), bh = V(70);
+                    g.fillStyle = 'rgb(56,48,30)'; g.fillRect(bx - 1.5, top - V(6), 3, hz - top); g.fillRect(bx - bw / 2 - V(3), top, bw + V(6), V(2.5));
+                    g.fillStyle = k % 2 ? 'rgb(92,108,48)' : 'rgb(110,96,52)'; g.beginPath(); g.moveTo(bx - bw / 2, top + V(2)); g.lineTo(bx + bw / 2, top + V(2)); for (let q = 0; q <= 5; q++) g.lineTo(bx + bw / 2 - q * bw / 5, top + bh - (q % 2 ? V(10) : 0) - R(k * 7 + q) * V(8)); g.fill();
+                    g.fillStyle = 'rgba(40,30,14,0.5)'; g.beginPath(); g.arc(bx + bw * 0.2, top + bh * 0.62, V(2.5), 0, 7); g.fill();   // a moth-hole
+                    g.strokeStyle = 'rgb(46,58,20)'; g.lineWidth = V(1.6); const my = top + V(26); [-Math.PI / 2, Math.PI / 6, Math.PI * 5 / 6].forEach(a => { g.beginPath(); g.arc(bx + Math.cos(a) * V(4.5), my + Math.sin(a) * V(4.5), V(3.6), 0, 7); g.stroke(); }); g.beginPath(); g.arc(bx, my, V(2.6), 0, 7); g.stroke(); });
+                // the plague bell, hung from a crooked gallows on the left
+                const gx = W * 0.25; g.fillStyle = 'rgb(50,44,28)'; g.fillRect(gx - V(14), hz - V(90), V(4), V(90)); g.fillRect(gx - V(14), hz - V(92), V(34), V(4)); g.save(); g.translate(gx - V(12), hz - V(70)); g.rotate(-0.7); g.fillRect(0, 0, V(3), V(26)); g.restore();
+                g.strokeStyle = 'rgb(40,36,24)'; g.lineWidth = 1; g.beginPath(); g.moveTo(gx + V(12), hz - V(88)); g.lineTo(gx + V(12), hz - V(78)); g.stroke();
+                g.fillStyle = 'rgb(108,104,62)'; g.beginPath(); g.moveTo(gx + V(6), hz - V(78)); g.quadraticCurveTo(gx + V(5), hz - V(64), gx + V(1), hz - V(58)); g.lineTo(gx + V(23), hz - V(58)); g.quadraticCurveTo(gx + V(19), hz - V(64), gx + V(18), hz - V(78)); g.fill();
+                g.fillStyle = 'rgba(80,130,40,0.6)'; g.fillRect(gx + V(8), hz - V(72), V(3), V(10)); g.fillRect(gx + V(14), hz - V(68), V(2), V(8));   // verdigris streaks
+                // the cauldron in the middle, bubbling over, green fumes rising
+                const cx = W * 0.5, cyb = hz; const fume = g.createRadialGradient(cx, cyb - V(30), 2, cx, cyb - V(30), V(60)); fume.addColorStop(0, 'rgba(170,230,60,0.35)'); fume.addColorStop(1, 'rgba(170,230,60,0)'); g.fillStyle = fume; g.fillRect(cx - V(60), cyb - V(90), V(120), V(90));
+                g.fillStyle = 'rgba(255,170,60,0.7)'; [[-8, 8], [0, 12], [8, 9]].forEach(([dx, h]) => { g.beginPath(); g.moveTo(cx + V(dx) - V(4), cyb); g.quadraticCurveTo(cx + V(dx), cyb - V(h), cx + V(dx) + V(4), cyb); g.fill(); });   // the fire under it
+                g.fillStyle = 'rgb(36,38,30)'; g.beginPath(); g.ellipse(cx, cyb - V(18), V(22), V(15), 0, 0, 7); g.fill(); g.fillRect(cx - V(20), cyb - V(4), V(4), V(4)); g.fillRect(cx + V(16), cyb - V(4), V(4), V(4));
+                g.fillStyle = 'rgb(150,210,50)'; g.beginPath(); g.ellipse(cx, cyb - V(30), V(20), V(4), 0, 0, 7); g.fill();   // the brew
+                [[-12, 4], [6, 6], [14, 3]].forEach(([dx, dy]) => { g.beginPath(); g.moveTo(cx + V(dx), cyb - V(30)); g.quadraticCurveTo(cx + V(dx) + V(1), cyb - V(26), cx + V(dx), cyb - V(30) + V(dy) + V(8)); g.lineTo(cx + V(dx) + V(2.5), cyb - V(30)); g.fill(); });   // slopping over the rim
+                g.strokeStyle = 'rgba(230,250,170,0.8)'; g.lineWidth = 1; [[-6, 2.5], [5, 3.5], [11, 2]].forEach(([dx, br]) => { g.beginPath(); g.arc(cx + V(dx), cyb - V(32), V(br), Math.PI, 0); g.stroke(); });
+                for (let k = 0; k < 6; k++) { g.fillStyle = `rgba(150,200,60,${(0.2 - k * 0.03).toFixed(3)})`; g.beginPath(); g.arc(cx + Math.sin(k * 1.3) * V(6), cyb - V(40) - k * V(11), V(5 + k * 2.5), 0, 7); g.fill(); }   // the fumes
+                // a few big toadstools in front, and swarms of flies everywhere
+                [[0.06, 46, 20], [0.16, 30, 13], [0.79, 40, 17], [0.94, 52, 22]].forEach(([fx, h, cr], k) => toad(W * fx, V(h), V(cr), 'rgb(92,150,40)', 40 + k * 5));
+                fogBand(hz - V(4), V(14), 0.35);
+                g.fillStyle = 'rgba(16,20,10,0.85)'; [[0.3, 0.3], [0.55, 0.5], [0.8, 0.35], [0.12, 0.55], [0.45, 0.2], [0.68, 0.6]].forEach(([fx, fy], k) => { const sx = W * fx, sy = hz * fy; for (let q = 0; q < 26; q++) { const a = R(k * 50 + q) * 7, dd = R(k * 50 + q + 3) * V(26); g.fillRect(sx + Math.cos(a) * dd * 1.4, sy + Math.sin(a) * dd * 0.7, 1.6, 1.2); } });
             } else if (style === 'shanty') {   // a two-tier orc stadium of rusty corrugated iron and planks, packed with green orcs, stone idols of Gork and Mork, a scrap watchtower, skull totems and smoke
                 const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
                 const K = Math.min(1, (hz - 12) / 190), V = v => v * K;   // (everything scaled to the space above the pitch)
@@ -16072,11 +16191,11 @@
         
         // ---------- pitch texture: painted once by the game itself (no image files) ----------
         // 'blades' = lush grass, 'worn' = the same with churned-up mud; one is picked at random each time the game loads
-        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty', 'dwarfhold', 'wastes'];
+        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty', 'dwarfhold', 'wastes', 'plague'];
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', nurgle: 'plague', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -16373,6 +16492,75 @@
             x.restore();
             return { cv, x, r };
         }
+        // the Plague Garden (Nurgle): rotten, sickly green turf - dark mire, pools of bubbling green slime, clusters of green toadstools,
+        // writhing maggots and the odd fly - with the Mark of Nurgle (three rings around a fourth) daubed in the middle
+        function plagueGardenPitch(S) {
+            const ts = CFG.tileSize, COLS = CFG.cols, ROWS = CFG.rows, W = COLS * ts, H = ROWS * ts;
+            const cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
+            const x = cv.getContext('2d'), r = pitchRng(PITCH.seed + 401); watchPitchCanvas(cv);
+            const img = x.createImageData(cv.width, cv.height), d = img.data;
+            const n1 = pitchNoise(r, cv.width, cv.height, 100 * S), n2 = pitchNoise(r, cv.width, cv.height, 36 * S), n3 = pitchNoise(r, cv.width, cv.height, 8 * S), sm = q => q * q * (3 - 2 * q);
+            for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) {
+                const t = n1(px, py), t2 = n2(px, py), t3 = n3(px, py), band = ((px / S / ts) >> 1) & 1;
+                let R = 78 + 22 * t + band * 5, G = 100 + 24 * t + band * 6, B = 40 + 10 * t;   // rotten turf, olive and sickly
+                const mire = t2 * 0.6 + t * 0.25 + t3 * 0.15;
+                if (mire > 0.55) { const k = sm(Math.min(1, (mire - 0.55) * 3)); R -= 20 * k; G -= 24 * k; B -= 8 * k; }   // dark, wet mire
+                if (mire < 0.35) { const k = sm(Math.min(1, (0.35 - mire) * 3)); R += 16 * k; G += 11 * k; B -= 2 * k; }   // yellowing, dying patches
+                R += (t3 - 0.5) * 16; G += (t3 - 0.5) * 18; B += (t3 - 0.5) * 8;
+                const j = (r() - 0.5) * 14, i = (py * cv.width + px) * 4;
+                d[i] = R + j * 0.6; d[i + 1] = G + j; d[i + 2] = B + j * 0.4; d[i + 3] = 255;
+            }
+            x.putImageData(img, 0, 0);
+            x.lineCap = 'round';
+            for (let k = 0; k < W * H / 20; k++) {   // sparse, limp grass
+                const bx = r() * cv.width, by = r() * cv.height, len = (2 + r() * 3.5) * S, a = -Math.PI / 2 + (r() - 0.5) * 1.6, v = r();
+                x.strokeStyle = v < 0.5 ? 'rgba(122,140,52,0.55)' : v < 0.8 ? 'rgba(60,82,30,0.55)' : 'rgba(150,140,60,0.5)'; x.lineWidth = 0.6 * S;
+                x.beginPath(); x.moveTo(bx, by); x.quadraticCurveTo(bx + Math.cos(a) * len * 0.6, by + Math.sin(a) * len * 0.6, bx + Math.cos(a + 0.6) * len, by + Math.sin(a + 0.6) * len); x.stroke();
+            }
+            // pools of green slime, glossy, with bubbles
+            for (let k = 0; k < Math.round(W * H / 32000); k++) {
+                const px = r() * cv.width, py = r() * cv.height, rx = (5 + r() * 9) * S, ry = rx * (0.5 + r() * 0.3), a = r() * 3;
+                x.save(); x.translate(px, py); x.rotate(a);
+                x.fillStyle = 'rgba(40,56,16,0.55)'; x.beginPath(); x.ellipse(0, 0, rx * 1.15, ry * 1.2, 0, 0, 7); x.fill();   // a dark rim
+                const sl = x.createRadialGradient(-rx * 0.3, -ry * 0.3, 1, 0, 0, rx); sl.addColorStop(0, 'rgba(170,204,72,0.8)'); sl.addColorStop(1, 'rgba(92,136,36,0.75)'); x.fillStyle = sl; x.beginPath(); x.ellipse(0, 0, rx, ry, 0, 0, 7); x.fill();
+                x.fillStyle = 'rgba(240,255,190,0.55)'; x.beginPath(); x.ellipse(-rx * 0.35, -ry * 0.35, rx * 0.3, ry * 0.18, 0, 0, 7); x.fill();   // its sheen
+                for (let q = 0; q < 2 + r() * 4; q++) { const bx = (r() - 0.5) * rx * 1.3, by = (r() - 0.5) * ry * 1.2, br = (0.8 + r() * 1.8) * S; x.strokeStyle = 'rgba(230,250,170,0.75)'; x.lineWidth = 0.6 * S; x.beginPath(); x.arc(bx, by, br, 0, 7); x.stroke(); }   // bubbles
+                x.restore();
+            }
+            // maggots: little pale grubs, curled and wriggling, in clusters
+            const maggot = (mx, my, a, l) => { x.save(); x.translate(mx, my); x.rotate(a); const bend = (r() - 0.5) * 1.4;
+                x.strokeStyle = 'rgba(70,60,30,0.35)'; x.lineWidth = 2.6 * S; x.beginPath(); x.moveTo(-l / 2 + 0.6 * S, 0.8 * S); x.quadraticCurveTo(0.6 * S, bend * l + 0.8 * S, l / 2 + 0.6 * S, 0.8 * S); x.stroke();   // a shadow
+                x.strokeStyle = 'rgb(238,230,196)'; x.lineWidth = 2.2 * S; x.beginPath(); x.moveTo(-l / 2, 0); x.quadraticCurveTo(0, bend * l, l / 2, 0); x.stroke();
+                x.strokeStyle = 'rgba(160,146,100,0.7)'; x.lineWidth = 0.5 * S; for (let q = 1; q < 4; q++) { const f = q / 4, px = -l / 2 + l * f, py = bend * l * 2 * f * (1 - f); x.beginPath(); x.moveTo(px, py - 1.1 * S); x.lineTo(px, py + 1.1 * S); x.stroke(); }   // its segments
+                x.fillStyle = 'rgb(60,44,26)'; x.beginPath(); x.arc(l / 2, 0, 0.6 * S, 0, 7); x.fill(); x.restore(); };   // a dark head
+            for (let k = 0; k < Math.round(W * H / 20000); k++) { const cx = r() * cv.width, cy = r() * cv.height; x.fillStyle = 'rgba(56,44,24,0.3)'; x.beginPath(); x.ellipse(cx, cy, 7 * S, 5 * S, r() * 3, 0, 7); x.fill();   // a patch of rot
+                for (let q = 0; q < 2 + r() * 4; q++) maggot(cx + (r() - 0.5) * 14 * S, cy + (r() - 0.5) * 10 * S, r() * 7, (3.5 + r() * 2.5) * S); }
+            // toadstools: clusters of green caps with pale spots, seen from above, each with a shadow and a glimpse of stalk
+            const shroom = (mx, my, rr) => {
+                x.fillStyle = 'rgba(26,36,12,0.4)'; x.beginPath(); x.ellipse(mx + rr * 0.3, my + rr * 1.15, rr * 0.9, rr * 0.32, 0, 0, 7); x.fill();   // its shadow
+                x.fillStyle = 'rgb(220,220,186)'; x.beginPath(); x.moveTo(mx - rr * 0.28, my + rr * 1.15); x.quadraticCurveTo(mx - rr * 0.2, my + rr * 0.5, mx - rr * 0.18, my); x.lineTo(mx + rr * 0.18, my); x.quadraticCurveTo(mx + rr * 0.2, my + rr * 0.5, mx + rr * 0.28, my + rr * 1.15); x.fill();   // the stalk
+                x.fillStyle = 'rgba(120,120,90,0.5)'; x.fillRect(mx + rr * 0.06, my, rr * 0.12, rr * 1.1);
+                x.fillStyle = 'rgb(40,70,20)'; x.beginPath(); x.ellipse(mx, my + rr * 0.02, rr, rr * 0.22, 0, 0, 7); x.fill();   // the dark gills under the rim
+                const cg = x.createRadialGradient(mx - rr * 0.35, my - rr * 0.5, rr * 0.08, mx, my - rr * 0.2, rr); cg.addColorStop(0, 'rgb(176,226,76)'); cg.addColorStop(0.6, 'rgb(90,156,36)'); cg.addColorStop(1, 'rgb(48,96,22)'); x.fillStyle = cg;
+                x.beginPath(); x.moveTo(mx - rr, my); x.bezierCurveTo(mx - rr, my - rr * 0.95, mx + rr, my - rr * 0.95, mx + rr, my); x.quadraticCurveTo(mx, my + rr * 0.18, mx - rr, my); x.fill();   // the domed cap
+                x.fillStyle = 'rgba(238,246,200,0.9)'; [[-0.45, -0.3, 0.13], [0.05, -0.55, 0.15], [0.45, -0.25, 0.11], [-0.1, -0.2, 0.09]].forEach(([dx, dy, sr]) => { if (r() < 0.85) { x.beginPath(); x.arc(mx + dx * rr, my + dy * rr, sr * rr, 0, 7); x.fill(); } });   // pale spots
+            };
+            for (let k = 0; k < Math.round(W * H / 15000); k++) { const cx = r() * cv.width, cy = r() * cv.height, n = 1 + Math.floor(r() * 3), m = [];
+                for (let q = 0; q < n; q++) m.push([cx + (r() - 0.5) * 16 * S, cy + (r() - 0.5) * 9 * S, (4 + r() * 5) * S]);
+                m.sort((a, b) => a[1] - b[1]).forEach(([a, b, c]) => shroom(a, b, c)); }   // (the back ones first)
+            // flies settled on the rot
+            for (let k = 0; k < W * H / 3000; k++) { const fx = r() * cv.width, fy = r() * cv.height; x.fillStyle = 'rgba(20,24,12,0.85)'; x.beginPath(); x.ellipse(fx, fy, 1 * S, 0.7 * S, 0, 0, 7); x.fill(); x.fillStyle = 'rgba(220,230,220,0.45)'; x.beginPath(); x.ellipse(fx - 0.8 * S, fy - 0.6 * S, 0.8 * S, 0.45 * S, -0.5, 0, 7); x.ellipse(fx + 0.8 * S, fy - 0.6 * S, 0.8 * S, 0.45 * S, 0.5, 0, 7); x.fill(); }
+            // the Mark of Nurgle, daubed in dark slime: a ring in the middle with three rings around it, joined, and drips running from it
+            const cx = cv.width / 2, cy = cv.height / 2, U = ts * S;
+            x.save(); x.translate(cx, cy); x.lineWidth = 0.42 * U;
+            const ring = (rx, ry, rr) => { x.strokeStyle = 'rgba(28,44,10,0.6)'; x.beginPath(); x.arc(rx, ry, rr, 0, 7); x.stroke(); x.fillStyle = 'rgba(150,200,50,0.22)'; x.beginPath(); x.arc(rx, ry, rr - 0.21 * U, 0, 7); x.fill(); };
+            [-Math.PI / 2, Math.PI / 6, Math.PI * 5 / 6].forEach(a => ring(Math.cos(a) * U * 1.15, Math.sin(a) * U * 1.15, U * 0.9));
+            ring(0, 0, U * 0.72);
+            x.fillStyle = 'rgba(28,44,10,0.6)'; [[-1.3, 1.45, 0.45], [-0.75, 1.75, 0.3], [0.8, 1.7, 0.4], [1.35, 1.4, 0.28]].forEach(([dx, dy, l]) => { x.beginPath(); x.moveTo((dx - 0.1) * U, (dy - 0.1) * U); x.quadraticCurveTo((dx - 0.06) * U, (dy + l * 0.6) * U, dx * U, (dy + l) * U); x.quadraticCurveTo((dx + 0.06) * U, (dy + l * 0.6) * U, (dx + 0.1) * U, (dy - 0.1) * U); x.fill(); x.beginPath(); x.arc(dx * U, (dy + l) * U, 0.11 * U, 0, 7); x.fill(); });   // drips
+            x.fillStyle = 'rgba(28,44,10,0.75)'; [[-0.28, -0.08], [0.28, -0.08]].forEach(([ex, ey]) => { x.beginPath(); x.arc(ex * U, ey * U, 0.12 * U, 0, 7); x.fill(); }); x.beginPath(); x.arc(0, 0.22 * U, 0.22 * U, 0, Math.PI); x.fill();   // a grinning face in the middle ring
+            x.restore();
+            return { cv, x, r };
+        }
         // the Black Ark (the Dark Elves): the deck of a floating fortress - blackened planks running the length of the pitch, iron nails and
         // gratings, coiled ropes and mooring rings, chains along the sidelines, salt streaks and wet patches, and faint violet runes in the end zones
         function blackArkPitch(S) {
@@ -16660,6 +16848,13 @@
             if (PITCH.style === 'wastes') {   // lines of white lime, a little scuffed, on the sand
                 const o = ogreWastesPitch(S), x = o.x, r = o.r;
                 const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(250,246,236,${(al * (0.6 + r() * 0.35)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5) * 0.8) * S, py * S, w * S, 2 * S); } };
+                chalkLines(chalk, ts);
+                PITCH.tex = o.cv;
+                return;
+            }
+            if (PITCH.style === 'plague') {   // lines in pale, sickly yellow-green
+                const o = plagueGardenPitch(S), x = o.x, r = o.r;
+                const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(232,240,190,${(al * (0.55 + r() * 0.35)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5) * 0.8) * S, py * S, w * S, 2 * S); } };
                 chalkLines(chalk, ts);
                 PITCH.tex = o.cv;
                 return;

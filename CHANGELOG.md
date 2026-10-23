@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.27 (23 Oct 2026)
+- **Added:** a new pitch, **Plague Garden**, Nurgle's home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** rotten, sickly green turf with dark mire, a few pools of bubbling slime, green spotted toadstools, patches of rot crawling with maggots and the odd fly. The Mark of Nurgle (three rings around a fourth, grinning) is daubed in dripping slime across the middle.
+  - **Behind the block clashes:** a foggy yellow-green garden of dead trees and giant toadstools. A sagging, mossy timber stand is packed with bloated cultists and one-horned plaguebearers, with nurglings clambering along the rail. There are tattered banners, a plague bell on a crooked gallows, a cauldron bubbling over with green fumes, and swarms of flies.
+  - **The music:** slow, gloomy doom. Sludgy guitar chords over a heavy half-time beat, a wheezing out-of-tune harmonium, a cracked plague bell and plague monks droning a dirge. Slime bubbles and squelches, and flies buzz everywhere: swarms drifting from side to side, a buzzing drone on the chords, and flies swooping past at the big moments. Its referee taunt is the harmonium and monks, ending on the bell and a doom chord.
+  - **Pitch menus:** Plague Garden can also be picked from the Pitch menus. Nurgle was on Brimstone before.
+
 ## v3.26 (23 Oct 2026)
 - **Added:** a new pitch, **Ogre Wastes**, the Ogres' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** sun-baked sand and grit, scattered with rocks and pebbles, cracked dry earth, dead scrub and bleached bones. The Great Maw is painted in red ochre across the middle: a gaping round mouth ringed with fangs.
