@@ -2,6 +2,12 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.19 (23 Oct 2026)
+- **Added:** voice chat in two-device play ([#18](https://github.com/sirspoon/BludBowl/issues/18)). Tap **🎤 Mic** next to the connection chip at the top. The browser asks for the microphone the first time, and then it's an open mic: tap again to mute (🔇) or unmute (🎙️).
+  - A 🔊 on the button shows when the other player's microphone is on, and the match log says when they switch it on or off.
+  - The sound goes straight between the two devices, with the browser's echo cancellation and noise suppression.
+  - After a dropped connection the voice link comes back by itself.
+
 ## v3.18 (23 Oct 2026)
 - **Fixed:** dragging the pitch with the mouse to look around also counted as a click where you let go, so it could move a player. A press that moves more than a few pixels now just moves the view. The same goes for dragging or pinching on a touch screen, and for the joining player in two-device play.
 - **Added:** W A S D or the arrow keys move the view around the pitch while held. They do nothing while you're typing in a box, such as the chat.

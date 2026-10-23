@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.18</title>
+    <title>BludBowl 3.19</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -893,6 +893,9 @@
 #net-league-btn { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #b45309; background: rgba(66,32,6,.75); color: #fde68a; white-space: nowrap; }
 #net-chip { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #0284c7; background: rgba(8,47,73,.75); color: #bae6fd; white-space: nowrap; }
 #net-chip.bad { border-color: #e11d48; background: rgba(76,5,25,.8); color: #fecdd3; }
+#net-mic { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #475569; background: rgba(15,23,42,.8); color: #cbd5e1; white-space: nowrap; margin-left: 4px; cursor: pointer; }
+#net-mic.hidden { display: none; } #net-mic.on { border-color: #10b981; background: rgba(6,78,59,.85); color: #a7f3d0; } #net-mic.muted { border-color: #f59e0b; background: rgba(69,26,3,.85); color: #fde68a; }
+#net-mic .them { margin-left: 5px; color: #7dd3fc; }
 #whats-new { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.65); display: grid; place-items: center; padding: 16px; font-family: Inter, system-ui, sans-serif; color: #e2e8f0; }
 #whats-new.hidden { display: none; }
 #whats-new .wn-card { position: relative; background: #121a2b; border: 1px solid #263247; border-top: 3px solid #fbbf24; border-radius: 12px; width: min(520px, 100%); max-height: min(80vh, 640px);
@@ -914,7 +917,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.18</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.19</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1214,6 +1217,7 @@
                         <button type="button" id="ind-chip" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-violet-500 bg-violet-950/70 text-violet-200 mr-1 whitespace-nowrap inline-block align-middle" onclick="indChipMenu()">🔮 Inducements</button>
                         <span id="bribe-indicator" class="hidden text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-yellow-600 bg-yellow-950/70 text-yellow-200 mr-1 whitespace-nowrap inline-block align-middle"></span>
                         <button type="button" id="net-chip" class="hidden" title="Two-device match: the connection to the other device"></button>
+                        <button type="button" id="net-mic" class="hidden" onclick="NET.micTap()"></button>
                         <button type="button" id="net-league-btn" class="hidden" title="The league table and fixtures" onclick="NET.leagueView()">📋 League</button>
                         <span id="kickoff-banner" class="hidden text-amber-400 font-bold text-[9px] sm:text-[10px] bg-amber-950/80 border border-amber-500 px-2 py-0.5 rounded animate-pulse truncate inline-block max-w-full"></span>
                 </div>
@@ -18920,7 +18924,7 @@
             }
             const inMatch = () => live || (role === 'guest' ? shopping : EXIND.open());
             function dropped(why) {
-                const was = !!link; link = null; rtt = null;
+                const was = !!link; link = null; rtt = null; VOICE.theirs = false; paintMic();
                 if (!was) return;
                 paintChip(); paintLobby();
                 if (role === 'guest' && inMatch()) { startRetry(); return; }   // the guest's device keeps trying to get back
@@ -18989,7 +18993,7 @@
                 if (peer.open) outgoing(peer.connect(slug(code), { reliable: true }));
             }
             function newGuestPeer() {
-                peer = new Peer();
+                peer = new Peer(); peer.on('call', onCall);
                 peer.on('open', () => { if (!link) { if (!retryT) status('Looking for the game…', 'wait'); outgoing(peer.connect(slug(code), { reliable: true })); } });
                 peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
                 peer.on('error', peerError);
@@ -19011,7 +19015,7 @@
             function hostPeer() {
                 peer = new Peer(slug(code));
                 peer.on('open', () => { if (!live) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait'); else log(`  Waiting for the other device to rejoin with the code ${code}.`, 'text-sky-300'); });
-                peer.on('connection', incoming);
+                peer.on('connection', incoming); peer.on('call', onCall);
                 peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
                 peer.on('error', peerError);
             }
@@ -19034,8 +19038,71 @@
                     if (asHost) hostPeer(); else newGuestPeer();
                 }).catch(() => status("Couldn't load the connection library. Check the internet connection and try again.", 'bad'));
             }
+            // ---- voice: an open microphone between the two devices, with mute ----
+            // Each device that switches its microphone on calls the other with it (a one-way WebRTC call through the same PeerJS broker,
+            // straight between the devices), so either can start first; a little message says whether it's live. Muting just silences
+            // the microphone, so unmuting is instant. After a drop the call is made again once the devices are back in touch.
+            const VOICE = { stream: null, muted: false, out: null, inc: null, theirs: false, audio: null, asking: false, err: '' };
+            const otherId = () => !link || !link.c ? null : role === 'host' ? link.c.peer : slug(code);
+            async function micTap() {
+                if (VOICE.asking) return;
+                if (!VOICE.stream) {
+                    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { VOICE.err = "This browser can't use the microphone here."; paintMic(); return; }
+                    VOICE.asking = true; VOICE.err = ''; paintMic();
+                    try { VOICE.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false }); }
+                    catch (e) { VOICE.asking = false; VOICE.err = e && e.name === 'NotAllowedError' ? 'Microphone blocked: allow it for this site in the browser, then tap 🎤 again.' : 'No microphone found on this device.'; paintMic(); log(`  ${VOICE.err}`, 'text-rose-300'); return; }
+                    VOICE.asking = false; VOICE.muted = false;
+                    if (!role) { voiceStop(); return; }   // (left the match while the browser was asking)
+                    callOut(); sendMic(); paintMic(); return;
+                }
+                VOICE.muted = !VOICE.muted;
+                VOICE.stream.getAudioTracks().forEach(t => { t.enabled = !VOICE.muted; });
+                sendMic(); paintMic();
+            }
+            const sendMic = () => { if (link) link.send({ t: 'mic', on: !!VOICE.stream && !VOICE.muted }); };
+            function callOut() {
+                if (!VOICE.stream || !peer || peer.test || !link) return;   // (two test tabs have no real connection to call over)
+                const id = otherId(); if (!id) return;
+                try { if (VOICE.out) VOICE.out.close(); } catch (e) {}
+                try {
+                    const c = peer.call(id, VOICE.stream, { metadata: { bbVoice: 1 } }); VOICE.out = c;
+                    if (c) { c.on('close', () => { if (VOICE.out === c) VOICE.out = null; }); c.on('error', e => console.warn('voice', e && e.type)); }
+                } catch (e) { console.warn('voice call', e); }
+            }
+            function onCall(c) {   // the other player's microphone
+                if (!c.metadata || !c.metadata.bbVoice) { try { c.close(); } catch (e) {} return; }
+                try { if (VOICE.inc && VOICE.inc !== c) VOICE.inc.close(); } catch (e) {}
+                VOICE.inc = c; c.answer();
+                c.on('stream', st => {
+                    let a = VOICE.audio;
+                    if (!a) { a = document.createElement('audio'); a.autoplay = true; a.setAttribute('playsinline', ''); a.style.display = 'none'; document.body.appendChild(a); VOICE.audio = a; }
+                    a.srcObject = st;
+                    const p = a.play(); if (p && p.catch) p.catch(() => document.addEventListener('pointerup', () => { a.play().catch(() => {}); }, { once: true, capture: true }));   // (sound waits for a tap)
+                });
+                c.on('close', () => { if (VOICE.inc === c) VOICE.inc = null; });
+            }
+            function voiceRelink() { if (VOICE.stream && link) { callOut(); sendMic(); } }
+            function voiceStop() {
+                if (VOICE.stream) VOICE.stream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+                [VOICE.out, VOICE.inc].forEach(c => { try { if (c) c.close(); } catch (e) {} });
+                if (VOICE.audio) { try { VOICE.audio.srcObject = null; } catch (e) {} }
+                Object.assign(VOICE, { stream: null, muted: false, out: null, inc: null, theirs: false, asking: false, err: '' });
+                paintMic();
+            }
+            function paintMic() {
+                const b = $('net-mic'), chip = $('net-chip'); if (!b) return;
+                const show = !!chip && !chip.classList.contains('hidden');
+                b.classList.toggle('hidden', !show); if (!show) return;
+                const on = !!VOICE.stream && !VOICE.muted, label = VOICE.asking ? '🎤 …' : !VOICE.stream ? '🎤 Mic' : VOICE.muted ? '🔇 Muted' : '🎙️ On';
+                b.innerHTML = label + (VOICE.theirs ? '<span class="them" aria-hidden="true">🔊</span>' : '');
+                b.classList.toggle('on', on); b.classList.toggle('muted', !!VOICE.stream && VOICE.muted);
+                const who = oppName || 'the other player';
+                b.title = VOICE.err || (!VOICE.stream ? `Talk to ${who}: switch your microphone on` : VOICE.muted ? 'Muted: tap to talk again' : 'Your microphone is on: tap to mute') + (VOICE.theirs ? ` (${who}'s microphone is on)` : '');
+                b.setAttribute('aria-label', b.title);
+                if (VOICE.err) { b.innerHTML = '🎤 ⚠'; }
+            }
             function close() {
-                stopRetry();
+                stopRetry(); voiceStop();
                 try { if (link) link.send({ t: 'bye' }); } catch (e) {}
                 try { if (link) link.close(); } catch (e) {}
                 try { if (peer) peer.destroy(); } catch (e) {}
@@ -19080,6 +19147,7 @@
             }, 2000);
             function common(m) {
                 if (m.t === 'ping') { link && link.send({ t: 'pong', at: m.at }); return true; }
+                if (m.t === 'mic') { const was = VOICE.theirs; VOICE.theirs = !!m.on; paintMic(); if (was !== VOICE.theirs) log(`  🎙️ ${escH(them())}'s microphone is ${VOICE.theirs ? 'on' : 'off'}.`, 'text-sky-300'); return true; }
                 if (m.t === 'pong') { rtt = Math.round(real() - m.at); paintChip(); paintLobby(); return true; }
                 if (m.t === 'bye') { try { if (link) link.close(); } catch (e) {} dropped('The other device has left.'); return true; }
                 if (m.t === 'name') { setOpp(m.name); return true; }
@@ -19097,6 +19165,7 @@
                 }
                 if (m.t === 'lgjoined') { invite = m.err ? invite : null; syncNote = m.err || 'You have joined the league. It is now in League on this device.'; if (m.err) status(m.err, 'bad'); paintLobby(); return true; }
                 if (m.t === 'hello') {
+                    setTimeout(voiceRelink, 400);   // (connected, or back after a drop: the microphone call is made again)
                     if (m.dev) peerDev = m.dev;
                     if (link) { lastSent = {}; link.send({ t: 'lgsum', ids: LEAGUE.sharedIds() }); }
                     if (m.name != null) setOpp(m.name);
@@ -19530,7 +19599,7 @@
                 }
                 if (!live) return;
                 if (t.closest('#modal-lineup')) return;   // the guest's own starting-eleven screen
-                if (t.closest('#net-chip, #net-chat, #net-league, #net-league-btn, #net-lobby, #net-end, #post-game, #team-builder, #modal-roster, #skill-tip, #whats-new')) return;
+                if (t.closest('#net-chip, #net-mic, #net-chat, #net-league, #net-league-btn, #net-lobby, #net-end, #post-game, #team-builder, #modal-roster, #skill-tip, #whats-new')) return;
                 const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
                 if (t === canvas) {
                     stop();
@@ -19828,7 +19897,7 @@
             function paintChip() {
                 const c = $('net-chip'); if (!c) return;
                 const on = live || (role && role === 'guest' && shown);
-                c.classList.toggle('hidden', !on);
+                c.classList.toggle('hidden', !on); paintMic();
                 if (!on) return;
                 const ok = !!link;
                 const vs = oppName ? `vs ${oppName.length > 12 ? oppName.slice(0, 11) + '…' : oppName}` : role === 'host' ? 'Host' : 'Guest';
@@ -19849,6 +19918,7 @@
                 leagueView,
                 hosting: () => role === 'host' && live,
                 saveInfo: () => ({ code, token: guestToken, aiWas, guestName, oppName, guestSide, guestPost, league: league ? { text: league.text, fx: league.fx, cpu: league.cpu } : null }),
+                micTap,
                 resumeHost(info) {   // the host's page was closed: the match is back from the save; open the same room again
                     open(true, null, info.code);
                     guestToken = info.token || ''; aiWas = info.aiWas || null; guestName = info.guestName || ''; oppName = info.oppName || '';
