@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.43 (23 Oct 2026)
+- **Improved:** the Elven Union have new player figures in the slim, detailed style of the other elves ([#13](https://github.com/sirspoon/BludBowl/issues/13)). They wear sleek team-coloured jerseys with a trim V, small pads, white boots, white face masks and a white sash at the hip.
+  - **Lineman:** long swept-back blond hair.
+  - **Thrower:** a high ponytail, the ball raised.
+  - **Catcher:** extra-long hair, arms up for the catch.
+  - **Blitzer:** dark hair swept up like a flame, a full face mask, spiked pads and steel gloves.
+
 ## v3.42 (23 Oct 2026)
 - **Improved:** the Skaven have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), and the Underworld team shares them. They're hunched rat-men with long snouts, beady red eyes, small swept-back ears, grey-brown fur, crouched legs and long pink tails.
   - **Clanrat:** a ragged team-coloured tunic, a rope belt and iron shoulder pads.
