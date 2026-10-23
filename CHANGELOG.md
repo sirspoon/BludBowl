@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.34 (23 Oct 2026)
+- **Added:** a new pitch, **Khemri**, the Tomb Kings' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** golden desert sand rippled by the wind, with half-buried sandstone blocks, bleached bones, skulls and scarab beetles. Lapis-blue lines and bands of painted hieroglyphs run along the sides, and a winged sun disc with two cobras sits in the middle.
+  - **Behind the block clashes:** a blazing sun over the pyramids, with vultures circling. Sandstone terraces under a painted cornice are packed with skeletons in striped headdresses and mummies, with painted papyrus columns, two great temple pylons framing the gate, an obelisk and braziers.
+  - **The music:** Egyptian, in the Hijaz scale. A reedy mizmar playing a snake-charmer riff, a breathy ney, an oud, darbuka drums in the maqsum rhythm, a riq, finger cymbals, a sistrum and a drone, with the priests of the dead humming and bones rattling. Its referee taunt is the mizmar with the oud, ending on finger cymbals and a rattle of bones.
+  - **Pitch menus:** Khemri can also be picked from the Pitch menus. The Tomb Kings were on the Graveyard before.
+- **Changed:** the Snotlings now play at home on Mossy Flagstones, the Goblins' caves, instead of Muddy Grass.
+
 ## v3.33 (23 Oct 2026)
 - **Added:** a new pitch, **Mootland Green**, the Halflings' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** a bright village green mown in a check, dotted with daisies, buttercups and clover, with a great painted pie in a ring of wildflowers in the middle.
