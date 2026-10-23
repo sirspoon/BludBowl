@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.32</title>
+    <title>BludBowl 3.33</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.32</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.33</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -957,7 +957,7 @@
             <div class="st-row"><span>Music</span><button type="button" class="st-tog" id="st-music"></button></div>
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
-                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="warpstone">Warped Flagstones</option></select></div>
+                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="moot">Mootland Green</option><option value="warpstone">Warped Flagstones</option></select></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
@@ -1004,7 +1004,7 @@
                 <option value="blades">Grass</option>
                 <option value="worn">Muddy Grass</option>
                 <option value="flagstone">Mossy Flagstones</option>
-                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="warpstone">Warped Flagstones</option>
+                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="moot">Mootland Green</option><option value="warpstone">Warped Flagstones</option>
             </select>
         </div>
         <div class="flex items-center justify-center gap-2 mb-5 -mt-2 pointer-events-auto">
@@ -10815,6 +10815,47 @@
     if ((kind === 'calm' || kind === 'breakdown') && i === 1 || kind === 'chorus' && i === 0 && ph < 4) khHorn(B, 40, t, s * 3, 0.065);
     if (fillNext) { [0, 0.25, 0.5, 0.75].forEach((b, k) => tom(B.main, t + (3 + b) * s, 40 - k * 3, 0.6, 0.3)); if (nextKind === 'chorus' || nextKind === 'drive') shriek(B, t + 3 * s, s, 0.09); }
   }
+  // ---------- MOOTLAND GREEN (the Halflings): a jolly folk polka on the village green - an oom-pah tuba, a squeezebox, a fiddle and a tin
+  // whistle, spoons and clapping, pots and pans clanging, the stew pot bubbling, and the halflings shouting HEY! In D (D, G, A, D).
+  const MO_BPM = { calm: 80, normal: 120, tense: 132 };
+  const MO_ROOTS = [38, 43, 45, 38], MO_THIRD = [4, 4, 4, 4];
+  // the tune, a line a bar: [note, eighth, eighths]
+  const MO_TUNE = [[[74, 0, 1], [78, 1, 1], [81, 2, 2], [78, 4, 1], [76, 5, 1], [74, 6, 2]], [[79, 0, 1], [83, 1, 1], [86, 2, 2], [83, 4, 1], [81, 5, 1], [79, 6, 2]], [[76, 0, 1], [78, 1, 1], [79, 2, 1], [81, 3, 1], [83, 4, 2], [81, 6, 1], [79, 7, 1]], [[78, 0, 2], [76, 2, 1], [73, 3, 1], [74, 4, 4]]];
+  const MO_VERSE = [[[78, 0, 2], [81, 2, 2], [78, 4, 4]], [[83, 0, 2], [81, 2, 2], [79, 4, 4]], [[81, 0, 2], [83, 2, 2], [85, 4, 4]], [[86, 0, 2], [81, 2, 2], [78, 4, 4]]];
+  // the tuba: a round, fat oom on the beat
+  const tuba = (B, m, t, dur, v) => note(B.sc, 'sawtooth', m, t, dur, v * 1.8, { a: 0.02, r: 0.08, cut: 520, q: 1.2, sus: 0.7, verb: 0.15 });
+  // spoons: a quick clack
+  const spoons = (B, t, v) => { v *= 4; nz(B.main, t, 0.03, v, 'bandpass', 2400, null, 3, 0.1); nz(B.main, t + 0.025, 0.025, v * 0.6, 'bandpass', 2900, null, 3, 0.1); };
+  // pots and pans: a bright, tinny clang
+  const potClang = (B, t, v, f = 520) => { v *= 2.5; [[1, 1, 0.35], [2.3, 0.6, 0.25], [3.8, 0.4, 0.18]].forEach(([r, k, d]) => note(B.main, 'triangle', 12 * Math.log2(f * r / 440) + 69, t, d, v * k, { a: 0.001, r: d * 0.9, sus: 0.2, verb: 0.3 })); nz(B.main, t, 0.04, v * 0.7, 'highpass', 3000, null, 0.8); };
+  const squeeze = (B, ms, t, dur, v, o) => concertina(B, ms, t, dur, v * 2.2, o), mFiddle = (B, m, t, dur, v) => fiddle(B, m, t, dur, v * 1.6);   // (the squeezebox and fiddle brought up to sit with the whistle)
+  function moBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    const r = MO_ROOTS[i], th = MO_THIRD[i], e = s / 2, quiet = kind === 'calm' || kind === 'lull', chord = [r + 12, r + 12 + th, r + 19];
+    // the stew pot bubbling away
+    if (quiet || kind === 'breakdown') for (let k = 0; k < 3; k++) bubble(B, t + Math.random() * s * 4, 0.06 + Math.random() * 0.04);
+    // the oom-pah: the tuba on the beat, the squeezebox on the off-beat
+    if (kind === 'calm') { squeeze(B, chord, t, s * 3.8, 0.015, { a: 0.3 }); if (i % 2 === 0) [0, 1, 2].forEach(k => glock(B, chord[k] + 12, t + s * (1 + k * 0.5), 0.04)); }
+    else if (kind === 'breakdown') squeeze(B, [r + 12, r + 19], t, s * 3.8, 0.022, { a: 0.3 });
+    else if (kind === 'stab') [0, 1.5].forEach(b => { tuba(B, r - 12, t + b * s, s * 0.8, 0.12); squeeze(B, chord, t + b * s, s * 0.8, 0.04); });
+    else { for (let b = 0; b < 4; b++) { tuba(B, r - 12 + (b % 2 ? 7 : 0), t + b * s, e * 0.9, kind === 'lull' ? 0.09 : 0.11); squeeze(B, chord, t + b * s + e, e * 0.85, kind === 'lull' ? 0.022 : 0.03, { a: 0.01 }); }
+      if (kind === 'drive') for (let b = 0; b < 4; b++) squeeze(B, chord, t + b * s, e * 0.6, 0.025, { a: 0.01 }); }
+    // the percussion: spoons and a bodhran, clapping in the chorus, a tambourine in the drive
+    if (kind === 'lull') for (let k = 0; k < 8; k++) spoons(B, t + k * e, k % 2 ? 0.12 : 0.2);
+    else if (kind === 'main' || kind === 'chorus' || kind === 'drive') { [0, 2].forEach(b => bodhran(B, t + b * s, 0.6)); [1, 3].forEach(b => bodhran(B, t + b * s, 0.35, true)); for (let k = 0; k < 8; k++) spoons(B, t + k * e, k % 2 ? 0.14 : 0.24);
+      if (kind === 'chorus') [1, 3].forEach(b => crowdClap(B, t + b * s, 0.5)); if (kind === 'drive') for (let k = 0; k < 8; k++) tambo(B, t + k * e, k % 2 ? 0.14 : 0.08); }
+    else if (kind === 'stab') { [0, 1.5].forEach(b => potClang(B, t + b * s, 0.12, b ? 660 : 520)); oi(B, t + 3 * s, 0.17); }
+    // the tune: the whistle's verse, the fiddle's tune in the breakdown, both together in the chorus (the fiddle an octave up the second time)
+    if (kind === 'main' && i % 2 === 0) MO_VERSE[i].forEach(([m, q, d]) => whistle(B, m, t + q * e, d * e * 0.92, 0.06, q === 0));
+    else if (kind === 'main') MO_TUNE[i].forEach(([m, q, d]) => mFiddle(B, m - 12, t + q * e, d * e * 0.92, 0.04));
+    else if (kind === 'breakdown') MO_TUNE[i].forEach(([m, q, d]) => mFiddle(B, m - 12, t + q * e * 1, d * e * 0.95, 0.045));
+    else if (kind === 'chorus') MO_TUNE[i].forEach(([m, q, d]) => { whistle(B, m, t + q * e, d * e * 0.92, 0.06); mFiddle(B, m - (ph >= 4 ? 0 : 12), t + q * e, d * e * 0.92, 0.035); });
+    else if (kind === 'drive' && i % 2 === 1) MO_TUNE[i].forEach(([m, q, d]) => mFiddle(B, m - 12, t + q * e, d * e * 0.9, 0.04));
+    else if (kind === 'calm' && i === 2) [[78, 0, 1.5], [76, 1.5, 0.5], [74, 2, 2]].forEach(([m, b, d]) => whistle(B, m, t + b * s, d * s * 0.95, 0.045));
+    // the halflings: HEY! at the end of the chorus and the drive, a pot clang at the top of the chorus
+    if ((kind === 'chorus' || kind === 'drive') && i === 3) oi(B, t + 3.5 * s, 0.16);
+    if (kind === 'chorus' && i === 0) potClang(B, t, 0.1);
+    if (fillNext) { for (let k = 0; k < 4; k++) spoons(B, t + 3 * s + k * e / 2, 0.2 + k * 0.05); potClang(B, t + 3.75 * s, 0.1, 660); }
+  }
   // ---------- the taunt at the referee after a sending-off, in every style: "duh-deeh-duh-deeh-duh-deeh-duuuhhhh", two notes a
   // minor third apart, each straight after the last, the high ones held a little longer and a long one to finish, played twice by
   // that style's own instruments (on the chant channel) while the rest of the band drops back. [semitones up, length in short notes]
@@ -10854,6 +10895,7 @@
     bretonnia: (B, t, s) => tauntPlay(B, t, 62, 1.6, (C, m, at, d, hi, last) => { herald(C, m + 12, at, d * 0.9, 0.04); luth(C, m, at, 0.06); if (hi) tabor(C, at, 0.5); if (last) luthStrum(C, 38, 4, at, 0.06); }, { n: tauntNote(s) }),
     ziggurat: (B, t, s) => tauntPlay(B, t, 64, 1.6, (C, m, at, d, hi, last) => { khChoir(C, m - 12, at, d * 0.95, 0.5, 4); hammer(C, at, 0.1); if (hi) slaveDrum(C, at, 0.7); if (last) { bullHorn(C, 40, at, d * 1.5, 0.05); khGuitar(C, power(28), at, d * 1.5, 0.06, { r: 0.8 }); } }, { n: tauntNote(s) }),
     fjord: (B, t, s) => tauntPlay(B, t, 52, 1.6, (C, m, at, d, hi, last) => { khGuitar(C, power(m - 12), at, d * 0.9, 0.06); kick(C.main, at, 0.9); if (hi) oi(C, at, 0.16); if (last) { growl(C, at, d * 1.4, 0.12); khHorn(C, 40, at, d * 1.5, 0.04); } }, { n: s / 2, dip: 0.8 }),   // (at the music's own pace, with the band driving on underneath)
+    moot: (B, t, s) => tauntPlay(B, t, 74, 1.5, (C, m, at, d, hi, last) => { whistle(C, m, at, d * 0.95, 0.07); concertina(C, [m - 12], at, d * 0.95, 0.04, { a: 0.01 }); if (hi) spoons(C, at, 0.25); if (last) { potClang(C, at, 0.12); oi(C, at + d * 0.5, 0.15); } }, { n: tauntNote(s) }),
   };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
@@ -10880,8 +10922,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far, band, chant };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold, wastes, plague, bretonnia, ziggurat, altdorf, fjord), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 }, plague: { bar: (...a) => pgBar(...a), bpm: PG_BPM }, bretonnia: { bar: (...a) => brBar(...a), bpm: BR_BPM, gain: 1.9 }, ziggurat: { bar: (...a) => zgBar(...a), bpm: ZG_BPM, gain: 0.9 }, altdorf: { bar: (...a) => trBar(...a), bpm: TR_BPM }, fjord: { bar: (...a) => fjBar(...a), bpm: FJ_BPM, gain: 0.85 } };   // (altdorf: the same terrace band and chanting as muddy grass)   // (bretonnia: the lute and recorder are gentle, so it's lifted to match)   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold, wastes, plague, bretonnia, ziggurat, altdorf, fjord, moot), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 }, plague: { bar: (...a) => pgBar(...a), bpm: PG_BPM }, bretonnia: { bar: (...a) => brBar(...a), bpm: BR_BPM, gain: 1.9 }, ziggurat: { bar: (...a) => zgBar(...a), bpm: ZG_BPM, gain: 0.9 }, altdorf: { bar: (...a) => trBar(...a), bpm: TR_BPM }, fjord: { bar: (...a) => fjBar(...a), bpm: FJ_BPM, gain: 0.85 }, moot: { bar: (...a) => moBar(...a), bpm: MO_BPM, gain: 1.35 } };   // (altdorf: the same terrace band and chanting as muddy grass)   // (bretonnia: the lute and recorder are gentle, so it's lifted to match)   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -14768,7 +14810,7 @@
             let base = [47, 107, 42];
             if (tex) { try { const s1 = document.createElement('canvas'); s1.width = s1.height = 8; const sc = s1.getContext('2d'); sc.drawImage(tex, 0, 0, 8, 8); const d = sc.getImageData(0, 0, 8, 8).data; let r = 0, gg = 0, b = 0; for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; base = [r / n, gg / n, b / n].map(Math.round); } catch (e) {} }
             const mix = (a, k) => `rgb(${Math.round(a[0] * k + 11 * (1 - k))},${Math.round(a[1] * k + 15 * (1 - k))},${Math.round(a[2] * k + 25 * (1 - k))})`;   // towards the night sky
-            const sky = g.createLinearGradient(0, 0, 0, ground), grassy = style === 'blades' || style === 'worn' || style === 'altdorf', elven = style === 'elven';
+            const sky = g.createLinearGradient(0, 0, 0, ground), grassy = style === 'blades' || style === 'worn' || style === 'altdorf' || style === 'moot', elven = style === 'elven';
             if (style === 'jungle') { sky.addColorStop(0, 'rgb(40,74,58)'); sky.addColorStop(0.7, 'rgb(104,140,98)'); sky.addColorStop(1, 'rgb(150,172,120)'); }   // misty jungle air
             else if (elven) { sky.addColorStop(0, 'rgb(150,186,222)'); sky.addColorStop(0.65, 'rgb(214,226,236)'); sky.addColorStop(1, 'rgb(246,236,210)'); }   // a soft, luminous elven sky
             else if (style === 'warpstone') { sky.addColorStop(0, 'rgb(8,14,10)'); sky.addColorStop(0.6, 'rgb(22,40,24)'); sky.addColorStop(1, 'rgb(60,96,48)'); }   // a dark night, lit green from below
@@ -15359,6 +15401,76 @@
                 // snow drifts along the front, and snow falling over everything
                 g.fillStyle = snow; g.beginPath(); g.moveTo(0, hz); for (let x0 = 0; x0 <= W; x0 += V(14)) g.lineTo(x0, hz - V(3) - R(x0 + 3) * V(4)); g.lineTo(W, hz); g.fill();
                 for (let i = 0; i < 160; i++) { g.fillStyle = `rgba(255,255,255,${(0.5 + R(i + 600) * 0.45).toFixed(2)})`; g.beginPath(); g.arc(R(i + 500) * W, R(i + 700) * hz, 0.6 + R(i + 800) * 1.4, 0, 7); g.fill(); }
+            } else if (style === 'moot') {   // a halfling stadium in the Moot: gently rolling hills with hedgerows, trees and a windmill; grassy banks dug with round doors and windows, chimneys smoking out of the turf; halflings on the terraces; bunting; tables of food; and a huge stew pot over a fire, a cook stirring it
+                const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
+                const K = Math.min(1, (hz - 12) / 190), V = v => v * K;
+                g.fillStyle = 'rgba(255,255,255,0.8)'; [[0.14, 26, 1], [0.48, 16, 0.8], [0.8, 30, 1.1]].forEach(([fx, y, k]) => [[-14, 0, 11], [0, -5, 15], [15, 0, 11]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(W * fx + dx * k, V(y) + dy * k, rr * k, 0, 7); g.fill(); }));
+                // the rolling hills, one behind another, with hedgerows, round trees and a windmill
+                const hill = (base, amp, f, ph, col) => { g.fillStyle = col; g.beginPath(); g.moveTo(0, hz); for (let x0 = 0; x0 <= W; x0 += 8) g.lineTo(x0, base - Math.sin(x0 / W * f + ph) * amp - Math.sin(x0 / W * f * 2.3 + ph * 2) * amp * 0.3); g.lineTo(W, hz); g.fill(); return x0 => base - Math.sin(x0 / W * f + ph) * amp - Math.sin(x0 / W * f * 2.3 + ph * 2) * amp * 0.3; };
+                const h1 = hill(hz - V(110), V(16), 4, 0.5, 'rgb(150,196,110)');
+                const tree = (tx, ty, sz, col) => { g.fillStyle = 'rgb(100,70,44)'; g.fillRect(tx - sz * 0.12, ty - sz * 0.6, sz * 0.24, sz * 0.6); g.fillStyle = col; [[0, -1.1, 0.7], [-0.45, -0.8, 0.5], [0.45, -0.8, 0.5]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(tx + dx * sz, ty + dy * sz, rr * sz, 0, 7); g.fill(); }); };
+                for (let k = 0; k < 8; k++) { const tx = R(k + 10) * W; tree(tx, h1(tx) + V(2), V(8 + R(k) * 4), 'rgb(96,150,74)'); }
+                const wx = W * 0.82, wy = h1(wx) + V(2); g.fillStyle = 'rgb(226,214,190)'; g.beginPath(); g.moveTo(wx - V(8), wy); g.lineTo(wx - V(5), wy - V(30)); g.lineTo(wx + V(5), wy - V(30)); g.lineTo(wx + V(8), wy); g.fill(); g.fillStyle = 'rgb(150,80,50)'; g.beginPath(); g.moveTo(wx - V(7), wy - V(30)); g.lineTo(wx, wy - V(38)); g.lineTo(wx + V(7), wy - V(30)); g.fill();   // the windmill
+                g.strokeStyle = 'rgb(120,90,60)'; g.lineWidth = V(1.6); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + 0.4; g.beginPath(); g.moveTo(wx, wy - V(30)); g.lineTo(wx + Math.cos(a) * V(22), wy - V(30) + Math.sin(a) * V(22)); g.stroke(); g.fillStyle = 'rgba(240,232,214,0.9)'; g.save(); g.translate(wx, wy - V(30)); g.rotate(a); g.fillRect(V(6), 0, V(15), V(5)); g.restore(); }
+                const h2 = hill(hz - V(84), V(12), 3, 2.1, 'rgb(122,178,88)');
+                g.strokeStyle = 'rgb(74,120,56)'; g.lineWidth = V(3); for (let k = 0; k < 3; k++) { const y0 = k * V(10); g.beginPath(); for (let x0 = 0; x0 <= W; x0 += 10) { const yy = h2(x0) + V(8) + y0 + Math.sin(x0 / 40 + k) * V(1.5); x0 ? g.lineTo(x0, yy) : g.moveTo(x0, yy); } g.stroke(); }   // hedgerows across the fields
+                for (let k = 0; k < 6; k++) { const tx = R(k + 30) * W; tree(tx, h2(tx) + V(3), V(10 + R(k + 3) * 5), 'rgb(80,136,62)'); }
+                // the stadium: grassy banks with round doors and windows dug into them, chimneys poking out of the turf
+                const bank = hz - V(58);
+                g.fillStyle = 'rgb(96,156,70)'; g.beginPath(); g.moveTo(0, hz); g.lineTo(0, bank + V(6)); for (let x0 = 0; x0 <= W; x0 += 10) g.lineTo(x0, bank + Math.sin(x0 / W * 9) * V(4)); g.lineTo(W, hz); g.fill();
+                g.fillStyle = 'rgba(60,110,44,0.5)'; for (let k = 0; k < 60; k++) { const gx = R(k + 300) * W, gy = bank + V(4) + R(k + 301) * V(14); g.fillRect(gx, gy, V(2), V(1)); }
+                const chimneys = [];
+                const doorCols = ['rgb(60,130,70)', 'rgb(220,180,50)', 'rgb(176,50,40)', 'rgb(50,90,160)', 'rgb(130,80,140)'];
+                for (let x0 = V(34), k = 0; x0 < W - V(20); x0 += V(70), k++) {
+                    if (Math.abs(x0 - W * 0.12) < V(36)) continue;   // (the stew pot stands there)
+                    const dy = bank + V(20), dr = V(11);
+                    g.fillStyle = 'rgb(140,110,80)'; g.beginPath(); g.arc(x0, dy, dr + V(2.5), 0, 7); g.fill();   // the stone surround
+                    g.fillStyle = doorCols[k % 5]; g.beginPath(); g.arc(x0, dy, dr, 0, 7); g.fill();   // the round door
+                    g.strokeStyle = 'rgba(0,0,0,0.18)'; g.lineWidth = 1; for (let q = -2; q <= 2; q++) { g.beginPath(); g.moveTo(x0 + q * dr * 0.38, dy - Math.sqrt(dr * dr - (q * dr * 0.38) ** 2)); g.lineTo(x0 + q * dr * 0.38, dy + Math.sqrt(dr * dr - (q * dr * 0.38) ** 2)); g.stroke(); }   // its planks
+                    g.fillStyle = 'rgb(232,196,90)'; g.beginPath(); g.arc(x0, dy, V(1.8), 0, 7); g.fill();   // the brass knob in the middle
+                    [-1, 1].forEach(sd => { const wx2 = x0 + sd * V(24); g.fillStyle = 'rgb(140,110,80)'; g.beginPath(); g.arc(wx2, dy - V(4), V(6), 0, 7); g.fill(); g.fillStyle = 'rgb(250,226,150)'; g.beginPath(); g.arc(wx2, dy - V(4), V(4.5), 0, 7); g.fill(); g.strokeStyle = 'rgb(110,80,50)'; g.lineWidth = 1; g.beginPath(); g.moveTo(wx2 - V(4.5), dy - V(4)); g.lineTo(wx2 + V(4.5), dy - V(4)); g.moveTo(wx2, dy - V(8.5)); g.lineTo(wx2, dy + V(0.5)); g.stroke();   // round windows, lit warm
+                        g.fillStyle = ['rgb(240,80,90)', 'rgb(250,214,50)', 'rgb(250,250,246)'][(k + (sd > 0 ? 1 : 0)) % 3]; for (let q = -2; q <= 2; q++) { g.beginPath(); g.arc(wx2 + q * V(2.4), dy + V(3.5), V(1.4), 0, 7); g.fill(); } });   // window boxes of flowers
+                    chimneys.push(x0 + V(14));
+                }
+                // the halflings on the terraces above: curly hair, rosy cheeks, waistcoats, some with ale and drumsticks
+                const fan = (cx, cy, sz, seed) => { const q = R(seed);
+                    g.fillStyle = ['rgb(176,60,40)', 'rgb(70,120,70)', 'rgb(220,180,70)', 'rgb(90,110,160)', 'rgb(150,100,60)'][Math.floor(R(seed + 1) * 5)]; g.fillRect(cx - sz * 1.1, cy + sz * 0.7, sz * 2.2, sz * 1.4);   // a waistcoat
+                    g.fillStyle = 'rgb(240,232,214)'; g.fillRect(cx - sz * 0.3, cy + sz * 0.7, sz * 0.6, sz * 1.4);   // the shirt
+                    g.fillStyle = 'rgb(240,200,170)'; g.beginPath(); g.arc(cx, cy, sz * 0.9, 0, 7); g.fill();
+                    g.fillStyle = 'rgba(240,120,110,0.5)'; g.beginPath(); g.arc(cx - sz * 0.45, cy + sz * 0.25, sz * 0.2, 0, 7); g.arc(cx + sz * 0.45, cy + sz * 0.25, sz * 0.2, 0, 7); g.fill();   // rosy cheeks
+                    g.fillStyle = ['rgb(110,70,40)', 'rgb(170,110,50)', 'rgb(70,46,30)', 'rgb(200,160,80)'][Math.floor(R(seed + 2) * 4)]; for (let k = 0; k < 6; k++) { const a = Math.PI + k * Math.PI / 5; g.beginPath(); g.arc(cx + Math.cos(a) * sz * 0.75, cy + Math.sin(a) * sz * 0.7 - sz * 0.1, sz * 0.32, 0, 7); g.fill(); }   // curly hair
+                    g.fillStyle = 'rgba(40,24,16,0.85)'; g.fillRect(cx - sz * 0.4, cy - sz * 0.05, sz * 0.16, sz * 0.16); g.fillRect(cx + sz * 0.24, cy - sz * 0.05, sz * 0.16, sz * 0.16);
+                    g.strokeStyle = 'rgba(80,40,30,0.85)'; g.lineWidth = Math.max(1, sz * 0.12); g.beginPath(); g.arc(cx, cy + sz * 0.2, sz * 0.35, 0.2, Math.PI - 0.2); g.stroke();   // a big smile
+                    if (q < 0.18) { const sd = R(seed + 3) < 0.5 ? -1 : 1; g.fillStyle = 'rgb(200,150,70)'; g.fillRect(cx + sd * sz * 1.4 - sz * 0.35, cy - sz * 0.5, sz * 0.7, sz * 0.9); g.fillStyle = 'rgb(250,246,230)'; g.fillRect(cx + sd * sz * 1.4 - sz * 0.4, cy - sz * 0.7, sz * 0.8, sz * 0.3); }   // a mug of ale
+                    else if (q < 0.32) { const sd = R(seed + 3) < 0.5 ? -1 : 1; g.fillStyle = 'rgb(236,226,200)'; g.fillRect(cx + sd * sz * 1.3 - sz * 0.08, cy - sz * 0.9, sz * 0.16, sz * 0.6); g.fillStyle = 'rgb(160,90,40)'; g.beginPath(); g.ellipse(cx + sd * sz * 1.3, cy - sz * 0.1, sz * 0.4, sz * 0.32, 0, 0, 7); g.fill(); }   // a drumstick
+                };
+                const tierH = V(11);
+                for (let k = 1; k >= 0; k--) { const ty = bank - V(4) - tierH * k;
+                    g.fillStyle = k ? 'rgb(110,168,80)' : 'rgb(104,162,74)'; g.fillRect(0, ty - tierH, W, tierH);
+                    for (let x0 = 0, n = 0, step = V(10); x0 < W; x0 += step, n++) fan(x0 + step / 2 + (R(n + k * 31) - 0.5) * V(3), ty - tierH + V(2) - R(n + k * 17) * V(2), V(3.8), n + k * 97 + 1300); }
+                chimneys.forEach(cx0 => { const top = bank - V(30); g.fillStyle = 'rgb(150,90,60)'; g.fillRect(cx0, top, V(6), bank - top); g.fillStyle = 'rgb(120,70,50)'; g.fillRect(cx0 - V(1), top - V(2), V(8), V(3)); g.strokeStyle = 'rgba(90,50,30,0.5)'; g.lineWidth = 1; for (let y = top + V(4); y < bank; y += V(4)) { g.beginPath(); g.moveTo(cx0, y); g.lineTo(cx0 + V(6), y); g.stroke(); }   // chimneys rising through the turf among the crowd
+                    for (let q = 0; q < 5; q++) { g.fillStyle = `rgba(226,226,230,${(0.5 - q * 0.09).toFixed(2)})`; g.beginPath(); g.arc(cx0 + V(3) + q * V(3.5), top - V(6) - q * V(7), V(3.5 + q * 1.6), 0, 7); g.fill(); } });
+                // bunting strung across, and a picket fence along the front with a table of food
+                g.strokeStyle = 'rgba(90,70,50,0.8)'; g.lineWidth = 0.8; for (let k = 0; k < 4; k++) { const x0 = k * W / 4, x1 = x0 + W / 4, y = bank - V(30); g.beginPath(); g.moveTo(x0, y); g.quadraticCurveTo((x0 + x1) / 2, y + V(10), x1, y); g.stroke(); for (let q = 0, n = Math.round(W / 4 / V(9)); q < n; q++) { const f = (q + 0.5) / n, px = x0 + (x1 - x0) * f, py = y + V(10) * 2 * f * (1 - f); g.fillStyle = ['rgb(240,80,90)', 'rgb(250,214,50)', 'rgb(80,160,90)', 'rgb(90,130,220)'][q % 4]; g.beginPath(); g.moveTo(px - V(3), py); g.lineTo(px + V(3), py); g.lineTo(px, py + V(6)); g.fill(); } }
+                g.fillStyle = 'rgb(240,236,226)'; for (let x0 = 0; x0 < W; x0 += V(7)) { g.fillRect(x0, hz - V(10), V(4), V(10)); g.beginPath(); g.moveTo(x0, hz - V(10)); g.lineTo(x0 + V(2), hz - V(12.5)); g.lineTo(x0 + V(4), hz - V(10)); g.fill(); } g.fillRect(0, hz - V(8), W, V(1.5)); g.fillRect(0, hz - V(4), W, V(1.5));   // the picket fence
+                const tx = W * 0.72; g.fillStyle = 'rgb(140,96,56)'; g.fillRect(tx - V(30), hz - V(16), V(60), V(3)); g.fillRect(tx - V(27), hz - V(13), V(3), V(13)); g.fillRect(tx + V(24), hz - V(13), V(3), V(13)); g.fillStyle = 'rgb(236,226,200)'; g.fillRect(tx - V(30), hz - V(17), V(60), V(2));   // a table with a cloth
+                g.fillStyle = 'rgb(214,150,70)'; g.beginPath(); g.ellipse(tx - V(18), hz - V(19), V(7), V(3), 0, 0, 7); g.fill(); g.fillStyle = 'rgb(240,200,80)'; g.beginPath(); g.moveTo(tx - V(5), hz - V(17)); g.lineTo(tx + V(5), hz - V(17)); g.lineTo(tx + V(5), hz - V(24)); g.lineTo(tx - V(5), hz - V(21)); g.fill();   // a pie and a wedge of cheese
+                g.fillStyle = 'rgb(190,130,70)'; g.beginPath(); g.ellipse(tx + V(17), hz - V(20), V(8), V(4), 0, 0, 7); g.fill(); g.strokeStyle = 'rgb(150,96,50)'; g.lineWidth = 1; [-4, 0, 4].forEach(dx => { g.beginPath(); g.moveTo(tx + V(17 + dx) - V(1.5), hz - V(23)); g.lineTo(tx + V(17 + dx) + V(1.5), hz - V(17.5)); g.stroke(); });   // a loaf
+                // the great stew pot off to the side: a black cauldron over a fire, stew bubbling over, steam rising, a halfling cook in a tall hat stirring from a step
+                const px = W * 0.12, pb = hz - V(6), pr = V(24);
+                const fg = g.createRadialGradient(px, pb, 2, px, pb, V(46)); fg.addColorStop(0, 'rgba(255,170,60,0.5)'); fg.addColorStop(1, 'rgba(255,120,40,0)'); g.fillStyle = fg; g.fillRect(px - V(46), pb - V(46), V(92), V(50));
+                g.fillStyle = 'rgba(255,170,60,0.95)'; [[-14, 12], [-5, 18], [5, 15], [14, 11]].forEach(([dx, h]) => { g.beginPath(); g.moveTo(px + V(dx) - V(5), pb + V(4)); g.quadraticCurveTo(px + V(dx) - V(2), pb - V(h) * 0.6, px + V(dx), pb - V(h)); g.quadraticCurveTo(px + V(dx) + V(2), pb - V(h) * 0.5, px + V(dx) + V(5), pb + V(4)); g.fill(); });   // the fire
+                g.fillStyle = 'rgb(40,38,36)'; g.beginPath(); g.moveTo(px - pr, pb - pr * 1.4); g.quadraticCurveTo(px - pr * 1.15, pb - pr * 0.2, px - pr * 0.6, pb); g.lineTo(px + pr * 0.6, pb); g.quadraticCurveTo(px + pr * 1.15, pb - pr * 0.2, px + pr, pb - pr * 1.4); g.fill();   // the cauldron
+                g.fillStyle = 'rgb(70,66,62)'; g.fillRect(px - pr * 1.08, pb - pr * 1.48, pr * 2.16, V(3.5)); [-1, 1].forEach(sd => { g.strokeStyle = 'rgb(40,38,36)'; g.lineWidth = V(2); g.beginPath(); g.arc(px + sd * pr * 1.05, pb - pr * 1.05, V(4), 0, 7); g.stroke(); });   // rim and handles
+                g.fillStyle = 'rgb(176,110,50)'; g.beginPath(); g.ellipse(px, pb - pr * 1.42, pr * 0.95, V(4), 0, 0, 7); g.fill();   // the stew
+                g.fillStyle = 'rgb(230,150,60)'; [[-10, 0], [4, 1], [12, -1]].forEach(([dx, dy]) => { g.beginPath(); g.arc(px + V(dx), pb - pr * 1.42 + V(dy), V(2), 0, 7); g.fill(); }); g.fillStyle = 'rgb(240,220,120)'; g.beginPath(); g.arc(px - V(3), pb - pr * 1.44, V(1.6), 0, 7); g.fill(); g.fillStyle = 'rgb(90,150,60)'; g.beginPath(); g.arc(px + V(8), pb - pr * 1.45, V(1.6), 0, 7); g.fill();   // carrots, a potato, a herb
+                g.fillStyle = 'rgb(176,110,50)'; [[-pr * 0.8, 7], [pr * 0.5, 10]].forEach(([dx, l]) => { g.beginPath(); g.moveTo(px + dx - V(2), pb - pr * 1.46); g.quadraticCurveTo(px + dx - V(3), pb - pr * 1.2, px + dx, pb - pr * 1.46 + V(l)); g.quadraticCurveTo(px + dx + V(2), pb - pr * 1.3, px + dx + V(2), pb - pr * 1.46); g.fill(); });   // bubbling over the rim
+                for (let k = 0; k < 6; k++) { g.fillStyle = `rgba(240,240,244,${(0.5 - k * 0.07).toFixed(2)})`; g.beginPath(); g.arc(px + Math.sin(k * 1.4) * V(5), pb - pr * 1.6 - k * V(9), V(5 + k * 2), 0, 7); g.fill(); }   // steam
+                const ck = px + pr * 1.5; g.fillStyle = 'rgb(130,96,60)'; g.fillRect(ck - V(9), hz - V(8), V(18), V(8));   // the cook's step
+                g.fillStyle = 'rgb(240,236,226)'; g.fillRect(ck - V(6), hz - V(24), V(12), V(16)); g.fillStyle = 'rgb(240,200,170)'; g.beginPath(); g.arc(ck, hz - V(28), V(5), 0, 7); g.fill(); g.fillStyle = 'rgba(240,120,110,0.6)'; g.beginPath(); g.arc(ck - V(2.5), hz - V(27), V(1.2), 0, 7); g.arc(ck + V(2.5), hz - V(27), V(1.2), 0, 7); g.fill();
+                g.fillStyle = 'rgb(250,250,246)'; g.fillRect(ck - V(4), hz - V(42), V(8), V(10)); g.beginPath(); g.arc(ck - V(2.5), hz - V(42), V(3.5), 0, 7); g.arc(ck + V(2.5), hz - V(42), V(3.5), 0, 7); g.arc(ck, hz - V(44), V(3.5), 0, 7); g.fill();   // the tall chef's hat
+                g.fillStyle = 'rgba(40,24,16,0.85)'; g.fillRect(ck - V(2.2), hz - V(29), V(1.2), V(1.2)); g.fillRect(ck + V(1), hz - V(29), V(1.2), V(1.2));
+                g.strokeStyle = 'rgb(140,100,60)'; g.lineWidth = V(1.6); g.beginPath(); g.moveTo(ck - V(5), hz - V(20)); g.lineTo(px + pr * 0.4, pb - pr * 1.55); g.stroke();   // the long wooden ladle, stirring
             } else if (style === 'shanty') {   // a two-tier orc stadium of rusty corrugated iron and planks, packed with green orcs, stone idols of Gork and Mork, a scrap watchtower, skull totems and smoke
                 const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
                 const K = Math.min(1, (hz - 12) / 190), V = v => v * K;   // (everything scaled to the space above the pitch)
@@ -16660,11 +16772,11 @@
         
         // ---------- pitch texture: painted once by the game itself (no image files) ----------
         // 'blades' = lush grass, 'worn' = the same with churned-up mud; one is picked at random each time the game loads
-        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty', 'dwarfhold', 'wastes', 'plague', 'bretonnia', 'ziggurat', 'altdorf', 'fjord'];
+        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty', 'dwarfhold', 'wastes', 'plague', 'bretonnia', 'ziggurat', 'altdorf', 'fjord', 'moot'];
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'ziggurat', human: 'altdorf', norse: 'fjord', imperial: 'altdorf', oldworld: 'altdorf', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', nurgle: 'plague', bretonnian: 'bretonnia', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'ziggurat', human: 'altdorf', norse: 'fjord', halfling: 'moot', imperial: 'altdorf', oldworld: 'altdorf', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', nurgle: 'plague', bretonnian: 'bretonnia', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -17168,6 +17280,26 @@
             x.restore();
             return { cv, x, r };
         }
+        // Mootland Green (the Halflings): a scatter of daisies, buttercups and clover over the green, and in the middle a ring of wildflowers
+        // around a great painted pie, its crust latticed and golden
+        function mootDressing(x, r, S, W, H, ts) {
+            const flower = (fx, fy, petal, eye, sz) => { x.fillStyle = petal; for (let q = 0; q < 5; q++) { const a = q * 1.256; x.beginPath(); x.arc(fx + Math.cos(a) * sz, fy + Math.sin(a) * sz, sz * 0.7, 0, 7); x.fill(); } x.fillStyle = eye; x.beginPath(); x.arc(fx, fy, sz * 0.55, 0, 7); x.fill(); };
+            for (let k = 0; k < W * H / 1500; k++) flower(r() * W * S, r() * H * S, 'rgba(252,252,246,0.9)', 'rgba(246,206,60,0.95)', 1.1 * S);   // daisies
+            for (let k = 0; k < W * H / 2600; k++) flower(r() * W * S, r() * H * S, 'rgba(250,214,50,0.9)', 'rgba(220,170,30,0.95)', 1.0 * S);   // buttercups
+            for (let k = 0; k < W * H / 2600; k++) { const fx = r() * W * S, fy = r() * H * S; x.fillStyle = 'rgba(46,120,40,0.6)'; [0, 2.1, 4.2].forEach(a => { x.beginPath(); x.arc(fx + Math.cos(a) * 1.2 * S, fy + Math.sin(a) * 1.2 * S, 1.1 * S, 0, 7); x.fill(); }); if (r() < 0.3) { x.fillStyle = 'rgba(220,150,200,0.85)'; x.beginPath(); x.arc(fx, fy - 2 * S, 1.1 * S, 0, 7); x.fill(); } }   // clover, some in flower
+            const cx = W / 2 * S, cy = H / 2 * S, U = ts * S;
+            for (let k = 0; k < 40; k++) { const a = k / 40 * Math.PI * 2, rr = 2.2 * U + (r() - 0.5) * 0.15 * U; flower(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, ['rgba(240,80,90,0.95)', 'rgba(250,214,50,0.95)', 'rgba(250,250,246,0.95)', 'rgba(150,120,230,0.95)', 'rgba(250,150,60,0.95)'][k % 5], 'rgba(250,236,150,0.95)', 0.16 * U); }   // the ring of wildflowers
+            x.save(); x.translate(cx, cy);
+            x.fillStyle = 'rgba(40,60,20,0.3)'; x.beginPath(); x.ellipse(0.12 * U, 0.15 * U, 1.75 * U, 1.75 * U, 0, 0, 7); x.fill();   // its shadow
+            x.fillStyle = 'rgb(206,140,62)'; x.beginPath(); x.arc(0, 0, 1.75 * U, 0, 7); x.fill();   // the crimped rim
+            x.fillStyle = 'rgb(226,162,78)'; for (let k = 0; k < 28; k++) { const a = k / 28 * Math.PI * 2; x.beginPath(); x.arc(Math.cos(a) * 1.62 * U, Math.sin(a) * 1.62 * U, 0.16 * U, 0, 7); x.fill(); }
+            x.fillStyle = 'rgb(150,40,60)'; x.beginPath(); x.arc(0, 0, 1.42 * U, 0, 7); x.fill();   // the filling: plum and blackberry
+            x.save(); x.beginPath(); x.arc(0, 0, 1.42 * U, 0, 7); x.clip(); x.fillStyle = 'rgb(232,176,90)'; x.strokeStyle = 'rgb(180,116,50)'; x.lineWidth = 0.03 * U;
+            for (let k = -3; k <= 3; k++) { x.save(); x.rotate(0.6); x.fillRect(k * 0.42 * U - 0.11 * U, -1.6 * U, 0.22 * U, 3.2 * U); x.strokeRect(k * 0.42 * U - 0.11 * U, -1.6 * U, 0.22 * U, 3.2 * U); x.restore(); x.save(); x.rotate(-0.6); x.fillRect(k * 0.42 * U - 0.11 * U, -1.6 * U, 0.22 * U, 3.2 * U); x.strokeRect(k * 0.42 * U - 0.11 * U, -1.6 * U, 0.22 * U, 3.2 * U); x.restore(); }   // the lattice
+            x.restore();
+            x.fillStyle = 'rgba(255,240,200,0.4)'; x.beginPath(); x.ellipse(-0.6 * U, -0.7 * U, 0.6 * U, 0.25 * U, -0.6, 0, 7); x.fill();   // a glaze shine
+            x.restore();
+        }
         // the Black Ark (the Dark Elves): the deck of a floating fortress - blackened planks running the length of the pitch, iron nails and
         // gratings, coiled ropes and mooring rings, chains along the sidelines, salt streaks and wet patches, and faint violet runes in the end zones
         function blackArkPitch(S) {
@@ -17510,7 +17642,7 @@
             const cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
             const x = cv.getContext('2d'), r = pitchRng(PITCH.seed); watchPitchCanvas(cv);
             const img = x.createImageData(cv.width, cv.height), d = img.data;
-            const n1 = pitchNoise(r, cv.width, cv.height, 90 * S), n2 = pitchNoise(r, cv.width, cv.height, 14 * S), grave = PITCH.style === 'graveyard', elf = PITCH.style === 'elven', wood = PITCH.style === 'woodland', orcy = PITCH.style === 'shanty', bret = PITCH.style === 'bretonnia';
+            const n1 = pitchNoise(r, cv.width, cv.height, 90 * S), n2 = pitchNoise(r, cv.width, cv.height, 14 * S), grave = PITCH.style === 'graveyard', elf = PITCH.style === 'elven', wood = PITCH.style === 'woodland', orcy = PITCH.style === 'shanty', bret = PITCH.style === 'bretonnia', moot = PITCH.style === 'moot';
             for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) {
                 const band = ((px / S / ts) >> 1) & 1;
                 const t = Math.min(1, n1(px, py) * (elf ? 0.45 : 0.8) + band * (elf ? 0.3 : 0.18)), t2 = n2(px, py) * (elf ? 0.18 : 0.35);
@@ -17519,6 +17651,7 @@
                 if (elf) { R = 34 + 18 * t; G = 124 + 34 * t; B = 72 + 20 * t; }   // lush, emerald, immaculately mown
                 if (wood) { R = 40 + 20 * t; G = 92 + 26 * t; B = 34 + 12 * t; }   // a shady forest glade
                 if (orcy) { R = 86 + 20 * t; G = 70 + 16 * t; B = 40 + 10 * t; }   // trampled almost bare: mud-brown, a little scrub
+                if (moot) { const ck = (((px / S / ts) | 0) + ((py / S / ts) | 0)) & 1; R = 70 + 16 * t + ck * 10; G = 140 + 24 * t + ck * 14; B = 46 + 12 * t + ck * 4; }   // a bright village green, mown in a check
                 if (bret) { const st = ((px / S / ts) | 0) & 1; R = 40 + 12 * t + st * 18; G = 112 + 22 * t + st * 32; B = 42 + 10 * t + st * 12; }   // a lord's tourney lawn, mown in stripes a square wide
                 R += ((grave ? 34 : elf ? 26 : 16) - R) * t2; G += ((grave ? 36 : elf ? 96 : 70) - G) * t2; B += ((grave ? 26 : elf ? 58 : 32) - B) * t2;
                 const j = (r() - 0.5) * 14, i = (py * cv.width + px) * 4;
@@ -17558,6 +17691,7 @@
             if (wood) woodlandDressing(x, r, S, W, H, ts);
             if (orcy) shantyDressing(x, r, S, W, H, ts);
             if (bret) bretonniaDressing(x, r, S, W, H, ts);
+            if (moot) mootDressing(x, r, S, W, H, ts);
             if (PITCH.style === 'altdorf') altdorfDressing(x, r, S, W, H, ts);
             if (elf) {   // an elven circle inlaid at the centre of the pitch: two gold rings and eight leaves
                 const cx = W / 2 * S, cy = H / 2 * S, R1 = ts * 1.9 * S;

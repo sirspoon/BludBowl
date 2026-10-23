@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.33 (23 Oct 2026)
+- **Added:** a new pitch, **Mootland Green**, the Halflings' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** a bright village green mown in a check, dotted with daisies, buttercups and clover, with a great painted pie in a ring of wildflowers in the middle.
+  - **Behind the block clashes:** gently rolling hills with hedgerows, trees and a windmill, and a stadium dug into grassy banks like hobbit holes, with round coloured doors, round windows with flower boxes, and chimneys smoking out of the turf. Rosy-cheeked halflings fill the terraces with ale and drumsticks, under bunting, behind a picket fence and a table of food. Off to one side, a huge stew pot bubbles over a fire while a halfling cook stirs it.
+  - **The music:** a jolly folk polka. An oom-pah tuba and squeezebox, a fiddle and tin whistle, spoons, a bodhran and clapping, pots and pans clanging, the stew pot bubbling and the halflings shouting HEY! Its referee taunt is the whistle and squeezebox with spoons, ending on a pot clang and a HEY!
+  - **Pitch menus:** Mootland Green can also be picked from the Pitch menus. The Halflings were on Muddy Grass before.
+
 ## v3.32 (23 Oct 2026)
 - **Added:** a new pitch, **Frozen Fjord**, the Norse home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** snow, trampled to slush in places with frozen grass showing through, with glassy ice sheets, footprints and glittering frost. The lines are painted red, with a red valknut in a ring of runes in the middle.
