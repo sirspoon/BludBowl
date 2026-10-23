@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.28</title>
+    <title>BludBowl 3.29</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.28</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.29</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -957,7 +957,7 @@
             <div class="st-row"><span>Music</span><button type="button" class="st-tog" id="st-music"></button></div>
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
-                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="warpstone">Warped Flagstones</option></select></div>
+                <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="warpstone">Warped Flagstones</option></select></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
@@ -1004,7 +1004,7 @@
                 <option value="blades">Grass</option>
                 <option value="worn">Muddy Grass</option>
                 <option value="flagstone">Mossy Flagstones</option>
-                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="warpstone">Warped Flagstones</option>
+                <option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="warpstone">Warped Flagstones</option>
             </select>
         </div>
         <div class="flex items-center justify-center gap-2 mb-5 -mt-2 pointer-events-auto">
@@ -10698,6 +10698,61 @@
     if (kind === 'stab' && i !== 0) [0, 1.5].forEach(b => herald(B, r + 24, t + b * s, s * 0.8, 0.03));
     if (fillNext) { for (let k = 0; k < 6; k++) tabor(B, t + 3 * s + k * s / 6, 0.3 + k * 0.07, k % 2); if (nextKind === 'chorus' || nextKind === 'stab') [[0, 0.5], [7, 0.5]].forEach(([x, d], k) => herald(B, 38 + 24 + x, t + (3 + k * 0.5) * s, d * s * 0.9, 0.03)); }
   }
+  // ---------- ZIGGURAT (the Chaos Dwarfs): heavy, oppressive industrial doom in the forges of Zharr-Naggrund - crushing low guitars grinding
+  // between E and F, huge slave drums, forge hammers clanging, the furnaces roaring, steam hissing, chains and the whip, bull horns blaring,
+  // and the priests of Hashut chanting in an ancient, eastern scale (E F G# A B C D)
+  const ZG_BPM = { calm: 58, normal: 72, tense: 84 };
+  const ZG_ROOTS = [40, 41, 40, 38];   // E, F, E, D: the half-step grind
+  const ZG_CHANT = [[[64, 0, 2], [65, 2, 1], [64, 3, 1]], [[68, 0, 1], [69, 1, 1], [68, 2, 1], [65, 3, 1]], [[64, 0, 1.5], [65, 1.5, 0.5], [68, 2, 1], [71, 3, 1]], [[69, 0, 1], [68, 1, 1], [65, 2, 1], [64, 3, 1]]];
+  // a forge hammer: a heavy, dull clang of iron on iron, low and inharmonic, with a thud
+  const hammer = (B, t, v, f = 160) => { v *= 3; [[1, 1, 0.5], [2.41, 0.6, 0.35], [3.93, 0.4, 0.25], [5.6, 0.25, 0.18]].forEach(([r, k, d]) => note(B.main, 'triangle', 12 * Math.log2(f * r / 440) + 69, t, d, v * k, { a: 0.001, r: d * 0.9, sus: 0.2, verb: 0.45 })); nz(B.main, t, 0.06, v * 0.9, 'lowpass', 1400, 200, 0.8, 0.2); };
+  // the furnaces: a deep roar, with crackling
+  const furnace = (B, t, dur, v) => { v *= 5; nz(B.pad, t, dur, v, 'lowpass', 220, 120, 0.8, 0.2); for (let k = 0; k < 5; k++) nz(B.pad, t + Math.random() * dur, 0.03, v * 0.8, 'bandpass', 1500 + Math.random() * 2000, null, 4); };
+  const steam = (B, t, dur, v) => nz(B.pad, t, dur, v, 'highpass', 3500, 6000, 0.7, 0.3);
+  const whip = (B, t, v) => { nz(B.main, t, 0.025, v, 'highpass', 2500, null, 0.7, 0.4); nz(B.main, t + 0.01, 0.05, v * 0.5, 'bandpass', 1800, 900, 2, 0.4); };
+  // a bull horn: a huge, low, blaring brass call, bending up into the note
+  const bullHorn = (B, m, t, dur, v) => [-9, 9].forEach(d => note(B.main, 'sawtooth', m, t, dur, v * 1.6, { det: d, slideFrom: m - 2, slideTime: 0.25, a: 0.15, r: 0.35, cut: 700, cutTo: 1300, q: 1.4, vib: 6, vibDelay: 0.4, verb: 0.6 }));
+  // the slave drums: enormous, booming
+  const slaveDrum = (B, t, v) => { kick(B.main, t, v); tom(B.main, t, 28, v * 0.8, 0.6); };
+  function zgBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    const r = ZG_ROOTS[i], e = s / 2, quiet = kind === 'calm' || kind === 'lull';
+    // the forge itself: the furnaces roaring, steam, chains, now and then the whip
+    if (quiet || kind === 'breakdown') furnace(B, t, s * 4, 0.12);
+    if (Math.random() < (quiet ? 0.6 : 0.3)) steam(B, t + Math.random() * s * 3, s * (0.8 + Math.random()), 0.1);
+    if (Math.random() < 0.5) chains(B, t + Math.random() * s * 3.5, quiet ? 0.5 : 0.4);
+    if ((kind === 'main' || kind === 'drive') && i === 3 || kind === 'stab' && i === 2) whip(B, t + 3.5 * s, 0.5);
+    // the drone: a low, grinding buzz under everything
+    if (kind !== 'stab') note(B.pad, 'sawtooth', 28, t, s * 4, quiet ? 0.05 : 0.04, { a: 0.4, r: 0.4, cut: 260, q: 2 });
+    // the hammers: a lone clang far off when it's calm, on the off-beats in the groove, every beat on the march
+    if (kind === 'calm') { if (i % 2 === 0) hammer(B, t + s * (1 + Math.random() * 2), 0.06, 140); }
+    else if (kind === 'lull') [1, 3].forEach(b => hammer(B, t + b * s, 0.09));
+    else if (kind === 'main' || kind === 'chorus') [1, 3].forEach(b => hammer(B, t + b * s, 0.11, b === 3 ? 190 : 160));
+    else if (kind === 'drive') for (let b = 0; b < 4; b++) hammer(B, t + b * s + e, 0.1, b % 2 ? 190 : 160);
+    else if (kind === 'stab') [0, 1.5].forEach(b => hammer(B, t + b * s, 0.14, 130));
+    // the drums: the slave drums, slow and crushing
+    if (kind === 'lull' || kind === 'breakdown') [0, 2].forEach(b => slaveDrum(B, t + b * s, kind === 'lull' ? 0.6 : 0.7));
+    else if (kind === 'main' || kind === 'chorus') { [0, 2.5].forEach(b => slaveDrum(B, t + b * s, 0.95)); if (tense) slaveDrum(B, t + 1.5 * s, 0.6); khSnare(B, t + 2 * s, 0.85); for (let b = 0; b < 4; b++) hat(B.main, t + b * s, 0.07, true); if (i === 0) crash(B.main, t, 0.12); }
+    else if (kind === 'drive') { for (let k = 0; k < 8; k++) slaveDrum(B, t + k * e, k % 2 ? 0.55 : 0.9); [1, 3].forEach(b => khSnare(B, t + b * s, 0.8)); if (i % 2 === 0) crash(B.main, t, 0.12); }
+    else if (kind === 'stab') [0, 1.5].forEach(b => { slaveDrum(B, t + b * s, 1); crash(B.main, t + b * s, 0.13); });
+    // the guitars: crushing, low, grinding up a half-step; chugging on the march; crushing hits in the hook
+    if (kind === 'main' || kind === 'chorus') { khGuitar(B, power(r - 12), t, s * 1.9, 0.065, { r: 0.5 }); khGuitar(B, power(r - 11), t + 2 * s, s * 0.9, 0.065); khGuitar(B, power(r - 12), t + 3 * s, s * 0.9, 0.065); }
+    else if (kind === 'drive') for (let k = 0; k < 8; k++) k % 4 === 0 ? khGuitar(B, power(r - 12), t + k * e, e * 0.95, 0.06) : khGuitar(B, [r - 12], t + k * e, e * 0.8, 0.055, { mute: true });
+    else if (kind === 'stab') [0, 1.5].forEach(b => khGuitar(B, power(r - 12), t + b * s, s * 1.4, 0.075, { r: 0.8 }));
+    else if (kind === 'calm' && i === 1) khGuitar(B, power(r), t, s * 3.8, 0.025, { r: 1.5 });
+    // the bass: low and heavy
+    if (kind === 'main' || kind === 'chorus' || kind === 'lull') [0, 2].forEach(b => khBass(B, r - 24 + (b === 2 && kind !== 'lull' ? 1 : 0), t + b * s, s * 1.9, kind === 'lull' ? 0.09 : 0.12));
+    else if (kind === 'drive') for (let k = 0; k < 8; k++) khBass(B, r - 24, t + k * e, e * 0.85, 0.11);
+    else if (kind === 'stab') [0, 1.5].forEach(b => khBass(B, r - 24, t + b * s, s * 1.3, 0.13));
+    // the priests of Hashut: a low hum when it's calm, the chant in the breakdown and the chorus (an octave lower too, the second time)
+    if (kind === 'calm') khChoir(B, 52, t, s * 3.8, 0.2, 4);
+    if (kind === 'breakdown' || kind === 'chorus') ZG_CHANT[i].forEach(([m, b, d]) => { khChoir(B, m - 12, t + b * s, d * s * 0.95, kind === 'chorus' ? 0.45 : 0.35, 4); if (ph >= 4) khChoir(B, m - 24, t + b * s, d * s * 0.95, 0.3, 3); });
+    if (kind === 'main' && i % 2 === 1) khChoir(B, r + 12, t, s * 3.8, 0.25, 4);
+    // the bull horns: blaring at the top of the hook, the chorus and the breakdown
+    if (kind === 'stab' && i === 0 || kind === 'chorus' && i === 0) bullHorn(B, 40, t, s * 2.5, 0.05);
+    if (kind === 'breakdown' && i === 2) bullHorn(B, 40, t, s * 3.5, 0.04);
+    // into the next section: the drums rolling and the whip
+    if (fillNext) { for (let k = 0; k < 6; k++) slaveDrum(B, t + 3 * s + k * s / 6, 0.4 + k * 0.09); whip(B, t + 3.9 * s, 0.4); }
+  }
   // ---------- the taunt at the referee after a sending-off, in every style: "duh-deeh-duh-deeh-duh-deeh-duuuhhhh", two notes a
   // minor third apart, each straight after the last, the high ones held a little longer and a long one to finish, played twice by
   // that style's own instruments (on the chant channel) while the rest of the band drops back. [semitones up, length in short notes]
@@ -10734,6 +10789,7 @@
     wastes: (B, t, s) => tauntPlay(B, t, 64, 1.4, (C, m, at, d, hi, last) => { khuur(C, m, at, d * 0.95, 0.06); taiko(C, at, 0.6); if (hi) hur(C, at, 0.14); if (last) gong(C, at, 0.08); }, { n: tauntNote(s) }),
     plague: (B, t, s) => tauntPlay(B, t, 62, 2, (C, m, at, d, hi, last) => { harmonium(C, [m, m - 12], at, d * 0.95, 0.1); khChoir(C, m - 12, at, d * 0.95, 0.4, 4); if (hi) bubble(C, at, 0.1); if (last) { bellToll(C, 49, at, 0.1); khGuitar(C, power(m - 24), at, d * 1.5, 0.05, { r: 0.8 }); } }, { n: tauntNote(s) }),
     bretonnia: (B, t, s) => tauntPlay(B, t, 62, 1.6, (C, m, at, d, hi, last) => { herald(C, m + 12, at, d * 0.9, 0.04); luth(C, m, at, 0.06); if (hi) tabor(C, at, 0.5); if (last) luthStrum(C, 38, 4, at, 0.06); }, { n: tauntNote(s) }),
+    ziggurat: (B, t, s) => tauntPlay(B, t, 64, 1.6, (C, m, at, d, hi, last) => { khChoir(C, m - 12, at, d * 0.95, 0.5, 4); hammer(C, at, 0.1); if (hi) slaveDrum(C, at, 0.7); if (last) { bullHorn(C, 40, at, d * 1.5, 0.05); khGuitar(C, power(28), at, d * 1.5, 0.06, { r: 0.8 }); } }, { n: tauntNote(s) }),
   };
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
@@ -10760,8 +10816,8 @@
     far.connect(fh); fh.connect(fl); fl.connect(bus); fl.connect(fwet); fwet.connect(verbIn);
     return { bus, main, pad, sc, far, band, chant };
   }
-  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold, wastes, plague, bretonnia), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 }, plague: { bar: (...a) => pgBar(...a), bpm: PG_BPM }, bretonnia: { bar: (...a) => brBar(...a), bpm: BR_BPM, gain: 1.9 } };   // (bretonnia: the lute and recorder are gentle, so it's lifted to match)   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold, wastes, plague, bretonnia, ziggurat), otherwise the electro track
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 }, plague: { bar: (...a) => pgBar(...a), bpm: PG_BPM }, bretonnia: { bar: (...a) => brBar(...a), bpm: BR_BPM, gain: 1.9 }, ziggurat: { bar: (...a) => zgBar(...a), bpm: ZG_BPM, gain: 0.9 } };   // (bretonnia: the lute and recorder are gentle, so it's lifted to match)   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
@@ -14640,6 +14696,7 @@
             else if (style === 'wastes') { sky.addColorStop(0, 'rgb(112,146,178)'); sky.addColorStop(0.55, 'rgb(196,184,160)'); sky.addColorStop(1, 'rgb(234,196,146)'); }   // a hot, dusty sky, hazy at the horizon
             else if (style === 'plague') { sky.addColorStop(0, 'rgb(30,36,24)'); sky.addColorStop(0.55, 'rgb(82,94,50)'); sky.addColorStop(1, 'rgb(150,158,86)'); }   // a sickly, fog-yellowed gloom
             else if (style === 'bretonnia') { sky.addColorStop(0, 'rgb(70,128,200)'); sky.addColorStop(0.7, 'rgb(150,196,234)'); sky.addColorStop(1, 'rgb(206,226,240)'); }   // a bright summer's day for the tourney
+            else if (style === 'ziggurat') { sky.addColorStop(0, 'rgb(24,10,8)'); sky.addColorStop(0.55, 'rgb(86,30,16)'); sky.addColorStop(1, 'rgb(176,74,30)'); }   // a smoke-choked sky, lit red by the furnaces
             else if (style === 'shanty') { sky.addColorStop(0, 'rgb(38,30,28)'); sky.addColorStop(0.6, 'rgb(112,74,46)'); sky.addColorStop(1, 'rgb(176,118,64)'); }   // a smoky, rust-coloured dusk
             else if (style === 'blackark') { sky.addColorStop(0, 'rgb(5,5,12)'); sky.addColorStop(0.6, 'rgb(22,18,40)'); sky.addColorStop(1, 'rgb(52,40,72)'); }   // a moonlit night at sea
             else if (style === 'brimstone') { sky.addColorStop(0, 'rgb(22,8,10)'); sky.addColorStop(0.55, 'rgb(88,20,14)'); sky.addColorStop(1, 'rgb(196,70,24)'); }   // a red-black sky, lit from below by the lava
@@ -15011,6 +15068,97 @@
                 [-1, 1].forEach(sd => turret(gx + sd * (gw + V(4)), V(22), V(108), 30 + sd));
                 bunt(W * 0.08, W * 0.28, wt + V(1)); bunt(W * 0.28, W * 0.42, wt + V(1)); bunt(W * 0.58, W * 0.72, wt + V(1)); bunt(W * 0.72, W * 0.92, wt + V(1));
                 [[0.03, 26, 120], [0.28, 22, 96], [0.72, 22, 96], [0.97, 26, 120]].forEach(([fx, tw, th], k) => turret(W * fx, V(tw), V(th), k * 13));
+            } else if (style === 'ziggurat') {   // Zharr-Naggrund: volcanoes and furnace chimneys, Hashut's great ziggurat with a fire on top, blue glazed walls with gold bulls and dragons, tiered stands of Chaos Dwarfs and hobgoblins, winged-bull statues by the gate, and braziers
+                const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
+                const K = Math.min(1, (hz - 12) / 190), V = v => v * K;
+                const blue = 'rgb(30,66,150)', blueDk = 'rgb(20,46,110)', gold = 'rgb(232,186,60)', basalt = 'rgb(44,34,32)', basaltLt = 'rgb(70,56,50)', bronze = 'rgb(176,112,50)';
+                const flame = (fx, fy, h, w, ga = 0.55) => { glow(fx, fy - h * 0.4, h * 1.6, ga); [[0, 1, 'rgba(255,120,30,0.9)'], [0, 0.7, 'rgba(255,190,70,0.95)'], [0, 0.4, 'rgba(255,240,170,0.95)']].forEach(([dx, k, c]) => { g.fillStyle = c; g.beginPath(); g.moveTo(fx - w * k, fy); g.quadraticCurveTo(fx - w * k * 0.9, fy - h * k * 0.55, fx + Math.sin(fx) * w * 0.2, fy - h * k); g.quadraticCurveTo(fx + w * k * 0.7, fy - h * k * 0.5, fx + w * k, fy); g.fill(); }); [[-0.6, 0.7], [0.55, 0.6]].forEach(([dx, k]) => { g.fillStyle = 'rgba(255,150,40,0.85)'; g.beginPath(); g.moveTo(fx + dx * w - w * 0.3, fy); g.quadraticCurveTo(fx + dx * w * 1.3, fy - h * k * 0.6, fx + dx * w * 1.1, fy - h * k * 0.9); g.quadraticCurveTo(fx + dx * w * 0.6, fy - h * k * 0.4, fx + dx * w + w * 0.3, fy); g.fill(); }); };
+                const fireBowl = (fx, fy, sz) => { g.fillStyle = 'rgb(140,88,40)'; g.beginPath(); g.moveTo(fx - sz, fy); g.lineTo(fx + sz, fy); g.quadraticCurveTo(fx + sz * 0.8, fy + sz * 0.8, fx, fy + sz * 0.8); g.quadraticCurveTo(fx - sz * 0.8, fy + sz * 0.8, fx - sz, fy); g.fill(); flame(fx, fy, sz * 2.4, sz * 0.8); };
+                const smoke = (sx, sy, n, sc, a) => { for (let k = 0; k < n; k++) { g.fillStyle = `rgba(40,30,28,${(a - k * a / n).toFixed(3)})`; g.beginPath(); g.arc(sx + Math.sin(k * 0.9 + sx) * V(8) + k * V(3), sy - k * V(12) * sc, V(8 + k * 3) * sc, 0, 7); g.fill(); } };
+                const glow = (gx, gy, rr, a) => { const gg = g.createRadialGradient(gx, gy, 1, gx, gy, rr); gg.addColorStop(0, `rgba(255,150,50,${a})`); gg.addColorStop(1, 'rgba(255,90,30,0)'); g.fillStyle = gg; g.fillRect(gx - rr, gy - rr, rr * 2, rr * 2); };
+                // volcanoes far off, glowing at their tops
+                [[0.1, 90, 0.16], [0.86, 110, 0.2], [0.68, 70, 0.12]].forEach(([fx, h, w]) => { const vx = W * fx, top = hz - V(60) - V(h); g.fillStyle = 'rgb(56,28,22)'; g.beginPath(); g.moveTo(vx - W * w, hz); g.lineTo(vx - V(10), top); g.lineTo(vx + V(10), top); g.lineTo(vx + W * w, hz); g.fill(); glow(vx, top, V(30), 0.6); g.strokeStyle = 'rgba(255,110,30,0.7)'; g.lineWidth = V(2); g.beginPath(); g.moveTo(vx - V(4), top); g.quadraticCurveTo(vx - V(14), top + V(30), vx - V(24), top + V(60)); g.stroke(); smoke(vx, top - V(6), 7, 1.2, 0.5); });
+                // the ziggurat: five stepped tiers of black basalt trimmed in bronze, a great stair up the middle, furnace mouths glowing, and the temple of Hashut on top with its fire
+                const zx = W * 0.5, zb = hz - V(72), zw = Math.min(W * 0.4, V(300)), zh = V(88), tiers = 5;
+                for (let k = 0; k < tiers; k++) { const w2 = zw * (1 - k * 0.17) / 2, y1 = zb - k * zh / tiers, y0 = y1 - zh / tiers;
+                    g.fillStyle = k % 2 ? basalt : 'rgb(52,40,36)'; g.beginPath(); g.moveTo(zx - w2, y1); g.lineTo(zx - w2 + V(4), y0); g.lineTo(zx + w2 - V(4), y0); g.lineTo(zx + w2, y1); g.fill();
+                    g.fillStyle = bronze; g.fillRect(zx - w2 + V(4), y0, w2 * 2 - V(8), V(2));
+                    [-1, 1].forEach(sd => fireBowl(zx + sd * (w2 - V(8)), y0, V(4.5)));
+                    for (let q = -3; q <= 3; q++) { if (q === 0) continue; const fx = zx + q * w2 / 4; if (Math.abs(fx - zx) > w2 - V(10)) continue; g.fillStyle = 'rgb(255,120,40)'; g.fillRect(fx - V(2), y1 - V(9), V(4), V(6)); glow(fx, y1 - V(6), V(8), 0.35); } }   // furnace mouths
+                const tw = zw * (1 - tiers * 0.17) / 2, tt = zb - zh;
+                g.fillStyle = basaltLt; g.beginPath(); g.moveTo(zx - V(16), zb); g.lineTo(zx - V(7), tt); g.lineTo(zx + V(7), tt); g.lineTo(zx + V(16), zb); g.fill();   // the stair
+                g.strokeStyle = 'rgba(20,14,12,0.6)'; g.lineWidth = 1; for (let y = zb; y > tt; y -= V(5)) { const f = (zb - y) / zh, hw = V(16) - f * V(9); g.beginPath(); g.moveTo(zx - hw, y); g.lineTo(zx + hw, y); g.stroke(); }
+                g.fillStyle = basalt; g.fillRect(zx - tw, tt - V(18), tw * 2, V(18)); g.fillStyle = bronze; g.fillRect(zx - tw, tt - V(18), tw * 2, V(2)); g.fillStyle = 'rgb(255,140,50)'; g.fillRect(zx - V(5), tt - V(14), V(10), V(14));   // the temple and its glowing door
+                glow(zx, tt - V(30), V(60), 0.6); flame(zx, tt - V(18), V(40), V(16));   // Hashut's fire
+                smoke(zx, tt - V(46), 8, 1.3, 0.55);
+                [-1, 1].forEach(sd => { const hx = zx + sd * tw * 0.8; g.fillStyle = bronze; g.beginPath(); g.moveTo(hx, tt - V(18)); g.quadraticCurveTo(hx + sd * V(10), tt - V(26), hx + sd * V(6), tt - V(36)); g.quadraticCurveTo(hx + sd * V(5), tt - V(27), hx - sd * V(2), tt - V(20)); g.fill(); });   // bronze bull horns on the temple roof
+                // furnace chimneys at the sides, belching smoke and fire
+                [[0.05, 26, 120], [0.17, 20, 96], [0.83, 20, 100], [0.95, 26, 124]].forEach(([fx, w, h], k) => { const cx = W * fx, top = hz - V(h); g.fillStyle = 'rgb(48,36,32)'; g.fillRect(cx - V(w) / 2, top, V(w), V(h)); g.fillStyle = bronze; [0.25, 0.6].forEach(f => g.fillRect(cx - V(w) / 2 - V(2), top + V(h) * f, V(w) + V(4), V(3))); g.fillRect(cx - V(w) / 2 - V(3), top, V(w) + V(6), V(4)); glow(cx, top - V(4), V(24), 0.6); g.fillStyle = 'rgba(255,170,60,0.9)'; g.beginPath(); g.moveTo(cx - V(w) / 3, top); g.quadraticCurveTo(cx, top - V(16 + k * 2), cx + V(w) / 3, top); g.fill(); smoke(cx, top - V(16), 7, 1, 0.5); });
+                // the wall: blue glazed brick, stepped battlements, bands of rosettes, and rows of gold bulls and dragons striding along it
+                const wt = hz - V(72);
+                g.fillStyle = blue; g.fillRect(0, wt, W, hz - wt);
+                g.strokeStyle = 'rgba(10,24,70,0.45)'; g.lineWidth = 1; for (let y = hz, row = 0; y > wt; y -= V(6), row++) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); for (let x0 = (row % 2) * V(6); x0 < W; x0 += V(12)) { g.beginPath(); g.moveTo(x0, y); g.lineTo(x0, y - V(6)); g.stroke(); } }
+                for (let x0 = 0; x0 < W; x0 += V(20)) { g.fillStyle = blue; g.beginPath(); g.moveTo(x0, wt); g.lineTo(x0, wt - V(5)); g.lineTo(x0 + V(3), wt - V(5)); g.lineTo(x0 + V(3), wt - V(10)); g.lineTo(x0 + V(9), wt - V(10)); g.lineTo(x0 + V(9), wt - V(5)); g.lineTo(x0 + V(12), wt - V(5)); g.lineTo(x0 + V(12), wt); g.fill(); }   // stepped merlons
+                const rosettes = y => { g.fillStyle = gold; g.fillRect(0, y - V(4), W, V(1)); g.fillRect(0, y + V(3), W, V(1)); for (let x0 = V(6); x0 < W; x0 += V(12)) { g.fillStyle = 'rgb(240,236,220)'; g.beginPath(); g.arc(x0, y, V(2.2), 0, 7); g.fill(); g.fillStyle = gold; g.beginPath(); g.arc(x0, y, V(1), 0, 7); g.fill(); } };
+                rosettes(wt + V(5));
+                for (let x0 = V(30); x0 < W; x0 += V(80)) if (Math.abs(x0 - W * 0.5) > V(60)) fireBowl(x0, wt - V(10), V(4));   // fire bowls burning along the battlements
+                const beast = (bx, by, sz, bull, dir) => { g.save(); g.translate(bx, by); g.scale(dir * sz, sz); g.fillStyle = gold;
+                    if (bull) [-9, -6.5, 4, 6.5].forEach(lx => { g.fillRect(lx - 0.8, 2, 1.6, 6.5); g.fillRect(lx - 1.1, 8, 2.2, 1); });   // slim legs and hooves
+                    else { g.beginPath(); g.ellipse(0, 0, 9, 4.5, 0, 0, 7); g.fill(); [-6, -3, 3, 6].forEach(lx => g.fillRect(lx - 0.8, 2, 1.6, 6.5)); }   // the dragon's body and legs
+                    if (bull) { g.beginPath(); g.moveTo(-11, -3); g.quadraticCurveTo(-4, -5, 1, -8); g.quadraticCurveTo(5, -9, 8, -5); g.lineTo(12, -3); g.lineTo(14, 1); g.lineTo(12.5, 2.5); g.lineTo(9, 2); g.quadraticCurveTo(7, 5, 4, 5); g.lineTo(-8, 4.5); g.quadraticCurveTo(-12, 3, -11, -3); g.fill();   // a bull: a great hump, a deep chest, the head lowered
+                        g.strokeStyle = gold; g.lineWidth = 1.4; g.lineCap = 'round'; g.beginPath(); g.moveTo(10, -4); g.quadraticCurveTo(14, -6, 14.5, -10); g.stroke(); g.lineWidth = 1; g.beginPath(); g.moveTo(-11, -2); g.quadraticCurveTo(-13.5, 1, -13, 5); g.stroke(); g.beginPath(); g.ellipse(-13, 5.5, 1, 1.6, 0, 0, 7); g.fill(); g.lineCap = 'butt'; }   // forward-curving horns and a tufted tail
+                    else { g.beginPath(); g.moveTo(7, -2); g.quadraticCurveTo(10, -9, 13, -10); g.lineTo(15, -9); g.lineTo(12, -7); g.quadraticCurveTo(10, -3, 9, 1); g.fill(); g.strokeStyle = gold; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-9, 0); g.quadraticCurveTo(-14, -4, -13, -9); g.stroke(); g.beginPath(); g.moveTo(13, -10); g.lineTo(12, -13); g.stroke(); }   // a dragon: long-necked, horned, tail up
+                    g.restore(); };
+                for (let x0 = V(20), k = 0; x0 < W; x0 += V(40), k++) beast(x0, wt + V(17), V(1.1), true, x0 < W / 2 ? 1 : -1);   // bulls striding towards the gate
+                rosettes(wt + V(29));
+                // the stands in front of the wall: two stepped brick tiers packed with Chaos Dwarfs in tall hats and black curled beards, and hobgoblins
+                const fan = (cx, cy, sz, seed) => { const q = R(seed);
+                    if (q < 0.62) {   // a Chaos Dwarf: a tall hat, stepped like a ziggurat, and a great black beard in curls
+                        g.fillStyle = ['rgb(110,30,26)', 'rgb(60,50,46)', 'rgb(90,60,30)'][Math.floor(R(seed + 1) * 3)]; g.fillRect(cx - sz * 1.3, cy + sz * 0.6, sz * 2.6, sz * 1.5);
+                        g.fillStyle = 'rgb(210,160,128)'; g.fillRect(cx - sz * 0.7, cy - sz * 0.5, sz * 1.4, sz);
+                        g.fillStyle = 'rgb(28,22,20)'; g.beginPath(); g.moveTo(cx - sz * 0.9, cy + sz * 0.05); g.lineTo(cx + sz * 0.9, cy + sz * 0.05); g.lineTo(cx + sz * 0.6, cy + sz * 1.7); g.lineTo(cx - sz * 0.6, cy + sz * 1.7); g.fill(); g.fillStyle = 'rgba(80,70,60,0.8)'; [0.5, 1.0, 1.4].forEach(f => g.fillRect(cx - sz * 0.6, cy + sz * f, sz * 1.2, sz * 0.08));   // the curls
+                        const hc = R(seed + 2) < 0.5 ? 'rgb(50,40,36)' : bronze, hcBig = ['rgb(30,24,22)', 'rgb(70,26,22)', 'rgb(44,40,46)'][Math.floor(R(seed + 2) * 3)];
+                        if (R(seed + 6) < 0.5) {   // the great hat: tall, flaring out to a broad flat top, banded in gold, with curling horns
+                            const hb = cy - sz * 0.45, ht = hb - sz * 3.8; g.fillStyle = hcBig; g.beginPath(); g.moveTo(cx - sz * 0.95, hb); g.lineTo(cx - sz * 1.55, ht); g.lineTo(cx + sz * 1.55, ht); g.lineTo(cx + sz * 0.95, hb); g.fill();
+                            g.fillStyle = gold; g.fillRect(cx - sz * 1.0, hb - sz * 0.35, sz * 2, sz * 0.22); g.fillRect(cx - sz * 1.5, ht, sz * 3, sz * 0.25); g.beginPath(); g.arc(cx, hb - sz * 1.7, sz * 0.32, 0, 7); g.fill();
+                            g.strokeStyle = 'rgb(220,206,170)'; g.lineWidth = Math.max(1, sz * 0.28); [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(cx + sd * sz * 0.9, hb - sz * 0.6); g.quadraticCurveTo(cx + sd * sz * 2.0, hb - sz * 0.7, cx + sd * sz * 1.8, hb - sz * 1.6); g.quadraticCurveTo(cx + sd * sz * 1.6, hb - sz * 2.0, cx + sd * sz * 1.4, hb - sz * 1.6); g.stroke(); });
+                        } else { g.fillStyle = hc; [[1.0, 0.45], [0.8, 0.5], [0.6, 0.55]].forEach(([w, h], k) => g.fillRect(cx - sz * w, cy - sz * 0.5 - sz * 0.5 * (k + 1) - k * sz * 0.05, sz * w * 2, sz * h)); }   // the stepped hat
+                        g.fillStyle = 'rgb(255,140,50)'; g.fillRect(cx - sz * 0.45, cy - sz * 0.25, sz * 0.25, sz * 0.15); g.fillRect(cx + sz * 0.2, cy - sz * 0.25, sz * 0.25, sz * 0.15);   // eyes lit by the furnaces
+                    } else {   // a hobgoblin: grey-green, long nose, pointed ears and a pointed cap
+                        g.fillStyle = 'rgb(80,64,48)'; g.fillRect(cx - sz, cy + sz * 0.6, sz * 2, sz * 1.3);
+                        g.fillStyle = 'rgb(120,130,90)'; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(cx + sd * sz * 0.5, cy - sz * 0.2); g.lineTo(cx + sd * sz * 1.6, cy - sz * 0.7); g.lineTo(cx + sd * sz * 0.6, cy + sz * 0.2); g.fill(); }); g.beginPath(); g.arc(cx, cy, sz * 0.75, 0, 7); g.fill();
+                        g.fillStyle = 'rgb(60,40,30)'; g.beginPath(); g.moveTo(cx - sz * 0.8, cy - sz * 0.3); g.lineTo(cx + sz * 0.3, cy - sz * 2.2); g.lineTo(cx + sz * 0.8, cy - sz * 0.3); g.fill();
+                        g.fillStyle = 'rgb(250,210,70)'; g.fillRect(cx - sz * 0.4, cy - sz * 0.1, sz * 0.2, sz * 0.15); g.fillRect(cx + sz * 0.2, cy - sz * 0.1, sz * 0.2, sz * 0.15); g.fillStyle = 'rgb(240,232,210)'; g.fillRect(cx - sz * 0.3, cy + sz * 0.4, sz * 0.6, sz * 0.1);
+                    } };
+                const tierH = V(14);
+                for (let k = 1; k >= 0; k--) { const ty = hz - V(8) - tierH * k;
+                    g.fillStyle = k ? 'rgb(96,56,40)' : 'rgb(110,64,44)'; g.fillRect(0, ty - tierH, W, tierH); g.strokeStyle = 'rgba(40,20,14,0.5)'; g.lineWidth = 1; for (let x0 = (k % 2) * V(5); x0 < W; x0 += V(10)) { g.beginPath(); g.moveTo(x0, ty - tierH); g.lineTo(x0, ty); g.stroke(); }
+                    for (let x0 = 0, n = 0, step = V(12); x0 < W; x0 += step, n++) fan(x0 + step / 2 + (R(n + k * 31) - 0.5) * V(3), ty - tierH + V(1) - R(n + k * 17) * V(2), V(4.6), n + k * 97 + 700); }
+                g.fillStyle = blueDk; g.fillRect(0, hz - V(9), W, V(9)); g.fillStyle = gold; g.fillRect(0, hz - V(9), W, V(1.5));   // the front barrier, glazed
+                for (let x0 = V(14); x0 < W; x0 += V(28)) { g.fillStyle = 'rgb(240,236,220)'; g.beginPath(); g.arc(x0, hz - V(4.5), V(2.4), 0, 7); g.fill(); g.fillStyle = gold; g.beginPath(); g.arc(x0, hz - V(4.5), V(1.1), 0, 7); g.fill(); }
+                // the gate in the middle: a tall arch of blue glazed brick with stepped battlements, its doors of bronze
+                const gx = W * 0.5, gw = V(34), gh = V(92);
+                g.fillStyle = blue; g.fillRect(gx - gw, hz - gh, gw * 2, gh); for (let x0 = gx - gw; x0 < gx + gw - V(2); x0 += V(17)) { g.beginPath(); g.moveTo(x0, hz - gh); g.lineTo(x0, hz - gh - V(5)); g.lineTo(x0 + V(4), hz - gh - V(5)); g.lineTo(x0 + V(4), hz - gh - V(10)); g.lineTo(x0 + V(13), hz - gh - V(10)); g.lineTo(x0 + V(13), hz - gh - V(5)); g.lineTo(x0 + V(17), hz - gh - V(5)); g.lineTo(x0 + V(17), hz - gh); g.fill(); }
+                g.fillStyle = gold; g.fillRect(gx - gw, hz - gh + V(4), gw * 2, V(1.5)); for (let x0 = gx - gw + V(6); x0 < gx + gw; x0 += V(11)) { g.fillStyle = 'rgb(240,236,220)'; g.beginPath(); g.arc(x0, hz - gh + V(9), V(2), 0, 7); g.fill(); }
+                beast(gx - V(16), hz - gh + V(24), V(0.9), true, 1); beast(gx + V(16), hz - gh + V(24), V(0.9), true, -1);
+                g.fillStyle = gold; g.beginPath(); g.moveTo(gx - V(17), hz); g.lineTo(gx - V(17), hz - V(30)); g.arc(gx, hz - V(30), V(17), Math.PI, 0); g.lineTo(gx + V(17), hz); g.fill();
+                g.fillStyle = 'rgb(120,74,34)'; g.beginPath(); g.moveTo(gx - V(14), hz); g.lineTo(gx - V(14), hz - V(30)); g.arc(gx, hz - V(30), V(14), Math.PI, 0); g.lineTo(gx + V(14), hz); g.fill();
+                g.strokeStyle = 'rgb(70,40,18)'; g.lineWidth = 1; g.beginPath(); g.moveTo(gx, hz); g.lineTo(gx, hz - V(44)); g.stroke(); g.fillStyle = gold; for (let y = hz - V(36); y < hz; y += V(9)) [-8, -3, 3, 8].forEach(dx => { g.beginPath(); g.arc(gx + V(dx), y, V(1), 0, 7); g.fill(); });   // bronze doors, studded
+                // the lamassu: great winged bulls with bearded, crowned human heads, guarding either side of the gate
+                const lamassu = (lx, dir) => { const u = V(1); g.save(); g.translate(lx, hz); g.scale(dir, 1); const st = 'rgb(150,134,110)', stDk = 'rgb(104,90,72)', stLt = 'rgb(186,170,140)';
+                    g.fillStyle = stDk; g.fillRect(-30 * u, -8 * u, 60 * u, 8 * u);   // the plinth
+                    g.fillStyle = st; g.beginPath(); g.moveTo(-24 * u, -26 * u); g.quadraticCurveTo(-26 * u, -40 * u, -14 * u, -41 * u); g.quadraticCurveTo(4 * u, -44 * u, 12 * u, -48 * u); g.lineTo(26 * u, -40 * u); g.quadraticCurveTo(28 * u, -24 * u, 20 * u, -20 * u); g.lineTo(-20 * u, -19 * u); g.quadraticCurveTo(-25 * u, -20 * u, -24 * u, -26 * u); g.fill(); [-18, -9, 10, 19].forEach(lx2 => g.fillRect(lx2 * u - 3.5 * u, -24 * u, 7 * u, 16 * u));   // the bull's body: a hump at the shoulders and a deep chest g.fillStyle = stDk; [-18, -9, 10, 19].forEach(lx2 => g.fillRect(lx2 * u - 3.5 * u, -10 * u, 7 * u, 3 * u));   // the bull's body, legs and hooves
+                    g.fillStyle = stLt; g.beginPath(); g.moveTo(-14 * u, -36 * u); g.quadraticCurveTo(-24 * u, -56 * u, -36 * u, -70 * u); g.lineTo(-30 * u, -60 * u); g.lineTo(-38 * u, -62 * u); g.lineTo(-28 * u, -50 * u); g.lineTo(-34 * u, -50 * u); g.quadraticCurveTo(-20 * u, -40 * u, -2 * u, -38 * u); g.fill();   // the great swept-back wing
+                    g.strokeStyle = stDk; g.lineWidth = 1; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(-6 * u - k * 5 * u, -38 * u); g.lineTo(-16 * u - k * 6 * u, -52 * u - k * 4 * u); g.stroke(); }
+                    g.fillStyle = st; g.fillRect(16 * u, -52 * u, 13 * u, 18 * u);   // the head
+                    g.fillStyle = 'rgb(60,50,42)'; g.fillRect(14 * u, -40 * u, 17 * u, 16 * u); g.fillStyle = 'rgba(120,110,90,0.8)'; for (let y = -38; y < -24; y += 3) g.fillRect(14 * u, y * u, 17 * u, 1);   // the long curled beard
+                    g.fillStyle = 'rgb(30,24,20)'; g.fillRect(25 * u, -48 * u, 2.5 * u, 2 * u);
+                    g.fillStyle = gold; g.fillRect(15 * u, -62 * u, 15 * u, 10 * u); g.fillStyle = 'rgb(200,150,50)'; [0, 4, 8].forEach(y => g.fillRect(15 * u, (-61 + y) * u, 15 * u, 1));   // the horned crown
+                    g.strokeStyle = gold; g.lineWidth = 1.5; g.beginPath(); g.moveTo(15 * u, -58 * u); g.quadraticCurveTo(10 * u, -62 * u, 12 * u, -68 * u); g.moveTo(30 * u, -58 * u); g.quadraticCurveTo(35 * u, -62 * u, 33 * u, -68 * u); g.stroke();
+                    g.restore(); };
+                lamassu(gx - gw - V(36), 1); lamassu(gx + gw + V(36), -1);
+                // braziers along the front
+                [0.04, 0.13, 0.22, 0.31, 0.69, 0.78, 0.87, 0.96].forEach(fx => { const bx = W * fx; g.fillStyle = bronze; g.fillRect(bx - 2, hz - V(24), 4, V(24)); g.beginPath(); g.moveTo(bx - V(10), hz - V(24)); g.lineTo(bx + V(10), hz - V(24)); g.lineTo(bx + V(6), hz - V(18)); g.lineTo(bx - V(6), hz - V(18)); g.fill(); flame(bx, hz - V(24), V(26), V(9), 0.3); });   // tall braziers blazing along the front
             } else if (style === 'shanty') {   // a two-tier orc stadium of rusty corrugated iron and planks, packed with green orcs, stone idols of Gork and Mork, a scrap watchtower, skull totems and smoke
                 const R = k => { let v = Math.sin(k * 12.9898) * 43758.5453; return v - Math.floor(v); };
                 const K = Math.min(1, (hz - 12) / 190), V = v => v * K;   // (everything scaled to the space above the pitch)
@@ -16311,11 +16459,11 @@
         
         // ---------- pitch texture: painted once by the game itself (no image files) ----------
         // 'blades' = lush grass, 'worn' = the same with churned-up mud; one is picked at random each time the game loads
-        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty', 'dwarfhold', 'wastes', 'plague', 'bretonnia'];
+        const PITCH_STYLES = ['blades', 'worn', 'flagstone', 'jungle', 'graveyard', 'elven', 'brimstone', 'woodland', 'warpstone', 'blackark', 'shanty', 'dwarfhold', 'wastes', 'plague', 'bretonnia', 'ziggurat'];
         let pitchPref = 'home';
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'flagstone', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', nurgle: 'plague', bretonnian: 'bretonnia', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'ziggurat', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', nurgle: 'plague', bretonnian: 'bretonnia', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'graveyard', underworld: 'flagstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -16705,6 +16853,67 @@
             P([[-0.14, 0.44], [-0.2, 0.75], [-0.42, 0.95], [-0.15, 0.95], [0, 0.78], [0.15, 0.95], [0.42, 0.95], [0.2, 0.75], [0.14, 0.44]]);   // the foot
             x.restore();
         }
+        // the Ziggurat court (the Chaos Dwarfs): a temple court in Zharr-Naggrund, paved with great fired-clay tiles, one a square, blackened
+        // with soot and dusted with ash, a few cracked and glowing; bands of blue glazed brick with gold rosettes along the sides; and Hashut's
+        // bull head in bronze in the middle, ringed with rosettes
+        function zigguratPitch(S) {
+            const ts = CFG.tileSize, COLS = CFG.cols, ROWS = CFG.rows, W = COLS * ts, H = ROWS * ts;
+            const cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
+            const x = cv.getContext('2d'), r = pitchRng(PITCH.seed + 503); watchPitchCanvas(cv);
+            const img = x.createImageData(cv.width, cv.height), d = img.data;
+            const soot = pitchNoise(r, cv.width, cv.height, 60 * S), grain = pitchNoise(r, cv.width, cv.height, 7 * S), ash = pitchNoise(r, cv.width, cv.height, 150 * S);
+            const tone = []; for (let k = 0; k < 500; k++) tone.push((r() - 0.5) * 0.16);
+            const sw = ts * S;
+            for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) {
+                const i = Math.floor(px / sw), j = Math.floor(py / sw), e = Math.min(px - i * sw, (i + 1) * sw - px, py - j * sw, (j + 1) * sw - py);
+                let R, G, B;
+                if (e < 1.3 * S) { R = 44; G = 30; B = 24; }   // the dark joints between the tiles
+                else {
+                    const t = tone[(i * 37 + j * 11) % 500] + (grain(px, py) - 0.5) * 0.12, so = soot(px, py), a2 = ash(px, py);
+                    R = 128 + 120 * t; G = 80 + 70 * t; B = 56 + 50 * t;   // fired clay, red-brown
+                    const k = Math.max(0, so - 0.45) * 1.4; R -= 46 * k; G -= 34 * k; B -= 24 * k;   // soot
+                    if (a2 > 0.6) { const q = Math.min(1, (a2 - 0.6) * 3); R += (120 - R) * q * 0.45; G += (112 - G) * q * 0.45; B += (106 - B) * q * 0.45; }   // drifts of grey ash
+                    if (e < 3 * S) { R *= 0.86; G *= 0.86; B *= 0.86; }   // worn edges
+                }
+                const q = (py * cv.width + px) * 4, jit = (r() - 0.5) * 10;
+                d[q] = R + jit; d[q + 1] = G + jit * 0.8; d[q + 2] = B + jit * 0.6; d[q + 3] = 255;
+            }
+            x.putImageData(img, 0, 0);
+            // cracked tiles, a few glowing from the heat beneath
+            for (let k = 0; k < Math.round(COLS * ROWS / 14); k++) { const cx = (Math.floor(r() * COLS) + 0.2 + r() * 0.6) * sw, cy = (Math.floor(r() * ROWS) + 0.2 + r() * 0.6) * sw, hot = r() < 0.35;
+                x.lineCap = 'round'; for (let a = 0, n = 2 + Math.floor(r() * 3); a < n; a++) { let px = cx, py = cy, ang = r() * 7; const pts = [[px, py]]; for (let st = 0; st < 3 + r() * 3; st++) { ang += (r() - 0.5) * 1.2; px += Math.cos(ang) * (3 + r() * 5) * S; py += Math.sin(ang) * (3 + r() * 5) * S; pts.push([px, py]); }
+                    if (hot) { x.strokeStyle = 'rgba(255,120,30,0.35)'; x.lineWidth = 3 * S; x.beginPath(); pts.forEach(([a1, b1], q) => q ? x.lineTo(a1, b1) : x.moveTo(a1, b1)); x.stroke(); }
+                    x.strokeStyle = hot ? 'rgba(255,190,90,0.85)' : 'rgba(30,18,12,0.7)'; x.lineWidth = (hot ? 1 : 0.9) * S; x.beginPath(); pts.forEach(([a1, b1], q) => q ? x.lineTo(a1, b1) : x.moveTo(a1, b1)); x.stroke(); } }
+            for (let k = 0; k < W * H / 260; k++) { x.fillStyle = r() < 0.5 ? 'rgba(30,24,20,0.5)' : 'rgba(160,150,140,0.35)'; const sz = (0.6 + r()) * S; x.fillRect(r() * cv.width, r() * cv.height, sz, sz); }   // cinders and ash
+            // the glazed brick bands along each side: lapis blue, edged in yellow, with gold rosettes
+            const band = y0 => { const bh = 12 * S;
+                x.fillStyle = 'rgb(28,64,150)'; x.fillRect(0, y0 - bh / 2, cv.width, bh);
+                x.strokeStyle = 'rgba(10,24,70,0.5)'; x.lineWidth = 0.6 * S; for (let row = 0; row < 3; row++) { const yy = y0 - bh / 2 + row * bh / 3; x.beginPath(); x.moveTo(0, yy); x.lineTo(cv.width, yy); x.stroke(); for (let bx = (row % 2) * 4 * S; bx < cv.width; bx += 8 * S) { x.beginPath(); x.moveTo(bx, yy); x.lineTo(bx, yy + bh / 3); x.stroke(); } }
+                x.fillStyle = 'rgb(232,186,60)'; x.fillRect(0, y0 - bh / 2 - 1.5 * S, cv.width, 1.5 * S); x.fillRect(0, y0 + bh / 2, cv.width, 1.5 * S);
+                for (let rx = ts * S / 2; rx < cv.width; rx += ts * S) { x.fillStyle = 'rgb(240,236,220)'; for (let p = 0; p < 8; p++) { const a = p * Math.PI / 4; x.beginPath(); x.ellipse(rx + Math.cos(a) * 2.4 * S, y0 + Math.sin(a) * 2.4 * S, 1.5 * S, 0.9 * S, a, 0, 7); x.fill(); } x.fillStyle = 'rgb(232,186,60)'; x.beginPath(); x.arc(rx, y0, 1.4 * S, 0, 7); x.fill(); } };   // rosettes
+            band(7 * S); band(cv.height - 7 * S);
+            // Hashut's bull head in bronze, in a ring of rosettes
+            const cx = cv.width / 2, cy = cv.height / 2, U = ts * S;
+            x.save(); x.translate(cx, cy);
+            x.strokeStyle = 'rgba(206,150,70,0.8)'; x.lineWidth = 0.12 * U; x.beginPath(); x.arc(0, 0, 2.25 * U, 0, 7); x.stroke(); x.lineWidth = 0.05 * U; x.beginPath(); x.arc(0, 0, 1.95 * U, 0, 7); x.stroke();
+            for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6, rx = Math.cos(a) * 2.1 * U, ry = Math.sin(a) * 2.1 * U; x.fillStyle = 'rgba(240,232,210,0.8)'; for (let p = 0; p < 6; p++) { const b = p * Math.PI / 3; x.beginPath(); x.arc(rx + Math.cos(b) * 0.07 * U, ry + Math.sin(b) * 0.07 * U, 0.05 * U, 0, 7); x.fill(); } x.fillStyle = 'rgba(232,186,60,0.9)'; x.beginPath(); x.arc(rx, ry, 0.045 * U, 0, 7); x.fill(); }
+            const P = (pts, f, st) => { x.beginPath(); pts.forEach(([a, b], q) => q ? x.lineTo(a * U, b * U) : x.moveTo(a * U, b * U)); x.closePath(); x.fillStyle = f; x.fill(); if (st) { x.strokeStyle = st; x.lineWidth = 0.04 * U; x.stroke(); } };
+            const br = 'rgba(184,116,52,0.88)', brDk = 'rgba(90,50,22,0.85)', brLt = 'rgba(232,170,90,0.9)';
+            [-1, 1].forEach(sd => { x.fillStyle = brLt; x.strokeStyle = brDk; x.lineWidth = 0.04 * U; x.beginPath(); x.moveTo(sd * 0.7 * U, -0.85 * U);   // the great horns: out sideways from the skull, then sweeping up
+                x.bezierCurveTo(sd * 1.3 * U, -1.05 * U, sd * 1.85 * U, -0.95 * U, sd * 1.95 * U, -1.85 * U); x.bezierCurveTo(sd * 1.7 * U, -1.25 * U, sd * 1.35 * U, -0.6 * U, sd * 0.72 * U, -0.5 * U); x.closePath(); x.fill(); x.stroke();
+                x.strokeStyle = 'rgba(90,50,22,0.5)'; [0.25, 0.45].forEach(f => { x.beginPath(); x.moveTo(sd * (0.75 + f * 0.9) * U, (-0.95 - f * 0.1) * U); x.lineTo(sd * (0.8 + f * 0.9) * U, (-0.62 - f * 0.05) * U); x.stroke(); }); });   // ridges
+            [-1, 1].forEach(sd => P([[sd * 0.72, -0.45], [sd * 1.35, -0.42], [sd * 1.25, -0.22], [sd * 0.72, -0.18]], br, brDk));   // the ears, out to the sides below the horns
+            P([[-0.82, -0.92], [0.82, -0.92], [0.8, -0.35], [0.62, 0.3], [0.58, 0.6], [-0.58, 0.6], [-0.62, 0.3], [-0.8, -0.35]], br, brDk);   // the broad, heavy head
+            x.fillStyle = brLt; x.strokeStyle = brDk; x.lineWidth = 0.04 * U; x.beginPath(); x.moveTo(-0.62, 0); x.moveTo(-0.62 * U, 0.42 * U); x.lineTo(0.62 * U, 0.42 * U); x.quadraticCurveTo(0.78 * U, 0.85 * U, 0.55 * U, 1.15 * U); x.quadraticCurveTo(0, 1.32 * U, -0.55 * U, 1.15 * U); x.quadraticCurveTo(-0.78 * U, 0.85 * U, -0.62 * U, 0.42 * U); x.fill(); x.stroke();   // the wide muzzle
+            x.fillStyle = brDk; [-1, 1].forEach(sd => { x.beginPath(); x.ellipse(sd * 0.27 * U, 0.85 * U, 0.12 * U, 0.15 * U, sd * 0.4, 0, 7); x.fill(); });   // big flaring nostrils
+            x.strokeStyle = brDk; x.lineWidth = 0.04 * U; x.beginPath(); x.moveTo(-0.25 * U, 1.12 * U); x.quadraticCurveTo(0, 1.2 * U, 0.25 * U, 1.12 * U); x.stroke();   // the mouth
+            [-1, 1].forEach(sd => P([[sd * 0.2, -0.3], [sd * 0.58, -0.4], [sd * 0.55, -0.2], [sd * 0.24, -0.16]], 'rgba(255,130,40,0.95)'));   // burning eyes, set wide
+            x.strokeStyle = brDk; x.lineWidth = 0.05 * U; [-1, 1].forEach(sd => { x.beginPath(); x.moveTo(sd * 0.15 * U, -0.48 * U); x.lineTo(sd * 0.62 * U, -0.6 * U); x.stroke(); });   // a scowling brow
+            x.fillStyle = brLt; for (let k = -3; k <= 3; k++) { x.beginPath(); x.arc(k * 0.18 * U, -0.9 * U + Math.abs(k) * 0.02 * U, 0.12 * U, Math.PI, 0); x.fill(); x.stroke(); }   // the curly forelock between the horns
+            x.strokeStyle = 'rgba(220,200,150,0.95)'; x.lineWidth = 0.07 * U; x.beginPath(); x.arc(0, 1.12 * U, 0.2 * U, 0.15 * Math.PI, 0.85 * Math.PI); x.stroke();   // the nose ring
+            x.restore();
+            return { cv, x, r };
+        }
         // the Black Ark (the Dark Elves): the deck of a floating fortress - blackened planks running the length of the pitch, iron nails and
         // gratings, coiled ropes and mooring rings, chains along the sidelines, salt streaks and wet patches, and faint violet runes in the end zones
         function blackArkPitch(S) {
@@ -16999,6 +17208,13 @@
             if (PITCH.style === 'plague') {   // lines in pale, sickly yellow-green
                 const o = plagueGardenPitch(S), x = o.x, r = o.r;
                 const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(232,240,190,${(al * (0.55 + r() * 0.35)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5) * 0.8) * S, py * S, w * S, 2 * S); } };
+                chalkLines(chalk, ts);
+                PITCH.tex = o.cv;
+                return;
+            }
+            if (PITCH.style === 'ziggurat') {   // lines in pale ash on the fired clay
+                const o = zigguratPitch(S), x = o.x, r = o.r;
+                const chalk = (lx, w, al) => { for (let py = 0; py < H; py += 2) { x.fillStyle = `rgba(236,226,206,${(al * (0.6 + r() * 0.3)).toFixed(2)})`; x.fillRect((lx - w / 2 + (r() - 0.5) * 0.6) * S, py * S, w * S, 2 * S); } };
                 chalkLines(chalk, ts);
                 PITCH.tex = o.cv;
                 return;

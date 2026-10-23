@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.29 (23 Oct 2026)
+- **Added:** a new pitch, **Ziggurat**, the Chaos Dwarfs' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** a temple court of fired-clay tiles, one a square, blackened with soot and dusted with ash, a few cracked and glowing. Blue glazed brick bands with gold rosettes run along the sides, and Hashut's bronze bull head sits in the middle in a ring of rosettes.
+  - **Behind the block clashes:** Hashut's great ziggurat with furnaces glowing on every tier, fire bowls on its corners and a blaze in the temple on top, between smoking volcanoes and furnace chimneys. In front are blue glazed walls in the Ishtar Gate style, with stepped battlements, fire bowls and gold bulls striding towards the gate. Brick stands are packed with Chaos Dwarfs, many in great flared hats with curling horns, and hobgoblins. Winged-bull lamassu guard the gate, and tall braziers blaze along the front.
+  - **The music:** heavy, oppressive industrial doom. Crushing low guitars grinding from E to F, enormous slave drums, forge hammers, roaring furnaces, steam, chains and the whip, bull horns, and the priests of Hashut chanting in an ancient eastern scale. Its referee taunt is the priests chanting over hammer blows, ending on a bull horn and a doom chord.
+  - **Pitch menus:** Ziggurat can also be picked from the Pitch menus. The Chaos Dwarfs were on Mossy Flagstones before.
+
 ## v3.28 (23 Oct 2026)
 - **Added:** a new pitch, **Bretonnian Castle**, the Bretonnians' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** a lord's tourney lawn, mown in stripes a square wide, with daisies and clover. The arms of Bretonnia are painted in the middle: a blue and red shield with a golden fleur-de-lis.
