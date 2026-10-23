@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.20</title>
+    <title>BludBowl 3.21</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.20</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.21</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -958,6 +958,7 @@
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="warpstone">Warped Flagstones</option></select></div>
+            <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
@@ -11891,28 +11892,32 @@
             return player.st >= 4 ? 2 : 1;
         }
 
-        function getValidMoves(player) { return freezePitch(() => getValidMoves0(player)); }
-        function getValidMoves0(player) {
+        function getValidMoves(player, o) { return freezePitch(() => getValidMoves0(player, o)); }
+        // o (a leg of a planned route): from {x, y}, dist0 squares already used, canDodge / canSF still unused, maxDist (1: just the next square)
+        function getValidMoves0(player, o = {}) {
+            const ox = o.from ? o.from.x : player.x, oy = o.from ? o.from.y : player.y, dist0 = o.dist0 || 0;
+            const legFrom = !!o.from;
             if(player.isStunned || (player.remainingMA <= 0 && player.rushes <= 0) || player.hasActed) return [];
             if (chomped(player)) return [];   // held by a Monstrous Mouth
             if (player.rooted && !player.isDown) return [];   // Take Root
             
             let visited = new Map(), bestP = new Map();
-            let initialCanDodge = (!player.usedSkills.includes('Dodge') && player.skills.includes('Dodge'));
+            let initialCanDodge = o.canDodge != null ? o.canDodge : (!player.usedSkills.includes('Dodge') && player.skills.includes('Dodge'));
             // (skills2) the odds count an opponent's Diving Tackle (-2 after the dodge roll) and this player's Sure Feet (a Rush re-roll)
-            const sk2 = AIX.on(player.team, 'skills2'), sureFeet = sk2 && player.skills.includes('Sure Feet') && !player.usedSkills.includes('Sure Feet');
-            let q = [{ x: player.x, y: player.y, dist: 0, path: [], prob: 1.0, canDodge: initialCanDodge, canSF: sureFeet }];
-            visited.set(`${player.x},${player.y}`, 0);
+            const sk2 = AIX.on(player.team, 'skills2'), sureFeet = o.canSF != null ? o.canSF : sk2 && player.skills.includes('Sure Feet') && !player.usedSkills.includes('Sure Feet');
+            let q = [{ x: ox, y: oy, dist: 0, path: [], prob: 1.0, canDodge: initialCanDodge, canSF: sureFeet }];
+            visited.set(`${ox},${oy}`, 0);
             
             const valid = [];
             const dirs = [[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
             const oppTeam = player.team === TEAMS.HUMAN ? TEAMS.ORC : TEAMS.HUMAN;
             
-            const totalAvailableMovement = player.remainingMA + player.rushes;
+            const totalAvailableMovement = player.remainingMA + player.rushes - dist0, legMax = o.maxDist != null ? Math.min(o.maxDist, totalAvailableMovement) : totalAvailableMovement;
             // one pass over the players: who stands where, and what marks each square (instead of asking for every step)
             const W = CFG.cols, H = CFG.rows, occ = new Uint8Array(W * H), tzG = new Uint8Array(W * H), tzNT = new Uint8Array(W * H), tailG = new Uint8Array(W * H), tackG = new Uint8Array(W * H);
             state.players.forEach(o => {
                 if (o.isCasualty || o.isEjected || o.isReserve || o.isKO || o.isFading || o.x < 0 || o.x >= W || o.y < 0 || o.y >= H) return;
+                if (o === player && legFrom) return;   // (a leg of a planned route: the square the player starts from will be empty)
                 occ[o.y * W + o.x] = 1;
                 if (o.team !== oppTeam || o.isDown || o.isStunned || o.isDistracted) return;
                 const nt = !o.skills.includes('Titchy'), tl = o.skills.includes('Prehensile Tail'), tk = o.skills.includes('Tackle');
@@ -11922,7 +11927,7 @@
                 }
             });
             let pogo = false;
-            try { pogo = AI.isAI(player.team); } catch (e) {}   // the computer plans jumps into its routes; people use the Jump button
+            try { pogo = AI.isAI(player.team) && !legFrom; } catch (e) {}   // the computer plans jumps into its routes; people use the Jump button
 
             let qi = 0;
             while(qi < q.length) {
@@ -11930,11 +11935,11 @@
                 if(curr.dist > 0) {
                     let requiresDodge = false;
                     for(let step of curr.path) { if(step.jump || tzG[step.prevY * W + step.prevX] > 0) requiresDodge = true; }
-                    let isRush = curr.dist > player.remainingMA;
-                    valid.push({ x: curr.x, y: curr.y, path: curr.path, requiresDodge, isRush, prob: Math.round(curr.prob * 100), cost: curr.dist });
+                    let isRush = curr.dist + dist0 > player.remainingMA;
+                    valid.push({ x: curr.x, y: curr.y, path: curr.path, requiresDodge, isRush, prob: Math.round(curr.prob * 100), cost: curr.dist, raw: curr.prob, endCanDodge: curr.canDodge, endCanSF: curr.canSF });
                 }
                 
-                if(curr.dist >= totalAvailableMovement) continue;
+                if(curr.dist >= legMax) continue;
 
                 for(let d of dirs) {
                     let nx = curr.x + d[0], ny = curr.y + d[1], key = `${nx},${ny}`;
@@ -11957,7 +11962,7 @@
                                 stepProb *= baseProb;
                             }
                             let newCanSF = curr.canSF;
-                            if (curr.dist + 1 > player.remainingMA) {
+                            if (curr.dist + dist0 + 1 > player.remainingMA) {
                                 let rp = (7 - Math.min(6, 2 + weatherTargetMod('RUSH'))) / 6;
                                 if (newCanSF) { rp = 1 - Math.pow(1 - rp, 2); newCanSF = false; }
                                 stepProb *= rp; 
@@ -16297,18 +16302,23 @@
 
             const quietMarks = CLOCK.speed >= 16;   // a fast computer match: the move and target squares would only flicker
             if(!quietMarks && [MODES.ACTION_MOVE, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM, MODES.ON_THE_BALL].includes(state.mode)) {
+                const PL = (() => { const P = state.movePlan, pp = P && getPlayerById(P.pid); return pp && planOf(pp) ? P : null; })();   // (a route on show: the other squares step back)
+                if (PL) ctx.globalAlpha = 0.55;
                 state.moves.forEach(m => {
+                    const onRoute = PL && PL.steps.some(st => st.x === m.x && st.y === m.y);
                     if (m.isRush) {
                         ctx.fillStyle = 'rgba(249, 115, 22, 0.5)'; ctx.fillRect(m.x*ts+2, m.y*ts+2, ts-4, ts-4);
                     } else if (m.requiresDodge) { 
                         ctx.fillStyle = m.prob > 50 ? 'rgba(234, 179, 8, 0.6)' : 'rgba(239, 68, 68, 0.6)'; 
                         ctx.fillRect(m.x*ts+2, m.y*ts+2, ts-4, ts-4); 
-                        ctx.fillStyle = '#fff'; ctx.font = `bold ${ts*0.28}px Inter`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(`${m.prob}%`, m.x*ts+ts/2, m.y*ts+ts/2); 
+                        if (!onRoute) { ctx.fillStyle = '#fff'; ctx.font = `bold ${ts*0.28}px Inter`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(`${m.prob}%`, m.x*ts+ts/2, m.y*ts+ts/2); }
                     } else { 
                         ctx.fillStyle = 'rgba(56, 189, 248, 0.5)'; ctx.fillRect(m.x*ts+2, m.y*ts+2, ts-4, ts-4); 
                     }
                 });
+                ctx.globalAlpha = 1;
             }
+            try { drawPlan(ts); } catch (e) {}
             if (state.mode === MODES.HIT_RUN && state.hitRun) state.hitRun.squares.forEach(s => { ctx.fillStyle = 'rgba(56, 189, 248, 0.5)'; ctx.fillRect(s.x*ts+2, s.y*ts+2, ts-4, ts-4); ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 2; ctx.strokeRect(s.x*ts+2, s.y*ts+2, ts-4, ts-4); });
             if(!quietMarks && [MODES.ACTION_BLOCK, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_VOMIT, MODES.ACTION_STAB, MODES.ACTION_CHAINSAW, MODES.ACTION_CHOMP].includes(state.mode)) {
                 state.targets.forEach(id => { let p = getPlayerById(id); if(p) { ctx.fillStyle='rgba(239, 68, 68, 0.6)'; ctx.fillRect(p.x*ts+2, p.y*ts+2, ts-4, ts-4); ctx.strokeStyle='#f87171'; ctx.lineWidth=2; ctx.strokeRect(p.x*ts+2, p.y*ts+2, ts-4, ts-4); }});
@@ -16803,8 +16813,10 @@
         // a drag remembers where it began (ox, oy) and whether it has really moved: a press that moves the view isn't also a tap on a square
         const DRAG_TAP = 6;   // (pixels: a press that wanders less than this still counts as a tap)
         const dragMoved = (x, y) => { if (!state.drag.moved && Math.hypot(x - state.drag.ox, y - state.drag.oy) > DRAG_TAP) state.drag.moved = true; };
-        canvas.addEventListener('mousedown', e => { state.drag = { active:true, startX: e.clientX, startY: e.clientY, ox: e.clientX, oy: e.clientY, moved: false }; });
-        window.addEventListener('mouseup', () => state.drag.active = false);
+        canvas.addEventListener('mousedown', e => {
+            if (planDragStart(e.clientX, e.clientY)) { state.drag = { active: false, startX: e.clientX, startY: e.clientY, ox: e.clientX, oy: e.clientY, moved: false }; return; }   // (a dot of the route, not the view)
+            state.drag = { active:true, startX: e.clientX, startY: e.clientY, ox: e.clientX, oy: e.clientY, moved: false }; });
+        window.addEventListener('mouseup', () => { state.drag.active = false; if (planDrag) planDragEnd(); });
         canvas.addEventListener('mousemove', e => {
             if (state.mode !== MODES.BALL_CHAIN || !state.bncAwait || state.drag.active) return;
             const p = getPlayerById(state.selectedId); if (!p || AI.isAI(p.team)) return;
@@ -16829,17 +16841,20 @@
             });
         }
         window.addEventListener('mousemove', e => {
+            if (planDrag) { planDragMove(e.clientX, e.clientY); return; }
             if(!state.drag.active) return; if (e.clientX !== state.drag.startX || e.clientY !== state.drag.startY) camUserAt = performance.now(); state.camera.x += e.clientX - state.drag.startX; state.camera.y += e.clientY - state.drag.startY;
             state.drag.startX = e.clientX; state.drag.startY = e.clientY; dragMoved(e.clientX, e.clientY);
         });
 
         let touchDist = null;
         canvas.addEventListener('touchstart', e => {
+            if (e.touches.length === 1 && planDragStart(e.touches[0].clientX, e.touches[0].clientY)) { state.drag = { active: false, startX: e.touches[0].clientX, startY: e.touches[0].clientY, ox: e.touches[0].clientX, oy: e.touches[0].clientY, moved: false }; return; }
             if(e.touches.length===1) state.drag = { active:true, startX: e.touches[0].clientX, startY: e.touches[0].clientY, ox: e.touches[0].clientX, oy: e.touches[0].clientY, moved: false };
             else if(e.touches.length===2) state.drag.moved = true;   // (a pinch to zoom isn't a tap either)
             if(e.touches.length===2) { state.drag.active=false; touchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); }
         });
         canvas.addEventListener('touchmove', e => {
+            if (planDrag && e.touches.length === 1) { planDragMove(e.touches[0].clientX, e.touches[0].clientY); return; }
             if(state.drag.active && e.touches.length===1) {
                 camUserAt = performance.now(); state.camera.x += e.touches[0].clientX - state.drag.startX; state.camera.y += e.touches[0].clientY - state.drag.startY;
                 state.drag.startX = e.touches[0].clientX; state.drag.startY = e.touches[0].clientY; dragMoved(e.touches[0].clientX, e.touches[0].clientY);
@@ -16848,7 +16863,7 @@
                 adjustZoom(d/touchDist, (e.touches[0].clientX+e.touches[1].clientX)/2, (e.touches[0].clientY+e.touches[1].clientY)/2); touchDist = d;
             }
         });
-        canvas.addEventListener('touchend', () => { state.drag.active=false; touchDist=null; });
+        canvas.addEventListener('touchend', () => { state.drag.active=false; touchDist=null; if (planDrag) planDragEnd(); });
         // W A S D (or the arrow keys) move the view around the pitch while held (not while typing in a box)
         {
             const held = new Set(), KEYS = { w: 'u', arrowup: 'u', s: 'd', arrowdown: 'd', a: 'l', arrowleft: 'l', d: 'r', arrowright: 'r' };
@@ -16884,6 +16899,101 @@
             handleGridClick(w.gridX, w.gridY);
         });
 
+        // the planned route: a line from the player through each square, a dot per step (yellow: a dodge, orange: a rush), the dragged-in
+        // squares ringed, and the chance of getting there on the last square
+        function drawPlan(ts) {
+            const P = state.movePlan, p = P && getPlayerById(P.pid); if (!p || !planOf(p)) return;
+            const c = (x, y) => [x * ts + ts / 2, y * ts + ts / 2];
+            ctx.save();
+            ctx.lineWidth = Math.max(3, ts * 0.09); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.setLineDash([ts * 0.18, ts * 0.12]);
+            ctx.beginPath(); ctx.moveTo(...c(p.x, p.y)); P.steps.forEach(st => ctx.lineTo(...c(st.x, st.y))); ctx.stroke(); ctx.setLineDash([]);
+            const drag = planDrag && planDrag.over;
+            P.steps.forEach((st, i) => {
+                const [cx, cy] = c(st.x, st.y), last = i === P.steps.length - 1, via = P.vias.some(v => v.x === st.x && v.y === st.y);
+                ctx.fillStyle = st.d ? '#facc15' : st.r ? '#fb923c' : '#e0f2fe'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(cx, cy, ts * (last ? 0.2 : 0.14), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                if (via) { ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, ts * 0.24, 0, Math.PI * 2); ctx.stroke(); }
+                if (st.d || st.r) { ctx.fillStyle = '#0f172a'; ctx.font = `bold ${ts * 0.17}px Inter`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(st.d ? 'D' : 'R', cx, cy + 1); }
+                if (last) {
+                    const txt = `${P.prob}%`; ctx.font = `bold ${ts * 0.26}px Inter`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.lineWidth = 4; ctx.strokeStyle = '#0f172a'; ctx.strokeText(txt, cx, cy - ts * 0.38); ctx.fillStyle = P.prob >= 100 ? '#e0f2fe' : P.prob > 50 ? '#fde68a' : '#fca5a5'; ctx.fillText(txt, cx, cy - ts * 0.38);
+                }
+            });
+            if (drag) { ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3; ctx.setLineDash([4, 3]); ctx.strokeRect(drag.x * ts + 3, drag.y * ts + 3, ts - 6, ts - 6); ctx.setLineDash([]); }
+            ctx.restore();
+        }
+        // dragging a dot of the route (mouse or finger); on the other device in a two-device match, the change goes to the host
+        let planDrag = null;
+        function planDragStart(cx, cy) {
+            const P = state.movePlan, p = P && getPlayerById(P.pid); if (!p || !planOf(p)) return false;
+            try { if (AI.isAI(p.team) || (NET.on() && !NET.guest() && NET.isRemote(p.team))) return false; } catch (e) {}
+            const w = screenToWorld(cx, cy), i = P.steps.findIndex(st => st.x === w.gridX && st.y === w.gridY);
+            if (i < 0) return false;
+            planDrag = { i, over: null }; return true;
+        }
+        function planDragMove(cx, cy) {
+            if (!planDrag) return; const w = screenToWorld(cx, cy); const st = state.movePlan && state.movePlan.steps[planDrag.i];
+            planDrag.over = st && st.x === w.gridX && st.y === w.gridY ? null : { x: w.gridX, y: w.gridY };
+            if (planDrag.over) state.drag.moved = true;   // (only now is it a drag; a press that stays on its dot is still a tap)
+        }
+        function planDragEnd() {
+            const d = planDrag; planDrag = null; if (!d || !d.over) return;
+            if (NET.guest()) NET.sendVia(d.i, d.over.x, d.over.y); else planVia(d.i, d.over.x, d.over.y);
+        }
+        // ---------- a person's move: the first tap shows the route, a second tap on the same square goes ----------
+        // The route is the safest way there, except a square right next to the player, which is always the direct step. Its dots can be
+        // dragged: a dot dragged onto another square makes the route go through it (more dodging, perhaps, but more movement left);
+        // the last dot moves where it ends. (Settings → Moving: Tap once goes straight away, the old way.)
+        const MOVE_MODES = [MODES.ACTION_MOVE, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM];
+        let twoTapPref = true; try { twoTapPref = localStorage.getItem('bb-two-tap') !== '0'; } catch (e) {}
+        let tapPrefFor = null;   // (two-device play: the other player's own setting, for their taps)
+        const twoTap = p => { try { if (AI.isAI(p.team) || CLOCK.sim) return false; } catch (e) {} return tapPrefFor != null ? tapPrefFor : twoTapPref; };
+        function planOf(p) { const P = state.movePlan; return P && p && P.pid === p.id && P.ox === p.x && P.oy === p.y && MOVE_MODES.includes(state.mode) ? P : null; }
+        function wouldPlan(p, x, y) {   // (a tap that would only show a route: not yet the move, so no activation roll)
+            if (!twoTap(p) || !MOVE_MODES.includes(state.mode) || getPlayer(x, y) || !state.moves.some(m => m.x === x && m.y === y)) return false;
+            const P = planOf(p); return !(P && P.dest.x === x && P.dest.y === y);
+        }
+        // the route through each square in turn (null: it can't be done)
+        function planRoute(p, dest, vias) {
+            const pts = [...vias, dest]; let from = { x: p.x, y: p.y }, used = 0, cd = null, csf = null, path = [], prob = 1;
+            for (const to of pts) {
+                if (to.x === from.x && to.y === from.y) return null;
+                const leg = getValidMoves(p, { from, dist0: used, canDodge: cd, canSF: csf, maxDist: cheb1(from, to) === 1 ? 1 : undefined }).find(q => q.x === to.x && q.y === to.y);
+                if (!leg) return null;
+                path = path.concat(leg.path); prob *= leg.raw; used += leg.cost; cd = leg.endCanDodge; csf = leg.endCanSF; from = to;
+            }
+            return { path, prob, cost: used };
+        }
+        function setPlan(p, dest, vias) {
+            const r = planRoute(p, dest, vias);
+            if (!r) return false;
+            const oppTeam = 1 - p.team; let used = 0;
+            const steps = r.path.map(st => { used += st.jump ? 2 : 1; return { x: st.x, y: st.y, d: !!st.jump || getTackleZones(st.prevX, st.prevY, oppTeam) > 0, r: used > p.remainingMA }; });
+            state.movePlan = { pid: p.id, ox: p.x, oy: p.y, dest: { x: dest.x, y: dest.y }, vias: vias.map(v => ({ x: v.x, y: v.y })), path: r.path, steps, prob: Math.round(r.prob * 100), cost: r.cost };
+            if (!planHinted) { planHinted = true; log(`  Tap the square again to move there. Drag the route's dots to change the way they go.`, 'text-slate-400'); }
+            return true;
+        }
+        let planHinted = false;
+        function planCheck() {   // the moves were worked out again: the route still stands, or it goes
+            const P = state.movePlan; if (!P || NET.guest()) return;   // (the other device just shows the host's)
+            const p = getPlayerById(P.pid);
+            if (!planOf(p) || p.id !== state.selectedId || !state.moves.some(m => m.x === P.dest.x && m.y === P.dest.y)) { state.movePlan = null; return; }
+            if (!setPlan(p, P.dest, P.vias)) state.movePlan = null;
+        }
+        // a dot dragged to square (x, y): step i of the route now goes through it (the last step: the route ends there)
+        function planVia(i, x, y) {
+            const p = getPlayerById(state.selectedId), P = planOf(p); if (!P || i < 0 || i >= P.path.length) return false;
+            if (x < 0 || y < 0 || x >= CFG.cols || y >= CFG.rows) return false;
+            let dest = P.dest, vias = P.vias;
+            if (i === P.path.length - 1) dest = { x, y };
+            else {
+                const at = v => P.path.findIndex(st => st.x === v.x && st.y === v.y);
+                vias = [...P.vias.filter(v => at(v) < i), { x, y }, ...P.vias.filter(v => at(v) > i)];
+            }
+            if (setPlan(p, dest, vias)) return true;
+            log(`  The route can't go that way (no square free, or not enough movement left).`, 'text-slate-400');
+            return false;
+        }
         // a tap on a pitch square (people via the canvas, the computer coach directly)
         function handleGridClick(x, y) {
             if(x<-1 || x>CFG.cols || y<-1 || y>CFG.rows) return; 
@@ -16891,7 +17001,7 @@
             if (isWalking()) return;   // taps while a player is still walking would start a second move on top of the first
             {   // the first real step or target: now roll for Bone Head and the like, then carry on with the tap
                 const sp = getPlayerById(state.selectedId);
-                if (sp && sp.pendingAct && sp.team === state.activeTeam && tapCommits(sp, x, y)) {
+                if (sp && sp.pendingAct && sp.team === state.activeTeam && tapCommits(sp, x, y) && !wouldPlan(sp, x, y)) {
                     const mode = state.mode; state.mode = MODES.LOCKED;
                     commitAction(sp, ok => {
                         if (!ok || sp.hasActed || state.pendingRoll || state.mode === MODES.IDLE) { if (state.mode === MODES.LOCKED && !state.pendingRoll) state.mode = MODES.IDLE; render(); return; }
@@ -17178,8 +17288,13 @@
                 if (selected && selected.id !== clicked.id && selected.actionTaken === null) { refreshSelection(clicked); return; }
             }
 
-            if(!clicked && selected && [MODES.ACTION_MOVE, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM].includes(state.mode)) {
-                let m = state.moves.find(m => m.x===x && m.y===y); if (m) startPath(selected, m.path);
+            if(!clicked && selected && MOVE_MODES.includes(state.mode)) {
+                let m = state.moves.find(m => m.x===x && m.y===y);
+                if (!m) { if (state.movePlan) state.movePlan = null; return; }
+                if (!twoTap(selected)) { state.movePlan = null; startPath(selected, m.path); return; }
+                const P = planOf(selected);
+                if (P && P.dest.x === x && P.dest.y === y) { const path = P.path; state.movePlan = null; startPath(selected, path); return; }   // the second tap: go
+                setPlan(selected, { x, y }, []);   // the first: show the route
             }
         }
 
@@ -17222,6 +17337,7 @@
 
         function updateValidActions(p) {
             state.moves = []; state.targets = [];
+            if (state.movePlan) setTimeout(planCheck, 0);   // (after the moves below are worked out)
             checkChargeProgress();
             if (p && p.team === state.activeTeam && !p.hasActed && !p.isStunned) { 
                 if ([MODES.ACTION_MOVE, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM].includes(state.mode)) state.moves = state.jumpArmed ? jumpMoves(p) : getValidMoves(p); 
@@ -19526,7 +19642,13 @@
                         if ([MODES.ROLL_PROMPT, MODES.LOCKED].includes(state.mode)) return;
                         if (AI.decider() !== R) return;
                     }
-                    AI.act(() => handleGridClick(m.x, m.y));
+                    tapPrefFor = m.tt == null ? null : !!m.tt;
+                    try { AI.act(() => handleGridClick(m.x, m.y)); } finally { tapPrefFor = null; }
+                    return;
+                }
+                if (m.k === 'via') {   // the guest dragged a dot of its route
+                    if (AI.decider() !== R || [MODES.ROLL_PROMPT, MODES.LOCKED].includes(state.mode)) return;
+                    AI.act(() => planVia(+m.i, +m.x, +m.y));
                     return;
                 }
                 if (m.k === 'click') {
@@ -19770,7 +19892,7 @@
                     stop();
                     if (state.drag && state.drag.moved) return;   // (the end of a drag, not a tap)
                     const w = screenToWorld(e.clientX, e.clientY);
-                    if (link) link.send({ t: 'in', k: 'grid', x: w.gridX, y: w.gridY });
+                    if (link) link.send({ t: 'in', k: 'grid', x: w.gridX, y: w.gridY, tt: twoTapPref });
                     return;
                 }
                 if (t.closest('#match-summary')) { stop(); if (myCareerHere()) { postAsked = false; postGame(); } else showEnd(league ? "The match is over. The league result and both teams' post-match are on the host's device." : 'The match is over.'); return; }
@@ -20085,6 +20207,7 @@
                 hosting: () => role === 'host' && live,
                 saveInfo: () => ({ code, token: guestToken, aiWas, guestName, oppName, guestSide, guestPost, league: league ? { text: league.text, fx: league.fx, cpu: league.cpu } : null }),
                 micTap,
+                sendVia: (i, x, y) => { if (link && role === 'guest') link.send({ t: 'in', k: 'via', i, x, y }); },
                 resumeHost(info) {   // the host's page was closed: the match is back from the save; open the same room again
                     open(true, null, info.code);
                     guestToken = info.token || ''; aiWas = info.aiWas || null; guestName = info.guestName || ''; oppName = info.oppName || '';
@@ -22317,6 +22440,7 @@
                 on('st-music', MUSIC.isEnabled(), 'On', 'Off');
                 on('st-anim', !window.FAST_ANIM, 'Full', 'Quick');
                 on('st-replay', REPLAY.enabled(), 'On', 'Off');
+                on('st-move', twoTapPref, 'Tap twice', 'Tap once');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
                 document.getElementById('st-text').textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';
                 document.getElementById('st-pitch').value = pitchPref;
@@ -22330,6 +22454,7 @@
                 paintSettings();
             });
             document.getElementById('st-replay').addEventListener('click', () => { REPLAY.setEnabled(!REPLAY.enabled()); paintSettings(); });
+            document.getElementById('st-move').addEventListener('click', () => { twoTapPref = !twoTapPref; try { localStorage.setItem('bb-two-tap', twoTapPref ? '1' : '0'); } catch (e) {} state.movePlan = null; paintSettings(); });
             document.getElementById('st-weather').addEventListener('click', () => {
                 wxFX = wxFX === 1 ? 0.55 : wxFX > 0 ? 0 : 1;
                 try { localStorage.setItem('bb-weather-fx', String(wxFX)); } catch (e) {}

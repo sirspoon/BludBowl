@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.21 (23 Oct 2026)
+- **Changed:** moving now takes two taps, so you can see the route first and change it.
+  - **First tap:** shows the route, with a dot for each step (D for a dodge, R for a rush) and the chance of getting there. Tap the same square again to go, or tap another square to plan a route there instead.
+  - **A square next to the player:** always the direct step, even if it means a dodge. The game used to go round the long way to avoid a dodge, which costs movement.
+  - **Changing the route:** drag any dot onto another square to make the route go through it, for example to take a riskier dodge and keep more movement for later. Drag the last dot to change where the move ends.
+  - **Activation rolls:** rolls like Bone Head now wait until you actually move.
+  - **Tap once:** Settings → Moving brings back moving on the first tap. In two-device play each player's own setting is used for their taps.
+
 ## v3.20 (23 Oct 2026)
 - **Added:** recent opponents in two-device play ([#18](https://github.com/sirspoon/BludBowl/issues/18)). The Two Devices screen now remembers who you've played.
   - **Online:** each recent opponent shows a green dot when they have the game open.
