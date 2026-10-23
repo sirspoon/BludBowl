@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.36 (23 Oct 2026)
+- **Improved:** the Wood Elves have all-new player figures, modelled on the official team and as detailed as the High and Dark Elves ([#13](https://github.com/sirspoon/BludBowl/issues/13)). The elves wear bodysuits in the team colour swirled with green vines, laced green boots, a belt with a blue gem and a red tabard.
+  - **Lineman:** a carved green wooden mask, a red crest and a bark shoulder guard.
+  - **Thrower:** long auburn hair with a leaf in it, the ball raised high.
+  - **Catcher:** a shaved head with two long orange braids, leaping for the ball.
+  - **Wardancer:** long hair, green antlers, a bare chest with vine tattoos and a green kilt.
+  - **Treeman:** a tall, gnarled trunk with shaded bark, moss, a crown of leaves, glowing eyes and root legs.
+
 ## v3.35 (23 Oct 2026)
 - **Improved:** the Dark Elves have all-new player figures, as detailed as the High Elves' ([#13](https://github.com/sirspoon/BludBowl/issues/13)). They're slim and pale with pointed ears, in black armour trimmed in the team's colours, and each position has its own look.
   - **Lineman:** a team-coloured helm with a tall silver blade crest and spiky shoulder plates.
