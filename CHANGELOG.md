@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.44 (23 Oct 2026)
+- **Improved:** the Amazons have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)). They have sun-tanned skin, long dark hair and war paint, and wear gold torcs and armbands, team-coloured wrap tops and loincloths, and sandals.
+  - **Eagle Warrior:** a crown of upright eagle feathers and a long braid.
+  - **Python Warrior:** a green snake coiled round her head and another round her arm, the ball held up.
+  - **Piranha Warrior:** a toothed blue fin crest and blue war paint across her eyes.
+  - **Jaguar Warrior:** a spotted jaguar pelt worn as a hood and over her shoulders.
+
 ## v3.43 (23 Oct 2026)
 - **Improved:** the Elven Union have new player figures in the slim, detailed style of the other elves ([#13](https://github.com/sirspoon/BludBowl/issues/13)). They wear sleek team-coloured jerseys with a trim V, small pads, white boots, white face masks and a white sash at the hip.
   - **Lineman:** long swept-back blond hair.
