@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.37 (23 Oct 2026)
+- **Improved:** the Orcs have all-new player figures in the detailed style of the elves ([#13](https://github.com/sirspoon/BludBowl/issues/13)): hunched, shaded green brutes with heavy brows, red eyes and tusks, in riveted iron and the team's colours.
+  - **Lineman:** a riveted iron helm, team-coloured shoulder plates and tabard.
+  - **Blitzer:** a horned skull helm, spiked plates and bracers, and the orc jaw glyph on his tabard.
+  - **Big Un:** the bulkiest, darker-skinned, in black iron with massive shoulder plates.
+  - **Thrower:** a topknot, a leather vest, a big grin and a spiked ball held high.
+  - **Goblin:** a floppy cap, big ears, a long nose, a sneaky grin and a ragged tunic.
+  - **Troll:** the classic Blood Bowl Troll with light blue skin: huge floppy ears, a spiked helm, a fist raised in a spiked bracer, an iron gauntlet, a chain across his chest and a pot belly. The Underworld Denizens' Troll is the same figure.
+
 ## v3.36 (23 Oct 2026)
 - **Improved:** the Wood Elves have all-new player figures, modelled on the official team and as detailed as the High and Dark Elves ([#13](https://github.com/sirspoon/BludBowl/issues/13)). The elves wear bodysuits in the team colour swirled with green vines, laced green boots, a belt with a blue gem and a red tabard.
   - **Lineman:** a carved green wooden mask, a red crest and a bark shoulder guard.
