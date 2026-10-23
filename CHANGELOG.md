@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.39 (23 Oct 2026)
+- **Improved:** the Bretonnians have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), in heraldic quartered tabards of the team's two colours.
+  - **Squire:** a peasant lad in a broad iron kettle hat, with parti-coloured hose.
+  - **Knight Catcher:** an open bascinet with a long streaming plume, a mail coif, a golden fleur-de-lis and gauntlets reaching for the ball.
+  - **Knight Thrower:** visor raised, a short plume, the ball cocked back over his shoulder.
+  - **Grail Knight:** a flat-topped great helm with a golden grail crest, huge plate pauldrons, a team-coloured cape and a grail on his tabard.
+
 ## v3.38 (23 Oct 2026)
 - **Improved:** the Black Orc has a new figure in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)): darker, murkier green skin than ordinary orcs, a black iron helm with great curved horns and a spike, spiked team-coloured shoulder plates, the jaw glyph down his front and a gold belt buckle. The Goblin Bruiser and Trained Troll already use the new Goblin and light blue Troll.
 
