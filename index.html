@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.17</title>
+    <title>BludBowl 3.18</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -914,7 +914,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.17</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.18</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -16784,7 +16784,10 @@
         }
 
         canvas.addEventListener('wheel', e => { e.preventDefault(); adjustZoom(e.deltaY<0?1.1:0.9, e.clientX, e.clientY); }, {passive:false});
-        canvas.addEventListener('mousedown', e => { state.drag = { active:true, startX: e.clientX, startY: e.clientY }; });
+        // a drag remembers where it began (ox, oy) and whether it has really moved: a press that moves the view isn't also a tap on a square
+        const DRAG_TAP = 6;   // (pixels: a press that wanders less than this still counts as a tap)
+        const dragMoved = (x, y) => { if (!state.drag.moved && Math.hypot(x - state.drag.ox, y - state.drag.oy) > DRAG_TAP) state.drag.moved = true; };
+        canvas.addEventListener('mousedown', e => { state.drag = { active:true, startX: e.clientX, startY: e.clientY, ox: e.clientX, oy: e.clientY, moved: false }; });
         window.addEventListener('mouseup', () => state.drag.active = false);
         canvas.addEventListener('mousemove', e => {
             if (state.mode !== MODES.BALL_CHAIN || !state.bncAwait || state.drag.active) return;
@@ -16811,29 +16814,55 @@
         }
         window.addEventListener('mousemove', e => {
             if(!state.drag.active) return; if (e.clientX !== state.drag.startX || e.clientY !== state.drag.startY) camUserAt = performance.now(); state.camera.x += e.clientX - state.drag.startX; state.camera.y += e.clientY - state.drag.startY;
-            state.drag.startX = e.clientX; state.drag.startY = e.clientY;
+            state.drag.startX = e.clientX; state.drag.startY = e.clientY; dragMoved(e.clientX, e.clientY);
         });
 
         let touchDist = null;
         canvas.addEventListener('touchstart', e => {
-            if(e.touches.length===1) state.drag = { active:true, startX: e.touches[0].clientX, startY: e.touches[0].clientY };
-            else if(e.touches.length===2) { state.drag.active=false; touchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); }
+            if(e.touches.length===1) state.drag = { active:true, startX: e.touches[0].clientX, startY: e.touches[0].clientY, ox: e.touches[0].clientX, oy: e.touches[0].clientY, moved: false };
+            else if(e.touches.length===2) state.drag.moved = true;   // (a pinch to zoom isn't a tap either)
+            if(e.touches.length===2) { state.drag.active=false; touchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); }
         });
         canvas.addEventListener('touchmove', e => {
             if(state.drag.active && e.touches.length===1) {
                 camUserAt = performance.now(); state.camera.x += e.touches[0].clientX - state.drag.startX; state.camera.y += e.touches[0].clientY - state.drag.startY;
-                state.drag.startX = e.touches[0].clientX; state.drag.startY = e.touches[0].clientY;
+                state.drag.startX = e.touches[0].clientX; state.drag.startY = e.touches[0].clientY; dragMoved(e.touches[0].clientX, e.touches[0].clientY);
             } else if(e.touches.length===2 && touchDist) {
                 let d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
                 adjustZoom(d/touchDist, (e.touches[0].clientX+e.touches[1].clientX)/2, (e.touches[0].clientY+e.touches[1].clientY)/2); touchDist = d;
             }
         });
         canvas.addEventListener('touchend', () => { state.drag.active=false; touchDist=null; });
+        // W A S D (or the arrow keys) move the view around the pitch while held (not while typing in a box)
+        {
+            const held = new Set(), KEYS = { w: 'u', arrowup: 'u', s: 'd', arrowdown: 'd', a: 'l', arrowleft: 'l', d: 'r', arrowright: 'r' };
+            const typing = t => t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+            const onPitch = () => !!state.players && canvas.offsetParent !== null && document.getElementById('start-screen').style.display === 'none';
+            let last = 0, loop = 0;
+            const step = now => {
+                if (!held.size) { loop = 0; return; }
+                const dt = Math.min(50, now - (last || now)); last = now;
+                const v = 0.75 * dt;   // (about 750 screen pixels a second)
+                state.camera.x += ((held.has('l') ? 1 : 0) - (held.has('r') ? 1 : 0)) * v;
+                state.camera.y += ((held.has('u') ? 1 : 0) - (held.has('d') ? 1 : 0)) * v;
+                camUserAt = performance.now();
+                loop = requestAnimationFrame(step);
+            };
+            document.addEventListener('keydown', e => {
+                const k = KEYS[(e.key || '').toLowerCase()];
+                if (!k || e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || !onPitch()) return;
+                e.preventDefault();
+                held.add(k);
+                if (!loop) { last = 0; loop = requestAnimationFrame(step); }
+            });
+            document.addEventListener('keyup', e => { const k = KEYS[(e.key || '').toLowerCase()]; if (k) held.delete(k); });
+            window.addEventListener('blur', () => held.clear());
+        }
 
         canvas.addEventListener('click', e => {
             if([MODES.ROLL_PROMPT, MODES.LOCKED].includes(state.mode)) return;
             if(!document.getElementById('modal-roster').classList.contains('hidden')) return;
-            if(Math.hypot(e.clientX - state.drag.startX, e.clientY - state.drag.startY) > 5 && state.drag.active) return;
+            if (state.drag.moved) return;   // the end of a drag across the pitch, not a tap
             
             const w = screenToWorld(e.clientX, e.clientY);
             handleGridClick(w.gridX, w.gridY);
@@ -19505,7 +19534,7 @@
                 const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
                 if (t === canvas) {
                     stop();
-                    if (state.drag && state.drag.active && Math.hypot(e.clientX - state.drag.startX, e.clientY - state.drag.startY) > 5) return;
+                    if (state.drag && state.drag.moved) return;   // (the end of a drag, not a tap)
                     const w = screenToWorld(e.clientX, e.clientY);
                     if (link) link.send({ t: 'in', k: 'grid', x: w.gridX, y: w.gridY });
                     return;

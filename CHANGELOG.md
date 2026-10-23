@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.18 (23 Oct 2026)
+- **Fixed:** dragging the pitch with the mouse to look around also counted as a click where you let go, so it could move a player. A press that moves more than a few pixels now just moves the view. The same goes for dragging or pinching on a touch screen, and for the joining player in two-device play.
+- **Added:** W A S D or the arrow keys move the view around the pitch while held. They do nothing while you're typing in a box, such as the chat.
+
 ## v3.17 (21 Oct 2026)
 - **Changed:** on a phone held upright, the main action buttons are two to a row, as in landscape, instead of one per row, so the bigger buttons take up about half the space.
 
