@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.24 (23 Oct 2026)
+- **Added:** a new pitch, **Orc Shantytown**, the home ground of the Orcs and Black Orcs, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** trampled almost bare and thick with mud, strewn with bones, skulls, broken planks, scraps of rusty iron and dried blood. A great cream-painted orc glyph covers the middle: a lopsided skull with a zig-zag jaw.
+  - **Behind the block clashes:** a two-tier stadium of rusty corrugated iron packed with green orcs, some waving choppas. Fat stone idols of Gork (red-eyed and glaring) and Mork (green-eyed and squinting) stand at either side, with a scrap watchtower flying a war banner, skull totems, a bonfire and smoke rising.
+  - **The music:** loud, fast, shouty orc punk. Distorted power chords hammered out in eighths, a pumping bass, a thrashing drum kit, and a gang of orcs shouting OI! OI! OI!, roaring WAAAGH! and chanting the chorus. Its referee taunt is power-chord stabs with OI!s and a WAAAGH! to finish.
+  - **Pitch menus:** Orc Shantytown can also be picked from the Pitch menus. The Orcs and Black Orcs were on Muddy Grass before.
+
 ## v3.23 (23 Oct 2026)
 - **Added:** a new pitch, **Black Ark**, the Dark Elves' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** the deck of a floating fortress at night. Blackened planks run the length of the pitch, with iron nails, gratings over the hold, coiled ropes, mooring rings, chains along the sidelines, salt streaks and wet patches, and faint violet runes in the end zones.
