@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.28 (23 Oct 2026)
+- **Added:** a new pitch, **Bretonnian Castle**, the Bretonnians' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
+  - **The pitch:** a lord's tourney lawn, mown in stripes a square wide, with daisies and clover. The arms of Bretonnia are painted in the middle: a blue and red shield with a golden fleur-de-lis.
+  - **Behind the block clashes:** a castle stadium on a summer's day. Tiered grandstands painted in heraldic colours are packed with peasants, knights and ladies in tall pointed hats, behind a barrier hung with knights' shields. Behind them is a crenellated wall with more spectators, fleur-de-lis banners and bunting, and round turrets with pointed blue roofs and fluttering flags. The players come out through the gatehouse, under the royal box where the king sits. Green hills rise beyond, with a far-off castle on one.
+  - **The music:** a courtly dance for tourney day. A fingerpicked lute leads, with a recorder and a reedy shawm on the tune, a tabor and tambourine, a hurdy-gurdy drone, and herald trumpets sounding fanfares. Its referee taunt is played on the trumpets with the lute and tabor.
+  - **Pitch menus:** Bretonnian Castle can also be picked from the Pitch menus. The Bretonnians were on Muddy Grass before.
+
 ## v3.27 (23 Oct 2026)
 - **Added:** a new pitch, **Plague Garden**, Nurgle's home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** rotten, sickly green turf with dark mire, a few pools of bubbling slime, green spotted toadstools, patches of rot crawling with maggots and the odd fly. The Mark of Nurgle (three rings around a fourth, grinning) is daubed in dripping slime across the middle.
