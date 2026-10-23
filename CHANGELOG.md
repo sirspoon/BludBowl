@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.35 (23 Oct 2026)
+- **Improved:** the Dark Elves have all-new player figures, as detailed as the High Elves' ([#13](https://github.com/sirspoon/BludBowl/issues/13)). They're slim and pale with pointed ears, in black armour trimmed in the team's colours, and each position has its own look.
+  - **Lineman:** a team-coloured helm with a tall silver blade crest and spiky shoulder plates.
+  - **Blitzer:** a golden crescent crown and golden spines fanning up from his shoulders, with spikier armour and a green gem.
+  - **Runner:** a shaved head with a tall topknot and light armour, caught mid-stride.
+  - **Assassin:** a deep hood and cloak, a mask hiding all but glowing red eyes, and two daggers.
+  - **Witch Elf:** a huge mane of pink hair, a bladed crest, black mail with a bronze skull, bare arms and legs, and a knife in each hand.
+
 ## v3.34 (23 Oct 2026)
 - **Added:** a new pitch, **Khemri**, the Tomb Kings' home ground, with its own music ([#7](https://github.com/sirspoon/BludBowl/issues/7)).
   - **The pitch:** golden desert sand rippled by the wind, with half-buried sandstone blocks, bleached bones, skulls and scarab beetles. Lapis-blue lines and bands of painted hieroglyphs run along the sides, and a winged sun disc with two cobras sits in the middle.
