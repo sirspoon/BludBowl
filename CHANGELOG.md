@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.40 (23 Oct 2026)
+- **Improved:** the Humans have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), and the Old World Alliance shares them.
+  - **Lineman:** a round steel helm with a team-coloured crest and nose guard, round shoulder pads and a breastplate.
+  - **Blitzer:** a caged helm with a tall plume, spiked pads, a breastplate with a cross and heavy gauntlets.
+  - **Catcher:** a leather cap and a numbered jersey, mid-stride with his arms out for the ball.
+  - **Thrower:** an open helm, pointing downfield with the ball cocked back.
+  - **Ogre:** a round bald head between huge spiked shoulder pads, a dark iron body with a team-coloured chest plate.
+- **Improved:** new Halfling figures: curly hair, rosy cheeks and big hairy bare feet. The Hefty wears an American football helmet with his belly out, and the Catcher a headband and white gloves.
+
 ## v3.39 (23 Oct 2026)
 - **Improved:** the Bretonnians have all-new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), in heraldic quartered tabards of the team's two colours.
   - **Squire:** a peasant lad in a broad iron kettle hat, with parti-coloured hose.
