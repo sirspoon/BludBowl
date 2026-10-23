@@ -2,11 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.46 (23 Oct 2026)
+- **Changed:** the Undead Ghoul Runner is back to his previous look ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
+
 ## v3.45 (23 Oct 2026)
 - **Improved:** the Undead have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
   - **Skeleton:** a grinning skull with a green glow in its sockets, a visible ribcage, tattered team pads and a ragged sash.
   - **Zombie:** grey-green and shambling with arms out, one staring eye, a stitched wound and a torn shirt showing ribs.
-  - **Ghoul:** hunched and gaunt, with long ears, red eyes, fangs and long claws.
   - **Wight Blitzer:** a crowned black helm over a skull with glowing eyes, spiked pauldrons and a tattered tabard with a bone cross.
   - **Mummy:** huge and wrapped in bandages, with glowing eyes, a gold collar and scarab, and trailing bandage ends.
 
