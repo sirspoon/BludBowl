@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.22 (23 Oct 2026)
+- **Added:** keyboard shortcuts ([#34](https://github.com/sirspoon/BludBowl/issues/34)). **Space** or **Enter** confirms: a roll, an announcement, the inducements panel, a kick-off event, the set-up, or the planned move. **Esc** cancels the planned route, a roll that can be cancelled, or the action. **M** Move, **B** Block, **L** Blitz, **F** Foul, **P** Pass, **H** Hand-off and **E** End activation pick from the action buttons. W A S D still scroll the view.
+- **Changed:** a saved team's players are now numbered in their Team Builder order ([#2](https://github.com/sirspoon/BludBowl/issues/2)). The in-match Rosters list and the line-up screen already followed that order. Only the formation decides where the starters stand.
+- **Clearer:** when a Rat Ogre (or anyone with Animal Savagery) fails its roll and lashes out at a team-mate, the log now says it carries on with its action afterwards, as the 2025 rules allow. It wasn't a bug, but it looked like the player acting twice. ([#31](https://github.com/sirspoon/BludBowl/issues/31))
+
 ## v3.21 (23 Oct 2026)
 - **Changed:** moving now takes two taps, so you can see the route first and change it.
   - **First tap:** shows the route, with a dot for each step (D for a dodge, R for a rush) and the chance of getting there. Tap the same square again to go, or tap another square to plan a route there instead.

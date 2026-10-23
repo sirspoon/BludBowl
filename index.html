@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.21</title>
+    <title>BludBowl 3.22</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.21</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.22</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -5826,6 +5826,16 @@
                         remainingMA: t.ma, rushes: 2, usedSkills: [], ...t, posKey: k, name: name || null, baseSkills: ((types[k] || {}).skills || []).slice()
                     });
                 });
+                // a saved team: its players are numbered in its Team Builder order (they are listed in formation order above, which only decides
+                // where the starters stand)
+                try {
+                    const tid = ROSTERS[team].careerTeamId, saved = tid && TB.get(tid);
+                    if (saved) {
+                        const mine = state.players.filter(p => p.team === team), first = Math.min(...mine.map(p => p.id));
+                        const at = new Map(saved.players.map((q, i) => [q.id, i])), ix = p => at.has(p.careerId) ? at.get(p.careerId) : 1e6;
+                        [...mine].sort((a, b) => (ix(a) - ix(b)) || (a.id - b.id)).forEach((p, i) => { p.id = first + i; });
+                    }
+                } catch (e) { console.error('numbering', e); }
             });
         }
 
@@ -9260,7 +9270,7 @@
             'Kick Team-mate': 'Special action, once per turn: kicks an adjacent Right Stuff team-mate exactly like Throw Team-mate (and on top of it). On a Fumble the kicked player takes an injury roll, with Stunned counting as KO.',
             'Breathe Fire': 'Special Action against an adjacent standing opponent (or instead of the Block of a Blitz). Roll a D6, -1 if the target is ST 5+: on a 1 this player is Knocked Down (Turnover); 2-3 nothing happens; 4+ the target is Placed Prone, and on a natural 6 Knocked Down. The activation then ends.',
             'Unchannelled Fury': 'Roll a D6 after declaring an action (+2 for a Block or Blitz). On a 1-3 the activation ends at once.',
-            'Animal Savagery': 'Roll a D6 when this player is activated (+2 if they declared a Block or Blitz). On a 1-3 they lash out: an adjacent standing team-mate is Knocked Down (no Turnover unless they held the ball). With no team-mate next to them they are Distracted instead.',
+            'Animal Savagery': 'Roll a D6 when this player is activated (+2 if they declared a Block or Blitz). On a 1-3 they lash out: an adjacent standing team-mate is Knocked Down (no Turnover unless they held the ball), and then they carry on with their Action. With no team-mate next to them they are Distracted instead, which ends their Action.',
             'Frenzy': 'When this player blocks and pushes the target back, they must follow up, and if the target is still standing they must block them a second time.',
             'Stab': 'Special action instead of a block: make an unmodified armour roll against an adjacent standing opponent, and an injury roll if it breaks. No Turnover either way.',
             'Strip Ball': 'When this player blocks the ball carrier and pushes them back, the ball is knocked loose (unless they have Sure Hands).',
@@ -11442,6 +11452,7 @@
                         v.isDown = true;
                         if (hadBall) dropBall(v);
                         harm({ kind: 'savagery', by: p }, () => checkArmor(v, p));
+                        log(`  (Glotl still carries on with his action.)`, 'text-slate-400');
                         refreshSelection(p); state.mode = { block: MODES.ACTION_BLOCK, blitz: MODES.ACTION_BLITZ }[p.actionTaken] || MODES.ACTION_MOVE;
                         return true;
                     }
@@ -11457,6 +11468,8 @@
                     if (hadBall) dropBall(v);
                     harm({ kind: 'savagery', by: p }, () => checkArmor(v, p));   // Mighty Blow / Claws must be used on the victim
                     if (hadBall) { triggerTurnover('The Rat Ogre flattened its own ball carrier!'); return false; }
+                    const actName = { block: 'Block', blitz: 'Blitz', foul: 'Foul', pass: 'Pass', handoff: 'Hand-off' }[p.actionTaken] || 'Move';
+                    log(`  (That's the rule: having lashed out, ${p.name || p.type} still carries on with the ${actName}.)`, 'text-slate-400');
                     refreshSelection(p); state.mode = { block: MODES.ACTION_BLOCK, blitz: MODES.ACTION_BLITZ }[p.actionTaken] || MODES.ACTION_MOVE;
                     return true;
                 }
@@ -16888,6 +16901,39 @@
             });
             document.addEventListener('keyup', e => { const k = KEYS[(e.key || '').toLowerCase()]; if (k) held.delete(k); });
             window.addEventListener('blur', () => held.clear());
+        }
+        // keyboard shortcuts, each one just presses the button on screen (so whose turn it is is checked as usual):
+        // Space / Enter confirm (a roll, an announcement, the planned move...), Esc cancels, and letters pick an action
+        {
+            const typing = t => t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+            const shown = el => !!el && !el.classList.contains('hidden') && el.offsetParent !== null && !el.disabled;
+            const press = id => { const el = typeof id === 'string' ? document.getElementById(id) : id; if (!shown(el)) return false; el.click(); return true; };
+            const visible = id => { const el = document.getElementById(id); return !!el && !el.classList.contains('hidden'); };
+            const LETTERS = { m: 'btn-action-move', b: 'btn-action-block', l: 'btn-action-blitz', f: 'btn-action-foul', p: 'btn-action-pass', h: 'btn-action-handoff', e: 'btn-end-action' };
+            function confirmMove() {   // a tap on the planned route's last square, as if by hand (so it goes the usual way, from either device)
+                const P = state.movePlan, p = P && getPlayerById(P.pid); if (!p || !planOf(p)) return false;
+                const r = canvas.getBoundingClientRect(), z = CFG.tileSize * state.camera.zoom;
+                const x = r.left + state.camera.x + (P.dest.x + 0.5) * z, y = r.top + state.camera.y + (P.dest.y + 0.5) * z;
+                state.drag.moved = false;
+                canvas.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+                return true;
+            }
+            document.addEventListener('keydown', e => {
+                if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || typing(e.target)) return;
+                if (!state.players || canvas.offsetParent === null || document.getElementById('start-screen').style.display !== 'none') return;
+                const k = (e.key || '').toLowerCase();
+                let done = false;
+                if (k === ' ' || k === 'enter') {
+                    if (e.target && e.target.tagName === 'BUTTON') return;   // (a focused button presses itself)
+                    done = press('btn-roll-confirm') || (visible('modal-announce') && press('modal-announce'))
+                        || press(document.querySelector('#modal-ind-intro:not(.hidden) .ii-ok')) || confirmMove()
+                        || press('btn-event-confirm') || press('btn-confirm-setup');
+                } else if (k === 'escape') {
+                    if (state.movePlan && !NET.guest()) { state.movePlan = null; done = true; }
+                    else done = press('btn-roll-cancel') || press('btn-cancel-action');
+                } else if (LETTERS[k] && !e.shiftKey) done = press(LETTERS[k]);
+                if (done) e.preventDefault();
+            });
         }
 
         canvas.addEventListener('click', e => {
