@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.20 (23 Oct 2026)
+- **Added:** recent opponents in two-device play ([#18](https://github.com/sirspoon/BludBowl/issues/18)). The Two Devices screen now remembers who you've played.
+  - **Online:** each recent opponent shows a green dot when they have the game open.
+  - **Invite:** tap Invite to ask them for a game without a room code. They get a pop-up and tap Join.
+  - **Looking for a game:** a switch that pops up on your recent opponents' screens (with a chime) when they have the game open, so they can invite you. On a computer it can also show a desktop notification if the game is in a background tab.
+  - **Privacy:** only people you've played can see you or invite you, and only while your game is open. A Forget button takes someone off the list, and a switch stops anyone seeing you at all.
+  - **Phones:** a phone pauses the game when it isn't on screen, so the other player needs the game open to get a pop-up.
+
 ## v3.19 (23 Oct 2026)
 - **Added:** voice chat in two-device play ([#18](https://github.com/sirspoon/BludBowl/issues/18)). Tap **🎤 Mic** next to the connection chip at the top. The browser asks for the microphone the first time, and then it's an open mic: tap again to mute (🔇) or unmute (🎙️).
   - A 🔊 on the button shows when the other player's microphone is on, and the match log says when they switch it on or off.

@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.19</title>
+    <title>BludBowl 3.20</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -841,7 +841,7 @@
 #net-lobby #nl-lgjoin { display: flex; flex-direction: column; gap: 6px; } #net-lobby #nl-lgjoin p { margin: 0; font-size: 14px; color: #fde68a; }
 #net-lobby[data-sync="1"] #nl-start, #net-lobby[data-sync="1"] .nl-hostonly { display: none; }
 #net-lobby .nl-check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #cbd5e1; } #net-lobby .nl-check.hidden, #net-lobby #nl-fixture.hidden { display: none; }
-#net-lobby .nl-check input { width: 18px; height: 18px; accent-color: #38bdf8; }
+#net-lobby .nl-check input { width: 18px; height: 18px; accent-color: #38bdf8; flex: none; }
 #net-lobby #nl-fixture { margin: 0; font-size: 14px; color: #fde68a; } #net-lobby[data-league="1"] .nl-own { display: none; }
 #net-lobby .nl-name { display: flex; align-items: center; gap: 8px; } #net-lobby .nl-name input { flex: 1; text-transform: none; letter-spacing: 0; }
 #net-chat { position: fixed; z-index: 70; display: flex; gap: 6px; padding: 6px; border-radius: 10px; background: #0b1220; border: 1px solid #38bdf8; box-shadow: 0 6px 24px rgba(0,0,0,.6); font-family: Inter, system-ui, sans-serif; }
@@ -860,6 +860,17 @@
 #net-lobby #nl-status { margin: 0; font-size: 14px; } #net-lobby #nl-status:empty { display: none; }
 #net-lobby #nl-status[data-kind="bad"] { color: #fda4af; } #net-lobby #nl-status[data-kind="ok"] { color: #86efac; } #net-lobby #nl-status[data-kind="wait"] { color: #fde68a; }
 #net-lobby #nl-opp { margin: 0; font-size: 14px; color: #cbd5e1; }
+#net-lobby #nl-friends { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid #263247; } #net-lobby #nl-friends.hidden { display: none; }
+#net-lobby .nl-fhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+#net-lobby .nl-fr { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: #0b1220; border: 1px solid #263247; }
+#net-lobby .nl-fr .dot { width: 10px; height: 10px; border-radius: 50%; background: #475569; flex: none; } #net-lobby .nl-fr .dot.on { background: #22c55e; box-shadow: 0 0 6px #22c55e; } #net-lobby .nl-fr .dot.look { background: #facc15; box-shadow: 0 0 8px #facc15; }
+#net-lobby .nl-fr .who { flex: 1; min-width: 0; display: flex; flex-direction: column; } #net-lobby .nl-fr .who b { font-size: 14px; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #net-lobby .nl-fr .who small { font-size: 11.5px; color: #94a3b8; }
+#net-lobby .nl-fr .nl-btn { padding: 6px 10px; font-size: 13px; } #net-lobby .nl-fr .nl-forget { padding: 6px 8px; background: transparent; border-color: #334155; color: #94a3b8; }
+#net-lobby .nl-fvis { font-size: 12px; color: #94a3b8; }
+#net-ftoast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 340; width: min(420px, calc(100% - 24px)); font-family: Inter, system-ui, sans-serif; color: #e2e8f0; } #net-ftoast.hidden { display: none; }
+#net-ftoast .ft-card { background: #121a2b; border: 1px solid #263247; border-top: 3px solid #22c55e; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.6); }
+#net-ftoast p { margin: 0; font-size: 14px; } #net-ftoast .ft-btns { display: flex; gap: 8px; justify-content: flex-end; }
+#net-ftoast button { background: #1e293b; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 7px 12px; font-weight: 700; cursor: pointer; font-size: 13px; } #net-ftoast .ft-go { background: #075985; border-color: #38bdf8; }
 #net-lobby #nl-opts { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 1px solid #263247; } #net-lobby[data-league="1"] #nl-opts, #net-lobby[data-sync="1"] #nl-opts, #net-lobby:not([data-role="host"]) #nl-opts { display: none; }
 #net-lobby .nl-opt { display: flex; align-items: center; gap: 8px; } #net-lobby .nl-opt .nl-dim { flex: 0 0 92px; } #net-lobby .nl-opt select { flex: 1; }
 #net-lobby #nl-optsum { margin: 0; font-size: 13px; color: #fde68a; } #net-lobby #nl-optsum.hidden, #net-lobby[data-league="1"] #nl-optsum { display: none; }
@@ -917,7 +928,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.19</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.20</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9541,6 +9552,7 @@
     'rollFail': () => { tone(220, 110, 0.32, 'sawtooth', 0.26); tone(165, 82, 0.32, 'square', 0.14, 0.02); },
     'teamReroll': () => { tone(200, 1200, 0.28, 'triangle', 0.3); tone(260, 1500, 0.28, 'p25', 0.12, 0.03); },
     'menuClick': () => { tone(N.A5, N.A5, 0.04, 'square', 0.2); },
+    'friendOnline': () => { tone(N.E5, N.E5, 0.12, 'triangle', 0.22); tone(N.A5, N.A5, 0.22, 'triangle', 0.22, 0.12); },
     'selectPlayer': () => { tone(N.E5, N.E5, 0.035, 'p25', 0.22); tone(N.A5, N.A5, 0.05, 'p25', 0.22, 0.04); },
     'blockHit': () => { noise(0.16, 0.7, 0, 3500, 300); tone(150, 45, 0.16, 'square', 0.4); },
     'bigHit': () => { noise(0.3, 0.85, 0, 4500, 150); tone(110, 30, 0.32, 'sawtooth', 0.45); tone(220, 60, 0.12, 'square', 0.25); },
@@ -18941,7 +18953,7 @@
                     if (!ok) { try { c.send(JSON.stringify({ t: 'busy' })); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 400); return; }
                     const old = link; wire(c);
                     if (old && old.c !== c) { try { old.close(); } catch (e) {} }
-                    status('', ''); link.send({ t: 'hello', v: version, role, name: myName(), dev: DEV.id });
+                    status('', ''); link.send({ t: 'hello', v: version, role, name: myName(), dev: DEV.id, pid: PRES.pid });
                     onData(raw);
                     paintLobby(); paintChip();
                 });
@@ -18954,7 +18966,7 @@
                     if (link) { try { c.close(); } catch (e) {} return; }
                     wire(c); stopRetry();
                     status('', '');
-                    link.send({ t: 'hello', v: version, role, token, name: myName(), dev: DEV.id, shop: shopping });
+                    link.send({ t: 'hello', v: version, role, token, name: myName(), dev: DEV.id, shop: shopping, pid: PRES.pid });
                     keepRejoin();
                     if (!inMatch()) sendTeam();
                     paintLobby(); paintChip();
@@ -19014,7 +19026,7 @@
             }
             function hostPeer() {
                 peer = new Peer(slug(code));
-                peer.on('open', () => { if (!live) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait'); else log(`  Waiting for the other device to rejoin with the code ${code}.`, 'text-sky-300'); });
+                peer.on('open', () => { roomReady(); if (!live) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait'); else log(`  Waiting for the other device to rejoin with the code ${code}.`, 'text-sky-300'); });
                 peer.on('connection', incoming); peer.on('call', onCall);
                 peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
                 peer.on('error', peerError);
@@ -19028,7 +19040,7 @@
                 if (!asHost) { const r = rejoinRec(); token = r && r.code === code ? r.token : Math.random().toString(36).slice(2, 12); }
                 if (TEST) {
                     peer = testNet(asHost);
-                    if (asHost) status(`Room code ready. On the other device, choose Join and type the code.`, 'wait');
+                    if (asHost) { status(`Room code ready. On the other device, choose Join and type the code.`, 'wait'); setTimeout(roomReady, 0); }
                     else { status('Looking for the game…', 'wait'); peer.knock(); }
                     return;
                 }
@@ -19038,6 +19050,158 @@
                     if (asHost) hostPeer(); else newGuestPeer();
                 }).catch(() => status("Couldn't load the connection library. Check the internet connection and try again.", 'bad'));
             }
+            // ---- recent opponents: who you've played, whether they have the game open, and invites without a room code ----
+            // Each device has a random presence address (not its device id), swapped only with the device it plays a two-device
+            // match against. While the game is open and there's someone on the list, the device listens on that address (through
+            // the same PeerJS broker as the room codes) and says hello to its recent opponents; anyone who is looking for a game
+            // pops up on the other's screen. An invite opens a room here and sends its code, so the other player just taps Join.
+            // Only devices on the list are listened to. (?nettest: the same, between tabs, over a BroadcastChannel.)
+            let peerPid = '';
+            const PRES = (function () {
+                const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+                let pid = ls('bb-presence-id');
+                if (!pid || !/^[a-z0-9]{12,24}$/.test(pid)) { pid = [0, 1, 2].map(() => Math.random().toString(36).slice(2, 8)).join('').slice(0, 18); ls('bb-presence-id', pid); }
+                let friends = []; try { friends = JSON.parse(ls('bb-net-friends') || '[]').filter(f => f && f.pid); } catch (e) {}
+                const save = () => ls('bb-net-friends', JSON.stringify(friends.slice(0, 20)));
+                const seen = new Map();   // pid -> { at, looking }
+                const FRESH = 150e3;      // (heard from within this long: online)
+                const visible = () => ls('bb-net-visible') !== '0', lookingPref = () => ls('bb-net-looking') === '1';
+                const looking = () => lookingPref() && !inMatch() && !(state && state.live && state.players && !state.isGameOver && !NET.on());
+                let p = null, bc = null, started = false;
+                const addr = id => 'bludbowl-u-' + id;
+                function start() {
+                    if (started || !visible() || !friends.length || CLOCK.sim) return;
+                    started = true;
+                    if (TEST) {
+                        bc = new BroadcastChannel('bb-presence');
+                        bc.onmessage = e => { const d = e.data; if (d && d.to === pid && d.from) recv(d.from, d.m); };
+                        hiAll(); return;
+                    }
+                    loadPeer().then(() => {
+                        if (!started) return;
+                        p = new Peer(addr(pid));
+                        p.on('open', () => hiAll());
+                        p.on('connection', c => c.on('data', raw => { const d = parse(raw); if (d && d.from) recv(String(d.from), d.m || {}); setTimeout(() => { try { c.close(); } catch (e) {} }, 2000); }));
+                        p.on('disconnected', () => { try { if (p && !p.destroyed) p.reconnect(); } catch (e) {} });
+                        p.on('error', e => { if (e && e.type === 'unavailable-id') { stop(true); setTimeout(start, 20000); } });   // (open in another tab too: try again later)
+                    }).catch(() => { started = false; });
+                }
+                function stop(quiet) {
+                    if (!quiet) friends.forEach(f => { if (online(f.pid)) send(f.pid, { t: 'bye' }); });
+                    started = false;
+                    const q = p, b2 = bc; p = null; bc = null;
+                    setTimeout(() => { try { if (q) q.destroy(); } catch (e) {} try { if (b2) b2.close(); } catch (e) {} }, quiet ? 0 : 1500);
+                }
+                function send(to, m) {
+                    if (TEST) { if (bc) bc.postMessage({ to, from: pid, m }); return; }
+                    if (!p || !p.open) return;
+                    try {
+                        const c = p.connect(addr(to), { reliable: true });
+                        c.on('open', () => { try { c.send(JSON.stringify({ from: pid, m })); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 2500); });
+                        c.on('error', () => {});
+                        setTimeout(() => { try { if (!c.open) c.close(); } catch (e) {} }, 12000);
+                    } catch (e) {}
+                }
+                const me = () => ({ name: myName(), looking: looking() });
+                function hiAll() { friends.slice(0, 12).forEach(f => send(f.pid, Object.assign({ t: 'hi' }, me()))); }
+                const online = id => { const s = seen.get(id); return !!s && Date.now() - s.at < FRESH; };
+                const isLooking = id => online(id) && seen.get(id).looking;
+                function recv(from, m) {
+                    const f = friends.find(x => x.pid === from); if (!f) return;   // (only someone you've played)
+                    const was = isLooking(from), wasOn = online(from);
+                    if (m.t === 'bye') { seen.delete(from); paintFriends(); return; }
+                    seen.set(from, { at: Date.now(), looking: !!m.looking });
+                    if (m.name && cleanName(m.name) !== f.name) { f.name = cleanName(m.name); save(); }
+                    if (m.t === 'hi') {
+                        if (!m.reply) send(from, Object.assign({ t: 'hi', reply: 1 }, me()));
+                        if (m.looking && !was) notifyLooking(f);
+                    } else if (m.t === 'invite') {
+                        if (role || inMatch() || (state && state.live && state.players && !state.isGameOver)) { send(from, Object.assign({ t: 'decline', busy: 1 }, me())); }
+                        else inviteToast(f, String(m.code || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 9));
+                    } else if (m.t === 'decline') {
+                        toast(`${escH(f.name || 'They')} ${m.busy ? 'is busy with a game right now' : "can't play right now"}.`);
+                        if (role === 'host' && !link && !live) status(`${f.name || 'They'} ${m.busy ? 'is busy right now' : "can't play right now"}.`, 'bad');
+                    }
+                    if (!wasOn || was !== isLooking(from)) paintFriends();
+                }
+                // met in a two-device match: onto the list (or back to the top of it)
+                function met() {
+                    if (!peerPid || peerPid === pid) return;
+                    const f = friends.find(x => x.pid === peerPid), name = oppName || (f && f.name) || '';
+                    friends = friends.filter(x => x.pid !== peerPid);
+                    friends.unshift({ pid: peerPid, name, at: Date.now(), n: ((f && f.n) || 0) + 1 });
+                    save(); start(); seen.set(peerPid, { at: Date.now(), looking: false });
+                }
+                function forget(id) { friends = friends.filter(x => x.pid !== id); seen.delete(id); save(); if (!friends.length) stop(true); paintFriends(); }
+                function setLooking(v) { ls('bb-net-looking', v ? '1' : '0'); askNotify(); if (started) hiAll(); }
+                function setVisible(v) { ls('bb-net-visible', v ? '1' : '0'); if (v) start(); else stop(false); paintFriends(); }
+                // an invite: a room opened here, its code sent once the room is ready
+                function invite(id) {
+                    const f = friends.find(x => x.pid === id); if (!f) return;
+                    askNotify();
+                    if (!(role === 'host' && !live && !link)) { open(true); paintLobby(); }
+                    whenRoomReady(() => { send(id, Object.assign({ t: 'invite', code }, me())); status(`Invited ${f.name || 'them'}. Waiting for them to join…`, 'wait'); });
+                }
+                // the pop-ups
+                function toast(html, btns = [], ms = 9000) {
+                    let el = $('net-ftoast');
+                    if (!el) { el = document.createElement('div'); el.id = 'net-ftoast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
+                    el.innerHTML = `<div class="ft-card"><p>${html}</p><div class="ft-btns"></div></div>`;
+                    const row = el.querySelector('.ft-btns');
+                    (btns.length ? btns : [{ label: 'OK' }]).forEach(b => { const x = document.createElement('button'); x.type = 'button'; x.textContent = b.label; if (b.go) x.className = 'ft-go'; x.onclick = () => { el.classList.add('hidden'); if (b.fn) b.fn(); }; row.appendChild(x); });
+                    el.classList.remove('hidden');
+                    clearTimeout(el._t); el._t = setTimeout(() => el.classList.add('hidden'), ms);
+                }
+                function desk(text) {   // a system notification, when this tab isn't the one being looked at (computers; phones pause hidden pages)
+                    try { if (document.hidden && window.Notification && Notification.permission === 'granted') new Notification('BludBowl', { body: text, tag: 'bb-friend' }); } catch (e) {}
+                }
+                function askNotify() { try { if (window.Notification && Notification.permission === 'default' && !/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) Notification.requestPermission().catch(() => {}); } catch (e) {} }
+                function notifyLooking(f) {
+                    if (live) { log(`  🟢 ${escH(f.name || 'A recent opponent')} is looking for a game.`, 'text-emerald-300'); return; }
+                    try { sfx('friendOnline'); } catch (e) {}
+                    toast(`🟢 <b>${escH(f.name || 'A recent opponent')}</b> is looking for a game.`, [{ label: 'Not now' }, { label: 'Invite', go: true, fn: () => { const L = $('net-lobby'); if (L && L.classList.contains('hidden')) openLobby(); invite(f.pid); } }], 20000);
+                    desk(`${f.name || 'A recent opponent'} is looking for a game.`);
+                }
+                function inviteToast(f, c) {
+                    if (!c) return;
+                    try { sfx('friendOnline'); } catch (e) {}
+                    toast(`🏈 <b>${escH(f.name || 'A recent opponent')}</b> wants a game.`, [
+                        { label: 'Not now', fn: () => send(f.pid, Object.assign({ t: 'decline' }, me())) },
+                        { label: 'Join', go: true, fn: () => { openLobby(); open(false, c); paintLobby(); } }], 60000);
+                    desk(`${f.name || 'A recent opponent'} wants a game. Open BludBowl to join.`);
+                }
+                // every minute: hello again to anyone not heard from lately (a backstop for a missed hello)
+                if (!CLOCK.sim) setInterval(() => { if (!started) return; friends.slice(0, 12).forEach(f => { const s = seen.get(f.pid); if (!s || Date.now() - s.at > 55e3) send(f.pid, Object.assign({ t: 'hi' }, me())); }); paintFriends(); }, 60e3);
+                window.addEventListener('pagehide', () => { if (started) friends.forEach(f => { if (online(f.pid)) send(f.pid, { t: 'bye' }); }); });
+                setTimeout(start, 1500);
+                return { pid, met, forget, invite, setLooking, setVisible, list: () => friends.slice(), online, isLooking, lookingPref, visible, hiAll: () => started && hiAll() };
+            })();
+            // the room is open and reachable: anything waiting on that (an invite) goes now
+            let roomWait = [];
+            function whenRoomReady(fn) { if (role === 'host' && peer && (peer.test || peer.open)) fn(); else roomWait.push(fn); }
+            function roomReady() { const w = roomWait; roomWait = []; setTimeout(() => w.forEach(fn => { try { fn(); } catch (e) { console.error(e); } }), 0); }   // (after the room's own status line)
+            function paintFriends() {
+                const box = $('nl-friends'); if (!box) return;
+                const list = PRES.list(), show = !role && list.length > 0;
+                box.classList.toggle('hidden', !show); if (!show) return;
+                $('nl-looking').checked = PRES.lookingPref(); $('nl-visible').checked = PRES.visible();
+                const ago = t => { const d = (Date.now() - t) / 864e5; return d < 1 ? 'today' : d < 2 ? 'yesterday' : d < 30 ? `${Math.floor(d)} days ago` : 'a while ago'; };
+                const rows = list.map(f => ({ f, on: PRES.online(f.pid), look: PRES.isLooking(f.pid) })).sort((a, b) => (b.look - a.look) || (b.on - a.on) || (b.f.at - a.f.at));
+                $('nl-flist').innerHTML = rows.map(({ f, on, look }) => `<div class="nl-fr" data-pid="${escH(f.pid)}"><span class="dot${look ? ' look' : on ? ' on' : ''}"></span>
+                    <span class="who"><b>${escH(f.name || 'Someone')}</b><small>${look ? 'Looking for a game' : on ? 'Online now' : 'Last played ' + ago(f.at)}${f.n > 1 ? ` · ${f.n} games` : ''}</small></span>
+                    <button type="button" class="nl-btn nl-go nl-invite"${on && PRES.visible() ? '' : ' disabled title="They need the game open to be invited"'}>Invite</button>
+                    <button type="button" class="nl-btn nl-forget" title="Forget ${escH(f.name || 'them')}" aria-label="Forget ${escH(f.name || 'them')}">✕</button></div>`).join('');
+            }
+            document.addEventListener('click', e => {
+                const fr = e.target.closest && e.target.closest('#nl-flist .nl-fr'); if (!fr) return;
+                if (e.target.closest('.nl-invite')) PRES.invite(fr.dataset.pid);
+                else if (e.target.closest('.nl-forget')) PRES.forget(fr.dataset.pid);
+            });
+            document.addEventListener('change', e => {
+                if (e.target.id === 'nl-looking') PRES.setLooking(e.target.checked);
+                else if (e.target.id === 'nl-visible') PRES.setVisible(e.target.checked);
+            });
+            if (!CLOCK.sim) setInterval(() => { const L = $('net-lobby'); if (L && !L.classList.contains('hidden') && !role) paintFriends(); }, 5000);
             // ---- voice: an open microphone between the two devices, with mute ----
             // Each device that switches its microphone on calls the other with it (a one-way WebRTC call through the same PeerJS broker,
             // straight between the devices), so either can start first; a little message says whether it's live. Muting just silences
@@ -19167,6 +19331,7 @@
                 if (m.t === 'hello') {
                     setTimeout(voiceRelink, 400);   // (connected, or back after a drop: the microphone call is made again)
                     if (m.dev) peerDev = m.dev;
+                    if (m.pid) peerPid = String(m.pid).replace(/[^a-z0-9]/gi, '').slice(0, 24);
                     if (link) { lastSent = {}; link.send({ t: 'lgsum', ids: LEAGUE.sharedIds() }); }
                     if (m.name != null) setOpp(m.name);
                     if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
@@ -19263,7 +19428,7 @@
             }
             let postTeam = null, leagueHtml = '', syncText = '';
             function begin() {
-                live = true; resetSent(); forgetRoom();
+                live = true; resetSent(); forgetRoom(); PRES.met();
                 if (link && league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false), side: guestSide, lid: league.fx && league.fx.lid });
                 setTimeout(() => { if (live) log(`  Playing ${escH(themL())}. Double-tap the match log to send them a message.`, 'text-sky-300'); }, 2500);
                 if (link) link.send({ t: 'start' });
@@ -19395,7 +19560,7 @@
                 if (m.t === 'exind') { if (shopping) $('ex-body').innerHTML = m.html; return; }
                 if (m.t === 'lobby') { shopping = false; $('ex-ind').classList.add('hidden'); openLobby(); sendTeam(); status(m.why === 'reopened' ? "The host's game was closed during the inducements: you're back in the lobby to start again." : 'The host went back to the lobby.', 'wait'); return; }
                 if (m.t === 'start' && !live && !league) setTimeout(settleMine, 1500);
-                if (m.t === 'start') { live = true; shopping = false; $('ex-ind').classList.add('hidden'); shown = false; raw.keys = {}; raw.pl = new Map(); raw.order = []; $('net-lobby').classList.add('hidden'); paintChip(); return; }
+                if (m.t === 'start') { PRES.met(); live = true; shopping = false; $('ex-ind').classList.add('hidden'); shown = false; raw.keys = {}; raw.pl = new Map(); raw.order = []; $('net-lobby').classList.add('hidden'); paintChip(); return; }
                 if (!live) return;
                 if (m.t === 'meta') { applyMeta(m.d); return; }
                 if (m.t === 'snap') { applySnap(m); ownView(); return; }
@@ -19599,7 +19764,7 @@
                 }
                 if (!live) return;
                 if (t.closest('#modal-lineup')) return;   // the guest's own starting-eleven screen
-                if (t.closest('#net-chip, #net-mic, #net-chat, #net-league, #net-league-btn, #net-lobby, #net-end, #post-game, #team-builder, #modal-roster, #skill-tip, #whats-new')) return;
+                if (t.closest('#net-chip, #net-mic, #net-ftoast, #net-chat, #net-league, #net-league-btn, #net-lobby, #net-end, #post-game, #team-builder, #modal-roster, #skill-tip, #whats-new')) return;
                 const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
                 if (t === canvas) {
                     stop();
@@ -19740,6 +19905,7 @@
             }
             function paintLobby() {
                 const L = $('net-lobby'); if (!L) return;
+                try { paintFriends(); } catch (e) { console.error('friends', e); }
                 L.dataset.role = role || '';
                 $('nl-code').textContent = role === 'host' ? code : '';
                 $('nl-ping').textContent = link ? `Connected${oppName ? ` to ${oppName}` : ''}${rtt != null ? ` · ${rtt} ms` : ''}` : '';
@@ -22264,6 +22430,11 @@
             <button type="button" id="nl-reopen" class="nl-btn nl-go hidden"></button>
             <button type="button" id="nl-host" class="nl-btn">Host a game</button>
             <div class="nl-join"><input id="nl-join-code" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="9" placeholder="ORC-4821" aria-label="Room code"><button type="button" id="nl-join" class="nl-btn">Join</button></div>
+        </div>
+        <div id="nl-friends" class="hidden">
+            <div class="nl-fhead"><span class="nl-dim">Recent opponents</span><label class="nl-check"><input type="checkbox" id="nl-looking"> Looking for a game</label></div>
+            <div id="nl-flist"></div>
+            <label class="nl-check nl-fvis"><input type="checkbox" id="nl-visible"> Let recent opponents see when I'm online and invite me</label>
         </div>
         <div class="nl-room"><span class="nl-dim">Room code</span><b id="nl-code"></b></div>
         <p id="nl-status" aria-live="polite"></p>
