@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.50 (23 Oct 2026)
+- **Improved:** the Snotlings have new, clearer player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), drawn bigger so they're easier to make out: oversized heads, huge ears, toothy grins, iron pot helmets and team rags. The Underworld team's Snotling matches.
+  - **Fun-hoppa:** bouncing on a big red-spotted mushroom.
+  - **Stilty Runna:** perched on tall roped stilts.
+  - **Fungus Flinga:** holding up a glowing mushroom to throw.
+  - **Pump Wagon:** a rickety cart with Snotlings heaving the pump, a spiked roller and a team banner.
+
 ## v3.49 (23 Oct 2026)
 - **Improved:** the Tomb Kings have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), all with broad gold collars and white linen kilts.
   - **Skeleton:** a striped team headdress over a glowing-eyed skull.
