@@ -1,0 +1,72 @@
+diff --git a/index.html b/index.html
+index ce2cd7b..23ff7e3 100644
+--- a/index.html
++++ b/index.html
+@@ -23430,9 +23430,34 @@
+             }
+ 
+             // ---- general blitz: knock someone over where it helps most ----
++            // (blitz3) what a blitz target sets up, beyond knocking them over (a coaching checklist; ai-training/README.md,
++            // "Blitzes"): a corner of the cage round their carrier, their last man back when our carrier could break, a quick or
++            // sure-handed player lurking deep in our half, a flimsy expensive piece, the one giving assists where our players
++            // are tied up. (Their exposed carrier and a marker on ours have their own steps: carrierBlitz, 5b.)
++            function blitzCtxFor(me) {
++                const them = other(me), c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
++                const theirC = c && c.team === them && onPitch(c) ? c : null, ourC = c && c.team === me && onPitch(c) ? c : null;
++                const opp = state.players.filter(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned);
++                // their deepest player: nearest the end zone we attack
++                const deep = opp.slice().sort((a, b) => Math.abs(a.x - endX(me)) - Math.abs(b.x - endX(me)))[0] || null;
++                return { theirC, ourC, deep, loose: !c && state.ball.x >= 0 };
++            }
++            function blitzBonus(me, d, X) {
++                let b = 0;
++                if (X.theirC && d.id !== X.theirC.id && cheb(d, X.theirC) === 1) b += AIX.p(me, 'bzCage', 2);
++                if (X.ourC && X.deep && d.id === X.deep.id && cheb(X.ourC, d) <= 10) b += AIX.p(me, 'bzSafety', 1.5);
++                const quick = hasSk(d, 'Catch') || hasSk(d, 'Sprint') || hasSk(d, 'Dodge') || (d.ma || 6) >= 7;
++                if (quick && toGo(d.x, d.team) <= 12) b += AIX.p(me, 'bzLurk', 1.5) + (X.theirC || X.loose ? 0.5 : 0);
++                if (d.av <= 8) b += armourBreakProb(d.av, 0) * playerCost(d) / AIX.p(me, 'bzCostDiv', 40);
++                let tied = 0;
++                state.players.forEach(q => { if (q.team === me && onPitch(q) && !q.isDown && cheb(q, d) === 1 && state.players.some(o => o.team !== me && o.id !== d.id && onPitch(o) && !o.isDown && cheb(o, q) === 1)) tied++; });
++                b += Math.min(1.5, tied * 0.5);
++                return b;
++            }
+             function blitzPlan(me, act) {
+                 if (state.blitzUsed) return null;
+                 let best = null;
++                const b3 = AIX.on(me, 'blitz3'), X = b3 ? blitzCtxFor(me) : null, bonus = new Map();
+                 act.forEach(p => {
+                     const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                     if (c && c.id === p.id) return;
+@@ -23444,12 +23469,15 @@
+                             blitzCtx = true; const e = blockEval(p, d, m.x, m.y); blitzCtx = false;
+                             if (e.pTurn > 0.12) return;
+                             const pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
+-                            const s = pr * e.ev - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0);
++                            if (b3 && !bonus.has(d.id)) bonus.set(d.id, blitzBonus(me, d, X));
++                            const s = pr * (e.ev + (b3 ? bonus.get(d.id) * Math.min(1, e.pMove + 0.3) : 0)) - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0);
+                             if (!best || s > best.s) best = { p, d, s };
+                         });
+                     });
+                 });
+-                if (!best || best.s < 3) return null;
++                // (blitz2) strong coaches blitz in nine turns out of ten, most often just as one more good block on a lineman next
++                // to their team-mates (ai-training/README.md, "Blitzes"); the computer held out for more than an ordinary block needs
++                if (!best || best.s < (AIX.on(me, 'blitz2') ? AIX.p(me, 'blitzMin', 2.5) : 3)) return null;
+                 return blitzOn(best.p, best.d.id);
+             }
+             function blitzOn(p, tid) {
+@@ -23864,6 +23892,14 @@
+                 // 3. blocks with almost no risk come first
+                 const safe = blocks.find(b => b.e.pTurn < 0.05);
+                 if (safe) return blockPlan(safe);
++                // (blitz2) the turn's blitz, decided early, before the screen, cage and other moves use up the players who could
++                // make it - unless it's wanted for their carrier, or to free ours
++                if (AIX.on(me, 'blitz2') && !state.blitzUsed && !state.charge) {
++                    const theirC = carrier && carrier.team === them && onPitch(carrier) && !carrier.isDown ? carrier : null;
++                    const oursMarked = carrier && carrier.team === me && onPitch(carrier) && tzFor(carrier.x, carrier.y, me) > 0;
++                    const ours = carrier && carrier.team === me && onPitch(carrier);
++                    if (!oursMarked && (!ours || AIX.p(me, 'blitzOurs', 1)) && !(theirC && carrierBlitz(me, act, theirC))) { const gb = blitzPlan(me, act); if (gb) return gb; }
++                }
+                 // defending: get the screen (and the markers) in place before anything that could cause a Turnover,
+                 // keeping back the player who will blitz their carrier
+                 if (carrier && carrier.team === them && onPitch(carrier) && !state.charge) {

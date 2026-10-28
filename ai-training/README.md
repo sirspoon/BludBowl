@@ -632,3 +632,14 @@ FLAGS argument is '' for every switch on). "Other" = not their carrier, nor mark
   Not when we have the ball (`blitzOurs` 0): 34-31, 17-15 over 48, then 71-67, 33-34 over 96: 105-98, 50-49 in all,
   blocks 37.9 v 33.6. Level, and slower to think (the blitz is worked out at every decision until it's used: the test
   matches took about 60% longer). Not released.
+- `blitz3` (not released: `blitz-targets.patch`, which also holds `blitz2`): `blitzBonus` adds what a target sets up to
+  the general blitz's value: next to their carrier (a cage corner) 2, their deepest player while our carrier is within
+  10 squares 1.5, a quick or sure-handed player (Catch, Sprint, Dodge or MA 7+) deep in our half 1.5 (+0.5 if they could
+  get the ball), a flimsy expensive one (AV 8 or less: armour-break chance x cost / 40, about 1.3 for an elf catcher),
+  0.5 for each of our players next to it who's tied up with another opponent (up to 1.5). Weighted by the chance of
+  moving them (knockdown or push). Blitzes 48 -> 56% of turns, more Gutter Runners, Skinks and Goblins, more cage
+  corners (9% with their ball). Against v3.66: 29-33 touchdowns, 14-14 wins over 48; with the early blitz too
+  (`blitzOurs` 0): 30-33, 17-16. Level both ways.
+- So far nothing about the blitz (more of them, earlier, or better-chosen targets) has changed results. Since the
+  computer's own defence goes hard after the ball, and the matches are mirror matches, a better blitz may help both
+  sides' cancelling-out less than it would against people; it may be worth trying against a fixed older AI instead.
