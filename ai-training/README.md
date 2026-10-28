@@ -578,3 +578,28 @@ their first roll gave the blocking side: 'down' (the attacker goes over), 'nothi
 - Results against v3.65: all four 46-52 touchdowns, 15-22 wins, turnovers 231-185 over 48: saving re-rolls early
   costs the computer turns (the coaches can afford it because they leave the risky actions till last). (a) and (b)
   only: 43-36, 18-15 over 48, then 83-85, 32-35 over 96; 126-121, 50-50 in all. Level, so not released.
+
+## Turn order (Oct 2026)
+`turnorder.py` (100 replays, 3044 turns with 3+ players acting) and `bb-turnorder.js` (v3.65, 48 mirror matches,
+1391 turns). Each activation is labelled by its risk: free (no dice), block (a block or blitz), dodge/rush, ball
+(pick-up, pass, hand-off), foul; "where" is the share of the way through the turn (0 first, 1 last).
+
+| | coaches | BludBowl |
+|---|---|---|
+| activations a turn | 8.4 | 7.2 |
+| free / block / dodge-rush / ball / foul | 59 / 31 / 7 / 2 / 1% | 61 / 27 / 7 / 4 / 1% |
+| where: free / block / dodge-rush / ball / foul | 0.43 / 0.53 / 0.79 / 0.80 / 0.90 | 0.50 / 0.41 / 0.80 / 0.47 / 0.95 |
+| pick-ups a turn, where | 0.19 at 0.80 | 0.19 at 0.40 |
+| free moves still to come after the first dodge/rush or ball action | 34% | 53% |
+| turns ending in a turnover | 30% | 20% |
+| team-mates who hadn't acted when it happened | 2.2 | 3.3 |
+| what the turnover was: block / dodge-rush / ball / foul | 40 / 37 / 15 / 6% | 31 / 42 / 17 / 5% |
+
+- Coaches leave the dice to the end: dodges, Rushes, ball actions and fouls come about 80-90% of the way through the
+  turn, after most free moves and blocks, so a turnover costs them only about two players' actions. The computer
+  dodges and Rushes late too, but picks the ball up mid-turn and leaves more free moves until after the risky part
+  (a turnover costs it three or more). It also has fewer turnovers overall: it takes fewer risks.
+- `order` (not released: `turn-order2.patch`): with a loose ball and no opponent within 3, (1) all the other dice-free
+  formation moves first, then the pick-up: pick-ups moved to 0.62 of the way through, free moves after a risky one
+  39%, but 38-44 touchdowns, 11-17 wins, turnovers 216-188 over 48; (2) only up to three team-mates into the diagonal
+  squares round the ball first: pick-ups at 0.45, 51-53, 16-20 over 48. Neither helped.

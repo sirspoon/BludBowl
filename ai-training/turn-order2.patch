@@ -1,0 +1,31 @@
+diff --git a/index.html b/index.html
+index ea27930..435e68d 100644
+--- a/index.html
++++ b/index.html
+@@ -23892,6 +23892,26 @@
+                             if (bz) return blitzOn(bz.p, bz.t.id);
+                         }
+                     }
++                    // (order) strong coaches pick the ball up late in the turn (at 0.80 of the way through, the computer at 0.40;
++                    // ai-training/README.md, "Turn order"): with the ball in no danger, everyone else's dice-free moves to the
++                    // squares round it go first - so a failed pick-up costs less, and the cage is there when it's picked up
++                    if (best && best.pr >= 30 && AIX.on(me, 'order') && !lastTurn && !state.players.some(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && Math.max(Math.abs(q.x - bx), Math.abs(q.y - by)) <= AIX.p(me, 'calmR', 3))) {
++                        // only the cage: up to three team-mates into the diagonal squares round the ball, each by a dice-free route
++                        const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([dx, dy]) => ({ x: bx + dx, y: by + dy })).filter(c => inPitch(c.x, c.y) && c.y > 0 && c.y < CFG.rows - 1);
++                        const held = corners.filter(c => { const o = getPlayer(c.x, c.y); return o && o.team === me && !o.isDown; }).length;
++                        if (held < 3) {
++                            let pre = null;
++                            act.forEach(q => {
++                                if (q.id === best.p.id || q.isDown || !canReposition(q, me) || tzFor(q.x, q.y, me) > 0 || corners.some(c => c.x === q.x && c.y === q.y)) return;
++                                movesFor(q).forEach(m => {
++                                    if (m.prob < 100 || m.isRush || !corners.some(c => c.x === m.x && c.y === m.y) || getPlayer(m.x, m.y)) return;
++                                    const v = -m.path.length - tzFor(m.x, m.y, me) * 3;
++                                    if (!pre || v > pre.v) pre = { q, m, v };
++                                });
++                            });
++                            if (pre) { const px = pre.m.x, py = pre.m.y; return { pid: pre.q.id, kind: 'move', pick: ms => ms.find(m => m.x === px && m.y === py) || null }; }
++                        }
++                    }
+                     if (best && (best.pr >= 30 || lastTurn)) return { pid: best.p.id, kind: best.kind, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
+                 }
+ 
