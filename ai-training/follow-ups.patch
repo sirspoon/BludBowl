@@ -1,0 +1,16 @@
+diff --git a/index.html b/index.html
+index 553885e..3c8f464 100644
+--- a/index.html
++++ b/index.html
+@@ -24342,7 +24342,10 @@
+                 const edgeWorse = edgeRisk(v.x, v.y, a.team, a.id) > edgeRisk(a.x, a.y, a.team, a.id) + 0.2;
+                 // their ball carrier pushed back and still on their feet: stay on them, so they have to dodge away next turn
+                 const stick = AIX.on(a.team, 'stick') && !carrierA && c.def && c.def.team !== a.team && state.ball.carrierId === c.def.id && !c.def.isDown && cheb(v, c.def) === 1;
+-                const go = stick || (!edgeWorse && (carrierA ? (there === 0 || (forward && there <= here)) : there <= here + (forward ? 1 : 0)));
++                // follow2: a strong player (ST 4+ or AV 10+) not carrying the ball steps up into contact - it keeps their players tied up
++                // and leaves ours placed to block again next turn - unless the new square is much more crowded
++                const strong = AIX.on(a.team, 'follow2') && !carrierA && (a.st >= 4 || a.av >= 10);
++                const go = stick || (!edgeWorse && (carrierA ? (there === 0 || (forward && there <= here)) : there <= here + (forward ? 1 : 0) + (strong ? AIX.p(a.team, 'fuTz', 2) : 0)));
+                 if (go) grid(v.x, v.y); else click('btn-stay-put');
+             }
+             function interception() {
