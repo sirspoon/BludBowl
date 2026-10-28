@@ -2,6 +2,14 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.57 (28 Oct 2026)
+- **New:** online tournament lobbies (Online → Online tournaments). This is the first stage.
+  - **Organising:** pick the game, a knockout cup or Swiss, the number of places and the budget. The lobby opens under a code like CUP-4821, with Copy code and Share link buttons.
+  - **Joining:** players type the code or open the link on their own device, then enter one of their tournament teams. A team that spends more than the budget or breaks its tier's skill-point rules can't enter. Both the player's device and the organiser's check this.
+  - **In the lobby:** everyone sees the players, their teams and who's online, with a group chat. The organiser can remove a player.
+  - **Saved on each device:** the organiser can close the lobby and reopen it under the same code, and players reconnect on their own.
+  - **Coming next:** making the draw and playing the ties from each player's device.
+
 ## v3.56 (28 Oct 2026)
 - **Improved:** the Play a friend room (two-device matches) before kick-off:
   - **Both players side by side:** each one's name and chosen team, which updates as they pick.

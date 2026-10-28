@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.56</title>
+    <title>BludBowl 3.57</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -257,161 +257,167 @@
         #team-builder .tb-vet.on { border-color: #fbbf24; color: #fbbf24; background: rgba(251,191,36,.12); }
         #ex-ind .ex-gold { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
         #ex-ind .ex-gold select { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 4px 6px; font-weight: 700; }
-        #teams-hub, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) { --pg-card: #121a2b; --pg-edge: #263247; --pg-dim: #94a3b8; --pg-amber: #fbbf24; --pg-good: #4ade80; --pg-bad: #f87171;
+        #teams-hub, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) { --pg-card: #121a2b; --pg-edge: #263247; --pg-dim: #94a3b8; --pg-amber: #fbbf24; --pg-good: #4ade80; --pg-bad: #f87171;
             position: fixed; inset: 0; z-index: 140; background: radial-gradient(ellipse at top, #16213a 0%, #0b0f1a 60%); color: #e2e8f0; overflow-y: auto; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; }
-        #teams-hub.hidden, :is(#league-hub,#cup-hub,#ex-ind,#online-hub).hidden { display: none; }
-        #teams-hub .pg-wrap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-wrap { max-width: 1000px; margin: 0 auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 12px; }
-        #teams-hub .pg-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        #teams-hub h2, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) h2 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 34px; line-height: 1; color: var(--pg-amber); margin: 0; flex: 1; letter-spacing: .03em; }
-        #teams-hub h3, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) h3 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 19px; letter-spacing: .05em; color: #cbd5e1; margin: 8px 0 4px; }
-        #teams-hub h3:first-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) h3:first-child { margin-top: 0; }
-        #teams-hub button, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) button { font: inherit; cursor: pointer; } #teams-hub button:disabled, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) button:disabled { opacity: .4; cursor: default; }
-        #teams-hub button:focus-visible, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) button:focus-visible { outline: 2px solid var(--pg-amber); outline-offset: 1px; }
-        #teams-hub .pg-tabs, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-        #teams-hub .pg-tab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tab { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
-        #teams-hub .pg-tab.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tab.on { border-color: var(--pg-amber); color: var(--pg-amber); }
-        #teams-hub .pg-card, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-card { background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 10px 12px; min-width: 0; }
-        #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
-        #teams-hub .pg-result, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-result { text-align: center; border-top: 3px solid var(--pg-amber); }
-        #teams-hub .pg-result.pg-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-result.pg-W { border-top-color: var(--pg-good); } #teams-hub .pg-result.pg-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-result.pg-L { border-top-color: var(--pg-bad); }
-        #teams-hub .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-word { font-family: 'Teko', 'Impact', sans-serif; font-size: 44px; line-height: 1; text-transform: uppercase; letter-spacing: .06em; }
-        #teams-hub .pg-W .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-W .pg-word { color: var(--pg-good); } #teams-hub .pg-L .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-L .pg-word { color: var(--pg-bad); } #teams-hub .pg-D .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-D .pg-word { color: var(--pg-amber); }
-        #teams-hub .pg-score, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-score { font-size: 16px; } #teams-hub .pg-score b, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-score b { font-size: 20px; margin: 0 6px; font-variant-numeric: tabular-nums; }
-        #teams-hub .pg-dim, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-dim { color: var(--pg-dim); font-size: 11.5px; } #teams-hub .pg-amber, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-amber { color: var(--pg-amber); } #teams-hub .pg-good, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-good { color: var(--pg-good); font-size: 11.5px; }
-        #teams-hub .pg-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-        #teams-hub .pg-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tbl td { padding: 3px 0; border-bottom: 1px solid #1c263a; } #teams-hub .pg-tbl td:last-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tbl td:last-child { text-align: right; }
-        #teams-hub .pg-total td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-total td { font-weight: 800; color: var(--pg-amber); }
-        #teams-hub .pg-row, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 110px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid #1c263a; }
-        #teams-hub .pg-row.pg-dead, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-row.pg-dead { opacity: .65; }
-        #teams-hub .pg-name, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-name { font-weight: 800; } #teams-hub .pg-inj, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-inj { color: var(--pg-bad); font-size: 11.5px; font-weight: 700; }
-        #teams-hub .pg-tag, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tag { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); vertical-align: 1px; }
-        #teams-hub .pg-tag-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-tag-bad { background: #450a0a; color: #fca5a5; }
-        #teams-hub .pg-spp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-spp { text-align: right; font-variant-numeric: tabular-nums; } #teams-hub .pg-act, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-act { text-align: right; }
-        #teams-hub .pg-btn, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-btn { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
-        #teams-hub .pg-btn:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-btn:hover:not(:disabled) { border-color: var(--pg-amber); }
-        #teams-hub .pg-btn-go, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-btn-go { background: #1e293b; color: var(--pg-amber); border-color: #a16207; }
-        #teams-hub .pg-primary, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-primary { background: #059669; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
-        #teams-hub .pg-chips, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
-        #teams-hub .pg-chip, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-chip { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 999px; padding: 5px 11px; font-weight: 700; font-size: 12px; }
-        #teams-hub .pg-chip:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-chip:hover:not(:disabled), #teams-hub .pg-chip.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-chip.on { border-color: var(--pg-amber); color: var(--pg-amber); }
-        #teams-hub .pg-mvp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-mvp { font-size: 15px; margin: 4px 0; }
-        #teams-hub .pg-adv, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-adv { background: var(--pg-card); border: 1px solid var(--pg-edge); border-top: 3px solid var(--pg-amber); border-radius: 10px; padding: 12px; }
-        #teams-hub .pg-adv-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-adv-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
-        #teams-hub .pg-sppbig, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-sppbig { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: .9; color: var(--pg-amber); text-align: right; }
-        #teams-hub .pg-sppbig span, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-sppbig span { display: block; font-size: 13px; color: var(--pg-dim); font-family: 'Inter', sans-serif; font-weight: 700; }
-        #teams-hub .pg-opts, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-opts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-        #teams-hub .pg-opt, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-opt { border: 1px solid var(--pg-edge); border-radius: 8px; padding: 8px 10px; background: #0d1424; }
-        #teams-hub .pg-opt.pg-off, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-opt.pg-off { opacity: .55; }
-        #teams-hub .pg-opt-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-opt-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
-        #teams-hub .pg-foot, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        #teams-hub .pg-footbar, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-footbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-        #teams-hub .pg-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-actions { display: flex; gap: 8px; align-items: center; }
-        #teams-hub .th-top, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-top { display: flex; gap: 8px; flex-wrap: wrap; }
-        #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 12px; align-items: start; }
-        #teams-hub .th-list, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-list { display: flex; flex-direction: column; gap: 6px; }
-        #teams-hub .th-detail, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-detail { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-        #teams-hub .th-team, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-team { display: flex; align-items: center; gap: 10px; text-align: left; background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 8px 10px; color: #e2e8f0; }
-        #teams-hub .th-team.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-team.on { border-color: var(--pg-amber); box-shadow: inset 3px 0 0 var(--pg-amber); }
-        #teams-hub .th-tmain, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tmain { display: flex; flex-direction: column; min-width: 0; } #teams-hub .th-tname, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tname { font-weight: 800; }
-        #teams-hub .th-tok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tok { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 800; border: 2px solid rgba(0,0,0,.5); }
-        #teams-hub .th-tok-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tok-big { width: 52px; height: 52px; flex-basis: 52px; font-size: 13px; }
-        #teams-hub .th-headcard, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-headcard { border-top: 3px solid var(--pg-amber); }
-        #teams-hub .th-title, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-title { display: flex; align-items: center; gap: 12px; }
-        #teams-hub .th-h, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-h { font-size: 28px; margin: 0; color: #f8fafc; }
-        #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
-        #teams-hub .th-cap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-cap { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
-        #teams-hub .th-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-big { font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
-        #teams-hub .th-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-        #teams-hub .th-danger, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-danger { color: var(--pg-bad); }
-        #teams-hub .th-scroll, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-scroll { overflow-x: auto; }
-        #teams-hub .th-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-        #teams-hub .th-tbl th, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--pg-edge); }
-        #teams-hub .th-tbl th:nth-child(2), :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tbl th:nth-child(2) { text-align: left; }
-        #teams-hub .th-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-tbl td { padding: 6px; border-bottom: 1px solid #1c263a; vertical-align: top; }
-        #teams-hub .th-num, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-num { text-align: right; } #teams-hub .th-info, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-info { font-size: 11px; color: #fcd34d; }
-        #teams-hub .th-out td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-out td { opacity: .7; } #teams-hub .th-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-bad { color: var(--pg-bad); font-size: 11px; font-weight: 700; } #teams-hub .th-ok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-ok { color: var(--pg-good); }
-        #teams-hub .th-res, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-res { padding: 4px 0; border-bottom: 1px solid #1c263a; }
-        #teams-hub .th-badge, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-badge { display: inline-block; width: 20px; text-align: center; border-radius: 4px; font-weight: 800; font-size: 11px; margin-right: 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-stage { font-family: 'Teko', 'Impact', sans-serif; font-size: 24px; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-form { display: grid; gap: 14px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-field { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-in, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-sel { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 8px; font: inherit; max-width: 100%; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-in { width: 280px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-step { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-num { font-family: 'Teko', 'Impact', sans-serif; font-size: 30px; line-height: 1; min-width: 2ch; text-align: center; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-pick { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #1c263a; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-pick.off { opacity: .55; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-cpus { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-cpu { display: flex; align-items: center; gap: 6px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-cpu select { flex: 1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-cta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-fx { display: grid; grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) 196px; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-lab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-sub { grid-column: 1 / -1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-lab { font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-sub { text-align: center; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-side { display: flex; align-items: center; gap: 7px; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-side.away { flex-direction: row-reverse; text-align: right; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-side.won .lg-tn { color: var(--pg-good); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tn { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-sc { display: flex; align-items: center; justify-content: center; gap: 3px; text-align: center; font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-acts { display: flex; gap: 6px; justify-content: flex-end; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-coach { flex: 0 0 auto; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-bye .lg-sc { font: 700 12px 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .08em; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tbl th { white-space: nowrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-prizes { display: flex; justify-content: center; gap: 6px 18px; flex-wrap: wrap; margin: 10px 0 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-holder { background: #422006; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-pmvs { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); align-items: center; gap: 10px; margin: 12px 0 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-pmside { display: flex; align-items: center; gap: 10px; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-pmside.away { flex-direction: row-reverse; text-align: right; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-budget { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 2px 0 8px; font-variant-numeric: tabular-nums; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-ind { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-ind.on .lg-ind-main b { color: var(--pg-amber); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-ind-main { min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-ind .lg-num { font-size: 24px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-funds { max-width: 420px; margin-top: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-merc .lg-ind-main { flex: 1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-merc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-star { align-items: flex-start; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-star-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-top: 6px; border: 1px solid #263247; border-radius: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-star-row.on { border-color: var(--pg-amber); background: rgba(251,191,36,.07); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-star-info { flex: 1; min-width: 0; font-size: 12.5px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-star-rule { font-size: 11.5px; color: #e2e8f0; margin-top: 2px; } :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-star-rule b { color: var(--pg-amber); margin-right: 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-star-why { font-size: 11px; color: var(--pg-bad); margin-top: 2px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-mega { font-size: 9px; font-weight: 800; letter-spacing: .08em; padding: 1px 5px; border-radius: 4px; background: #713f12; color: #fde68a; vertical-align: 1px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-merc-row .pg-btn { padding: 3px 9px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-ind .lg-step { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-grid { align-items: start; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-coach.you { background: #064e3b; color: #6ee7b7; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tok { width: 26px; height: 26px; flex: 0 0 26px; font-size: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 5px; border-bottom: 1px solid var(--pg-edge); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tbl td { padding: 5px; text-align: right; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tbl .l { text-align: left; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tbl tr.cut td { border-bottom: 2px solid var(--pg-amber); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tbl tr.me td { background: rgba(5, 150, 105, .09); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-tcell { display: flex; align-items: center; gap: 7px; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-team { padding: 8px 0; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-team-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-team-main { flex: 1; min-width: 160px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-team-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-who { margin-top: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-champ { text-align: center; border-top: 3px solid var(--pg-amber); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-cup { font-size: 46px; line-height: 1.1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-champ-name { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: 1; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
+        #teams-hub.hidden, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub).hidden { display: none; }
+        #otour-hub { z-index: 150; }
+        #otour-hub .ot-code { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+        #otour-hub .ot-code b { font-family: 'Teko', 'Impact', sans-serif; font-size: 34px; letter-spacing: .08em; color: var(--pg-amber); line-height: 1; }
+        #otour-hub .ot-state { margin-top: 4px; color: #fde68a; } #otour-hub .ot-state.ok { color: #86efac; }
+        #otour-hub .ot-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #475569; margin-right: 5px; vertical-align: 1px; } #otour-hub .ot-dot.on { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
+        #otour-hub .ot-clog { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 14px; margin-bottom: 6px; } #otour-hub .ot-clog b { color: #7dd3fc; } #otour-hub .ot-clog div { overflow-wrap: anywhere; }
+        #teams-hub .pg-wrap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-wrap { max-width: 1000px; margin: 0 auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+        #teams-hub .pg-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        #teams-hub h2, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) h2 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 34px; line-height: 1; color: var(--pg-amber); margin: 0; flex: 1; letter-spacing: .03em; }
+        #teams-hub h3, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) h3 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 19px; letter-spacing: .05em; color: #cbd5e1; margin: 8px 0 4px; }
+        #teams-hub h3:first-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) h3:first-child { margin-top: 0; }
+        #teams-hub button, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) button { font: inherit; cursor: pointer; } #teams-hub button:disabled, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) button:disabled { opacity: .4; cursor: default; }
+        #teams-hub button:focus-visible, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) button:focus-visible { outline: 2px solid var(--pg-amber); outline-offset: 1px; }
+        #teams-hub .pg-tabs, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        #teams-hub .pg-tab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tab { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
+        #teams-hub .pg-tab.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tab.on { border-color: var(--pg-amber); color: var(--pg-amber); }
+        #teams-hub .pg-card, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-card { background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+        #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+        #teams-hub .pg-result, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-result { text-align: center; border-top: 3px solid var(--pg-amber); }
+        #teams-hub .pg-result.pg-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-result.pg-W { border-top-color: var(--pg-good); } #teams-hub .pg-result.pg-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-result.pg-L { border-top-color: var(--pg-bad); }
+        #teams-hub .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-word { font-family: 'Teko', 'Impact', sans-serif; font-size: 44px; line-height: 1; text-transform: uppercase; letter-spacing: .06em; }
+        #teams-hub .pg-W .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-W .pg-word { color: var(--pg-good); } #teams-hub .pg-L .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-L .pg-word { color: var(--pg-bad); } #teams-hub .pg-D .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-D .pg-word { color: var(--pg-amber); }
+        #teams-hub .pg-score, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-score { font-size: 16px; } #teams-hub .pg-score b, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-score b { font-size: 20px; margin: 0 6px; font-variant-numeric: tabular-nums; }
+        #teams-hub .pg-dim, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-dim { color: var(--pg-dim); font-size: 11.5px; } #teams-hub .pg-amber, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-amber { color: var(--pg-amber); } #teams-hub .pg-good, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-good { color: var(--pg-good); font-size: 11.5px; }
+        #teams-hub .pg-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        #teams-hub .pg-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tbl td { padding: 3px 0; border-bottom: 1px solid #1c263a; } #teams-hub .pg-tbl td:last-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tbl td:last-child { text-align: right; }
+        #teams-hub .pg-total td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-total td { font-weight: 800; color: var(--pg-amber); }
+        #teams-hub .pg-row, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 110px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid #1c263a; }
+        #teams-hub .pg-row.pg-dead, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-row.pg-dead { opacity: .65; }
+        #teams-hub .pg-name, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-name { font-weight: 800; } #teams-hub .pg-inj, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-inj { color: var(--pg-bad); font-size: 11.5px; font-weight: 700; }
+        #teams-hub .pg-tag, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tag { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); vertical-align: 1px; }
+        #teams-hub .pg-tag-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tag-bad { background: #450a0a; color: #fca5a5; }
+        #teams-hub .pg-spp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-spp { text-align: right; font-variant-numeric: tabular-nums; } #teams-hub .pg-act, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-act { text-align: right; }
+        #teams-hub .pg-btn, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-btn { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
+        #teams-hub .pg-btn:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-btn:hover:not(:disabled) { border-color: var(--pg-amber); }
+        #teams-hub .pg-btn-go, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-btn-go { background: #1e293b; color: var(--pg-amber); border-color: #a16207; }
+        #teams-hub .pg-primary, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-primary { background: #059669; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+        #teams-hub .pg-chips, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+        #teams-hub .pg-chip, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chip { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 999px; padding: 5px 11px; font-weight: 700; font-size: 12px; }
+        #teams-hub .pg-chip:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chip:hover:not(:disabled), #teams-hub .pg-chip.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chip.on { border-color: var(--pg-amber); color: var(--pg-amber); }
+        #teams-hub .pg-mvp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-mvp { font-size: 15px; margin: 4px 0; }
+        #teams-hub .pg-adv, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-adv { background: var(--pg-card); border: 1px solid var(--pg-edge); border-top: 3px solid var(--pg-amber); border-radius: 10px; padding: 12px; }
+        #teams-hub .pg-adv-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-adv-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+        #teams-hub .pg-sppbig, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-sppbig { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: .9; color: var(--pg-amber); text-align: right; }
+        #teams-hub .pg-sppbig span, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-sppbig span { display: block; font-size: 13px; color: var(--pg-dim); font-family: 'Inter', sans-serif; font-weight: 700; }
+        #teams-hub .pg-opts, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+        #teams-hub .pg-opt, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opt { border: 1px solid var(--pg-edge); border-radius: 8px; padding: 8px 10px; background: #0d1424; }
+        #teams-hub .pg-opt.pg-off, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opt.pg-off { opacity: .55; }
+        #teams-hub .pg-opt-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opt-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+        #teams-hub .pg-foot, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        #teams-hub .pg-footbar, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-footbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+        #teams-hub .pg-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-actions { display: flex; gap: 8px; align-items: center; }
+        #teams-hub .th-top, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-top { display: flex; gap: 8px; flex-wrap: wrap; }
+        #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 12px; align-items: start; }
+        #teams-hub .th-list, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-list { display: flex; flex-direction: column; gap: 6px; }
+        #teams-hub .th-detail, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-detail { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+        #teams-hub .th-team, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-team { display: flex; align-items: center; gap: 10px; text-align: left; background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 8px 10px; color: #e2e8f0; }
+        #teams-hub .th-team.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-team.on { border-color: var(--pg-amber); box-shadow: inset 3px 0 0 var(--pg-amber); }
+        #teams-hub .th-tmain, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tmain { display: flex; flex-direction: column; min-width: 0; } #teams-hub .th-tname, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tname { font-weight: 800; }
+        #teams-hub .th-tok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tok { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 800; border: 2px solid rgba(0,0,0,.5); }
+        #teams-hub .th-tok-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tok-big { width: 52px; height: 52px; flex-basis: 52px; font-size: 13px; }
+        #teams-hub .th-headcard, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-headcard { border-top: 3px solid var(--pg-amber); }
+        #teams-hub .th-title, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-title { display: flex; align-items: center; gap: 12px; }
+        #teams-hub .th-h, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-h { font-size: 28px; margin: 0; color: #f8fafc; }
+        #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+        #teams-hub .th-cap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-cap { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
+        #teams-hub .th-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-big { font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+        #teams-hub .th-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        #teams-hub .th-danger, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-danger { color: var(--pg-bad); }
+        #teams-hub .th-scroll, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-scroll { overflow-x: auto; }
+        #teams-hub .th-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        #teams-hub .th-tbl th, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--pg-edge); }
+        #teams-hub .th-tbl th:nth-child(2), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl th:nth-child(2) { text-align: left; }
+        #teams-hub .th-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl td { padding: 6px; border-bottom: 1px solid #1c263a; vertical-align: top; }
+        #teams-hub .th-num, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-num { text-align: right; } #teams-hub .th-info, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-info { font-size: 11px; color: #fcd34d; }
+        #teams-hub .th-out td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-out td { opacity: .7; } #teams-hub .th-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-bad { color: var(--pg-bad); font-size: 11px; font-weight: 700; } #teams-hub .th-ok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-ok { color: var(--pg-good); }
+        #teams-hub .th-res, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-res { padding: 4px 0; border-bottom: 1px solid #1c263a; }
+        #teams-hub .th-badge, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-badge { display: inline-block; width: 20px; text-align: center; border-radius: 4px; font-weight: 800; font-size: 11px; margin-right: 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-stage { font-family: 'Teko', 'Impact', sans-serif; font-size: 24px; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-form { display: grid; gap: 14px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-field { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-in, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sel { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 8px; font: inherit; max-width: 100%; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-in { width: 280px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-step { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-num { font-family: 'Teko', 'Impact', sans-serif; font-size: 30px; line-height: 1; min-width: 2ch; text-align: center; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pick { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #1c263a; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pick.off { opacity: .55; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cpus { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cpu { display: flex; align-items: center; gap: 6px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cpu select { flex: 1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-fx { display: grid; grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) 196px; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-lab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sub { grid-column: 1 / -1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-lab { font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sub { text-align: center; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side { display: flex; align-items: center; gap: 7px; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side.away { flex-direction: row-reverse; text-align: right; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side.won .lg-tn { color: var(--pg-good); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tn { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sc { display: flex; align-items: center; justify-content: center; gap: 3px; text-align: center; font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-acts { display: flex; gap: 6px; justify-content: flex-end; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-coach { flex: 0 0 auto; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-bye .lg-sc { font: 700 12px 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl th { white-space: nowrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-prizes { display: flex; justify-content: center; gap: 6px 18px; flex-wrap: wrap; margin: 10px 0 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-holder { background: #422006; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pmvs { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); align-items: center; gap: 10px; margin: 12px 0 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pmside { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pmside.away { flex-direction: row-reverse; text-align: right; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-budget { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 2px 0 8px; font-variant-numeric: tabular-nums; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind.on .lg-ind-main b { color: var(--pg-amber); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind-main { min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind .lg-num { font-size: 24px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-funds { max-width: 420px; margin-top: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-merc .lg-ind-main { flex: 1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-merc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star { align-items: flex-start; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-top: 6px; border: 1px solid #263247; border-radius: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-row.on { border-color: var(--pg-amber); background: rgba(251,191,36,.07); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-info { flex: 1; min-width: 0; font-size: 12.5px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-rule { font-size: 11.5px; color: #e2e8f0; margin-top: 2px; } :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-rule b { color: var(--pg-amber); margin-right: 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-why { font-size: 11px; color: var(--pg-bad); margin-top: 2px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-mega { font-size: 9px; font-weight: 800; letter-spacing: .08em; padding: 1px 5px; border-radius: 4px; background: #713f12; color: #fde68a; vertical-align: 1px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-merc-row .pg-btn { padding: 3px 9px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind .lg-step { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-grid { align-items: start; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-coach.you { background: #064e3b; color: #6ee7b7; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tok { width: 26px; height: 26px; flex: 0 0 26px; font-size: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 5px; border-bottom: 1px solid var(--pg-edge); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl td { padding: 5px; text-align: right; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl .l { text-align: left; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl tr.cut td { border-bottom: 2px solid var(--pg-amber); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl tr.me td { background: rgba(5, 150, 105, .09); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tcell { display: flex; align-items: center; gap: 7px; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team { padding: 8px 0; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team-main { flex: 1; min-width: 160px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-who { margin-top: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-champ { text-align: center; border-top: 3px solid var(--pg-amber); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cup { font-size: 46px; line-height: 1.1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-champ-name { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: 1; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
         @media (max-width: 640px) {
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-fx { grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-acts { grid-column: 1 / -1; justify-content: center; }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-hide-sm { display: none; }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-coach { display: none; }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .lg-side .lg-tn { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-fx { grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-acts { grid-column: 1 / -1; justify-content: center; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-hide-sm { display: none; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-coach { display: none; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side .lg-tn { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; }
         }
-        #teams-hub .th-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-W { background: #14532d; color: #86efac; } #teams-hub .th-D, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-D { background: #422006; color: #fcd34d; } #teams-hub .th-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-L { background: #450a0a; color: #fca5a5; }
+        #teams-hub .th-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-W { background: #14532d; color: #86efac; } #teams-hub .th-D, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-D { background: #422006; color: #fcd34d; } #teams-hub .th-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-L { background: #450a0a; color: #fca5a5; }
         @media (max-width: 820px) {
-            #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-layout, #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .pg-grid { grid-template-columns: minmax(0, 1fr); }
-            #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub) .th-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-layout, #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-grid { grid-template-columns: minmax(0, 1fr); }
+            #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (max-width: 720px) {
             #post-game .pg-grid, #post-game .pg-opts { grid-template-columns: minmax(0, 1fr); }
@@ -944,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.56</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.57</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1071,6 +1077,12 @@
       <div class="pg-wrap">
         <header class="pg-head"><button id="on-close" type="button" class="pg-btn">← Menu</button><h2 id="on-title">Online</h2><div class="th-top"></div><button type="button" class="fsc-btn" data-fs title="Full screen" aria-label="Full screen">⛶</button></header>
         <div id="on-body" class="th-detail"></div>
+      </div>
+    </div>
+    <div id="otour-hub" class="hidden" role="dialog" aria-modal="true" aria-labelledby="ot-title">
+      <div class="pg-wrap">
+        <header class="pg-head"><button id="ot-close" type="button" class="pg-btn">← Online</button><h2 id="ot-title">Online tournaments</h2><div id="ot-top" class="th-top"></div><button type="button" class="fsc-btn" data-fs title="Full screen" aria-label="Full screen">⛶</button></header>
+        <div id="ot-body" class="th-detail"></div>
       </div>
     </div>
     <div id="cup-hub" class="hidden" role="dialog" aria-modal="true" aria-labelledby="cp-title">
@@ -5183,12 +5195,14 @@
             const $ = id => document.getElementById(id);
             function render() {
                 let shared = 0; try { shared = (JSON.parse(localStorage.getItem('bb-leagues') || '{}').leagues || []).filter(l => l.shared).length; } catch (e) {}
+                let tn = 0; try { tn = (JSON.parse(localStorage.getItem('bb-otours') || '{}').tours || []).length; } catch (e) {}
                 $('on-body').innerHTML = `
                     <section class="pg-card"><h3>Play a friend</h3><div class="pg-dim">A one-off match against someone on another phone, tablet or computer. One of you hosts and the other joins with the room code, or invite a recent opponent.</div>
                         <div class="lg-cta"><button type="button" class="pg-primary" data-on="net">Host or join a match</button></div></section>
                     <section class="pg-card"><h3>Shared leagues</h3><div class="pg-dim">A league with friends, each playing from their own device. Everyone keeps a copy, and results sync whenever two of you connect.${shared ? ` You're in ${shared} shared league${shared === 1 ? '' : 's'}.` : ''}</div>
                         <div class="lg-cta"><button type="button" class="pg-primary" data-on="leagues">${shared ? 'Open shared leagues' : 'Start a shared league'}</button><button type="button" class="pg-btn" data-on="net">Join with a code</button></div></section>
-                    <section class="pg-card"><h3>Online tournaments</h3><div class="pg-dim">Coming next: a lobby where players join with their tournament teams and chat, then play their ties from their own devices. For now, tournaments are on the Tournaments screen, on one device.</div></section>`;
+                    <section class="pg-card"><h3>Online tournaments</h3><div class="pg-dim">Organise a knockout cup or a Swiss event and send your friends the lobby code. They join from their own devices with one of their tournament teams, and everyone can chat while the field gathers. (Making the draw and playing the ties online comes in the next update.)${tn ? ` You're in ${tn} online tournament${tn === 1 ? '' : 's'}.` : ''}</div>
+                        <div class="lg-cta"><button type="button" class="pg-primary" data-on="tours">${tn ? 'Open online tournaments' : 'Organise or join one'}</button></div></section>`;
             }
             function open() { $('online-hub').classList.remove('hidden'); $('online-hub').scrollTop = 0; render(); }
             function close() { $('online-hub').classList.add('hidden'); }
@@ -5198,8 +5212,366 @@
                 try { sfx('menuClick'); } catch (er) {}
                 if (b.dataset.on === 'net') NET.openLobby();
                 else if (b.dataset.on === 'leagues') { close(); LEAGUE.open(null, 'shared'); }
+                else if (b.dataset.on === 'tours') OTOUR.open();
             });
             return { open, close, render };
+        })();
+
+        // ---------- Online tournaments: a lobby on the organiser's device ----------
+        // The organiser's device is the hub: it opens the lobby under a code (through the same PeerJS broker as two-device matches) and
+        // every player's device connects to it, sending the tournament team it enters. The hub checks each team against the
+        // tournament's budget and rules, keeps everyone's copy, and passes the chat round. Each device keeps its own record of the
+        // tournament, so a lobby can be reopened (same code) and players reconnect. (?nettest: the same, between tabs, over a BroadcastChannel.)
+        const OTOUR = (function () {
+            const KEY = 'bb-otours', PEER_SRC = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js'];
+            const TEST = /[?&]nettest\b/.test(location.search);
+            const WORDS = ['CUP', 'BWL', 'SPK', 'TDS', 'BLD', 'GLD'];
+            const $ = id => document.getElementById(id);
+            const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const k = n => Math.round(n).toLocaleString('en-GB') + 'k';
+            const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+            const clean = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
+            const myName = () => DEV.name() || 'Player';
+            const version = () => (($('app-version') || {}).textContent || '').trim();
+            let tours = [], cur = null, mode = 'list', draft = null, armed = null;
+            function load() { try { const d = JSON.parse(localStorage.getItem(KEY) || '{}'); tours = Array.isArray(d.tours) ? d.tours : []; } catch (e) { tours = []; } }
+            function save() { try { localStorage.setItem(KEY, JSON.stringify({ version: 1, tours })); } catch (e) {} }
+            load();
+            const get = id => tours.find(t => t.id === id);
+            const byCode = c => tours.find(t => t.code === c);
+            const isOrg = t => t && t.org === DEV.id;
+            const FMT = t => `${t.fmt === 'sevens' ? 'Blood Bowl Sevens' : 'Blood Bowl'} · ${t.type === 'swiss' ? `Swiss, ${t.rounds} rounds` : 'knockout cup'} · ${t.size} places · ${k(t.budget)} budget`;
+            // what a team needs to enter: a tournament team of the right game that fits the budget and its tier's skill points
+            function teamProblems(tm, t) {
+                if (!tm || !tm.players) return ['no team'];
+                if (!TB.isMP(tm)) return ['not a tournament team (set its Format to Tournament team in Teams)'];
+                if (!!TB.isSev(tm) !== (t.fmt === 'sevens')) return [t.fmt === 'sevens' ? 'not a Sevens team' : 'a Sevens team, and this is 11 a side'];
+                return CUP.unfit(tm, t.budget);
+            }
+            const entryOf = tm => { const c = TB.costs(tm), R = RACES[tm.race] || {}; return { teamName: tm.name, race: tm.race, raceName: R.name || tm.race, short: R.short || '', tv: c.tv, primary: tm.primary, secondary: tm.secondary }; };
+
+            // ---- the connection: the hub (organiser) and the players ----
+            let peer = null, net = null;   // net: { role: 'hub' | 'player', tid, conns (hub: Map dev -> conn), conn (player), state }
+            const slug = c => 'bludbowl-lobby-' + String(c).toLowerCase().replace(/[^a-z0-9]/g, '');
+            function loadPeer() {
+                if (window.Peer) return Promise.resolve();
+                const one = src => new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+                return one(PEER_SRC[0]).catch(() => one(PEER_SRC[1]));
+            }
+            const parse = raw => { try { return typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { return null; } };
+            const sendTo = (c, m) => { try { c.send(JSON.stringify(m)); } catch (e) {} };
+            // the BroadcastChannel stand-in for PeerJS (?nettest): the hub answers knocks on its code's channel
+            function testPeer(asHub, code) {
+                const bc = new BroadcastChannel(slug(code)), me = Math.random().toString(36).slice(2), conns = new Map(), h = {};
+                const mk = other => {
+                    const hh = {}, c = { on: (e, f) => { (hh[e] = hh[e] || []).push(f); }, fire: (e, x) => (hh[e] || []).forEach(f => f(x)),
+                        send: x => { if (!c.closed) bc.postMessage({ from: me, to: other, x }); },
+                        close: () => { if (c.closed) return; c.closed = true; bc.postMessage({ from: me, to: other, bye: 1 }); c.fire('close'); } };
+                    conns.set(other, c); return c;
+                };
+                bc.onmessage = e => {
+                    const d = e.data; if (!d || d.from === me) return;
+                    if (d.knock) { if (asHub) { const c = mk(d.from); (h.connection || []).forEach(f => f(c)); bc.postMessage({ from: me, to: d.from, welcome: 1 }); c.fire('open'); } return; }
+                    if (d.to !== me) return;
+                    if (d.welcome && !asHub) { const c = mk(d.from); (h.joined || []).forEach(f => f(c)); c.fire('open'); return; }
+                    const c = conns.get(d.from); if (!c) return;
+                    if (d.bye) { if (!c.closed) { c.closed = true; c.fire('close'); } return; }
+                    if (d.x != null) c.fire('data', d.x);
+                };
+                addEventListener('beforeunload', () => conns.forEach(c => { try { c.close(); } catch (e) {} }));
+                return { test: true, on: (e, f) => { (h[e] = h[e] || []).push(f); }, knock: () => bc.postMessage({ from: me, knock: 1 }), destroy: () => { conns.forEach(c => { try { c.close(); } catch (e) {} }); bc.close(); } };
+            }
+            function stop() {
+                if (net && net.retry) clearTimeout(net.retry);
+                if (net && net.conn) { try { sendTo(net.conn, { t: 'bye' }); net.conn.close(); } catch (e) {} }
+                if (net && net.conns) net.conns.forEach(c => { try { c.close(); } catch (e) {} });
+                try { if (peer) peer.destroy(); } catch (e) {}
+                peer = null; net = null;
+            }
+            function setState(s) { if (net) { net.state = s; paint(); } }
+            // the organiser opens the lobby: players connect under its code
+            function hub(t) {
+                stop();
+                net = { role: 'hub', tid: t.id, conns: new Map(), state: 'Opening the lobby…' };
+                const onConn = c => {
+                    c.on('data', raw => { const m = parse(raw); if (m && net && net.role === 'hub') hubMsg(c, m); });
+                    c.on('close', () => { if (!net || net.role !== 'hub') return; for (const [dv, x] of net.conns) if (x === c) { net.conns.delete(dv); broadcast(); paint(); } });
+                };
+                if (TEST) { peer = testPeer(true, t.code); peer.on('connection', onConn); setTimeout(() => setState('open'), 0); return; }
+                loadPeer().then(() => {
+                    if (!net || net.tid !== t.id) return;
+                    peer = new Peer(slug(t.code));
+                    peer.on('open', () => setState('open'));
+                    peer.on('connection', onConn);
+                    peer.on('disconnected', () => { try { if (peer && !peer.destroyed) peer.reconnect(); } catch (e) {} });
+                    peer.on('error', e => { const ty = e && e.type; setState(ty === 'unavailable-id' ? 'This lobby is already open, perhaps in another tab. Close that one, then reopen it here.' : ty === 'network' || ty === 'server-error' ? "Can't reach the matchmaking server. Check the internet connection." : 'The lobby had a connection problem.'); });
+                }).catch(() => setState("Couldn't load the connection library. Check the internet connection."));
+            }
+            // a player connects to the organiser's lobby (and keeps trying if it drops)
+            function join(code, tid) {
+                stop();
+                net = { role: 'player', tid, code, conn: null, state: 'Looking for the lobby…' };
+                const attach = c => {
+                    c.on('open', () => { if (!net || net.code !== code) { try { c.close(); } catch (e) {} return; } if (net.conn) return; net.conn = c; net.state = 'connected'; sendTo(c, { t: 'hi', dev: DEV.id, name: myName(), v: version() }); paint(); });
+                    c.on('data', raw => { const m = parse(raw); if (m && net && net.conn === c) playerMsg(m); });
+                    c.on('close', () => { if (!net || net.conn !== c) return; net.conn = null; net.state = 'Lost the lobby: trying again…'; paint(); again(); });
+                };
+                const again = () => { if (!net || net.code !== code || net.gone) return; clearTimeout(net.retry); net.retry = setTimeout(knock, 4000); };
+                const knock = () => {
+                    if (!net || net.code !== code || net.conn) return;
+                    if (peer && peer.test) { peer.knock(); again(); return; }
+                    if (peer && peer.open) { attach(peer.connect(slug(code), { reliable: true })); again(); }
+                };
+                if (TEST) { peer = testPeer(false, code); peer.on('joined', attach); knock(); setTimeout(() => { if (net && !net.conn && net.code === code) setState(net.tid ? "The organiser's lobby isn't open right now. It reconnects when they open it." : "No lobby with that code is open. Check it, or ask the organiser to open it."); }, 2500); return; }
+                loadPeer().then(() => {
+                    if (!net || net.code !== code) return;
+                    peer = new Peer();
+                    peer.on('open', knock);
+                    peer.on('disconnected', () => { try { if (peer && !peer.destroyed) peer.reconnect(); } catch (e) {} });
+                    peer.on('error', e => { if (e && e.type === 'peer-unavailable') { if (net && !net.conn) setState(net.tid ? "The organiser's lobby isn't open right now. It reconnects when they open it." : "No lobby with that code is open. Check it, or ask the organiser to open it."); again(); } else if (e && (e.type === 'network' || e.type === 'server-error')) setState("Can't reach the matchmaking server. Check the internet connection."); });
+                }).catch(() => setState("Couldn't load the connection library. Check the internet connection."));
+            }
+
+            // ---- the hub's side ----
+            const online = t => new Set([DEV.id, ...(net && net.role === 'hub' && net.tid === t.id ? net.conns.keys() : [])]);
+            function roomFor(t) {   // what every player's device shows
+                const on = online(t);
+                return { id: t.id, code: t.code, name: t.name, fmt: t.fmt, type: t.type, size: t.size, rounds: t.rounds, budget: t.budget, org: t.org, orgName: t.orgName, stage: t.stage,
+                    entrants: t.entrants.map(e => Object.assign({ dev: e.dev, name: e.name, online: on.has(e.dev) }, e.entry)),
+                    here: [...on].filter(dv => !t.entrants.some(e => e.dev === dv)).map(dv => ({ dev: dv, name: dv === DEV.id ? t.orgName : (t.seen || {})[dv] || 'Player' })),
+                    chat: (t.chat || []).slice(-40) };
+            }
+            function broadcast() {
+                if (!net || net.role !== 'hub') return;
+                const t = get(net.tid); if (!t) return;
+                const room = roomFor(t);
+                net.conns.forEach(c => sendTo(c, { t: 'room', room }));
+            }
+            function hubMsg(c, m) {
+                const t = get(net.tid); if (!t) return;
+                if (m.t === 'hi') {
+                    const dv = clean(m.dev, 40); if (!dv) return;
+                    if ((t.banned || []).includes(dv)) { sendTo(c, { t: 'removed', why: 'The organiser has removed you from this tournament.' }); return; }
+                    const old = net.conns.get(dv); if (old && old !== c) { try { old.close(); } catch (e) {} }
+                    net.conns.set(dv, c); c.dev = dv;
+                    t.seen = t.seen || {}; t.seen[dv] = clean(m.name, 20) || 'Player';
+                    const en = t.entrants.find(e => e.dev === dv); if (en) en.name = t.seen[dv];
+                    save();
+                    if (m.v && m.v !== version()) sendTo(c, { t: 'note', text: `You're on ${m.v} and the organiser is on ${version()}. Reload the page to get the latest version.` });
+                    broadcast(); paint(); return;
+                }
+                const dv = c.dev; if (!dv) return;
+                if (m.t === 'say') { addChat(t, t.seen[dv] || 'Player', m.text); return; }
+                if (m.t === 'enter') {
+                    const err = enterTeam(t, dv, t.seen[dv] || 'Player', m.team);
+                    sendTo(c, { t: 'entered', err: err || '' });
+                    return;
+                }
+                if (m.t === 'withdraw') { withdraw(t, dv); return; }
+                if (m.t === 'bye') { net.conns.delete(dv); broadcast(); paint(); }
+            }
+            function addChat(t, name, text) {
+                text = clean(text, 200); if (!text) return;
+                t.chat = (t.chat || []).concat([{ name: clean(name, 20) || 'Player', text, at: Date.now() }]).slice(-80); save();
+                broadcast(); paint();
+                try { sfx('menuClick'); } catch (e) {}
+            }
+            // a team enters (or replaces the one it entered): checked here, whatever the player's device said
+            function enterTeam(t, dv, name, tm) {
+                if (t.stage !== 'lobby') return 'The draw has been made: entries are closed.';
+                const pr = teamProblems(tm, t); if (pr.length) return `That team can't enter: ${pr.join('; ')}.`;
+                const en = t.entrants.find(e => e.dev === dv);
+                if (!en && t.entrants.length >= t.size) return 'The tournament is full.';
+                const copy = JSON.parse(JSON.stringify(tm));
+                if (en) Object.assign(en, { name, team: copy, entry: entryOf(copy), at: Date.now() });
+                else t.entrants.push({ dev: dv, name, team: copy, entry: entryOf(copy), at: Date.now() });
+                save(); broadcast(); paint();
+                return '';
+            }
+            function withdraw(t, dv) { t.entrants = t.entrants.filter(e => e.dev !== dv); save(); broadcast(); paint(); }
+            function removePlayer(t, dv) {
+                withdraw(t, dv);
+                t.banned = (t.banned || []).concat([dv]); save();
+                const c = net && net.conns && net.conns.get(dv); if (c) { sendTo(c, { t: 'removed', why: 'The organiser has removed you from this tournament.' }); setTimeout(() => { try { c.close(); } catch (e) {} }, 300); net.conns.delete(dv); }
+                broadcast(); paint();
+            }
+
+            // ---- the player's side ----
+            function playerMsg(m) {
+                if (m.t === 'room') {
+                    const R = m.room; let t = get(R.id);
+                    if (!t) { t = { id: R.id, code: R.code, role: 'player', created: new Date().toISOString().slice(0, 10) }; tours.unshift(t); }
+                    Object.assign(t, { name: R.name, fmt: R.fmt, type: R.type, size: R.size, rounds: R.rounds, budget: R.budget, org: R.org, orgName: R.orgName, stage: R.stage, room: R });
+                    net.tid = t.id; if (cur !== t.id && mode !== 'lobby') { cur = t.id; }
+                    if (mode === 'joining') { mode = 'lobby'; cur = t.id; }
+                    save(); paint(); return;
+                }
+                if (m.t === 'entered') { flash(m.err || 'Your team is in. Good luck!', !!m.err); return; }
+                if (m.t === 'note') { flash(m.text, true); return; }
+                if (m.t === 'removed') { if (net) net.gone = true; const t = get(net && net.tid); if (t) { t.removed = true; save(); } flash(m.why, true); stop(); paint(); }
+            }
+
+            // ---- screens ----
+            let flashMsg = '', flashBad = false;
+            function flash(t, bad) { flashMsg = t || ''; flashBad = !!bad; paint(); }
+            const tok = e => `<span class="th-tok lg-tok" style="background:${esc(e.primary || '#334155')};color:${esc(e.secondary || '#fff')}">${esc(e.short || '?')}</span>`;
+            function listHtml() {
+                const rows = tours.map(t => `<section class="pg-card lg-card"><div><div class="lg-tn" style="font-size:16px">${esc(t.name)}</div>
+                    <div class="pg-dim">${isOrg(t) ? 'You organise it' : `Organised by ${esc(t.orgName || 'another player')}`} · ${esc(FMT(t))} · code ${esc(t.code)}${t.removed ? ' · you were removed' : ''}</div></div>
+                    <div class="lg-team-acts"><button type="button" class="pg-primary" data-ot="open" data-id="${t.id}">${isOrg(t) ? 'Open lobby' : 'Go to lobby'}</button><button type="button" class="pg-btn th-danger" data-ot="del" data-id="${t.id}">${armed && armed.id === t.id && armed.t > Date.now() ? 'Tap again to delete' : 'Delete'}</button></div></section>`).join('');
+                return `<section class="pg-card"><h3>Join a tournament</h3><div class="pg-dim">Type the lobby code the organiser sent you, or open the link they shared.</div>
+                        <div class="lg-cta" style="justify-content:flex-start"><input id="ot-code" class="lg-in" maxlength="9" placeholder="CUP-4821" autocapitalize="characters" autocomplete="off" spellcheck="false" style="max-width:140px;text-transform:uppercase"><button type="button" class="pg-primary" data-ot="join">Join</button></div></section>
+                    ${rows || '<section class="pg-card"><div class="pg-dim">No online tournaments yet. Organise one with + Organise a tournament, then send the players its code or link. They join from their own devices with one of their tournament teams.</div></section>'}`;
+            }
+            const seg = (key, opts) => `<div class="lg-seg">${opts.map(([v, l]) => `<button type="button" class="pg-chip ${draft[key] === v ? 'on' : ''}" data-ot="set" data-k="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
+            function createHtml() {
+                const d = draft, sw = d.type === 'swiss', sev = d.fmt === 'sevens';
+                return `<section class="pg-card lg-form">
+                    <div class="lg-field"><span class="lg-lbl">Name</span><input class="lg-in" id="ot-name" maxlength="30" value="${esc(d.name)}"></div>
+                    <div class="lg-field"><span class="lg-lbl">Game</span>${seg('fmt', [['std', 'Blood Bowl'], ['sevens', 'Blood Bowl Sevens']])}</div>
+                    <div class="lg-field"><span class="lg-lbl">Format</span>${seg('type', [['ko', 'Knockout cup'], ['swiss', 'Swiss']])}</div>
+                    <div class="lg-field"><span class="lg-lbl">Places</span>${sw ? seg('size', [[4, '4'], [6, '6'], [8, '8'], [10, '10'], [12, '12'], [16, '16']]) : seg('size', [[4, '4'], [8, '8'], [16, '16']])}<span class="pg-dim">Places nobody takes go to computer teams when the draw is made.</span></div>
+                    ${sw ? `<div class="lg-field"><span class="lg-lbl">Rounds</span>${seg('rounds', [[3, '3'], [4, '4'], [5, '5']].filter(([n]) => n < d.size))}</div>` : ''}
+                    <div class="lg-field"><span class="lg-lbl">Budget</span>${seg('budget', sev ? [[600, '600k'], [650, '650k'], [700, '700k']] : [[1100, '1,100k'], [1150, '1,150k'], [1200, '1,200k'], [1300, '1,300k'], [1400, '1,400k'], [1500, '1,500k']])}<span class="pg-dim">Every team must fit it: no more spent, and its tier's skill points.</span></div>
+                </section>
+                <div class="lg-cta"><button type="button" class="pg-btn" data-ot="cancel">Cancel</button><button type="button" class="pg-primary" data-ot="create">Open the lobby →</button></div>`;
+            }
+            function lobbyHtml(t) {
+                const org = isOrg(t), R = org ? roomFor(t) : t.room || { entrants: [], here: [], chat: [] };
+                const live = net && net.tid === t.id && (org ? net.state === 'open' : !!net.conn);
+                const stateText = !net || net.tid !== t.id ? (org ? 'The lobby is closed.' : 'Not connected.') : org ? (net.state === 'open' ? `The lobby is open. ${net.conns.size} player${net.conns.size === 1 ? '' : 's'} connected.` : net.state) : net.conn ? `Connected to ${esc(t.orgName || 'the organiser')}'s lobby.` : net.state;
+                const mine = (R.entrants || []).find(e => e.dev === DEV.id);
+                const teams = TB.list().filter(tm => !tm.cpu && TB.isMP(tm) && !!TB.isSev(tm) === (t.fmt === 'sevens'));
+                const fits = teams.filter(tm => !teamProblems(tm, t).length), misfit = teams.filter(tm => teamProblems(tm, t).length);
+                const rows = (R.entrants || []).map(e => `<div class="lg-team"><div class="lg-team-row">${tok(e)}<div class="lg-team-main"><div class="lg-tn">${esc(e.teamName)}</div>
+                        <div class="pg-dim"><span class="ot-dot${e.online ? ' on' : ''}"></span><b style="color:#e2e8f0">${esc(e.dev === DEV.id ? 'You' : e.name)}</b> · ${e.online ? 'online' : 'offline'} · ${esc(e.raceName)} · TV ${k(e.tv)}</div></div>
+                        ${org && e.dev !== DEV.id && t.stage === 'lobby' ? `<div class="lg-team-acts"><button type="button" class="pg-btn th-danger" data-ot="kick" data-dev="${esc(e.dev)}">${armed && armed.id === e.dev && armed.t > Date.now() ? 'Tap again to remove' : 'Remove'}</button></div>` : ''}</div></div>`).join('');
+                const here = (R.here || []).filter(h => h.dev !== DEV.id).map(h => esc(h.name)).join(', ');
+                const left = t.size - (R.entrants || []).length;
+                const entryCard = t.removed ? '<section class="pg-card"><div class="pg-dim">You were removed from this tournament.</div></section>'
+                    : t.stage !== 'lobby' ? '' : `<section class="pg-card"><h3>Your entry</h3>${mine ? `<div class="pg-dim" style="margin-bottom:6px">You've entered <b>${esc(mine.teamName)}</b>. You can swap it for another of your teams until the draw.</div>` : ''}
+                    ${fits.length ? `<div class="lg-cta" style="justify-content:flex-start"><select id="ot-team" class="lg-sel">${fits.map(tm => `<option value="${tm.id}">${esc(tm.name)} (${esc((RACES[tm.race] || {}).name || tm.race)} · spends ${k(TB.costs(tm).spent)})</option>`).join('')}</select>
+                        <button type="button" class="pg-primary" data-ot="enter" ${live ? '' : 'disabled'}>${mine ? 'Swap to this team' : 'Enter this team'}</button>${mine ? `<button type="button" class="pg-btn" data-ot="withdraw" ${live ? '' : 'disabled'}>Withdraw</button>` : ''}</div>`
+                        : `<div class="pg-dim">You have no ${t.fmt === 'sevens' ? 'Sevens ' : ''}tournament teams that fit. In Teams, make one with its Format set to ${t.fmt === 'sevens' ? 'Sevens tournament team' : 'Tournament team'} and a budget of ${k(t.budget)} or less.</div>`}
+                    ${misfit.length ? `<div class="pg-dim" style="margin-top:6px">Not eligible: ${misfit.map(tm => `${esc(tm.name)} (${esc(teamProblems(tm, t).join('; '))})`).join(' · ')}</div>` : ''}</section>`;
+                const chat = (R.chat || []).map(c => `<div><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join('');
+                return `<section class="pg-card th-headcard"><div class="lg-card"><div><h3 class="th-h">${esc(t.name)}</h3><div class="pg-dim">${esc(FMT(t))} · organised by ${org ? 'you' : esc(t.orgName || 'another player')}</div></div>
+                        <div class="lg-stage">${t.stage === 'lobby' ? 'Lobby' : 'Under way'}</div></div>
+                        <div class="ot-code"><span class="pg-dim">Lobby code</span><b>${esc(t.code)}</b>${org ? `<button type="button" class="pg-btn" data-ot="copy">Copy code</button><button type="button" class="pg-btn" data-ot="share">Share link</button>` : ''}</div>
+                        <div class="pg-dim ot-state${live ? ' ok' : ''}">${stateText}</div>
+                        ${org && !live ? '<div class="lg-cta"><button type="button" class="pg-primary" data-ot="reopen">Open the lobby</button></div>' : ''}
+                        ${!org && !live && !t.removed ? '<div class="lg-cta"><button type="button" class="pg-primary" data-ot="reconnect">Connect</button></div>' : ''}</section>
+                    ${flashMsg ? `<div class="pg-dim" style="color:${flashBad ? '#fda4af' : '#86efac'}">${esc(flashMsg)}</div>` : ''}
+                    <section class="pg-card"><h3>Players (${(R.entrants || []).length} of ${t.size})</h3>${rows || '<div class="pg-dim">Nobody has entered yet.</div>'}
+                        <div class="pg-dim" style="margin-top:6px">${left > 0 ? `${left} place${left === 1 ? '' : 's'} left: any still empty at the draw go to computer teams.` : 'Every place is taken.'}${here ? ` Also in the lobby: ${here}.` : ''}</div></section>
+                    ${entryCard}
+                    <section class="pg-card"><h3>Chat</h3><div id="ot-clog" class="ot-clog">${chat || '<span class="pg-dim">Say hello while everyone gathers.</span>'}</div>
+                        <div class="lg-cta" style="justify-content:flex-start"><input id="ot-cin" class="lg-in" maxlength="200" enterkeyhint="send" placeholder="Message everyone" style="flex:1;min-width:0"><button type="button" class="pg-btn" data-ot="say" ${live ? '' : 'disabled'}>Send</button></div></section>
+                    ${org && t.stage === 'lobby' ? `<section class="pg-card"><h3>The draw</h3><div class="pg-dim">Making the draw and playing the ties from each player's device comes in the next update. For now, gather your players here.</div>
+                        <div class="lg-cta"><button type="button" class="pg-primary" disabled>Make the draw</button></div></section>` : ''}`;
+            }
+            function paint() {
+                const hubEl = $('otour-hub'); if (!hubEl || hubEl.classList.contains('hidden')) return;
+                const top = $('ot-top'), body = $('ot-body'), t = cur && get(cur);
+                const keep = $('ot-cin') ? $('ot-cin').value : '', had = document.activeElement && document.activeElement.id === 'ot-cin', sel = $('ot-team') ? $('ot-team').value : '';
+                if (mode === 'lobby' && t) { $('ot-title').textContent = 'Tournament lobby'; top.innerHTML = '<button type="button" class="pg-btn" data-ot="list">All online tournaments</button>'; body.innerHTML = lobbyHtml(t); }
+                else if (mode === 'joining') { $('ot-title').textContent = 'Joining…'; top.innerHTML = '<button type="button" class="pg-btn" data-ot="list">Back</button>'; body.innerHTML = `<section class="pg-card"><div class="pg-dim">${esc(net ? net.state : '')}</div></section>`; }
+                else if (mode === 'create' && draft) { $('ot-title').textContent = 'Organise a tournament'; top.innerHTML = ''; body.innerHTML = createHtml(); }
+                else { mode = 'list'; $('ot-title').textContent = 'Online tournaments'; top.innerHTML = '<button type="button" class="pg-primary" data-ot="new">+ Organise a tournament</button>'; body.innerHTML = listHtml(); }
+                const ci = $('ot-cin'); if (ci) { ci.value = keep; if (had) ci.focus(); }
+                const ts = $('ot-team'); if (ts && sel && [...ts.options].some(o => o.value === sel)) ts.value = sel;
+                const lg = $('ot-clog'); if (lg) lg.scrollTop = lg.scrollHeight;
+            }
+            function openTour(t) {
+                cur = t.id; mode = 'lobby'; flashMsg = '';
+                if (isOrg(t)) { if (!(net && net.role === 'hub' && net.tid === t.id)) hub(t); }
+                else if (!t.removed && !(net && net.role === 'player' && net.tid === t.id)) join(t.code, t.id);
+                paint();
+            }
+            function joinCode(raw) {
+                const c = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (c.length < 5) { flash('Type the lobby code, like CUP-4821.', true); return; }
+                const code = c.slice(0, 3) + '-' + c.slice(3, 7);
+                const t = byCode(code); if (t) { openTour(t); return; }
+                mode = 'joining'; join(code, null); paint();
+            }
+            function open(code) {
+                load(); $('otour-hub').classList.remove('hidden'); $('otour-hub').scrollTop = 0;
+                if (code) { joinCode(code); return; }
+                if (mode !== 'lobby' || !get(cur)) mode = 'list';
+                paint();
+            }
+            function close() { $('otour-hub').classList.add('hidden'); try { ONLINE.render(); } catch (e) {} }
+            const joinLink = code => { const u = new URL(location.href); const keep = ['nettest', 'dev'].filter(x => u.searchParams.has(x)).map(x => [x, u.searchParams.get(x)]); u.search = ''; u.hash = ''; keep.forEach(([a, b]) => u.searchParams.set(a, b)); u.searchParams.set('lobby', code); return u.toString().replace('nettest=&', 'nettest&'); };
+            const copy = (text, ok) => { try { navigator.clipboard.writeText(text).then(() => flash(ok), () => flash(text)); } catch (e) { flash(text); } };
+            document.addEventListener('click', e => {
+                if (e.target.closest('#ot-close')) { close(); return; }
+                const b = e.target.closest('#otour-hub [data-ot]'); if (!b || b.disabled) return;
+                const a = b.dataset.ot, t = cur && get(cur);
+                try { sfx('menuClick'); } catch (er) {}
+                if (a === 'list') { mode = 'list'; flashMsg = ''; paint(); }
+                else if (a === 'new') { draft = { name: 'Online Cup ' + (tours.filter(isOrg).length + 1), fmt: 'std', type: 'ko', size: 8, rounds: 3, budget: 1150 }; mode = 'create'; paint(); }
+                else if (a === 'set' && draft) {
+                    draft.name = ($('ot-name') || {}).value || draft.name;
+                    const key = b.dataset.k, v = b.dataset.v;
+                    if (key === 'fmt') { draft.fmt = v; draft.budget = v === 'sevens' ? 600 : 1150; }
+                    else if (key === 'type') { draft.type = v; if (v === 'ko' && ![4, 8, 16].includes(draft.size)) draft.size = 8; if (/^Online (Cup|Swiss) \d+$/.test(draft.name)) draft.name = (v === 'swiss' ? 'Online Swiss ' : 'Online Cup ') + (tours.filter(isOrg).length + 1); }
+                    else draft[key] = +v;
+                    if (draft.rounds >= draft.size) draft.rounds = Math.max(1, draft.size - 1);
+                    paint();
+                }
+                else if (a === 'cancel') { mode = 'list'; paint(); }
+                else if (a === 'create' && draft) {
+                    const name = clean(($('ot-name') || {}).value || draft.name, 30) || draft.name;
+                    let code; do { code = WORDS[Math.floor(Math.random() * WORDS.length)] + '-' + String(1000 + Math.floor(Math.random() * 9000)); } while (byCode(code));
+                    const nt = Object.assign({ id: uid(), code, org: DEV.id, orgName: myName(), role: 'org', stage: 'lobby', entrants: [], chat: [], seen: {}, banned: [], created: new Date().toISOString().slice(0, 10) }, draft, { name });
+                    tours.unshift(nt); save(); draft = null; openTour(nt);
+                }
+                else if (a === 'open') { const x = get(b.dataset.id); if (x) openTour(x); }
+                else if (a === 'del') {
+                    const id = b.dataset.id;
+                    if (armed && armed.id === id && armed.t > Date.now()) { if (net && net.tid === id) stop(); tours = tours.filter(x => x.id !== id); save(); armed = null; }
+                    else { armed = { id, t: Date.now() + 3000 }; setTimeout(paint, 3100); }
+                    paint();
+                }
+                else if (a === 'join') joinCode(($('ot-code') || {}).value);
+                else if (a === 'reopen' && t) hub(t);
+                else if (a === 'reconnect' && t) join(t.code, t.id);
+                else if (a === 'copy' && t) copy(t.code, `Copied the code ${t.code}. Send it to your players.`);
+                else if (a === 'share' && t) { const url = joinLink(t.code), text = `Join my Blood Bowl tournament, ${t.name}! Lobby ${t.code}`; if (navigator.share) navigator.share({ title: 'BludBowl', text, url }).catch(() => {}); else copy(url, 'Copied a link to the lobby. Whoever opens it goes straight in.'); }
+                else if (a === 'say' && t) sayNow(t);
+                else if (a === 'enter' && t) {
+                    const tm = TB.get(($('ot-team') || {}).value); if (!tm) return;
+                    const pr = teamProblems(tm, t); if (pr.length) { flash(`That team can't enter: ${pr.join('; ')}.`, true); return; }
+                    if (isOrg(t)) { const err = enterTeam(t, DEV.id, myName(), tm); flash(err || 'Your team is in.', !!err); }
+                    else if (net && net.conn) { sendTo(net.conn, { t: 'enter', team: tm }); flash('Entering…'); }
+                }
+                else if (a === 'withdraw' && t) { if (isOrg(t)) withdraw(t, DEV.id); else if (net && net.conn) sendTo(net.conn, { t: 'withdraw' }); flash('You have withdrawn your team.'); }
+                else if (a === 'kick' && t && isOrg(t)) {
+                    const dv = b.dataset.dev;
+                    if (armed && armed.id === dv && armed.t > Date.now()) { armed = null; removePlayer(t, dv); }
+                    else { armed = { id: dv, t: Date.now() + 3000 }; setTimeout(paint, 3100); paint(); }
+                }
+            });
+            function sayNow(t) {
+                const inp = $('ot-cin'); const text = clean(inp && inp.value, 200); if (!text) return;
+                inp.value = '';
+                if (isOrg(t)) addChat(t, myName(), text); else if (net && net.conn) sendTo(net.conn, { t: 'say', text });
+            }
+            document.addEventListener('keydown', e => {
+                if (e.key !== 'Enter' || !e.target) return;
+                if (e.target.id === 'ot-cin') { e.preventDefault(); const t = cur && get(cur); if (t) sayNow(t); }
+                else if (e.target.id === 'ot-code') { e.preventDefault(); joinCode(e.target.value); }
+            });
+            // opened from a shared link (?lobby=CUP-4821): straight to that lobby
+            {
+                const q = new URLSearchParams(location.search), jc = (q.get('lobby') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (jc.length >= 5) {
+                    q.delete('lobby'); try { history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString().replace(/nettest=(&|$)/, 'nettest$1') : '') + location.hash); } catch (e) {}
+                    setTimeout(() => open(jc), 700);
+                }
+            }
+            return { open, close, list: () => { load(); return tours.slice(); }, _net: () => net };
         })();
 
         // ---------- Tournaments for Matched Play teams: knockout cups and Swiss events ----------
@@ -5670,7 +6042,7 @@
                 root.addEventListener('input', e => { if (draft && e.target.id === 'cp-name') draft.name = e.target.value; });
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
-            return { open, close, recordLive, draftTeam, standings, get: id => { load(); return get(id); }, list: () => { load(); return cups.slice(); }, _sim: simTie, _save: save, _draft: () => draft, _create: d => { draft = d; return create(); } };
+            return { open, close, recordLive, draftTeam, standings, unfit, get: id => { load(); return get(id); }, list: () => { load(); return cups.slice(); }, _sim: simTie, _save: save, _draft: () => draft, _create: d => { draft = d; return create(); } };
         })();
 
         // a race key may be a built-in race or 'custom:<id>' for a saved team
