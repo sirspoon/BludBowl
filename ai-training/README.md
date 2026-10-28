@@ -534,3 +534,34 @@ which counts opponents walled off by our players too).
   team-mates within 3 towards the threat, 15% on the far side; was 58 / 20; coaches 71 / 12) and the ball was lost a
   little less (25% v 31%), but results were 43-28, 20-10 over 48 then 77-83, 30-35 over 96 (120-111, 50-45), no better
   than the carrier part alone, and it costs about half a second's thinking a turn. Left off.
+
+## Team re-rolls (Oct 2026)
+`fumbbl-rerolls.py` (71 replays) and `bb-rerolls.js` (v3.65, 48 mirror matches). A "decision" is a failed roll by the
+side whose turn it is, not rescued by a skill, with a team re-roll still unused that turn. Blocks are sorted by what
+their first roll gave the blocking side: 'down' (the attacker goes over), 'nothing' (no knockdown) or 'kd'.
+
+| | coaches | BludBowl |
+|---|---|---|
+| team re-rolls used, a team a match: on block dice / on other rolls | 2.45 / 1.88 | 1.57 / 1.88 |
+| left unused at the end of a half | 0.33 | 0.47 |
+| failed rolls re-rolled (Bone Head and the like left out) | 60% | 75% |
+| ...turns 1-2 / 3-4 / 5-6 / 7-8 | 42 / 57 / 65 / 89% | 85 / 56 / 81 / 92% |
+| ...the first or second player of the turn | 47% | 93% |
+| ...ball at stake (carrier, pick-up, catch, pass) / not | 66 / 60% | 90 / 49% |
+| ...dodge / rush / pick-up / catch | 53 / 87 / 67 / 41% | 55 / 74 / 98 / 80% |
+| Bone Head, Really Stupid, Animal Savagery... re-rolled | 12% | never (`teamRerollable` doesn't ask the computer) |
+| blocks whose first roll was 'down': re-rolled | 61% | 87% |
+| blocks whose first roll was 'nothing': re-rolled | 6% | 0% |
+| ...on their ball carrier / a blitz / other | 53 / 12 / 2% | 0% |
+
+- Coaches save their re-rolls early in a half and spend them late (42% of failures re-rolled in turns 1-2, 89% in
+  turns 7-8); the computer re-rolls most failures from the start (85% in turns 1-2: its "first turn is free with a
+  big stock" and "a turn-ending failure with five or more still to act" rules).
+- They don't treat the ball as special for rolls (66% v 60%), where the computer re-rolls nearly every ball roll and
+  only half the others. Rushes are the roll they re-roll most (87%): a failed Rush is usually the last step to
+  somewhere that matters. They re-roll catches and pick-ups much less than the computer does.
+- On blocks they're choosier about the attacker going down (61% v 87%), but they will re-roll a block that didn't
+  knock their ball carrier over (53%), or a blitz that didn't (12%). The computer never re-rolls a block that leaves
+  its attacker standing.
+- FUMBBL teams are developed and usually have more re-rolls (and Leader, Brilliant Coaching), so the totals aren't a
+  like-for-like comparison; the patterns are.
