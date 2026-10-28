@@ -1,4 +1,5 @@
-// node ai-training/carrier-support.js RACES N [AIPjson] [flags]
+// node ai-training/carrier-support.js RACES N [AIPjson] [flags]   (RACES: e.g. skaven,orc for mirror matches, or skaven:orc pairs;
+//   rows are labelled by the carrier's own team; DETAIL=1 for a breakdown by carrier, support, sideline, distance and how the ball was lost)
 // How well the computer protects its ball carrier. At the end of each computer turn that ends with its own carrier on
 // the pitch (not having scored): how far the ball moved up the pitch this turn, how many team-mates stand next to the
 // carrier, how many opponents could get at it next turn, and whether the other side has the ball off it by the end of
@@ -26,17 +27,21 @@ const [RACES, N = 2, AIP = '', FLAGS = ''] = process.argv.slice(2);
         const E = window.endTeamTurn; window.endTeamTurn = function () { try {
           const t = state.activeTeam, c = carrier();
           // the turn after one we recorded: does the side still have the ball?
-          if (pend && pend.team !== t) { pend.kept = !!(c && c.team === pend.team); pend.scoredBy = (state.score[t] || 0) > pend.oppScore; CS.rows.push(pend); pend = null; }
+          if (pend && pend.team !== t) { pend.kept = !!(c && c.team === pend.team); pend.scoredBy = (state.score[t] || 0) > pend.oppScore;
+            const was = getPlayerById(pend.cid); pend.how = pend.kept ? '' : pend.scoredBy ? 'they scored' : c && c.team === t ? 'they have it' : was && (was.isDown || !onP(was)) ? 'carrier knocked over' : 'ball loose';
+            CS.rows.push(pend); pend = null; }
           if (!state.charge && c && c.team === t && start && start.t === t) {
             const adj = state.players.filter(q => q.team === t && q.id !== c.id && onP(q) && !q.isDown && !q.isStunned && Math.max(Math.abs(q.x - c.x), Math.abs(q.y - c.y)) === 1).length;
             const tz = getTackleZones(c.x, c.y, 1 - t);
             // opponents able to reach the carrier next turn (a square next to it within their move + 2 Rushes, as the crow flies)
             const reach = state.players.filter(q => q.team !== t && onP(q) && !q.isStunned && Math.max(Math.abs(q.x - c.x), Math.abs(q.y - c.y)) - 1 <= (q.ma || 6) + 2 - (q.isDown ? 3 : 0)).length;
             const adv = start.bx != null ? toGo(start.bx, t) - toGo(c.x, t) : null;
-            pend = { race, team: t, adv, adj, tz, reach, go: toGo(c.x, t), oppScore: state.score[1 - t] || 0 };
+            const near3 = state.players.filter(q => q.team === t && q.id !== c.id && onP(q) && !q.isDown && Math.max(Math.abs(q.x - c.x), Math.abs(q.y - c.y)) <= 3).length;
+            const edge = Math.min(c.y, CFG.rows - 1 - c.y);
+            pend = { race: window.__ra[t], team: t, adv, adj, tz, reach, near3, edge, cid: c.id, pos: c.type, ma: c.ma, av: c.av, dodge: (c.skills || []).includes('Dodge'), go: toGo(c.x, t), oppScore: state.score[1 - t] || 0, turn: state.turn[t] };
           }
         } catch (e) {} return E.apply(this, arguments); };
-        AI.set(0, true); AI.set(1, true); window.launchMatch(race, race, { replaceOk: true });
+        AI.set(0, true); AI.set(1, true); const [ra, rb] = race.includes(':') ? race.split(':') : [race, race]; window.__ra = [ra, rb]; window.launchMatch(ra, rb, { replaceOk: true });
       }, race);
       const t0 = Date.now(); let clicked = false;
       while (Date.now() - t0 < 150000) { await p.waitForTimeout(250); if (!clicked) clicked = await p.evaluate(() => { const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) { b.click(); return true; } return false; }); if (await p.evaluate(() => state.isGameOver)) break; }
@@ -51,6 +56,17 @@ const [RACES, N = 2, AIP = '', FLAGS = ''] = process.argv.slice(2);
   [[0, 0], [1, 1], [2, 2], [3, 9]].forEach(([a, z]) => { const rs = out.filter(r => r.adj >= a && r.adj <= z); console.log(`  ${a}${z > a ? '+' : ''}: ${rs.length} turns, lost ${pct(lost(rs), rs.length)}, mean moved ${(rs.reduce((s, r) => s + (r.adv || 0), 0) / Math.max(1, rs.length)).toFixed(1)}, opponents in reach ${(rs.reduce((s, r) => s + r.reach, 0) / Math.max(1, rs.length)).toFixed(1)}`); });
   const run = out.filter(r => r.adv >= 4), runAlone = run.filter(r => r.adj <= 1);
   console.log(`after a run of 4+ squares: ${run.length} turns, alone or 1 next to it ${runAlone.length} (${pct(runAlone.length, run.length)}), lost next turn ${pct(lost(run), run.length)} (alone/1: ${pct(lost(runAlone), runAlone.length)}, 2+: ${pct(lost(run.filter(r => r.adj >= 2)), run.length - runAlone.length)})`);
+  if (process.env.DETAIL) {
+    [...new Set(out.map(r => r.race))].forEach(rc => { const rs = out.filter(r => r.race === rc); console.log(`\n== ${rc}: ${rs.length} turns, lost ${pct(lost(rs), rs.length)}`);
+      const by = (lab, f) => { const g = {}; rs.forEach(r => { const k = f(r); (g[k] = g[k] || []).push(r); }); console.log('  ' + lab + ': ' + Object.entries(g).sort((a, b) => b[1].length - a[1].length).map(([k, v]) => `${k} ${v.length} (lost ${pct(lost(v), v.length)})`).join(' · ')); };
+      by('carrier', r => `${r.pos} MA${r.ma} AV${r.av}${r.dodge ? ' Dodge' : ''}`);
+      by('team-mates within 3', r => r.near3 >= 4 ? '4+' : String(r.near3));
+      by('next to it', r => r.adj >= 3 ? '3+' : String(r.adj));
+      by('from the sideline', r => r.edge === 0 ? 'on it' : r.edge <= 2 ? '1-2' : '3+');
+      by('squares to go', r => r.go <= 5 ? '0-5' : r.go <= 10 ? '6-10' : '11+');
+      by('how lost', r => r.how || 'kept');
+      by('marked at the end of its turn', r => r.tz ? 'yes' : 'no');
+    }); }
   console.log('by race (turns, mean next to it, lost):');
-  races.forEach(rc => { const rs = out.filter(r => r.race === rc); console.log(`  ${rc}: ${rs.length}, ${(rs.reduce((s, r) => s + r.adj, 0) / Math.max(1, rs.length)).toFixed(2)}, ${pct(lost(rs), rs.length)}`); });
+  [...new Set(out.map(r => r.race))].forEach(rc => { const rs = out.filter(r => r.race === rc); console.log(`  ${rc}: ${rs.length}, ${(rs.reduce((s, r) => s + r.adj, 0) / Math.max(1, rs.length)).toFixed(2)}, ${pct(lost(rs), rs.length)}`); });
 })();

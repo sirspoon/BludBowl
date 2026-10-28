@@ -320,3 +320,10 @@ team-mate next to them. Cause: `carrierScore` gave 1.5 a square gained but only 
   three-or-more support 99 to 117 turns, long runs not fewer (141 to 159). `supW` 0.9 was worse (30% lost).
 - Results against the AI without it: 53-37 touchdowns, 22-9 wins over 48 matches (12 teams); then 83-73, 37-32 over 96
   (24 teams). 144 in all: 136-110, 59-41, turnovers 519-559. Released.
+- Why the Skaven lose it most (`carrier-support.js` with `skaven:orc`-style pairs and `DETAIL=1`, 48 matches against six
+  teams): 37% of Skaven carrier turns lost the ball next turn, against 18-31% for those teams against the Skaven. All their
+  carriers are AV8-9 without Block (55 of 97 losses were the carrier knocked over), 43% of turns ended with one team-mate
+  or none next to the carrier (about half lost), Clanrats carried in 84 of 261 turns (44% lost), and a carrier ending the
+  turn marked was lost 69% of the time. In mirror matches it's about 50%, as Gutter Runners are the best at taking it back.
+  Ideas not yet tried: hand off from a slow carrier to a Gutter Runner readier on fast teams; a poorly supported carrier
+  hangs back instead of pushing on alone.
