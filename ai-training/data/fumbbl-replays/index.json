@@ -1,0 +1,458 @@
+[
+ {
+  "match": 4745576,
+  "replay": 1951606,
+  "date": "2026-10-13",
+  "home": {
+   "race": "Imperial Nobility",
+   "coach": "petehodges",
+   "rating": 1578,
+   "score": 1,
+   "team": "Friends Reunited"
+  },
+  "away": {
+   "race": "Orc",
+   "coach": "MerryZ",
+   "rating": 1818,
+   "score": 2,
+   "team": "Sp0RRRks"
+  }
+ },
+ {
+  "match": 4744473,
+  "replay": 1951640,
+  "date": "2026-10-09",
+  "home": {
+   "race": "Khorne",
+   "coach": "RickDipper",
+   "rating": 1624,
+   "score": 2,
+   "team": "BB18 Mexican protein powder"
+  },
+  "away": {
+   "race": "Amazon",
+   "coach": "Nicodaz",
+   "rating": 1760,
+   "score": 0,
+   "team": "[BBT18] Patxamamazes"
+  }
+ },
+ {
+  "match": 4744548,
+  "replay": 1951730,
+  "date": "2026-10-09",
+  "home": {
+   "race": "Shambling Undead",
+   "coach": "mr_mesmer",
+   "rating": 1745,
+   "score": 1,
+   "team": "[BB18] MMM Undead"
+  },
+  "away": {
+   "race": "Lizardmen",
+   "coach": "Elyod",
+   "rating": 1765,
+   "score": 0,
+   "team": "[IDT18] Antique Jug Collectors"
+  }
+ },
+ {
+  "match": 4744605,
+  "replay": 1951807,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Underworld Denizens",
+   "coach": "nerdkingdan",
+   "rating": 1672,
+   "score": 2,
+   "team": "BB18 Fumblin'N'Tumblin'"
+  },
+  "away": {
+   "race": "Human",
+   "coach": "Hiyoko",
+   "rating": 1800,
+   "score": 1,
+   "team": "Shire Nero"
+  }
+ },
+ {
+  "match": 4744627,
+  "replay": 1951836,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Chaos Dwarf",
+   "coach": "oh_help",
+   "rating": 1717,
+   "score": 2,
+   "team": "bb18-chorfs"
+  },
+  "away": {
+   "race": "Black Orc",
+   "coach": "sirvejlance",
+   "rating": 1783,
+   "score": 0,
+   "team": "BBT18 Blorcs"
+  }
+ },
+ {
+  "match": 4744637,
+  "replay": 1951849,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Tomb Kings",
+   "coach": "Madrauder",
+   "rating": 1553,
+   "score": 0,
+   "team": "BX-18 Outback Dusters"
+  },
+  "away": {
+   "race": "Dwarf",
+   "coach": "Elyod",
+   "rating": 1752,
+   "score": 0,
+   "team": "[IDT18] Evolution"
+  }
+ },
+ {
+  "match": 4744790,
+  "replay": 1952014,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Black Orc",
+   "coach": "PorkFest",
+   "rating": 1643,
+   "score": 1,
+   "team": "BBT18-BlackOrc"
+  },
+  "away": {
+   "race": "Lizardmen",
+   "coach": "Fermano",
+   "rating": 1718,
+   "score": 1,
+   "team": "Lagarto , lagarto"
+  }
+ },
+ {
+  "match": 4744844,
+  "replay": 1952083,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "chigrero",
+   "rating": 1738,
+   "score": 0,
+   "team": "Owa viene"
+  },
+  "away": {
+   "race": "Skaven",
+   "coach": "Hagymacsipos",
+   "rating": 1769,
+   "score": 4,
+   "team": "bummm"
+  }
+ },
+ {
+  "match": 4744916,
+  "replay": 1952158,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Shambling Undead",
+   "coach": "Joost",
+   "rating": 1819,
+   "score": 2,
+   "team": "(BBT18) Eye Gougers"
+  },
+  "away": {
+   "race": "Black Orc",
+   "coach": "Nicodaz",
+   "rating": 1764,
+   "score": 1,
+   "team": "[BBT8] Strongbork United"
+  }
+ },
+ {
+  "match": 4744973,
+  "replay": 1952229,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Chaos Dwarf",
+   "coach": "Blackswan",
+   "rating": 1695,
+   "score": 2,
+   "team": "BBox Chorf"
+  },
+  "away": {
+   "race": "Skaven",
+   "coach": "Hagymacsipos",
+   "rating": 1785,
+   "score": 2,
+   "team": "bummm"
+  }
+ },
+ {
+  "match": 4745023,
+  "replay": 1952280,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Norse",
+   "coach": "MattDakka",
+   "rating": 1716,
+   "score": 1,
+   "team": "Fenrir's Fangs 25"
+  },
+  "away": {
+   "race": "High Elf",
+   "coach": "rug-thug",
+   "rating": 1790,
+   "score": 1,
+   "team": "Some Rad Lads"
+  }
+ },
+ {
+  "match": 4745032,
+  "replay": 1952281,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Black Orc",
+   "coach": "Nicodaz",
+   "rating": 1755,
+   "score": 0,
+   "team": "[BBT8] Strongbork United"
+  },
+  "away": {
+   "race": "Dwarf",
+   "coach": "Azzik",
+   "rating": 1712,
+   "score": 1,
+   "team": "WorldSitar Recommendation"
+  }
+ },
+ {
+  "match": 4745082,
+  "replay": 1952321,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Orc",
+   "coach": "Valen",
+   "rating": 1626,
+   "score": 1,
+   "team": "Rookie Rancid Rorcs"
+  },
+  "away": {
+   "race": "Shambling Undead",
+   "coach": "Storr",
+   "rating": 1880,
+   "score": 2,
+   "team": "What Rhymes With Knoppers"
+  }
+ },
+ {
+  "match": 4745305,
+  "replay": 1952609,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Human",
+   "coach": "MerryZ",
+   "rating": 1840,
+   "score": 0,
+   "team": "HuRRR DuRRR RRRuRRR-Mans"
+  },
+  "away": {
+   "race": "Orc",
+   "coach": "DoctorMidnight",
+   "rating": 1718,
+   "score": 2,
+   "team": "BBT17 Orks"
+  }
+ },
+ {
+  "match": 4745382,
+  "replay": 1952706,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Chaos Chosen",
+   "coach": "Henning",
+   "rating": 1769,
+   "score": 1,
+   "team": "[BBT18] H Dark"
+  },
+  "away": {
+   "race": "Underworld Denizens",
+   "coach": "Elyod",
+   "rating": 1753,
+   "score": 1,
+   "team": "[IDT18] Wombles"
+  }
+ },
+ {
+  "match": 4745410,
+  "replay": 1952736,
+  "date": "2026-10-12",
+  "home": {
+   "race": "High Elf",
+   "coach": "yan64",
+   "rating": 1722,
+   "score": 2,
+   "team": "Falcons Millenium"
+  },
+  "away": {
+   "race": "Chaos Renegade",
+   "coach": "darkmage",
+   "rating": 1790,
+   "score": 2,
+   "team": "[bbox]renegades"
+  }
+ },
+ {
+  "match": 4745881,
+  "replay": 1953005,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Nurgle",
+   "coach": "Jinamero82",
+   "rating": 1722,
+   "score": 2,
+   "team": "Bb25 Toxic Flies"
+  },
+  "away": {
+   "race": "Chaos Chosen",
+   "coach": "letdreamsdie",
+   "rating": 1584,
+   "score": 0,
+   "team": "Reinka\u03a9s"
+  }
+ },
+ {
+  "match": 4745712,
+  "replay": 1953101,
+  "date": "2026-10-13",
+  "home": {
+   "race": "Shambling Undead",
+   "coach": "Zelmor",
+   "rating": 1788,
+   "score": 1,
+   "team": "Budapest Bone Brothers"
+  },
+  "away": {
+   "race": "Nurgle",
+   "coach": "tetri",
+   "rating": 1741,
+   "score": 0,
+   "team": "BBT18 tetri Nurgle"
+  }
+ },
+ {
+  "match": 4745768,
+  "replay": 1953161,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Orc",
+   "coach": "Beltroniko",
+   "rating": 1853,
+   "score": 1,
+   "team": "[BBT18] Belt's Orcs"
+  },
+  "away": {
+   "race": "Imperial Nobility",
+   "coach": "Hujujajajaj",
+   "rating": 1665,
+   "score": 1,
+   "team": "Imperi Nob [18a Huju]"
+  }
+ },
+ {
+  "match": 4745789,
+  "replay": 1953182,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Wood Elf",
+   "coach": "Bazakastine",
+   "rating": 1938,
+   "score": 2,
+   "team": "Houston Treants BBT17"
+  },
+  "away": {
+   "race": "Shambling Undead",
+   "coach": "Wargraith",
+   "rating": 1629,
+   "score": 2,
+   "team": "Buccee Beaver"
+  }
+ },
+ {
+  "match": 4745828,
+  "replay": 1953223,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Amazon",
+   "coach": "Beltroniko",
+   "rating": 1844,
+   "score": 1,
+   "team": "[IDT] Zons 10W v2"
+  },
+  "away": {
+   "race": "Wood Elf",
+   "coach": "CrisisChris",
+   "rating": 1732,
+   "score": 0,
+   "team": "BBT18 Wood (Re-) Cycle"
+  }
+ },
+ {
+  "match": 4745891,
+  "replay": 1953281,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Norse",
+   "coach": "littlestone",
+   "rating": 1675,
+   "score": 1,
+   "team": "Probable Chaos"
+  },
+  "away": {
+   "race": "Chaos Chosen",
+   "coach": "diomed",
+   "rating": 1806,
+   "score": 1,
+   "team": "Kozlingo!"
+  }
+ },
+ {
+  "match": 4745973,
+  "replay": 1953377,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Dwarf",
+   "coach": "spelledaren",
+   "rating": 1754,
+   "score": 0,
+   "team": "A Wall of Block"
+  },
+  "away": {
+   "race": "Lizardmen",
+   "coach": "VinnyTheFish",
+   "rating": 1636,
+   "score": 1,
+   "team": "BB Jurassic Dorks"
+  }
+ },
+ {
+  "match": 4746172,
+  "replay": 1953618,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Wood Elf",
+   "coach": "Bazakastine",
+   "rating": 1880,
+   "score": 4,
+   "team": "Houston Treants BBT17"
+  },
+  "away": {
+   "race": "High Elf",
+   "coach": "Doom11",
+   "rating": 1604,
+   "score": 2,
+   "team": "HoethHathunters"
+  }
+ }
+]

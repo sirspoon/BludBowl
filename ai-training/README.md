@@ -13,6 +13,10 @@ Comparing how the computer plays BludBowl with how strong human coaches play on
 | `bb-stats.js` | Plays the BludBowl matches and records those stats (uses the `?simtest` test mode, ~8s a match). |
 | `compare.py` | Prints FUMBBL and BludBowl side by side, overall and (with `--races`) per team. |
 | `fumbbl-collect.py` | Downloads more FUMBBL matches and their stats (one request a second). |
+| `data/fumbbl-replays/` | 24 full FUMBBL replays (Oct 2026): two matches each for Orc, Human, Skaven, Dwarf, Lizardmen, Wood Elf, Chaos Chosen, Shambling Undead, Black Orc, Nurgle, High Elf and Amazon, the best-rated coaches' from the 300 above (both sides of each match are in the file). FUMBBL's own gzipped JSON, unchanged; `index.json` lists them. |
+| `fumbbl-replays.py` | Downloads a few more replays into `data/fumbbl-replays/` (one every 3 seconds; skips ones already there). |
+| `fumbbl-setups.py` | Kick-off set-ups from those replays: a summary, `--show <race>` draws them, `--bb <file>` summarises BludBowl's the same way. |
+| `bb-setups.js` | The BludBowl computer's kick-off set-ups, from mirror matches, for `fumbbl-setups.py --bb`. |
 | `fumbbl-fetch-replays.js` | Downloads full FUMBBL replays. Untested, and can't run from a cloud session (see below). |
 
 ## What it showed (v3.04, per team per match)
@@ -362,3 +366,20 @@ blocked again next turn 36% of the time against 25% for those who stayed (a link
   teams: blocks 29.6 v 21.2 per team per match, 128-134 touchdowns, 41-43 wins (60 drawn), casualties 146-134,
   turnovers 555-515 over 144 matches. Level: the computer blocks more (still short of the FUMBBL coaches' 46),
   but it doesn't win more for it.
+
+## Kick-off set-ups (Oct 2026, from 24 FUMBBL replays)
+`fumbbl-setups.py` on the 24 replays (89 kick-offs, each side) against `bb-setups.js` on v3.62 (24 mirror matches, the same
+12 teams; 81 kick-offs). "Back" counts squares behind the team's own side of the line of scrimmage.
+
+| | FUMBBL kicking | BludBowl kicking | FUMBBL receiving | BludBowl receiving |
+|---|---|---|---|---|
+| on the line | 3.0 | 3.0 | 6.4 (5-9 usually) | 3.0 (always) |
+| 1-3 back | 5.2 | 3.2 | 2.5 | 4.5 |
+| 4+ back | 2.0 (none at all in 49 of 89) | 4.4 (6 in 52 of 81) | 1.2 (one returner in 64 of 89) | 2.7 |
+
+- Receiving, good coaches put most of the team on the line (6-8), ready to block on the first turn, with two or three
+  just behind and one back to take the kick. The AI always puts exactly 3 on the line.
+- Kicking, they keep a screen 1-3 squares behind the line and few or none deep. The AI usually stands six players 7 back.
+  Skaven are the exception: they kick deep (5 of 11 4+ back), using their speed.
+- All teams; the AI's set-ups barely change by team, while the coaches' do a little (Dwarf, Chaos Dwarf, Nurgle, Old
+  World Alliance and Imperial Nobility kick a little deeper).
