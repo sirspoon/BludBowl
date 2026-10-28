@@ -603,3 +603,5 @@ their first roll gave the blocking side: 'down' (the attacker goes over), 'nothi
   formation moves first, then the pick-up: pick-ups moved to 0.62 of the way through, free moves after a risky one
   39%, but 38-44 touchdowns, 11-17 wins, turnovers 216-188 over 48; (2) only up to three team-mates into the diagonal
   squares round the ball first: pick-ups at 0.45, 51-53, 16-20 over 48. Neither helped.
+- Update: (a) and (b) on top of the turn planner (`turn-planner.md`, stages 1-2) were 134-99 touchdowns, 57-39 wins
+  over 144 against v3.65, and were released with it in v3.66. (c) and (d) stay off.
