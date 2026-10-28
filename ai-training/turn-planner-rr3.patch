@@ -1,0 +1,63 @@
+diff --git a/index.html b/index.html
+index ce2cd7b..df12fc9 100644
+--- a/index.html
++++ b/index.html
+@@ -24610,7 +24610,8 @@
+                 // (rr2) strong coaches save their re-rolls early in a half (42% of failures re-rolled in turns 1-2, against 89% in
+                 // turns 7-8; ai-training/README.md, "Team re-rolls"): no turn-ending or big-stock re-rolls in the first two turns
+                 const save = AIX.on(me, 'rr2') && AIX.p(me, 'rrSave', 0) && turn <= 2;   // (off: level in testing even with the turn ordered)
+-                if (AIX.on(me, 'rrturn') && !save) {
++                const r3 = AIX.on(me, 'rr3');
++                if (AIX.on(me, 'rrturn') && !save && !r3) {
+                     const p = ctx ? ctx.player : state.combat && state.combat.atk;
+                     if (endsTurn === undefined && ctx) endsTurn = p && p.team === me && ['DODGE', 'RUSH', 'PICKUP', 'JUMP', 'LEAP'].includes(ctx.type);
+                     if (endsTurn && p) {
+@@ -24632,13 +24633,47 @@
+                     // a roll that decides a touchdown (our carrier on the way in this turn, or stopping theirs scoring next turn): always worth a re-roll
+                     if (decisive === undefined && ctx) { const p = ctx.player; decisive = !!(p && p.team === me && state.ball.carrierId === p.id && toGo(p.x, me) <= (p.remainingMA || 0) + 2); }
+                     if (decisive) return true;
+-                    if (left <= 2 && rr >= 2) return true;                         // late in the half with re-rolls to spare: use them
++                    if (left <= 2 && rr >= 2 && !r3) return true;                  // late in the half with re-rolls to spare: use them
++                }
++                if (r3) {
++                    const p = ctx ? ctx.player : state.combat && state.combat.atk;
++                    if (endsTurn === undefined && ctx) endsTurn = !!(p && p.team === me && ['DODGE', 'RUSH', 'PICKUP', 'JUMP', 'LEAP'].includes(ctx.type));
++                    return rr3Worth(me, ctx, p, !!critical, !!endsTurn, rr, left);
+                 }
+                 if (rr >= 4 && turn <= 1 && !save) return true;               // a big stock: the first turn is free
+                 if (rr - 1 > left / 2) return true;                           // plenty: about one a turn, still one kept back
+                 if (rr <= 1) return !!critical && left <= 2;                  // the last one: only to save the ball late on
+                 return !!critical;                                            // otherwise only when the ball is at stake
+             }
++            // (rr3; turn planner stage 3) a re-roll judged against what the rest of this turn's plan is worth: the planner is
++            // asked what it would still do (with the failing player out of it), each action valued - the ball and the carrier's
++            // run most, blocks by their value, cage and screen moves a little - and that, with the ball if it's at stake, is set
++            // against what a re-roll is worth keeping (more with few left for the turns to come)
++            function restOfTurn(me, skipId) {
++                const keep = { tr: new Set(tried), st: state.aiStalling, cd: cageDest };
++                let v = 0;
++                try {
++                    if (skipId != null) tried.add(skipId);
++                    const c0 = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
++                    for (let i = 0; i < 10; i++) {
++                        const c = choose0(); if (!c || c.pid == null) break;
++                        const q = getPlayerById(c.pid); tried.add(c.pid);
++                        if (!q) continue;
++                        if (state.ball.carrierId === c.pid || ['pickup', 'secure', 'pass', 'handoff'].includes(c.kind)) v += AIX.p(me, 'r3Ball', 3);
++                        else if (c.kind === 'block' || c.kind === 'blitz') { const t = getPlayerById(c.target); v += t ? Math.min(3, Math.max(0.5, blockEval(q, t).ev / 2)) : 1; }
++                        else if (c.kind === 'foul') v += 0.5;
++                        else v += c0 && c0.team === me && cheb(q, c0) <= 3 ? 0.8 : 0.3;
++                    }
++                } catch (e) { console.error('restOfTurn', e); }
++                finally { tried = keep.tr; state.aiStalling = keep.st; cageDest = keep.cd; moveMemo = new Map(); laneCache = null; supCtx = null; }
++                return v;
++            }
++            function rr3Worth(me, ctx, p, critical, endsTurn, rr, left) {
++                const pSucc = ctx && ctx.target ? Math.max(1, Math.min(5, 7 - Number(ctx.target))) / 6 : 0.6;
++                const loss = (endsTurn ? restOfTurn(me, p ? p.id : null) : 0) + (critical ? AIX.p(me, 'r3Crit', 5) : 0) + (endsTurn && !ctx ? 1 : 0);
++                const keepV = Math.max(0.4, Math.min(AIX.p(me, 'r3Max', 4), AIX.p(me, 'r3Cost', 1.2) * (left + 1) / rr));
++                return pSucc * loss >= keepV;
++            }
+             function diceChoice() {
+                 const c = state.combat;
+                 if (!c || !c.dice || c.aiPicking) return;

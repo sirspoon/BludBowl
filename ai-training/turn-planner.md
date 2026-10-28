@@ -130,3 +130,18 @@ planner keeps those till last.
 - So the extra risk coaches take isn't simply "more blocks at the end of the turn". Their 1-die blocks and hard dodges
   are probably chosen for what they win (a carrier, a sideline push, a lane), which the existing scores already try to
   weigh. Left here.
+
+## Stage 3, the precise version (Oct 2026): tried, not released (`turn-planner-rr3.patch`)
+`rr3`: in place of the `rrturn` count and the stock rules (the last-turn and touchdown rules stay), a re-roll is taken
+when `chance the re-roll works x what's at stake >= what a re-roll is worth keeping`:
+- at stake: for a turn-ending failure, the rest of this turn's plan (`restOfTurn`: `choose0()` asked again and again
+  with the failing player and each planned one set aside; the ball or the carrier's run 3, a block its value / 2 up to
+  3, a move near our carrier 0.8, anything else 0.3, a foul 0.5), plus 5 (`r3Crit`) if the ball is at stake;
+- worth keeping: `r3Cost x (turns left + 1) / re-rolls left`, between 0.4 and 4 (`r3Max`).
+Results against v3.66:
+- `r3Cost` 1.2: re-rolls look more like the coaches' (turns 1-2 52%, ball / not 62 / 54%, pick-ups 76%, catches 30%)
+  but dodges only 41% (coaches 54%); 32-46 touchdowns, 11-21 wins over 48. Worse.
+- `r3Cost` 0.8: 38-31, 16-16, turnovers 182-220 over 48, then 68-66, 28-30 over 96: 106-97, 44-46 in all,
+  turnovers 597-628. Level, and slower to think (each decision re-runs the planner up to ten times).
+- So the simple rules released in v3.66 (re-roll blocks on their carrier and Rushes, the rest as before) are as good
+  as this, for less work.
