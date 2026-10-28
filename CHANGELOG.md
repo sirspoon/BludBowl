@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.54 (28 Oct 2026)
+- **Improved:** Chaos Chosen and Chaos Renegades now use the new detailed figures where another team already has them ([#13](https://github.com/sirspoon/BludBowl/issues/13)): the Troll, Ogre and Minotaur on both teams, and the Renegades' Rat Ogre, Orc, Skaven, Dark Elf and Thrower. The Beastman, Chaos Chosen, Renegade Human and Renegade Goblin keep their own looks.
+
 ## v3.53 (28 Oct 2026)
 - **Improved:** the Nurgle team has new player figures in the detailed style, keeping their old look and colours ([#13](https://github.com/sirspoon/BludBowl/issues/13)). They're sickly pink, with weeping sores, buzzing flies, rusty olive armour and stained team shorts.
   - **Rotter:** a spiked, slitted olive helm and a drooling grin.
