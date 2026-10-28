@@ -99,7 +99,16 @@ python3 ai-training/compare.py --mincr 1700                                  # o
     faces; armour and injury rolls; every turnover with its action and whether it was re-rolled; re-rolls used; which
     players took which actions; and the same broken down by half, drive and turn.
   - `/api/ruleset/get/{id}`: the Competitive division uses ruleset 3906, "BB2025".
-- **Full replays** (every move, with positions) aren't available over plain web addresses. FUMBBL's client
+- **Full replays over plain HTTPS (found Oct 2026):** `https://fumbbl.com/api/replay/get/{replayId}/gz` returns the whole
+  replay as gzipped JSON (about 180 KB, 4 MB unpacked), and it works from a cloud session. It isn't in FUMBBL's published API
+  list; [gsverhoeven/fumbbl_replays](https://github.com/gsverhoeven/fumbbl_replays) (Python) uses it, waiting 0.3 s
+  between files. Contents: `game` (both rosters, skills, the ruleset's options) and `gameLog.commandArray`, the server's
+  command stream: `modelChangeArray` entries (`fieldModelSetPlayerCoordinate`, `fieldModelSetPlayerState`,
+  `fieldModelSetBallCoordinate`, `actingPlayerSetPlayerId`, `turnDataSetTurnNr`...) and `reports` (`playerAction`,
+  `blockRoll`, `blockChoice` with `nrOfDice`, `dodgeRoll`, `goForItRoll`, `pushback`, `kickoffResult`...). Coordinates
+  are x 0-25, y 0-14, as in BludBowl. That package also has parsers for set-ups, block choices, dodges and rushes. Keep it
+  to a few dozen replays, fetched slowly, as below. (The older way, below, is no longer needed.)
+- **The older way:** full replays weren't thought to be available over plain web addresses. FUMBBL's client
   ([source](https://github.com/christerk/ffb)) streams them over a WebSocket from `fumbbl.com:22223/command`
   (send `clientReplay` with the `gameId` = the match's `replayId`; messages are LZString-compressed JSON). Cloud
   sessions' proxy can't carry WebSockets, so `fumbbl-fetch-replays.js` has to be run on a normal computer and the
