@@ -335,7 +335,7 @@ team-mate next to them. Cause: `carrierScore` gave 1.5 a square gained but only 
   ball to Gutter Runners more often. Results for `fasthand`, 48 matches on 12 fast/agile teams: 55-53 touchdowns, 17-20 wins,
   hand-offs 84-71. Neither released. The Skaven's losses look mostly built into the team (AV8 without Block everywhere).
 
-## Following up (Oct 2026, not released)
+## Following up and assists (v3.61)
 The owner's observation: strong players who are unlikely to get the ball (Saurus, Kroxigor...) often don't follow up, so
 they're less often placed to block next turn. `follow-ups.js` (24 mirror matches on six strength teams, v3.60): blocks
 25.8 per team per match; strong non-carriers (ST 4+ or AV 10+) followed up 50% of the time (Kroxigor 38%, Trolls 35%,

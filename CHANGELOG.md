@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.61 (28 Oct 2026)
+- **Improved (AI):** the computer blocks more, as strong coaches do. Its strong players (ST 4+ or AV 10+) who aren't carrying the ball now nearly always follow up after a block, so they're in place to hit again next turn (before, they held back about half the time). Spare players also step in, without dice, to give an assist or to stand next to one of the defender's helpers and cancel theirs, so more blocks get two dice. In testing it threw about 30 blocks a match instead of 21. Over 144 test matches the results were level with the old AI (128-134 touchdowns, 41-43 wins).
+
 ## v3.60 (28 Oct 2026)
 - **Improved (AI):** the computer's ball carrier now weighs up how well the rest of the team can protect it before choosing where to stop. It still makes breaks through gaps, but it counts only team-mates who can really get next to it this turn without dice (not anyone within range, as before). That support counts for more the more opponents could reach it. It now sometimes stops a square or two short so the team can surround it. In testing it left the carrier on its own less often after a run (33% of the time, down from 43%) and lost the ball the next turn a little less. Over 144 test matches it scored 136 touchdowns to 110 against the old AI and won 59 to 41.
 
