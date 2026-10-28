@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.62 (28 Oct 2026)
+- **Fixed:** the close-up replay of a pass or Throw Team-mate now shows the ball bouncing where it really went. Before, after an off-target pass, a dropped catch, a fumble or a crash landing, the replay always bounced the ball off to one side, so when it zoomed back out the ball was somewhere else. The game now records each bounce and throw-in as it happens and the replay plays them back, including a throw-in from the crowd or a player catching the bouncing ball, and the replay ends over the ball's real square.
+
 ## v3.61 (28 Oct 2026)
 - **Improved (AI):** the computer blocks more, as strong coaches do. Its strong players (ST 4+ or AV 10+) who aren't carrying the ball now nearly always follow up after a block, so they're in place to hit again next turn (before, they held back about half the time). Spare players also step in, without dice, to give an assist or to stand next to one of the defender's helpers and cancel theirs, so more blocks get two dice. In testing it threw about 30 blocks a match instead of 21. Over 144 test matches the results were level with the old AI (128-134 touchdowns, 41-43 wins).
 

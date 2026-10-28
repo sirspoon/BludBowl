@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.61</title>
+    <title>BludBowl 3.62</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.61</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.62</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -12925,6 +12925,7 @@
 
             state.ball.carrierId = null;
             state.ball.x = -1; state.ball.y = -1;
+            REPLAY.hop({ fx: crowdStartX, fy: crowdStartY, x: nx, y: ny, crowd: true });
 
             animateBallFlight(crowdStartX, crowdStartY, nx, ny, 1000, () => {
                 log(`  Ball lands from the crowd at [${nx}, ${ny}]!`);
@@ -12936,7 +12937,7 @@
                     
                     setupRoll('CATCH', p, withRaw(cTarget, cRaw), 'Catch',
                         () => {
-                            log(`  ${p.type} catches the throw-in!`, 'text-green-400 font-bold');
+                            log(`  ${p.type} catches the throw-in!`, 'text-green-400 font-bold'); REPLAY.hopCaught(p.id);
                             state.ball.carrierId = p.id;
                             state.ball.x = -1;
                             state.ball.y = -1;
@@ -12968,7 +12969,8 @@
             const dirs = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
             const d = dirs[Math.floor(Math.random() * dirs.length)];
             let nx = fromX + d[0], ny = fromY + d[1];
-            
+            REPLAY.hop({ fx: fromX, fy: fromY, x: nx, y: ny });   // (so a replay shows the ball going where it really went)
+
             animateBallFlight(fromX, fromY, nx, ny, 800, () => {
                 if (state.isResolvingKickoff) {
                     if (!kickInBounds(nx, ny, state.kickoff.receivingTeam)) {
@@ -13026,7 +13028,7 @@
             const prevMode = state.mode;
             setupRoll('CATCH', p, withRaw(cTarget, cRaw), 'Catch',
                 () => { 
-                    log(`  ${p.type} catches the bouncing ball!`, 'text-green-400 font-bold'); 
+                    log(`  ${p.type} catches the bouncing ball!`, 'text-green-400 font-bold'); REPLAY.hopCaught(p.id);
                     state.ball.carrierId = p.id; state.ball.x = -1; state.ball.y = -1;
                     if (state.isResolvingKickoff) {
                         beginDriveActivePhase();
@@ -20579,9 +20581,30 @@
             }, opt);
             const pathFor = (from, tgt, end, endZ, L) => t => { const bend = t * t; return { x: lerp(from.x, tgt.x, t) + (end.x - tgt.x) * bend, y: lerp(from.y, tgt.y, t) + (end.y - tgt.y) * bend, z: lerp(1.0, endZ, t) + (0.55 + 0.09 * L.dist) * 4 * t * (1 - t) }; };
             const along = (from, L, p) => { const c = C(p); return Math.max(0.2, Math.min(0.7, ((c.x - from.x) * L.dir.x + (c.y - from.y) * L.dir.y) / L.dist)); };
-            // the ball comes loose and bounces off sideways from a point
-            const looseBounce = (at, L, ms, opt) => { const side = { x: -L.dir.y, y: L.dir.x }, end = { x: at.x + side.x * 1.3 + L.dir.x * 0.5, y: at.y + side.y * 1.3 + L.dir.y * 0.5 };
-                add(ms, u => { ball.holder = null; ball.x = lerp(at.x, end.x, u); ball.y = lerp(at.y, end.y, u); ball.z = Math.abs(Math.sin(u * Math.PI * 2.2)) * (1 - u) * 1.1; ball.spin += 0.25; }, opt); return end; };
+            // the ball's real bounces and throw-ins, as recorded, the camera following along its line of view; returns where it ends up
+            const hops = (r, at, z0 = 0) => {
+                let end = at, held = false;
+                (r.hops || []).forEach((h, i) => {
+                    if (held) return;
+                    const a = sq({ x: h.fx, y: h.fy }), b = sq(h), dist = Math.hypot(b.x - a.x, b.y - a.y);
+                    const top = h.crowd ? 1.3 + 0.18 * dist : i ? 0.45 : 0.7, zs = i ? 0 : z0;
+                    add(h.crowd ? 700 + 70 * dist : 520, u => {
+                        ball.on = true; ball.holder = null; ball.x = lerp(a.x, b.x, u); ball.y = lerp(a.y, b.y, u); ball.z = zs * (1 - u) + top * 4 * u * (1 - u); ball.spin += 0.25;
+                        const dx = Math.cos(cam.hd), dy = Math.sin(cam.hd), k = h.crowd ? 0.06 : 0.1;
+                        cam.x = lerp(cam.x, ball.x - dx * V.back, k); cam.y = lerp(cam.y, ball.y - dy * V.back, k);
+                    }, h.crowd ? { banner: ['THROW-IN!', tone(1 - r.team)] } : {});
+                    end = b;
+                    const Q = h.caught != null && pl(h.caught);
+                    if (Q) { held = true; end = C(Q); add(420, () => { ball.holder = Q; }, { star: Q, banner: ['CAUGHT!', tone(Q.team)] }); add(500, () => {}); }
+                });
+                const g = r.gbEnd;   // anyone else who has it at the end (a Diving Catch, say), or where it was put down
+                if (g && !held && (r.hops || []).length) {
+                    const Q = g.id != null && pl(g.id);
+                    if (Q) { end = C(Q); add(420, () => { ball.holder = Q; }); }
+                    else if (g.x >= 0 && !(g.x + 0.5 === end.x && g.y + 0.5 === end.y)) { const e = sq(g); end = e; add(300, () => { ball.holder = null; ball.x = e.x; ball.y = e.y; ball.z = 0; }); }
+                }
+                return end;
+            };
             const fall = (p, from, up = 0.35) => { const B = basis(), sd = Math.sign((p.x + 0.5 - from.x) * B.px + (p.y + 0.5 - from.y) * B.py) || 1; return u => { p.lean = sd * Math.PI / 2 * ease(u); p.z = up * Math.sin(Math.PI * u); }; };
 
             function buildPass(r) {
@@ -20590,17 +20613,11 @@
                 ball.on = true; ball.bomb = false; ball.holder = T;
                 camTo(1000, behind);
                 let end = from;
-                if (r.res === 'fumble') {   // the arm goes back... and the ball slips out and bounces away
-                    const side = { x: -L.dir.y, y: L.dir.x }, bx = u => from.x + L.dir.x * 0.35 + side.x * 1.2 * u + L.dir.x * 0.5 * u, by = u => from.y + L.dir.y * 0.35 + side.y * 1.2 * u + L.dir.y * 0.5 * u;
+                if (r.res === 'fumble') {   // the arm goes back... and the ball slips out and bounces away, where it really went
                     add(300, u => { T.lean = -0.4 * ease(u); });
-                    add(260, u => { T.lean = -0.4 + 0.65 * ease(u); ball.holder = null; ball.x = lerp(from.x, bx(0), u); ball.y = lerp(from.y, by(0), u); ball.z = 1.0 + 0.4 * Math.sin(Math.PI * u) + 0.1 * u; ball.spin += 0.5; }, { slow: 0.4, banner: ['FUMBLE!', tone(opp)] });
-                    add(1200, u => {
-                        const ph = Math.min(2.999, u * 3), n = Math.floor(ph), f = ph - n;
-                        ball.x = bx(u); ball.y = by(u); ball.z = n === 0 ? 1.1 * (1 - f * f) : [0, 0.5, 0.2][n] * 4 * f * (1 - f); ball.spin += 0.25 * (1 - u);
-                        T.lean = 0.25 * (1 - ease(u)) + 0.15 * Math.sin(u * Math.PI * 3) * (1 - u);
-                        const k = ease(Math.min(1, u * 1.5)); cam.x = lerp(behind.x, bx(u) - L.dir.x * 2.6, k); cam.y = lerp(behind.y, by(u) - L.dir.y * 2.6, k);
-                    });
-                    end = { x: bx(1), y: by(1) };
+                    add(260, u => { T.lean = -0.4 + 0.65 * ease(u); ball.holder = null; ball.x = from.x; ball.y = from.y; ball.z = 1.0 + 0.4 * Math.sin(Math.PI * u) + 0.1 * u; ball.spin += 0.5; }, { slow: 0.4, banner: ['FUMBLE!', tone(opp)] });
+                    add(1, () => { T.lean = 0; });
+                    end = hops(r, from, 1.1);
                     outro(end); return true;
                 }
                 add(380, u => { T.lean = -0.35 * Math.sin(Math.PI * Math.min(1, u * 1.2)); });
@@ -20626,16 +20643,16 @@
                         add(420, () => { ball.holder = Cc; Cc.z = CATCH_JUMP; }, { star: Cc, banner: ['CAUGHT!', tone(Cc.team)] });
                         add(900, u => { ball.holder = Cc; Cc.z = CATCH_JUMP * (1 - ease(u)); }, { slow: 0.6 });
                         end = to;
-                    } else {
-                        const side = { x: -L.dir.y, y: L.dir.x }, e2 = { x: to.x + side.x * 1.4 + L.dir.x * 0.5, y: to.y + side.y * 1.4 + L.dir.y * 0.5 };
-                        add(900, u => { ball.holder = null; ball.x = lerp(to.x, e2.x, u); ball.y = lerp(to.y, e2.y, u); ball.z = u < 0.77 ? 1.0 + CATCH_HANDS * (1 - u) * 0.6 + 0.9 * Math.sin(Math.PI * Math.min(1, u * 1.3)) : Math.abs(Math.sin((u - 0.77) * 14)) * 0.25 * (1 - u); ball.spin += 0.3; Cc.z = CATCH_JUMP * (1 - ease(Math.min(1, u * 2))); },
+                    } else {   // it pops up out of their hands, then bounces where it really went
+                        const z0 = 1.0 + CATCH_HANDS;
+                        add(450, u => { ball.holder = null; ball.x = to.x; ball.y = to.y; ball.z = z0 + 0.6 * Math.sin(Math.PI * u) - 0.4 * u; ball.spin += 0.3; Cc.z = CATCH_JUMP * (1 - ease(u)); },
                             { banner: ['DROPPED!', tone(1 - Cc.team)] });
-                        end = e2;
+                        end = hops(r, to, z0 - 0.4);
                     }
                 } else {
                     const out = offPitch(r.land || r.tgt);
                     flight(path, L, behind, 0.78, 1, fms * 0.22, null, out ? { banner: ['INTO THE CROWD!', tone(opp)] } : r.res === 'inacc' ? { banner: ['OFF TARGET!', tone(opp)] } : {});
-                    end = out ? to : looseBounce(to, L, 800);
+                    end = hops(r, to);
                 }
                 outro(end); return true;
             }
@@ -20667,7 +20684,7 @@
                 }
                 let end = land;
                 const inj = r.inj || {}, bled = {}, hurt = p => { if (p && inj[p.id] && !bled[p.id]) { bled[p.id] = true; bleed(p, inj[p.id]); } };
-                if (outFirst) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); }
+                if (outFirst) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); if ((r.hops || []).length) end = hops(r, end); }
                 else if (crashes.length) {   // crash landings: whoever is landed on goes down, and the thrown player bounces off (maybe onto someone else) and falls
                     let at = land;
                     crashes.forEach((c, i) => {
@@ -20679,13 +20696,13 @@
                             const k = Math.min(1, u * 1.4); put(Hf, lerp(from2.x, to2.x, k), lerp(from2.y, to2.y, k)); Hf.z = (i ? 0.55 : 0.8) * Math.sin(Math.PI * k);
                             Hf.lean = last ? lerp(lean0, Math.PI / 2 + (i ? Math.PI * 2 : 0), ease(k)) : lean0 + Math.PI * 2 * ease(k);   // tumbling on, and down at the end
                             if (last && k >= 1 && !r.out) hurt(Hf);   // the thrown player hits the ground
-                            if (r.ball && i === 0 && u > 0.5) { const v = (u - 0.5) * 2; ball.holder = null; ball.x = to2.x + -L2.dir.y * 1.1 * v; ball.y = to2.y + L2.dir.x * 1.1 * v; ball.z = Math.abs(Math.sin(v * Math.PI * 2)) * (1 - v) * 0.9; ball.spin += 0.25; }
                             const hx = Hf.x + 0.5 - L2.dir.x * V.back, hy = Hf.y + 0.5 - L2.dir.y * V.back; cam.x = lerp(cam.x, hx, 0.06); cam.y = lerp(cam.y, hy, 0.06);   // the camera follows the bounces
                         }, i === 0 ? { banner: ['CRASH LANDING!', tone(1 - Hf.team)] } : {});
                         if (!(last && r.out)) end = to2; else end = from2;   // (if they bounced into the crowd, the view ends over the last crash)
                         at = to2;
                     });
                     if (r.out) add(700, () => { Hf.gone = true; if (r.ball && ball.holder === Hf) ball.on = false; }, { banner: ['INTO THE CROWD!', tone(1 - Hf.team)] });   // bounced off the pitch
+                    if ((r.hops || []).length) end = hops(r, end);
                 } else if (r.landed === true) {
                     add(420, () => { Hf.z = 0; Hf.lean = 0; put(Hf, land.x, land.y); }, { star: Hf, banner: ['SAFE LANDING!', tone(Hf.team)] });
                     add(800, u => { Hf.z = 0.12 * Math.sin(Math.PI * u); }, { slow: 0.6 });
@@ -20693,8 +20710,8 @@
                     add(900, u => {
                         Hf.z = 0; Hf.lean = Math.PI / 2 * Math.min(1, u * 2.5);
                         if (u > 0.12) hurt(Hf);
-                        if (r.ball) { ball.holder = null; ball.x = land.x + -L2.dir.y * 1.2 * u + L2.dir.x * 0.6 * u; ball.y = land.y + L2.dir.x * 1.2 * u + L2.dir.y * 0.6 * u; ball.z = Math.abs(Math.sin(u * Math.PI * 2.2)) * (1 - u) * 1.1; ball.spin += 0.25; }
                     }, { banner: ['CRASH LANDING!', tone(1 - Hf.team)] });
+                    if ((r.hops || []).length) end = hops(r, end, 0.5);
                 } else add(300, () => { Hf.z = 0; Hf.lean = 0; });
                 // the worst injury gets its own word (a Stunned player isn't really hurt)
                 const sevN = { stun: 1, ko: 2, cas: 3 }, worst = [r.out ? null : Hf, ...crashes.map(c => pl(c.on))].filter(p => p && sevN[inj[p.id]] > 1).sort((a, b) => sevN[inj[b.id]] - sevN[inj[a.id]])[0];
@@ -20800,6 +20817,9 @@
                         gb: b.carrierId != null ? { id: b.carrierId } : { x: b.x, y: b.y } }, data);
                 },
                 set(k, v, once) { if (rec && !(once && rec[k] != null)) rec[k] = v; },
+                // each bounce or throw-in of the ball after the throw, in order, and who caught it
+                hop(h) { if (rec && (rec.hops = rec.hops || []).length < 12) rec.hops.push(h); },
+                hopCaught(id) { const h = rec && rec.hops && rec.hops[rec.hops.length - 1]; if (h) h.caught = id; },
                 injury(id, out) { if (rec && rec.kind === 'ttm') (rec.inj = rec.inj || {})[id] = out; },   // who was hurt in a Throw Team-mate, and how: 'stun', 'ko' or 'cas'
                 get: () => rec,
                 leg() { return rec && rec.legs ? rec.legs[rec.legs.length - 1] : null; },
@@ -20809,6 +20829,7 @@
                 then(fn) {
                     const r = rec; rec = null;
                     if (!r || r.drive !== state.driveId || Date.now() - r.at > 180000) { fn(); return; }
+                    { const b = state.ball; r.gbEnd = b.carrierId != null ? { id: b.carrierId } : { x: b.x, y: b.y }; }   // where the ball ended up
                     waiting = true;
                     afterSettled(60, () => {
                         waiting = false;
