@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.55 (28 Oct 2026)
+- **New:** an **Online** button on the main menu brings together everything played with friends on their own devices: Play a friend (the old Two Devices), shared leagues, and a place for online tournaments (coming next). The League and Tournaments buttons are now for leagues and tournaments on this device. Shared leagues are listed on the Online screen, and New shared league starts one there.
+- **Tournaments:** the budget is now one limit for every team, with new 1,300k, 1,400k and 1,500k options. Your own teams must fit it: if a team spends more, or breaks its tier's skill-point rules, it can't enter, and the reason is shown. If a team is changed after entering so it no longer fits, its ties can't be played until it's fixed.
+- **Teams:** the Matched Play format is now called a Tournament team, and its budget can go up to 1,500k.
+
 ## v3.54 (28 Oct 2026)
 - **Improved:** Chaos Chosen and Chaos Renegades now use the new detailed figures where another team already has them ([#13](https://github.com/sirspoon/BludBowl/issues/13)): the Troll, Ogre and Minotaur on both teams, and the Renegades' Rat Ogre, Orc, Skaven, Dark Elf and Thrower. The Beastman, Chaos Chosen, Renegade Human and Renegade Goblin keep their own looks.
 
