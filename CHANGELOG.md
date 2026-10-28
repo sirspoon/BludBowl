@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.53 (28 Oct 2026)
+- **Improved:** the Nurgle team has new player figures in the detailed style, keeping their old look and colours ([#13](https://github.com/sirspoon/BludBowl/issues/13)). They're sickly pink, with weeping sores, buzzing flies, rusty olive armour and stained team shorts.
+  - **Rotter:** a spiked, slitted olive helm and a drooling grin.
+  - **Pestigor:** a goat head with curling horns, slotted eyes and a straggly beard.
+  - **Bloater:** a vast pockmarked belly and a domed olive helm with a spike, steel visor and slit, sitting in a thick collar ring.
+  - **Rotspawn:** a hunched pale brute with a boar-like face, great mossy antlers hung with bells, long dangling arms and yellow boils.
+
 ## v3.52 (28 Oct 2026)
 - **Improved:** the Vampires have new player figures in the detailed style, keeping their old look and colours ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
   - **Thrall:** fair-haired and tired, in a white shirt with a red neckerchief, with bite marks on his neck.
