@@ -1,0 +1,42 @@
+diff --git a/index.html b/index.html
+index 553885e..328e51b 100644
+--- a/index.html
++++ b/index.html
+@@ -23558,6 +23558,9 @@
+                 }
+                 const theirC = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                 if (theirC && theirC.team === them && onPitch(theirC) && !theirC.isDown) keys.set(theirC.id, 6);
++                // assist2: any opponent one of ours could block, not just the ones that matter for the ball
++                const wide = AIX.on(me, 'assist2');
++                if (wide) state.players.forEach(d => { if (d.team === them && onPitch(d) && !d.isDown && !d.isStunned && !keys.has(d.id) && act.some(b => !b.isDown && cheb(b, d) === 1 && (!ourC || b.id !== ourC.id))) keys.set(d.id, AIX.p(me, 'astWorth', 1)); });
+                 if (!keys.size) return null;
+                 let best = null;
+                 const mvCache = new Map(), mv = a => { if (!mvCache.has(a.id)) mvCache.set(a.id, movesFor(a)); return mvCache.get(a.id); };
+@@ -23568,9 +23571,13 @@
+                     const now = Math.max(...blockers.map(b => { const e = blockEval(b, d); return e.pTurn <= 0.12 ? e.ev + laneValue(e, worth) : -9; }));
+                     act.forEach(a => {
+                         if (blockers.includes(a) || (ourC && a.id === ourC.id) || (theirC && cheb(a, theirC) === 1) || !canReposition(a, me)) return;
++                        // (assist2) or stand next to one of theirs who'd help the defender, so that help is cancelled
++                        const helpers = wide ? state.players.filter(q => q.team === them && q.id !== d.id && onPitch(q) && !q.isDown && !q.isStunned && blockers.some(b => cheb(b, q) === 1)) : [];
+                         mv(a).forEach(m => {
+-                            if (m.prob < 100 || Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) !== 1) return;
+-                            if (getTackleZones(m.x, m.y, them) > 1) return;   // marked by someone else as well: no assist
++                            if (m.prob < 100) return;
++                            const nextTo = Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) === 1;
++                            if (nextTo) { if (getTackleZones(m.x, m.y, them) > 1) return; }   // marked by someone else as well: no assist
++                            else if (!helpers.some(q => cheb(q, m) === 1) || getTackleZones(m.x, m.y, them) > 2) return;
+                             const ox = a.x, oy = a.y, wasDown = a.isDown;
+                             a.x = m.x; a.y = m.y; a.isDown = false;
+                             let after = -9;
+@@ -24342,7 +24349,10 @@
+                 const edgeWorse = edgeRisk(v.x, v.y, a.team, a.id) > edgeRisk(a.x, a.y, a.team, a.id) + 0.2;
+                 // their ball carrier pushed back and still on their feet: stay on them, so they have to dodge away next turn
+                 const stick = AIX.on(a.team, 'stick') && !carrierA && c.def && c.def.team !== a.team && state.ball.carrierId === c.def.id && !c.def.isDown && cheb(v, c.def) === 1;
+-                const go = stick || (!edgeWorse && (carrierA ? (there === 0 || (forward && there <= here)) : there <= here + (forward ? 1 : 0)));
++                // follow2: a strong player (ST 4+ or AV 10+) not carrying the ball steps up into contact - it keeps their players tied up
++                // and leaves ours placed to block again next turn - unless the new square is much more crowded
++                const strong = AIX.on(a.team, 'follow2') && !carrierA && (a.st >= 4 || a.av >= 10);
++                const go = stick || (!edgeWorse && (carrierA ? (there === 0 || (forward && there <= here)) : there <= here + (forward ? 1 : 0) + (strong ? AIX.p(a.team, 'fuTz', 2) : 0)));
+                 if (go) grid(v.x, v.y); else click('btn-stay-put');
+             }
+             function interception() {

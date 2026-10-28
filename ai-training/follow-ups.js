@@ -4,7 +4,7 @@
 const { chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright');
 const [RACES, N = 2, AIP = '', FLAGS = ''] = process.argv.slice(2);
 (async () => {
-  const b = await chromium.launch(); const out = []; const races = RACES.split(','); let blocks = 0;
+  const b = await chromium.launch(); const out = []; const races = RACES.split(','); let blocks = 0; const dice = {};
   await Promise.all([0, 1, 2, 3].map(async w => {
     for (let k = w; k < races.length * N; k += 4) {
       const race = races[k % races.length];
@@ -16,7 +16,7 @@ const [RACES, N = 2, AIP = '', FLAGS = ''] = process.argv.slice(2);
         window.FU = { rows: [], blocks: 0 }; const blockedIn = new Map();   // "team:turn" -> attacker ids that blocked
         const onP = q => q && !q.isReserve && !q.isKO && !q.isCasualty && q.x >= 0 && q.x < CFG.cols;
         const oRB = window.resolveBlock;
-        window.resolveBlock = function () { const c = state.combat; if (c && !c._fu) { c._fu = 1; FU.blocks++; const k = c.atk.team + ':' + state.half + ':' + state.turn[c.atk.team]; if (!blockedIn.has(k)) blockedIn.set(k, new Set()); blockedIn.get(k).add(c.atk.id); } return oRB.apply(this, arguments); };
+        window.resolveBlock = function () { const c = state.combat; if (c && !c._fu) { c._fu = 1; FU.blocks++; const n = (c.dice || []).length, own = c.chooser === c.atk.team; FU.dice = FU.dice || {}; const dk = n === 1 ? '1' : own ? n + ' ours' : n + ' theirs'; FU.dice[dk] = (FU.dice[dk] || 0) + 1; const k = c.atk.team + ':' + state.half + ':' + state.turn[c.atk.team]; if (!blockedIn.has(k)) blockedIn.set(k, new Set()); blockedIn.get(k).add(c.atk.id); } return oRB.apply(this, arguments); };
         const rec = followed => {
           const c = state.combat, a = c && c.atk, v = c && c.vacatedSquare; if (!a || !v) return;
           const opp = 1 - a.team, tz = (x, y) => getTackleZones(x, y, opp);
@@ -33,13 +33,14 @@ const [RACES, N = 2, AIP = '', FLAGS = ''] = process.argv.slice(2);
       }, race);
       const t0 = Date.now(); let clicked = false;
       while (Date.now() - t0 < 150000) { await p.waitForTimeout(250); if (!clicked) clicked = await p.evaluate(() => { const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) { b.click(); return true; } return false; }); if (await p.evaluate(() => state.isGameOver)) break; }
-      const r = await p.evaluate(() => ({ rows: FU.rows.map(x => Object.assign(x, { again: !!(__blockedIn.get(x.key) || new Set()).has(x.id) })), blocks: FU.blocks }));
-      out.push(...r.rows); blocks += r.blocks; await p.close();
+      const r = await p.evaluate(() => ({ rows: FU.rows.map(x => Object.assign(x, { again: !!(__blockedIn.get(x.key) || new Set()).has(x.id) })), blocks: FU.blocks, dice: FU.dice || {} }));
+      out.push(...r.rows); blocks += r.blocks; Object.entries(r.dice).forEach(([k, v]) => { dice[k] = (dice[k] || 0) + v; }); await p.close();
     }
   }));
   await b.close();
   const pct = (a, n) => n ? Math.round(100 * a / n) + '%' : '-', m = races.length * N;
   console.log(`matches ${m}, blocks ${blocks} (${(blocks / m / 2).toFixed(1)} per team per match); follow-up choices ${out.length}, followed ${pct(out.filter(r => r.followed).length, out.length)}`);
+  console.log('  blocks by dice: ' + Object.entries(dice).sort().map(([k, v]) => `${k} ${(v / m / 2).toFixed(1)}`).join(' · ') + ' (per team per match)');
   const show = (lab, rs) => { const f = rs.filter(r => r.followed), s = rs.filter(r => !r.followed); console.log(`  ${lab}: ${rs.length}, followed ${pct(f.length, rs.length)} · blocked again next turn: followed ${pct(f.filter(r => r.again).length, f.length)}, stayed ${pct(s.filter(r => r.again).length, s.length)}`); };
   show('strong (ST4+ or AV10+), not carrying', out.filter(r => !r.carrier && (r.st >= 4 || r.av >= 10)));
   show('others, not carrying', out.filter(r => !r.carrier && r.st < 4 && r.av < 10));

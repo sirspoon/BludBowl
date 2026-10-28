@@ -345,3 +345,11 @@ blocked again next turn 36% of the time against 25% for those who stayed (a link
   where they stand (beyond the old allowance) or is worse for the sideline. They then followed 96%, and blocks rose to
   28.1 a match on those six teams. Results against the AI without it: 39-38 touchdowns, 18-16 wins over 48 matches (12
   teams); 74-78, 26-29 over 96 (24 teams; blocks there 22.8 v 23.9). 144 in all: 113-116, 44-45, casualties 161-174. Level.
+- `assist2` (with `follow2`, both in `assist-blocks.patch`): `assistPlan` (step 5c) used to line up a dice-free assist only
+  next to key opponents (markers of our carrier, lane blockers, their carrier). With `assist2` any standing opponent one of
+  ours is next to counts (worth `astWorth`, 1), and a spare player may also step next to one of the defender's helpers
+  (at most 2 tackle zones there) to cancel that assist. On the six strength teams: blocks 30.0 → 33.3 per team per match,
+  1-die 1.9 → 2.0, 2-dice 25.2 → 28.2 (`follow-ups.js` now prints blocks by dice). Against the AI with neither, on 12
+  teams: blocks 29.6 v 21.2 per team per match, 128-134 touchdowns, 41-43 wins (60 drawn), casualties 146-134,
+  turnovers 555-515 over 144 matches. Level: the computer blocks about as often as the FUMBBL coaches' lower range now,
+  but it doesn't win more for it.
