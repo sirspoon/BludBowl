@@ -1,0 +1,50 @@
+diff --git a/index.html b/index.html
+index ea27930..bc50eec 100644
+--- a/index.html
++++ b/index.html
+@@ -24534,7 +24534,10 @@
+                 if (rr <= 0) return false;
+                 // (rrturn) a failure that ends the turn costs everyone still to act their go: worth a re-roll when that's
+                 // several players (the last re-roll is kept back early in the half unless most of the team would lose out)
+-                if (AIX.on(me, 'rrturn')) {
++                // (rr2) strong coaches save their re-rolls early in a half (42% of failures re-rolled in turns 1-2, against 89% in
++                // turns 7-8; ai-training/README.md, "Team re-rolls"): no turn-ending or big-stock re-rolls in the first two turns
++                const save = AIX.on(me, 'rr2') && AIX.p(me, 'rrSave', 1) && turn <= 2;
++                if (AIX.on(me, 'rrturn') && !save) {
+                     const p = ctx ? ctx.player : state.combat && state.combat.atk;
+                     if (endsTurn === undefined && ctx) endsTurn = p && p.team === me && ['DODGE', 'RUSH', 'PICKUP', 'JUMP', 'LEAP'].includes(ctx.type);
+                     if (endsTurn && p) {
+@@ -24544,7 +24547,10 @@
+                 }
+                 if (critical === undefined && ctx) {
+                     const p = ctx.player, c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+-                    critical = (c && c.id === p.id) || ['PICKUP', 'CATCH', 'PASS', 'THROW TEAMMATE', 'HAND-OFF', 'HANDOFF'].includes(ctx.type)
++                    // (rr2) a Rush is the roll coaches re-roll most (87%): it's usually the last step to somewhere that matters; a
++                    // catch only counts when it's our own pass (they re-roll catches far less than the computer did)
++                    const r2 = AIX.on(me, 'rr2'), r2c = r2 && AIX.p(me, 'rrCatch', 1), ownPass = !!(state.passData && state.passData.thrower && state.passData.thrower.team === me);
++                    critical = (c && c.id === p.id) || ['PICKUP', 'PASS', 'THROW TEAMMATE', 'HAND-OFF', 'HANDOFF'].includes(ctx.type) || (ctx.type === 'CATCH' && (!r2c || ownPass)) || (r2 && ctx.type === 'RUSH')
+                         || (ctx.type === 'LANDING' && c && c.id === p.id)
+                         || (c && c.team === me && cheb(p, c) <= 1);   // a cage player going down next to our carrier
+                 }
+@@ -24555,7 +24561,7 @@
+                     if (decisive) return true;
+                     if (left <= 2 && rr >= 2) return true;                         // late in the half with re-rolls to spare: use them
+                 }
+-                if (rr >= 4 && turn <= 1) return true;                        // a big stock: the first turn is free
++                if (rr >= 4 && turn <= 1 && !save) return true;               // a big stock: the first turn is free
+                 if (rr - 1 > left / 2) return true;                           // plenty: about one a turn, still one kept back
+                 if (rr <= 1) return !!critical && left <= 2;                  // the last one: only to save the ball late on
+                 return !!critical;                                            // otherwise only when the ball is at stake
+@@ -24575,7 +24581,11 @@
+                 const blockCritical = state.ball.carrierId === c.atk.id || state.ball.carrierId === c.def.id || (chosen <= -10 && (state.rr[state.activeTeam] || 0) >= 3);   // the ball at stake (or our blocker going down, with re-rolls to spare)
+                 const blockDecisive = (state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && tdThreat(c.def))
+                     || (state.ball.carrierId === c.atk.id && toGo(c.atk.x, c.atk.team) <= (c.atk.remainingMA || 0) + 2);
+-                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) {
++                // (rr2) a block on their ball carrier that won't knock them over: coaches re-roll it half the time (53%)
++                const kdFace = f => f === FACES.POW || (f === FACES.STUMBLE && (!hasSk(c.def, 'Dodge') || hasSk(c.atk, 'Tackle'))) || (f === FACES.BOTH_DOWN && hasSk(c.atk, 'Block') && !hasSk(c.def, 'Block'));
++                const noKd = !friendly && (c.chooser === c.atk.team ? !c.dice.some(kdFace) : !c.dice.every(kdFace));
++                const onCarrier = AIX.on(state.activeTeam, 'rr2') && noKd && chosen >= 0 && state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && (state.rr[state.activeTeam] || 0) > 0;
++                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && !c.aiRerolled && ((chosen < 0 && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) || onCarrier)) {
+                     after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); });
+                     return;
+                 }

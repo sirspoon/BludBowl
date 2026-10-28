@@ -13,7 +13,7 @@ Comparing how the computer plays BludBowl with how strong human coaches play on
 | `bb-stats.js` | Plays the BludBowl matches and records those stats (uses the `?simtest` test mode, ~8s a match). |
 | `compare.py` | Prints FUMBBL and BludBowl side by side, overall and (with `--races`) per team. |
 | `fumbbl-collect.py` | Downloads more FUMBBL matches and their stats (one request a second). |
-| `data/fumbbl-replays/` | 71 full FUMBBL replays (Oct 2026), the best-rated coaches' matches from the 300 above: four each for Orc, Human, Skaven, Dwarf, Lizardmen, Wood Elf, Chaos Chosen, Shambling Undead, Black Orc, Nurgle, High Elf and Amazon (Dwarf: all four there are), two each for Khorne, Necromantic Horror, Old World Alliance, Tomb Kings, Chaos Dwarf, Ogre, Imperial Nobility, Bretonnian, Norse, Dark Elf, Vampire and Elven Union (both sides of each match are in the file, so most teams appear more often). FUMBBL's own gzipped JSON, unchanged; `index.json` lists them. |
+| `data/fumbbl-replays/` | 100 full FUMBBL replays (Oct 2026; 29 more added after the first 71, one for each of the least-covered teams and then the best-rated remaining matches), the best-rated coaches' matches from the 300 above: four each for Orc, Human, Skaven, Dwarf, Lizardmen, Wood Elf, Chaos Chosen, Shambling Undead, Black Orc, Nurgle, High Elf and Amazon (Dwarf: all four there are), two each for Khorne, Necromantic Horror, Old World Alliance, Tomb Kings, Chaos Dwarf, Ogre, Imperial Nobility, Bretonnian, Norse, Dark Elf, Vampire and Elven Union (both sides of each match are in the file, so most teams appear more often). FUMBBL's own gzipped JSON, unchanged; `index.json` lists them. |
 | `fumbbl-replays.py` | Downloads a few more replays into `data/fumbbl-replays/` (one every 3 seconds; skips ones already there). |
 | `fumbbl-setups.py` | Kick-off set-ups from those replays: a summary, `--show <race>` draws them, `--bb <file>` summarises BludBowl's the same way. |
 | `bb-setups.js` | The BludBowl computer's kick-off set-ups, from mirror matches, for `fumbbl-setups.py --bb`. |
@@ -565,3 +565,16 @@ their first roll gave the blocking side: 'down' (the attacker goes over), 'nothi
   its attacker standing.
 - FUMBBL teams are developed and usually have more re-rolls (and Leader, Brilliant Coaching), so the totals aren't a
   like-for-like comparison; the patterns are.
+
+- With all 100 replays (Oct 2026) the coaches' re-roll numbers hold: 4.43 used a team a match (2.44 on block dice),
+  45 / 56 / 66 / 87% of failures re-rolled in turns 1-2 / 3-4 / 5-6 / 7-8, rushes 88%, dodges 54%, pick-ups 68%,
+  catches 43%; blocks: 'down' 61%, 'nothing' on their ball carrier 53%, on a blitz 12%.
+
+### Re-roll changes (`rr2`, not released: `rerolls.patch`)
+- (a) re-roll a block or blitz on their ball carrier that won't knock them over; (b) a failed Rush counts as critical;
+  (c) a catch only counts as critical from our own pass (`rrCatch`); (d) no turn-ending or big-stock re-rolls in turns
+  1-2 (`rrSave`). Measured with all four: turns 1-2 53% re-rolled (coaches 45%, before 85%), ball / not 67 / 64%,
+  rushes 89%, catches 16% (too few now), 'down' blocks 64%, 'nothing' 11%.
+- Results against v3.65: all four 46-52 touchdowns, 15-22 wins, turnovers 231-185 over 48: saving re-rolls early
+  costs the computer turns (the coaches can afford it because they leave the risky actions till last). (a) and (b)
+  only: 43-36, 18-15 over 48, then 83-85, 32-35 over 96; 126-121, 50-50 in all. Level, so not released.
