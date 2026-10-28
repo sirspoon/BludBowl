@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.57</title>
+    <title>BludBowl 3.58</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.57</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.58</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -5201,7 +5201,7 @@
                         <div class="lg-cta"><button type="button" class="pg-primary" data-on="net">Host or join a match</button></div></section>
                     <section class="pg-card"><h3>Shared leagues</h3><div class="pg-dim">A league with friends, each playing from their own device. Everyone keeps a copy, and results sync whenever two of you connect.${shared ? ` You're in ${shared} shared league${shared === 1 ? '' : 's'}.` : ''}</div>
                         <div class="lg-cta"><button type="button" class="pg-primary" data-on="leagues">${shared ? 'Open shared leagues' : 'Start a shared league'}</button><button type="button" class="pg-btn" data-on="net">Join with a code</button></div></section>
-                    <section class="pg-card"><h3>Online tournaments</h3><div class="pg-dim">Organise a knockout cup or a Swiss event and send your friends the lobby code. They join from their own devices with one of their tournament teams, and everyone can chat while the field gathers. (Making the draw and playing the ties online comes in the next update.)${tn ? ` You're in ${tn} online tournament${tn === 1 ? '' : 's'}.` : ''}</div>
+                    <section class="pg-card"><h3>Online tournaments</h3><div class="pg-dim">Organise a knockout cup or a Swiss event and send your friends the lobby code. They join from their own devices with one of their tournament teams and chat while the field gathers. Then the organiser makes the draw, and each player plays their ties from their own device, against each other or the computer.${tn ? ` You're in ${tn} online tournament${tn === 1 ? '' : 's'}.` : ''}</div>
                         <div class="lg-cta"><button type="button" class="pg-primary" data-on="tours">${tn ? 'Open online tournaments' : 'Organise or join one'}</button></div></section>`;
             }
             function open() { $('online-hub').classList.remove('hidden'); $('online-hub').scrollTop = 0; render(); }
@@ -5339,7 +5339,65 @@
                 return { id: t.id, code: t.code, name: t.name, fmt: t.fmt, type: t.type, size: t.size, rounds: t.rounds, budget: t.budget, org: t.org, orgName: t.orgName, stage: t.stage,
                     entrants: t.entrants.map(e => Object.assign({ dev: e.dev, name: e.name, online: on.has(e.dev) }, e.entry)),
                     here: [...on].filter(dv => !t.entrants.some(e => e.dev === dv)).map(dv => ({ dev: dv, name: dv === DEV.id ? t.orgName : (t.seen || {})[dv] || 'Player' })),
-                    chat: (t.chat || []).slice(-40) };
+                    chat: (t.chat || []).slice(-40), view: t.stage !== 'lobby' ? viewFor(t) : null };
+            }
+            // ---- the tournament itself (on the organiser's device, as one of its cups) ----
+            const tieCode = () => ['ORC', 'ELF', 'RAT', 'GOB', 'DWF', 'LIZ', 'SKV', 'OGR'][Math.floor(Math.random() * 8)] + '-' + String(1000 + Math.floor(Math.random() * 9000));
+            function makeDraw(t) {
+                if (!isOrg(t) || t.stage !== 'lobby') return;
+                const entries = t.entrants.map(e => {
+                    if (e.dev === DEV.id) { if (!TB.get(e.team.id)) TB.putRaw(e.team); return { id: e.team.id, coach: 'p' }; }
+                    TB.putRaw(Object.assign(JSON.parse(JSON.stringify(e.team)), { ext: 'otour' }));   // a copy of the player's team, kept out of your own lists
+                    return { id: e.team.id, coach: 'n:' + e.dev };
+                });
+                const cp = CUP.createOnline({ tid: t.id, name: t.name, fmt: t.fmt, type: t.type, size: t.size, rounds: t.rounds, budget: t.budget }, entries);
+                t.cid = cp.id; t.stage = 'play'; save();
+                addChat(t, 'Lobby', `The draw is made! ${t.type === 'swiss' ? 'Round 1' : CUP.ROUND(cp.rounds[0].length)} is ready to play.`);
+            }
+            function viewFor(t) {
+                const cp = t.cid && CUP.get(t.cid); if (!cp) return null;
+                const devOf = id => cp.coach[id] === 'p' ? t.org : String(cp.coach[id] || '').startsWith('n:') ? cp.coach[id].slice(2) : null;
+                const side = id => {
+                    const tm = TB.get(id), R = (tm && RACES[tm.race]) || {}, dv = devOf(id), en = dv && t.entrants.find(e => e.dev === dv);
+                    return { id, name: tm ? tm.name : '(gone)', short: R.short || '', primary: tm && tm.primary, secondary: tm && tm.secondary, race: tm && tm.race, dev: dv, coach: dv ? (dv === t.org ? t.orgName : (en && en.name) || 'Player') : 'Computer' };
+                };
+                let dirty = false;   // a room code for each tie two people play
+                if (cp.stage !== 'done') (cp.rounds[cp.at] || []).forEach(f => { if (!f.bye && !f.r && !f.room && devOf(f.h) && devOf(f.a) && devOf(f.h) !== devOf(f.a)) { f.room = tieCode(); dirty = true; } });
+                if (dirty) CUP._save();
+                const cpuTeams = {};
+                const rounds = cp.rounds.map((rd, r) => rd.map((f, i) => {
+                    const key = `${r}:${i}`;
+                    if (f.bye) return { key, bye: side(f.bye) };
+                    const h = side(f.h), a = side(f.a);
+                    if (!f.r && r === cp.at && (h.dev || a.dev) && !(h.dev && a.dev)) { const c = h.dev ? f.a : f.h, tm = TB.get(c); if (tm) cpuTeams[c] = tm; }
+                    return { key, h, a, third: !!f.third, room: f.room || '', r: f.r ? { s: f.r.s, pen: f.r.pen ? { h: f.r.pen.h, a: f.r.pen.a } : null, et: !!f.r.et, sim: !!f.r.sim, forfeit: !!f.r.forfeit } : null };
+                }));
+                const sw = CUP.isSwiss(cp), main = CUP.mainTies(cp.rounds[cp.at] || []);
+                return { cid: cp.id, type: cp.type, stage: cp.stage, at: cp.at, nRounds: cp.nRounds, rounds, cpuTeams,
+                    label: cp.stage === 'done' ? 'Finished' : sw ? `Round ${cp.at + 1} of ${cp.nRounds}` : CUP.ROUND(main.length),
+                    standings: sw ? CUP.standings(cp).map(x => { const sd = side(x.id); return { name: sd.name, coach: sd.coach, dev: sd.dev, p: x.p, w: x.w, d: x.d, l: x.l, tf: x.tf, ta: x.ta, pts: x.pts }; }) : null,
+                    champ: cp.champ ? side(cp.champ) : null };
+            }
+            // a result reported by the home player's device (or a player who beat the computer on theirs)
+            function takeResult(t, dv, key, R) {
+                const V = viewFor(t); if (!V || V.stage === 'done') return 'This tournament has finished.';
+                const [r] = String(key).split(':').map(Number);
+                const f = (V.rounds[r] || []).find(x => x.key === key); if (!f || f.bye) return 'No such tie.';
+                if (f.r) return '';   // already in (sent again, or the other device's report)
+                if (r !== V.at) return 'That round is over.';
+                if (f.h.dev !== dv && f.a.dev !== dv) return "You don't play in that tie.";
+                if (!R || !Array.isArray(R.s)) return 'That result was garbled.';
+                CUP.applyResult(t.cid, key, R);
+                const cp = CUP.get(t.cid);
+                addChat(t, 'Lobby', `Result: ${f.h.name} ${R.s[0]}–${R.s[1]} ${f.a.name}.`);
+                if (cp && cp.stage === 'done') { t.stage = 'done'; save(); addChat(t, 'Lobby', `🏆 ${(viewFor(t).champ || {}).name} win ${t.name}!`); }
+                return '';
+            }
+            function changed(cid) {
+                load();
+                const t = tours.find(x => x.cid === cid && isOrg(x)); if (!t) return;
+                const cp = CUP.get(cid); if (cp && cp.stage === 'done' && t.stage !== 'done') { t.stage = 'done'; save(); }
+                broadcast(); paint();
             }
             function broadcast() {
                 if (!net || net.role !== 'hub') return;
@@ -5368,6 +5426,7 @@
                     return;
                 }
                 if (m.t === 'withdraw') { withdraw(t, dv); return; }
+                if (m.t === 'result') { const err = takeResult(t, dv, m.key, m.r); sendTo(c, { t: 'got', key: m.key, err: err || '' }); if (err) return; broadcast(); paint(); return; }
                 if (m.t === 'bye') { net.conns.delete(dv); broadcast(); paint(); }
             }
             function addChat(t, name, text) {
@@ -5388,7 +5447,7 @@
                 save(); broadcast(); paint();
                 return '';
             }
-            function withdraw(t, dv) { t.entrants = t.entrants.filter(e => e.dev !== dv); save(); broadcast(); paint(); }
+            function withdraw(t, dv) { if (t.stage !== 'lobby') return; t.entrants = t.entrants.filter(e => e.dev !== dv); save(); broadcast(); paint(); }
             function removePlayer(t, dv) {
                 withdraw(t, dv);
                 t.banned = (t.banned || []).concat([dv]); save();
@@ -5404,12 +5463,25 @@
                     Object.assign(t, { name: R.name, fmt: R.fmt, type: R.type, size: R.size, rounds: R.rounds, budget: R.budget, org: R.org, orgName: R.orgName, stage: R.stage, room: R });
                     net.tid = t.id; if (cur !== t.id && mode !== 'lobby') { cur = t.id; }
                     if (mode === 'joining') { mode = 'lobby'; cur = t.id; }
-                    save(); paint(); return;
+                    save(); flushPending(t); paint(); return;
                 }
                 if (m.t === 'entered') { flash(m.err || 'Your team is in. Good luck!', !!m.err); return; }
+                if (m.t === 'got') { const t = get(net.tid); if (t) { t.pending = (t.pending || []).filter(x => x.key !== m.key); save(); } if (m.err) flash(m.err, true); return; }
                 if (m.t === 'note') { flash(m.text, true); return; }
                 if (m.t === 'removed') { if (net) net.gone = true; const t = get(net && net.tid); if (t) { t.removed = true; save(); } flash(m.why, true); stop(); paint(); }
             }
+
+            function flushPending(t) { if (net && net.role === 'player' && net.conn && net.tid === t.id) (t.pending || []).forEach(x => sendTo(net.conn, { t: 'result', key: x.key, r: x.r })); }
+            // full time in an online tournament's tie: on the organiser's device the cup has it already; anywhere else it goes to the lobby
+            function matchOver() {
+                const C = state.cup; if (!C || !C.otid) return;
+                load(); const t = get(C.otid); if (!t) return;
+                if (isOrg(t)) { changed(t.cid); return; }
+                const r = CUP.liveResult();
+                t.pending = (t.pending || []).filter(x => x.key !== C.key).concat([{ key: C.key, r }]); save();
+                if (!(net && net.role === 'player' && net.tid === t.id)) join(t.code, t.id); else flushPending(t);
+            }
+            let prevAI = null;
 
             // ---- screens ----
             let flashMsg = '', flashBad = false;
@@ -5455,20 +5527,48 @@
                         : `<div class="pg-dim">You have no ${t.fmt === 'sevens' ? 'Sevens ' : ''}tournament teams that fit. In Teams, make one with its Format set to ${t.fmt === 'sevens' ? 'Sevens tournament team' : 'Tournament team'} and a budget of ${k(t.budget)} or less.</div>`}
                     ${misfit.length ? `<div class="pg-dim" style="margin-top:6px">Not eligible: ${misfit.map(tm => `${esc(tm.name)} (${esc(teamProblems(tm, t).join('; '))})`).join(' · ')}</div>` : ''}</section>`;
                 const chat = (R.chat || []).map(c => `<div><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join('');
+                const V = R.view, ties = V ? tiesHtml(t, V, org, live) : '';
                 return `<section class="pg-card th-headcard"><div class="lg-card"><div><h3 class="th-h">${esc(t.name)}</h3><div class="pg-dim">${esc(FMT(t))} · organised by ${org ? 'you' : esc(t.orgName || 'another player')}</div></div>
-                        <div class="lg-stage">${t.stage === 'lobby' ? 'Lobby' : 'Under way'}</div></div>
+                        <div class="lg-stage">${t.stage === 'lobby' ? 'Lobby' : V ? esc(V.label) : 'Under way'}</div></div>
                         <div class="ot-code"><span class="pg-dim">Lobby code</span><b>${esc(t.code)}</b>${org ? `<button type="button" class="pg-btn" data-ot="copy">Copy code</button><button type="button" class="pg-btn" data-ot="share">Share link</button>` : ''}</div>
                         <div class="pg-dim ot-state${live ? ' ok' : ''}">${stateText}</div>
                         ${org && !live ? '<div class="lg-cta"><button type="button" class="pg-primary" data-ot="reopen">Open the lobby</button></div>' : ''}
                         ${!org && !live && !t.removed ? '<div class="lg-cta"><button type="button" class="pg-primary" data-ot="reconnect">Connect</button></div>' : ''}</section>
                     ${flashMsg ? `<div class="pg-dim" style="color:${flashBad ? '#fda4af' : '#86efac'}">${esc(flashMsg)}</div>` : ''}
+                    ${ties}
                     <section class="pg-card"><h3>Players (${(R.entrants || []).length} of ${t.size})</h3>${rows || '<div class="pg-dim">Nobody has entered yet.</div>'}
                         <div class="pg-dim" style="margin-top:6px">${left > 0 ? `${left} place${left === 1 ? '' : 's'} left: any still empty at the draw go to computer teams.` : 'Every place is taken.'}${here ? ` Also in the lobby: ${here}.` : ''}</div></section>
                     ${entryCard}
                     <section class="pg-card"><h3>Chat</h3><div id="ot-clog" class="ot-clog">${chat || '<span class="pg-dim">Say hello while everyone gathers.</span>'}</div>
                         <div class="lg-cta" style="justify-content:flex-start"><input id="ot-cin" class="lg-in" maxlength="200" enterkeyhint="send" placeholder="Message everyone" style="flex:1;min-width:0"><button type="button" class="pg-btn" data-ot="say" ${live ? '' : 'disabled'}>Send</button></div></section>
-                    ${org && t.stage === 'lobby' ? `<section class="pg-card"><h3>The draw</h3><div class="pg-dim">Making the draw and playing the ties from each player's device comes in the next update. For now, gather your players here.</div>
-                        <div class="lg-cta"><button type="button" class="pg-primary" disabled>Make the draw</button></div></section>` : ''}`;
+                    ${org && t.stage === 'lobby' ? `<section class="pg-card"><h3>The draw</h3><div class="pg-dim">When everyone's in, make the draw: entries close, empty places go to computer teams, and the first ${t.type === 'swiss' ? 'round' : 'ties'} can be played.</div>
+                        <div class="lg-cta"><button type="button" class="pg-primary" data-ot="draw" ${(R.entrants || []).length ? '' : 'disabled'}>${armed && armed.id === 'draw' && armed.t > Date.now() ? 'Tap again to make the draw' : 'Make the draw'}</button></div></section>` : ''}`;
+            }
+            // the ties: this round's (with what this device can do about each), the table, earlier rounds
+            function tiesHtml(t, V, org, live) {
+                const me = DEV.id, done = V.stage === 'done';
+                const line = (sd, sc, won) => `<div class="cp-tl${won ? ' won' : ''}">${tok(sd)}<span class="lg-tn">${esc(sd.name)}</span><span class="pg-dim" style="margin-left:4px">${esc(sd.dev === me ? 'you' : sd.coach)}</span><b>${sc == null ? '' : sc}</b></div>`;
+                const tieBox = (f, current) => {
+                    if (f.bye) return `<div class="cp-tie">${line(f.bye)}<div class="cp-note">Bye: counts as a win</div></div>`;
+                    const r = f.r, w = r ? (r.s[0] > r.s[1] ? 0 : r.s[1] > r.s[0] ? 1 : r.pen ? (r.pen.h > r.pen.a ? 0 : 1) : -1) : -1;
+                    const mine = f.h.dev === me ? 'h' : f.a.dev === me ? 'a' : '', opp = mine === 'h' ? f.a : mine === 'a' ? f.h : null;
+                    let acts = '', note = '';
+                    if (current && !r && !done) {
+                        if (mine && opp.dev) { acts = `<button type="button" class="pg-primary" data-ot="${mine === 'h' ? 'thost' : 'tjoin'}" data-key="${f.key}" ${f.room ? '' : 'disabled'}>${mine === 'h' ? 'Host the match' : 'Join the match'}</button>`; note = mine === 'h' ? `You're at home: host it, and ${esc(opp.coach)} joins.` : `${esc(opp.coach)} is at home and hosts it: join when they've opened the room.`; }
+                        else if (mine) acts = `<button type="button" class="pg-primary" data-ot="tplay" data-key="${f.key}">Play</button>`;
+                        else note = f.h.dev || f.a.dev ? 'Waiting to be played.' : '';
+                        if (org && !f.h.dev && !f.a.dev) acts += `<button type="button" class="pg-btn pg-btn-go" data-ot="tsim" data-key="${f.key}">Quick sim</button>`;
+                        else if (org) acts += ` <button type="button" class="pg-btn" data-ot="tsim" data-key="${f.key}">${armed && armed.id === 'sim' + f.key && armed.t > Date.now() ? 'Tap again to sim it' : 'Sim it'}</button>`;
+                    }
+                    const sub = r ? [r.et ? 'after extra time' : '', r.pen ? `penalties ${r.pen.h}–${r.pen.a}` : '', r.forfeit ? 'forfeit' : r.sim ? 'simmed' : 'played'].filter(Boolean).join(' · ') : '';
+                    return `<div class="cp-tie${current && !r ? ' now' : ''}">${f.third ? '<div class="cp-note"><b>Third-place match</b></div>' : ''}${line(f.h, r ? r.s[0] : null, w === 0)}${line(f.a, r ? r.s[1] : null, w === 1)}${sub || note ? `<div class="cp-note">${sub || note}</div>` : ''}${acts ? `<div class="lg-acts" style="margin-top:4px">${acts}</div>` : ''}</div>`;
+                };
+                const curRd = V.rounds[V.at] || [], cpuLeft = org && !done && curRd.some(f => !f.bye && !f.r && !f.h.dev && !f.a.dev);
+                const champ = done && V.champ ? `<section class="pg-card lg-champ"><div class="lg-cup">${TROPHY.svg('gold', 56)}</div><div class="lg-champ-name">${esc(V.champ.name)}</div><div class="pg-dim">Winners of ${esc(t.name)} · coached by ${esc(V.champ.dev === me ? 'you' : V.champ.coach)}</div></section>` : '';
+                const table = V.standings ? `<section class="pg-card"><h3>Standings</h3><div class="th-scroll"><table class="lg-tbl"><thead><tr><th></th><th class="l">Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>TD</th><th>Pts</th></tr></thead><tbody>${V.standings.map((x, i) => `<tr class="${x.dev === me ? 'me' : ''}"><td>${i + 1}</td><td class="l">${esc(x.name)} <span class="pg-dim">${esc(x.dev === me ? 'you' : x.coach)}</span></td><td>${x.p}</td><td>${x.w}</td><td>${x.d}</td><td>${x.l}</td><td>${x.tf}:${x.ta}</td><td><b>${x.pts}</b></td></tr>`).join('')}</tbody></table></div></section>` : '';
+                const earlier = V.rounds.map((rd, r) => ({ rd, r })).filter(x => done || x.r < V.at).reverse().map(({ rd, r }) => `<section class="pg-card"><h3>${V.type === 'swiss' ? `Round ${r + 1}` : esc(CUP.ROUND(rd.filter(f => !f.third && !f.bye).length))}</h3><div class="cp-round">${rd.map(f => tieBox(f, false)).join('')}</div></section>`).join('');
+                return champ + (done ? '' : `<section class="pg-card"><h3>${esc(V.label)}</h3><div class="pg-dim" style="margin-bottom:6px">The home team (top) plays on the left.${V.type === 'swiss' ? '' : ' A drawn tie goes to extra time, then penalties.'}${live ? '' : ' Connect to the lobby to play or report results.'}</div>
+                    <div class="cp-round">${curRd.map(f => tieBox(f, true)).join('')}</div>${cpuLeft ? '<div class="lg-cta"><button type="button" class="pg-btn pg-btn-go" data-ot="tsimall">Quick sim all computer ties</button></div>' : ''}</section>`) + table + earlier;
             }
             function paint() {
                 const hubEl = $('otour-hub'); if (!hubEl || hubEl.classList.contains('hidden')) return;
@@ -5497,6 +5597,7 @@
             }
             function open(code) {
                 load(); $('otour-hub').classList.remove('hidden'); $('otour-hub').scrollTop = 0;
+                if (prevAI) { [0, 1].forEach(i => AI.set(i, prevAI[i])); prevAI = null; }
                 if (code) { joinCode(code); return; }
                 if (mode !== 'lobby' || !get(cur)) mode = 'list';
                 paint();
@@ -5547,6 +5648,42 @@
                     else if (net && net.conn) { sendTo(net.conn, { t: 'enter', team: tm }); flash('Entering…'); }
                 }
                 else if (a === 'withdraw' && t) { if (isOrg(t)) withdraw(t, DEV.id); else if (net && net.conn) sendTo(net.conn, { t: 'withdraw' }); flash('You have withdrawn your team.'); }
+                else if (a === 'draw' && t && isOrg(t)) {
+                    if (armed && armed.id === 'draw' && armed.t > Date.now()) { armed = null; makeDraw(t); }
+                    else { armed = { id: 'draw', t: Date.now() + 3000 }; setTimeout(paint, 3100); paint(); }
+                }
+                else if ((a === 'thost' || a === 'tjoin' || a === 'tplay') && t) {
+                    const V = isOrg(t) ? viewFor(t) : t.room && t.room.view; if (!V) return;
+                    const f = (V.rounds[V.at] || []).find(x => x.key === b.dataset.key); if (!f || f.r || f.bye) return;
+                    const mineSide = f.h.dev === DEV.id ? f.h : f.a, own = TB.get(mineSide.id);
+                    if (!own || own.ext) { flash(`${mineSide.name} isn't on this device any more, so it can't play.`, true); return; }
+                    const pr = teamProblems(own, t); if (pr.length) { flash(`${own.name} no longer fits the tournament: ${pr.join('; ')}. Fix it in Teams to play this tie.`, true); return; }
+                    const cup = { cid: V.cid, key: f.key, ko: V.type !== 'swiss', otid: t.id };
+                    if (a === 'tplay') {
+                        if (isOrg(t)) { close(); try { ONLINE.close(); } catch (er) {} CUP.playTie(V.cid, f.key); return; }
+                        const cpuSide = f.h.dev ? f.a : f.h, cpu = V.cpuTeams && V.cpuTeams[cpuSide.id];
+                        if (!cpu) { flash("The computer team's details haven't arrived yet. Connect to the lobby and try again.", true); return; }
+                        TB.putRaw(Object.assign(JSON.parse(JSON.stringify(cpu)), { ext: 'otour' }));
+                        prevAI = [AI.isOn(0), AI.isOn(1)]; AI.set(0, !f.h.dev); AI.set(1, !f.a.dev);
+                        close(); try { ONLINE.close(); } catch (er) {}
+                        window.launchMatch('custom:' + f.h.id, 'custom:' + f.a.id, { cup, fmt: t.fmt === 'sevens' ? 'sevens' : 'std' });
+                        return;
+                    }
+                    const opp = f.h.dev === DEV.id ? f.a : f.h;
+                    NET.tie({ code: f.room, host: a === 'thost', teamKey: 'custom:' + own.id, race: own.race, fmt: t.fmt, cup,
+                        text: `${t.name}: ${f.h.name} v ${f.a.name}. ${a === 'thost' ? `You're at home and host it. When ${opp.coach} has joined and is ready, start the match.` : `${opp.coach} hosts it. Tap I'm ready once you're in.`}` });
+                }
+                else if (a === 'tsim' && t && isOrg(t)) {
+                    const V = viewFor(t), f = V && (V.rounds[V.at] || []).find(x => x.key === b.dataset.key); if (!f || f.r) return;
+                    if ((f.h.dev || f.a.dev) && !(armed && armed.id === 'sim' + f.key && armed.t > Date.now())) { armed = { id: 'sim' + f.key, t: Date.now() + 3000 }; setTimeout(paint, 3100); paint(); return; }
+                    armed = null; CUP.sim(V.cid, f.key); const cp = CUP.get(V.cid); if (cp && cp.stage === 'done') t.stage = 'done'; save();
+                    addChat(t, 'Lobby', `${f.h.name} v ${f.a.name} was simmed by the organiser.`);
+                }
+                else if (a === 'tsimall' && t && isOrg(t)) {
+                    const V = viewFor(t); if (!V) return;
+                    (V.rounds[V.at] || []).filter(f => !f.bye && !f.r && !f.h.dev && !f.a.dev).forEach(f => CUP.sim(V.cid, f.key));
+                    const cp = CUP.get(V.cid); if (cp && cp.stage === 'done') t.stage = 'done'; save(); broadcast(); paint();
+                }
                 else if (a === 'kick' && t && isOrg(t)) {
                     const dv = b.dataset.dev;
                     if (armed && armed.id === dv && armed.t > Date.now()) { armed = null; removePlayer(t, dv); }
@@ -5571,7 +5708,7 @@
                     setTimeout(() => open(jc), 700);
                 }
             }
-            return { open, close, list: () => { load(); return tours.slice(); }, _net: () => net };
+            return { open, close, changed, matchOver, list: () => { load(); return tours.slice(); }, _net: () => net };
         })();
 
         // ---------- Tournaments for Matched Play teams: knockout cups and Swiss events ----------
@@ -5813,17 +5950,39 @@
                 advance(cp);
             }
             // a played tie comes back here at the final whistle
+            // the result of the match just played (the home team on the left), as it goes into a tie
+            function liveResult() {
+                const s = [state.score[0] || 0, state.score[1] || 0];
+                const td = [0, 1].map(i => tdList(state.players.filter(p => p.team === i && p.gStats && p.gStats.td).flatMap(p => Array(p.gStats.td).fill(p.name || p.type))));
+                return { s, cas: [0, 1].map(i => state.players.filter(p => p.team === 1 - i && p.isCasualty).length), td, et: state.half === 3,
+                    pen: state.penalties ? { h: state.penalties.s[0], a: state.penalties.s[1], side: state.penalties.w } : null, rr: [state.rr[0] || 0, state.rr[1] || 0] };
+            }
+            // a result into a tie (a match played here, or one reported to an online tournament's hub)
+            function putResult(cp, key, R) {
+                const f = byKey(cp, key); if (!f || f.r || f.bye) return false;
+                const s = [Math.max(0, +R.s[0] || 0), Math.max(0, +R.s[1] || 0)];
+                f.r = { s, cas: (R.cas || [0, 0]).map(n => Math.max(0, +n || 0)), td: (R.td || [[], []]).map(a => (a || []).slice(0, 12).map(x => String(x).slice(0, 40))), sim: false };
+                if (R.et) f.r.et = true;
+                if (!isSwiss(cp) && s[0] === s[1]) f.r.pen = R.pen && (R.pen.side === 0 || R.pen.side === 1) ? { h: +R.pen.h || 0, a: +R.pen.a || 0, w: R.pen.side === 0 ? f.h : f.a } : shootout(f, (R.rr || [])[0] || 0, (R.rr || [])[1] || 0);
+                advance(cp); return true;
+            }
             function recordLive() {
                 const C = state.cup; if (!C) return;
                 load();
                 const cp = get(C.cid); if (!cp) return;
-                const f = byKey(cp, C.key); if (!f || f.r) return;
-                const s = [state.score[0] || 0, state.score[1] || 0];
-                const td = [0, 1].map(i => tdList(state.players.filter(p => p.team === i && p.gStats && p.gStats.td).flatMap(p => Array(p.gStats.td).fill(p.name || p.type))));
-                f.r = { s, cas: [0, 1].map(i => state.players.filter(p => p.team === 1 - i && p.isCasualty).length), td, sim: false };
-                if (state.half === 3) f.r.et = true;
-                if (!isSwiss(cp) && s[0] === s[1]) f.r.pen = state.penalties ? { h: state.penalties.s[0], a: state.penalties.s[1], w: state.penalties.w === 0 ? f.h : f.a } : shootout(f, state.rr[0] || 0, state.rr[1] || 0);
-                advance(cp); save();
+                if (putResult(cp, C.key, liveResult())) { save(); if (cp.online) { try { OTOUR.changed(cp.id); } catch (e) {} } }
+            }
+            // an online tournament's draw, on the organiser's device: the entrants' teams (copies kept here), then computer teams for the empty places
+            function createOnline(spec, entries) {
+                const ids = [], coach = {}, cid = uid();
+                entries.forEach(e => { ids.push(e.id); coach[e.id] = e.coach; });
+                const usedNames = new Set(TB.list().map(t => t.name).concat(entries.map(e => (TB.get(e.id) || {}).name))), usedKits = new Set(TB.list().map(t => t.primary)), races = LEAGUE.raceKeys();
+                while (ids.length < spec.size) { const t = draftTeam(rnd(races), spec.budget, cid, usedNames, usedKits, spec.fmt); TB.put(t); ids.push(t.id); coach[t.id] = 'c'; }
+                const cp = { id: cid, online: spec.tid, fmt: spec.fmt === 'sevens' ? 'sevens' : 'std', type: spec.type === 'swiss' ? 'swiss' : 'ko', name: spec.name, size: spec.size, budget: spec.budget, teams: ids, coach, rounds: [], at: 0, stage: 'play', champ: null, created: new Date().toISOString().slice(0, 10) };
+                if (isSwiss(cp)) { cp.nRounds = Math.max(1, Math.min(spec.rounds || 3, ids.length - 1)); cp.scoring = '310'; cp.rounds.push(swissPairs(cp, true)); }
+                else { cp.third = true; const order = ids.slice().sort(() => Math.random() - 0.5), first = []; for (let i = 0; i < order.length; i += 2) first.push({ h: order[i], a: order[i + 1], r: null }); cp.rounds.push(first); }
+                cups.push(cp); save();
+                return cp;
             }
             function play(cp, key, watch) {
                 const f = byKey(cp, key); if (!f || f.r) return;
@@ -5909,7 +6068,7 @@
                             ${show === id ? `<div class="pg-dim" style="margin:4px 0 0 34px">${t.players.map(p => `${esc(p.name)} <span class="pg-amber">${esc((RACES[t.race].types[p.pos] || {}).type || p.pos)}</span>${p.mp ? ' +' + esc(p.mp.skill) : ''}`).join(' · ')}${Object.keys(t.mind || {}).length ? `<div>Inducements: ${esc(LEAGUE.IND.filter(it => t.mind[it.key]).map(it => it.name + (t.mind[it.key] > 1 ? ' ×' + t.mind[it.key] : '')).join(', '))}</div>` : ''}</div>` : ''}</div>`; }).join('')}</section>`;
             }
             function listHtml() {
-                const cards = cups.map(cp => {
+                const cards = cups.filter(cp => !cp.online).map(cp => {
                     const mine = cp.teams.filter(id => isYou(cp, id)).map(nameOf);
                     return `<section class="pg-card lg-card"><div><div class="lg-tn" style="font-size:16px">${esc(cp.name)}</div>
                         <div class="pg-dim">${cp.fmt === 'sevens' ? 'Sevens · ' : ''}${isSwiss(cp) ? 'Swiss' : 'Knockout cup'} · ${cp.teams.length} teams · ${cp.stage === 'done' ? '🏆 ' + esc(nameOf(cp.champ)) : stageText(cp)}${mine.length ? ' · your team' + (mine.length > 1 ? 's' : '') + ': ' + esc(mine.join(', ')) : ' · all computer teams'}</div></div>
@@ -5954,7 +6113,7 @@
             function open(cid) {
                 load();
                 if (prevAI) { [0, 1].forEach(i => AI.set(i, prevAI[i])); prevAI = null; }
-                if (cid && get(cid)) { cur = cid; mode = 'cup'; } else if (!cid) { mode = 'list'; if (cups.length === 1) { cur = cups[0].id; mode = 'cup'; } }
+                if (cid && get(cid) && !get(cid).online) { cur = cid; mode = 'cup'; } else { mode = 'list'; const vis = cups.filter(cp => !cp.online); if (vis.length === 1) { cur = vis[0].id; mode = 'cup'; } }
                 const cp = cur && get(cur);
                 msg(cp && mode === 'cup' && cp.stage === 'done' ? `${nameOf(cp.champ)} win ${cp.name}!` : '');
                 $('cup-hub').classList.remove('hidden'); $('cup-hub').scrollTop = 0;
@@ -6042,7 +6201,11 @@
                 root.addEventListener('input', e => { if (draft && e.target.id === 'cp-name') draft.name = e.target.value; });
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
-            return { open, close, recordLive, draftTeam, standings, unfit, get: id => { load(); return get(id); }, list: () => { load(); return cups.slice(); }, _sim: simTie, _save: save, _draft: () => draft, _create: d => { draft = d; return create(); } };
+            return { open, close, recordLive, draftTeam, standings, unfit, liveResult, createOnline, ROUND, isSwiss,
+                applyResult: (cid, key, R) => { load(); const cp = get(cid); if (!cp || !putResult(cp, key, R)) return false; save(); return true; },
+                sim: (cid, key) => { load(); const cp = get(cid); if (!cp) return; simTie(cp, key); save(); },
+                playTie: (cid, key) => { load(); const cp = get(cid); if (cp) play(cp, key, false); },
+                winner, mainTies, get: id => { load(); return get(id); }, list: () => { load(); return cups.slice(); }, _sim: simTie, _save: save, _draft: () => draft, _create: d => { draft = d; return create(); } };
         })();
 
         // a race key may be a built-in race or 'custom:<id>' for a saved team
@@ -7231,7 +7394,7 @@
             }
             function go() {
                 const opts = { career: X.career, fmt: X.fmt };
-                if (X.net) { opts.replaceOk = true; opts.netCareer = NET.careerSides(); NET.begin(); }
+                if (X.net) { opts.replaceOk = true; opts.netCareer = NET.careerSides(); const tc = NET.tieCup(); if (tc) opts.cup = tc; NET.begin(); }
                 const any = X.ind.some(d => Object.keys(d).some(key => key === 'stars' ? (d.stars || []).length : d[key]));
                 if (any) opts.ind = X.ind.map(d => JSON.parse(JSON.stringify(d)));
                 $('ex-ind').classList.add('hidden');
@@ -7496,6 +7659,7 @@
             state.isGameOver = true; state.mode = MODES.LOCKED;
             try { if (NET.on()) SAVE.clearNet(); else SAVE.clear(); } catch (e) {}   // a two-device match leaves any other saved match alone
             if (state.cup) { try { CUP.recordLive(); } catch (e) { console.error('cup', e); } }
+            if (state.cup && state.cup.otid) { try { OTOUR.matchOver(); } catch (e) { console.error('otour', e); } }
             try { mournMatched(); } catch (e) { console.error('mourn', e); }
             SIMSPEED.matchOver();
             sfx('gong'); sfx('whistle', 300); sfx('crowdHuge', 500);
@@ -21089,6 +21253,7 @@
             let token = '', guestToken = '', retryT = null, retryAt = 0, oppName = '';
             // the room before kick-off: chat, each side's team and whether the guest is ready
             let lchat = [], meReady = false, oppReady = false, hostTeam = '';
+            let tie = null;   // an online tournament's tie: { cup: { cid, key, ko, otid }, text }
             const NAME = 'bb-net-name';
             const cleanName = n => String(n || '').replace(/\s+/g, ' ').trim().slice(0, 20);
             const myName = () => { try { return cleanName(localStorage.getItem(NAME)); } catch (e) { return ''; } };
@@ -21201,7 +21366,7 @@
             function reopenHost() { try { if (peer) peer.destroy(); } catch (e) {} peer = null; loadPeer().then(hostPeer).catch(() => {}); }
             function open(asHost, joinCode, keepCode) {
                 close();
-                lchat = []; meReady = false; oppReady = false; hostTeam = ''; try { paintChat(); } catch (e) {}
+                lchat = []; meReady = false; oppReady = false; hostTeam = ''; tie = null; try { paintChat(); } catch (e) {}
                 role = asHost ? 'host' : 'guest'; code = asHost ? (keepCode || newCode()) : joinCode;
                 if (!asHost && lobbyFmt !== 'std') { lobbyFmt = 'std'; optSum = ''; try { fillPicker($('nl-race'), $('nl-squad')); paintOpts(); } catch (e) {} }   // (until the host says otherwise)
                 version = (($('app-version') || {}).textContent || '').trim();
@@ -22298,7 +22463,19 @@
                 c.classList.toggle('bad', !ok);
             }
 
+            // an online tournament's tie: the room for the two players, with its code and each one's team already picked
+            function tieMatch(sp) {
+                openLobby();
+                if (sp.host) open(true, null, sp.code); else open(false, sp.code);
+                tie = { cup: sp.cup, text: sp.text };
+                lobbyFmt = sp.fmt === 'sevens' ? 'sevens' : 'std';
+                const rs = $('nl-race'), sq = $('nl-squad');
+                rs.value = sp.race; fillPicker(rs, sq); sq.value = sp.teamKey; paintCareer(); paintOpts();
+                status(sp.text, 'ok'); paintLobby();
+                if (sp.host) sendHostTeam();
+            }
             return {
+                tie: tieMatch, tieCup: () => (tie && role === 'host' ? Object.assign({}, tie.cup) : null),
                 openLobby, matchOver, begin, cancelShop, gate, hostLeague, hostLeagueSync,
                 leaguesSaved: () => { if (link && peerLeagues.size) sendLeagues(false); },
                 careerSides: () => netCareer.slice(),

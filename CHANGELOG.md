@@ -2,6 +2,15 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.58 (28 Oct 2026)
+- **New:** online tournaments can now be played. This is stage two.
+  - **The draw:** the organiser taps Make the draw. Entries close and empty places go to computer teams drafted to the same budget.
+  - **Two players meeting:** the home player gets **Host the match** and the away player **Join the match**. Both land in the Play a friend room with the code already set and their team picked, can chat, and the guest taps Ready. When the match ends, the home player's device sends the result to the lobby.
+  - **A player against a computer team:** the player taps **Play** and plays it on their own device, and the result goes to the lobby.
+  - **The organiser's controls:** quick sim computer-against-computer ties, and sim a tie between players that's stuck (tap twice).
+  - **Rules:** a drawn knockout tie goes to extra time, then penalties, as in a normal cup.
+  - **In the lobby:** everyone sees each round, the results, the Swiss table and the winner. A result made while the lobby was closed is sent when the player next connects.
+
 ## v3.57 (28 Oct 2026)
 - **New:** online tournament lobbies (Online → Online tournaments). This is the first stage.
   - **Organising:** pick the game, a knockout cup or Swiss, the number of places and the budget. The lobby opens under a code like CUP-4821, with Copy code and Share link buttons.
