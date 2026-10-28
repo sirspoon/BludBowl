@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.58</title>
+    <title>BludBowl 3.59</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.58</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.59</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -5352,7 +5352,8 @@
                 });
                 const cp = CUP.createOnline({ tid: t.id, name: t.name, fmt: t.fmt, type: t.type, size: t.size, rounds: t.rounds, budget: t.budget }, entries);
                 t.cid = cp.id; t.stage = 'play'; save();
-                addChat(t, 'Lobby', `The draw is made! ${t.type === 'swiss' ? 'Round 1' : CUP.ROUND(cp.rounds[0].length)} is ready to play.`);
+                autoSim(t);
+                addChat(t, 'Lobby', `The draw is made! ${t.type === 'swiss' ? 'Round 1' : CUP.ROUND(cp.rounds[0].length)} is ready to play. Ties between computer teams are simmed straight away.`);
             }
             function viewFor(t) {
                 const cp = t.cid && CUP.get(t.cid); if (!cp) return null;
@@ -5388,14 +5389,29 @@
                 if (f.h.dev !== dv && f.a.dev !== dv) return "You don't play in that tie.";
                 if (!R || !Array.isArray(R.s)) return 'That result was garbled.';
                 CUP.applyResult(t.cid, key, R);
-                const cp = CUP.get(t.cid);
                 addChat(t, 'Lobby', `Result: ${f.h.name} ${R.s[0]}–${R.s[1]} ${f.a.name}.`);
+                autoSim(t);
+                const cp = CUP.get(t.cid);
                 if (cp && cp.stage === 'done') { t.stage = 'done'; save(); addChat(t, 'Lobby', `🏆 ${(viewFor(t).champ || {}).name} win ${t.name}!`); }
                 return '';
+            }
+            // computer-against-computer ties are simmed as soon as their round comes up (so nobody has to wait for the organiser)
+            function autoSim(t) {
+                if (!isOrg(t) || !t.cid) return 0;
+                let n = 0;
+                for (let g = 0; g < 40; g++) {
+                    const cp = CUP.get(t.cid); if (!cp || cp.stage === 'done') break;
+                    const f = (cp.rounds[cp.at] || []).map((x, i) => ({ x, key: `${cp.at}:${i}` })).find(({ x }) => !x.bye && !x.r && cp.coach[x.h] === 'c' && cp.coach[x.a] === 'c');
+                    if (!f) break;
+                    CUP.sim(t.cid, f.key); n++;
+                }
+                const cp = CUP.get(t.cid); if (cp && cp.stage === 'done' && t.stage !== 'done') { t.stage = 'done'; save(); }
+                return n;
             }
             function changed(cid) {
                 load();
                 const t = tours.find(x => x.cid === cid && isOrg(x)); if (!t) return;
+                autoSim(t);
                 const cp = CUP.get(cid); if (cp && cp.stage === 'done' && t.stage !== 'done') { t.stage = 'done'; save(); }
                 broadcast(); paint();
             }
@@ -5426,7 +5442,7 @@
                     return;
                 }
                 if (m.t === 'withdraw') { withdraw(t, dv); return; }
-                if (m.t === 'result') { const err = takeResult(t, dv, m.key, m.r); sendTo(c, { t: 'got', key: m.key, err: err || '' }); if (err) return; broadcast(); paint(); return; }
+                if (m.t === 'result') { const by = clean(m.by, 40) || dv; const err = takeResult(t, by, m.key, m.r); sendTo(c, { t: 'got', key: m.key, err: err || '' }); if (err) return; broadcast(); paint(); return; }
                 if (m.t === 'bye') { net.conns.delete(dv); broadcast(); paint(); }
             }
             function addChat(t, name, text) {
@@ -5466,12 +5482,38 @@
                     save(); flushPending(t); paint(); return;
                 }
                 if (m.t === 'entered') { flash(m.err || 'Your team is in. Good luck!', !!m.err); return; }
-                if (m.t === 'got') { const t = get(net.tid); if (t) { t.pending = (t.pending || []).filter(x => x.key !== m.key); save(); } if (m.err) flash(m.err, true); return; }
+                if (m.t === 'got') { const t = get(net.tid); if (t) { t.pending = (t.pending || []).filter(x => x.key !== m.key); t.relay = (t.relay || []).filter(x => x.key !== m.key); save(); } if (m.err && m.err !== 'That round is over.') flash(m.err, true); return; }
                 if (m.t === 'note') { flash(m.text, true); return; }
                 if (m.t === 'removed') { if (net) net.gone = true; const t = get(net && net.tid); if (t) { t.removed = true; save(); } flash(m.why, true); stop(); paint(); }
             }
 
-            function flushPending(t) { if (net && net.role === 'player' && net.conn && net.tid === t.id) (t.pending || []).forEach(x => sendTo(net.conn, { t: 'result', key: x.key, r: x.r })); }
+            // results waiting for the organiser: this device's own (pending) and other players' it has been handed (relay)
+            function flushPending(t) {
+                if (!(net && net.role === 'player' && net.conn && net.tid === t.id)) return;
+                (t.pending || []).forEach(x => sendTo(net.conn, { t: 'result', key: x.key, r: x.r, by: DEV.id }));
+                (t.relay || []).forEach(x => sendTo(net.conn, { t: 'result', key: x.key, r: x.r, by: x.by }));
+            }
+            // whenever two devices in a tournament connect (a Play a friend match, say), each hands the other the results it's carrying
+            function relayOut() {
+                load();
+                return tours.filter(t => !isOrg(t) && t.stage !== 'done').flatMap(t => (t.pending || []).map(x => ({ tid: t.id, key: x.key, r: x.r, by: DEV.id })).concat((t.relay || []).map(x => ({ tid: t.id, key: x.key, r: x.r, by: x.by }))));
+            }
+            function relayIn(items) {
+                if (!Array.isArray(items)) return;
+                load(); let got = 0;
+                items.slice(0, 200).forEach(it => {
+                    const t = it && get(it.tid); if (!t || !it.key || !it.r || !Array.isArray(it.r.s)) return;
+                    const by = clean(it.by, 40);
+                    if (isOrg(t)) { if (!takeResult(t, by, String(it.key), it.r)) got++; return; }
+                    if (by === DEV.id || (t.pending || []).some(x => x.key === it.key) || (t.relay || []).some(x => x.key === it.key)) return;
+                    const V = t.room && t.room.view, f = V && (V.rounds[+String(it.key).split(':')[0]] || []).find(x => x.key === it.key);
+                    if (f && f.r) return;   // the organiser has it already
+                    t.relay = (t.relay || []).concat([{ key: String(it.key), r: it.r, by }]).slice(-40); got++;
+                    flushPending(t);
+                });
+                save();
+                if (got) { const t = tours.find(x => isOrg(x) && net && net.tid === x.id); if (t) broadcast(); paint(); }
+            }
             // full time in an online tournament's tie: on the organiser's device the cup has it already; anywhere else it goes to the lobby
             function matchOver() {
                 const C = state.cup; if (!C || !C.otid) return;
@@ -5479,6 +5521,7 @@
                 if (isOrg(t)) { changed(t.cid); return; }
                 const r = CUP.liveResult();
                 t.pending = (t.pending || []).filter(x => x.key !== C.key).concat([{ key: C.key, r }]); save();
+                try { if (NET.on()) NET.sendOt(relayOut()); } catch (e) {}
                 if (!(net && net.role === 'player' && net.tid === t.id)) join(t.code, t.id); else flushPending(t);
             }
             let prevAI = null;
@@ -5708,7 +5751,7 @@
                     setTimeout(() => open(jc), 700);
                 }
             }
-            return { open, close, changed, matchOver, list: () => { load(); return tours.slice(); }, _net: () => net };
+            return { open, close, changed, matchOver, relayOut, relayIn, list: () => { load(); return tours.slice(); }, _net: () => net };
         })();
 
         // ---------- Tournaments for Matched Play teams: knockout cups and Swiss events ----------
@@ -21648,6 +21691,7 @@
                 if (m.t === 'pong') { rtt = Math.round(real() - m.at); paintChip(); paintLobby(); return true; }
                 if (m.t === 'bye') { try { if (link) link.close(); } catch (e) {} dropped('The other device has left.'); return true; }
                 if (m.t === 'name') { setOpp(m.name); return true; }
+                if (m.t === 'otres') { try { OTOUR.relayIn(m.items); } catch (e) { console.error('otres', e); } return true; }
                 if (m.t === 'lchat') { if (live) { if (role === 'host') chatLine(them(), m.text, 1); } else { pushChat(them(), m.text, false); try { sfx('menuClick'); } catch (e) {} } return true; }
                 if (m.t === 'ready') { oppReady = !!m.on; paintLobby(); return true; }
                 if (m.t === 'hteam') { hostTeam = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 60); paintLobby(); return true; }
@@ -21672,6 +21716,7 @@
                     if (m.name != null) setOpp(m.name);
                     if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
                     if (!inMatch()) { oppReady = false; meReady = false; sendHostTeam(); }
+                    try { const it = OTOUR.relayOut(); if (it.length && link) link.send({ t: 'otres', items: it }); } catch (e) {}
                     if (role === 'host') {
                         if (!inMatch()) {
                             guestToken = m.token || '';
@@ -22475,6 +22520,7 @@
                 if (sp.host) sendHostTeam();
             }
             return {
+                sendOt: items => { if (link && items && items.length) link.send({ t: 'otres', items }); },
                 tie: tieMatch, tieCup: () => (tie && role === 'host' ? Object.assign({}, tie.cup) : null),
                 openLobby, matchOver, begin, cancelShop, gate, hostLeague, hostLeagueSync,
                 leaguesSaved: () => { if (link && peerLeagues.size) sendLeagues(false); },

@@ -2,6 +2,11 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.59 (28 Oct 2026)
+- **Improved:** online tournaments need the organiser online much less.
+  - **Computer ties:** ties between two computer teams are now simmed as soon as their round comes up, so nobody waits for the organiser to do it.
+  - **Results passed on:** at full time, the home player's device hands the result to the other player's too. Whenever two players in a tournament connect (any Play a friend match), they swap the results they're carrying. A result then reaches the organiser through whichever of them connects to the lobby first.
+
 ## v3.58 (28 Oct 2026)
 - **New:** online tournaments can now be played. This is stage two.
   - **The draw:** the organiser taps Make the draw. Entries close and empty places go to computer teams drafted to the same budget.
