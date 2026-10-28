@@ -482,3 +482,14 @@ to act.)
 - Caveat: the loss rate depends on the defence too. FUMBBL teams are developed (Block, Sure Hands, Guard), the
   computer plays starting rosters, and its own defence (the other side of a mirror match) goes after the ball hard,
   so its losses are high at every distance (23% even with no one within 3).
+
+### Carrier space (`space`, Oct 2026, not released: `carrier-space.patch`)
+From the cage numbers: in `carrierScore`, a square with the nearest standing opponent 2 away costs 3, 3 away 1.5, and
+each opponent within 3 beyond the first 0.5 (`spaceW` scales it).
+- The carrier ended 4+ from the nearest opponent 45% of the time (was 29%; coaches 55%), opponents within 3 fell from
+  2.0 to 1.4, and the ball was lost by the end of the other side's next turn 26% of the time (was 31%).
+- Results against v3.64: 122-125 touchdowns, 46-43 wins over 144, but turnovers 607-541: moving away from opponents
+  brought more Rushes. With the space term only for dice-free moves (a dodge or Rush judged as if it left the carrier as
+  crowded as now): 43-38, 17-13 over 48, then 76-95, 26-41 over 96; 119-133, 43-54 in all. Not released.
+- So keeping the ball safer for a turn doesn't by itself win matches: the carrier presumably gives up ground or time
+  to do it. Untried: the space term only in our own half, or only while the cage is forming (first two turns with the ball).

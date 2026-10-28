@@ -1,0 +1,46 @@
+diff --git a/index.html b/index.html
+index 6d54f20..0abc5d5 100644
+--- a/index.html
++++ b/index.html
+@@ -22955,13 +22955,22 @@
+                 for (let i = 0; i < n; i++) v += w[i];
+                 return v * AIX.p(team, 'supW', 0.5) * (1 + Math.min(4, reach) * AIX.p(team, 'supReach', 0.5));
+             }
+-            function carrierScore(p, x, y, aggressive) {
++            function carrierScore(p, x, y, aggressive, noSpace) {
+                 const fit = !aggressive && AIX.on(p.team, 'cagefit');
+                 const cp = fit ? realSupport(p, x, y) : cagePotential(p, x, y);
+                 const rc = fit ? reachers(x, y, p.team) : 0;
+                 let s = (toGo(p.x, p.team) - toGo(x, p.team)) * (aggressive ? 3 : 1.5) - tzFor(x, y, p.team) * 5 - oppNear(x, y, p.team, 2) * 0.6 + (fit ? supportValue(p.team, cp, rc) : cp * 0.6);
+                 // a breakaway: within a turn's run of the end zone and few of them can get there to stop it
+                 if (toGo(x, p.team) <= p.ma + 2) s += Math.max(0, 3 - threatAt(x, y, p.team)) * 1.5;
++                // (space) strong coaches keep their carrier clear of the opposition: over half the time the nearest opponent is 4+
++                // squares away at the end of their turn, and the ball is lost far more often with one 2 or 3 away
++                // (ai-training/README.md, "Cages"). Room counts for more than bodies round it.
++                if (!aggressive && !noSpace && AIX.on(p.team, 'space')) {
++                    let near = 99, in3 = 0;
++                    state.players.forEach(q => { if (q.team === p.team || !onPitch(q) || q.isDown || q.isStunned || q.isDistracted) return; const d = Math.max(Math.abs(q.x - x), Math.abs(q.y - y)); if (d < near) near = d; if (d <= 3) in3++; });
++                    const w = AIX.p(p.team, 'spaceW', 1);
++                    s -= w * ((near === 2 ? 3 : near === 3 ? 1.5 : 0) + Math.max(0, in3 - 1) * 0.5);
++                }
+                 return s - edgeRisk(x, y, p.team, p.id) * 6 - Math.min(4, reachers(x, y, p.team)) * (aggressive ? 0.4 : cp >= 3 ? 0.6 : 1.2);
+             }
+             // stalling: may we hold the ball back instead of scoring this turn?
+@@ -22994,13 +23003,16 @@
+                 const minProb = aggressive ? 50 : marked ? 66 : mobileTeam(p.team) ? 80 : 75;   // a marked carrier may dodge away if the odds are good
+                 // judged against staying put, so the same crowd of opponents counts against both
+                 const stay = carrierScore(p, p.x, p.y, aggressive);
++                // (space) room from the opposition is a reason for a safe move, never for a dodge or a Rush: those are judged
++                // as if they left the carrier as crowded as it is now
++                const stayNS = carrierScore(p, p.x, p.y, aggressive, true), off = stay - stayNS;
+                 let best = null, bs = stay + (marked ? 0.5 : 0.8);
+                 const rr = state.rr[p.team] > 0 && !state.teamRRUsedThisTurn;
+                 const scored = [];
+                 moves.forEach(m => {
+                     if (m.prob < minProb) return;
+                     if (m.prob < 100 && !aggressive && tzFor(m.x, m.y, p.team) > 0) return;
+-                    scored.push({ m, g: carrierScore(p, m.x, m.y, aggressive) });
++                    scored.push({ m, g: m.prob < 100 ? carrierScore(p, m.x, m.y, aggressive, true) + off : carrierScore(p, m.x, m.y, aggressive) });
+                 });
+                 scored.sort((a, b) => b.g - a.g);
+                 const here = nextTurnLane(p, p.x, p.y);
