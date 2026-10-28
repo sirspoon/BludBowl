@@ -115,3 +115,18 @@ old turn order; with the turn ordered they pay:
   57-39 wins over 144** (about a 2% chance by luck), turnovers 586-599, casualties up (206-162). Released: `tplan`,
   `cagefirst`, `rr2` with `rrSave` and `rrCatch` off (AIP 1 to switch them on).
 - Still to try: re-roll decisions that look at the rest of the planned turn directly (stage 3 proper), and stage 4.
+
+## Stage 4 (Oct 2026): tried, not released (`turn-planner-stage4.patch`)
+`risk4`: in `blockOK`, with no more than two others left to act (`lateN`), blocks up to pTurn 0.34 (`lateLim`) and
+worth 1.5 or more (`lateV`, normally 2.5) are allowed; `planRisk` counts a block with pTurn over 0.2 as risky, so the
+planner keeps those till last.
+- Blocks 34.4 -> 37.5 per team per match, 1-die blocks 1.5 -> 2.0 (`follow-ups.js`; note its FLAGS argument takes a
+  list of switches, so pass '' for all on, not 'all').
+- Against v3.66: 36-47 touchdowns, 13-22 wins, turnovers 222-177 over 48. Worse. A failed block late in the turn
+  doesn't cost actions, but it leaves the attacker on the floor (out of position, an armour roll, open to a foul) for the
+  whole of their turn.
+- Stricter (`lateLim` 0.2, `lateV` 2.5: only 1-die blocks with Block, and the usual value): 37-40, 16-17 over 48, and
+  no more blocks than before (34.6 v 35.3). Level, and barely different.
+- So the extra risk coaches take isn't simply "more blocks at the end of the turn". Their 1-die blocks and hard dodges
+  are probably chosen for what they win (a carrier, a sideline push, a lane), which the existing scores already try to
+  weigh. Left here.

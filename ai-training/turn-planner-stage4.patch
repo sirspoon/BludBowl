@@ -1,0 +1,30 @@
+diff --git a/index.html b/index.html
+index ce2cd7b..db87284 100644
+--- a/index.html
++++ b/index.html
+@@ -23761,7 +23761,8 @@
+             function planRisk(pl) {
+                 const p = pl && pl.pid != null ? getPlayerById(pl.pid) : null;
+                 if (!p || RISKY_KINDS.includes(pl.kind)) return 'risky';
+-                if (pl.kind === 'block' || pl.kind === 'stab') return 'block';
++                if (pl.kind === 'stab') return 'block';
++                if (pl.kind === 'block') { const t = getPlayerById(pl.target); return t && AIX.on(p.team, 'risk4') && blockEval(p, t).pTurn > 0.2 ? 'risky' : 'block'; }
+                 if (pl.kind === 'blitz' || pl.kind === 'move') {
+                     if (p.isDown && p.ma <= 2) return 'risky';   // a 4+ to stand up
+                     let m = null; try { m = pl.pick ? pl.pick(movesFor(p), p) : null; } catch (e) { return 'risky'; }
+@@ -23843,9 +23844,13 @@
+                     // agile teams only take near-safe blocks - (line1) unless the blocker is marked anyway: then the block frees them,
+                     // where otherwise they'd dodge away (strong elf and Amazon coaches block on their first turn about as much as anyone)
+                     const agileLim = AIX.on(me, 'line1') && tzFor(p.x, p.y, me) > 0 ? 0.12 : 0.05;
+-                    const limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? agileLim : 0.12) + (gain >= 3 || freesC ? 0.08 : 0);
++                    let limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? agileLim : 0.12) + (gain >= 3 || freesC ? 0.08 : 0);
++                    // (risk4; turn planner stage 4) the end of the turn: with no more than two others left to act, a failure costs
++                    // little, so riskier blocks (1-die ones too) are worth taking - the planner keeps them till last (planRisk)
++                    const late = AIX.on(me, 'risk4') && !(carrier && carrier.id === p.id) && act.filter(q => q.id !== p.id && !q.isDown && !q.isStunned).length <= AIX.p(me, 'lateN', 2);
++                    if (late) limit = Math.max(limit, AIX.p(me, 'lateLim', 0.34));
+                     const v = e.ev + laneValue(e, gain + freesC);
+-                    return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : 2.5), v, gain };
++                    return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : late ? AIX.p(me, 'lateV', 1.5) : 2.5), v, gain };
+                 };
+                 // block candidates
+                 const blocks = [];
