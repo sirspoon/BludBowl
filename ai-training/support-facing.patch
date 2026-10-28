@@ -1,0 +1,57 @@
+diff --git a/index.html b/index.html
+index 6d54f20..39f8e39 100644
+--- a/index.html
++++ b/index.html
+@@ -23197,6 +23197,19 @@
+                 });
+                 return out.sort((a, b) => b.s - a.s).slice(0, k);
+             }
++            // where the danger to a carrier at (a) comes from: the mean direction of the opponents who could get next to it next
++            // turn (a unit vector), and how much they agree on it (k: 1 = all from one side, 0 = all round); null if nobody can
++            function threatFrom(me, a) {
++                let vx = 0, vy = 0, n = 0;
++                state.players.forEach(q => {
++                    if (q.team === me || !onPitch(q) || q.isStunned) return;
++                    const d = Math.max(Math.abs(q.x - a.x), Math.abs(q.y - a.y));
++                    if (d - 1 > (q.isDown ? q.ma - 1 : q.ma + 2)) return;
++                    const dx = q.x - a.x, dy = q.y - a.y, h = Math.hypot(dx, dy) || 1; vx += dx / h; vy += dy / h; n++;
++                });
++                const h = Math.hypot(vx, vy);
++                return n && h > 0 ? { x: vx / h, y: vy / h, k: h / n } : null;
++            }
+             function formationTargets(me, cageOnly) {
+                 const T = [], c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                 const add = (x, y, role) => {
+@@ -23224,10 +23237,28 @@
+                         return T;
+                     }
+                     if (a !== c) [[1, 1], [1, -1]].forEach(([dx, dy]) => add(c.x + dx * fwd, c.y + dy, 'cage'));   // two stay with the carrier as an escort
+-                    [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
+-                    if (cageOnly) return T;
+-                    if (AIX.on(me, 'flank')) flankSquares(me, AIX.p(me, 'flankN', 2)).forEach(o => add(o.x, o.y, 'flank'));
+-                    [0, -3, 3].forEach(dy => add(a.x + 3 * fwd, a.y + dy, 'front'));
++                    // (facing) strong coaches put the carrier's support between it and the opponents who could get at it next turn
++                    // (71% of their players within 3 are on that side, 12% on the far side; ai-training/README.md, "Which side"):
++                    // corners nobody of theirs can reach are left out, and the front screen faces where the threat comes from
++                    const face = AIX.on(me, 'facing') ? threatFrom(me, a) : null;
++                    const canReach = (x, y) => state.players.some(q => q.team !== me && onPitch(q) && !q.isStunned && Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) <= (q.isDown ? q.ma - 1 : q.ma + 2));
++                    const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([dx, dy]) => [dx * fwd, dy]);
++                    if (face) corners.sort((p, q) => (q[0] * face.x + q[1] * face.y) - (p[0] * face.x + p[1] * face.y));
++                    const corner = ([dx, dy]) => { if (face && !canReach(a.x + dx, a.y + dy)) return; add(a.x + dx, a.y + dy, 'cage'); };
++                    if (face && face.k >= AIX.p(me, 'faceK', 0.5)) {
++                        // the two corners facing them, then the screen in front of those, then the rest of the cage and the flanks
++                        corners.slice(0, 2).forEach(corner);
++                        if (cageOnly) { corners.slice(2).forEach(corner); return T; }
++                        const px = -face.y, py = face.x;
++                        [[2.5, 0], [2, 2], [2, -2]].forEach(([f, sd]) => add(Math.round(a.x + face.x * f + px * sd), Math.round(a.y + face.y * f + py * sd), 'front'));
++                        corners.slice(2).forEach(corner);
++                        if (AIX.on(me, 'flank')) flankSquares(me, AIX.p(me, 'flankN', 2)).forEach(o => add(o.x, o.y, 'flank'));
++                    } else {
++                        corners.forEach(corner);
++                        if (cageOnly) return T;
++                        if (AIX.on(me, 'flank')) flankSquares(me, AIX.p(me, 'flankN', 2)).forEach(o => add(o.x, o.y, 'flank'));
++                        [0, -3, 3].forEach(dy => add(a.x + 3 * fwd, a.y + dy, 'front'));
++                    }
+                     outletSquares(me, Math.max(1, toGo(a.x, me) - 8), toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 7).slice(0, 2).forEach(o => add(o.x, o.y, 'runner'));
+                 } else if (c && onPitch(c)) {
+                     if (cageOnly) return T;

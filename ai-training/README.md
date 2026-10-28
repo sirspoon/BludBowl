@@ -493,3 +493,30 @@ each opponent within 3 beyond the first 0.5 (`spaceW` scales it).
   crowded as now): 43-38, 17-13 over 48, then 76-95, 26-41 over 96; 119-133, 43-54 in all. Not released.
 - So keeping the ball safer for a turn doesn't by itself win matches: the carrier presumably gives up ground or time
   to do it. Untried: the space term only in our own half, or only while the cage is forming (first two turns with the ball).
+
+### Which side the support is on (Oct 2026)
+`screen-sides.py` on the cage turns (`fumbbl-cages.py --json`, `bb-cages.js`, which now keep the raw positions): the
+opponents who could get next to the carrier next turn (as the crow flies, MA + 2 Rushes, standing up costs 3), the
+direction they come from, and where the carrier's team-mates within 3 squares stand relative to it.
+
+| | coaches | BludBowl v3.64 |
+|---|---|---|
+| team-mates within 3: towards the threat / to the side / far side | 71 / 17 / 12% | 58 / 22 / 20% |
+| ...ahead of the carrier (towards the end zone) / level / behind | 57 / 11 / 33% | 41 / 13 / 46% |
+| ...standing next to an opponent | 23% | 32% |
+| squares next to the carrier an opponent could reach: filled by us | 21% | 24% |
+| when the carrier acts in the turn (share of the way through) | 0.62 | 0.61 |
+
+- The coaches' support stands between the carrier and the opposition, mostly ahead of it; the computer's is spread
+  round the carrier, half of it behind. The computer's attacking shape (`formationTargets`) is a fixed template round the
+  carrier (four corners, a front screen 3 ahead, flankers, runners) and doesn't look at where the opponents are.
+- Drawn out, the coaches' carriers sit in open space with their team between them and the opponents (who are mostly
+  on one side); the computer's carriers end up in a crowd with opponents on every side, behind as well. Part of that is
+  the computer's own defence, which swarms the ball, but its carrier also walks into those crowds.
+- `facing` (not released: `support-facing.patch`): the cage corners and front screen turned towards the threat
+  (`threatFrom`), corners no opponent can reach left out, the threat-side corners and the screen filled first. It moved
+  the support only a little (63% towards the threat, still 48% behind) and was 38-44 touchdowns, 12-15 wins, turnovers
+  198-174 over 48. The template squares aren't what decides where players end up.
+- Next idea: judge reach the real way. Work out once per decision where each opponent can actually get next turn (a
+  path round our players, dodges counted) and have the carrier stop, and the support stand, so that few of them have an
+  easy way in: the team between the carrier and the opposition, which is what the coaches' pictures show.

@@ -12,11 +12,13 @@ const [RACES, N = 2, OUT = 'bb-cages.json', FLAGS = 'all'] = process.argv.slice(
       await p.goto('http://localhost:8765/index.html?simtest');
       await p.evaluate(([race, flags]) => {
         if (flags !== 'all') AIX.flags = [flags.split(','), flags.split(',')];
-        window.CG = []; let pend = null; const held = [0, 0];
+        window.CG = []; let pend = null; const held = [0, 0]; let order = [], pos = new Map();
         const onP = q => q && !q.isReserve && !q.isKO && !q.isCasualty && !q.isEjected && q.x >= 0 && q.x < CFG.cols;
         const up = q => onP(q) && !q.isDown && !q.isStunned;
         const carrier = () => { const c = state.ball.carrierId && getPlayerById(state.ball.carrierId); return c && up(c) ? c : null; };
         const SK = window.startKickoffSequence; window.startKickoffSequence = function () { pend = null; held[0] = held[1] = 0; return SK.apply(this, arguments); };
+        const RN = window.render; window.render = function () { try { state.players.forEach(q => { if (!onP(q)) return; const k = q.x + ',' + q.y, was = pos.get(q.id); if (was !== undefined && was !== k && q.team === state.activeTeam && order[order.length - 1] !== q.id) order.push(q.id); pos.set(q.id, k); }); } catch (e) {} return RN.apply(this, arguments); };
+        const RB = window.resolveBlock; window.resolveBlock = function () { try { const c = state.combat; if (c && c.atk && c.atk.team === state.activeTeam && order[order.length - 1] !== c.atk.id) order.push(c.atk.id); } catch (e) {} return RB.apply(this, arguments); };
         const E = window.endTeamTurn; window.endTeamTurn = function () { try {
           const t = state.activeTeam, c = carrier();
           if (pend && pend.team !== t) { pend.kept = !!(c && c.team === pend.team); CG.push(pend); pend = null; }
@@ -28,8 +30,11 @@ const [RACES, N = 2, OUT = 'bb-cages.json', FLAGS = 'all'] = process.argv.slice(
             const toGo = Math.abs(c.x - (t === 0 ? CFG.cols - 1 : 0));
             const rec = { race, team: t, adj: adj.length, corners, orth: adj.length - corners, within2: mates.filter(q => d(q) <= 2).length, within3: mates.filter(q => d(q) <= 3).length,
               oppAdj: opps.filter(q => d(q) === 1).length, opp3: opps.filter(q => d(q) <= 3).length, toGo, edge: Math.min(c.y, CFG.rows - 1 - c.y), nearest: Math.min(99, ...opps.map(d)), reach: state.players.filter(q => q.team !== t && onP(q) && !q.isStunned && d(q) - 1 <= (q.ma || 6) + 2 - (q.isDown ? 3 : 0)).length, turn: state.turn[t], held: held[t] };
+            const ix = order.lastIndexOf(c.id); if (ix >= 0) { rec.carrierAt = (ix + 1) / order.length; rec.nActs = order.length; }
+            rec.raw = { car: [c.x, c.y], dir: t === 0 ? 1 : -1, mates: mates.map(q => [q.x, q.y]), opps: state.players.filter(q => q.team !== t && onP(q) && !q.isStunned).map(q => [q.x, q.y, q.ma || 6, q.isDown ? 0 : 1]) };
             if (toGo > 0 && state.turn[t] < TURNS) pend = rec;
           } else if (!c || c.team !== t) held[t] = 0;
+          order = [];
         } catch (e) {} return E.apply(this, arguments); };
         AI.set(0, true); AI.set(1, true); window.launchMatch(race, race, { replaceOk: true });
       }, [race, FLAGS]);

@@ -29,7 +29,7 @@ def cages(fn, meta):
     for side in ('teamHome', 'teamAway'):
         for p in g[side]['playerArray']: team[str(p['playerId'])] = side; ma[str(p['playerId'])] = p['movement']
     st, at, ball, homePlaying, homeLeft, turn = {}, {}, None, None, True, {'home': 0, 'away': 0}
-    score = {'home': 0, 'away': 0}; out = []; pend = None; held = {'teamHome': 0, 'teamAway': 0}; actSide = None
+    score = {'home': 0, 'away': 0}; out = []; pend = None; held = {'teamHome': 0, 'teamAway': 0}; actSide = None; order = []
     up = lambda q: (st.get(q, 1) & 0xFF) in (1, 2)
     onp = lambda q: at.get(q) and 0 <= at[q][0] <= 25 and 0 <= at[q][1] <= 14
     for cmd in d['gameLog']['commandArray']:
@@ -42,14 +42,16 @@ def cages(fn, meta):
             elif k == 'turnDataSetTurnNr': turn[m['modelChangeKey']] = v
             elif k == 'teamResultSetScore': score[m['modelChangeKey']] = v
         for r in reports(cmd):
-            if r['reportId'] == 'playerAction' and str(r.get('actingPlayerId')) in team: actSide = team[str(r['actingPlayerId'])]
+            if r['reportId'] == 'playerAction' and str(r.get('actingPlayerId')) in team:
+                actSide = team[str(r['actingPlayerId'])]; pid = str(r['actingPlayerId'])
+                if not order or order[-1][0] != pid: order.append((pid, [at.get(pid)]))
             if r['reportId'] == 'kickoffResult':
                 hx = [at[q][0] for q in at if q in team and team[q] == 'teamHome' and onp(q)]
                 if hx: homeLeft = sum(hx) / len(hx) < 12.5
                 held = {'teamHome': 0, 'teamAway': 0}; pend = None   # (the half ended, or someone scored: no next turn to judge by)
             if r['reportId'] != 'turnEnd': continue
             # (FFB switches homePlaying to the next team before this report, so the side whose turn it was is the last to act)
-            side = actSide; actSide = None
+            side = actSide; actSide = None; turnOrder = order; order = []
             if side is None: continue
             other = 'teamAway' if side == 'teamHome' else 'teamHome'
             carrier = None
@@ -68,6 +70,12 @@ def cages(fn, meta):
                 opps = [at[q] for q in at if q in team and team[q] == other and onp(q) and up(q)]
                 reachO = [(at[q], ma[q] - (0 if up(q) else 3)) for q in at if q in team and team[q] == other and onp(q) and (st.get(q, 1) & 0xFF) in (1, 2, 3)]
                 rec = shape(at[carrier], mates, opps, toGo, reachO)
+                # when in the turn the carrier moved (its last activation, of all the team's activations), and whether it moved at all
+                acts = [pid for pid, _ in turnOrder]
+                if carrier in acts:
+                    k = len(acts) - 1 - acts[::-1].index(carrier); rec['carrierAt'] = (k + 1) / len(acts); rec['nActs'] = len(acts)
+                rec['raw'] = {'car': at[carrier], 'dir': 1 if attacksRight else -1, 'mates': [at[q] for q in at if q in team and team[q] == side and q != carrier and onp(q) and up(q)],
+                              'opps': [[at[q][0], at[q][1], ma[q], 1 if up(q) else 0] for q in at if q in team and team[q] == other and onp(q) and (st.get(q, 1) & 0xFF) in (1, 2, 3)]}
                 rec.update(race=meta['home' if side == 'teamHome' else 'away']['race'], side=side, turn=turn['home' if side == 'teamHome' else 'away'], held=held[side],
                            oppScore0=score['home' if other == 'teamHome' else 'away'])
                 if toGo > 0: pend = rec
