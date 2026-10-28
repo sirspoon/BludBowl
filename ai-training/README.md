@@ -306,3 +306,17 @@ player steps onto the ball, so measure at the ball's square):
 - The losses are the 4+ and 5+ pick-ups next to opponents (about 0.45 turnovers a team a match), where Secure the Ball
   isn't allowed. A team-mate with an easier roll was almost never available; a marker could have been blocked first in
   about 1 in 4 (the `loose` switch already clears markers first when it can, under 75%).
+
+## Protecting the carrier (v3.60)
+The owner's observation: the AI finds a gap and sends fast players through with the ball (the Lizardmen especially), but
+leaves the carrier poorly protected, so it's easily blitzed. `carrier-support.js` (24 mirror matches, 6 teams, at the end of
+each turn ending with our carrier on the pitch): the ball was lost the next turn 34% of the time with nobody next to the
+carrier, 38% with one, 26% with two, 13% with three or more; after a run of 4+ squares 43% of carriers had at most one
+team-mate next to them. Cause: `carrierScore` gave 1.5 a square gained but only 0.6 per possible supporter, and
+`cagePotential` counted anyone within reach as the crow flies (through tackle zones and blocked routes).
+- `cagefit`: support counted as team-mates already next to the square plus those with a dice-free route to a free square
+  beside it (one square each), worth `supW` (0.5) x (1 + `supReach` (0.5) x opponents who could reach it, up to 4) per
+  supporter (diminishing: 1, 1, 0.8, 0.6). Behaviour: lost next turn 26% to 23%, alone-or-one after a run 43% to 33%,
+  three-or-more support 99 to 117 turns, long runs not fewer (141 to 159). `supW` 0.9 was worse (30% lost).
+- Results against the AI without it: 53-37 touchdowns, 22-9 wins over 48 matches (12 teams); then 83-73, 37-32 over 96
+  (24 teams). 144 in all: 136-110, 59-41, turnovers 519-559. Released.

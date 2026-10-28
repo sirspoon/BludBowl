@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.59</title>
+    <title>BludBowl 3.60</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.59</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.60</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -22896,9 +22896,49 @@
                 });
                 return Math.min(4, n);
             }
+            // cagefit: who could really get next to the carrier this turn - team-mates already there, then those with a dice-free
+            // route to a free square beside it (one each). Worked out once per carrier decision (supCtx), then per square.
+            let supCtx = null;
+            function supportCtx(p) {
+                const helpers = [];
+                state.players.forEach(q => {
+                    if (q.team !== p.team || q.id === p.id || !onPitch(q) || q.isStunned || q.hasActed || tried.has(q.id) || q.isDistracted || !canReposition(q, p.team)) return;
+                    const sq = new Set(); if (!q.isDown) sq.add(q.x + ',' + q.y);
+                    movesFor(q).forEach(m => { if (m.prob >= 100 && !m.isRush) sq.add(m.x + ',' + m.y); });
+                    helpers.push({ q, sq });
+                });
+                return { pid: p.id, helpers };
+            }
+            function realSupport(p, x, y) {
+                const C = supCtx && supCtx.pid === p.id ? supCtx : (supCtx = supportCtx(p));
+                const used = new Set(), free = [];
+                let n = 0;
+                for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+                    if (!dx && !dy) continue;
+                    const ax = x + dx, ay = y + dy; if (ax < 0 || ay < 0 || ax >= CFG.cols || ay >= CFG.rows) continue;
+                    const q = getPlayer(ax, ay);
+                    if (q && q.id !== p.id) { if (q.team === p.team && !q.isDown && !q.isStunned) { n++; used.add(q.id); } continue; }
+                    free.push(ax + ',' + ay);
+                }
+                const taken = new Set();
+                C.helpers.forEach(h => {
+                    if (n >= 4 || used.has(h.q.id)) return;
+                    const k = free.find(f => !taken.has(f) && h.sq.has(f)); if (!k) return;
+                    taken.add(k); used.add(h.q.id); n++;
+                });
+                return Math.min(4, n);
+            }
+            // what that support is worth: more the more of them could get at the carrier
+            function supportValue(team, n, reach) {
+                const w = [1, 1, 0.8, 0.6]; let v = 0;
+                for (let i = 0; i < n; i++) v += w[i];
+                return v * AIX.p(team, 'supW', 0.5) * (1 + Math.min(4, reach) * AIX.p(team, 'supReach', 0.5));
+            }
             function carrierScore(p, x, y, aggressive) {
-                const cp = cagePotential(p, x, y);
-                let s = (toGo(p.x, p.team) - toGo(x, p.team)) * (aggressive ? 3 : 1.5) - tzFor(x, y, p.team) * 5 - oppNear(x, y, p.team, 2) * 0.6 + cp * 0.6;
+                const fit = !aggressive && AIX.on(p.team, 'cagefit');
+                const cp = fit ? realSupport(p, x, y) : cagePotential(p, x, y);
+                const rc = fit ? reachers(x, y, p.team) : 0;
+                let s = (toGo(p.x, p.team) - toGo(x, p.team)) * (aggressive ? 3 : 1.5) - tzFor(x, y, p.team) * 5 - oppNear(x, y, p.team, 2) * 0.6 + (fit ? supportValue(p.team, cp, rc) : cp * 0.6);
                 // a breakaway: within a turn's run of the end zone and few of them can get there to stop it
                 if (toGo(x, p.team) <= p.ma + 2) s += Math.max(0, 3 - threatAt(x, y, p.team)) * 1.5;
                 return s - edgeRisk(x, y, p.team, p.id) * 6 - Math.min(4, reachers(x, y, p.team)) * (aggressive ? 0.4 : cp >= 3 ? 0.6 : 1.2);
@@ -22926,6 +22966,7 @@
                 return best && !best.here ? best : null;
             }
             function carrierPick(moves, p) {
+                supCtx = null;
                 if (state.aiStalling && state.turn[p.team] < TURNS) return stallPick(moves, p);
                 const aggressive = state.turn[p.team] >= TURNS;
                 const marked = tzFor(p.x, p.y, p.team) > 0;

@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.60 (28 Oct 2026)
+- **Improved (AI):** the computer's ball carrier now weighs up how well the rest of the team can protect it before choosing where to stop. It still makes breaks through gaps, but it counts only team-mates who can really get next to it this turn without dice (not anyone within range, as before). That support counts for more the more opponents could reach it. It now sometimes stops a square or two short so the team can surround it. In testing it left the carrier on its own less often after a run (33% of the time, down from 43%) and lost the ball the next turn a little less. Over 144 test matches it scored 136 touchdowns to 110 against the old AI and won 59 to 41.
+
 ## v3.59 (28 Oct 2026)
 - **Improved:** online tournaments need the organiser online much less.
   - **Computer ties:** ties between two computer teams are now simmed as soon as their round comes up, so nobody waits for the organiser to do it.
