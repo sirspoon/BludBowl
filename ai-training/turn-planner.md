@@ -93,3 +93,14 @@ the carrier (or a hand-off or pass) is the risky thing. Switch: `tplan`.
 - Results against v3.65: 34-37 touchdowns, 13-15 wins over 48, then 84-82, 29-33 over 96: 118-119, 42-48 in all;
   casualties 233-192, turnovers 556-568. Level, as expected for a reorder with no new judgement.
 - What's left: much of the remaining gap is the cage, which can only form after the carrier moves (stage 2).
+
+## Stage 2 (Oct 2026): done, not released (`turn-planner-stage2.patch`, which includes stage 1)
+`cagefirst`: when our carrier is about to move (step 7 of `choose0()`), its stopping square (`carrierPick`) is worked
+out once and kept for the turn (`cageDest`); free, unmarked team-mates step without dice into the diagonal squares
+round it (not across the carrier's route), and the carrier comes in last. Not for a touchdown run or the last turn.
+- `bb-turnorder.js`: free moves still to come after the first risky action 40 -> 37% (coaches 34%), team-mates left
+  when a turnover happens 3.0 -> 2.9 (2.2). `bb-cages.js`: team-mates next to the carrier at the end of the turn
+  1.8 -> 2.0 (corners 1.38), the ball lost by the end of their next turn 26%.
+- Results against v3.65 (stages 1 and 2): 42-43 touchdowns, 15-14 wins, turnovers 178-171 over 48. Level.
+- So far the reordering makes the play look more like the coaches' without making it stronger. The pay-off the plan
+  is meant to unlock is stage 3 (re-rolls that know what's left of the turn) and stage 4 (more risk at the end).
