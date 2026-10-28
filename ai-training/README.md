@@ -520,3 +520,17 @@ direction they come from, and where the carrier's team-mates within 3 squares st
 - Next idea: judge reach the real way. Work out once per decision where each opponent can actually get next turn (a
   path round our players, dodges counted) and have the carrier stop, and the support stand, so that few of them have an
   easy way in: the team between the carrier and the opposition, which is what the coaches' pictures show.
+
+### Real reach (`realreach`, v3.65)
+`oppReach(me)` runs the game's own route-finding (`getValidMoves`) for each opponent as if it were their turn (full
+move, two Rushes, a prone player standing first), round every player on the pitch and with the dodges out of our
+tackle zones in the odds; `realDanger(me, x, y)` adds up each opponent's best chance of reaching a free square next to
+(x, y). The carrier's stopping square (`carrierScore`, `dangerW` 1.3) uses it in place of `reachers` (as the crow flies,
+which counts opponents walled off by our players too).
+- Carrier part alone: 49-37 touchdowns, 20-14 wins over 48; then 101-83, 36-31 over 96; 150-120, 56-45 in all,
+  turnovers 558-585. Released.
+- With `shieldPlan` as well (off: AIP `shield` 1): once the carrier has stopped, the free team-mate whose dice-free move
+  cuts the most real danger steps there first (gain 0.35 or more). It moved the support the coaches' way (64% of
+  team-mates within 3 towards the threat, 15% on the far side; was 58 / 20; coaches 71 / 12) and the ball was lost a
+  little less (25% v 31%), but results were 43-28, 20-10 over 48 then 77-83, 30-35 over 96 (120-111, 50-45), no better
+  than the carrier part alone, and it costs about half a second's thinking a turn. Left off.

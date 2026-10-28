@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.64</title>
+    <title>BludBowl 3.65</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.64</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.65</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -22899,6 +22899,42 @@
                 return state.players.filter(q => q.team !== team && onPitch(q) && !q.isStunned && !q.isDistracted
                     && Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) - 1 <= q.ma + 2 - (q.isDown ? 3 : 0)).length;
             }
+            // (realreach) where each opponent could really get to next turn: the game's own route-finding, as if it were their
+            // turn (a full move and two Rushes; a prone player stands up first), going round every player on the pitch, with the
+            // dodges out of our tackle zones in the odds. Worked out once for a set of positions. id -> Map('x,y' -> chance).
+            let reachMemo = null;
+            function oppReach(me, only) {
+                const key = me + ':' + (only ? [...only].join(',') : '') + ':' + state.players.map(q => onPitch(q) ? q.id + '@' + q.x + ',' + q.y + (q.isDown ? 'd' : '') + (q.isStunned ? 's' : '') : '').join(';');
+                if (reachMemo && reachMemo.key === key) return reachMemo.m;
+                const m = [];
+                state.players.forEach(q => {
+                    if (q.team === me || !onPitch(q) || q.isStunned || q.isDistracted || (only && !only.has(q.id))) return;
+                    const keep = { r: q.remainingMA, ru: q.rushes, h: q.hasActed, u: q.usedSkills };
+                    q.remainingMA = q.isDown ? Math.max(0, q.ma - 3) : q.ma; q.rushes = 2; q.hasActed = false; q.usedSkills = [];
+                    let ms = [];
+                    try { ms = getValidMoves(q); } catch (e) {} finally { q.remainingMA = keep.r; q.rushes = keep.ru; q.hasActed = keep.h; q.usedSkills = keep.u; }
+                    const mm = new Map(); mm.set(q.x + ',' + q.y, 1);
+                    ms.forEach(v => { const k = v.x + ',' + v.y, pr = v.prob / 100; if (pr > (mm.get(k) || 0)) mm.set(k, pr); });
+                    m.push({ q, mm });
+                });
+                reachMemo = { key, m };
+                return m;
+            }
+            // how many of them could really get next to (x, y) next turn: each opponent's best chance of reaching a free square beside it
+            function realDanger(me, x, y, selfId, only) {
+                let s = 0;
+                for (const { q, mm } of oppReach(me, only)) {
+                    let best = 0;
+                    for (let dx = -1; dx <= 1 && best < 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+                        if (!dx && !dy) continue;
+                        const ax = x + dx, ay = y + dy; if (ax < 0 || ay < 0 || ax >= CFG.cols || ay >= CFG.rows) continue;
+                        const o = getPlayer(ax, ay); if (o && o.id !== selfId && o.id !== q.id) continue;
+                        const pr = mm.get(ax + ',' + ay) || 0; if (pr > best) best = pr;
+                    }
+                    s += best;
+                }
+                return s;
+            }
             // how much it hurts to leave this player where a blitz can reach them: valuable, flimsy players most
             function exposureCost(p) {
                 const cost = playerCost(p);
@@ -22958,11 +22994,13 @@
             function carrierScore(p, x, y, aggressive) {
                 const fit = !aggressive && AIX.on(p.team, 'cagefit');
                 const cp = fit ? realSupport(p, x, y) : cagePotential(p, x, y);
-                const rc = fit ? reachers(x, y, p.team) : 0;
+                const real = !aggressive && AIX.on(p.team, 'realreach');
+                const dz = real ? realDanger(p.team, x, y, p.id) * AIX.p(p.team, 'dangerW', 1.3) : null;   // (realreach) in place of the crow-flies count
+                const rc = fit ? (real ? dz : reachers(x, y, p.team)) : 0;
                 let s = (toGo(p.x, p.team) - toGo(x, p.team)) * (aggressive ? 3 : 1.5) - tzFor(x, y, p.team) * 5 - oppNear(x, y, p.team, 2) * 0.6 + (fit ? supportValue(p.team, cp, rc) : cp * 0.6);
                 // a breakaway: within a turn's run of the end zone and few of them can get there to stop it
                 if (toGo(x, p.team) <= p.ma + 2) s += Math.max(0, 3 - threatAt(x, y, p.team)) * 1.5;
-                return s - edgeRisk(x, y, p.team, p.id) * 6 - Math.min(4, reachers(x, y, p.team)) * (aggressive ? 0.4 : cp >= 3 ? 0.6 : 1.2);
+                return s - edgeRisk(x, y, p.team, p.id) * 6 - Math.min(4, real ? dz : reachers(x, y, p.team)) * (aggressive ? 0.4 : cp >= 3 ? 0.6 : 1.2);
             }
             // stalling: may we hold the ball back instead of scoring this turn?
             function stallOK(c, me) {
@@ -23666,6 +23704,31 @@
                 const mine = state.players.filter(q => q.team === me && onPitch(q));
                 return agileTeam(me) || (mine.some(q => hasSk(q, 'Pass') || (q.pa != null && q.pa <= 2)) && mine.some(q => hasSk(q, 'Catch')));
             }
+            function shieldPlan(me, act, c) {
+                // the opponents who could get at the carrier now, and how much
+                const all = oppReach(me), threats = new Set();
+                const near = (mm) => { for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if ((dx || dy) && (mm.get((c.x + dx) + ',' + (c.y + dy)) || 0) > 0.05) return true; return false; };
+                all.forEach(({ q, mm }) => { if (near(mm)) threats.add(q.id); });
+                if (!threats.size) return null;
+                const now = realDanger(me, c.x, c.y, c.id, threats);
+                if (now < AIX.p(me, 'shieldMin', 0.5)) return null;
+                const movers = act.filter(q => q.id !== c.id && !q.isDown && canReposition(q, me) && tzFor(q.x, q.y, me) === 0 && cheb(q, c) <= 7)
+                    .sort((a, b) => cheb(a, c) - cheb(b, c)).slice(0, 4);
+                let best = null;
+                movers.forEach(q => {
+                    movesFor(q).forEach(m => {
+                        if (m.prob < 100 || m.isRush || cheb(m, c) > 3 || cheb(m, c) === 0) return;
+                        const ox = q.x, oy = q.y; q.x = m.x; q.y = m.y;
+                        let after; try { after = realDanger(me, c.x, c.y, c.id, threats); } finally { q.x = ox; q.y = oy; }
+                        // (the gain, less a little for exposing a valuable player and for walking further than needed)
+                        const g = now - after - tzFor(m.x, m.y, me) * 0.15 * exposureCost(q) - m.path.length * 0.01;
+                        if (!best || g > best.g) best = { q, m, g };
+                    });
+                });
+                if (!best || best.g < AIX.p(me, 'shieldGain', 0.35)) return null;
+                const bx = best.m.x, by = best.m.y;
+                return { pid: best.q.id, kind: 'move', pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
+            }
             function carrierBlitz(me, act, carrier) {
                 if (!carrier || carrier.team === me || !onPitch(carrier) || carrier.isDown || state.blitzUsed) return null;
                 let best = null;
@@ -23919,6 +23982,13 @@
                     const m = carrierPick(movesFor(carrier), carrier);
                     if (m) return { pid: carrier.id, kind: 'move', pick: carrierPick };
                     tried.add(carrier.id);
+                }
+                // (realreach, off: AIP shield 1) with the carrier where it will stay this turn: a free team-mate steps (without dice)
+                // to where its body most cuts the opponents' real routes to the carrier - the team between the carrier and them.
+                // It moved the support the coaches' way but didn't win more than the carrier part alone, and costs time to think.
+                if (carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && AIX.on(me, 'realreach') && AIX.p(me, 'shield', 0) && (!act.includes(carrier) || tried.has(carrier.id) || carrier.hasActed)) {
+                    const sh = shieldPlan(me, act, carrier);
+                    if (sh) return sh;
                 }
                 // (safepos: every move with no dice at all goes first, so a failed dodge or rush can't stop the rest moving)
                 const cage = (AIX.on(me, 'safepos') && formationPlan(me, act, true, false, true)) || formationPlan(me, act, true);

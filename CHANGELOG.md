@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.65 (28 Oct 2026)
+- **Improved (AI):** when the computer's ball carrier chooses where to stop, it now works out where each opponent could really get to next turn: their actual route round the players on the pitch, with the dodges they'd need to get out of tackle zones and their Rushes, using the game's own movement rules. Before, it simply counted every opponent within running distance as the crow flies, even ones walled off by its team. So it now stops where its team-mates are really between it and the opposition, as strong human coaches' carriers do. Over 144 test matches against v3.64: 150-120 touchdowns, 56-45 wins, and fewer turnovers.
+
 ## v3.64 (28 Oct 2026)
 - **Improved (AI):** the computer now makes use of its line when it receives, as strong human coaches do. On a turn when the loose ball is in no danger it throws its good blocks first and picks the ball up afterwards, so knocking the markers over frees its players to move without dodging (before, it grabbed the ball first and then dodged players out of contact to build the cage). Agile teams (elves, Amazons) now block with a player who is already marked, instead of dodging away. With that in place it puts seven on the line when receiving (five for teams without many sturdy players). In testing, players starting next to an opponent blocked 59% of the time (strong coaches 58%, before 45%) and dodged away 8% (coaches 3%, before 16%), and the computer threw about 33 blocks a match instead of 30. Over 144 test matches against v3.63: 136-122 touchdowns, 43-40 wins, 204-172 casualties. Part of [#26](https://github.com/sirspoon/BludBowl/issues/26).
 
