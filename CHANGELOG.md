@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.52 (28 Oct 2026)
+- **Improved:** the Vampires have new player figures in the detailed style, keeping their old look and colours ([#13](https://github.com/sirspoon/BludBowl/issues/13)).
+  - **Thrall:** fair-haired and tired, in a white shirt with a red neckerchief, with bite marks on his neck.
+  - **Vampires:** pale, with red eyes, fangs, slicked black hair in a widow's peak, and tall-collared cloaks in the team colour falling open at the front. The Runner has a purple tunic and silver circlet, and the Thrower a dark waistcoat and cravat.
+  - **Blitzer:** a horned cowl in the team colour and grey plate armour.
+  - **Vargheist:** a hunched bat-beast with dark wings, big ears, red eyes and fangs.
+
 ## v3.51 (28 Oct 2026)
 - **Improved:** the Lizardmen have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)). Their scales now have their own colours, and the team colours go on their loincloths and crests.
   - **Skink:** blue, with bulging yellow eyes, a wide grin, a frilled crest and a curling tail.
