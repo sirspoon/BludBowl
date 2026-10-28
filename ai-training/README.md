@@ -385,3 +385,27 @@ teams; 81 kick-offs). "Back" counts squares behind the team's own side of the li
   179 earlier (and 37 of 104 when ahead, 9 of 129 level, 0 of 14 behind), to stop a quick touchdown before half time
   or the end. Skaven kick a little deeper than others (3.6 players 4+ back).
 - The AI's set-ups barely change by team or by the clock.
+
+### How the receivers answer the kicking set-up
+The kicking team sets up first, so the receivers can react. `fumbbl-receive.py` scores each receiving set-up against
+the kickers it really faced, and against kicking set-ups from other kick-offs (the baseline: the same shape, no reaction).
+247 FUMBBL kick-offs; the BludBowl computer (v3.62, 81 kick-offs) alongside.
+
+| | coaches: real v baseline | BludBowl: real v baseline |
+|---|---|---|
+| kickers' line players with a 2+ dice block on them for turn 1 (of ~3) | 2.28 v 1.95 | 0.94 v 1.13 |
+| kickers' line players with 0 / 1 / 2 / 3+ receivers next to them | 0.09 / 0.39 / 1.11 / 1.49 v 0.13 / 0.67 / 1.21 / 1.11 | 0.91 / 0.42 / 1.09 / 0.58 |
+| receivers' ST4+ line players facing a soft kicker (ST3 or less, no Block) | 57% v 49% | 11% v 30% |
+| ...facing an ST4+ kicker | 20% v 22% | 91% v 66% |
+| a wide zone the kickers left empty gets a receiver | 93% v 86% | (kickers never leave one) |
+
+- Coaches line up so each of the kickers' three line players has two or three receivers next to it (one blocks, the
+  others assist), which is what gives them more 2-dice blocks than their shape alone would. They leave almost none
+  unmarked (0.09 a kick-off), and they don't avoid the kickers' big players either: 76% of ST4+ or Guard line players
+  get two or more receivers next to them.
+- They put their strong players opposite the soft kickers.
+- They fill a wide zone the kickers leave empty.
+- No sign that the backfield moves to where the kickers' screen is thin (the row-by-row correlation is the same as the
+  baseline, +0.21).
+- The computer, with only three on the line, leaves about one of the kickers' line players unmarked each kick-off, gets
+  fewer 2-dice blocks than chance, and lines its strong players up against the kickers' strong players.
