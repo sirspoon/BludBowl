@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.65</title>
+    <title>BludBowl 3.66</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.65</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.66</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -22593,6 +22593,7 @@
             try { const s = JSON.parse(localStorage.getItem('bb-ai') || '{}'); on[0] = !!s[0]; on[1] = !!s[1]; } catch (e) {}
             const save = () => { try { localStorage.setItem('bb-ai', JSON.stringify(on)); } catch (e) {} };
             const isAI = t => (t === 0 || t === 1) && !!on[t];
+            let cageDest = null;   // (cagefirst) where our carrier will stop this turn, once worked out
             let started = false, internal = false, plan = null, tried = new Set(), turnKey = '', pk = null, pt = 0, annSince = 0;
             function reset() { started = false; plan = null; tried = new Set(); turnKey = ''; pk = null; pt = 0; annSince = 0; paused = false; }
             let speed = 1;
@@ -23752,7 +23753,52 @@
                 });
                 return best && best.s > 0 ? best : null;
             }
+            // ---- turn planning, stage 1 (tplan; ai-training/turn-planner.md): the same choices, played safest-first ----
+            // choose0() picks what matters most right now. When that is risky (a dodge or Rush, the ball, a foul...), ask again
+            // with that player set aside, and do the first block or dice-free move first - the risky part waits for the end of the
+            // turn, as strong coaches play it, so a failure costs fewer players' actions.
+            const RISKY_KINDS = ['pickup', 'secure', 'pass', 'handoff', 'foul', 'ttm', 'ktm', 'bomb', 'chainsaw', 'vomit', 'gaze', 'bnc', 'eat', 'hail'];
+            function planRisk(pl) {
+                const p = pl && pl.pid != null ? getPlayerById(pl.pid) : null;
+                if (!p || RISKY_KINDS.includes(pl.kind)) return 'risky';
+                if (pl.kind === 'block' || pl.kind === 'stab') return 'block';
+                if (pl.kind === 'blitz' || pl.kind === 'move') {
+                    if (p.isDown && p.ma <= 2) return 'risky';   // a 4+ to stand up
+                    let m = null; try { m = pl.pick ? pl.pick(movesFor(p), p) : null; } catch (e) { return 'risky'; }
+                    if (pl.kind === 'blitz') return !m || m.prob >= 100 ? 'block' : 'risky';
+                    return !m || m.prob >= 100 ? 'free' : 'risky';
+                }
+                return 'risky';
+            }
             function choose() {
+                const first = choose0(), me = state.activeTeam;
+                if (!first || first.pid == null || !AIX.on(me, 'tplan') || state.turn[me] >= TURNS || planRisk(first) !== 'risky') return first;
+                const stall = state.aiStalling, carrier = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                const ourC = carrier && carrier.team === me && onPitch(carrier) ? carrier : null;
+                // a risky move by our carrier (or a hand-off, a pass): the cage round where it stands now would be wasted - those wait
+                const byCarrier = ourC && (first.pid === ourC.id || first.kind === 'handoff' || first.kind === 'pass');
+                const added = []; let alt = null;
+                try {
+                    const aside = id => { if (!tried.has(id)) { tried.add(id); added.push(id); } };
+                    aside(first.pid);
+                    for (let i = 0; i < AIX.p(me, 'tplanTries', 4) && !alt; i++) {
+                        const c = choose0();
+                        if (!c || c.pid == null) break;
+                        const r = planRisk(c);
+                        let ok = r !== 'risky';
+                        if (ok && byCarrier && r === 'free') {
+                            const q = getPlayerById(c.pid); let m = null; try { m = c.pick ? c.pick(movesFor(q), q) : null; } catch (e) {}
+                            if (m && cheb(m, ourC) <= 2) ok = false;
+                        }
+                        if (ok) alt = c; else aside(c.pid);
+                    }
+                } catch (e) { console.error('tplan', e); alt = null; }
+                finally { added.forEach(id => tried.delete(id)); }
+                if (!alt) { moveMemo = new Map(); state.aiStalling = stall; return first; }
+                state.aiStalling = stall; moveMemo = new Map();
+                return alt;
+            }
+            function choose0() {
                 moveMemo = new Map();
                 state.aiStalling = false;
                 const me = state.activeTeam, them = other(me), act = avail(me);
@@ -23979,7 +24025,34 @@
                 }
                 // move our ball carrier forward, then build the cage round him
                 if (carrier && carrier.team === me && act.includes(carrier)) {
-                    const m = carrierPick(movesFor(carrier), carrier);
+                    let m = carrierPick(movesFor(carrier), carrier);
+                    // (cagefirst; turn planner stage 2) the cage goes to where the carrier will stop before the carrier moves, as strong
+                    // coaches do: the stopping square is worked out once and kept for the turn, free team-mates step (without dice) into
+                    // the diagonal squares round it, and the carrier comes in last
+                    if (m && AIX.on(me, 'cagefirst') && m.x !== endX(me) && !lastTurn) {
+                        const tk = state.half + ':' + me + ':' + state.turn[me] + ':' + carrier.id;
+                        if (cageDest && cageDest.key === tk) {
+                            const keep = movesFor(carrier).find(q => q.x === cageDest.x && q.y === cageDest.y);
+                            if (keep && keep.prob >= Math.min(100, m.prob)) m = keep;
+                        } else cageDest = { key: tk, x: m.x, y: m.y };
+                        if (m.x === cageDest.x && m.y === cageDest.y) {
+                            const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([dx, dy]) => ({ x: m.x + dx, y: m.y + dy })).filter(c => inPitch(c.x, c.y));
+                            let pre = null;
+                            act.forEach(q => {
+                                if (q.id === carrier.id || q.isDown || !canReposition(q, me) || tzFor(q.x, q.y, me) > 0 || corners.some(c => c.x === q.x && c.y === q.y)) return;
+                                movesFor(q).forEach(mv => {
+                                    if (mv.prob < 100 || mv.isRush || !corners.some(c => c.x === mv.x && c.y === mv.y) || getPlayer(mv.x, mv.y)) return;
+                                    // (not across the carrier's own route in)
+                                    if ((m.path || []).some(st => st.x === mv.x && st.y === mv.y)) return;
+                                    const v = -mv.path.length - tzFor(mv.x, mv.y, me) * 2 - edgeRisk(mv.x, mv.y, me, q.id) * 3;
+                                    if (!pre || v > pre.v) pre = { q, mv, v };
+                                });
+                            });
+                            if (pre) { const px = pre.mv.x, py = pre.mv.y; return { pid: pre.q.id, kind: 'move', pick: ms => ms.find(x => x.x === px && x.y === py) || null }; }
+                            const dx0 = m.x, dy0 = m.y;
+                            return { pid: carrier.id, kind: 'move', pick: (ms, p) => ms.find(x => x.x === dx0 && x.y === dy0) || carrierPick(ms, p) };
+                        }
+                    }
                     if (m) return { pid: carrier.id, kind: 'move', pick: carrierPick };
                     tried.add(carrier.id);
                 }
@@ -24534,7 +24607,10 @@
                 if (rr <= 0) return false;
                 // (rrturn) a failure that ends the turn costs everyone still to act their go: worth a re-roll when that's
                 // several players (the last re-roll is kept back early in the half unless most of the team would lose out)
-                if (AIX.on(me, 'rrturn')) {
+                // (rr2) strong coaches save their re-rolls early in a half (42% of failures re-rolled in turns 1-2, against 89% in
+                // turns 7-8; ai-training/README.md, "Team re-rolls"): no turn-ending or big-stock re-rolls in the first two turns
+                const save = AIX.on(me, 'rr2') && AIX.p(me, 'rrSave', 0) && turn <= 2;   // (off: level in testing even with the turn ordered)
+                if (AIX.on(me, 'rrturn') && !save) {
                     const p = ctx ? ctx.player : state.combat && state.combat.atk;
                     if (endsTurn === undefined && ctx) endsTurn = p && p.team === me && ['DODGE', 'RUSH', 'PICKUP', 'JUMP', 'LEAP'].includes(ctx.type);
                     if (endsTurn && p) {
@@ -24544,7 +24620,10 @@
                 }
                 if (critical === undefined && ctx) {
                     const p = ctx.player, c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
-                    critical = (c && c.id === p.id) || ['PICKUP', 'CATCH', 'PASS', 'THROW TEAMMATE', 'HAND-OFF', 'HANDOFF'].includes(ctx.type)
+                    // (rr2) a Rush is the roll coaches re-roll most (87%): it's usually the last step to somewhere that matters; a
+                    // catch only counts when it's our own pass (they re-roll catches far less than the computer did)
+                    const r2 = AIX.on(me, 'rr2'), r2c = r2 && AIX.p(me, 'rrCatch', 0), ownPass = !!(state.passData && state.passData.thrower && state.passData.thrower.team === me);
+                    critical = (c && c.id === p.id) || ['PICKUP', 'PASS', 'THROW TEAMMATE', 'HAND-OFF', 'HANDOFF'].includes(ctx.type) || (ctx.type === 'CATCH' && (!r2c || ownPass)) || (r2 && ctx.type === 'RUSH')
                         || (ctx.type === 'LANDING' && c && c.id === p.id)
                         || (c && c.team === me && cheb(p, c) <= 1);   // a cage player going down next to our carrier
                 }
@@ -24555,7 +24634,7 @@
                     if (decisive) return true;
                     if (left <= 2 && rr >= 2) return true;                         // late in the half with re-rolls to spare: use them
                 }
-                if (rr >= 4 && turn <= 1) return true;                        // a big stock: the first turn is free
+                if (rr >= 4 && turn <= 1 && !save) return true;               // a big stock: the first turn is free
                 if (rr - 1 > left / 2) return true;                           // plenty: about one a turn, still one kept back
                 if (rr <= 1) return !!critical && left <= 2;                  // the last one: only to save the ball late on
                 return !!critical;                                            // otherwise only when the ball is at stake
@@ -24575,7 +24654,11 @@
                 const blockCritical = state.ball.carrierId === c.atk.id || state.ball.carrierId === c.def.id || (chosen <= -10 && (state.rr[state.activeTeam] || 0) >= 3);   // the ball at stake (or our blocker going down, with re-rolls to spare)
                 const blockDecisive = (state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && tdThreat(c.def))
                     || (state.ball.carrierId === c.atk.id && toGo(c.atk.x, c.atk.team) <= (c.atk.remainingMA || 0) + 2);
-                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && chosen < 0 && !c.aiRerolled && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) {
+                // (rr2) a block on their ball carrier that won't knock them over: coaches re-roll it half the time (53%)
+                const kdFace = f => f === FACES.POW || (f === FACES.STUMBLE && (!hasSk(c.def, 'Dodge') || hasSk(c.atk, 'Tackle'))) || (f === FACES.BOTH_DOWN && hasSk(c.atk, 'Block') && !hasSk(c.def, 'Block'));
+                const noKd = !friendly && (c.chooser === c.atk.team ? !c.dice.some(kdFace) : !c.dice.every(kdFace));
+                const onCarrier = AIX.on(state.activeTeam, 'rr2') && noKd && chosen >= 0 && state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && (state.rr[state.activeTeam] || 0) > 0;
+                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && !c.aiRerolled && ((chosen < 0 && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) || onCarrier)) {
                     after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); });
                     return;
                 }

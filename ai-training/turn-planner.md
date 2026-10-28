@@ -104,3 +104,14 @@ round it (not across the carrier's route), and the carrier comes in last. Not fo
 - Results against v3.65 (stages 1 and 2): 42-43 touchdowns, 15-14 wins, turnovers 178-171 over 48. Level.
 - So far the reordering makes the play look more like the coaches' without making it stronger. The pay-off the plan
   is meant to unlock is stage 3 (re-rolls that know what's left of the turn) and stage 4 (more risk at the end).
+
+## Stage 3 (Oct 2026): released in v3.66
+The re-roll changes from `rerolls.patch` (`rr2`), now on top of stages 1 and 2. They had been level or worse on the
+old turn order; with the turn ordered they pay:
+- All four (blocks on their carrier, Rushes critical, catches only from our own pass, no turn-ending or big-stock
+  re-rolls in turns 1-2): 35-33, 16-11 over 48, then 70-73, 29-31 over 96: 105-106, 45-42 in all. Level (without the
+  turn planner this was 46-52, 15-22).
+- Blocks on their carrier and Rushes only: 43-29, 19-14 over 48, then 91-70, 38-25 over 96: **134-99 touchdowns,
+  57-39 wins over 144** (about a 2% chance by luck), turnovers 586-599, casualties up (206-162). Released: `tplan`,
+  `cagefirst`, `rr2` with `rrSave` and `rrCatch` off (AIP 1 to switch them on).
+- Still to try: re-roll decisions that look at the rest of the planned turn directly (stage 3 proper), and stage 4.
