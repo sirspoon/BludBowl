@@ -451,3 +451,34 @@ the start of the turn.
 - Results against v3.63: line1 with 5 on the line 38-40 touchdowns, 14-15 wins (48 matches); with 7 on the line
   136-122, 43-40, casualties 204-172 (144). Released with 7 (5 for teams with fewer than six ST4+ or AV9+ players).
   Amazons in the mirror match still hardly block (blocking a Dodge player is rarely worth it), so they still dodge away.
+
+## Cages (Oct 2026)
+`fumbbl-cages.py` (71 replays, 912 turns) and `bb-cages.js` (v3.64, 48 mirror matches, 595 turns): at the end of each
+turn where the moving side's carrier is standing, how its team-mates stand round it and whether the other side has
+the ball (or has scored) by the end of their next turn. Turns just before half time are left out. (FFB switches
+`homePlaying` to the next team before its `turnEnd` report, so the side whose turn ended is taken from the last player
+to act.)
+
+| | coaches | BludBowl |
+|---|---|---|
+| ball lost by the end of their next turn | 15% | 31% |
+| team-mates next to the carrier (diagonal corners) | 1.48 (1.06) | 1.79 (1.23) |
+| all four corners / 3+ corners | 9% / 14% | 5% / 14% |
+| within 2 / within 3 | 2.7 / 3.7 | 2.7 / 3.6 |
+| nearest opponent: next to it / 2 / 3 / 4+ squares | 3 / 15 / 28 / 55% | 12 / 30 / 29 / 29% |
+| opponents within 3 / able to reach it next turn | 1.0 / 6.6 | 2.0 / 7.4 |
+| lost, by nearest opponent 1 / 2 / 3 / 4+ | 74 / 29 / 14 / 10% | 49 / 26 / 39 / 23% |
+| lost, by corners filled 0 / 1 / 2 / 3 / 4 | 18 / 17 / 14 / 6 / 2% | 47 / 32 / 24 / 9 / 0% |
+| scoring range (1-6 to go): next to it, lost | 1.0, 22% | 0.6, 49% |
+
+- The coaches' cages aren't denser than the computer's; their carriers are further from the opposition. Over half
+  the time the nearest opponent is 4+ squares away (the computer: 29%), and the carrier is hardly ever left marked
+  (3% v 12%). Space, more than bodies.
+- When the coaches do build a cage it holds: 3-4 corners lose the ball 2-6% of the time. The computer's 3-4 corner
+  cages hold about as well (0-9%); the difference is in the turns with 0-2 corners (47-24% lost v 18-14%).
+- Holding the ball longer, the coaches' cages fill out (0.9 next to it on the first turn with the ball, 1.6-1.8 after)
+  and move up about 2 squares a turn; the most corners are in the opponents' half (1.4), and the cage thins out near
+  the end zone as players peel off to block and the carrier goes for it.
+- Caveat: the loss rate depends on the defence too. FUMBBL teams are developed (Block, Sure Hands, Guard), the
+  computer plays starting rosters, and its own defence (the other side of a mirror match) goes after the ball hard,
+  so its losses are high at every distance (23% even with no one within 3).
