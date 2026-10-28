@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.55</title>
+    <title>BludBowl 3.56</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -875,6 +875,22 @@
 #net-lobby .nl-opt { display: flex; align-items: center; gap: 8px; } #net-lobby .nl-opt .nl-dim { flex: 0 0 92px; } #net-lobby .nl-opt select { flex: 1; }
 #net-lobby #nl-optsum { margin: 0; font-size: 13px; color: #fde68a; } #net-lobby #nl-optsum.hidden, #net-lobby[data-league="1"] #nl-optsum { display: none; }
 #net-lobby #nl-teams { display: flex; flex-direction: column; gap: 8px; } #net-lobby #nl-teams.hidden { display: none; }
+#net-lobby .nl-share { display: flex; gap: 6px; margin-left: auto; } #net-lobby .nl-share .nl-btn { padding: 6px 10px; font-size: 13px; }
+#net-lobby .nl-room { flex-wrap: wrap; }
+#net-lobby #nl-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#net-lobby .nl-pc { background: #0b1220; border: 1px solid #263247; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+#net-lobby .nl-pc.ready { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e inset; }
+#net-lobby .nl-pc .pc-who { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #94a3b8; }
+#net-lobby .nl-pc b { font-size: 15px; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#net-lobby .nl-pc .pc-team { font-size: 13px; color: #fde68a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#net-lobby .nl-pc .pc-st { font-size: 12px; color: #94a3b8; } #net-lobby .nl-pc.ready .pc-st { color: #86efac; font-weight: 700; }
+#net-lobby #nl-ready.on { background: #14532d; border-color: #22c55e; }
+#net-lobby:not([data-role="guest"]) #nl-ready, #net-lobby[data-league="1"] #nl-ready, #net-lobby[data-league="1"] #nl-cards { display: none; }
+#net-lobby #nl-chatbox { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid #263247; }
+#net-lobby #nl-clog { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 14px; }
+#net-lobby #nl-clog:empty::before { content: 'Chat here while you set up. It carries on into the match log.'; color: #64748b; font-size: 13px; }
+#net-lobby #nl-clog .me b { color: #fbbf24; } #net-lobby #nl-clog .them b { color: #7dd3fc; } #net-lobby #nl-clog div { color: #e2e8f0; overflow-wrap: anywhere; }
+#net-lobby .nl-crow { display: flex; gap: 6px; } #net-lobby .nl-crow input { text-transform: none; letter-spacing: 0; }
 #net-end .ne-text { margin: 0; font-size: 15px; }
 #net-gone { position: fixed; left: 50%; top: 64px; transform: translateX(-50%); z-index: 310; width: min(420px, calc(100% - 32px)); font-family: Inter, system-ui, sans-serif; color: #e2e8f0; } #net-gone.hidden { display: none; }
 #net-gone .ng-card { background: #121a2b; border: 1px solid #263247; border-top: 3px solid #f43f5e; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.6); }
@@ -928,7 +944,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.55</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.56</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -20699,6 +20715,8 @@
             const forgetRoom = () => { try { localStorage.removeItem(ROOM); } catch (e) {} };
             let reopening = false;   // reopening that room: wait for its code to come free rather than picking another
             let token = '', guestToken = '', retryT = null, retryAt = 0, oppName = '';
+            // the room before kick-off: chat, each side's team and whether the guest is ready
+            let lchat = [], meReady = false, oppReady = false, hostTeam = '';
             const NAME = 'bb-net-name';
             const cleanName = n => String(n || '').replace(/\s+/g, ' ').trim().slice(0, 20);
             const myName = () => { try { return cleanName(localStorage.getItem(NAME)); } catch (e) { return ''; } };
@@ -20713,7 +20731,7 @@
             }
             const inMatch = () => live || (role === 'guest' ? shopping : EXIND.open());
             function dropped(why) {
-                const was = !!link; link = null; rtt = null; VOICE.theirs = false; paintMic();
+                const was = !!link; link = null; rtt = null; VOICE.theirs = false; paintMic(); oppReady = false; meReady = false;
                 if (!was) return;
                 paintChip(); paintLobby();
                 if (role === 'guest' && inMatch()) { startRetry(); return; }   // the guest's device keeps trying to get back
@@ -20811,6 +20829,7 @@
             function reopenHost() { try { if (peer) peer.destroy(); } catch (e) {} peer = null; loadPeer().then(hostPeer).catch(() => {}); }
             function open(asHost, joinCode, keepCode) {
                 close();
+                lchat = []; meReady = false; oppReady = false; hostTeam = ''; try { paintChat(); } catch (e) {}
                 role = asHost ? 'host' : 'guest'; code = asHost ? (keepCode || newCode()) : joinCode;
                 if (!asHost && lobbyFmt !== 'std') { lobbyFmt = 'std'; optSum = ''; try { fillPicker($('nl-race'), $('nl-squad')); paintOpts(); } catch (e) {} }   // (until the host says otherwise)
                 version = (($('app-version') || {}).textContent || '').trim();
@@ -21092,6 +21111,9 @@
                 if (m.t === 'pong') { rtt = Math.round(real() - m.at); paintChip(); paintLobby(); return true; }
                 if (m.t === 'bye') { try { if (link) link.close(); } catch (e) {} dropped('The other device has left.'); return true; }
                 if (m.t === 'name') { setOpp(m.name); return true; }
+                if (m.t === 'lchat') { if (live) { if (role === 'host') chatLine(them(), m.text, 1); } else { pushChat(them(), m.text, false); try { sfx('menuClick'); } catch (e) {} } return true; }
+                if (m.t === 'ready') { oppReady = !!m.on; paintLobby(); return true; }
+                if (m.t === 'hteam') { hostTeam = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 60); paintLobby(); return true; }
                 if (m.t === 'lgsum') { peerLeagues = new Set(m.ids || []); sendLeagues(true); offerInvite(); return true; }
                 if (m.t === 'lgdata') {
                     if (m.pack && m.pack.lg) { lastRecv[m.pack.lg.id] = canon(m.pack); peerLeagues.add(m.pack.lg.id); const ch = LEAGUE.merge(m.pack); if (ch || !syncNote) syncNote = `${m.pack.lg.name} synced${oppName ? ' with ' + oppName : ''}.`; paintLobby(); }
@@ -21112,6 +21134,7 @@
                     if (link) { lastSent = {}; link.send({ t: 'lgsum', ids: LEAGUE.sharedIds() }); }
                     if (m.name != null) setOpp(m.name);
                     if (m.v && version && m.v !== version) status(`The two devices are on different versions (${version} here, ${m.v} there). Reload the page on both.`, 'bad');
+                    if (!inMatch()) { oppReady = false; meReady = false; sendHostTeam(); }
                     if (role === 'host') {
                         if (!inMatch()) {
                             guestToken = m.token || '';
@@ -21207,7 +21230,7 @@
             function begin() {
                 live = true; resetSent(); forgetRoom(); PRES.met();
                 if (link && league) link.send({ t: 'fixture', text: fixText(league.fx || league.text, false), side: guestSide, lid: league.fx && league.fx.lid });
-                setTimeout(() => { if (live) log(`  Playing ${escH(themL())}. Double-tap the match log to send them a message.`, 'text-sky-300'); }, 2500);
+                setTimeout(() => { if (!live) return; const pre = lchat.slice(-12); lchat = []; pre.forEach(c => chatLine(c.name, c.text, c.mine ? 0 : 1)); log(`  Playing ${escH(themL())}. Double-tap the match log to send them a message.`, 'text-sky-300'); }, 2500);
                 if (link) link.send({ t: 'start' });
                 paintChip();
             }
@@ -21661,8 +21684,13 @@
                 $('nl-career-row').classList.toggle('hidden', !careerOk(key));
             }
             const wantCareer = () => careerOk(teamOf($('nl-race'), $('nl-squad'))) && $('nl-career').checked;
+            const pickLabel = () => { const sq = $('nl-squad'), rs = $('nl-race'); return sq && sq.value ? sq.selectedOptions[0].textContent : rs && rs.selectedOptions[0] ? `${rs.selectedOptions[0].textContent} (default team)` : ''; };
+            function sendHostTeam() { if (role === 'host' && link && !league && !syncLid) link.send({ t: 'hteam', name: pickLabel() }); paintLobby(); }
+            function setReady(on) { meReady = !!on; if (link) link.send({ t: 'ready', on: meReady }); paintLobby(); }
             function sendTeam() {
                 paintCareer();
+                if (role === 'host') { sendHostTeam(); return; }
+                if (meReady) setReady(false);   // a new pick: ready again once it's settled
                 if (role !== 'guest' || !link || league) return;
                 const key = teamOf($('nl-race'), $('nl-squad')), r = JSON.parse(JSON.stringify(raceFor(key)));
                 if (!wantCareer()) delete r.careerTeamId;   // the guest's team is recorded on the guest's device, if it wants
@@ -21693,9 +21721,17 @@
                 $('nl-code').textContent = role === 'host' ? code : '';
                 $('nl-ping').textContent = link ? `Connected${oppName ? ` to ${oppName}` : ''}${rtt != null ? ` · ${rtt} ms` : ''}` : '';
                 const opp = $('nl-opp');
-                opp.textContent = role === 'host' ? (guestRace ? `${oppName ? oppName + "'s" : "The other player's"} team: ${guestName}` : link ? `Waiting for ${oppName || 'the other player'} to pick a team…` : '') : role === 'guest' && link ? `Pick your team. ${oppName || 'The host'} starts the match.` : '';
+                opp.textContent = role === 'host' ? (guestRace ? (oppReady ? `${oppName || 'The other player'} is ready. Start when you are.` : `Waiting for ${oppName || 'the other player'} to tap Ready…`) : link ? `Waiting for ${oppName || 'the other player'} to pick a team…` : '') : role === 'guest' && link ? (meReady ? `Waiting for ${oppName || 'the host'} to start the match.` : `Pick your team, then tap I'm ready. ${oppName || 'The host'} starts the match.`) : '';
                 const wrongDev = role === 'host' && league && league.fx && league.fx.owner && peerDev && peerDev !== league.fx.owner;
-                $('nl-start').disabled = !(role === 'host' && link && (guestRace || league)) || !!wrongDev;
+                $('nl-start').disabled = !(role === 'host' && link && (league || (guestRace && oppReady))) || !!wrongDev;
+                // the two players, side by side
+                const card = (el, who, name, team, st, ok) => { el.className = 'nl-pc' + (ok ? ' ready' : ''); el.innerHTML = `<span class="pc-who">${who}</span><b>${escH(name)}</b><span class="pc-team">${escH(team || 'Picking a team…')}</span><span class="pc-st">${st}</span>`; };
+                if (link && !league && !((role === 'host' && syncLid) || (role === 'guest' && syncText))) {
+                    const mine = pickLabel();
+                    if (role === 'host') { card($('nl-pc-me'), 'You · host', myName() || 'You', mine, 'Starts the match', true); card($('nl-pc-them'), 'Guest', oppName || 'The other player', guestRace ? guestName : '', oppReady ? '✓ Ready' : guestRace ? 'Not ready yet' : '', oppReady); }
+                    else { card($('nl-pc-me'), 'You', myName() || 'You', mine, meReady ? '✓ Ready' : 'Tap Ready when set', meReady); card($('nl-pc-them'), 'Host', oppName || 'The host', hostTeam, 'Starts the match', true); }
+                }
+                const rb2 = $('nl-ready'); if (rb2) { rb2.classList.toggle('on', meReady); rb2.textContent = meReady ? "✓ Ready (tap to change your mind)" : "I'm ready"; }
                 const syncing = (role === 'host' && syncLid && !league) || (role === 'guest' && syncText && !league);
                 L.dataset.league = league || syncing ? '1' : '';
                 L.dataset.sync = syncing ? '1' : '';
@@ -21760,8 +21796,28 @@
                     open(false, c.slice(0, 3) + '-' + c.slice(3)); paintLobby();
                 };
                 $('nl-join').onclick = join;
+                // opened from a shared link (?join=ORC-4821): straight into that room
+                {
+                    const q = new URLSearchParams(location.search), jc = (q.get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (jc.length >= 5) {
+                        q.delete('join'); try { history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q.toString().replace('nettest=&', 'nettest&').replace(/nettest=$/, 'nettest') : '') + location.hash); } catch (e) {}
+                        setTimeout(() => { openLobby(); $('nl-join-code').value = jc.slice(0, 3) + '-' + jc.slice(3); join(); }, 600);
+                    }
+                }
                 $('nl-join-code').onkeydown = e => { if (e.key === 'Enter') join(); };
                 $('nl-start').onclick = () => start(teamOf(rs, sq));
+                $('nl-ready').onclick = () => setReady(!meReady);
+                $('nl-csend').onclick = lobbySay;
+                $('nl-cin').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); lobbySay(); } };
+                // the room code: copy it, or share a link that opens the game and joins the room
+                const joinLink = () => { const u = new URL(location.href); const keep = ['nettest', 'dev'].filter(k => u.searchParams.has(k)).map(k => [k, u.searchParams.get(k)]); u.search = ''; u.hash = ''; keep.forEach(([k, v]) => u.searchParams.set(k, v)); u.searchParams.set('join', code); return u.toString().replace('nettest=&', 'nettest&'); };
+                const copyText = (t, ok) => { const done = () => status(ok, 'ok'); try { navigator.clipboard.writeText(t).then(done, () => status(t, 'ok')); } catch (e) { status(t, 'ok'); } };
+                $('nl-copy').onclick = () => copyText(code, `Copied the code ${code}. Send it to the other player.`);
+                $('nl-sharelink').onclick = () => {
+                    const url = joinLink(), text = `Play me at Blood Bowl! Room ${code}`;
+                    if (navigator.share) navigator.share({ title: 'BludBowl', text, url }).catch(() => {});
+                    else copyText(url, 'Copied a link to this room. Whoever opens it joins straight in.');
+                };
                 $('nl-leave').onclick = () => {
                     forgetRoom(); reopening = false;
                     const lg = league, sl = syncLid; league = null; syncLid = null; syncNote = ''; close(); status('', ''); paintLobby(); L.classList.add('hidden');
@@ -21803,6 +21859,21 @@
                 text = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 200); if (!text) return;
                 log(`<span class="net-chat-line"><b>💬 ${escH(name)}:</b> ${escH(text)}</span>`, side ? 'text-sky-200' : 'text-amber-200');
                 if (side !== (role === 'host' ? 0 : 1)) { try { sfx('menuClick'); } catch (e) {} }
+            }
+            // ---- chat in the lobby, before kick-off ----
+            function pushChat(name, text, mine) {
+                text = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 200); if (!text) return;
+                lchat.push({ name: name || (mine ? 'You' : them()), text, mine }); if (lchat.length > 60) lchat.shift();
+                paintChat();
+            }
+            function paintChat() {
+                const el = $('nl-clog'); if (!el) return;
+                el.innerHTML = lchat.map(c => `<div class="${c.mine ? 'me' : 'them'}"><b>${escH(c.name)}:</b> ${escH(c.text)}</div>`).join('');
+                el.scrollTop = el.scrollHeight;
+            }
+            function lobbySay() {
+                const inp = $('nl-cin'); const text = String(inp.value || '').trim(); if (!text || !link || live) return;
+                link.send({ t: 'lchat', text }); pushChat(myName() || 'You', text, true); inp.value = '';
             }
             function say(text) {
                 text = String(text || '').trim(); if (!text || !live) return;
@@ -24208,7 +24279,7 @@
 <div id="act-banner" class="hidden"></div>
 <div id="net-lobby" class="hidden" role="dialog" aria-modal="true" aria-labelledby="nl-title">
     <div class="nl-card">
-        <h2 id="nl-title">Two Devices</h2>
+        <h2 id="nl-title">Play a friend</h2>
         <p class="nl-dim">Play a friend on another phone, tablet or computer. One of you hosts; the other joins with the host's room code. Both devices need an internet connection.</p>
         <label class="nl-name"><span class="nl-dim">Your name</span><input id="nl-name" type="text" maxlength="20" autocomplete="nickname" spellcheck="false" placeholder="So they know who they're playing"></label>
         <div class="nl-pick">
@@ -24223,7 +24294,7 @@
             <div id="nl-flist"></div>
             <label class="nl-check nl-fvis"><input type="checkbox" id="nl-visible"> Let recent opponents see when I'm online and invite me</label>
         </div>
-        <div class="nl-room"><span class="nl-dim">Room code</span><b id="nl-code"></b></div>
+        <div class="nl-room"><span class="nl-dim">Room code</span><b id="nl-code"></b><span class="nl-share"><button type="button" id="nl-copy" class="nl-btn">Copy code</button><button type="button" id="nl-sharelink" class="nl-btn">Share link</button></span></div>
         <p id="nl-status" aria-live="polite"></p>
         <p id="nl-ping" class="nl-dim"></p>
         <div id="nl-teams" class="hidden">
@@ -24242,9 +24313,12 @@
                 <label class="nl-opt"><span class="nl-dim">Inducements</span><select id="nl-ind"></select></label>
             </div>
             <p id="nl-optsum" class="hidden"></p>
+            <div id="nl-cards"><div class="nl-pc" id="nl-pc-me"></div><div class="nl-pc" id="nl-pc-them"></div></div>
+            <button type="button" id="nl-ready" class="nl-btn nl-go">I'm ready</button>
             <p id="nl-opp"></p>
             <button type="button" id="nl-start" class="nl-btn nl-go" disabled>Start match</button>
             <p class="nl-dim nl-hostonly">You play the left-hand team and start the match from this device; the other player picks their own team on theirs.</p>
+            <div id="nl-chatbox"><div id="nl-clog" aria-live="polite"></div><div class="nl-crow"><input id="nl-cin" type="text" maxlength="200" enterkeyhint="send" placeholder="Say hello…" aria-label="Message"><button type="button" id="nl-csend" class="nl-btn">Send</button></div></div>
         </div>
         <button type="button" id="nl-leave" class="nl-btn nl-back">Close</button>
     </div>

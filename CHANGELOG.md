@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.56 (28 Oct 2026)
+- **Improved:** the Play a friend room (two-device matches) before kick-off:
+  - **Both players side by side:** each one's name and chosen team, which updates as they pick.
+  - **Ready:** the guest taps I'm ready, and the host's Start match unlocks once they have. Changing team takes the tick off again.
+  - **Chat while you set up:** messages carry on into the match log once the game starts.
+  - **Copy code** and **Share link** buttons by the room code. The link opens the game and joins the room straight away, so there's no code to type.
+
 ## v3.55 (28 Oct 2026)
 - **New:** an **Online** button on the main menu brings together everything played with friends on their own devices: Play a friend (the old Two Devices), shared leagues, and a place for online tournaments (coming next). The League and Tournaments buttons are now for leagues and tournaments on this device. Shared leagues are listed on the Online screen, and New shared league starts one there.
 - **Tournaments:** the budget is now one limit for every team, with new 1,300k, 1,400k and 1,500k options. Your own teams must fit it: if a team spends more, or breaks its tier's skill-point rules, it can't enter, and the reason is shown. If a team is changed after entering so it no longer fits, its ties can't be played until it's fixed.
