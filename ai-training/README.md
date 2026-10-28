@@ -351,5 +351,5 @@ blocked again next turn 36% of the time against 25% for those who stayed (a link
   (at most 2 tackle zones there) to cancel that assist. On the six strength teams: blocks 30.0 → 33.3 per team per match,
   1-die 1.9 → 2.0, 2-dice 25.2 → 28.2 (`follow-ups.js` now prints blocks by dice). Against the AI with neither, on 12
   teams: blocks 29.6 v 21.2 per team per match, 128-134 touchdowns, 41-43 wins (60 drawn), casualties 146-134,
-  turnovers 555-515 over 144 matches. Level: the computer blocks about as often as the FUMBBL coaches' lower range now,
+  turnovers 555-515 over 144 matches. Level: the computer blocks more (still short of the FUMBBL coaches' 46),
   but it doesn't win more for it.
