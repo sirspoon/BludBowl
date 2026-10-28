@@ -81,3 +81,15 @@ the key sequence (the pick-up, the hand-off, the last Rush in) is the one to spe
 - **Dependencies:** a missed one (say, a player moving away before giving the assist its block needs) would show up
   as worse results; the turn-order numbers and a few drawn-out turns would catch it.
 - **The game itself:** nothing changes outside the AI, so two-device play, replays and the game rules aren't touched.
+
+## Stage 1 (Oct 2026): done, not released (`turn-planner-stage1.patch`)
+`choose()` became a layer over the old one (now `choose0()`): when the top choice is risky (`planRisk`: a dodge or
+Rush on the way, a pick-up, pass, hand-off, foul and the like), it asks again with that player set aside (up to four
+times, `tplanTries`) and does the first block or dice-free move first; moves to within 2 of our carrier wait while
+the carrier (or a hand-off or pass) is the risky thing. Switch: `tplan`.
+- `bb-turnorder.js`: dodges and Rushes 0.80 -> 0.87 of the way through the turn (coaches 0.79), pick-ups 0.40 -> 0.56
+  (0.80), free moves still to come after the first risky action 53 -> 40% (34%), team-mates left when a turnover
+  happens 3.3 -> 3.0 (2.2). No extra thinking time to speak of.
+- Results against v3.65: 34-37 touchdowns, 13-15 wins over 48, then 84-82, 29-33 over 96: 118-119, 42-48 in all;
+  casualties 233-192, turnovers 556-568. Level, as expected for a reorder with no new judgement.
+- What's left: much of the remaining gap is the cage, which can only form after the carrier moves (stage 2).
