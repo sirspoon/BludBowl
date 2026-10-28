@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.63 (28 Oct 2026)
+- **Improved (AI):** the computer sets up for kick-offs more like strong human coaches (from 71 FUMBBL replays). Kicking, it puts three cheap linemen in the middle of the line and a screen two or three squares back across the whole width, instead of six players far back; it still drops deep when the other side has only one turn left in the half. Receiving, it puts five on the line instead of three, placed so each of the kickers' line players has two or three of ours next to it (two-dice blocks on the first turn), with its strongest players opposite the kickers' weakest, plus a player in each wide zone, two ball handlers just behind and a returner. It now also uses these set-ups when it's short of players. Over 48 test matches the results were level with the old set-ups (37-34 touchdowns, 16-14 wins). Part of [#26](https://github.com/sirspoon/BludBowl/issues/26).
+
 ## v3.62 (28 Oct 2026)
 - **Fixed:** the close-up replay of a pass or Throw Team-mate now shows the ball bouncing where it really went. Before, after an off-target pass, a dropped catch, a fumble or a crash landing, the replay always bounced the ball off to one side, so when it zoomed back out the ball was somewhere else. The game now records each bounce and throw-in as it happens and the replay plays them back, including a throw-in from the crowd or a player catching the bouncing ball, and the replay ends over the ball's real square.
 

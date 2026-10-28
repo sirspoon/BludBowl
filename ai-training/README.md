@@ -409,3 +409,20 @@ the kickers it really faced, and against kicking set-ups from other kick-offs (t
   baseline, +0.21).
 - The computer, with only three on the line, leaves about one of the kickers' line players unmarked each kick-off, gets
   fewer 2-dice blocks than chance, and lines its strong players up against the kickers' strong players.
+
+### The new set-ups (`setup2`, v3.63)
+- Kicking (`screen` in `SETUPS`): three cheap linemen in the middle of the line (rows 6-8), a screen at 2-3 back
+  (x 9-10: rows 2, 4, 5, 7, 9, 10, 12) and one player 4 back. `lastTurn` (deep) is kept for the receivers' last turn,
+  which is when the coaches go deep too (32 of 41 when ahead, 4 of 10 level).
+- Receiving (`offence2`): N on the line chosen square by square so each of the kickers' line players gets two or three
+  of ours next to it, strongest opposite softest; a flanker a square back in each wide zone, a pocket, a returner 6 back.
+  Short-handed teams use it too (the squares fill in order).
+- Measured (`bb-setups.js`, `fumbbl-receive.py`): receiving, 2.74 of the kickers' 3 line players can be hit with 2+
+  dice on turn 1 (coaches 2.28, old AI 0.94); our ST4+ players face a soft kicker 94% of the time (old 11%).
+- Results against the old set-ups: with 7 on the line (as the coaches do) 123-139 touchdowns, 41-49 wins over 144
+  matches. Split: the kicking screen alone was level (68-69, 24-26 over 72); the 7-man receiving line alone was worse
+  (54-66, 22-30). `drives.js` showed why: the receivers threw more first-turn blocks (2.6 v 1.6) and knocked more down,
+  but failed far more dodges on turn 1 (8 v 1 in ~90 drives) pulling players out of contact to support the ball, and
+  didn't score more. With 5 on the line (`recvLine`, AIX.p): 59-58, 21-23 over 72; both halves together 37-34, 16-14
+  over 48. Released with 5. The next step would be the receivers' first turn itself: block with the line, move the
+  ball up behind it, and don't dodge out of contact to do it, after which 6-7 on the line may pay.
