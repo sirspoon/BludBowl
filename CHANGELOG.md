@@ -2,6 +2,13 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.51 (28 Oct 2026)
+- **Improved:** the Lizardmen have new player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)). Their scales now have their own colours, and the team colours go on their loincloths and crests.
+  - **Skink:** blue, with bulging yellow eyes, a wide grin, a frilled crest and a curling tail.
+  - **Chameleon Skink:** mottled camouflage green, with turret eyes and a flicking tongue.
+  - **Saurus:** blue with a pale belly, jaws wide open, and heavy gold Aztec armour: pronged shoulder plates, collar, bracers, thigh plates and a gem medallion.
+  - **Kroxigor:** bigger and more armoured, with a crocodile's long blunt snout and raised eyes, a gold brow crown with a feather crest, huge gold shoulder plates and a jewelled chest plate.
+
 ## v3.50 (23 Oct 2026)
 - **Improved:** the Snotlings have new, clearer player figures in the detailed style ([#13](https://github.com/sirspoon/BludBowl/issues/13)), drawn bigger so they're easier to make out: oversized heads, huge ears, toothy grins, iron pot helmets and team rags. The Underworld team's Snotling matches.
   - **Fun-hoppa:** bouncing on a big red-spotted mushroom.
