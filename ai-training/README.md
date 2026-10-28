@@ -13,7 +13,7 @@ Comparing how the computer plays BludBowl with how strong human coaches play on
 | `bb-stats.js` | Plays the BludBowl matches and records those stats (uses the `?simtest` test mode, ~8s a match). |
 | `compare.py` | Prints FUMBBL and BludBowl side by side, overall and (with `--races`) per team. |
 | `fumbbl-collect.py` | Downloads more FUMBBL matches and their stats (one request a second). |
-| `data/fumbbl-replays/` | 24 full FUMBBL replays (Oct 2026): two matches each for Orc, Human, Skaven, Dwarf, Lizardmen, Wood Elf, Chaos Chosen, Shambling Undead, Black Orc, Nurgle, High Elf and Amazon, the best-rated coaches' from the 300 above (both sides of each match are in the file). FUMBBL's own gzipped JSON, unchanged; `index.json` lists them. |
+| `data/fumbbl-replays/` | 71 full FUMBBL replays (Oct 2026), the best-rated coaches' matches from the 300 above: four each for Orc, Human, Skaven, Dwarf, Lizardmen, Wood Elf, Chaos Chosen, Shambling Undead, Black Orc, Nurgle, High Elf and Amazon (Dwarf: all four there are), two each for Khorne, Necromantic Horror, Old World Alliance, Tomb Kings, Chaos Dwarf, Ogre, Imperial Nobility, Bretonnian, Norse, Dark Elf, Vampire and Elven Union (both sides of each match are in the file, so most teams appear more often). FUMBBL's own gzipped JSON, unchanged; `index.json` lists them. |
 | `fumbbl-replays.py` | Downloads a few more replays into `data/fumbbl-replays/` (one every 3 seconds; skips ones already there). |
 | `fumbbl-setups.py` | Kick-off set-ups from those replays: a summary, `--show <race>` draws them, `--bb <file>` summarises BludBowl's the same way. |
 | `bb-setups.js` | The BludBowl computer's kick-off set-ups, from mirror matches, for `fumbbl-setups.py --bb`. |
@@ -367,19 +367,21 @@ blocked again next turn 36% of the time against 25% for those who stayed (a link
   turnovers 555-515 over 144 matches. Level: the computer blocks more (still short of the FUMBBL coaches' 46),
   but it doesn't win more for it.
 
-## Kick-off set-ups (Oct 2026, from 24 FUMBBL replays)
-`fumbbl-setups.py` on the 24 replays (89 kick-offs, each side) against `bb-setups.js` on v3.62 (24 mirror matches, the same
-12 teams; 81 kick-offs). "Back" counts squares behind the team's own side of the line of scrimmage.
+## Kick-off set-ups (Oct 2026, from 71 FUMBBL replays)
+`fumbbl-setups.py` on the 71 replays (247 kick-offs, each side) against `bb-setups.js` on v3.62 (24 mirror matches, 12
+teams; 81 kick-offs). "Back" counts squares behind the team's own side of the line of scrimmage.
 
 | | FUMBBL kicking | BludBowl kicking | FUMBBL receiving | BludBowl receiving |
 |---|---|---|---|---|
-| on the line | 3.0 | 3.0 | 6.4 (5-9 usually) | 3.0 (always) |
+| on the line | 3.1 | 3.0 | 6.5 (5-9 usually) | 3.0 (always) |
 | 1-3 back | 5.2 | 3.2 | 2.5 | 4.5 |
-| 4+ back | 2.0 (none at all in 49 of 89) | 4.4 (6 in 52 of 81) | 1.2 (one returner in 64 of 89) | 2.7 |
+| 4+ back | 2.1 (none at all in 140 of 247) | 4.4 (6 in 52 of 81) | 1.3 (one returner in 177 of 247) | 2.7 |
 
 - Receiving, good coaches put most of the team on the line (6-8), ready to block on the first turn, with two or three
-  just behind and one back to take the kick. The AI always puts exactly 3 on the line.
-- Kicking, they keep a screen 1-3 squares behind the line and few or none deep. The AI usually stands six players 7 back.
-  Skaven are the exception: they kick deep (5 of 11 4+ back), using their speed.
-- All teams; the AI's set-ups barely change by team, while the coaches' do a little (Dwarf, Chaos Dwarf, Nurgle, Old
-  World Alliance and Imperial Nobility kick a little deeper).
+  just behind and one back to take the kick. The AI always puts exactly 3 on the line. Every team does this; the agile
+  ones a little less (Wood Elf 5.1, Skaven 4.7, Elven Union 4.0, Human 5.3 on the line).
+- Kicking, they keep a screen 1-3 squares behind the line and usually nobody deep. The AI usually stands six players 7
+  back. Coaches kick deep (6+ players 4+ back) almost only late in a half: 39 of 65 kick-offs at turn 7-8, against 6 of
+  179 earlier (and 37 of 104 when ahead, 9 of 129 level, 0 of 14 behind), to stop a quick touchdown before half time
+  or the end. Skaven kick a little deeper than others (3.6 players 4+ back).
+- The AI's set-ups barely change by team or by the clock.

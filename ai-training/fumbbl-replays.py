@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Download a few full FUMBBL replays for matches in data/fumbbl-top-coaches.jsonl.gz, politely (one every 3 seconds).
 
-  python3 ai-training/fumbbl-replays.py --races "Orc,Human" --per 2      # the best-rated coaches' matches with those teams
+  python3 ai-training/fumbbl-replays.py --races "Orc,Human" --per 2      # the best-rated coaches' matches with those teams,
+                                                                         # 2 more of each than are already here
   python3 ai-training/fumbbl-replays.py --matches 4746217,4746215       # particular matches
 
 Each replay is saved as data/fumbbl-replays/<replayId>.json.gz (FUMBBL's own gzipped JSON, unchanged), and
@@ -25,6 +26,8 @@ def main():
     ap.add_argument('--matches', default='')
     a = ap.parse_args()
     matches = [json.loads(l)['match'] for l in gzip.open(DATA, 'rt')]
+    ip = os.path.join(OUT, 'index.json')
+    done = {e['match'] for e in json.load(open(ip))} if os.path.exists(ip) else set()
     pick = []
     if a.matches:
         want = {int(x) for x in a.matches.split(',')}
@@ -37,11 +40,10 @@ def main():
         rs.sort(key=lambda x: -x[0]); n = 0
         for _, m in rs:
             if n >= a.per: break
-            if m in pick: continue
+            if m in pick or m['id'] in done: continue   # (--per counts new matches only)
             pick.append(m); n += 1
         if n < a.per: print(f'only {n} matches with {race}', file=sys.stderr)
     os.makedirs(OUT, exist_ok=True)
-    ip = os.path.join(OUT, 'index.json')
     index = json.load(open(ip)) if os.path.exists(ip) else []
     have = {e['replay'] for e in index}
     for m in pick:

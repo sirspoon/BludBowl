@@ -38,6 +38,25 @@
   }
  },
  {
+  "match": 4744546,
+  "replay": 1951723,
+  "date": "2026-10-09",
+  "home": {
+   "race": "Elven Union",
+   "coach": "Thoriin",
+   "rating": 1743,
+   "score": 1,
+   "team": "Les Rateaux Heroiques"
+  },
+  "away": {
+   "race": "Tomb Kings",
+   "coach": "Vatrop",
+   "rating": 1634,
+   "score": 2,
+   "team": "BB bones and roll"
+  }
+ },
+ {
   "match": 4744548,
   "replay": 1951730,
   "date": "2026-10-09",
@@ -54,6 +73,82 @@
    "rating": 1765,
    "score": 0,
    "team": "[IDT18] Antique Jug Collectors"
+  }
+ },
+ {
+  "match": 4744566,
+  "replay": 1951755,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Bretonnian",
+   "coach": "Elyod",
+   "rating": 1756,
+   "score": 0,
+   "team": "[BBT18] Erbs"
+  },
+  "away": {
+   "race": "Khorne",
+   "coach": "MTM",
+   "rating": 1823,
+   "score": 2,
+   "team": "Khorne Krunch BBT18"
+  }
+ },
+ {
+  "match": 4744588,
+  "replay": 1951784,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Dark Elf",
+   "coach": "smeborg",
+   "rating": 1731,
+   "score": 1,
+   "team": "xviii Sknit"
+  },
+  "away": {
+   "race": "Chaos Dwarf",
+   "coach": "Urrghs",
+   "rating": 1630,
+   "score": 1,
+   "team": "BBC Magma Management"
+  }
+ },
+ {
+  "match": 4744594,
+  "replay": 1951797,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Khorne",
+   "coach": "Pugz",
+   "rating": 1586,
+   "score": 1,
+   "team": "Slice N Die"
+  },
+  "away": {
+   "race": "Human",
+   "coach": "Hiyoko",
+   "rating": 1780,
+   "score": 2,
+   "team": "Shire Nero"
+  }
+ },
+ {
+  "match": 4744599,
+  "replay": 1951801,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Imperial Nobility",
+   "coach": "Akindsir",
+   "rating": 1801,
+   "score": 1,
+   "team": "[18a] Kindly Nobbin"
+  },
+  "away": {
+   "race": "Norse",
+   "coach": "Eliminator",
+   "rating": 1674,
+   "score": 0,
+   "team": "ElimiNorse"
   }
  },
  {
@@ -95,6 +190,44 @@
   }
  },
  {
+  "match": 4744629,
+  "replay": 1951837,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Shambling Undead",
+   "coach": "Joost",
+   "rating": 1799,
+   "score": 2,
+   "team": "(BBT18) Eye Gougers"
+  },
+  "away": {
+   "race": "Khorne",
+   "coach": "Dan123456",
+   "rating": 1709,
+   "score": 1,
+   "team": "BT18 Korn Crazies"
+  }
+ },
+ {
+  "match": 4744634,
+  "replay": 1951843,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Bretonnian",
+   "coach": "sirvejlance",
+   "rating": 1768,
+   "score": 0,
+   "team": "BBT18 Brets"
+  },
+  "away": {
+   "race": "Khorne",
+   "coach": "tripio",
+   "rating": 1600,
+   "score": 1,
+   "team": "[BB18] Blood"
+  }
+ },
+ {
   "match": 4744637,
   "replay": 1951849,
   "date": "2026-10-10",
@@ -114,6 +247,139 @@
   }
  },
  {
+  "match": 4744639,
+  "replay": 1951850,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "XtremeXwing",
+   "rating": 1760,
+   "score": 2,
+   "team": "TreeGone"
+  },
+  "away": {
+   "race": "Tomb Kings",
+   "coach": "magicseadog",
+   "rating": 1550,
+   "score": 0,
+   "team": "Rattlin Sabres"
+  }
+ },
+ {
+  "match": 4744662,
+  "replay": 1951878,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Chaos Chosen",
+   "coach": "jnewman",
+   "rating": 1720,
+   "score": 0,
+   "team": "Judge Dredd"
+  },
+  "away": {
+   "race": "Khorne",
+   "coach": "Jormanicus",
+   "rating": 1569,
+   "score": 0,
+   "team": "GeeseLease"
+  }
+ },
+ {
+  "match": 4744677,
+  "replay": 1951897,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Tomb Kings",
+   "coach": "Dan123456",
+   "rating": 1711,
+   "score": 1,
+   "team": "Red Sea Mashers"
+  },
+  "away": {
+   "race": "Human",
+   "coach": "doclystria",
+   "rating": 1758,
+   "score": 1,
+   "team": "[BT17] I Human"
+  }
+ },
+ {
+  "match": 4744705,
+  "replay": 1951921,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "Rib-Goaty",
+   "rating": 1737,
+   "score": 1,
+   "team": "OWA Right There [BBT18]"
+  },
+  "away": {
+   "race": "Nurgle",
+   "coach": "DaCoach",
+   "rating": 1702,
+   "score": 1,
+   "team": "[BT18] DCs Smellies"
+  }
+ },
+ {
+  "match": 4744730,
+  "replay": 1951954,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "gotti8",
+   "rating": 1660,
+   "score": 0,
+   "team": "Auryl OWA"
+  },
+  "away": {
+   "race": "Shambling Undead",
+   "coach": "Joost",
+   "rating": 1810,
+   "score": 2,
+   "team": "(BBT18) Eye Gougers"
+  }
+ },
+ {
+  "match": 4744735,
+  "replay": 1951959,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Imperial Nobility",
+   "coach": "Wyzard",
+   "rating": 1564,
+   "score": 1,
+   "team": "BBT18 Swords and Serfs"
+  },
+  "away": {
+   "race": "Necromantic Horror",
+   "coach": "Malmir",
+   "rating": 1822,
+   "score": 2,
+   "team": "Man's Best Friend"
+  }
+ },
+ {
+  "match": 4744778,
+  "replay": 1952003,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "YangZubr",
+   "rating": 1584,
+   "score": 0,
+   "team": "Alliance_BB18_UA"
+  },
+  "away": {
+   "race": "Amazon",
+   "coach": "Nicodaz",
+   "rating": 1758,
+   "score": 1,
+   "team": "[BBT18] Patxamamazes"
+  }
+ },
+ {
   "match": 4744790,
   "replay": 1952014,
   "date": "2026-10-10",
@@ -130,6 +396,25 @@
    "rating": 1718,
    "score": 1,
    "team": "Lagarto , lagarto"
+  }
+ },
+ {
+  "match": 4744808,
+  "replay": 1952028,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Imperial Nobility",
+   "coach": "Rib-Goaty",
+   "rating": 1730,
+   "score": 1,
+   "team": "Pointy Mug [BBT18]"
+  },
+  "away": {
+   "race": "Old World Alliance",
+   "coach": "XtremeXwing",
+   "rating": 1768,
+   "score": 0,
+   "team": "TreeGone"
   }
  },
  {
@@ -171,6 +456,25 @@
   }
  },
  {
+  "match": 4744922,
+  "replay": 1952169,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Chaos Dwarf",
+   "coach": "underthemountain",
+   "rating": 1770,
+   "score": 2,
+   "team": "pickle punchers"
+  },
+  "away": {
+   "race": "Dark Elf",
+   "coach": "Enderman",
+   "rating": 1602,
+   "score": 1,
+   "team": "Meanest Ever"
+  }
+ },
+ {
   "match": 4744973,
   "replay": 1952229,
   "date": "2026-10-11",
@@ -187,6 +491,63 @@
    "rating": 1785,
    "score": 2,
    "team": "bummm"
+  }
+ },
+ {
+  "match": 4744988,
+  "replay": 1952242,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Necromantic Horror",
+   "coach": "Keithabix",
+   "rating": 1655,
+   "score": 1,
+   "team": "All Bark No Bite!"
+  },
+  "away": {
+   "race": "Amazon",
+   "coach": "Inquisitor1974",
+   "rating": 1751,
+   "score": 0,
+   "team": "Forest Triangle"
+  }
+ },
+ {
+  "match": 4745002,
+  "replay": 1952261,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Orc",
+   "coach": "Keithabix",
+   "rating": 1672,
+   "score": 1,
+   "team": "Needed A Buff"
+  },
+  "away": {
+   "race": "Norse",
+   "coach": "DoctorMidnight",
+   "rating": 1738,
+   "score": 0,
+   "team": "BBT18 Norsemen"
+  }
+ },
+ {
+  "match": 4745016,
+  "replay": 1952271,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Lizardmen",
+   "coach": "littlestone",
+   "rating": 1703,
+   "score": 0,
+   "team": "Haxliatlaplan"
+  },
+  "away": {
+   "race": "Lizardmen",
+   "coach": "DaCoach",
+   "rating": 1703,
+   "score": 1,
+   "team": "[BT18] DC's Lizzies"
   }
  },
  {
@@ -228,6 +589,25 @@
   }
  },
  {
+  "match": 4745051,
+  "replay": 1952307,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Orc",
+   "coach": "Bashto",
+   "rating": 1751,
+   "score": 1,
+   "team": "Simply good"
+  },
+  "away": {
+   "race": "Orc",
+   "coach": "diomed",
+   "rating": 1816,
+   "score": 1,
+   "team": "Testing_new_orcs"
+  }
+ },
+ {
   "match": 4745082,
   "replay": 1952321,
   "date": "2026-10-11",
@@ -247,6 +627,139 @@
   }
  },
  {
+  "match": 4745081,
+  "replay": 1952352,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Chaos Chosen",
+   "coach": "dolce",
+   "rating": 1729,
+   "score": 0,
+   "team": "Cleave Hand Clawaliers"
+  },
+  "away": {
+   "race": "Orc",
+   "coach": "diomed",
+   "rating": 1811,
+   "score": 1,
+   "team": "Testing_new_orcs"
+  }
+ },
+ {
+  "match": 4745080,
+  "replay": 1952361,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Black Orc",
+   "coach": "Nicodaz",
+   "rating": 1744,
+   "score": 2,
+   "team": "[BBT8] Strongbork United"
+  },
+  "away": {
+   "race": "Shambling Undead",
+   "coach": "mr_mesmer",
+   "rating": 1751,
+   "score": 1,
+   "team": "[BB18] MMM Undead"
+  }
+ },
+ {
+  "match": 4745262,
+  "replay": 1952562,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Wood Elf",
+   "coach": "Beltroniko",
+   "rating": 1874,
+   "score": 0,
+   "team": "[BBT18] Belt's Woodies"
+  },
+  "away": {
+   "race": "Chaos Dwarf",
+   "coach": "JuicyBee",
+   "rating": 1649,
+   "score": 0,
+   "team": "Salama tuli kallo"
+  }
+ },
+ {
+  "match": 4745266,
+  "replay": 1952568,
+  "date": "2026-10-12",
+  "home": {
+   "race": "High Elf",
+   "coach": "MattDakka",
+   "rating": 1717,
+   "score": 1,
+   "team": "Asuryan's Phoenixes"
+  },
+  "away": {
+   "race": "Gnome",
+   "coach": "petehodges",
+   "rating": 1587,
+   "score": 1,
+   "team": "Gnomes aren't real"
+  }
+ },
+ {
+  "match": 4745284,
+  "replay": 1952587,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Orc",
+   "coach": "wescha",
+   "rating": 1551,
+   "score": 1,
+   "team": "Waaaaghabonds"
+  },
+  "away": {
+   "race": "Elven Union",
+   "coach": "squidface",
+   "rating": 1789,
+   "score": 1,
+   "team": "proelves"
+  }
+ },
+ {
+  "match": 4745283,
+  "replay": 1952588,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Human",
+   "coach": "petehodges",
+   "rating": 1590,
+   "score": 0,
+   "team": "Els Ossos Trencats"
+  },
+  "away": {
+   "race": "Tomb Kings",
+   "coach": "Force_unlocked",
+   "rating": 1854,
+   "score": 2,
+   "team": "BBT- Resident evil"
+  }
+ },
+ {
+  "match": 4745285,
+  "replay": 1952591,
+  "date": "2026-10-12",
+  "home": {
+   "race": "High Elf",
+   "coach": "MattDakka",
+   "rating": 1714,
+   "score": 1,
+   "team": "Asuryan's Phoenixes"
+  },
+  "away": {
+   "race": "Chaos Chosen",
+   "coach": "letdreamsdie",
+   "rating": 1589,
+   "score": 1,
+   "team": "Reinka\u03a9s"
+  }
+ },
+ {
   "match": 4745305,
   "replay": 1952609,
   "date": "2026-10-12",
@@ -263,6 +776,44 @@
    "rating": 1718,
    "score": 2,
    "team": "BBT17 Orks"
+  }
+ },
+ {
+  "match": 4745356,
+  "replay": 1952674,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Skaven",
+   "coach": "Carnis",
+   "rating": 1726,
+   "score": 1,
+   "team": "[B]Furry Elves"
+  },
+  "away": {
+   "race": "Necromantic Horror",
+   "coach": "diomed",
+   "rating": 1824,
+   "score": 1,
+   "team": "Classic dio"
+  }
+ },
+ {
+  "match": 4745358,
+  "replay": 1952685,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Chaos Dwarf",
+   "coach": "oh_help",
+   "rating": 1734,
+   "score": 0,
+   "team": "bb18-chorfs"
+  },
+  "away": {
+   "race": "Black Orc",
+   "coach": "Elyod",
+   "rating": 1746,
+   "score": 2,
+   "team": "[BBT18] Runbad Tribute Act"
   }
  },
  {
@@ -301,6 +852,82 @@
    "rating": 1790,
    "score": 2,
    "team": "[bbox]renegades"
+  }
+ },
+ {
+  "match": 4745446,
+  "replay": 1952776,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Orc",
+   "coach": "Carnis",
+   "rating": 1727,
+   "score": 1,
+   "team": "Orkheim Orks"
+  },
+  "away": {
+   "race": "Wood Elf",
+   "coach": "MarcosGrande",
+   "rating": 1763,
+   "score": 0,
+   "team": "[BBT17] Elfitos"
+  }
+ },
+ {
+  "match": 4745466,
+  "replay": 1952788,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Necromantic Horror",
+   "coach": "diomed",
+   "rating": 1821,
+   "score": 0,
+   "team": "Classic dio"
+  },
+  "away": {
+   "race": "Old World Alliance",
+   "coach": "Fermano",
+   "rating": 1716,
+   "score": 1,
+   "team": "OwaOgre"
+  }
+ },
+ {
+  "match": 4745489,
+  "replay": 1952834,
+  "date": "2026-10-13",
+  "home": {
+   "race": "Shambling Undead",
+   "coach": "TalonBay",
+   "rating": 1707,
+   "score": 1,
+   "team": "BBT18 TB Undead"
+  },
+  "away": {
+   "race": "Ogre",
+   "coach": "diomed",
+   "rating": 1805,
+   "score": 1,
+   "team": "Ogers my lord"
+  }
+ },
+ {
+  "match": 4745494,
+  "replay": 1952848,
+  "date": "2026-10-13",
+  "home": {
+   "race": "Orc",
+   "coach": "Hujujajajaj",
+   "rating": 1654,
+   "score": 1,
+   "team": "Orc [18a Huju]"
+  },
+  "away": {
+   "race": "Khorne",
+   "coach": "Beltroniko",
+   "rating": 1863,
+   "score": 1,
+   "team": "[BBT18] Belt's Khorne"
   }
  },
  {
@@ -380,6 +1007,25 @@
   }
  },
  {
+  "match": 4745818,
+  "replay": 1953206,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Chaos Dwarf",
+   "coach": "littlestone",
+   "rating": 1697,
+   "score": 1,
+   "team": "Burning Embers"
+  },
+  "away": {
+   "race": "Dark Elf",
+   "coach": "Superlynx",
+   "rating": 1574,
+   "score": 2,
+   "team": "Witchcraft Incorporated"
+  }
+ },
+ {
   "match": 4745828,
   "replay": 1953223,
   "date": "2026-10-14",
@@ -396,6 +1042,82 @@
    "rating": 1732,
    "score": 0,
    "team": "BBT18 Wood (Re-) Cycle"
+  }
+ },
+ {
+  "match": 4745852,
+  "replay": 1953251,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Ogre",
+   "coach": "Joost",
+   "rating": 1834,
+   "score": 2,
+   "team": "(BBT) Titchy Boneheads"
+  },
+  "away": {
+   "race": "Norse",
+   "coach": "nobbynobbs",
+   "rating": 1550,
+   "score": 0,
+   "team": "Wolves of Somewhere"
+  }
+ },
+ {
+  "match": 4745865,
+  "replay": 1953253,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Chaos Dwarf",
+   "coach": "karrashantemi",
+   "rating": 1679,
+   "score": 1,
+   "team": "Mini Khaos Karrash I"
+  },
+  "away": {
+   "race": "Khorne",
+   "coach": "Beltroniko",
+   "rating": 1855,
+   "score": 1,
+   "team": "[BBT18] Belt's Khorne"
+  }
+ },
+ {
+  "match": 4745857,
+  "replay": 1953258,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Tomb Kings",
+   "coach": "Dan123456",
+   "rating": 1740,
+   "score": 1,
+   "team": "Red Sea Mashers"
+  },
+  "away": {
+   "race": "Norse",
+   "coach": "MattDakka",
+   "rating": 1726,
+   "score": 0,
+   "team": "Fenrir's Fangs 25"
+  }
+ },
+ {
+  "match": 4745877,
+  "replay": 1953275,
+  "date": "2026-10-14",
+  "home": {
+   "race": "Tomb Kings",
+   "coach": "Dan123456",
+   "rating": 1745,
+   "score": 1,
+   "team": "Red Sea Mashers"
+  },
+  "away": {
+   "race": "Nurgle",
+   "coach": "MattDakka",
+   "rating": 1719,
+   "score": 2,
+   "team": "Nurgle's Reapers 25"
   }
  },
  {
@@ -437,6 +1159,139 @@
   }
  },
  {
+  "match": 4745977,
+  "replay": 1953378,
+  "date": "2026-10-14",
+  "home": {
+   "race": "High Elf",
+   "coach": "Alcibiade",
+   "rating": 1644,
+   "score": 1,
+   "team": "Swiftwindy"
+  },
+  "away": {
+   "race": "Dark Elf",
+   "coach": "tore3005",
+   "rating": 1864,
+   "score": 1,
+   "team": "Pime\u00e4 Puoli"
+  }
+ },
+ {
+  "match": 4746035,
+  "replay": 1953451,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Norse",
+   "coach": "rug-thug",
+   "rating": 1763,
+   "score": 1,
+   "team": "Badkings"
+  },
+  "away": {
+   "race": "Old World Alliance",
+   "coach": "chigrero",
+   "rating": 1728,
+   "score": 0,
+   "team": "Owa viene"
+  }
+ },
+ {
+  "match": 4746041,
+  "replay": 1953458,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Imperial Nobility",
+   "coach": "Hobbelknopf",
+   "rating": 1575,
+   "score": 2,
+   "team": "BBT 18 - Cobblehoppers"
+  },
+  "away": {
+   "race": "Vampire",
+   "coach": "diomed",
+   "rating": 1781,
+   "score": 2,
+   "team": "Kono Dio da!"
+  }
+ },
+ {
+  "match": 4746055,
+  "replay": 1953470,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Imperial Nobility",
+   "coach": "Rib-Goaty",
+   "rating": 1750,
+   "score": 1,
+   "team": "Pointy Mug [BBT18]"
+  },
+  "away": {
+   "race": "Wood Elf",
+   "coach": "warpstone",
+   "rating": 1667,
+   "score": 1,
+   "team": "Feanor did nothing wrong 18"
+  }
+ },
+ {
+  "match": 4746083,
+  "replay": 1953511,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Tomb Kings",
+   "coach": "Bazakastine",
+   "rating": 1919,
+   "score": 0,
+   "team": "T'lan Imass BBT18"
+  },
+  "away": {
+   "race": "Chaos Chosen",
+   "coach": "smeborg",
+   "rating": 1736,
+   "score": 1,
+   "team": "xviii Cuddly Bunnies"
+  }
+ },
+ {
+  "match": 4746118,
+  "replay": 1953550,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Dwarf",
+   "coach": "spelledaren",
+   "rating": 1734,
+   "score": 1,
+   "team": "A Wall of Block"
+  },
+  "away": {
+   "race": "Chaos Renegade",
+   "coach": "GARNET",
+   "rating": 1600,
+   "score": 1,
+   "team": "Cacaos Renegade"
+  }
+ },
+ {
+  "match": 4746128,
+  "replay": 1953567,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Ogre",
+   "coach": "Joost",
+   "rating": 1840,
+   "score": 2,
+   "team": "(BBT) Titchy Boneheads"
+  },
+  "away": {
+   "race": "Skaven",
+   "coach": "Hagymacsipos",
+   "rating": 1762,
+   "score": 1,
+   "team": "bummm"
+  }
+ },
+ {
   "match": 4746172,
   "replay": 1953618,
   "date": "2026-10-15",
@@ -453,6 +1308,44 @@
    "rating": 1604,
    "score": 2,
    "team": "HoethHathunters"
+  }
+ },
+ {
+  "match": 4746197,
+  "replay": 1953648,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Khorne",
+   "coach": "TheGe",
+   "rating": 1558,
+   "score": 1,
+   "team": "BT18 - Khorne's Runners"
+  },
+  "away": {
+   "race": "Vampire",
+   "coach": "diomed",
+   "rating": 1782,
+   "score": 3,
+   "team": "Kono Dio da!"
+  }
+ },
+ {
+  "match": 4746215,
+  "replay": 1953675,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Lizardmen",
+   "coach": "petehodges",
+   "rating": 1588,
+   "score": 1,
+   "team": "BBT Lizard Wizards"
+  },
+  "away": {
+   "race": "Chaos Renegade",
+   "coach": "maol",
+   "rating": 1667,
+   "score": 2,
+   "team": "BB18 ChaotiquesNuls"
   }
  }
 ]

@@ -25,13 +25,15 @@ def setups(fn, meta):
             ps = pos.get(p['positionId'], {})
             who[str(p['playerId'])] = {'side': side, 'pos': ps.get('positionName', p.get('playerType')), 'short': ps.get('shorthand') or '?',
                                        'ma': p['movement'], 'st': p['strength'], 'ag': p['agility'], 'av': p['armour'], 'skills': [s if isinstance(s, str) else s.get('skillName', str(s)) for s in p.get('skillArray', [])]}
-    at, ball, half, kicks = {}, None, 0, 0
+    at, ball, half, kicks, turn, score = {}, None, 0, 0, {'home': 0, 'away': 0}, {'home': 0, 'away': 0}
     for cmd in d['gameLog']['commandArray']:
         for m in changes(cmd):
             k, v = m['modelChangeId'], m.get('modelChangeValue')
             if k == 'fieldModelSetPlayerCoordinate': at[str(m['modelChangeKey'])] = v
             elif k == 'fieldModelSetBallCoordinate' and isinstance(v, list): ball = v
             elif k == 'gameSetHalf': half = v
+            elif k == 'turnDataSetTurnNr': turn[m['modelChangeKey']] = v
+            elif k == 'teamResultSetScore': score[m['modelChangeKey']] = v
         for r in reports(cmd):
             if r['reportId'] != 'kickoffResult': continue
             kicks += 1
@@ -43,7 +45,9 @@ def setups(fn, meta):
                 # the kicking team is the one whose half the ball is NOT in (it kicks into the receiving half)
                 kicking = ball is not None and ((ball[0] <= 12) != (not flip))
                 pl = [dict(who[pid], x=(25 - xy[0]) if flip else xy[0], y=xy[1]) for pid, xy in ps]
+                me, them = ('home', 'away') if side == 'teamHome' else ('away', 'home')
                 out.append({'replay': meta['replay'], 'race': race, 'coach': coach, 'half': half, 'kick': kicks, 'kicking': kicking,
+                            'turn': max(turn.values()), 'lead': score[me] - score[them],
                             'opp': meta['away' if side == 'teamHome' else 'home']['race'], 'players': pl})
     return out
 
