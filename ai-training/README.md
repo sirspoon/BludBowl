@@ -605,3 +605,30 @@ their first roll gave the blocking side: 'down' (the attacker goes over), 'nothi
   squares round the ball first: pick-ups at 0.45, 51-53, 16-20 over 48. Neither helped.
 - Update: (a) and (b) on top of the turn planner (`turn-planner.md`, stages 1-2) were 134-99 touchdowns, 57-39 wins
   over 144 against v3.65, and were released with it in v3.66. (c) and (d) stay off.
+
+## Blitzes (Oct 2026)
+`fumbbl-blitz.py` (100 replays, 3119 turns with 2+ players acting) and `bb-blitz.js` (v3.66, 48 mirror matches; its
+FLAGS argument is '' for every switch on). "Other" = not their carrier, nor marking ours, nor next to their carrier.
+
+| | coaches | BludBowl v3.66 |
+|---|---|---|
+| turns with a blitz: overall / our ball / their ball / loose | 89 / 89 / 94 / 83% | 48 / 50 / 53 / 37% |
+| target down | 67% | 62% |
+| who: other / their carrier / marking our carrier / next to their carrier | 78 / 11 / 7 / 5% | 36 / 43 / 20 / 1% |
+| ...with their ball: the carrier / other | 25 / 63% | 93 / 5% |
+| blitzer with Block; target with Block | 64%; 34% | 35%; 14% |
+| squares run; with a dodge / a Rush | 2.4; 12 / 13% | 2.8; 8 / 10% |
+| block dice 1 / 2 / 3 | 8 / 81 / 11% | 15 / 69 / 16% |
+| where in the turn | 0.51 | 0.50 |
+
+- For coaches the blitz is nearly always used, and mostly just as one more good block: the "other" targets are
+  linemen (MA 5.8, AV 8.8), usually next to one or two of the blitzer's team-mates (assists), rarely on the sideline.
+  The computer keeps its blitz for a job (their carrier, a marker on ours) and otherwise often doesn't use it.
+- Why: `blitzPlan` (the general blitz) needed a value of 3 (an ordinary block 2.5) and came after every other block,
+  by when the likely blitzers had moved into the screen or cage.
+- `blitz2` (not released: `blitz-early.patch`): the bar lowered to 2.5 (`blitzMin`): blitzes 48 -> 52% of turns. Then
+  the general blitz decided early (straight after the risk-free blocks, unless their carrier is to be blitzed or ours is
+  marked): 69% of turns, target down 67%, blocks 32.9 -> 36.4 a match; but 29-39 touchdowns, 14-16 wins over 48.
+  Not when we have the ball (`blitzOurs` 0): 34-31, 17-15 over 48, then 71-67, 33-34 over 96: 105-98, 50-49 in all,
+  blocks 37.9 v 33.6. Level, and slower to think (the blitz is worked out at every decision until it's used: the test
+  matches took about 60% longer). Not released.

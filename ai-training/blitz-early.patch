@@ -1,0 +1,30 @@
+diff --git a/index.html b/index.html
+index ce2cd7b..cb04dc3 100644
+--- a/index.html
++++ b/index.html
+@@ -23449,7 +23449,9 @@
+                         });
+                     });
+                 });
+-                if (!best || best.s < 3) return null;
++                // (blitz2) strong coaches blitz in nine turns out of ten, most often just as one more good block on a lineman next
++                // to their team-mates (ai-training/README.md, "Blitzes"); the computer held out for more than an ordinary block needs
++                if (!best || best.s < (AIX.on(me, 'blitz2') ? AIX.p(me, 'blitzMin', 2.5) : 3)) return null;
+                 return blitzOn(best.p, best.d.id);
+             }
+             function blitzOn(p, tid) {
+@@ -23864,6 +23866,14 @@
+                 // 3. blocks with almost no risk come first
+                 const safe = blocks.find(b => b.e.pTurn < 0.05);
+                 if (safe) return blockPlan(safe);
++                // (blitz2) the turn's blitz, decided early, before the screen, cage and other moves use up the players who could
++                // make it - unless it's wanted for their carrier, or to free ours
++                if (AIX.on(me, 'blitz2') && !state.blitzUsed && !state.charge) {
++                    const theirC = carrier && carrier.team === them && onPitch(carrier) && !carrier.isDown ? carrier : null;
++                    const oursMarked = carrier && carrier.team === me && onPitch(carrier) && tzFor(carrier.x, carrier.y, me) > 0;
++                    const ours = carrier && carrier.team === me && onPitch(carrier);
++                    if (!oursMarked && (!ours || AIX.p(me, 'blitzOurs', 1)) && !(theirC && carrierBlitz(me, act, theirC))) { const gb = blitzPlan(me, act); if (gb) return gb; }
++                }
+                 // defending: get the screen (and the markers) in place before anything that could cause a Turnover,
+                 // keeping back the player who will blitz their carrier
+                 if (carrier && carrier.team === them && onPitch(carrier) && !state.charge) {
