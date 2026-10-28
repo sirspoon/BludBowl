@@ -640,6 +640,6 @@ FLAGS argument is '' for every switch on). "Other" = not their carrier, nor mark
   moving them (knockdown or push). Blitzes 48 -> 56% of turns, more Gutter Runners, Skinks and Goblins, more cage
   corners (9% with their ball). Against v3.66: 29-33 touchdowns, 14-14 wins over 48; with the early blitz too
   (`blitzOurs` 0): 30-33, 17-16. Level both ways.
-- So far nothing about the blitz (more of them, earlier, or better-chosen targets) has changed results. Since the
-  computer's own defence goes hard after the ball, and the matches are mirror matches, a better blitz may help both
-  sides' cancelling-out less than it would against people; it may be worth trying against a fixed older AI instead.
+- So far nothing about the blitz (more of them, earlier, or better-chosen targets) has changed results against the
+  computer. It may still matter more against people, whose defence (keeping their distance) differs from the
+  computer's (going hard after the ball), but the tests here can't show that.
