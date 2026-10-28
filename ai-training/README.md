@@ -327,3 +327,10 @@ team-mate next to them. Cause: `carrierScore` gave 1.5 a square gained but only 
   turn marked was lost 69% of the time. In mirror matches it's about 50%, as Gutter Runners are the best at taking it back.
   Ideas not yet tried: hand off from a slow carrier to a Gutter Runner readier on fast teams; a poorly supported carrier
   hangs back instead of pushing on alone.
+- Tried (`fast-carrier.patch`, switches `fasthand`, `hangback`): `fasthand` gives a receiver at least 2 MA quicker than the
+  carrier the passing teams' bonus (+`fastBonus` 2 when it could run in next turn and at most one opponent can reach it) and
+  the lower bar (0.8); `hangback` takes `hbPen` 1.5 off a forward square where the carrier would have at most one supporter
+  and 3+ opponents in reach (unless within a turn's run of the end zone). Skaven carrier turns lost next turn, 48 matches each
+  against six teams: 32% without, 32% `fasthand`, 36% `hangback` (runs vary by about 5 points). `fasthand` didn't get the
+  ball to Gutter Runners more often. Results for `fasthand`, 48 matches on 12 fast/agile teams: 55-53 touchdowns, 17-20 wins,
+  hand-offs 84-71. Neither released. The Skaven's losses look mostly built into the team (AV8 without Block everywhere).
