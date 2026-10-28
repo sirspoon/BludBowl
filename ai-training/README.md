@@ -426,3 +426,28 @@ the kickers it really faced, and against kicking set-ups from other kick-offs (t
   didn't score more. With 5 on the line (`recvLine`, AIX.p): 59-58, 21-23 over 72; both halves together 37-34, 16-14
   over 48. Released with 5. The next step would be the receivers' first turn itself: block with the line, move the
   ball up behind it, and don't dodge out of contact to do it, after which 6-7 on the line may pay.
+
+## The receivers' first turn (Oct 2026)
+`fumbbl-firstturn.py` reads the receiving team's first turn after each kick-off in the 71 replays (245 turns);
+`bb-firstturn.js` records the computer's the same way (`--bb` to compare). "In contact" = next to a standing opponent at
+the start of the turn.
+
+| | coaches | v3.63, 5 on the line | v3.63, 7 | with `line1` (v3.64) |
+|---|---|---|---|---|
+| in contact at the start | 4.9 | 4.9 | 5.1 | 5.0 |
+| ...blocked / other action, no dodge / did nothing / dodged away | 58 / 24 / 14 / 3% | 45 / 23 / 15 / 16% | 45 / 20 / 17 / 18% | 59 / 24 / 9 / 8% |
+| blocks a turn | 3.7 | 2.6 | 2.7 | 3.2 |
+| ball picked up after (actions; blocks before it) | 7.9; 3.3 | 1.8; 1.0 | 1.9; 1.1 | 3.8; 2.9 |
+| in contact at the end | 1.5 | 3.0 | 2.9 | 2.3 |
+
+- Coaches block first and move after: knocking a marker over lets the player walk off without a dodge ("other action,
+  no dodge" is mostly that). The ball comes late, once the blocks are done. 96% of their first-turn blocks are 2 or 3 dice.
+- The computer took the ball first (step 4 of `choose()` came before ordinary blocks), then dodged line players away
+  to build the cage. And agile teams (Wood Elf, High Elf, Amazon: `agileTeam`) only took near-safe blocks (pTurn 0.05),
+  so their line players dodged away instead: 41-84% of them, against 11-14% for coaches with those teams, who block
+  about 3 times on that turn like everyone else.
+- `line1`: (a) with the ball loose and no standing opponent within 3 squares of it (`calmR`), the good blocks go before
+  the pick-up; (b) an agile team's blocker who is marked anyway takes blocks up to pTurn 0.12, like other teams.
+- Results against v3.63: line1 with 5 on the line 38-40 touchdowns, 14-15 wins (48 matches); with 7 on the line
+  136-122, 43-40, casualties 204-172 (144). Released with 7 (5 for teams with fewer than six ST4+ or AV9+ players).
+  Amazons in the mirror match still hardly block (blocking a Dodge player is rarely worth it), so they still dodge away.

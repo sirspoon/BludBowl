@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.63</title>
+    <title>BludBowl 3.64</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.63</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.64</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -23731,7 +23731,10 @@
                     const isCarrier = state.ball.carrierId === d.id;
                     const gain = ourC && p.id !== ourC.id ? laneGain(ourC, d) : 0;
                     const freesC = ourC && cheb(d, ourC) === 1 ? 2 : 0;   // knocking a marker off our carrier
-                    const limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? 0.05 : 0.12) + (gain >= 3 || freesC ? 0.08 : 0);   // agile teams only take near-safe blocks
+                    // agile teams only take near-safe blocks - (line1) unless the blocker is marked anyway: then the block frees them,
+                    // where otherwise they'd dodge away (strong elf and Amazon coaches block on their first turn about as much as anyone)
+                    const agileLim = AIX.on(me, 'line1') && tzFor(p.x, p.y, me) > 0 ? 0.12 : 0.05;
+                    const limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? agileLim : 0.12) + (gain >= 3 || freesC ? 0.08 : 0);
                     const v = e.ev + laneValue(e, gain + freesC);
                     return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : 2.5), v, gain };
                 };
@@ -23772,8 +23775,13 @@
                 const bm = bombPlan(me, act);
                 if (bm) return bm;
 
+                // (line1) a loose ball nobody of theirs is near (the receivers' first turn, most of all): the good blocks first, as
+                // strong coaches do (ai-training/README.md, "The receivers' first turn") - knocking the markers over frees our
+                // players to move without dodging - and the ball after
+                const ballCalm = AIX.on(me, 'line1') && !carrier && state.ball.x >= 0 && blocks.length > 0
+                    && !state.players.some(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && Math.max(Math.abs(q.x - state.ball.x), Math.abs(q.y - state.ball.y)) <= AIX.p(me, 'calmR', 3));
                 // 4. pick up a loose ball (Secure the Ball when nobody is close)
-                if (!carrier && state.ball.x >= 0 && !state.isResolvingKickoff) {
+                if (!carrier && state.ball.x >= 0 && !state.isResolvingKickoff && !ballCalm) {
                     let best = null;
                     const bx = state.ball.x, by = state.ball.y;
                     const quiet = !state.players.some(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && Math.max(Math.abs(q.x - bx), Math.abs(q.y - by)) <= 2);
@@ -24213,9 +24221,10 @@
                 if (theirLos !== ourLos + 1) return null;
                 const fx = x => team === TEAMS.HUMAN ? x : W - 1 - x;
                 const line = state.players.filter(q => q.team === opp && onPitch(q) && fx(q.x) === theirLos);
-                // (coaches put 6-7 there, but the computer's first turn doesn't make use of more than 5 yet: with 7 it failed more
-                // dodges getting players out of contact and did worse, ai-training/README.md)
-                const N = Math.max(3, Math.min(8, n - 2, AIX.p(team, 'recvLine', 5)));
+                // seven for most teams, as the coaches do; five for a team without many sturdy players (elves, Skaven). (Seven only
+                // paid once the first turn blocked with the line instead of dodging away from it - line1, v3.64.)
+                const sturdy = state.players.filter(q => q.team === team && !q.isReserve && !q.isCasualty && !q.isKO && !q.isEjected && (q.st >= 4 || q.av >= 9)).length;
+                const N = Math.max(3, Math.min(8, n - 2, AIX.p(team, 'recvLine', AIX.on(team, 'line1') && sturdy >= 6 ? 7 : 5)));
                 const near = (d, y) => Math.abs(d.y - y) <= 1;
                 const count = new Map(line.map(d => [d.id, 0])), MARG = [3, 2.5, 1.5, 0.2];
                 const wideUsed = { top: 0, bot: 0 }, side = y => y < GEO.wz ? 'top' : y >= H - GEO.wz ? 'bot' : null;
