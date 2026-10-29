@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.02 (29 Oct 2026)
+- I Like to Watch: the close-up action replays of passes, thrown team-mates and bombs, as in a normal match.
+
 ## v4.01 (29 Oct 2026)
 - I Like to Watch: an action banner, a pointer and a ring show who's acting, and a red ring their target.
 

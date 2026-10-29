@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.02 (29 Oct 2026)
+- **New:** I Like to Watch now has the game's close-up action replays: after a pass, a thrown (or kicked) team-mate or a bomb, the slow-motion 16-bit replay plays it from behind the thrower, just as in a normal match. Passes show the throw, any interception, the catch or drop, the bounces and throw-ins; thrown team-mates their flight and a safe or crash landing; bombs each throw (a caught bomb thrown on) and the blast. They follow the Replays setting, play at ½× to 2×, and can be tapped to skip.
+
 ## v4.01 (29 Oct 2026)
 - **Improved:** in I Like to Watch, it's much clearer who is acting. As soon as a player's action starts, the game's action banner shows what they're doing and who they are ("⚡ Blitz · Mighty Zug #17", "👊 Block", "🏃 Move", "🤝 Hand-off", "💣 Bomb"…), a bobbing pointer and a pulsing gold ring mark them on the pitch, and for a block, blitz, foul or hand-off their target gets a red ring with a dashed line to it, before any dice are rolled. The camera keeps the action clear of the banner.
 
