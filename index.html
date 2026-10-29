@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.71</title>
+    <title>BludBowl 3.72</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.71</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.72</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -24018,6 +24018,11 @@
                     }
                 }
 
+                // (bomb2) the bomber stays out of the blocks, the cage and the screens: it throws last, or gets ready for next turn
+                if (AIX.on(me, 'bomb2')) {
+                    const bombers = act.filter(p => hasSk(p, 'Bombardier') && state.ball.carrierId !== p.id);
+                    if (bombers.length && bombers.length < act.length) { act = act.filter(p => !bombers.includes(p)); standing = act.filter(p => !p.isDown); }
+                }
                 // our carrier, still to move this turn: blocks that open a lane for it are worth more
                 const ourC = carrier && carrier.team === me && act.includes(carrier) && onPitch(carrier) && !state.charge ? carrier : null;
                 laneCache = null;
@@ -24264,11 +24269,18 @@
                 const bomb = ttmEndPlan(me, avail(me));
                 const late = bombPlan(me, avail(me), true);   // keep a Bomma back to throw at the end of the turn
                 const keep = new Set([...(bomb ? bomb.reserve : []), ...(late ? [late.pid] : []), ...(fl ? [fl.pid] : [])]);
+                if (AIX.on(me, 'bomb2')) avail(me).forEach(p => { if (hasSk(p, 'Bombardier') && state.ball.carrierId !== p.id) keep.add(p.id); });
                 const formers = avail(me).filter(p => !keep.has(p.id));
                 const form = (AIX.on(me, 'safepos') && formationPlan(me, formers, false, false, true)) || formationPlan(me, formers, false);
                 if (form) return form;
 
                 // 10. anyone left: stand up and drift towards the action without any dice
+                // (bomb2) a bomber with no bomb to throw this turn steps to where it can throw next turn
+                if (AIX.on(me, 'bomb2') && !late) for (const p of avail(me)) {
+                    if (!hasSk(p, 'Bombardier') || state.ball.carrierId === p.id || !canReposition(p, me)) continue;
+                    const m = bombPosPick(movesFor(p), p);
+                    if (m || p.isDown) return { pid: p.id, kind: 'move', pick: (ms, q) => bombPosPick(ms, q) || (q.isDown ? supportPick(ms, q) : null) };
+                }
                 const order = avail(me).filter(p => !keep.has(p.id) && canReposition(p, me));
                 for (const p of order) {
                     const m = supportPick(movesFor(p), p);
@@ -24278,7 +24290,8 @@
                 // 11. the foul, then finally a bomb or a thrown team-mate at their ball carrier or cage
                 const fl2 = foulPlan(me, avail(me));
                 if (fl2) return fl2;
-                const bl = bombPlan(me, avail(me));
+                if (AIX.on(me, 'bomb2')) { const tm = ttmEndPlan(me, avail(me)); if (tm) return tm; }
+                const bl = bombPlan(me, avail(me), AIX.on(me, 'bomb2') && avail(me).filter(p => !p.isDown && !hasSk(p, 'Bombardier')).length === 0);
                 if (bl) return bl;
                 return ttmEndPlan(me, avail(me));
             }
@@ -24318,7 +24331,7 @@
             // a bomb is worth more late in the turn, when a fumble (a Turnover) costs fewer actions
             // what a bomb coming down on [x, y] is worth to team `me`: a standing player in the square must try to Catch it,
             // and a catch sends it straight back (unless Bomber's Kaboom! makes it go off in their hands)
-            function bombSquare(me, x, y, thrower) {
+            function bombSquare(me, x, y, thrower, soft = false) {
                 let v = 0, own = 0;
                 const kaboom = thrower && starIs(thrower, 'bomber') && starFree(thrower, 'kaboom');
                 state.players.forEach(q => {
@@ -24329,7 +24342,7 @@
                         let val = w * (up ? 1 + (state.ball.carrierId === q.id ? 3 : 0) + (q.st >= 4 ? 0.5 : 0) : 0.35);
                         if (d === 0 && up && !kaboom && !hasSk(q, 'No Ball')) { const c = (7 - clampT((q.ag == null ? 6 : q.ag) + tzFor(q.x, q.y, q.team))) / 6; val = val * (1 - c) - c * 1.5; }
                         v += val;
-                    } else { v -= w * (up ? 3 : 0.6); if (up) own++; }
+                    } else { v -= w * (soft ? (up ? 1.5 : 0.3) : (up ? 3 : 0.6)); if (up) own++; }
                 });
                 return { v, own };
             }
@@ -24347,24 +24360,49 @@
                 });
                 return best;
             }
+            // (bomb2) a bomber with nothing to throw at this turn gets ready for the next one (it can't move before throwing): 2-4 squares
+            // from the nearest opponent - in range of a quick or short bomb, not next to anyone - with as many of them in range as possible
+            function bombPosPick(ms, p) {
+                const me = p.team, opp = state.players.filter(q => q.team !== me && onPitch(q) && !q.isDown && !q.isStunned);
+                if (!opp.length) return null;
+                const score = (x, y) => {
+                    const d = Math.min(...opp.map(q => cheb(q, { x, y })));
+                    const inRange = opp.filter(q => Math.hypot(q.x - x, q.y - y) <= 6.4).length;
+                    return Math.min(inRange, 6) * 0.3 - (d <= 1 ? 4 : d === 2 ? 0.8 : d >= 5 ? (d - 4) * 0.6 : 0);
+                };
+                const here = p.isDown ? -99 : score(p.x, p.y);
+                let best = null;
+                (ms || []).forEach(m => {
+                    if (m.prob < 100 || m.isRush || getPlayer(m.x, m.y)) return;
+                    const v = score(m.x, m.y) - m.path.length * 0.01;
+                    if (v > here + 0.2 && (!best || v > best.v)) best = { m, v };
+                });
+                return best ? best.m : null;
+            }
             function bombPlan(me, act, assumeLate = false) {
                 if (state.bombUsed || state.charge) return null;
                 let best = null;
                 const rem = assumeLate ? 0 : Math.max(0, act.length - 1);
+                // (bomb2) strong coaches throw a bomb in half the turns their bomber starts on its feet - it's sent off at the end of
+                // the drive anyway (Secret Weapon) - mostly as the last action, accepting the fumbles (ai-training/README.md, "Bombs").
+                // Last in the turn, a fumble only floors the bomber and ends a turn that's over: cheap, unless team-mates stand next to it
+                const b2 = AIX.on(me, 'bomb2') && rem === 0;
                 act.forEach(p => {
                     if (!hasSk(p, 'Bombardier') || p.isDown || p.pa == null || state.ball.carrierId === p.id) return;
                     const tz = tzFor(p.x, p.y, me), dp = dpCount(p);
+                    const mates = state.players.filter(q => q.team === me && q.id !== p.id && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, p) === 1).length;
                     for (let x = 0; x < CFG.cols; x++) for (let y = 0; y < CFG.rows; y++) {
                         if (x === p.x && y === p.y) continue;
                         const info = getPassRangeInfo(Math.hypot(x - p.x, y - p.y));
                         if (!info || (state.weather.key === 'blizzard' && info.penalty > 1)) continue;
-                        const { v, own } = bombSquare(me, x, y, p);
-                        if (v <= 0 || own) continue;
+                        const { v, own } = bombSquare(me, x, y, p, b2);
+                        if (v <= 0 || (own && !b2)) continue;
                         const mod = info.penalty + tz + dp + weatherTargetMod('THROW BOMB');
                         const acc = withSkillRR((7 - clampT(p.pa + mod)) / 6, p, 'Pass');
                         const fum = Math.min(6, 1 + mod) / 6;
-                        const ev = acc * v + Math.max(0, 1 - acc - fum) * 0.2 * v - fum * (1.5 + 0.6 * rem);
-                        if (ev >= 0.6 && (!best || ev > best.ev)) best = { ev, p, x, y };
+                        const fumCost = b2 ? AIX.p(me, 'bombFum', 0.4) + 0.75 * mates : 1.5 + 0.6 * rem;
+                        const ev = acc * v + Math.max(0, 1 - acc - fum) * 0.2 * v - fum * fumCost;
+                        if (ev >= (b2 ? AIX.p(me, 'bombBar', 0.3) : 0.6) && (!best || ev > best.ev)) best = { ev, p, x, y };
                     }
                 });
                 return best ? { pid: best.p.id, kind: 'bomb', tx: best.x, ty: best.y } : null;

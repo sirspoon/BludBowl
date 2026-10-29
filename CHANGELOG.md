@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.72 (29 Oct 2026)
+- **Improved (computer):** Goblin Bommas and Snotling Fungus Flingas now throw their bombs. The bomber stays out of the blocks, cage and screens; when there's a bunch of opponents in range it throws as the last action of the turn, accepting the risk of a fumble the way strong human coaches do (the bomber is sent off at the end of the drive anyway). With nothing to throw at, it steps to 2-4 squares from the opposition, ready for next turn (a bomber can't move before throwing). About 1.5 bombs a match (before: about one every six or seven matches; strong coaches: 1.7). Results against the previous computer were level.
+
 ## v3.71 (29 Oct 2026)
 - **Improved (computer):** teams built round Throw Team-mate (Ogres, Gnomes, Halflings, Goblins, Snotlings and others with a thrower) now actually throw their small players. When a good throw is on, the computer walks a Right Stuff player over to its thrower without risking any dice, keeps the pair back, and throws at the end of the turn: mostly up the pitch, sometimes onto an opponent or next to their ball carrier. It throws more readily on the last turn of a half, when a failure costs nothing. It throws about 1.4 times a match with these teams (before: almost never; strong human coaches: about 2). Results against the previous computer were level.
 

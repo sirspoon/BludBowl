@@ -762,3 +762,17 @@ line-up: the Bomma and the Fungus Flinga). "At whom" is what was in the blast (t
   - nothing counts the bomber being sent off at the end of the drive (use it or lose it);
   - the bomber isn't kept back for the end of the turn (it joins the cage and the screens), and nothing puts it 2-3
     squares behind our line, out of reach, for the next turn's bomb.
+
+### Throwing bombs (`bomb2`, released in v3.72)
+- **Price them like coaches:** as the last action of the turn, a fumble costs 0.4 (`bombFum`; the bomber is floored and a
+  finished turn ends) plus 0.75 for each team-mate standing next to the bomber; a team-mate in the blast is allowed (at
+  half the usual penalty); the bar is 0.3 (`bombBar`, was 0.6). Earlier in the turn, as before.
+- **Keep the bomber back:** out of the blocks, the cage and the screens; the bomb comes at the very end (after any thrown
+  team-mate, since a fumbled bomb can end the turn).
+- **Get ready for next turn:** with nothing worth a bomb, the bomber steps (no dice) to 2-4 squares from the nearest
+  opponent with as many of them in range as possible (`bombPosPick`).
+- `bb-bombs.js` (12 matches): 1.46 bombs a match (coaches 1.7), in 28% of the turns the bomber starts on its feet
+  (coaches 51%); a crowd 86%, their carrier 11%; accurate 34%, fumbled 40% (coaches 26%); a turnover 40% (coaches
+  40%); always the last action. Unlike the coaches (their ball 76%), most come while we have the ball (74%).
+- Against v3.71 (Goblins and Snotlings, 48 matches): 48-44 touchdowns, 16-14 wins, casualties 168-154. Level; released
+  because the teams now play to type without doing worse.
