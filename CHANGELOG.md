@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.79 (29 Oct 2026)
+- **Improved:** FUMBBL replays now show the game's own notifications, as when you watch the computer play itself: the turn banner; the roll window ("DODGE REQUIRED!", the target and the chance) with the result on its button; the team re-roll window with the coach's answer lit up; the block window with both players squaring up, the dice, the one chosen and the clash; the choice window for skills, the apothecary and arguing the call; the big announcements for the coin toss, weather, TOUCHDOWN!, TURNOVER! (with why), half time, secret weapons and full time; the "player removed" notice for KOs, casualties and sendings-off; and skill pop-ups. Each stays up about as long as it does for the computer, and the replay waits for it. Above 2x speed the roll windows are left out and blocks use the small dice tray, so fast play stays fast. (These replace the replay's own decision cards.)
+- **New:** tap a player in a FUMBBL replay to see their card: name, number, position and team, MA/ST/AG/PA/AV, skills (tap one for what it does), and whether they're prone, stunned, KO'd or holding the ball. Tap the grass to close it.
+
 ## v3.78 (29 Oct 2026)
 - **Improved:** FUMBBL replays show the coaches' decisions the way the game asks you them: a card with the question and both answers comes up, then the one the coach chose lights up and the replay carries on. Re-roll a failed roll (with what was needed and rolled, and which re-roll was used) or accept the failure; re-roll the block dice; use a skill (Sidestep, Stand Firm, Dodge…); follow up after a block (shown briefly, as it comes up so often); use the apothecary; the coin toss; kick or receive; argue the call.
 - **Fixed:** a FUMBBL replay is now played on the home team's own ground (as a league match is), instead of whichever pitch the team screen last showed.

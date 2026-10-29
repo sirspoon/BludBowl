@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.78</title>
+    <title>BludBowl 3.79</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -636,6 +636,17 @@
         #frep-list .fr-s { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
         #frep-list .fr-msg { font-size: 12.5px; color: #94a3b8; margin: 6px 2px; }
         /* a coach's decision in a FUMBBL replay: the game's question card, answered by itself (nothing to tap) */
+        body.frep-on #modal-roll, body.frep-on #modal-team-reroll, body.frep-on #modal-choice, body.frep-on #modal-dice { pointer-events: none !important; }
+        body.frep-on #dice-tap-hint { display: none; }
+        body.frep-on #frep-bar { z-index: 35; }   /* (the game's windows - a roll sheet sits at the bottom on a phone - come above the controls) */
+        body.frep-on .fx-pick { background: #059669 !important; color: #fff !important; outline: 3px solid #6ee7b7; outline-offset: 1px; transform: scale(1.05); }
+        body.frep-on .fx-off { opacity: .35; }
+        body.frep-on .fx-ok { background: #059669 !important; }
+        body.frep-on .fx-bad { background: #b91c1c !important; }
+        body.frep-on.frep-info #panel-unit-container { display: flex !important; }
+        body.frep-on.frep-info #action-toolbar { display: none !important; }
+        @media (orientation: portrait) { body.frep-on #panel-unit-container { bottom: calc(118px + env(safe-area-inset-bottom)) !important; } }
+        @media (orientation: landscape) { body.frep-on #panel-unit-container { bottom: calc(132px + env(safe-area-inset-bottom)) !important; } }
         #frep-askcard { position: fixed; inset: 0; z-index: 47; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0,0,0,.18); padding: 16px; }
         #frep-askcard.hidden { display: none; }
         #frep-askcard .fa-card { background: #0f172a; border: 2px solid #eab308; border-radius: 12px; padding: 12px 14px; width: min(300px, 100%); box-shadow: 0 10px 30px rgba(0,0,0,.6); text-align: center; }
@@ -1004,7 +1015,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.78</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.79</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1563,7 +1574,7 @@
             
             <div id="dice-container" class="flex flex-wrap justify-center gap-3 p-3 rounded-lg w-full transition-all"></div>
             
-            <p class="text-[10px] text-slate-400 italic mt-3">Tap a die to select</p>
+            <p id="dice-tap-hint" class="text-[10px] text-slate-400 italic mt-3">Tap a die to select</p>
         </div>
     </div>
 
@@ -19443,7 +19454,7 @@
         }
         // a tap on a pitch square (people via the canvas, the computer coach directly)
         function handleGridClick(x, y) {
-            if (FREP.on()) return;   // (watching a FUMBBL replay: nothing to play)
+            if (FREP.on()) { FREP.tap(x, y); return; }   // (watching a FUMBBL replay: a tap shows that player's card)
             if(x<-1 || x>CFG.cols || y<-1 || y>CFG.rows) return; 
             if (pitchPickTap(x, y)) return;   // picking a square or player for a spell or ability
             if (isWalking()) return;   // taps while a player is still walking would start a second move on top of the first
@@ -21115,7 +21126,7 @@
                 const ix = new Map(roster.map((p, i) => [p.fid, i])), n = roster.length;
                 const pos = new Int16Array(n * 2).fill(-99), st = new Uint8Array(n).fill(9);
                 let ball = null, inPlay = false, score = [0, 0], half = 1, turn = [0, 0], homePlaying = true, act = -1, rr = [T[0].reRolls || 0, T[1].reRolls || 0], weather = 'perfect';
-                const W = { NICE: 'perfect', VERY_SUNNY: 'sunny', POURING_RAIN: 'rain', BLIZZARD: 'blizzard', SWELTERING_HEAT: 'heat' };
+                const W = { NICE: 'perfect', NICE_WEATHER: 'perfect', VERY_SUNNY: 'sunny', POURING_RAIN: 'rain', BLIZZARD: 'blizzard', SWELTERING_HEAT: 'heat' };
                 const frames = [], turns = [], seenTurns = new Set(); let lines = [], fx = [], bombAt = null, blasted = false, prevCarrier = -1, prevBall = null, bombLive = false, thrownNow = -1;
                 const UP = [1, 2, 12];   // standing (or moving, or being blocked): can hold the ball
                 // ---- the commentary: FUMBBL's reports as lines for the match log, [side, html, style] (names are escaped: they're
@@ -21126,7 +21137,7 @@
                 const sum = a => Array.isArray(a) ? a.reduce((x, y) => x + y, 0) : null;
                 const mods = r => (r.rollModifiers || []).length ? ` <span class="opacity-60">(${esc(r.rollModifiers.join(', '))})</span>` : '';
                 const words2 = t => esc(String(t || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase());
-                let lastAct = '', lastLine = '', lastRoll = null, blockFrom = null;
+                let lastAct = '', lastLine = '', lastRoll = null, blockFrom = null, toFail = null;
                 // the questions FUMBBL put to the coaches: each becomes a card shown when it was asked, its answer filled in from what
                 // happened next (a re-roll used or not, the blocker stepping up or not...)
                 const teamSide = id => String(id) === String(g.teamHome.teamId) ? 0 : String(id) === String(g.teamAway.teamId) ? 1 : -1;
@@ -21138,7 +21149,7 @@
                     if (k === 'reRollProperties' && v.playerId != null) {
                         const j = ix.get(String(v.playerId)), lr = lastRoll && lastRoll.p === j ? lastRoll : null;
                         const opts = (v.reRollProperties || []).map(x => esc({ TRR: 'Team re-roll', PRO: 'Pro', LONER: 'Loner', SKILL: v.skill || 'Skill' }[x] || String(x)));
-                        e = { kind: 'reroll', p: j, rolled: !!lr, side: sideOf(v.playerId), title: 'Roll failed!', sub: `${who(v.playerId)}: ${esc(String(v.reRolledAction || 'roll').split('.').pop().replace(/([a-z])([A-Z])/g, '$1 $2'))}`,
+                        e = { kind: 'reroll', p: j, rolled: !!lr, min: v.minimumRoll, roll: lr ? lr.roll : null, trr: (v.reRollProperties || []).includes('TRR'), side: sideOf(v.playerId), title: 'Roll failed!', sub: `${who(v.playerId)}: ${esc(String(v.reRolledAction || 'roll').split('.').pop().replace(/([a-z])([A-Z])/g, '$1 $2'))}`,
                             line: v.minimumRoll ? `Needed ${v.minimumRoll}+${lr ? ', rolled ' + lr.roll : ''}` : '', q: 'Use a re-roll?', opts: [opts[0] || 'Re-roll', 'Accept failure'] };
                     } else if (k === 'blockRollProperties' && (v.reRollProperties || []).length) {
                         e = { kind: 'blockrr', side: teamSide(v.choosingTeamId), title: 'Block dice', sub: (v.blockRoll || []).map(f => FACE[f] || '?').join(' · '), line: '', q: 'Re-roll the block dice?', opts: ['Re-roll', 'Keep them'] };
@@ -21169,10 +21180,18 @@
                         else if (e.kind === 'argue' && k === 'argueTheCall') settle(e, 0);
                     });
                     if (k === 'playerAction' || k === 'turnEnd') settleAll();
+                    if (k === 'playerAction') toFail = null;
+                    if (k === 'turnEnd') { if (toFail && !r.playerIdTouchdown) fx.push({ t: 'turnover', why: toFail.why, side: homePlaying ? 0 : 1 }); toFail = null; }
+                    if (k === 'injury' && act >= 0 && String(r.defenderId) === roster[act].fid && /^block/.test(String(r.injuryType))) toFail = { p: r.defenderId, why: 'Player knocked down!' };
+                    if (k === 'startHalf' && r.half > 1) fx.push({ t: 'half', half: r.half });
+                    if (k === 'weather' && r.weather) fx.push({ t: 'weather', w: W[String(r.weather).toUpperCase().replace(/ /g, '_')] || null, name: plain(r.weather) });
+                    if (k === 'secretWeaponBan') fx.push({ t: 'swban', names: (r.playerIds || []).map(id => { const q = P(id); return q ? `${q.pos} #${q.nr}` : ''; }).filter(Boolean) });
+                    if (k === 'skillUse' && r.used && r.skill) fx.push({ t: 'skill', skill: plain(r.skill) });
+                    if (k === 'referee' && r.foulingPlayerBanned && act >= 0) fx.push({ t: 'sentoff', p: act });
                     if (ROLLS[k] !== undefined && r.playerId != null && r.roll != null) {
                         lastRoll = { p: ix.get(String(r.playerId)), roll: r.roll };
                         const rn = k === 'confusionRoll' ? (r.confusionSkill || 'Bone Head') : k === 'passRoll' && r.bomb ? 'Bomb' : ROLLS[k];
-                        pend.forEach(e => { if (e.kind === 'reroll' && e.p === lastRoll.p && !e.rolled) { e.rolled = true; e.line += (e.line ? ', rolled ' : 'Rolled ') + r.roll; e.sub = `${who(r.playerId)}: ${esc(rn)}`; } });   // (the roll comes in the same step as the question)
+                        pend.forEach(e => { if (e.kind === 'reroll' && e.p === lastRoll.p && !e.rolled) { e.rolled = true; e.line += (e.line ? ', rolled ' : 'Rolled ') + r.roll; e.roll = r.roll; e.sub = `${who(r.playerId)}: ${esc(rn)}`; } });   // (the roll comes in the same step as the question)
                     }
                     if (k === 'playerAction' && r.actingPlayerId != null) {
                         const key = r.actingPlayerId + ':' + r.playerAction; if (key === lastAct) return; lastAct = key;
@@ -21194,12 +21213,15 @@
                         if (r.seriousInjury) t += ` (${esc(r.seriousInjury)})`;
                         if ((r.armorModifiers || []).length || (r.injuryModifiers || []).length) t += ` <span class="opacity-60">(${esc([...(r.armorModifiers || []), ...(r.injuryModifiers || [])].join(', '))})</span>`;
                         add(sideOf(r.defenderId), t, r.injury >= 5 ? 'big' : r.armorBroken ? 'hurt' : 'info');
-                        fx.push({ t: 'hurt', d: ix.get(String(r.defenderId)), broken: !!r.armorBroken || !r.armorRoll, inj: r.injury });
+                        fx.push({ t: 'hurt', d: ix.get(String(r.defenderId)), broken: !!r.armorBroken || !r.armorRoll, inj: r.injury, si: plain(r.seriousInjury || '') });
                     } else if (ROLLS[k] !== undefined && r.playerId != null && r.roll != null && r.minimumRoll != null) {
                         let name = k === 'confusionRoll' ? (r.confusionSkill || 'Bone Head') : ROLLS[k];
                         if (k === 'passRoll' && r.bomb) name = 'Bomb';
                         const extra = r.passResult ? ` → ${words2(r.passResult)}` : '';
-                        fx.push({ t: 'roll', ok: !!r.successful, k, p: ix.get(String(r.playerId)), thrown: r.thrownPlayerId != null ? ix.get(String(r.thrownPlayerId)) : null });
+                        fx.push({ t: 'roll', ok: !!r.successful, k, p: ix.get(String(r.playerId)), thrown: r.thrownPlayerId != null ? ix.get(String(r.thrownPlayerId)) : null,
+                            min: r.minimumRoll, roll: r.roll, name: k === 'confusionRoll' ? plain(r.confusionSkill || 'Bone Head') : k === 'passRoll' && r.bomb ? 'Bomb' : ROLLS[k], mods: (r.rollModifiers || []).map(plain).join(', ') });
+                        // (a turnover: a failed dodge, Rush, pick-up, catch, pass or leap that the turn then ends on)
+                        if (TO_ROLLS[k] && sideOf(r.playerId) === (homePlaying ? 0 : 1)) toFail = r.successful ? (toFail && toFail.p === r.playerId ? null : toFail) : { p: r.playerId, why: TO_ROLLS[k] };
                         if (r.thrownPlayerId != null && ix.has(String(r.thrownPlayerId))) thrownNow = ix.get(String(r.thrownPlayerId));
                         add(sideOf(r.playerId), `${r.successful ? '✓' : '✗'} ${who(r.playerId)} ${esc(name)} ${r.minimumRoll}+: ${r.roll}${extra}${r.reRolled ? ' (re-roll)' : ''}${mods(r)}`, r.successful ? 'ok' : 'bad');
                     } else if (k === 'reRoll' && (fx.push({ t: 'reroll', team: /Team|Coaching|Leader/.test(r.reRollSource || '') }), true)) add(sideOf(r.playerId), `↻ ${esc(r.reRollSource || 're-roll')}${r.roll && !r.successful ? ' - failed' : ''}`, 'info');
@@ -21284,6 +21306,10 @@
                 animosityRoll: 'Animosity', escapeRoll: 'Escape', projectileVomit: 'Projectile Vomit', breatheFire: 'Breathe Fire', throwTeamMateRoll: 'Throw Team-mate', standUpRoll: 'Stand Up',
                 tentaclesShadowingRoll: 'Shadowing', confusionRoll: 'Bone Head' };
             const FACE = ['', 'Skull', 'Both Down', 'Push', 'Push', 'Stumble', 'POW'];   // FUMBBL's block die: 1-6 (the same numbering as FACES)
+            const TO_ROLLS = { dodgeRoll: 'Failed Dodge!', goForItRoll: 'Failed Rush!', pickUpRoll: 'Failed pick-up!', catchRoll: 'The ball was not caught!', passRoll: 'Failed pass!', leapRoll: 'Failed Leap!' };
+            // the game's own roll window titles
+            const ROLL_TITLE = { dodgeRoll: 'DODGE', goForItRoll: 'RUSH', pickUpRoll: 'PICKUP', catchRoll: 'CATCH', passRoll: 'PASS', interceptionRoll: 'INTERCEPT', rightStuffRoll: 'LANDING',
+                throwTeamMateRoll: 'THROW TEAMMATE', leapRoll: 'LEAP', jumpUpRoll: 'JUMP UP', standUpRoll: 'STAND UP' };
             function dieCanvas(face, sz) {
                 const cv = document.createElement('canvas'); cv.width = cv.height = sz;
                 const g = cv.getContext('2d'), sym = document.createElement('canvas'); sym.width = sym.height = sz;
@@ -21334,7 +21360,7 @@
                         id: i + 1, team: f.side, x: -9, y: -9, inSquad: true, starter: true, sub: false, sitOut: false,
                         isDown: false, isStunned: false, isCasualty: false, isKO: false, isEjected: false, isReserve: true, casualtyStatus: null,
                         isFading: false, fadeStartTime: 0, fadeDuration: 2000, stunnedThisTurn: false, hasActed: false, actionTaken: null, hasBlocked: false,
-                        ma: f.ma, st: f.st, ag: f.ag, pa: f.pa, av: f.av, skills: f.skills.slice(), baseSkills: f.skills.slice(), usedSkills: [], remainingMA: f.ma, rushes: 2,
+                        ma: f.ma, st: f.st, ag: f.ag, pa: f.pa, av: f.av, skills: f.skills.map(plain).filter(Boolean), baseSkills: f.skills.map(plain).filter(Boolean), usedSkills: [], remainingMA: f.ma, rushes: 2,
                         posKey: m ? m.k : null, name: plain(f.name) || null, nr: f.nr, star: f.star || null, fid: f.fid });
                     byFid.set(f.fid, p);
                     return p;
@@ -21415,6 +21441,117 @@
                 if (cells.length) focus(cells, Math.max(90, Math.min(420 / speed, delay(F) * 0.7)));   // (done before the next step)
             }
             const floater = (p, text) => { if (p && !p.isReserve) (state.floaters = state.floaters || []).push({ id: p.id, x: p.x, y: p.y, text, t0: performance.now() }); };
+            // ---- the game's notifications, as when the computer plays itself: its roll window, re-roll window, block window
+            // (with the clash), choice window and big announcements, each for as long as the computer leaves them up, one after
+            // another; the turn banner, the removal notice and skill pop-ups don't hold anything up. Above 2x the roll windows
+            // are left out and blocks use the small dice tray. (Their buttons do nothing here: nothing is waiting on them.) ----
+            let winT = [], winMs = 0;
+            const WINDOWS = ['modal-roll', 'modal-team-reroll', 'modal-choice', 'modal-dice', 'modal-announce'];
+            function clearWindows() {
+                winT.forEach(clearTimeout); winT = []; winMs = 0;
+                WINDOWS.forEach(id => { const m = $(id); if (m) m.classList.add('hidden'); });
+                document.querySelectorAll('.fx-pick, .fx-off, .fx-ok, .fx-bad').forEach(b => b.classList.remove('fx-pick', 'fx-off', 'fx-ok', 'fx-bad'));
+                const cb = $('btn-roll-confirm'); if (cb) cb.textContent = 'Roll Dice';
+            }
+            const later = (fn, ms) => winT.push(setTimeout(() => { try { fn(); } catch (e) { console.error('FREP window', e); } }, ms));
+            const pct = min => Math.round(Math.max(1, Math.min(5, 7 - min)) / 6 * 100);
+            const nameOf = j => { const f = D.roster[j]; return f ? `${plain(f.pos)} #${f.nr}` : 'A player'; };
+            const teamOf = side => plain(D.teams[side] ? D.teams[side].name : '');
+            function rollWin(e) {
+                if (speed > 2 || e.min == null || e.roll == null) return null;
+                const T1 = 700 / speed, T2 = 500 / speed, type = ROLL_TITLE[e.k] || String(e.name || 'ROLL').toUpperCase();
+                return { ms: T1 + T2, open: () => {
+                    $('roll-title').textContent = `${type} REQUIRED!`;
+                    $('roll-desc').textContent = nameOf(e.p) + (e.mods ? ` (${e.mods})` : '');
+                    $('roll-target').textContent = e.min + '+'; $('roll-odds').textContent = `(${pct(e.min)}% Chance)`;
+                    $('break-tackle-container').classList.add('hidden'); $('btn-roll-cancel').classList.add('hidden');
+                    const cb = $('btn-roll-confirm'); cb.textContent = 'Roll Dice'; cb.classList.remove('fx-ok', 'fx-bad');
+                    $('modal-roll').classList.remove('hidden');
+                    later(() => { cb.textContent = `Rolled ${e.roll} ${e.ok ? '✓' : '✗'}`; cb.classList.add(e.ok ? 'fx-ok' : 'fx-bad'); sfxRoll(e.ok, type); }, T1);
+                }, close: () => { $('modal-roll').classList.add('hidden'); $('btn-roll-cancel').classList.remove('hidden'); } };
+            }
+            function pickWin(id, yes, no, choice, T) {   // highlight the coach's answer part-way through
+                later(() => { const y = $(yes), n = $(no); (choice === 0 ? y : n).classList.add('fx-pick'); (choice === 0 ? n : y).classList.add('fx-off'); sfx('menuClick'); }, T * 0.55);
+            }
+            function askWin(e) {
+                if (e.drop || e.choice == null || e.kind === 'follow' || e.kind === 'coin') return null;
+                if (e.kind === 'receive') {
+                    const t = teamOf(e.side);
+                    return annWin('COIN TOSS', `${t} win the toss & choose to ${e.choice === 0 ? 'receive' : 'kick'}!`, 'bg-amber-800/90', 3000);
+                }
+                if (e.kind === 'reroll' && e.trr) {
+                    const T = Math.max(450, 1000 / speed);
+                    return { ms: T, open: () => {
+                        $('trr-title').textContent = 'Roll Failed!'; $('trr-desc').innerHTML = e.sub || 'Action failed!';
+                        $('trr-target').textContent = e.min != null ? e.min + '+' : '?'; $('trr-roll').textContent = e.roll != null ? e.roll : '?';
+                        $('trr-odds').textContent = e.min != null ? `${pct(e.min)}% Chance of Success on Reroll` : '';
+                        const mb = $('trr-meaning-box'); if (mb) mb.classList.add('hidden');
+                        $('modal-team-reroll').classList.remove('hidden');
+                        pickWin('modal-team-reroll', 'btn-trr-yes', 'btn-trr-no', e.choice, T);
+                    }, close: () => { $('modal-team-reroll').classList.add('hidden'); ['btn-trr-yes', 'btn-trr-no'].forEach(id => $(id).classList.remove('fx-pick', 'fx-off')); } };
+                }
+                const T = Math.max(500, 1100 / speed), yesB = $('btn-choice-yes'), noB = $('btn-choice-no');
+                return { ms: T, open: () => {
+                    $('choice-title').innerHTML = e.title; $('choice-options').classList.add('hidden'); $('choice-yesno').classList.remove('hidden');
+                    $('choice-text').innerHTML = [e.team ? '<b>' + e.team + '</b>' : '', e.sub, e.line, e.q].filter(Boolean).join('<br>');
+                    yesB.innerHTML = e.opts[0]; noB.innerHTML = e.opts[1];
+                    $('modal-choice').classList.remove('hidden');
+                    pickWin('modal-choice', 'btn-choice-yes', 'btn-choice-no', e.choice, T);
+                }, close: () => { $('modal-choice').classList.add('hidden'); [yesB, noB].forEach(b => b.classList.remove('fx-pick', 'fx-off')); } };
+            }
+            function blockWin(e) {
+                const a = state.players[e.a], d = state.players[e.d];
+                if (speed > 2 || !a || !d || !e.dice || !e.dice.length || a.isReserve || d.isReserve) return null;
+                const T1 = Math.max(450, 1000 / speed);
+                return { ms: T1 + 1450, open: () => {
+                    const chooser = e.nr < 0 ? d.team : a.team;
+                    try { paintDiceChooser(chooser, chooser !== a.team); } catch (er) {}
+                    clashSetup(a, d, 0, 0);
+                    const c = $('dice-container'); c.innerHTML = '';
+                    e.dice.forEach(f => { const b = document.createElement('div'); b.className = 'die-canvas-btn p-1 bg-slate-200 border-2 border-slate-400 rounded shadow-md';
+                        const cv = document.createElement('canvas'); cv.width = cv.height = 50; b.appendChild(cv); c.appendChild(b); renderDieIcon(cv.getContext('2d'), f, 50); });
+                    $('btn-combat-trr').classList.add('hidden'); $('btn-combat-keep').classList.add('hidden');
+                    $('modal-dice').classList.remove('hidden'); sfx('dice');
+                    later(() => [...c.children].forEach((b, i) => b.classList.add(i === e.pick ? 'fx-pick' : 'fx-off')), T1 * 0.55);
+                    later(() => clashPlay(e.dice[e.pick] || 3, () => {}), T1);
+                }, close: () => $('modal-dice').classList.add('hidden') };
+            }
+            function annWin(title, sub, cls, ms) {
+                const T = Math.max(900, ms / speed);
+                return { ms: T, open: () => announce(title, sub, cls, null, T), close: () => { const m = $('modal-announce'); if (m) m.classList.add('hidden'); } };
+            }
+            function noticeOf(e) {   // the windows this step brings, in the order the game shows them
+                const out = [], fx = e.fx || [];
+                fx.filter(x => x.t === 'roll').forEach(x => out.push(rollWin(x)));
+                fx.filter(x => x.t === 'ask' && x.kind === 'reroll').forEach(x => out.push(askWin(x)));
+                fx.filter(x => x.t === 'block').forEach(x => out.push(blockWin(x)));
+                fx.filter(x => x.t === 'ask' && x.kind !== 'reroll').forEach(x => out.push(askWin(x)));
+                fx.forEach(x => {
+                    if (x.t === 'td') out.push(annWin('TOUCHDOWN!', `${teamOf(D.roster[x.p] ? D.roster[x.p].side : 0)} score!`, 'bg-amber-600/90', 2500));
+                    else if (x.t === 'turnover') out.push(annWin('TURNOVER!', x.why, 'bg-red-900/80', 2500));
+                    else if (x.t === 'half') out.push(x.half >= 3 ? annWin('EXTRA TIME', 'Level after two halves! Sudden death: the first touchdown wins.', 'bg-red-900/90', 4000) : annWin('HALF TIME', 'Teams swap sides!', 'bg-blue-900/90', 2500));
+                    else if (x.t === 'weather') { const w = WEATHER_TABLE[x.w] || null; out.push(annWin(w ? `${w.icon} ${w.name.toUpperCase()}` : x.name.toUpperCase(), w ? w.desc : '', x.w === 'perfect' ? 'bg-sky-900/90' : 'bg-indigo-900/90', 4000)); }
+                    else if (x.t === 'swban' && x.names.length) out.push(annWin('SECRET WEAPONS', `Sent-off: ${x.names.join(', ')}`, 'bg-red-900/90', 3000));
+                });
+                return out.filter(Boolean);
+            }
+            function runWindows(F) {
+                const list = noticeOf(F); let t = 0;
+                list.forEach(w => { later(w.open, t); t += w.ms; later(w.close, t - 20); });
+                winMs = t;
+            }
+            function quickNotes(F) {   // the ones that don't hold the replay up
+                (F.fx || []).forEach(e => {
+                    try {
+                        if (e.t === 'hurt' && e.inj >= 5) {
+                            const f = D.roster[e.d]; if (!f) return;
+                            const desc = e.inj === 5 ? "KO'd - Stretchered to Dugout" : e.inj === 8 ? 'Dead - R.I.P.' : e.inj === 6 ? 'Badly Hurt' : (e.si || 'Seriously Injured');
+                            showRemovalNotice(e.inj === 5 ? 'KNOCKED OUT' : 'CASUALTY', `${teamOf(f.side)} ${plain(f.pos)} #${f.nr}: ${desc}`);
+                        } else if (e.t === 'sentoff') { const f = D.roster[e.p]; if (f) showRemovalNotice('SENT OFF', `${teamOf(f.side)} ${plain(f.pos)} #${f.nr}: sent off for fouling`); }
+                        else if (e.t === 'skill') skillPop(e.skill);
+                    } catch (er) {}
+                });
+            }
             function playFx(F) {
                 const P = j => (j != null && j >= 0 ? state.players[j] : null);
                 (F.fx || []).forEach(e => {
@@ -21425,7 +21562,7 @@
                                 if (e.t === 'foul') { pitchBump(a, d.x, d.y, 0.22); sfx('stompThump'); setTimeout(() => sfx('stompThump'), 180); return; }
                                 // the pictures only (the positions already moved): the attacker lunges in, the defender rocks back
                                 pitchBump(a, d.x, d.y, 0.32); pitchBump(d, d.x + (d.x - a.x), d.y + (d.y - a.y), 0.16, 110);
-                                if (e.t === 'block') showDice(e);
+                                if (e.t === 'block' && speed > 2) showDice(e);
                                 sfx(e.res === 'POW' || e.res === 'POW/PUSH' ? 'bigHit' : 'blockHit');
                                 floater(e.res === 'SKULL' ? a : d, RES[e.res] || e.res);
                             }
@@ -21438,12 +21575,12 @@
                             if (e.k === 'pickUpRoll' && e.ok) sfx('pickUp');
                             else if (e.k === 'catchRoll' && e.ok) sfx('catch');
                             else if (e.k === 'passRoll' || e.k === 'throwTeamMateRoll') sfx(e.ok ? 'passThrown' : 'fumble');
-                            else if (!e.ok) sfx('rollFail');
+                            else if (!e.ok && speed > 2) sfx('rollFail');
                         } else if (e.t === 'reroll') { if (e.team) sfx('teamReroll'); }
                         else if (e.t === 'boom') { bombFx.blasts.push({ x: e.x, y: e.y, t0: performance.now() }); sfx('boom'); sfx('crowdOoooh', 400); }
                         else if (e.t === 'kick') sfx('kickOff');
                         else if (e.t === 'whistle') sfx('whistle');
-                        else if (e.t === 'ask') { showAsk(e); if (!e.drop && e.choice != null) setTimeout(() => sfx('menuClick'), askMs(e) * 0.45); }
+                        else if (e.t === 'ask') { /* (the game's own windows: runWindows) */ }
                         else if (e.t === 'td') { sfx('touchdown'); sfx('crowdHuge', 200); floater(P(e.p), 'TOUCHDOWN!'); }
                     } catch (er) { console.error('FREP fx', er); }
                 });
@@ -21474,11 +21611,13 @@
                 state.selectedId = F.act >= 0 ? F.act + 1 : null;
                 try { updateTopBar(); } catch (e) {}
                 if (animate) {
-                    playFx(F);
+                    clearWindows();
+                    playFx(F); quickNotes(F); runWindows(F);
+                    if (F.start) later(() => showTurnBanner(F.side), winMs);   // (after a turnover's announcement, not over it)
                     logFrame(F);
                     try { focusFrame(F); } catch (e) {}
                 }
-                paintBar();
+                paintBar(); if (inspect != null) paintInfo();
             }
 
             // ---- playback ----
@@ -21487,13 +21626,16 @@
                 const quiet = F.kind === 'other' && !F.lines.length && !F.fly;
                 const fly = F.fly ? (F.fly.kick ? 1300 : F.fly.d <= 1 ? 200 : Math.min(900, 260 + F.fly.d * 55)) + 120 : 0;
                 const hit = (F.fx || []).some(e => e.t === 'block') ? 850 : (F.fx || []).some(e => e.t === 'boom' || (e.t === 'hurt' && e.inj >= 5)) ? 350 : 0;
-                const asked = (F.fx || []).filter(e => e.t === 'ask' && !e.drop && e.choice != null).reduce((m, e) => Math.max(m, askMs(e) * speed + 150), 0);
-                return (Math.max(quiet ? 200 : base, fly, asked) + hit + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed;
+                return Math.max(winMs + 120, (Math.max(quiet ? 200 : base, fly) + hit + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed);
             }
-            function stop() { playing = false; clearTimeout(timer); timer = null; paintBar(); }
+            function stop() { playing = false; clearTimeout(timer); timer = null; clearWindows(); paintBar(); }
             function tick() {
                 if (!playing) return;
-                if (at >= D.frames.length - 1) { stop(); log('— End of the replay —', 'text-amber-400 font-bold'); return; }
+                if (at >= D.frames.length - 1) {
+                    stop(); log('— End of the replay —', 'text-amber-400 font-bold');
+                    const F = D.frames[at]; try { announce('FULL TIME', `Final Score: ${teamOf(0)} ${F.score[0]} - ${F.score[1]} ${teamOf(1)}`, 'bg-black/90', null, 5000); } catch (e) {}
+                    return;
+                }
                 at++; show(at, true);
                 timer = setTimeout(tick, delay(D.frames[at]));
             }
@@ -21527,6 +21669,7 @@
                 const tm = t => `${esc(t.name)} (${esc(t.rosterName)}, ${esc(t.coach)})`;
                 log(`FUMBBL match: ${tm(D.teams[0])} v ${tm(D.teams[1])}`, 'text-amber-300 font-bold');
                 D.teams.forEach(t => { if (!t.race) log(`&nbsp;&nbsp;${esc(t.rosterName)}: not a team BludBowl has, so its players are shown as plain tokens.`, 'text-slate-400'); });
+                log('&nbsp;&nbsp;Tap a player to see their card.', 'text-slate-400');
                 {   // the turn picker: every turn of the match, to jump straight to
                     const w = $('frep-where'); w.innerHTML = '';
                     const o0 = document.createElement('option'); o0.value = '-1'; o0.textContent = 'Kick-off'; w.appendChild(o0);
@@ -21536,6 +21679,39 @@
                 // start at the first kick-off set-up, not the empty pitch
                 const first = D.frames.findIndex(F => F.pos.some((v, j) => j % 2 === 0 && v >= 0 && v < CFG.cols));
                 jump(Math.max(0, first)); startFrameLoop(); play();
+            }
+            // ---- tap a player for their card (the game's unit panel: name, position, characteristics, skills, state) ----
+            let inspect = null;
+            const STATE_TXT = { 1: '', 2: '', 3: 'Prone', 4: 'Stunned', 5: 'KO', 6: 'Badly Hurt', 7: 'Seriously Injured', 8: 'Dead', 9: 'Reserve', 11: 'Falling', 12: '', 13: 'Sent off' };
+            function paintInfo() {
+                const box = $('panel-unit-container'), stats = $('stats-panel'), tb = $('action-toolbar');
+                if (!box || !stats) return;
+                document.body.classList.toggle('frep-info', inspect != null);
+                if (inspect == null) return;
+                const p = state.players[inspect], f = D.roster[inspect], F = D.frames[at]; if (!p || !f) return;
+                const st = F ? STATE_TXT[F.st[inspect]] : '', ball = state.ball.carrierId === p.id;
+                const col = (teamStyle(p.team).fill || '#94a3b8').slice(0, 7);
+                stats.innerHTML = `
+                    <div class="font-bold text-xs border-b border-slate-700 pb-0.5 mb-1 flex justify-between items-center">
+                        <div><span style="color:${col}">■</span> <span class="text-slate-100">${esc(f.name || f.pos)}</span>
+                            ${f.star ? '<span class="text-yellow-300 font-normal"> ★ Star Player</span>' : ''}${st ? ` <span class="text-amber-300 text-[10px]">[${esc(st)}]</span>` : ''}${ball ? ' <span class="text-[10px]">🏈</span>' : ''}</div>
+                        <span class="text-slate-400 font-normal">#${esc(f.nr)}</span>
+                    </div>
+                    <div class="text-[9px] text-slate-400 mb-1">${esc(f.pos)} · ${esc(D.teams[f.side].name)}</div>
+                    <div class="flex justify-between bg-slate-950 rounded px-1.5 py-0.5 mb-1 shadow-inner">
+                        <div class="text-center"><div class="text-[8px] text-slate-500">MA</div><div class="font-bold text-[10px]">${esc(f.ma)}</div></div>
+                        <div class="text-center"><div class="text-[8px] text-slate-500">ST</div><div class="font-bold text-[10px]">${esc(f.st)}</div></div>
+                        <div class="text-center"><div class="text-[8px] text-slate-500">AG</div><div class="font-bold text-[10px]">${esc(f.ag)}+</div></div>
+                        <div class="text-center"><div class="text-[8px] text-slate-500">PA</div><div class="font-bold text-[10px]">${f.pa != null && f.pa !== 0 ? esc(f.pa) + '+' : '-'}</div></div>
+                        <div class="text-center"><div class="text-[8px] text-slate-500">AV</div><div class="font-bold text-[10px]">${esc(f.av)}+</div></div>
+                    </div>
+                    <div class="text-[9px] text-slate-400 break-words leading-tight"><span class="text-slate-500 font-bold">Skills:</span> <span class="text-slate-300">${skillTags(p.skills, 'None')}</span></div>`;
+                if (tb) tb.classList.add('hidden');
+            }
+            function tap(x, y) {
+                const p = state.players.find(q => !q.isReserve && !q.isKO && !q.isCasualty && !q.isEjected && q.x === x && q.y === y);
+                inspect = p ? state.players.indexOf(p) : null;
+                paintInfo(); if (p) sfx('selectPlayer');
             }
             function leave() { stop(); location.reload(); }
             const PICKS = [{"id": 4745896, "rid": 1953280, "races": ["Bretonnian", "Skaven"], "score": [3, 2], "coaches": ["proff70", "Aelendil"], "cr": [1658, 1697], "note": "Five touchdowns, decided by one", "date": "2026-10-14"}, {"id": 4749879, "rid": 1957940, "races": ["Goblin", "High Elf"], "score": [2, 3], "coaches": ["angusosborne", "e1f0"], "cr": [1589, 1435], "note": "Five touchdowns, and Goblin bombs", "date": "2026-10-28"}, {"id": 4745631, "rid": 1952984, "races": ["Ogre", "Orc"], "score": [1, 1], "coaches": ["Zelmor", "Willking"], "cr": [1786, 1783], "note": "A bloodbath, with Gnoblars flying", "date": "2026-10-13"}, {"id": 4745789, "rid": 1953182, "races": ["Wood Elf", "Shambling Undead"], "score": [2, 2], "coaches": ["Bazakastine", "Wargraith"], "cr": [1938, 1629], "note": "A 1938-rated coach's Wood Elves", "date": "2026-10-14"}, {"id": 4746128, "rid": 1953567, "races": ["Ogre", "Skaven"], "score": [2, 1], "coaches": ["Joost", "Hagymacsipos"], "cr": [1840, 1762], "note": "Two top coaches; Ogres throwing Gnoblars", "date": "2026-10-15"}, {"id": 4749330, "rid": 1957326, "races": ["Goblin", "Chaos Renegade"], "score": [1, 1], "coaches": ["angusosborne", "highsididy"], "cr": [1593, 1596], "note": "Seven bombs", "date": "2026-10-27"}, {"id": 4745410, "rid": 1952736, "races": ["High Elf", "Chaos Renegade"], "score": [2, 2], "coaches": ["yan64", "darkmage"], "cr": [1722, 1790], "note": "Close and high-scoring, both coaches 1700+", "date": "2026-10-12"}, {"id": 4745990, "rid": 1953380, "races": ["Chaos Chosen", "Khorne"], "score": [1, 2], "coaches": ["AlRonno", "MTM"], "cr": [1715, 1804], "note": "Chaos v Khorne: brutal", "date": "2026-10-14"}, {"id": 4745809, "rid": 1953200, "races": ["Old World Alliance", "Snotling"], "score": [1, 1], "coaches": ["zagori", "Force_unlocked"], "cr": [1653, 1858], "note": "A Snotling swarm, coached by an 1858", "date": "2026-10-14"}, {"id": 4745828, "rid": 1953223, "races": ["Amazon", "Wood Elf"], "score": [1, 0], "coaches": ["Beltroniko", "CrisisChris"], "cr": [1844, 1732], "note": "Two elite coaches, a tight elf game", "date": "2026-10-14"}];
@@ -21653,7 +21829,7 @@
             }
             // (tests) the players a replay would put on the pitch, with FUMBBL's position name beside ours
             function debugBuild(d) { const keep = D; D = d; try { buildMatch(); return state.players.map((p, i) => ({ team: p.team, type: p.type, star: p.star, ffb: d.roster[i].pos })); } finally { D = keep; } }
-            return { wire, on: () => on, parse, start, debugBuild, debug: () => ({ D, at }) };
+            return { wire, on: () => on, parse, start, tap, debugBuild, debug: () => ({ D, at }) };
         })();
 
         // ---------- Ball & Chain ----------
