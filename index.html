@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.72</title>
+    <title>BludBowl 3.73</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -608,6 +608,20 @@
         .sv-btn:disabled { opacity: .45; } .sv-btn.sv-go { background: #059669; border-color: #34d399; color: #fff; } .sv-btn.sv-bad { color: #fca5a5; border-color: #7f1d1d; }
         .sv-import { background: none; border: 0; color: #94a3b8; font-size: 12px; text-decoration: underline; padding: 4px; align-self: center; }
         .sv-note { font-size: 12.5px; color: #fde68a; text-align: center; }
+        /* watching a FUMBBL replay: the game's own controls step aside for the replay's */
+        body.frep-on #btn-end-turn, body.frep-on #btn-saveexit, body.frep-on #btn-simspeed, body.frep-on #btn-aifast, body.frep-on #panel-unit-container,
+        body.frep-on #setup-controls-container, body.frep-on #ind-chip, body.frep-on #btn-rosters { display: none !important; }
+        #frep-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(8px, env(safe-area-inset-bottom)); z-index: 45; width: min(440px, calc(100vw - 16px));
+            background: rgba(2,6,23,.88); border: 1px solid #475569; border-radius: 14px; padding: 6px 8px 4px; box-shadow: 0 6px 24px rgba(0,0,0,.5); color: #e2e8f0; }
+        #frep-bar.hidden { display: none; }
+        #frep-where { font-size: 11px; font-weight: 700; text-align: center; color: #fcd34d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #frep-bar .frep-row { display: flex; justify-content: space-between; gap: 4px; margin: 4px 0 2px; }
+        #frep-bar button { flex: 1 1 0; min-width: 0; min-height: 36px; border-radius: 9px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; font-size: 15px; font-weight: 700; }
+        #frep-bar button:active { background: #334155; }
+        #frep-pp { background: #065f46 !important; border-color: #10b981 !important; }
+        #frep-range { width: 100%; accent-color: #f59e0b; }
+        @media (orientation: portrait) { body.frep-on #panel-log-container { bottom: calc(118px + env(safe-area-inset-bottom)) !important; } }   /* (the log sits above the controls) */
+        @media (orientation: landscape) { #frep-bar { left: auto; right: max(8px, env(safe-area-inset-right)); transform: none; width: min(380px, 42vw); } }   /* (where the unit panel goes) */
         .sv-ask { position: fixed; inset: 0; z-index: 250; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.7); padding: 16px; }
         .sv-ask.hidden { display: none; }
         .sv-ask-card { max-width: 420px; width: 100%; background: #0f172a; border: 2px solid #059669; border-radius: 14px; padding: 16px; color: #e2e8f0; }
@@ -950,7 +964,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.72</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.73</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -964,6 +978,7 @@
             <button type="button" class="mm-btn" data-go="league"><span class="mm-t">League</span><span class="mm-s">On this device: seasons, fixtures, a league table and play-offs</span></button>
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">On this device: knockout cups and Swiss events for tournament teams</span></button>
             <button type="button" class="mm-btn" data-go="teams"><span class="mm-t">Teams</span><span class="mm-s">Build, manage and back up your teams and their careers</span></button>
+            <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">Watch a FUMBBL Match</span><span class="mm-s">Replay any match from fumbbl.com by its match number</span></button>
             <button type="button" class="mm-btn" data-go="settings"><span class="mm-t">Settings</span><span class="mm-s">Sound, music, text size, pitch and animations</span></button>
             <button type="button" class="sv-import" data-sv="import">Load a saved match or a backup from a file…</button>
             <input type="file" id="sv-file" accept=".json,application/json" class="hidden">
@@ -973,6 +988,14 @@
             <div class="sv-btns"><button type="button" class="sv-btn sv-go" data-bk="yes">Restore</button><button type="button" class="sv-btn" data-bk="no">Cancel</button></div></div></div>
         <div id="save-ask" class="sv-ask hidden" role="dialog" aria-modal="true"><div class="sv-ask-card"><div class="sv-head">Match in progress</div><p class="sv-ask-text"></p>
             <div class="sv-btns"><button type="button" class="sv-btn sv-go" data-ask="resume">Resume it</button><button type="button" class="sv-btn sv-bad" data-ask="go">Start new match</button><button type="button" class="sv-btn" data-ask="back">Cancel</button></div></div></div>
+        <div id="frep-ask" class="sv-ask hidden" role="dialog" aria-modal="true" aria-labelledby="frep-h"><div class="sv-ask-card">
+            <div class="sv-head" id="frep-h">Watch a FUMBBL match</div>
+            <p class="sv-ask-text">Type the match number from fumbbl.com (or paste the match page's address). The replay is downloaded from FUMBBL and played on the pitch here.</p>
+            <input id="frep-id" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="e.g. 4749985" aria-label="FUMBBL match number"
+                style="width:100%;box-sizing:border-box;background:#020617;color:#e2e8f0;border:2px solid #475569;border-radius:10px;padding:8px 10px;font-size:16px;margin-bottom:8px">
+            <p id="frep-note" role="status" style="min-height:1.2em;font-size:12px;margin:0 0 10px;color:#94a3b8"></p>
+            <div class="sv-btns"><button type="button" class="sv-btn sv-go" id="frep-go">▶ Watch</button><label class="sv-btn" style="cursor:pointer">Open a file…<input type="file" id="frep-file" accept=".gz,.json,application/gzip,application/json" class="hidden"></label><button type="button" class="sv-btn" id="frep-cancel">Cancel</button></div>
+        </div></div>
         <section id="settings-panel" class="hidden" aria-label="Settings">
             <h2 class="fantasy-font text-xl md:text-2xl text-slate-300 uppercase tracking-widest mb-3 text-center">Settings</h2>
             <div class="st-row"><span>Sound effects</span><button type="button" class="st-tog" id="st-sound"></button></div>
@@ -1205,6 +1228,19 @@
         </div>
     </div>
 
+    <div id="frep-bar" class="hidden" role="toolbar" aria-label="Replay controls">
+        <div id="frep-where"></div>
+        <div class="frep-row">
+            <button type="button" id="frep-prevturn" title="Back a turn" aria-label="Back a turn">⏮</button>
+            <button type="button" id="frep-back" title="Step back" aria-label="Step back">◀</button>
+            <button type="button" id="frep-pp" title="Play / pause" aria-label="Play or pause">▶</button>
+            <button type="button" id="frep-fwd" title="Step forward" aria-label="Step forward">▶|</button>
+            <button type="button" id="frep-nextturn" title="Next turn" aria-label="Next turn">⏭</button>
+            <button type="button" id="frep-speed" title="Speed" aria-label="Speed">1×</button>
+            <button type="button" id="frep-exit" title="Leave the replay" aria-label="Leave the replay">✕</button>
+        </div>
+        <input type="range" id="frep-range" min="0" max="0" value="0" aria-label="Position in the replay">
+    </div>
     <canvas id="gameCanvas" class="absolute inset-0 cursor-grab active:cursor-grabbing w-full h-full z-0"></canvas>
 
     <div id="ui-layer" class="absolute inset-0 pointer-events-none z-10 p-2 pb-safe flex flex-col justify-between">
@@ -19355,6 +19391,7 @@
         }
         // a tap on a pitch square (people via the canvas, the computer coach directly)
         function handleGridClick(x, y) {
+            if (FREP.on()) return;   // (watching a FUMBBL replay: nothing to play)
             if(x<-1 || x>CFG.cols || y<-1 || y>CFG.rows) return; 
             if (pitchPickTap(x, y)) return;   // picking a square or player for a spell or ability
             if (isWalking()) return;   // taps while a player is still walking would start a second move on top of the first
@@ -20941,6 +20978,277 @@
                 },
                 show: (r, team) => PASSFX.play(r, team, null)   // the guest's copy of the host's replay
             };
+        })();
+
+        // ---------- Watching a FUMBBL match (FREP) ----------
+        // fumbbl.com keeps a full replay of every match (its own model-change log, the same file ai-training/ reads). This fetches one
+        // (by match or replay number), turns it into a list of snapshots, and plays them on our own pitch: players walk, fall over, the
+        // ball moves, the score and turns tick over. Nothing of our game runs meanwhile (no rules, no computer, no autosave: the match
+        // is never "live"), and leaving reloads the page to put everything back.
+        const FREP = (() => {
+            const $ = id => document.getElementById(id);
+            const norm = s => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+            const words = s => String(s || '').toLowerCase().split(/[^a-z]+/).filter(w => w.length > 1);
+            let on = false, D = null, at = 0, playing = false, timer = null, speed = 1, byFid = new Map();
+
+            // ---- getting the replay ----
+            async function gunzipText(buf) {
+                const u = new Uint8Array(buf);
+                if (u[0] !== 0x1f || u[1] !== 0x8b) return new TextDecoder().decode(u);
+                if (typeof DecompressionStream === 'undefined') throw new Error('This browser cannot unpack the replay (it needs a newer browser).');
+                return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+            }
+            async function fetchReplay(input, note) {
+                const s = String(input || '').trim(); let m, rid = null, mid = null;
+                if ((m = s.match(/replay\D{0,12}(\d+)/i))) rid = +m[1];
+                else if ((m = s.match(/(\d{4,})/))) mid = +m[1];
+                if (!rid && !mid) throw new Error('Type a FUMBBL match number (or paste the match page address).');
+                if (mid) {
+                    note('Looking up match ' + mid + '…');
+                    try { const r = await fetch('https://fumbbl.com/api/match/get/' + mid); if (r.ok) { const j = await r.json(); if (j && j.replayId) rid = +j.replayId; } } catch (e) {}
+                    if (!rid) rid = mid;   // (perhaps it was the replay's own number)
+                }
+                note('Downloading replay ' + rid + '…');
+                const r = await fetch('https://fumbbl.com/api/replay/get/' + rid + '/gz');
+                if (!r.ok) throw new Error('FUMBBL has no replay ' + rid + ' (' + r.status + ').');
+                note('Unpacking…');
+                const buf = await r.arrayBuffer();
+                if (!buf.byteLength) throw new Error('FUMBBL has no match or replay ' + (mid || rid) + ' - check the number.');
+                let d = null; try { d = JSON.parse(await gunzipText(buf)); } catch (e) { throw new Error('That replay could not be read.'); }
+                if (!d || !d.game || !d.gameLog) throw new Error('That replay could not be read.');
+                return d;
+            }
+
+            // ---- who's who: FUMBBL's teams and positions onto ours ----
+            function raceKey(rosterName) {
+                const want = norm(rosterName);
+                const forms = R => { const n = norm(R.name); return [n, R.key, n.replace(/s$/, ''), n.replace(/elves$/, 'elf'), n.replace(/ves$/, 'f')]; };
+                const R = Object.values(RACES).find(R => forms(R).includes(want) || forms(R).includes(want.replace(/s$/, '')));
+                return R ? R.key : null;
+            }
+            function matchType(race, ffb) {   // the closest of our positions: shared words in the name, then the nearest characteristics
+                const types = race ? Object.entries(RACES[race].types) : [];
+                const raceWords = new Set(words(RACES[race] ? RACES[race].name : '').concat(words(race)));
+                const fw = words(ffb.name).filter(w => !raceWords.has(w));
+                let best = null;
+                types.forEach(([k, t]) => {
+                    const tw = words(t.type);
+                    let sc = norm(t.type) === norm(ffb.name) ? 20 : fw.filter(w => tw.includes(w)).length * 3;
+                    sc -= Math.abs((t.st || 3) - ffb.st) * 0.8 + Math.abs((t.ag || 3) - ffb.ag) * 0.5 + Math.abs((t.ma || 6) - ffb.ma) * 0.3 + Math.abs((t.av || 9) - ffb.av) * 0.3
+                        + Math.abs((t.pa == null ? 6 : t.pa) - (ffb.pa == null ? 6 : ffb.pa)) * 0.4;
+                    sc += (t.skills || []).filter(k => (ffb.skills || []).includes(k)).length * 0.5;
+                    if (!best || sc > best.sc) best = { sc, k, t };
+                });
+                return best;
+            }
+            function starKey(name) { const n = norm(name); const e = Object.entries(STARS).find(([k, s]) => norm(s.name) === n); return e ? e[0] : null; }
+
+            // ---- the replay as a list of snapshots ----
+            // player states (FUMBBL's PlayerState, low byte): 1 standing, 2 moving, 3 prone, 4 stunned, 5 KO, 6 badly hurt, 7 seriously injured,
+            // 8 dead, 9 reserve, 10 missing, 11 falling, 12 blocked (still on their feet), 13 banned, 14 exhausted, 15 being dragged, 16 picked up, 17 hit on the ground
+            function parse(d) {
+                const g = d.game, T = [g.teamHome, g.teamAway], teams = [], roster = [];
+                T.forEach((t, side) => {
+                    const pos = new Map((t.roster && t.roster.positionArray || []).map(q => [q.positionId, q]));
+                    const race = raceKey(t.roster && t.roster.rosterName || t.race);
+                    teams.push({ name: t.teamName || ('Team ' + (side + 1)), coach: t.coach || '', rosterName: t.roster && t.roster.rosterName || t.race || '', race });
+                    (t.playerArray || []).forEach(p => {
+                        const q = pos.get(p.positionId) || {};
+                        roster.push({ fid: String(p.playerId), side, nr: p.playerNr, name: p.playerName, pos: q.positionName || p.playerType || '?', short: q.shorthand || '',
+                            star: (p.playerType === 'Star' || q.playerType === 'Star') ? starKey(q.positionName || p.playerName) : null,
+                            ma: p.movement, st: p.strength, ag: p.agility, pa: p.passing, av: p.armour,
+                            skills: [...new Set([...(q.skillArray || []), ...(p.skillArray || []).map(s => typeof s === 'string' ? s : s && s.skillName)].filter(Boolean))] });
+                    });
+                });
+                const ix = new Map(roster.map((p, i) => [p.fid, i])), n = roster.length;
+                const pos = new Int16Array(n * 2).fill(-99), st = new Uint8Array(n).fill(9);
+                let ball = null, inPlay = false, score = [0, 0], half = 1, turn = [0, 0], homePlaying = true, act = -1, rr = [T[0].reRolls || 0, T[1].reRolls || 0], weather = 'perfect';
+                const W = { NICE: 'perfect', VERY_SUNNY: 'sunny', POURING_RAIN: 'rain', BLIZZARD: 'blizzard', SWELTERING_HEAT: 'heat' };
+                const frames = [], turns = [], seenTurns = new Set(); let lines = [];
+                const snap = (kind, mover) => {
+                    // a turn starts the first time its number shows (FUMBBL hands over to the other side for their choices mid-turn, and
+                    // just before a turn ends)
+                    const tk = half + ':' + (homePlaying ? 0 : 1) + ':' + turn[homePlaying ? 0 : 1];
+                    const start = !seenTurns.has(tk) && turn[homePlaying ? 0 : 1] > 0;
+                    if (start) { seenTurns.add(tk); turns.push(frames.length); }
+                    frames.push({ pos: pos.slice(), st: st.slice(), ball: ball ? ball.slice() : null, inPlay, score: score.slice(), half, turn: turn.slice(), side: homePlaying ? 0 : 1,
+                        act, rr: rr.slice(), weather, kind, mover, start, lines });
+                    lines = [];
+                };
+                for (const c of d.gameLog.commandArray || []) {
+                    const mc = (c.modelChangeList && c.modelChangeList.modelChangeArray) || [];
+                    let seen = false, moved = [];
+                    for (const m of mc) {
+                        const k = m.modelChangeId, v = m.modelChangeValue, key = m.modelChangeKey;
+                        switch (k) {
+                            case 'fieldModelSetPlayerCoordinate': { const i = ix.get(String(key)); if (i == null || !v) break; if (pos[i * 2] !== v[0] || pos[i * 2 + 1] !== v[1]) { moved.push(i); pos[i * 2] = v[0]; pos[i * 2 + 1] = v[1]; seen = true; } break; }
+                            case 'fieldModelSetPlayerState': { const i = ix.get(String(key)); if (i == null || typeof v !== 'number') break; if (st[i] !== (v & 0xFF)) { st[i] = v & 0xFF; seen = true; } break; }
+                            case 'fieldModelRemovePlayer': { const i = ix.get(String(key)); if (i != null) { pos[i * 2] = -99; seen = true; } break; }
+                            case 'fieldModelSetBallCoordinate': ball = Array.isArray(v) ? v.slice() : null; seen = true; break;
+                            case 'fieldModelSetBallInPlay': inPlay = !!v; seen = true; break;
+                            case 'teamResultSetScore': score[key === 'away' ? 1 : 0] = v; seen = true; break;
+                            case 'gameSetHalf': half = v; seen = true; break;
+                            case 'turnDataSetTurnNr': turn[key === 'away' ? 1 : 0] = v; seen = true; break;
+                            case 'gameSetHomePlaying': homePlaying = !!v; seen = true; break;
+                            case 'turnDataSetReRolls': rr[key === 'away' ? 1 : 0] = v; break;
+                            case 'actingPlayerSetPlayerId': act = v == null ? -1 : (ix.has(String(v)) ? ix.get(String(v)) : -1); break;
+                            case 'fieldModelSetWeather': weather = W[v] || weather; seen = true; break;
+                        }
+                    }
+                    for (const r of (c.reportList && c.reportList.reports) || []) {
+                        if (r.reportId === 'playerAction' && r.actingPlayerId != null) {
+                            const p = roster[ix.get(String(r.actingPlayerId))];
+                            if (p) lines.push([p.side, `${p.pos} #${p.nr}${p.name ? ' (' + p.name + ')' : ''}: ${actionName(r.playerAction)}`]);
+                        } else if (r.reportId === 'kickoffResult' && r.kickoffResult) lines.push([-1, 'Kick-off: ' + String(r.kickoffResult).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()]);
+                        else if (r.reportId === 'turnEnd' && r.playerIdTouchdown) { const p = roster[ix.get(String(r.playerIdTouchdown))]; if (p) lines.push([p.side, `TOUCHDOWN! ${p.pos} #${p.nr}${p.name ? ' (' + p.name + ')' : ''}`, true]); }
+                    }
+                    if (seen || lines.length) snap(moved.length === 1 ? 'move' : moved.length > 2 ? 'setup' : 'other', moved.length === 1 ? moved[0] : -1);
+                }
+                return { teams, roster, frames, turns, id: g.gameId };
+            }
+            const ACTIONS = { move: 'moves', block: 'blocks', blitz: 'blitzes', blitzMove: 'blitzes', foul: 'fouls', foulMove: 'fouls', pass: 'passes', passMove: 'passes',
+                handOver: 'hands off', handOverMove: 'hands off', standUp: 'stands up', standUpBlitz: 'stands up to blitz', throwTeamMate: 'throws a team-mate', throwTeamMateMove: 'throws a team-mate',
+                kickTeamMate: 'kicks a team-mate', kickTeamMateMove: 'kicks a team-mate', throwBomb: 'throws a bomb', hailMaryPass: 'throws a Hail Mary', gaze: 'uses Hypnotic Gaze',
+                gazeMove: 'uses Hypnotic Gaze', multipleBlock: 'blocks two', stab: 'stabs', chainsaw: 'starts the chainsaw', projectileVomit: 'vomits', secureTheBall: 'secures the ball' };
+            const actionName = a => ACTIONS[a] || String(a || 'acts').replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+
+            // ---- putting a snapshot on our pitch ----
+            function buildMatch() {
+                setFormat('std');
+                const keys = D.teams.map(t => t.race || 'human');
+                setTeams(keys[0], keys[1]);
+                D.teams.forEach((t, i) => { const R = ROSTERS[i]; R.name = t.name; R.baseName = t.name; if (!t.race) R.style = null; });
+                ROSTERS[0].oppName = ROSTERS[1].name; ROSTERS[1].oppName = ROSTERS[0].name;
+                applyTeamLabels();
+                try { resizeCanvas(); buildPitchTexture(); } catch (e) { console.error(e); }
+                byFid = new Map();
+                state.players = D.roster.map((f, i) => {
+                    const race = D.teams[f.side].race, sk = f.star && STARS[f.star];
+                    const m = !sk && race ? matchType(race, { name: f.pos, st: f.st, ag: f.ag, ma: f.ma, av: f.av, pa: f.pa, skills: f.skills }) : null;
+                    const base = sk ? Object.assign({}, sk, { type: sk.name }) : m ? Object.assign({}, m.t) : { type: f.pos, label: (f.short || f.pos.slice(0, 2)).slice(0, 3) };
+                    const p = Object.assign({}, base, {
+                        id: i + 1, team: f.side, x: -9, y: -9, inSquad: true, starter: true, sub: false, sitOut: false,
+                        isDown: false, isStunned: false, isCasualty: false, isKO: false, isEjected: false, isReserve: true, casualtyStatus: null,
+                        isFading: false, fadeStartTime: 0, fadeDuration: 2000, stunnedThisTurn: false, hasActed: false, actionTaken: null, hasBlocked: false,
+                        ma: f.ma, st: f.st, ag: f.ag, pa: f.pa, av: f.av, skills: f.skills.slice(), baseSkills: f.skills.slice(), usedSkills: [], remainingMA: f.ma, rushes: 2,
+                        posKey: m ? m.k : null, name: f.name || null, nr: f.nr, star: f.star || null, fid: f.fid });
+                    byFid.set(f.fid, p);
+                    return p;
+                });
+                state.live = false; state.isGameOver = false; state.mode = MODES.LOCKED; state.selectedId = null; state.charge = null; state.kickEvent = null;
+                state.moves = []; state.targets = []; state.bloodSplatters = [];
+                state.ball = { x: -1, y: -1, carrierId: null };
+                try { AI.set(0, false); AI.set(1, false); } catch (e) {}
+            }
+            function show(i, animate) {
+                const F = D.frames[i]; if (!F) return;
+                const slideMs = Math.max(60, 230 / speed);
+                state.players.forEach((p, j) => {
+                    const x = F.pos[j * 2], y = F.pos[j * 2 + 1], s = F.st[j];
+                    const onP = x >= 0 && x < CFG.cols && y >= 0 && y < CFG.rows && ![5, 6, 7, 8, 9, 10, 13, 14].includes(s);
+                    const ox = p.x, oy = p.y, wasOn = !p.isReserve && !p.isKO && !p.isCasualty && !p.isEjected;
+                    p.isKO = s === 5; p.isCasualty = s >= 6 && s <= 8; p.isEjected = s === 13; p.isReserve = !onP && !p.isKO && !p.isCasualty && !p.isEjected;
+                    p.isDown = onP && (s === 3 || s === 4 || s === 11 || s === 17); p.isStunned = onP && s === 4;
+                    if (onP) { p.x = x; p.y = y; } else { p.x = -9; p.y = -9; }
+                    if (animate && onP && wasOn && (ox !== x || oy !== y) && Math.max(Math.abs(ox - x), Math.abs(oy - y)) <= 2) slideTo(p, ox, oy, slideMs);
+                    else p.walkAnim = null;
+                    p.hasActed = false;
+                });
+                const carrier = F.ball && F.inPlay ? state.players.find(p => !p.isReserve && !p.isDown && p.x === F.ball[0] && p.y === F.ball[1]) : null;
+                state.ball = carrier ? { x: carrier.x, y: carrier.y, carrierId: carrier.id } : (F.ball && F.inPlay ? { x: F.ball[0], y: F.ball[1], carrierId: null } : { x: -1, y: -1, carrierId: null });
+                state.score = F.score.slice(); state.turn = F.turn.slice(); state.half = F.half; state.activeTeam = F.side; state.rr = F.rr.slice();
+                if (!state.weather || state.weather.key !== F.weather) state.weather = Object.assign({}, WEATHER_TABLE[F.weather] || WEATHER_TABLE.perfect, { roll: 0 });
+                state.selectedId = F.act >= 0 ? F.act + 1 : null;
+                try { updateTopBar(); } catch (e) {}
+                if (animate) {
+                    F.lines.forEach(([side, txt, big]) => log((side >= 0 ? '  ' : '') + txt, big ? 'text-amber-300 font-bold' : side === 0 ? 'text-sky-300' : side === 1 ? 'text-emerald-300' : 'text-slate-400'));
+                    if (F.start) log(`— ${D.teams[F.side].name}: turn ${F.turn[F.side]} (half ${F.half}) —`, 'text-amber-400 font-bold');
+                    const mover = F.mover >= 0 ? state.players[F.mover] : F.act >= 0 ? state.players[F.act] : null;
+                    if (mover && !mover.isReserve) try { followAction([mover], 400 / speed); } catch (e) {}
+                }
+                paintBar();
+            }
+
+            // ---- playback ----
+            function delay(F) {
+                const base = F.kind === 'move' ? 240 : F.kind === 'setup' ? 500 : 420;
+                return (base + (F.start ? 700 : 0) + (F.lines.some(l => l[2]) ? 1800 : 0)) / speed;
+            }
+            function stop() { playing = false; clearTimeout(timer); timer = null; paintBar(); }
+            function tick() {
+                if (!playing) return;
+                if (at >= D.frames.length - 1) { stop(); log('— End of the replay —', 'text-amber-400 font-bold'); return; }
+                at++; show(at, true);
+                timer = setTimeout(tick, delay(D.frames[at]));
+            }
+            function play() { if (!D) return; if (at >= D.frames.length - 1) at = 0; playing = true; paintBar(); clearTimeout(timer); timer = setTimeout(tick, 150); }
+            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); show(at, false); }
+            function stepTurn(dir) {
+                const T = D.turns; if (!T.length) return;
+                if (dir > 0) { const n = T.find(f => f > at); jump(n != null ? n : D.frames.length - 1); }
+                else { const prev = T.filter(f => f < at - 1); jump(prev.length ? prev[prev.length - 1] : 0); }
+                const F = D.frames[at]; log(`— ${D.teams[F.side].name}: turn ${F.turn[F.side]} (half ${F.half}) —`, 'text-amber-400 font-bold');
+            }
+            function paintBar() {
+                const b = $('frep-bar'); if (!b || !D) return;
+                const F = D.frames[at] || {};
+                $('frep-pp').textContent = playing ? '⏸' : '▶';
+                $('frep-speed').textContent = speed + '×';
+                $('frep-where').textContent = F.turn ? `H${F.half} · ${D.teams[F.side].name.slice(0, 18)} T${F.turn[F.side] || '-'} · ${F.score[0]}–${F.score[1]}` : '';
+                const r = $('frep-range'); r.max = String(D.frames.length - 1); if (document.activeElement !== r) r.value = String(at);
+            }
+
+            // ---- opening and leaving ----
+            function start(data) {
+                D = parse(data);
+                if (!D.frames.length) throw new Error('That replay has nothing in it.');
+                on = true; at = 0;
+                const ss = $('start-screen'); if (ss) ss.style.display = 'none';
+                document.body.classList.add('frep-on');
+                buildMatch();
+                { const cur = $('pitch-curtain'); if (cur) { cur.classList.remove('opacity-100'); cur.classList.add('opacity-0'); } }   // (the game lifts it at the kick-off)
+                const msg = $('message-log'); if (msg) msg.innerHTML = '';
+                log(`FUMBBL match: ${D.teams[0].name} (${D.teams[0].rosterName}, ${D.teams[0].coach}) v ${D.teams[1].name} (${D.teams[1].rosterName}, ${D.teams[1].coach})`, 'text-amber-300 font-bold');
+                D.teams.forEach(t => { if (!t.race) log(`  ${t.rosterName}: not a team BludBowl has, so its players are shown as plain tokens.`, 'text-slate-400'); });
+                $('frep-bar').classList.remove('hidden');
+                // start at the first kick-off set-up, not the empty pitch
+                const first = D.frames.findIndex(F => F.pos.some((v, j) => j % 2 === 0 && v >= 0 && v < CFG.cols));
+                jump(Math.max(0, first)); startFrameLoop(); play();
+            }
+            function leave() { stop(); location.reload(); }
+            function wire() {
+                const ask = $('frep-ask'), inp = $('frep-id'), note = $('frep-note'), go = $('frep-go');
+                const say = (t, bad) => { note.textContent = t; note.style.color = bad ? '#fca5a5' : '#94a3b8'; };
+                const btn = $('mm-fumbbl');
+                if (btn) btn.addEventListener('click', () => { ask.classList.remove('hidden'); say(''); setTimeout(() => inp.focus(), 50); });
+                $('frep-cancel').addEventListener('click', () => ask.classList.add('hidden'));
+                const load = async () => {
+                    go.disabled = true;
+                    try { const d = await fetchReplay(inp.value, t => say(t)); say('Starting…'); ask.classList.add('hidden'); start(d); }
+                    catch (e) { console.error(e); say(e && e.message ? e.message : 'Something went wrong.', true); }
+                    finally { go.disabled = false; }
+                };
+                go.addEventListener('click', load);
+                inp.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
+                $('frep-file').addEventListener('change', async e => {
+                    const f = e.target.files && e.target.files[0]; if (!f) return;
+                    try { say('Reading ' + f.name + '…'); const d = JSON.parse(await gunzipText(await f.arrayBuffer())); ask.classList.add('hidden'); start(d); }
+                    catch (er) { console.error(er); say('That file is not a FUMBBL replay.', true); }
+                    e.target.value = '';
+                });
+                $('frep-pp').addEventListener('click', () => playing ? stop() : play());
+                $('frep-back').addEventListener('click', () => { stop(); jump(at - 1); });
+                $('frep-fwd').addEventListener('click', () => { stop(); if (at < D.frames.length - 1) { at++; show(at, true); } });
+                $('frep-prevturn').addEventListener('click', () => { const was = playing; stop(); stepTurn(-1); if (was) play(); });
+                $('frep-nextturn').addEventListener('click', () => { const was = playing; stop(); stepTurn(1); if (was) play(); });
+                $('frep-speed').addEventListener('click', () => { speed = speed >= 8 ? 1 : speed * 2; paintBar(); });
+                $('frep-exit').addEventListener('click', leave);
+                const r = $('frep-range');
+                r.addEventListener('input', () => { const v = +r.value, was = playing; stop(); jump(v); if (was) play(); });
+            }
+            // (tests) the players a replay would put on the pitch, with FUMBBL's position name beside ours
+            function debugBuild(d) { const keep = D; D = d; try { buildMatch(); return state.players.map((p, i) => ({ team: p.team, type: p.type, star: p.star, ffb: d.roster[i].pos })); } finally { D = keep; } }
+            return { wire, on: () => on, parse, start, debugBuild, debug: () => ({ D, at }) };
         })();
 
         // ---------- Ball & Chain ----------
@@ -25019,6 +25327,7 @@
 
         function init() {
             buildPlayers();
+            try { FREP.wire(); } catch (e) { console.error('FREP', e); }
             
             resizeCanvas();
             updateTopBar();

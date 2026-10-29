@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.73 (29 Oct 2026)
+- **New:** Watch a FUMBBL Match (main menu). Type a match number from fumbbl.com, or paste the match page's address, and the game downloads that match's replay and plays it on the pitch: players walk, fall over and leave injured, the ball moves, and the score, turns, re-rolls and weather tick over, with each player's action in the match log. Play/pause, step forward and back, jump a turn either way, speed (1x to 8x), a slider to go anywhere in the match, and ✕ to leave. Teams and positions are matched to BludBowl's own sprites; a team BludBowl doesn't have shows as plain tokens. You can also open a replay file saved from FUMBBL. (Stage 1: commentary on dice and blocks comes next.)
+
 ## v3.72 (29 Oct 2026)
 - **Improved (computer):** Goblin Bommas and Snotling Fungus Flingas now throw their bombs. The bomber stays out of the blocks, cage and screens; when there's a bunch of opponents in range it throws as the last action of the turn, accepting the risk of a fumble the way strong human coaches do (the bomber is sent off at the end of the drive anyway). With nothing to throw at, it steps to 2-4 squares from the opposition, ready for next turn (a bomber can't move before throwing). About 1.5 bombs a match (before: about one every six or seven matches; strong coaches: 1.7). Results against the previous computer were level.
 
