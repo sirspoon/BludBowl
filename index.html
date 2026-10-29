@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.79</title>
+    <title>BludBowl 3.80</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1015,7 +1015,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.79</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.80</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1029,7 +1029,7 @@
             <button type="button" class="mm-btn" data-go="league"><span class="mm-t">League</span><span class="mm-s">On this device: seasons, fixtures, a league table and play-offs</span></button>
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">On this device: knockout cups and Swiss events for tournament teams</span></button>
             <button type="button" class="mm-btn" data-go="teams"><span class="mm-t">Teams</span><span class="mm-s">Build, manage and back up your teams and their careers</span></button>
-            <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">Watch a FUMBBL Match</span><span class="mm-s">Replay any match from fumbbl.com by its match number</span></button>
+            <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">I Like to Watch</span><span class="mm-s">Replay any match from fumbbl.com by its match number</span></button>
             <button type="button" class="mm-btn" data-go="settings"><span class="mm-t">Settings</span><span class="mm-s">Sound, music, text size, pitch and animations</span></button>
             <button type="button" class="sv-import" data-sv="import">Load a saved match or a backup from a file…</button>
             <input type="file" id="sv-file" accept=".json,application/json" class="hidden">
@@ -1040,7 +1040,7 @@
         <div id="save-ask" class="sv-ask hidden" role="dialog" aria-modal="true"><div class="sv-ask-card"><div class="sv-head">Match in progress</div><p class="sv-ask-text"></p>
             <div class="sv-btns"><button type="button" class="sv-btn sv-go" data-ask="resume">Resume it</button><button type="button" class="sv-btn sv-bad" data-ask="go">Start new match</button><button type="button" class="sv-btn" data-ask="back">Cancel</button></div></div></div>
         <div id="frep-ask" class="sv-ask hidden" role="dialog" aria-modal="true" aria-labelledby="frep-h"><div class="sv-ask-card">
-            <div class="sv-head" id="frep-h">Watch a FUMBBL match</div>
+            <div class="sv-head" id="frep-h">I Like to Watch</div>
             <p class="sv-ask-text">Type the match number from fumbbl.com (or paste the match page's address). The replay is downloaded from FUMBBL and played on the pitch here.</p>
             <input id="frep-id" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="e.g. 4749985" aria-label="FUMBBL match number"
                 style="width:100%;box-sizing:border-box;background:#020617;color:#e2e8f0;border:2px solid #475569;border-radius:10px;padding:8px 10px;font-size:16px;margin-bottom:8px">
@@ -21679,6 +21679,7 @@
                 // start at the first kick-off set-up, not the empty pitch
                 const first = D.frames.findIndex(F => F.pos.some((v, j) => j % 2 === 0 && v >= 0 && v < CFG.cols));
                 jump(Math.max(0, first)); startFrameLoop(); play();
+                try { MUSIC.matchStart(); } catch (e) {}   // the match music (if it's on), its mood following the replay
             }
             // ---- tap a player for their card (the game's unit panel: name, position, characteristics, skills, state) ----
             let inspect = null;
@@ -21713,7 +21714,11 @@
                 inspect = p ? state.players.indexOf(p) : null;
                 paintInfo(); if (p) sfx('selectPlayer');
             }
-            function leave() { stop(); location.reload(); }
+            function leave() {   // back to the main menu (as after a match), not the title screen
+                stop(); try { MUSIC.matchEnd(); } catch (e) {}
+                try { sessionStorage.setItem('bb-to-menu', '1'); } catch (e) {}
+                location.reload();
+            }
             const PICKS = [{"id": 4745896, "rid": 1953280, "races": ["Bretonnian", "Skaven"], "score": [3, 2], "coaches": ["proff70", "Aelendil"], "cr": [1658, 1697], "note": "Five touchdowns, decided by one", "date": "2026-10-14"}, {"id": 4749879, "rid": 1957940, "races": ["Goblin", "High Elf"], "score": [2, 3], "coaches": ["angusosborne", "e1f0"], "cr": [1589, 1435], "note": "Five touchdowns, and Goblin bombs", "date": "2026-10-28"}, {"id": 4745631, "rid": 1952984, "races": ["Ogre", "Orc"], "score": [1, 1], "coaches": ["Zelmor", "Willking"], "cr": [1786, 1783], "note": "A bloodbath, with Gnoblars flying", "date": "2026-10-13"}, {"id": 4745789, "rid": 1953182, "races": ["Wood Elf", "Shambling Undead"], "score": [2, 2], "coaches": ["Bazakastine", "Wargraith"], "cr": [1938, 1629], "note": "A 1938-rated coach's Wood Elves", "date": "2026-10-14"}, {"id": 4746128, "rid": 1953567, "races": ["Ogre", "Skaven"], "score": [2, 1], "coaches": ["Joost", "Hagymacsipos"], "cr": [1840, 1762], "note": "Two top coaches; Ogres throwing Gnoblars", "date": "2026-10-15"}, {"id": 4749330, "rid": 1957326, "races": ["Goblin", "Chaos Renegade"], "score": [1, 1], "coaches": ["angusosborne", "highsididy"], "cr": [1593, 1596], "note": "Seven bombs", "date": "2026-10-27"}, {"id": 4745410, "rid": 1952736, "races": ["High Elf", "Chaos Renegade"], "score": [2, 2], "coaches": ["yan64", "darkmage"], "cr": [1722, 1790], "note": "Close and high-scoring, both coaches 1700+", "date": "2026-10-12"}, {"id": 4745990, "rid": 1953380, "races": ["Chaos Chosen", "Khorne"], "score": [1, 2], "coaches": ["AlRonno", "MTM"], "cr": [1715, 1804], "note": "Chaos v Khorne: brutal", "date": "2026-10-14"}, {"id": 4745809, "rid": 1953200, "races": ["Old World Alliance", "Snotling"], "score": [1, 1], "coaches": ["zagori", "Force_unlocked"], "cr": [1653, 1858], "note": "A Snotling swarm, coached by an 1858", "date": "2026-10-14"}, {"id": 4745828, "rid": 1953223, "races": ["Amazon", "Wood Elf"], "score": [1, 0], "coaches": ["Beltroniko", "CrisisChris"], "cr": [1844, 1732], "note": "Two elite coaches, a tight elf game", "date": "2026-10-14"}];
             // ---- featured matches: our picks (above, from ai-training's downloads), and the best of FUMBBL's latest, found from its
             // public match list (newest first, 25 a page): close, high-scoring, bloody, between strong coaches. Kept for 20 minutes so
