@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.73</title>
+    <title>BludBowl 3.74</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -614,12 +614,14 @@
         #frep-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(8px, env(safe-area-inset-bottom)); z-index: 45; width: min(440px, calc(100vw - 16px));
             background: rgba(2,6,23,.88); border: 1px solid #475569; border-radius: 14px; padding: 6px 8px 4px; box-shadow: 0 6px 24px rgba(0,0,0,.5); color: #e2e8f0; }
         #frep-bar.hidden { display: none; }
-        #frep-where { font-size: 11px; font-weight: 700; text-align: center; color: #fcd34d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #frep-where { display: block; width: 100%; font-size: 12px; font-weight: 700; text-align: center; text-align-last: center; color: #fcd34d; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 3px 6px; }
         #frep-bar .frep-row { display: flex; justify-content: space-between; gap: 4px; margin: 4px 0 2px; }
         #frep-bar button { flex: 1 1 0; min-width: 0; min-height: 36px; border-radius: 9px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; font-size: 15px; font-weight: 700; }
         #frep-bar button:active { background: #334155; }
         #frep-pp { background: #065f46 !important; border-color: #10b981 !important; }
         #frep-range { width: 100%; accent-color: #f59e0b; }
+        #frep-bar .fs-wrap { display: block; width: 100%; }
+        #frep-bar .fs-btn { font-size: 12px; min-height: 28px; padding: 3px 10px; color: #fcd34d; background: #0f172a; border-color: #334155; }
         @media (orientation: portrait) { body.frep-on #panel-log-container { bottom: calc(118px + env(safe-area-inset-bottom)) !important; } }   /* (the log sits above the controls) */
         @media (orientation: landscape) { #frep-bar { left: auto; right: max(8px, env(safe-area-inset-right)); transform: none; width: min(380px, 42vw); } }   /* (where the unit panel goes) */
         .sv-ask { position: fixed; inset: 0; z-index: 250; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.7); padding: 16px; }
@@ -964,7 +966,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.73</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.74</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1229,7 +1231,7 @@
     </div>
 
     <div id="frep-bar" class="hidden" role="toolbar" aria-label="Replay controls">
-        <div id="frep-where"></div>
+        <select id="frep-where" aria-label="Go to a turn"></select>
         <div class="frep-row">
             <button type="button" id="frep-prevturn" title="Back a turn" aria-label="Back a turn">⏮</button>
             <button type="button" id="frep-back" title="Step back" aria-label="Step back">◀</button>
@@ -21065,12 +21067,63 @@
                 let ball = null, inPlay = false, score = [0, 0], half = 1, turn = [0, 0], homePlaying = true, act = -1, rr = [T[0].reRolls || 0, T[1].reRolls || 0], weather = 'perfect';
                 const W = { NICE: 'perfect', VERY_SUNNY: 'sunny', POURING_RAIN: 'rain', BLIZZARD: 'blizzard', SWELTERING_HEAT: 'heat' };
                 const frames = [], turns = [], seenTurns = new Set(); let lines = [];
+                // ---- the commentary: FUMBBL's reports as lines for the match log, [side, html, style] (names are escaped: they're
+                // whatever FUMBBL's coaches typed) ----
+                const P = id => roster[ix.get(String(id))];
+                const who = id => { const p = P(id); return p ? esc(`${p.pos} #${p.nr}`) : 'a player'; };
+                const sideOf = id => { const p = P(id); return p ? p.side : -1; };
+                const sum = a => Array.isArray(a) ? a.reduce((x, y) => x + y, 0) : null;
+                const mods = r => (r.rollModifiers || []).length ? ` <span class="opacity-60">(${esc(r.rollModifiers.join(', '))})</span>` : '';
+                const words2 = t => esc(String(t || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase());
+                let lastAct = '', lastLine = '';
+                const say = r => {
+                    const k = r.reportId, add = (side, html, st) => { if (html === lastLine) return; lastLine = html; lines.push([side, html, st]); };
+                    if (k === 'playerAction' && r.actingPlayerId != null) {
+                        const key = r.actingPlayerId + ':' + r.playerAction; if (key === lastAct) return; lastAct = key;
+                        const p = P(r.actingPlayerId); if (p) add(p.side, `${who(r.actingPlayerId)}${p.name ? ' <span class="opacity-70">(' + esc(p.name) + ')</span>' : ''}: ${esc(actionName(r.playerAction))}`, 'act');
+                    } else if (k === 'block' || k === 'foul') add(sideOf(r.defenderId), `against ${who(r.defenderId)}`, 'info');
+                    else if (k === 'selectBlitzTarget') add(sideOf(r.defenderId), `blitz target: ${who(r.defenderId)}`, 'info');
+                    else if (k === 'blockChoice') {
+                        const dice = (r.blockRoll || []).map(f => FACE[f] || '?').join(', ');
+                        const res = RES[r.blockResult] || words2(r.blockResult);
+                        add(-1, `🎲 ${Math.abs(r.nrOfDice || 1)} ${Math.abs(r.nrOfDice || 1) === 1 ? 'die' : 'dice'}${r.nrOfDice < 0 ? ' (defender picks)' : ''}: ${dice} → <b>${res}</b>`, r.blockResult === 'SKULL' ? 'bad' : r.blockResult === 'BOTH DOWN' ? 'info' : 'ok');
+                    } else if (k === 'blockReRoll') add(-1, `↻ block dice re-rolled (${esc(r.reRollSource || 're-roll')})`, 'info');
+                    else if (k === 'injury') {
+                        const lead = { foul: 'Foul on ', crowdpush: 'Into the crowd: ', bomb: 'Bomb: ', stab: 'Stab: ', chainsaw: 'Chainsaw: ', projectileVomit: 'Vomit: ', bitten: 'Bitten: ', breatheFire: 'Fire: ', ttmLanding: 'Landing: ', eatPlayer: 'Eaten: ' }[String(r.injuryType).replace(/ForSpp$/, '')] || '';
+                        let t = `${lead}${who(r.defenderId)}`;
+                        if (r.armorRoll) t += `: armour ${r.armorRoll.join('+')}=${sum(r.armorRoll)} ${r.armorBroken ? '<b>breaks</b>' : 'holds'}`;
+                        if (r.injuryRoll) t += `, injury ${r.injuryRoll.join('+')}=${sum(r.injuryRoll)}`;
+                        if (r.injuryRoll || !r.armorRoll) t += ` → <b>${STATE[r.injury] || 'Stunned'}</b>`;
+                        if (r.seriousInjury) t += ` (${esc(r.seriousInjury)})`;
+                        if ((r.armorModifiers || []).length || (r.injuryModifiers || []).length) t += ` <span class="opacity-60">(${esc([...(r.armorModifiers || []), ...(r.injuryModifiers || [])].join(', '))})</span>`;
+                        add(sideOf(r.defenderId), t, r.injury >= 5 ? 'big' : r.armorBroken ? 'hurt' : 'info');
+                    } else if (ROLLS[k] !== undefined && r.playerId != null && r.roll != null && r.minimumRoll != null) {
+                        let name = k === 'confusionRoll' ? (r.confusionSkill || 'Bone Head') : ROLLS[k];
+                        if (k === 'passRoll' && r.bomb) name = 'Bomb';
+                        const extra = r.passResult ? ` → ${words2(r.passResult)}` : '';
+                        add(sideOf(r.playerId), `${r.successful ? '✓' : '✗'} ${who(r.playerId)} ${esc(name)} ${r.minimumRoll}+: ${r.roll}${extra}${r.reRolled ? ' (re-roll)' : ''}${mods(r)}`, r.successful ? 'ok' : 'bad');
+                    } else if (k === 'reRoll') add(sideOf(r.playerId), `↻ ${esc(r.reRollSource || 're-roll')}${r.roll && !r.successful ? ' - failed' : ''}`, 'info');
+                    else if (k === 'skillUse' && r.used) add(sideOf(r.playerId), `${who(r.playerId)} uses ${esc(r.skill)}`, 'info');
+                    else if (k === 'scatterBall') add(-1, `The ball bounces ${esc((r.directionArray || []).join(', ').toLowerCase())}`, 'info');
+                    else if (k === 'throwIn') add(-1, 'The crowd throws the ball back in', 'info');
+                    else if (k === 'handOver') add(sideOf(r.catcherId), `hands the ball to ${who(r.catcherId)}`, 'info');
+                    else if (k === 'spellEffectRoll' && r.specialEffect === 'bomb') add(sideOf(r.playerId), `💥 ${who(r.playerId)} ${r.successful ? 'is hit by the blast' : 'escapes the blast'}`, r.successful ? 'hurt' : 'info');
+                    else if (k === 'kickoffResult' && r.kickoffResult) add(-1, `Kick-off: <b>${esc(r.kickoffResult)}</b>`, 'big');
+                    else if (k === 'weather' && r.weather) add(-1, `Weather: ${esc(r.weather)}`, 'info');
+                    else if (k === 'startHalf') add(-1, `— Half ${esc(r.half)} —`, 'turn');
+                    else if (k === 'referee' && r.foulingPlayerBanned) add(-1, 'The referee saw that: the fouler is <b>sent off</b>!', 'bad');
+                    else if (k === 'argueTheCall') add(sideOf(r.playerId), `Argue the call (${esc(r.roll)}): ${r.successful ? 'the ref changes their mind' : 'no luck'}${r.coachBanned ? ' - and the coach is thrown out' : ''}`, 'info');
+                    else if (k === 'apothecaryRoll' && r.playerId) add(sideOf(r.playerId), `The apothecary sees to ${who(r.playerId)}`, 'info');
+                    else if (k === 'stallerDetected') add(sideOf(r.playerId), `${who(r.playerId)} is stalling`, 'info');
+                    else if (k === 'secretWeaponBan') add(-1, 'Secret weapons are sent off at the end of the drive', 'info');
+                    else if (k === 'turnEnd' && r.playerIdTouchdown) { const p = P(r.playerIdTouchdown); if (p) add(p.side, `TOUCHDOWN! ${who(r.playerIdTouchdown)}${p.name ? ' (' + esc(p.name) + ')' : ''}`, 'td'); }
+                };
                 const snap = (kind, mover) => {
                     // a turn starts the first time its number shows (FUMBBL hands over to the other side for their choices mid-turn, and
                     // just before a turn ends)
                     const tk = half + ':' + (homePlaying ? 0 : 1) + ':' + turn[homePlaying ? 0 : 1];
                     const start = !seenTurns.has(tk) && turn[homePlaying ? 0 : 1] > 0;
-                    if (start) { seenTurns.add(tk); turns.push(frames.length); }
+                    if (start) { seenTurns.add(tk); turns.push(frames.length); lastAct = ''; const sd = homePlaying ? 0 : 1; lines.unshift([sd, `— ${esc(teams[sd].name)}: turn ${turn[sd]} (half ${half}) —`, 'turn']); }
                     frames.push({ pos: pos.slice(), st: st.slice(), ball: ball ? ball.slice() : null, inPlay, score: score.slice(), half, turn: turn.slice(), side: homePlaying ? 0 : 1,
                         act, rr: rr.slice(), weather, kind, mover, start, lines });
                     lines = [];
@@ -21095,13 +21148,7 @@
                             case 'fieldModelSetWeather': weather = W[v] || weather; seen = true; break;
                         }
                     }
-                    for (const r of (c.reportList && c.reportList.reports) || []) {
-                        if (r.reportId === 'playerAction' && r.actingPlayerId != null) {
-                            const p = roster[ix.get(String(r.actingPlayerId))];
-                            if (p) lines.push([p.side, `${p.pos} #${p.nr}${p.name ? ' (' + p.name + ')' : ''}: ${actionName(r.playerAction)}`]);
-                        } else if (r.reportId === 'kickoffResult' && r.kickoffResult) lines.push([-1, 'Kick-off: ' + String(r.kickoffResult).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()]);
-                        else if (r.reportId === 'turnEnd' && r.playerIdTouchdown) { const p = roster[ix.get(String(r.playerIdTouchdown))]; if (p) lines.push([p.side, `TOUCHDOWN! ${p.pos} #${p.nr}${p.name ? ' (' + p.name + ')' : ''}`, true]); }
-                    }
+                    for (const r of (c.reportList && c.reportList.reports) || []) { try { say(r); } catch (e) {} }
                     if (seen || lines.length) snap(moved.length === 1 ? 'move' : moved.length > 2 ? 'setup' : 'other', moved.length === 1 ? moved[0] : -1);
                 }
                 return { teams, roster, frames, turns, id: g.gameId };
@@ -21111,13 +21158,37 @@
                 kickTeamMate: 'kicks a team-mate', kickTeamMateMove: 'kicks a team-mate', throwBomb: 'throws a bomb', hailMaryPass: 'throws a Hail Mary', gaze: 'uses Hypnotic Gaze',
                 gazeMove: 'uses Hypnotic Gaze', multipleBlock: 'blocks two', stab: 'stabs', chainsaw: 'starts the chainsaw', projectileVomit: 'vomits', secureTheBall: 'secures the ball' };
             const actionName = a => ACTIONS[a] || String(a || 'acts').replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+            const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+            const plain = v => String(v == null ? '' : v).replace(/[<>&"'`\\]/g, '').trim().slice(0, 48);
+            const ROLLS = { dodgeRoll: 'Dodge', goForItRoll: 'Rush', pickUpRoll: 'Pick-up', catchRoll: 'Catch', passRoll: 'Pass', bloodLustRoll: 'Bloodlust', dauntlessRoll: 'Dauntless',
+                foulAppearanceRoll: 'Foul Appearance', steadyFootingRoll: 'Steady Footing', gettingEvenRoll: 'Getting Even', hypnoticGazeRoll: 'Hypnotic Gaze', rightStuffRoll: 'Landing',
+                regenerationRoll: 'Regeneration', leapRoll: 'Leap', alwaysHungryRoll: 'Always Hungry', jumpUpRoll: 'Jump Up', chainsawRoll: 'Chainsaw', interceptionRoll: 'Interception',
+                animosityRoll: 'Animosity', escapeRoll: 'Escape', projectileVomit: 'Projectile Vomit', breatheFire: 'Breathe Fire', throwTeamMateRoll: 'Throw Team-mate', standUpRoll: 'Stand Up',
+                tentaclesShadowingRoll: 'Shadowing', confusionRoll: 'Bone Head' };
+            const FACE = ['', 'Skull', 'Both Down', 'Push', 'Push', 'Stumble', 'POW'];   // FUMBBL's block die: 1-6
+            const RES = { PUSHBACK: 'Push', POW: 'POW!', 'POW/PUSH': 'Stumble', 'BOTH DOWN': 'Both Down', SKULL: 'Skull' };
+            const STATE = { 1: 'unhurt', 3: 'Prone', 4: 'Stunned', 5: "KO'd", 6: 'Badly Hurt', 7: 'Seriously Injured', 8: 'DEAD' };
+            const STYLE = { ok: 'text-green-400', bad: 'text-red-400', hurt: 'text-orange-300', big: 'text-amber-300 font-bold', td: 'text-amber-300 font-bold text-[11px]', info: 'text-slate-400', turn: 'text-amber-400 font-bold' };
+            function logFrame(F) {
+                F.lines.forEach(([side, html, st]) => {
+                    const cls = st === 'act' ? (side === 0 ? 'text-sky-300' : side === 1 ? 'text-emerald-300' : 'text-slate-300') : STYLE[st] || 'text-slate-400';
+                    log((st === 'act' || st === 'turn' || st === 'td' || st === 'big' ? '' : '&nbsp;&nbsp;') + html, cls);
+                });
+            }
+            // after a jump: the log shows this turn so far
+            function logTurn(i) {
+                const msg = $('message-log'); if (msg) msg.innerHTML = '';
+                let s = 0; D.turns.forEach(f => { if (f <= i) s = f; });
+                for (let f = s; f <= i; f++) logFrame(D.frames[f]);
+            }
 
             // ---- putting a snapshot on our pitch ----
             function buildMatch() {
                 setFormat('std');
                 const keys = D.teams.map(t => t.race || 'human');
                 setTeams(keys[0], keys[1]);
-                D.teams.forEach((t, i) => { const R = ROSTERS[i]; R.name = t.name; R.baseName = t.name; if (!t.race) R.style = null; });
+                // (FUMBBL's names are whatever its coaches typed, and parts of the game show names as HTML: only plain characters get through)
+                D.teams.forEach((t, i) => { const R = ROSTERS[i]; R.name = plain(t.name) || ('Team ' + (i + 1)); R.baseName = R.name.length > 24 ? R.name.slice(0, 23) + '…' : R.name; if (!t.race) R.style = null; });   // (baseName: the end-zone lettering)
                 ROSTERS[0].oppName = ROSTERS[1].name; ROSTERS[1].oppName = ROSTERS[0].name;
                 applyTeamLabels();
                 try { resizeCanvas(); buildPitchTexture(); } catch (e) { console.error(e); }
@@ -21125,13 +21196,13 @@
                 state.players = D.roster.map((f, i) => {
                     const race = D.teams[f.side].race, sk = f.star && STARS[f.star];
                     const m = !sk && race ? matchType(race, { name: f.pos, st: f.st, ag: f.ag, ma: f.ma, av: f.av, pa: f.pa, skills: f.skills }) : null;
-                    const base = sk ? Object.assign({}, sk, { type: sk.name }) : m ? Object.assign({}, m.t) : { type: f.pos, label: (f.short || f.pos.slice(0, 2)).slice(0, 3) };
+                    const base = sk ? Object.assign({}, sk, { type: sk.name }) : m ? Object.assign({}, m.t) : { type: plain(f.pos) || 'Player', label: plain(f.short || f.pos.slice(0, 2)).slice(0, 3) };
                     const p = Object.assign({}, base, {
                         id: i + 1, team: f.side, x: -9, y: -9, inSquad: true, starter: true, sub: false, sitOut: false,
                         isDown: false, isStunned: false, isCasualty: false, isKO: false, isEjected: false, isReserve: true, casualtyStatus: null,
                         isFading: false, fadeStartTime: 0, fadeDuration: 2000, stunnedThisTurn: false, hasActed: false, actionTaken: null, hasBlocked: false,
                         ma: f.ma, st: f.st, ag: f.ag, pa: f.pa, av: f.av, skills: f.skills.slice(), baseSkills: f.skills.slice(), usedSkills: [], remainingMA: f.ma, rushes: 2,
-                        posKey: m ? m.k : null, name: f.name || null, nr: f.nr, star: f.star || null, fid: f.fid });
+                        posKey: m ? m.k : null, name: plain(f.name) || null, nr: f.nr, star: f.star || null, fid: f.fid });
                     byFid.set(f.fid, p);
                     return p;
                 });
@@ -21161,8 +21232,7 @@
                 state.selectedId = F.act >= 0 ? F.act + 1 : null;
                 try { updateTopBar(); } catch (e) {}
                 if (animate) {
-                    F.lines.forEach(([side, txt, big]) => log((side >= 0 ? '  ' : '') + txt, big ? 'text-amber-300 font-bold' : side === 0 ? 'text-sky-300' : side === 1 ? 'text-emerald-300' : 'text-slate-400'));
-                    if (F.start) log(`— ${D.teams[F.side].name}: turn ${F.turn[F.side]} (half ${F.half}) —`, 'text-amber-400 font-bold');
+                    logFrame(F);
                     const mover = F.mover >= 0 ? state.players[F.mover] : F.act >= 0 ? state.players[F.act] : null;
                     if (mover && !mover.isReserve) try { followAction([mover], 400 / speed); } catch (e) {}
                 }
@@ -21172,7 +21242,8 @@
             // ---- playback ----
             function delay(F) {
                 const base = F.kind === 'move' ? 240 : F.kind === 'setup' ? 500 : 420;
-                return (base + (F.start ? 700 : 0) + (F.lines.some(l => l[2]) ? 1800 : 0)) / speed;
+                const quiet = F.kind === 'other' && !F.lines.length;
+                return ((quiet ? 200 : base) + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed;
             }
             function stop() { playing = false; clearTimeout(timer); timer = null; paintBar(); }
             function tick() {
@@ -21182,19 +21253,18 @@
                 timer = setTimeout(tick, delay(D.frames[at]));
             }
             function play() { if (!D) return; if (at >= D.frames.length - 1) at = 0; playing = true; paintBar(); clearTimeout(timer); timer = setTimeout(tick, 150); }
-            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); show(at, false); }
+            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); show(at, false); logTurn(at); }
             function stepTurn(dir) {
                 const T = D.turns; if (!T.length) return;
                 if (dir > 0) { const n = T.find(f => f > at); jump(n != null ? n : D.frames.length - 1); }
                 else { const prev = T.filter(f => f < at - 1); jump(prev.length ? prev[prev.length - 1] : 0); }
-                const F = D.frames[at]; log(`— ${D.teams[F.side].name}: turn ${F.turn[F.side]} (half ${F.half}) —`, 'text-amber-400 font-bold');
             }
             function paintBar() {
                 const b = $('frep-bar'); if (!b || !D) return;
                 const F = D.frames[at] || {};
                 $('frep-pp').textContent = playing ? '⏸' : '▶';
                 $('frep-speed').textContent = speed + '×';
-                $('frep-where').textContent = F.turn ? `H${F.half} · ${D.teams[F.side].name.slice(0, 18)} T${F.turn[F.side] || '-'} · ${F.score[0]}–${F.score[1]}` : '';
+                { const w = $('frep-where'); let s = -1; D.turns.forEach(f => { if (f <= at) s = f; }); if (document.activeElement !== w) w.value = String(s); }
                 const r = $('frep-range'); r.max = String(D.frames.length - 1); if (document.activeElement !== r) r.value = String(at);
             }
 
@@ -21208,8 +21278,14 @@
                 buildMatch();
                 { const cur = $('pitch-curtain'); if (cur) { cur.classList.remove('opacity-100'); cur.classList.add('opacity-0'); } }   // (the game lifts it at the kick-off)
                 const msg = $('message-log'); if (msg) msg.innerHTML = '';
-                log(`FUMBBL match: ${D.teams[0].name} (${D.teams[0].rosterName}, ${D.teams[0].coach}) v ${D.teams[1].name} (${D.teams[1].rosterName}, ${D.teams[1].coach})`, 'text-amber-300 font-bold');
-                D.teams.forEach(t => { if (!t.race) log(`  ${t.rosterName}: not a team BludBowl has, so its players are shown as plain tokens.`, 'text-slate-400'); });
+                const tm = t => `${esc(t.name)} (${esc(t.rosterName)}, ${esc(t.coach)})`;
+                log(`FUMBBL match: ${tm(D.teams[0])} v ${tm(D.teams[1])}`, 'text-amber-300 font-bold');
+                D.teams.forEach(t => { if (!t.race) log(`&nbsp;&nbsp;${esc(t.rosterName)}: not a team BludBowl has, so its players are shown as plain tokens.`, 'text-slate-400'); });
+                {   // the turn picker: every turn of the match, to jump straight to
+                    const w = $('frep-where'); w.innerHTML = '';
+                    const o0 = document.createElement('option'); o0.value = '-1'; o0.textContent = 'Kick-off'; w.appendChild(o0);
+                    D.turns.forEach(f => { const F = D.frames[f], o = document.createElement('option'); o.value = String(f); o.textContent = `Half ${F.half} · turn ${F.turn[F.side]} · ${plain(D.teams[F.side].name)}`; w.appendChild(o); });
+                }
                 $('frep-bar').classList.remove('hidden');
                 // start at the first kick-off set-up, not the empty pitch
                 const first = D.frames.findIndex(F => F.pos.some((v, j) => j % 2 === 0 && v >= 0 && v < CFG.cols));
@@ -21243,6 +21319,7 @@
                 $('frep-nextturn').addEventListener('click', () => { const was = playing; stop(); stepTurn(1); if (was) play(); });
                 $('frep-speed').addEventListener('click', () => { speed = speed >= 8 ? 1 : speed * 2; paintBar(); });
                 $('frep-exit').addEventListener('click', leave);
+                $('frep-where').addEventListener('change', e => { const v = +e.target.value, was = playing; stop(); jump(v < 0 ? 0 : v); e.target.blur(); if (was) play(); });
                 const r = $('frep-range');
                 r.addEventListener('input', () => { const v = +r.value, was = playing; stop(); jump(v); if (was) play(); });
             }
