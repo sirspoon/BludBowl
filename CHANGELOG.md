@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.69 (29 Oct 2026)
+- **Fixed:** the secret found in v3.68 played its sound but stayed hidden behind the title screen.
+
 ## v3.68 (29 Oct 2026)
 - **Changed:** saved formations now belong to the race, not the team: any team of that race on this device shares them. There's one set for defence (when you kick) and one for offence (when you receive), picked automatically, and the label above the buttons says which. When a formation is loaded, players are matched by name and position first, then by position, then to whoever is the nearest kind of player (Move, Strength, Agility, Armour and skills), so a formation saved with one team fits another of the same race. Formations saved before this still show until you save over them.
 - **New:** a secret. Tap "By SirSpoon" on the title screen eight times.
