@@ -703,3 +703,19 @@ opponent was hurt), next to their carrier, or just up the pitch.
   the thrower at the end of its turn (`ttmPair` / `getAdjacentRightStuffTeammate`): nothing ever moves one into place
   (only `ttmHandoffPlan` does, for a ball carrier to score). And it never aims at an opponent in practice.
 - Small samples: 39 coach throws in all, and only one or two matches for some teams.
+
+### Throwing more (`ttm2`, released in v3.71)
+- **Bring the pair together:** when no Right Stuff player is next to a thrower, one walks over without dice if a throw from
+  there would be worth it (`ttmGather`), and the pair is kept back for a throw at the end of the turn.
+- **Hold them back early:** the thrower was nearly always used up (blocks, the cage) before step 9 looked at throws (8 of
+  9 turns), so at the start of the turn, if a throw worth 0.8 (`ttmHold`; any throw on the last turn) is on, the thrower
+  and team-mate are kept out of the other steps. Not when we have the ball (`ttmHoldO` 0): holding Gnome players back
+  on offence cost them their cage (gnomes 18-38 touchdowns over 24 matches with it, 14-14 without). And not a thrower in
+  contact: its block comes first.
+- **Lower bars:** a throw 0.45 (`ttmBar`, was 0.6), a kick at an opponent 0.8 (`ktmBar`, was 1.2), up the pitch with only
+  one Right Stuff player, and 0.05 on the last turn (`ttmLast`).
+- `bb-ttm.js` (6 teams, 24 team-matches): 1.42 throws a match (was 0.07; coaches 0.8 over all nine teams, about 2-5 for
+  the teams built round it); up the pitch 76% (5.1 squares, on their feet 42%), next to their carrier 12%, onto an
+  opponent 12%; turn 8 24% (coaches 31%). Accuracy is low (27% accurate, 19% fumbled).
+- Against v3.70 over the nine throwing teams: 33-30 touchdowns, 17-13 wins, turnovers 151-174 over 45. Level. Released
+  because the teams now play to type without doing worse.

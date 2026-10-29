@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.70</title>
+    <title>BludBowl 3.71</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,7 +950,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.70</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.71</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -23674,6 +23674,9 @@
             function ttmEndPlan(me, act) {
                 const pair = ttmPair(act);
                 if (!pair || state.ball.carrierId === pair.g.id) return null;
+                // (ttm2) strong coaches' teams built round throwing do it about twice a match: a fifth of the throws at an opponent,
+                // a third on the last turn of a half, when a failure costs nothing (ai-training/README.md, "Throw Team-mate")
+                const r2 = AIX.on(me, 'ttm2'), last = r2 && state.turn[me] >= TURNS, bar = r2 ? AIX.p(me, 'ttmBar', 0.45) : 0.6;
                 const { t, g } = pair, c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                 const theirs = c && c.team !== me && onPitch(c) ? c : null;
                 let best = null;
@@ -23684,32 +23687,56 @@
                     for (let x = 0; x < CFG.cols; x++) for (let y = 0; y < CFG.rows; y++) {
                         if (Math.hypot(x - t.x, y - t.y) > 6.4 || (x === t.x && y === t.y)) continue;
                         const ev = ttmValue(t, g, x, y, fin);
-                        if (ev >= 0.6 && (!best || ev > best.ev)) best = { ev, x, y };
+                        if (ev >= bar && (!best || ev > best.ev)) best = { ev, x, y };
                     }
-                    if (!best && AIX.on(me, 'ttm') && state.players.filter(q => q.team === me && onPitch(q) && hasSk(q, 'Right Stuff')).length >= 2) {
+                    if (!best && AIX.on(me, 'ttm') && state.players.filter(q => q.team === me && onPitch(q) && hasSk(q, 'Right Stuff')).length >= (r2 ? 1 : 2)) {
                         const open = (x, y) => !state.players.some(q => q.team !== me && onPitch(q) && !q.isDown && Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) <= 1);
                         const adv = (x, y, landP, q) => q ? 0 : landP * (open(x, y) ? Math.max(0, toGo(g.x, me) - toGo(x, me)) / 4 : 0) * (toGo(x, me) <= CFG.cols / 2 ? 1.3 : 0.7);
                         for (let x = 0; x < CFG.cols; x++) for (let y = 1; y < CFG.rows - 1; y++) {
                             if (Math.hypot(x - t.x, y - t.y) > 6.4 || toGo(x, me) >= toGo(g.x, me) - 2) continue;
                             const ev = ttmValue(t, g, x, y, adv);
-                            if (ev >= 0.6 && (!best || ev > best.ev)) best = { ev, x, y };
+                            if (ev >= (last ? AIX.p(me, 'ttmLast', 0.05) : bar) && (!best || ev > best.ev)) best = { ev, x, y };
                         }
                     }
-                    return best ? { pid: t.id, kind: 'ttm', tx: best.x, ty: best.y, reserve: [t.id, g.id] } : null;
+                    return best ? { pid: t.id, kind: 'ttm', tx: best.x, ty: best.y, reserve: [t.id, g.id], ev: best.ev } : null;
                 }
                 state.players.forEach(q => {
                     if (q.team === me || !onPitch(q) || q.isDown || q.isStunned) return;
                     const val = crashVal(q);
                     const ev = ttmOdds(t, q.x, q.y) * val;
-                    if (ev >= 1.2 && (!best || ev > best.ev)) best = { ev, x: q.x, y: q.y };
+                    if (ev >= (r2 ? AIX.p(me, 'ktmBar', 0.8) : 1.2) && (!best || ev > best.ev)) best = { ev, x: q.x, y: q.y };
                 });
                 if (theirs) for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
                     const x = theirs.x + dx, y = theirs.y + dy;
                     if ((!dx && !dy) || !inPitch(x, y) || getPlayer(x, y)) continue;
                     const ev = ttmOdds(t, x, y) * landProb(g, x, y) * 4;   // marks their carrier for our next turn
-                    if (ev >= 0.6 && (!best || ev > best.ev)) best = { ev, x, y };
+                    if (ev >= bar && (!best || ev > best.ev)) best = { ev, x, y };
                 }
-                return best ? { pid: t.id, kind: pair.kick ? 'ktm' : 'ttm', tx: best.x, ty: best.y, reserve: [t.id, g.id] } : null;
+                return best ? { pid: t.id, kind: pair.kick ? 'ktm' : 'ttm', tx: best.x, ty: best.y, reserve: [t.id, g.id], ev: best.ev } : null;
+            }
+            // (ttm2) nobody to throw next to the thrower: bring a Right Stuff team-mate over (no dice) when a throw from there
+            // would be worth it - the thrower and they are then kept back, and the throw comes at the end of the turn
+            let ttmHold = null;   // (ttm2) the thrower and team-mate kept back for a throw this turn
+            function ttmGather(me, act, bar) {
+                if (state.charge || ttmPair(act)) return null;
+                const throwers = act.filter(t => !t.isDown && !t.isStunned && ((hasSk(t, 'Throw Team Mate') && !state.ttmUsed) || (hasSk(t, 'Kick Team-mate') && !state.ktmUsed)));
+                if (!throwers.length) return null;
+                const gs = act.filter(g => !g.isDown && !g.isStunned && hasSk(g, 'Right Stuff') && state.ball.carrierId !== g.id && canReposition(g, me));
+                let best = null;
+                throwers.forEach(t => gs.forEach(g => {
+                    if (g.id === t.id) return;
+                    movesFor(g).forEach(m => {
+                        if (m.prob < 100 || m.isRush || cheb(m, t) !== 1 || getPlayer(m.x, m.y)) return;
+                        const ox = g.x, oy = g.y; g.x = m.x; g.y = m.y;
+                        let r = null; try { r = ttmEndPlan(me, [t, g]); } catch (e) { r = null; } finally { g.x = ox; g.y = oy; }
+                        if (!r || r.ev == null) return;
+                        const v = r.ev - m.path.length * 0.02;
+                        if (r.ev >= (bar != null ? bar : AIX.p(me, 'ttmGather', state.turn[me] >= TURNS ? 0.05 : 0.6)) && (!best || v > best.v)) best = { g, m, v, t };
+                    });
+                }));
+                if (!best) return null;
+                const bx = best.m.x, by = best.m.y;
+                return { pid: best.g.id, kind: 'move', pick: ms => ms.find(m => m.x === bx && m.y === by) || null, reserve: [best.t.id] };
             }
 
             function fanaticPlan(me) {
@@ -23914,11 +23941,12 @@
             function choose0() {
                 moveMemo = new Map();
                 state.aiStalling = false;
-                const me = state.activeTeam, them = other(me), act = avail(me);
+                const me = state.activeTeam, them = other(me);
+                let act = avail(me);
                 if (!act.length) return fanaticPlan(me);
                 const carrier = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                 const lastTurn = state.turn[me] >= TURNS;
-                const standing = act.filter(p => !p.isDown);
+                let standing = act.filter(p => !p.isDown);
 
                 // 1. score a touchdown if we can
                 if (carrier && carrier.team === me && act.includes(carrier)) {
@@ -23964,6 +23992,31 @@
                 if (tt) return tt;
                 // or hand the ball to the goblin next to the thrower, then throw him in
                 if (AIX.on(me, 'ttm')) { const th = ttmHandoffPlan(me, act, carrier, lastTurn); if (th) return th; }
+                // (ttm2) a good throw on this turn: the thrower and the team-mate are held back from the blocks and the shape (the
+                // thrower is usually a big blocker, and was always used up before the throw was looked at), the team-mate steps over
+                // first if it needs to, and the throw comes at the end of the turn
+                if (AIX.on(me, 'ttm2') && (lastTurn || !(carrier && carrier.team === me && onPitch(carrier)) || AIX.p(me, 'ttmHoldO', 0))) {
+                    const hk = state.half + ':' + state.turn[me] + ':' + me;
+                    if (!ttmHold || ttmHold.key !== hk) {
+                        let ids = null;
+                        try {
+                            // not a thrower in contact: its block comes first (the throw can still follow if it is left over)
+                            const free = act.filter(p => !(hasSk(p, 'Throw Team Mate') || hasSk(p, 'Kick Team-mate')) || tzFor(p.x, p.y, me) === 0);
+                            const ready = ttmEndPlan(me, free), bar = AIX.p(me, 'ttmHold', lastTurn ? 0.05 : 0.8);
+                            if (ready && ready.ev >= bar) ids = ready.reserve;
+                            else { const ga = ttmGather(me, free, bar); if (ga) ids = [ga.pid, ...ga.reserve]; }
+                        } catch (e) { ids = null; }
+                        ttmHold = { key: hk, ids };
+                    }
+                    if (ttmHold.ids) {
+                        const ids = ttmHold.ids;
+                        if (ids.every(id => { const q = getPlayerById(id); return q && onPitch(q) && !q.isStunned; })) {
+                            if (!ttmPair(act)) { const ga = ttmGather(me, act, 0); if (ga && ids.includes(ga.pid)) return ga; }
+                            act = act.filter(p => !ids.includes(p.id)); standing = act.filter(p => !p.isDown);
+                            if (!act.length) return ttmEndPlan(me, avail(me));
+                        } else ttmHold.ids = null;
+                    }
+                }
 
                 // our carrier, still to move this turn: blocks that open a lane for it are worth more
                 const ourC = carrier && carrier.team === me && act.includes(carrier) && onPitch(carrier) && !state.charge ? carrier : null;
@@ -24206,6 +24259,8 @@
 
                 // 9. screens, markers and a deep safety
                 // (keep a thrower and team-mate back if a Throw Team-mate is worth doing at the end of the turn)
+                // (ttm2) no throw lined up yet: bring a team-mate over to the thrower first, if a throw from there is worth it
+                if (AIX.on(me, 'ttm2') && !ttmPair(avail(me))) { const ga = ttmGather(me, avail(me)); if (ga) return ga; }
                 const bomb = ttmEndPlan(me, avail(me));
                 const late = bombPlan(me, avail(me), true);   // keep a Bomma back to throw at the end of the turn
                 const keep = new Set([...(bomb ? bomb.reserve : []), ...(late ? [late.pid] : []), ...(fl ? [fl.pid] : [])]);

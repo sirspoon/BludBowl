@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.71 (29 Oct 2026)
+- **Improved (computer):** teams built round Throw Team-mate (Ogres, Gnomes, Halflings, Goblins, Snotlings and others with a thrower) now actually throw their small players. When a good throw is on, the computer walks a Right Stuff player over to its thrower without risking any dice, keeps the pair back, and throws at the end of the turn: mostly up the pitch, sometimes onto an opponent or next to their ball carrier. It throws more readily on the last turn of a half, when a failure costs nothing. It throws about 1.4 times a match with these teams (before: almost never; strong human coaches: about 2). Results against the previous computer were level.
+
 ## v3.70 (29 Oct 2026)
 - **Improved:** league and tournament matches now each keep their own save, alongside one exhibition match. You can leave a league fixture half played, play an exhibition or a tournament tie, and come back to it later: playing that fixture again offers to resume it, and the main menu's Continue Match card shows every saved match (use the arrows to pick one). Starting a new exhibition only asks about the saved exhibition. A saved league or tournament match whose fixture has since got a result (or gone) is marked so you can discard it. A league or tournament match saved before this update moves to its own slot by itself.
 
