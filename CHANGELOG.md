@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.70 (29 Oct 2026)
+- **Improved:** league and tournament matches now each keep their own save, alongside one exhibition match. You can leave a league fixture half played, play an exhibition or a tournament tie, and come back to it later: playing that fixture again offers to resume it, and the main menu's Continue Match card shows every saved match (use the arrows to pick one). Starting a new exhibition only asks about the saved exhibition. A saved league or tournament match whose fixture has since got a result (or gone) is marked so you can discard it. A league or tournament match saved before this update moves to its own slot by itself.
+
 ## v3.69 (29 Oct 2026)
 - **Fixed:** the secret found in v3.68 played its sound but stayed hidden behind the title screen.
 

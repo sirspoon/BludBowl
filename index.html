@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.69</title>
+    <title>BludBowl 3.70</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -950,13 +950,13 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.69</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.70</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
         <nav id="main-menu" class="hidden" aria-label="Main menu">
             <div id="save-card" class="sv-card hidden" role="group" aria-label="Match in progress">
-                <div class="sv-head">Continue match</div><div class="sv-info"></div>
+                <div class="sv-head" style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>Continue match</span><span class="sv-nav" style="display:none;align-items:center;gap:6px"><button type="button" class="sv-btn" data-sv="prev" aria-label="Previous saved match" style="padding:0 8px">‹</button><span class="sv-count" style="font-weight:600;font-size:11px"></span><button type="button" class="sv-btn" data-sv="next" aria-label="Next saved match" style="padding:0 8px">›</button></span></div><div class="sv-info"></div>
                 <div class="sv-btns"><button type="button" class="sv-btn sv-go" data-sv="resume">▶ Resume</button><button type="button" class="sv-btn" data-sv="export">Export</button><button type="button" class="sv-btn sv-bad" data-sv="discard">Discard</button></div>
             </div>
             <button type="button" class="mm-btn mm-hero" data-go="exhibition"><span class="mm-t">Exhibition Match</span><span class="mm-s">A one-off game with default or saved teams</span></button>
@@ -5187,6 +5187,7 @@
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
             return { pack, merge, sharedIds, addMember, info: lid => { load(); const lg = get(lid); return lg ? { id: lg.id, name: lg.name, fmt: lg.fmt, stage: lg.stage, open: lg.open || 0, comm: lg.comm, shared: !!lg.shared, names: lg.names || {}, owner: lg.owner || {} } : null; },
+                played: (lid, key) => { load(); const lg = get(lid), f = lg && byKey(lg, key); return !f || !!f.r; },   // (a saved match for it is out of date)
                 viewHtml, cpuTeam, raceKeys, IND, IND7, indList, indCost, indMax, offered, open, close, recordLive, simMatch, W, _pm: () => pm, _rd: () => rd, _autoRedraft: autoRedraft, table, get: id => { load(); return get(id); }, list: () => { load(); return leagues.slice(); }, _sim: simFixture, _save: save, _advance: advance };
         })();
 
@@ -6245,6 +6246,7 @@
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
             return { open, close, recordLive, draftTeam, standings, unfit, liveResult, createOnline, ROUND, isSwiss,
+                played: (cid, key) => { load(); const cp = get(cid), f = cp && byKey(cp, key); return !f || !!f.r || !!f.bye; },   // (a saved match for it is out of date)
                 applyResult: (cid, key, R) => { load(); const cp = get(cid); if (!cp || !putResult(cp, key, R)) return false; save(); return true; },
                 sim: (cid, key) => { load(); const cp = get(cid); if (!cp) return; simTie(cp, key); save(); },
                 playTie: (cid, key) => { load(); const cp = get(cid); if (cp) play(cp, key, false); },
@@ -7113,11 +7115,35 @@
         // The match is saved in this browser whenever it is at a quiet moment (nothing rolling, moving or waiting for an answer):
         // at the start of every turn, after every player's action, and when the app goes into the background. One slot.
         const SAVE = (function () {
-            const KEY = 'bb-match-save', KEYN = 'bb-net-save', V = 1, BUILD = 'bb201';   // KEYN: a hosted two-device match (kept apart from the usual slot)
-            let last = '', busy = false;
-            const read = () => { try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); return d && d.v === V ? d : d ? { old: true } : null; } catch (e) { return null; } };
-            const has = () => { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } };
-            const clear = () => { try { localStorage.removeItem(KEY); } catch (e) {} last = ''; paintCard(); };
+            // Matches in progress: one exhibition match (KEY), and one for each league fixture and tournament tie (KEY + ':lg:...' /
+            // ':cup:...'), so a league or tournament match can wait while something else is played. KEYN: a hosted two-device match.
+            const KEY = 'bb-match-save', KEYN = 'bb-net-save', V = 1, BUILD = 'bb201';
+            let last = '', busy = false, sel = null;   // sel: the saved match the main-menu card shows
+            const slotOf = (lg, cp) => lg && lg.lid != null ? 'lg:' + lg.lid + ':' + lg.key : cp && cp.cid != null ? 'cup:' + cp.cid + ':' + cp.key : '';
+            const keyOf = slot => slot ? KEY + ':' + slot : KEY;
+            const curSlot = () => slotOf(state.league, state.cup);
+            const parse = txt => { try { const d = JSON.parse(txt || 'null'); return d && d.v === V ? d : d ? { old: true } : null; } catch (e) { return null; } };
+            const readKey = k => { try { return parse(localStorage.getItem(k)); } catch (e) { return null; } };
+            // every saved match on this device, newest first: [{ slot, key, d }]
+            function list() {
+                const out = [];
+                try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k === KEY || (k && k.startsWith(KEY + ':'))) { const d = readKey(k); if (d) out.push({ slot: k === KEY ? '' : k.slice(KEY.length + 1), key: k, d }); } } } catch (e) {}
+                return out.sort((a, b) => ((b.d && b.d.at) || 0) - ((a.d && a.d.at) || 0));
+            }
+            const read = slot => readKey(keyOf(slot == null ? (sel != null ? sel : '') : slot));
+            const has = (slot = '') => { try { return !!localStorage.getItem(keyOf(slot)); } catch (e) { return false; } };
+            const clear = (slot = curSlot()) => { try { localStorage.removeItem(keyOf(slot)); } catch (e) {} if (slot === curSlot()) last = ''; if (sel === slot) sel = null; paintCard(); };
+            // a league or tournament match whose fixture has been played (or has gone) since it was saved
+            function stale(d) {
+                const st = d && d.state; if (!st) return false;
+                try {
+                    if (st.league && st.league.lid != null) return LEAGUE.played(st.league.lid, st.league.key);
+                    if (st.cup && st.cup.cid != null) return CUP.played(st.cup.cid, st.cup.key);
+                } catch (e) {}
+                return false;
+            }
+            // (before v3.70 there was one slot, for any match: a league or tournament match saved there moves to its own)
+            try { const d = readKey(KEY); const sl = d && d.state ? slotOf(d.state.league, d.state.cup) : ''; if (sl && !localStorage.getItem(keyOf(sl))) { localStorage.setItem(keyOf(sl), localStorage.getItem(KEY)); localStorage.removeItem(KEY); } } catch (e) {}
             // players are saved once; anything else pointing at a player is saved as its id
             function encode(v, inPlayers, seen) {
                 if (v === null || typeof v !== 'object') return typeof v === 'function' ? undefined : v;
@@ -7166,7 +7192,7 @@
             }
             function save(force) {
                 if (busy || NET.guest() || !quiet()) return false;   // (the guest's device never keeps the match: the host has it)
-                const key = NET.hosting() ? KEYN : KEY;
+                const key = NET.hosting() ? KEYN : keyOf(curSlot());
                 const g = sig(); if (!force && g === last) return false;
                 let txt = '';
                 try { const d = snapshot(); txt = JSON.stringify(d); localStorage.setItem(key, txt); }
@@ -7228,17 +7254,24 @@
             function ago(t) { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : new Date(t).toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' }); }
             function paintCard() {
                 const el = document.getElementById('save-card'); if (!el) return;
-                const d = read();
+                const L = list();
+                if (sel == null || !L.some(x => x.slot === sel)) sel = L.length ? L[0].slot : null;
+                const d = sel != null ? read(sel) : null;
                 if (!d) { el.classList.add('hidden'); return; }
                 el.classList.remove('hidden');
+                const i = L.findIndex(x => x.slot === sel), nav = el.querySelector('.sv-nav');
+                if (nav) { nav.style.display = L.length < 2 ? 'none' : 'inline-flex'; nav.querySelector('.sv-count').textContent = `${i + 1} of ${L.length}`; }
+                const old = stale(d);
                 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
                 el.querySelector('.sv-info').innerHTML = d.old ? 'A saved match from an older version of the game (it can\'t be restored).'
                     : `<b>${esc(d.card.t[0])} ${d.card.s[0]} – ${d.card.s[1]} ${esc(d.card.t[1])}</b><br>${esc(d.card.comp)} · ${['', '1st half', '2nd half', 'extra time'][d.card.half] || ''} · ${esc(d.card.who)} to play, turn ${d.card.turn}<br><span class="sv-dim">Saved ${ago(d.at)}</span>`;
-                el.querySelector('[data-sv="resume"]').disabled = !!d.old;
+                if (old && !d.old) el.querySelector('.sv-info').innerHTML += '<br><span style="color:#fca5a5">This fixture has a result now (or has gone), so this match can only be discarded.</span>';
+                el.querySelector('[data-sv="resume"]').disabled = !!d.old || old;
                 el.querySelector('[data-sv="export"]').disabled = !!d.old;
             }
+            function step(n) { const L = list(); if (L.length < 2) return; const i = L.findIndex(x => x.slot === sel); sel = L[(i + n + L.length) % L.length].slot; paintCard(); }
             async function exportFile() {
-                let txt = ''; try { txt = localStorage.getItem(KEY) || ''; } catch (e) {}
+                let txt = ''; try { txt = localStorage.getItem(keyOf(sel != null ? sel : '')) || ''; } catch (e) {}
                 if (!txt) return;
                 const d = JSON.parse(txt), nm = `bludbowl-${(d.card ? d.card.t.join('-v-') : 'match').replace(/[^a-z0-9-]+/gi, '-').toLowerCase()}.json`;
                 const file = new File([txt], nm, { type: 'application/json' });
@@ -7252,20 +7285,23 @@
                         const d = JSON.parse(r.result);
                         if (!d || !d.state || !d.rosters) throw new Error('not a match');
                         if (d.v !== V) { note("That match file is from a different version of the game and can't be restored."); return; }
-                        localStorage.setItem(KEY, JSON.stringify(d)); paintCard(); note('Match loaded: tap Resume to carry on.');
+                        const sl = slotOf(d.state.league, d.state.cup);
+                        localStorage.setItem(keyOf(sl), JSON.stringify(d)); sel = sl; paintCard(); note('Match loaded: tap Resume to carry on.');
                     } catch (e) { note("That file isn't a BludBowl match save."); }
                 };
                 r.readAsText(f);
             }
             // starting a new match when one is saved: ask first
-            function confirmReplace(go) {
-                const d = read(); if (!d) { go(); return; }
+            // (slot: the exhibition slot, or this league fixture's or tournament tie's own)
+            function confirmReplace(go, slot = '') {
+                const d = read(slot); if (!d) { go(); return; }
                 const box = document.getElementById('save-ask');
+                const what = slot ? 'You have already started this match' : 'You have an exhibition match in progress';
                 box.querySelector('.sv-ask-text').textContent = d.old ? 'There is a saved match from an older version of the game. Starting a new match will replace it.'
-                    : `You have a match in progress: ${d.card.t[0]} ${d.card.s[0]} – ${d.card.s[1]} ${d.card.t[1]}. Starting a new match will replace it.`;
+                    : `${what}: ${d.card.t[0]} ${d.card.s[0]} – ${d.card.s[1]} ${d.card.t[1]}. Starting ${slot ? 'it again' : 'a new match'} will replace it.`;
                 box.classList.remove('hidden');
-                box.querySelector('[data-ask="go"]').onclick = () => { box.classList.add('hidden'); clear(); go(); };
-                box.querySelector('[data-ask="resume"]').onclick = () => { box.classList.add('hidden'); resumeFromMenu(); };
+                box.querySelector('[data-ask="go"]').onclick = () => { box.classList.add('hidden'); clear(slot); go(); };
+                box.querySelector('[data-ask="resume"]').onclick = () => { box.classList.add('hidden'); sel = slot; resumeFromMenu(); };
                 box.querySelector('[data-ask="back"]').onclick = () => box.classList.add('hidden');
                 box.querySelector('[data-ask="resume"]').classList.toggle('hidden', !!d.old);
             }
@@ -7273,7 +7309,9 @@
                 const isFs = document.fullscreenElement || document.webkitFullscreenElement;
                 if (!isFs) try { toggleFullscreen(); } catch (e) {}
                 ['league-hub', 'cup-hub', 'teams-hub', 'team-builder'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.add('hidden'); });
-                resume();
+                const d = read(sel != null ? sel : '');
+                if (d && !d.old && stale(d)) { note('That fixture has a result now, so this saved match can only be discarded.'); return; }
+                resume(d);
             }
             // the in-match "save and exit" button
             function exitAsk() {
@@ -7281,14 +7319,15 @@
                 if (NET.on()) { askChoice('LEAVE MATCH', "Leave this two-device match and go back to the main menu? It isn't saved, and it ends on the other device too.", 'Leave match', 'Keep playing', () => { state.live = false; backToMenu(); }, null); return; }
                 const saved = save(true) || has();
                 askChoice('SAVE & EXIT', saved
-                    ? `Your match is saved${quiet() ? '' : ' as it was at the end of the last action'}. Go back to the main menu? Carry on any time with Continue Match.`
+                    ? `Your match is saved${quiet() ? '' : ' as it was at the end of the last action'}. Go back to the main menu? Carry on any time with Continue Match${curSlot() ? ', or by playing this fixture again' : ''}.`
                     : "Nothing is saved yet: the match saves from the first turn. Go back to the main menu anyway?", 'Exit to menu', 'Keep playing',
                     () => { state.live = false; backToMenu(); }, null);
             }
             const readNet = () => { try { const d = JSON.parse(localStorage.getItem(KEYN) || 'null'); return d && d.v === V && d.net ? d : null; } catch (e) { return null; } };
             const clearNet = () => { try { localStorage.removeItem(KEYN); } catch (e) {} };
             function resumeNet() { const d = readNet(); if (!d) return; if (resume(d)) NET.resumeHost(d.net); }
-            return { readNet, clearNet, resumeNet, encode, decode, save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note };
+            return { readNet, clearNet, resumeNet, encode, decode, save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note,
+                slotOf, step, list, discardShown: () => clear(sel != null ? sel : '') };
         })();
 
         // ---------- Back up everything the game keeps on this device, and restore it ----------
@@ -25125,8 +25164,10 @@
                     if (a === 'resume') SAVE.resumeFromMenu();
                     else if (a === 'export') SAVE.exportFile();
                     else if (a === 'import') document.getElementById('sv-file').click();
+                    else if (a === 'prev') SAVE.step(-1);
+                    else if (a === 'next') SAVE.step(1);
                     else if (a === 'discard') {
-                        if (sv.dataset.sure) { SAVE.clear(); SAVE.note('Saved match discarded.'); }
+                        if (sv.dataset.sure) { SAVE.discardShown(); SAVE.note('Saved match discarded.'); }
                         else { sv.dataset.sure = '1'; sv.textContent = 'Sure? Tap again'; setTimeout(() => { delete sv.dataset.sure; sv.textContent = 'Discard'; }, 3000); }
                     }
                     return;
@@ -25171,7 +25212,8 @@
 
             // start a match between two teams (race keys or 'custom:<id>'); opts.career records it for saved teams, opts.league is a league fixture
             window.launchMatch = (k0, k1, opts = {}) => {
-                if (!opts.replaceOk && SAVE.has()) { SAVE.confirmReplace(() => window.launchMatch(k0, k1, Object.assign({}, opts, { replaceOk: true }))); return; }
+                { const slot = SAVE.slotOf(opts.league, opts.cup);   // (an exhibition, or this fixture or tie: other saved matches wait)
+                  if (!opts.replaceOk && SAVE.has(slot)) { SAVE.confirmReplace(() => window.launchMatch(k0, k1, Object.assign({}, opts, { replaceOk: true })), slot); return; } }
                 // from here until the coin toss the title screen is just black
                 const ss = document.getElementById('start-screen');
                 ss.style.display = ''; ss.style.transition = 'none'; ss.style.background = '#000';
