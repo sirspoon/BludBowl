@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.12 (29 Oct 2026)
+- The full-screen button explains what happened when it doesn't work, to help track down a problem.
+
 ## v4.11 (29 Oct 2026)
 - When full screen is refused, the message now includes the browser's own reason.
 

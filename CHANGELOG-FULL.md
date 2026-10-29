@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.12 (29 Oct 2026)
+- **Improved:** when the full-screen button doesn't end in full screen, a note at the top of the screen says what happened (whether the browser answered, said no, or thought the game was already full screen, and whether the screen-on lock was held), to track down why full screen stopped working on one phone. The full-screen messages now show over the menus and matches alike.
+
 ## v4.11 (29 Oct 2026)
 - **Improved:** when the browser refuses full screen, the message now quotes the browser's own reason, to help track down why full screen stopped working on one phone.
 
