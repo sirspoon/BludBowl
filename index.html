@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.09</title>
+    <title>BludBowl 4.10</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1023,7 +1023,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.09</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.10</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -2846,6 +2846,7 @@
             function finish() {
                 reports.forEach(finalize);
                 if (state.league) { try { LEAGUE.recordLive(reports); } catch (e) { console.error('league', e); } }
+                try { SAVE.resultRecorded(); } catch (e) {}   // (now the match's save can go)
                 finished = true; adv = null;
                 render();
             }
@@ -6683,7 +6684,8 @@
             el.scrollTop = el.scrollHeight;
         }
 
-        function toggleFullscreen() {
+        // tell = it was the full-screen button: if the browser won't do it, say why (otherwise nothing seemed to happen)
+        function toggleFullscreen(tell) {
             const doc = document;
             const docEl = document.documentElement;
 
@@ -6691,11 +6693,16 @@
             const exitFs = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
 
             const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+            const say = msg => { if (tell !== true) return; const menu = (document.getElementById('start-screen') || {}).style && document.getElementById('start-screen').style.display !== 'none';
+                if (menu) { try { SAVE.note(msg); } catch (e) {} } else { try { showRemovalNotice('FULL SCREEN', msg); } catch (e) {} } };
+            const elsewhere = 'If the game is open inside another app (from a link in it), open it in Chrome or Safari itself instead.';
 
             if (!isFs) {
-                if (requestFs) requestFs.call(docEl).catch(() => {});
+                if (!requestFs) { say("This browser doesn't let web pages go full screen (iPhones don't). " + elsewhere); return; }
+                try { Promise.resolve(requestFs.call(docEl)).catch(() => say('The browser said no to full screen. ' + elsewhere)); }   // (old Safari's version returns nothing)
+                catch (e) { say('The browser said no to full screen. ' + elsewhere); }
             } else {
-                if (exitFs) exitFs.call(doc).catch(() => {});
+                if (exitFs) try { Promise.resolve(exitFs.call(doc)).catch(() => {}); } catch (e) {}
             }
         }
 
@@ -6705,9 +6712,9 @@
             if (icon) icon.textContent = isFs ? '✕' : '⛶';
             document.querySelectorAll('.fsc-btn').forEach(b => { b.textContent = isFs ? '✕' : '⛶'; b.title = isFs ? 'Leave full screen' : 'Full screen'; b.setAttribute('aria-label', b.title); });
         }
-        document.addEventListener('click', e => { const b = e.target.closest('[data-fs]'); if (!b) return; e.stopPropagation(); toggleFullscreen(); }, true);
+        document.addEventListener('click', e => { const b = e.target.closest('[data-fs]'); if (!b) return; e.stopPropagation(); toggleFullscreen(true); }, true);
 
-        document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
+        document.getElementById('btn-fullscreen').addEventListener('click', () => toggleFullscreen(true));
         document.addEventListener('fullscreenchange', updateFullscreenIcon);
         document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
@@ -7369,6 +7376,12 @@
                     resizeCanvas(); updateTopBar(); updateWeatherBadge(); refreshSelection(null); render();
                     try { MUSIC.matchStart(); } catch (e) {}
                     last = sig();
+                    if (state.isGameOver) {   // a finished match whose result wasn't recorded yet: back to its match summary to finish it
+                        state.mode = MODES.LOCKED;
+                        log('--- Match picked up again at full time: finish it from the match summary to record the result ---', 'text-emerald-300 font-bold');
+                        fullTimeBoard(); setTimeout(() => { document.getElementById('modal-announce').classList.add('hidden'); MATCH.open(); }, 400);
+                        return true;
+                    }
                     log(`--- Match resumed: ${ROSTERS[state.activeTeam].name}, turn ${state.turn[state.activeTeam]} of the ${['', 'first', 'second', 'extra'][state.half] || ''} half ---`, 'text-emerald-300 font-bold');
                     announce('MATCH RESUMED', `${ROSTERS[0].name} ${state.score[0]} – ${state.score[1]} ${ROSTERS[1].name} · ${ROSTERS[state.activeTeam].name} to play, turn ${state.turn[state.activeTeam]}`, 'bg-emerald-800/90', () => showTurnBanner(state.activeTeam), 2600);
                     return true;
@@ -7395,6 +7408,7 @@
                 const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
                 el.querySelector('.sv-info').innerHTML = d.old ? 'A saved match from an older version of the game (it can\'t be restored).'
                     : `<b>${esc(d.card.t[0])} ${d.card.s[0]} – ${d.card.s[1]} ${esc(d.card.t[1])}</b><br>${esc(d.card.comp)} · ${['', '1st half', '2nd half', 'extra time'][d.card.half] || ''} · ${esc(d.card.who)} to play, turn ${d.card.turn}<br><span class="sv-dim">Saved ${ago(d.at)}</span>`;
+                if (d.over && !d.old && !old) el.querySelector('.sv-info').innerHTML = `<b>${esc(d.card.t[0])} ${d.card.s[0]} – ${d.card.s[1]} ${esc(d.card.t[1])}</b><br>${esc(d.card.comp)} · full time<br><span style="color:#fcd34d">The result isn't recorded yet: tap Resume to finish the match from its summary.</span><br><span class="sv-dim">Saved ${ago(d.at)}</span>`;
                 if (old && !d.old) el.querySelector('.sv-info').innerHTML += '<br><span style="color:#fca5a5">This fixture has a result now (or has gone), so this match can only be discarded.</span>';
                 el.querySelector('[data-sv="resume"]').disabled = !!d.old || old;
                 el.querySelector('[data-sv="export"]').disabled = !!d.old;
@@ -7456,7 +7470,15 @@
             const readNet = () => { try { const d = JSON.parse(localStorage.getItem(KEYN) || 'null'); return d && d.v === V && d.net ? d : null; } catch (e) { return null; } };
             const clearNet = () => { try { localStorage.removeItem(KEYN); } catch (e) {} };
             function resumeNet() { const d = readNet(); if (!d) return; if (resume(d)) NET.resumeHost(d.net); }
-            return { readNet, clearNet, resumeNet, encode, decode, save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note,
+            // full time in a league or career match: the result is only recorded from the match summary (Main Menu) or the post-match
+            // report, so the match stays saved, marked finished, until then (if the game closes on the summary, it can be picked up there)
+            function keepFinished() {
+                if (NET.on()) return false;
+                try { const d = snapshot(); d.over = true; try { localStorage.setItem(keyOf(curSlot()), JSON.stringify(d)); } catch (e) { d.log = ''; localStorage.setItem(keyOf(curSlot()), JSON.stringify(d)); } last = sig(); paintCard(); return true; }
+                catch (e) { console.error('final save failed', e); return false; }
+            }
+            const resultRecorded = () => { if (!NET.on()) clear(); };
+            return { readNet, clearNet, resumeNet, encode, decode, save, quiet, read, has, clear, resume, resumeFromMenu, paintCard, exportFile, importFile, confirmReplace, exitAsk, note, keepFinished, resultRecorded,
                 slotOf, step, list, discardShown: () => clear(sel != null ? sel : '') };
         })();
 
@@ -7869,7 +7891,7 @@
             function close() { document.getElementById('match-summary').classList.add('hidden'); }
             function wire() {
                 document.getElementById('ms-pitch').onclick = () => { close(); const b = document.getElementById('btn-announce-reload'); if (b) b.classList.remove('hidden'); document.getElementById('modal-announce').classList.remove('hidden'); };
-                document.getElementById('ms-menu').onclick = () => { if (state.league) { try { LEAGUE.recordLive([]); } catch (e) { console.error('league', e); } } backToMenu(); };
+                document.getElementById('ms-menu').onclick = () => { if (state.league) { try { LEAGUE.recordLive([]); SAVE.resultRecorded(); } catch (e) { console.error('league', e); } } backToMenu(); };
                 document.getElementById('ms-report').onclick = () => { close(); CAREER.open(); };
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
@@ -7911,13 +7933,18 @@
                 if (!state.penalties) penalties();
             }
             state.isGameOver = true; state.mode = MODES.LOCKED;
-            try { if (NET.on()) SAVE.clearNet(); else SAVE.clear(); } catch (e) {}   // a two-device match leaves any other saved match alone
+            // a two-device match leaves any other saved match alone; a league or career match keeps its save until its result is recorded
+            const toRecord = !NET.on() && (!!state.league || (state.careerOn || []).some(Boolean));
+            try { if (NET.on()) SAVE.clearNet(); else if (!(toRecord && SAVE.keepFinished())) SAVE.clear(); } catch (e) {}
             if (state.cup) { try { CUP.recordLive(); } catch (e) { console.error('cup', e); } }
             if (state.cup && state.cup.otid) { try { OTOUR.matchOver(); } catch (e) { console.error('otour', e); } }
             try { mournMatched(); } catch (e) { console.error('mourn', e); }
             SIMSPEED.matchOver();
             sfx('gong'); sfx('whistle', 300); sfx('crowdHuge', 500);
             log(`  FULL TIME! The match has concluded.`, 'text-amber-400 font-bold');
+            fullTimeBoard();
+        }
+        function fullTimeBoard() {   // (also for a finished match picked up again from its save)
             announce("FULL TIME", `Final Score: ${ROSTERS[0].name} ${state.score[TEAMS.HUMAN]} - ${state.score[TEAMS.ORC]} ${ROSTERS[1].name}${state.half === 3 ? ' (after extra time)' : ''}${state.penalties ? ` · ${ROSTERS[state.penalties.w].name} win ${Math.max(...state.penalties.s)}–${Math.min(...state.penalties.s)} on penalties` : ''}`, "bg-black/90", null, 0, true);
             const b = document.getElementById('btn-announce-reload');
             b.textContent = 'Match Summary';

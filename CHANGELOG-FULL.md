@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.10 (29 Oct 2026)
+- **Fixed:** a league or career match's save was deleted at full time, but its result is only recorded later, from the match summary (Main Menu) or the post-match report (Finish & save). If the game closed in between, the match was lost and had to be played again. Now it stays saved, marked as finished, until the result is recorded. The main menu's saved-match card says "full time: the result isn't recorded yet", and Resume goes straight back to the match summary to finish it. Exhibitions and tournament matches (whose results are recorded at the final whistle) work as before.
+- **Improved:** the full-screen button now says why when the browser won't go full screen (some browsers, such as an app's built-in browser that opens a link, or an iPhone, don't allow it), instead of seeming to do nothing.
+
 ## v4.09 (29 Oct 2026)
 - **Fixed:** the top bar cut off whatever didn't fit across the screen, so a bigger text size (the Aa button) pushed its buttons off the side, Aa itself included, leaving no way to make it smaller again. On a landscape phone the End Turn and fullscreen buttons were already cut off at the normal size. The top bar is now only ever as big as fits the screen's width (the other panels and pop-ups still take the size you pick), so every button stays in reach.
 - **Improved:** tapping Aa shows the size it has switched to for a moment (Auto, 100%, 125%... 200%, then back to Auto).
