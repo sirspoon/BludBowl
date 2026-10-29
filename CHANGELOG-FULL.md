@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.14 (29 Oct 2026)
+- **Changed:** full screen not working turned out to be Chrome itself: it had stopped answering full-screen requests from any page, and fully closing and reopening Chrome fixed it. The detailed diagnostic note from v4.12-4.13 is replaced by a plain one: if the full-screen button gets no answer, it says Chrome isn't responding and suggests closing and reopening it. (The one-request-at-a-time change from v4.13 stays.) The test page fstest.html is removed.
+
 ## v4.13 (29 Oct 2026)
 - **Fixed (we hope):** full screen getting no answer at all from Chrome on Android. After a match or replay the main menu asks for full screen on your first tap, so tapping the full-screen button there sent two requests in one tap, and the game asked again on every tap while one was still waiting. Now only one request is ever waiting at a time, and a tap on the full-screen button is left to that button.
 - **Improved:** the note when full screen doesn't come on now also says how many requests were sent and answered, whether the page had focus, and whether you'd come back to the menu from a match or replay; if the browser answers late, the note adds that.
