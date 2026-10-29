@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.03</title>
+    <title>BludBowl 4.04</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -636,6 +636,12 @@
         #frep-list .fr-t { font-weight: 800; font-size: 14px; }
         #frep-list .fr-s { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
         #frep-list .fr-msg { font-size: 12.5px; color: #94a3b8; margin: 6px 2px; }
+        #frep-list .fr-mine { display: flex; flex-direction: column; gap: 6px; cursor: default; }
+        #frep-list .fr-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+        #frep-list .fr-acts button, #frep-list .fr-add { padding: 5px 10px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; font-weight: 700; font-size: 12.5px; cursor: pointer; }
+        #frep-list .fr-acts .fr-go { background: #065f46; border-color: #10b981; }
+        #frep-list .fr-acts .fr-del.arm { background: #7f1d1d; border-color: #ef4444; }
+        #frep-list .fr-add { display: block; text-align: center; border-style: dashed; }
         /* a coach's decision in a FUMBBL replay: the game's question card, answered by itself (nothing to tap) */
         body.frep-on #modal-roll, body.frep-on #modal-team-reroll, body.frep-on #modal-choice, body.frep-on #modal-dice { pointer-events: none !important; }
         body.frep-on #dice-tap-hint { display: none; }
@@ -1016,7 +1022,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.03</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.04</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1049,7 +1055,7 @@
             <div class="sv-btns"><button type="button" class="sv-btn sv-go" id="frep-go">▶ Watch</button><label class="sv-btn" style="cursor:pointer">Open a file…<input type="file" id="frep-file" accept=".gz,.json,application/gzip,application/json" class="hidden"></label><button type="button" class="sv-btn" id="frep-cancel">Cancel</button></div>
             <div class="fr-feat">
                 <div class="sv-head" style="margin-top:14px">Featured matches</div>
-                <div class="fr-tabs" role="tablist"><button type="button" data-ft="recent" class="on" role="tab">Recent top games</button><button type="button" data-ft="picks" role="tab">Our picks</button><button type="button" id="frep-refresh" title="Look again" aria-label="Look again">↻</button></div>
+                <div class="fr-tabs" role="tablist"><button type="button" data-ft="recent" class="on" role="tab">Recent top games</button><button type="button" data-ft="picks" role="tab">Our picks</button><button type="button" data-ft="mine" role="tab">My matches</button><button type="button" id="frep-refresh" title="Look again" aria-label="Look again">↻</button></div>
                 <select id="frep-race" aria-label="Team"><option value="">Any team</option></select>
                 <div id="frep-list" role="list"></div>
             </div>
@@ -1189,6 +1195,7 @@
         <h2 id="ms-title">Match Summary</h2>
         <div id="ms-body"></div>
         <footer class="ms-foot"><button id="ms-pitch" type="button" class="ms-btn">Back to the pitch</button>
+          <button id="ms-keep" type="button" class="ms-btn hidden" title="Keep a replay of this match in I Like to Watch > My matches (on this device only)">💾 Save this match</button>
           <button id="ms-menu" type="button" class="ms-primary">Main Menu</button>
           <button id="ms-report" type="button" class="ms-primary hidden">Post-Match Report</button></footer>
       </div>
@@ -7792,6 +7799,15 @@
                 document.getElementById('ms-report').classList.toggle('hidden', !career);
                 document.getElementById('ms-menu').classList.toggle('hidden', career);   // a career match must be finished in its report
                 document.getElementById('ms-menu').textContent = state.cup ? (state.cup.ko === false ? 'Back to the event' : 'Back to the cup') : 'Main Menu';
+                {   // a replay of the match, to keep (or not): it goes to I Like to Watch > My matches
+                    const k = document.getElementById('ms-keep'), can = REC.has() || REC.saved();
+                    k.classList.toggle('hidden', !can); k.disabled = REC.saved(); k.textContent = REC.saved() ? '✓ Saved to My matches' : '💾 Save this match';
+                    k.onclick = async () => {
+                        k.disabled = true; k.textContent = 'Saving…';
+                        try { await REC.save(); k.textContent = '✓ Saved to My matches'; sfx('selectPlayer'); }
+                        catch (e) { console.error(e); k.disabled = false; k.textContent = "Couldn't save - try again"; }
+                    };
+                }
                 document.getElementById('match-summary').classList.remove('hidden');
                 document.getElementById('match-summary').scrollTop = 0;
             }
@@ -21114,10 +21130,11 @@
             // player states (FUMBBL's PlayerState, low byte): 1 standing, 2 moving, 3 prone, 4 stunned, 5 KO, 6 badly hurt, 7 seriously injured,
             // 8 dead, 9 reserve, 10 missing, 11 falling, 12 blocked (still on their feet), 13 banned, 14 exhausted, 15 being dragged, 16 picked up, 17 hit on the ground
             function parse(d) {
-                const g = d.game, T = [g.teamHome, g.teamAway], teams = [], roster = [];
+                const g = d.game, T = [g.teamHome, g.teamAway], teams = [], roster = [], bb = d.bludbowl && typeof d.bludbowl === 'object' ? d.bludbowl : null;   // (bb: one of our own matches)
                 T.forEach((t, side) => {
                     const pos = new Map((t.roster && t.roster.positionArray || []).map(q => [q.positionId, q]));
-                    const race = raceKey(t.roster && t.roster.rosterName || t.race);
+                    const own = bb && Array.isArray(bb.races) && RACES[bb.races[side]] ? bb.races[side] : null;
+                    const race = own || raceKey(t.roster && t.roster.rosterName || t.race);
                     teams.push({ name: t.teamName || ('Team ' + (side + 1)), coach: t.coach || '', rosterName: t.roster && t.roster.rosterName || t.race || '', race });
                     (t.playerArray || []).forEach(p => {
                         const q = pos.get(p.positionId) || {};
@@ -21229,7 +21246,7 @@
                     if (k === 'weather' && r.weather) fx.push({ t: 'weather', w: W[String(r.weather).toUpperCase().replace(/ /g, '_')] || null, name: plain(r.weather) });
                     if (k === 'secretWeaponBan') fx.push({ t: 'swban', names: (r.playerIds || []).map(id => { const q = P(id); return q ? `${q.pos} #${q.nr}` : ''; }).filter(Boolean) });
                     // a skill that needs a roll (Steady Footing, Regeneration...) only pops up if the roll works, as in the game
-                    if (k === 'skillUse' && r.used && r.skill) { const e = { t: 'skill', skill: plain(r.skill), need: SKILL_ROLL[r.skill] || null, p: r.playerId, ok: null }; fx.push(e); if (e.need) skillWait.push(e); }
+                    if (k === 'skillUse' && r.used && r.skill) { const e = { t: 'skill', skill: plain(r.skill), need: r.confirmed ? null : SKILL_ROLL[r.skill] || null, p: r.playerId, ok: null }; fx.push(e); if (e.need) skillWait.push(e); }
                     if (ROLLS[k] !== undefined && r.playerId != null) skillWait = skillWait.filter(e => { if (e.need !== k || String(e.p) !== String(r.playerId)) return true; e.ok = !!r.successful; return false; });
                     if (k === 'playerAction' || k === 'turnEnd') skillWait = [];
                     if (k === 'referee' && r.foulingPlayerBanned && act >= 0) fx.push({ t: 'sentoff', p: act });
@@ -21252,8 +21269,9 @@
                     else if (k === 'injury') {
                         const lead = { foul: 'Foul on ', crowdpush: 'Into the crowd: ', bomb: 'Bomb: ', stab: 'Stab: ', chainsaw: 'Chainsaw: ', projectileVomit: 'Vomit: ', bitten: 'Bitten: ', breatheFire: 'Fire: ', ttmLanding: 'Landing: ', eatPlayer: 'Eaten: ' }[String(r.injuryType).replace(/ForSpp$/, '')] || '';
                         let t = `${lead}${who(r.defenderId)}`;
-                        if (r.armorRoll) t += `: armour ${r.armorRoll.join('+')}=${sum(r.armorRoll)} ${r.armorBroken ? '<b>breaks</b>' : 'holds'}`;
-                        if (r.injuryRoll) t += `, injury ${r.injuryRoll.join('+')}=${sum(r.injuryRoll)}`;
+                        const dice = a => a.length > 1 ? `${a.join('+')}=${sum(a)}` : `${sum(a)}`;   // (our own matches keep only the total of some rolls)
+                        if (r.armorRoll) t += `: armour ${dice(r.armorRoll)} ${r.armorBroken ? '<b>breaks</b>' : 'holds'}`;
+                        if (r.injuryRoll) t += `, injury ${dice(r.injuryRoll)}`;
                         if (r.injuryRoll || !r.armorRoll) t += ` → <b>${STATE[r.injury] || 'Stunned'}</b>`;
                         if (r.seriousInjury) t += ` (${esc(r.seriousInjury)})`;
                         if ((r.armorModifiers || []).length || (r.injuryModifiers || []).length) t += ` <span class="opacity-60">(${esc([...(r.armorModifiers || []), ...(r.injuryModifiers || [])].join(', '))})</span>`;
@@ -21270,7 +21288,7 @@
                         if (r.thrownPlayerId != null && ix.has(String(r.thrownPlayerId))) thrownNow = ix.get(String(r.thrownPlayerId));
                         add(sideOf(r.playerId), `${r.successful ? '✓' : '✗'} ${who(r.playerId)} ${esc(name)} ${r.minimumRoll}+: ${r.roll}${extra}${r.reRolled ? ' (re-roll)' : ''}${mods(r)}`, r.successful ? 'ok' : 'bad');
                     } else if (k === 'reRoll' && (fx.push({ t: 'reroll', team: /Team|Coaching|Leader/.test(r.reRollSource || '') }), true)) add(sideOf(r.playerId), `↻ ${esc(r.reRollSource || 're-roll')}${r.roll && !r.successful ? ' - failed' : ''}`, 'info');
-                    else if (k === 'skillUse' && r.used && !SKILL_ROLL[r.skill]) add(sideOf(r.playerId), `${who(r.playerId)} uses ${esc(r.skill)}`, 'info');   // (one with a roll: the roll's line says how it went)
+                    else if (k === 'skillUse' && r.used && (r.confirmed || !SKILL_ROLL[r.skill])) add(sideOf(r.playerId), r.playerId != null ? `${who(r.playerId)} uses ${esc(r.skill)}` : `${esc(r.skill)}!`, 'info');   // (one with a roll: the roll's line says how it went)
                     else if (k === 'scatterBall') add(-1, `${bombLive ? 'The bomb scatters' : 'The ball bounces'} ${esc((r.directionArray || []).join(', ').toLowerCase())}`, 'info');
                     else if (k === 'throwIn') add(-1, 'The crowd throws the ball back in', 'info');
                     else if (k === 'handOver') add(sideOf(r.catcherId), `hands the ball to ${who(r.catcherId)}`, 'info');
@@ -21375,7 +21393,9 @@
                     const prev = isStep(i - 1) && frames[i - 1].mover === F.mover, next = isStep(i + 1) && frames[i + 1].mover === F.mover;
                     F.walk = prev && next ? 'mid' : prev ? 'last' : next ? 'first' : 'solo';
                 });
-                return { teams, roster, frames, turns, id: g.gameId };
+                const own = bb ? { fmt: bb.format === 'sevens' ? 'sevens' : 'std', pitch: typeof bb.pitch === 'string' ? plain(bb.pitch) : null, partial: !!bb.partial,
+                    styles: (Array.isArray(bb.styles) ? bb.styles : []).map(st => { if (!st || typeof st !== 'object') return null; const o = {}; Object.keys(st).forEach(k => { const v = st[k]; if (typeof v === 'string' && /^(#[0-9a-fA-F]{3,8}|rgba?\([0-9., ]+\))$/.test(v)) o[k] = v; }); return o; }) } : null;   // (kit colours only as colours)
+                return { teams, roster, frames, turns, id: g.gameId, own };
             }
             const ACTIONS = { move: 'moves', block: 'blocks', blitz: 'blitzes', blitzMove: 'blitzes', foul: 'fouls', foulMove: 'fouls', pass: 'passes', passMove: 'passes',
                 handOver: 'hands off', handOverMove: 'hands off', standUp: 'stands up', standUpBlitz: 'stands up to blitz', throwTeamMate: 'throws a team-mate', throwTeamMateMove: 'throws a team-mate',
@@ -21432,16 +21452,17 @@
 
             // ---- putting a snapshot on our pitch ----
             function buildMatch() {
-                setFormat('std');
+                setFormat(D.own ? D.own.fmt : 'std');
                 const keys = D.teams.map(t => t.race || 'human');
                 setTeams(keys[0], keys[1]);
+                if (D.own) D.own.styles.forEach((st, i) => { if (st && Object.keys(st).length && ROSTERS[i]) ROSTERS[i].style = st; });
                 // (FUMBBL's names are whatever its coaches typed, and parts of the game show names as HTML: only plain characters get through)
                 D.teams.forEach((t, i) => { const R = ROSTERS[i]; R.name = plain(t.name) || ('Team ' + (i + 1)); R.baseName = R.name.length > 24 ? R.name.slice(0, 23) + '…' : R.name; if (!t.race) R.style = null; });   // (baseName: the end-zone lettering)
                 ROSTERS[0].oppName = ROSTERS[1].name; ROSTERS[1].oppName = ROSTERS[0].name;
                 applyTeamLabels();
                 {   // the home team's own ground, as for a league match (otherwise it stayed whatever the team screen last showed)
                     const pick = homeRace; homeRace = () => ROSTERS[0].race || ROSTERS[0].key;
-                    try { PITCH.style = pitchFor('home'); } finally { homeRace = pick; }
+                    try { PITCH.style = D.own && D.own.pitch && PITCH_STYLES.includes(D.own.pitch) ? D.own.pitch : pitchFor('home'); } finally { homeRace = pick; }
                 }
                 try { resizeCanvas(); buildPitchTexture(); } catch (e) { console.error(e); }
                 byFid = new Map();
@@ -21778,7 +21799,8 @@
                 { const cur = $('pitch-curtain'); if (cur) { cur.classList.remove('opacity-100'); cur.classList.add('opacity-0'); } }   // (the game lifts it at the kick-off)
                 const msg = $('message-log'); if (msg) msg.innerHTML = '';
                 const tm = t => `${esc(t.name)} (${esc(t.rosterName)}, ${esc(t.coach)})`;
-                log(`FUMBBL match: ${tm(D.teams[0])} v ${tm(D.teams[1])}`, 'text-amber-300 font-bold');
+                log(`${D.own ? 'BludBowl' : 'FUMBBL'} match: ${tm(D.teams[0])} v ${tm(D.teams[1])}`, 'text-amber-300 font-bold');
+                if (D.own && D.own.partial) log('&nbsp;&nbsp;(recorded from part-way through: the match was resumed from a save)', 'text-slate-400');
                 D.teams.forEach(t => { if (!t.race) log(`&nbsp;&nbsp;${esc(t.rosterName)}: not a team BludBowl has, so its players are shown as plain tokens.`, 'text-slate-400'); });
                 log('&nbsp;&nbsp;Tap a player to see their card.', 'text-slate-400');
                 {   // the turn picker: every turn of the match, to jump straight to
@@ -21924,6 +21946,7 @@
                 box.innerHTML = '';
                 const note = t => { const p = document.createElement('p'); p.className = 'fr-msg'; p.textContent = t; box.appendChild(p); };
                 if (msg) { note(msg); return; }
+                if (featTab === 'mine') { paintMine(box, note); return; }
                 const keyOf = n => raceKey(n);
                 let list = featTab === 'picks' ? PICKS.slice() : (pool || []).slice().sort((a, b) => interest(b) - interest(a));
                 if (featRace) list = list.filter(it => it.races.some(n => keyOf(n) === featRace));
@@ -21940,12 +21963,49 @@
                     box.appendChild(b);
                 });
             }
+            // ---- My matches: the ones saved at full time (REC), kept on this device; each can be watched, sent on as a file, or deleted ----
+            async function paintMine(box, note) {
+                const say = t => { const n = $('frep-note'); if (n) { n.textContent = t; n.style.color = '#94a3b8'; } };
+                let items = [];
+                try { items = await REC.list(); } catch (e) { note("This browser can't keep matches (" + (e && e.message ? e.message : 'no storage') + ').'); return; }
+                if (featTab !== 'mine') return;
+                box.innerHTML = '';
+                {   // a match file someone sent: kept here too
+                    const add = document.createElement('label'); add.className = 'fr-add'; add.textContent = '＋ Add a match file…';
+                    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.gz,.json,application/gzip,application/json'; inp.className = 'hidden';
+                    inp.addEventListener('change', async () => {
+                        const f = inp.files && inp.files[0]; if (!f) return;
+                        try { const d = JSON.parse(await gunzipText(await f.arrayBuffer())); if (!d || !d.game || !d.gameLog) throw new Error('not a replay'); parse(d); await REC.keep(d); say('Added ' + f.name + '.'); paintFeat(); }
+                        catch (e) { console.error(e); say('That file is not a match replay.'); }
+                        inp.value = '';
+                    });
+                    add.appendChild(inp); box.appendChild(add);
+                }
+                const list = featRace ? items.filter(it => (it.races || []).includes(featRace)) : items;
+                if (!list.length) { note(items.length ? 'None of your saved matches has that team.' : 'No saved matches yet. At the end of a match, "💾 Save this match" on the match summary keeps it here (on this device only, until you share it).'); return; }
+                list.forEach(it => {
+                    const row = document.createElement('div'); row.className = 'fr-row fr-mine'; row.setAttribute('role', 'listitem');
+                    const t = document.createElement('div'); t.className = 'fr-t'; t.textContent = it.title || 'Match';
+                    const sub = document.createElement('div'); sub.className = 'fr-s';
+                    sub.textContent = [it.comp, it.date, it.partial ? 'from part-way through' : '', it.size ? Math.max(1, Math.round(it.size / 1024)) + ' KB' : ''].filter(Boolean).join(' · ');
+                    const acts = document.createElement('div'); acts.className = 'fr-acts';
+                    const mk = (txt, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; if (cls) b.className = cls; b.addEventListener('click', fn); acts.appendChild(b); return b; };
+                    mk('▶ Watch', 'fr-go', async () => { try { say('Starting…'); const d = await REC.load(it.id); $('frep-ask').classList.add('hidden'); start(d); } catch (e) { console.error(e); say(e && e.message ? e.message : "Couldn't open it."); } });
+                    mk('↗ Share / export', '', async () => { try { const how = await REC.share(it.id); if (how === 'saved') say('Saved as a file: send it to anyone with BludBowl, who can open it with "Open a file…".'); } catch (e) { console.error(e); say("Couldn't export it."); } });
+                    const del = mk('🗑 Delete', 'fr-del', async () => {
+                        if (!del.classList.contains('arm')) { del.classList.add('arm'); del.textContent = 'Tap again to delete'; setTimeout(() => { del.classList.remove('arm'); del.textContent = '🗑 Delete'; }, 3500); return; }
+                        try { await REC.del(it.id); paintFeat(); } catch (e) { console.error(e); }
+                    });
+                    row.append(t, sub, acts); box.appendChild(row);
+                });
+            }
             async function showFeat(force) {
-                if (featTab === 'picks') { paintFeat(); return; }
+                if (featTab === 'picks' || featTab === 'mine') { paintFeat(); return; }
                 if (pool && !force) { paintFeat(); return; }
                 if (poolBusy) return;
-                poolBusy = recentPool(t => paintFeat(t), force).then(items => { pool = items; paintFeat(); })
-                    .catch(e => { console.error(e); paintFeat("Couldn't reach FUMBBL just now" + (e && e.message ? ' (' + e.message + ')' : '') + '. Our picks still work.'); })
+                const mine = m => { if (featTab === 'recent') paintFeat(m); };   // (only while its tab is showing)
+                poolBusy = recentPool(t => mine(t), force).then(items => { pool = items; mine(); })
+                    .catch(e => { console.error(e); mine("Couldn't reach FUMBBL just now" + (e && e.message ? ' (' + e.message + ')' : '') + '. Our picks still work.'); })
                     .finally(() => { poolBusy = null; });
             }
             let loadFrom = () => {};
@@ -21972,7 +22032,7 @@
                 $('frep-file').addEventListener('change', async e => {
                     const f = e.target.files && e.target.files[0]; if (!f) return;
                     try { say('Reading ' + f.name + '…'); const d = JSON.parse(await gunzipText(await f.arrayBuffer())); ask.classList.add('hidden'); start(d); }
-                    catch (er) { console.error(er); say('That file is not a FUMBBL replay.', true); }
+                    catch (er) { console.error(er); say('That file is not a match replay.', true); }
                     e.target.value = '';
                 });
                 $('frep-pp').addEventListener('click', () => playing ? stop() : play());
@@ -21988,7 +22048,262 @@
             }
             // (tests) the players a replay would put on the pitch, with FUMBBL's position name beside ours
             function debugBuild(d) { const keep = D; D = d; try { buildMatch(); return state.players.map((p, i) => ({ team: p.team, type: p.type, star: p.star, ffb: d.roster[i].pos })); } finally { D = keep; } }
-            return { wire, on: () => on, parse, start, tap, overlay, debugBuild, debug: () => ({ D, at }) };
+            return { wire, on: () => on, parse, start, tap, overlay, debugBuild, raceOf: raceKey, debug: () => ({ D, at }) };
+        })();
+
+        // ---------- My matches: each match is quietly recorded as it's played, in the same form as a FUMBBL replay (the subset
+        // I Like to Watch reads: where everyone is, the ball, score and turns, each action, the rolls, block dice, armour and
+        // injuries, touchdowns). Nothing is kept unless it's saved at full time; saved matches stay on this device, under
+        // I Like to Watch > My matches, until exported to a file ----------
+        const REC = (() => {
+            const DBN = 'bb-mymatches', STORE = 'm';
+            let cur = null, done = null, saved = false, busy = false;
+            const FFB_W = { perfect: 'NICE', sunny: 'VERY_SUNNY', rain: 'POURING_RAIN', blizzard: 'BLIZZARD', heat: 'SWELTERING_HEAT' };
+            const ROLL_ID = { DODGE: 'dodgeRoll', RUSH: 'goForItRoll', PICKUP: 'pickUpRoll', CATCH: 'catchRoll', PASS: 'passRoll', INTERCEPT: 'interceptionRoll',
+                LANDING: 'rightStuffRoll', 'THROW TEAMMATE': 'throwTeamMateRoll', 'THROW BOMB': 'passRoll', 'JUMP UP': 'jumpUpRoll', 'STAND UP': 'standUpRoll',
+                CHAINSAW: 'chainsawRoll', 'ALWAYS HUNGRY': 'alwaysHungryRoll', LEAP: 'leapRoll', POGO: 'leapRoll' };
+            const ACT = { move: 'move', blitz: 'blitzMove', block: 'block', foul: 'foulMove', pass: 'passMove', handoff: 'handOverMove', ttm: 'throwTeamMateMove',
+                bomb: 'throwBomb', punt: 'kickTeamMateMove', stab: 'stab', chainsaw: 'chainsaw', vomit: 'projectileVomit', gaze: 'gazeMove', bnc: 'move', chomp: 'block' };
+            const FACE_NAME = { 1: 'SKULL', 2: 'BOTH DOWN', 3: 'PUSHBACK', 4: 'PUSHBACK', 5: 'POW/PUSH', 6: 'POW' };
+            const CAS = { 'Badly Hurt': 6, 'Seriously Hurt': 7, 'Serious Injury': 7, 'Lasting Injury': 7, 'Dead': 8 };
+            const live = () => { try { return !!(state && state.live && state.players && !FREP.on() && !NET.guest()); } catch (e) { return false; } };   // (a two-device guest's match is the host's)
+            const onPitch = p => !p.isReserve && !p.isKO && !p.isCasualty && !p.isEjected && p.x >= 0 && p.x < CFG.cols && p.y >= 0 && p.y < CFG.rows;
+            const pState = p => p.isEjected ? 13 : p.isCasualty ? (CAS[p.casualtyStatus] || 6) : p.isKO ? 5 : !onPitch(p) ? 9 : p.isStunned ? 4 : p.isDown ? 3 : 1;
+            const sid = p => String(p.id);
+            function begin() {
+                cur = { players: state.players, cmds: [], prev: null, seen: new Map(), lastRoll: null, inj: [], kick: false, act: null, carrier: null,
+                    partial: (state.turn[0] || 0) + (state.turn[1] || 0) > 1 || state.score[0] + state.score[1] > 0 || state.half > 1, at: Date.now() };
+                done = null; saved = false;
+            }
+            // what has changed since the last look, as FUMBBL's model changes
+            function sample(reports) {
+                if (!live()) return;
+                if (!cur || cur.players !== state.players) begin();
+                if (cur.ended) return;
+                const C = cur, P = C.prev || { pos: new Map(), st: new Map(), ball: 'x', inPlay: null, score: [-1, -1], half: -1, turn: [-1, -1], side: -1, rr: [-1, -1], weather: '', act: 'x' };
+                const mc = [], ch = (id, key, v) => mc.push({ modelChangeId: id, modelChangeKey: key, modelChangeValue: v });
+                const pre = [], post = reports ? reports.slice() : [];
+                // a new turn (or a hand-over): the turn ends first, in a step of its own
+                const side = state.activeTeam, turn = [state.turn[0] || 0, state.turn[1] || 0];
+                if (P.side >= 0 && (side !== P.side || turn[0] !== P.turn[0] || turn[1] !== P.turn[1] || state.half !== P.half)) pre.push({ reportId: 'turnEnd' });
+                const pos = new Map(), st = new Map();
+                state.players.forEach(p => {
+                    if (!C.seen.has(p.id)) C.seen.set(p.id, p);
+                    const on = onPitch(p), xy = on ? [p.x, p.y] : [-1, -1], s = pState(p), k = sid(p);
+                    pos.set(p.id, xy); st.set(p.id, s);
+                    const was = P.pos.get(p.id);
+                    if (!was || was[0] !== xy[0] || was[1] !== xy[1]) ch('fieldModelSetPlayerCoordinate', k, xy);
+                    if (P.st.get(p.id) !== s) ch('fieldModelSetPlayerState', k, s);
+                });
+                const carrier = state.ball && state.ball.carrierId != null ? state.players.find(p => p.id === state.ball.carrierId) : null;
+                const b = carrier && onPitch(carrier) ? [carrier.x, carrier.y] : state.ball && state.ball.x >= 0 && state.ball.x < CFG.cols && state.ball.y >= 0 && state.ball.y < CFG.rows ? [state.ball.x, state.ball.y] : null;
+                const bk = b ? b.join(',') : '', inPlay = !!b;
+                if (bk !== P.ball) { ch('fieldModelSetBallCoordinate', null, b); if (b && C.kick) { post.unshift({ reportId: 'kickoffScatter' }); C.kick = false; } }
+                if (inPlay !== P.inPlay) ch('fieldModelSetBallInPlay', null, inPlay);
+                if (carrier) C.carrier = carrier;
+                [0, 1].forEach(t => {
+                    const sc = state.score[t] || 0;
+                    if (sc !== P.score[t]) {
+                        ch('teamResultSetScore', t ? 'away' : 'home', sc);
+                        if (P.score[t] >= 0 && sc > P.score[t]) { const who = carrier || C.carrier; post.push({ reportId: 'turnEnd', playerIdTouchdown: who && who.team === t ? sid(who) : null }); }
+                    }
+                    if (turn[t] !== P.turn[t]) ch('turnDataSetTurnNr', t ? 'away' : 'home', turn[t]);
+                    if ((state.rr[t] || 0) !== P.rr[t]) ch('turnDataSetReRolls', t ? 'away' : 'home', state.rr[t] || 0);
+                });
+                if (state.half !== P.half) { ch('gameSetHalf', null, state.half); post.push({ reportId: 'startHalf', half: state.half }); }
+                if (side !== P.side) ch('gameSetHomePlaying', null, side === 0);
+                const wk = state.weather && state.weather.key || 'perfect';
+                if (wk !== P.weather) { ch('fieldModelSetWeather', null, FFB_W[wk] || 'NICE'); if (P.weather) post.push({ reportId: 'weather', weather: (WEATHER_TABLE[wk] || {}).name || wk }); }
+                const sel = state.selectedId != null ? state.players.find(p => p.id === state.selectedId) : null;
+                const act = C.act != null ? C.act : sel && sel.actionTaken && !sel.hasActed ? sid(sel) : null;
+                if (act !== P.act) ch('actingPlayerSetPlayerId', null, act);
+                C.act = null;
+                C.prev = { pos, st, ball: bk, inPlay, score: [state.score[0] || 0, state.score[1] || 0], half: state.half, turn, side, rr: [state.rr[0] || 0, state.rr[1] || 0], weather: wk, act };
+                if (pre.length) C.cmds.push({ modelChangeList: { modelChangeArray: [] }, reportList: { reports: pre } });
+                settleInj(false, post);
+                if (mc.length || post.length) C.cmds.push({ modelChangeList: { modelChangeArray: mc }, reportList: { reports: post } });
+            }
+            const report = (...r) => { try { sample(r); } catch (e) { console.error('REC', e); } };
+            // an injury is finished once the player's state has settled (a casualty's kind is rolled a moment later)
+            function settleInj(all, out) {
+                if (!cur) return;
+                cur.inj = cur.inj.filter(j => {
+                    if (!j.closed && !all) return true;
+                    const p = j.p, wait = p.isCasualty && !p.casualtyStatus && Date.now() - j.at < 8000;
+                    if (wait && !all) return true;
+                    const r = { reportId: 'injury', defenderId: sid(p), injuryType: j.type, armorRoll: j.armor != null ? (j.dice || [j.armor]) : null, armorBroken: !!j.broken,
+                        injuryRoll: j.inj != null ? (j.injDice || [j.inj]) : null, injury: j.broken || j.armor == null ? pState(p) : (p.isStunned ? 4 : p.isDown ? 3 : 1) };
+                    if (p.isCasualty && p.casualtyStatus) r.seriousInjury = p.casualtyStatus === 'Badly Hurt' ? null : p.casualtyStatus;
+                    out.push(r); return false;
+                });
+            }
+            const injFor = (p, type) => {
+                let j = cur && cur.inj.find(x => x.p === p && !x.closed);
+                if (!j && cur) { j = { p, type, armor: null, broken: false, inj: null, at: Date.now() }; cur.inj.push(j); }
+                return j;
+            };
+            // ---- the game's own steps, watched from outside ----
+            function onLog(msg) {
+                if (!cur || cur.ended || !live()) { if (live()) sample(); return; }
+                const m = String(msg).replace(/<[^>]*>/g, ''); let r;
+                const pr = state.pendingRoll;
+                if ((r = m.match(/^\s*Rolled (\d+) \(Needed (\d+)\+\)/)) && pr && pr.player) { cur.lastRoll = { type: pr.type, p: pr.player, min: +r[2] }; rollRep(+r[1], false); return; }
+                if (cur.lastRoll && (r = m.match(/(?:TRR Rolled|Re-rolled|re-roll!?:?|re-rolls:?|re-rolls the throw:?)\s*(\d+) \(needed (\d+)\+\)/i))) { cur.lastRoll.min = +r[2]; rollRep(+r[1], true); return; }
+                if (/TEAM RE-ROLL used!/.test(m) && cur.lastRoll) { report({ reportId: 'reRoll', playerId: sid(cur.lastRoll.p), reRollSource: 'Team Re-roll' }); return; }
+                if ((r = m.match(/uses (.+) to re-roll!/)) && cur.lastRoll) { report({ reportId: 'reRoll', playerId: sid(cur.lastRoll.p), reRollSource: r[1] }); return; }
+                if ((r = m.match(/KICK-OFF EVENT \((\d+)\+(\d+)=\d+\): (.+)$/))) { report({ reportId: 'kickoffResult', kickoffResult: r[3].trim(), kickoffRoll: [+r[1], +r[2]] }); return; }
+                if (/^\s*Kick deviates/.test(m)) cur.kick = true;
+                const j = cur.inj.find(x => !x.closed);
+                if (j) {
+                    if ((r = m.match(/Armor broken \((\d+) >=/))) { j.armor = +r[1]; j.broken = true; }
+                    else if ((r = m.match(/Armor held \((\d+) vs/))) { j.armor = +r[1]; j.broken = false; }
+                    else if ((r = m.match(/Claws! A natural (\d+)/))) { j.armor = +r[1]; j.broken = true; }
+                    else if ((r = m.match(/^\s*Armor Roll: (\d)\+(\d) \(([+-]?\d+)\) = (\d+) vs AV(\d+)/))) { j.dice = [+r[1], +r[2]]; j.armor = +r[4]; j.broken = +r[4] >= +r[5]; if ((+r[3])) j.dice.push(+r[3]); }
+                    else if ((r = m.match(/Injury Roll: (\d)\+(\d)(?:[^=]*)= (\d+)/))) { j.inj = +r[3]; j.injDice = [+r[1], +r[2]]; if (+r[3] - +r[1] - +r[2]) j.injDice.push(+r[3] - +r[1] - +r[2]); }
+                    else if ((r = m.match(/\((\d)\+(\d)\+(\d+) = (\d+)\)/))) { j.inj = +r[4]; j.injDice = [+r[1], +r[2], +r[3]]; }
+                    else if ((r = m.match(/Injury Roll: (\d+)\./)) && j.inj == null) j.inj = +r[1];
+                    else if (j.type === 'foul' && /^\s*Armor held\.|remains Stunned|is KO'd|CASUALTY|Sevens injury table/.test(m)) j.closed = true;
+                }
+                sample();
+            }
+            function rollRep(roll, re) {
+                const L = cur.lastRoll, id = ROLL_ID[L.type] || null; if (!id) { sample(); return; }
+                const ok = roll !== 1 && (roll === 6 || roll >= L.min);
+                const r = { reportId: id, playerId: sid(L.p), roll, minimumRoll: L.min, successful: ok, reRolled: re, rollModifiers: [] };
+                if (id === 'passRoll') { r.passResult = ok ? 'ACCURATE' : roll === 1 ? 'FUMBLE' : 'INACCURATE'; if (L.type === 'THROW BOMB') r.bomb = true; }
+                if (id === 'throwTeamMateRoll') r.passResult = ok ? 'ACCURATE' : 'FUMBLE';
+                report(r);
+            }
+            function wrap(name, fn) {
+                const f = window[name]; if (typeof f !== 'function') return;
+                window[name] = function (...a) { try { if (!FREP.on()) fn(a, true); } catch (e) { console.error('REC', name, e); } const v = f.apply(this, a); try { if (!FREP.on()) fn(a, false, v); } catch (e) { console.error('REC', name, e); } return v; };
+            }
+            function install() {
+                wrap('log', (a, before) => { if (before) onLog(a[0]); });
+                wrap('walkStepAnim', (a, before) => { if (before) sample(); });
+                wrap('declareAction', ([p], before) => {
+                    if (!before || !p || !live()) return;
+                    if (p.activatedAt === actStamp()) return;   // (the same action again)
+                    if (!cur) sample();
+                    if (!cur) return;
+                    cur.act = sid(p); report({ reportId: 'playerAction', actingPlayerId: sid(p), playerAction: ACT[p.actionTaken] || 'move' });
+                });
+                wrap('resolveBlock', ([face], before) => {
+                    const c = state.combat; if (!before || !c || c.recDone || !cur || !c.atk || !c.def) return;
+                    c.recDone = true;
+                    const dice = (c.dice || [face]).slice(), mine = c.chooser == null || c.chooser === c.atk.team;
+                    report({ reportId: 'block', defenderId: sid(c.def) },
+                        { reportId: 'blockChoice', nrOfDice: mine ? dice.length : -dice.length, blockRoll: dice, diceIndex: Math.max(0, dice.indexOf(face)), blockResult: FACE_NAME[face] || 'PUSHBACK', defenderId: sid(c.def) });
+                });
+                wrap('foulCore', ([atkId, defId], before) => {
+                    if (!before || !cur) return;
+                    const d = state.players.find(p => p.id === defId); if (!d) return;
+                    report({ reportId: 'foul', defenderId: sid(d) });
+                    injFor(d, 'foul');
+                });
+                wrap('checkArmor', ([p], before) => {
+                    if (!cur || !p) return;
+                    if (before) { const c = state.combat; injFor(p, c && (c.atk === p || c.def === p) ? 'block' : 'other'); return; }
+                    const j = cur.inj.find(x => x.p === p && !x.closed); if (j) { j.closed = true; sample(); }
+                });
+                wrap('rollInjury', ([p, crowd], before) => {
+                    if (!cur || !p) return;
+                    if (before) { const j = injFor(p, crowd ? 'crowdpush' : 'other'); if (crowd && j.armor == null) j.type = 'crowdpush'; return; }
+                    const j = cur.inj.find(x => x.p === p && !x.closed); if (j) { j.closed = true; sample(); }
+                });
+                wrap('skillPop', ([name], before) => {
+                    if (!before || !cur || !live() || !name) return;
+                    const c = state.combat, sel = state.selectedId != null ? state.players.find(p => p.id === state.selectedId) : null;   // (whose skill it is: the likeliest who has it)
+                    const who = [state.pendingRoll && state.pendingRoll.player, c && c.atk, c && c.def, sel].find(p => p && (p.skills || []).includes(name));
+                    report({ reportId: 'skillUse', skill: String(name), used: true, confirmed: true, playerId: who ? sid(who) : null });
+                });
+                wrap('triggerGameOver', (a, before) => { if (before) return; if (!cur || cur.ended) return; sample(); finish(); });
+                setInterval(() => { try { if (cur && !cur.ended) sample(); else if (live()) sample(); } catch (e) {} }, 120);
+            }
+            function finish() {
+                const C = cur; C.ended = true;
+                const out = []; settleInj(true, out);
+                if (out.length) C.cmds.push({ modelChangeList: { modelChangeArray: [] }, reportList: { reports: out } });
+                try { done = build(C); } catch (e) { console.error('REC', e); done = null; }
+            }
+            // ---- the file: FUMBBL's replay shape, with BludBowl's own extras (the races, format, pitch and kits) alongside ----
+            function build(C) {
+                const all = [...C.seen.values()];
+                const team = t => {
+                    const R = ROSTERS[t], ps = all.filter(p => p.team === t), positions = new Map();
+                    const players = ps.map((p, i) => {
+                        const pid = p.star ? 'star:' + p.star : (p.posKey || p.type || 'p');
+                        if (!positions.has(pid)) positions.set(pid, { positionId: pid, positionName: p.star && STARS[p.star] ? STARS[p.star].name : p.type, shorthand: String(p.label || '').slice(0, 3), playerType: p.star ? 'Star' : 'Regular', skillArray: [] });
+                        return { playerId: sid(p), playerNr: p.nr || i + 1, playerName: p.name || '', positionId: pid, movement: p.ma, strength: p.st, agility: p.ag, passing: p.pa, armour: p.av, skillArray: (p.baseSkills || p.skills || []).slice() };
+                    });
+                    let coach = 'Coach'; try { coach = AI.isAI(t) ? 'Computer' : NET.on() ? 'Two-device' : 'Coach'; } catch (e) {}
+                    return { teamId: t ? 'away' : 'home', teamName: R.baseName || R.name, coach, race: R.name, reRolls: R.rerolls != null ? R.rerolls : 3,
+                        roster: { rosterName: (RACES[R.race || R.key] || {}).name || R.name, positionArray: [...positions.values()] }, playerArray: players };
+                };
+                const sc = [state.score[0] || 0, state.score[1] || 0];
+                let comp = 'Exhibition'; try { comp = (GEO.sev ? 'Sevens · ' : '') + (state.league ? 'League match' : state.cup ? 'Tournament match' : (state.careerOn || []).some(Boolean) ? 'Career match' : 'Exhibition'); } catch (e) {}
+                return {
+                    game: { gameId: 'bb-' + C.at, started: new Date(C.at).toISOString(), finished: new Date().toISOString(), teamHome: team(0), teamAway: team(1) },
+                    gameLog: { commandArray: C.cmds.map((c, i) => Object.assign({ commandNr: i + 1, netCommandId: 'serverModelSync' }, c)) },
+                    bludbowl: { v: 1, version: (document.getElementById('app-version') || {}).textContent || '', format: GEO.fmt || 'std', races: [0, 1].map(t => ROSTERS[t].race || ROSTERS[t].key),
+                        styles: [0, 1].map(t => { try { return JSON.parse(JSON.stringify(ROSTERS[t].style || null)); } catch (e) { return null; } }),
+                        pitch: (() => { try { return PITCH.style; } catch (e) { return null; } })(), score: sc, comp, partial: !!C.partial,
+                        names: [0, 1].map(t => ROSTERS[t].baseName || ROSTERS[t].name) }
+                };
+            }
+            // ---- keeping them: IndexedDB on this device ----
+            function db() {
+                return new Promise((ok, bad) => {
+                    if (typeof indexedDB === 'undefined') { bad(new Error('This browser has no storage for matches.')); return; }
+                    const q = indexedDB.open(DBN, 1);
+                    q.onupgradeneeded = () => { q.result.createObjectStore(STORE, { keyPath: 'id' }); };
+                    q.onsuccess = () => ok(q.result); q.onerror = () => bad(q.error || new Error('Storage refused.'));
+                });
+            }
+            async function tx(mode, f) {
+                const d = await db();
+                return new Promise((ok, bad) => { const t = d.transaction(STORE, mode), s = t.objectStore(STORE); let v; const q = f(s); if (q) q.onsuccess = () => { v = q.result; }; t.oncomplete = () => { ok(v); d.close(); }; t.onerror = t.onabort = () => { bad(t.error); d.close(); }; });
+            }
+            async function gz(text) {
+                if (typeof CompressionStream === 'undefined') return new Blob([text], { type: 'application/json' });
+                return await new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).blob();
+            }
+            const meta = d => {
+                const b = d.bludbowl && typeof d.bludbowl === 'object' ? d.bludbowl : {}, g = d.game, sc = Array.isArray(b.score) ? b.score.slice(0, 2) : [0, 0];
+                if (!Array.isArray(b.score)) (d.gameLog.commandArray || []).forEach(c => ((c.modelChangeList || {}).modelChangeArray || []).forEach(m => { if (m.modelChangeId === 'teamResultSetScore') sc[m.modelChangeKey === 'away' ? 1 : 0] = +m.modelChangeValue || 0; }));   // (a FUMBBL replay)
+                const nm = i => String((Array.isArray(b.names) && b.names[i]) || (i ? g.teamAway : g.teamHome).teamName || 'Team ' + (i + 1)).slice(0, 40);
+                const races = Array.isArray(b.races) ? b.races.map(String) : [g.teamHome, g.teamAway].map(t => { try { return FREP.raceOf(t.roster && t.roster.rosterName || t.race) || ''; } catch (e) { return ''; } });
+                return { title: `${nm(0)} ${+sc[0] || 0}–${+sc[1] || 0} ${nm(1)}`, comp: String(b.comp || (b.v ? '' : 'FUMBBL')).slice(0, 40), races, date: String(g.finished || g.started || '').slice(0, 10), partial: !!b.partial };
+            };
+            async function keep(d, id) {
+                const blob = await gz(JSON.stringify(d));
+                const rec = Object.assign({ id: id || d.game.gameId || ('bb-' + Date.now()), at: Date.now(), size: blob.size, blob }, meta(d));
+                await tx('readwrite', s => s.put(rec));
+                return rec;
+            }
+            async function save() { if (!done || saved || busy) return false; busy = true; try { await keep(done); saved = true; return true; } finally { busy = false; } }
+            const list = async () => ((await tx('readonly', s => s.getAll())) || []).sort((a, b) => b.at - a.at);
+            const get = id => tx('readonly', s => s.get(id));
+            const del = id => tx('readwrite', s => s.delete(id));
+            async function load(id) {
+                const r = await get(id); if (!r) throw new Error('That match is no longer saved.');
+                const u = new Uint8Array(await r.blob.arrayBuffer());
+                const text = u[0] === 0x1f && u[1] === 0x8b ? await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text() : new TextDecoder().decode(u);
+                return JSON.parse(text);
+            }
+            const fileName = r => ('BludBowl ' + (r.title || 'match') + ' ' + (r.date || '')).replace(/[^A-Za-z0-9 ._–-]+/g, '').replace(/\s+/g, '-').replace(/–/g, '-').slice(0, 80) + (r.blob && r.blob.type === 'application/json' ? '.json' : '.json.gz');
+            async function share(id) {   // the phone's share sheet where it has one (to send it on, or keep it in Files), otherwise a download
+                const r = await get(id); if (!r) throw new Error('That match is no longer saved.');
+                const name = fileName(r), type = r.blob.type === 'application/json' ? 'application/json' : 'application/gzip';
+                try {
+                    const f = new File([r.blob], name, { type });
+                    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: r.title, text: 'A BludBowl match: open it in I Like to Watch.' }); return 'shared'; }
+                } catch (e) { if (e && e.name === 'AbortError') return 'cancelled'; }
+                const a = document.createElement('a'); a.href = URL.createObjectURL(r.blob); a.download = name; document.body.appendChild(a); a.click();
+                setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+                return 'saved';
+            }
+            return { install, save, list, load, share, del, keep, has: () => !!done && !saved, saved: () => saved, debug: () => ({ cur, done, now: () => cur && build(cur) }) };
         })();
 
         // ---------- Ball & Chain ----------
@@ -26068,6 +26383,7 @@
         function init() {
             buildPlayers();
             try { FREP.wire(); } catch (e) { console.error('FREP', e); }
+            try { REC.install(); } catch (e) { console.error('REC', e); }
             
             resizeCanvas();
             updateTopBar();

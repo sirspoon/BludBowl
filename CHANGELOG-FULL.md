@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.04 (29 Oct 2026)
+- **New: My matches.** Every match you play (or watch the computer play) is now recorded quietly as it goes, in the same form as a FUMBBL replay. Nothing is kept unless you ask: at full time the match summary has a "💾 Save this match" button, so you can decide afterwards whether it was one worth keeping. Saved matches go in a new **My matches** tab in I Like to Watch, where each one can be:
+  - **watched** on the pitch like a FUMBBL replay (same team colours, pitch and format, Sevens included), with the moves, falls and injuries, the ball, score and turns, each player's action, the rolls and re-rolls, block dice, armour and injury rolls, kick-off events, skills and touchdowns;
+  - **shared or exported** as a small file (about 15-20 KB): the phone's share sheet where it has one, otherwise a download. Anyone with BludBowl can watch it with "Open a file…", or keep it with "＋ Add a match file…" in My matches (FUMBBL replay files can be kept there too);
+  - **deleted** (tap twice).
+  
+  Saved matches stay on this device only; nothing is shared unless you export it. A match resumed from a save is recorded from the point it was resumed. On a two-device match, the host's device keeps the recording. Still to come: the coaches' decisions (re-roll or not, follow up...) and the close-up pass replays in recorded matches, and a list of epic matches to watch.
+
 ## v4.03 (29 Oct 2026)
 - **Fixed:** in I Like to Watch, a skill that needs a roll to work (Steady Footing, Regeneration, Dauntless, Foul Appearance, Jump Up, Leap, Shadowing, Hypnotic Gaze and the like) only gets its pop-up when the roll succeeds, as in the game. FUMBBL marks the skill as used before rolling for it, so a failed Steady Footing (it needs a 6) still popped up. The log no longer says "uses" for these either: the roll's ✓ or ✗ line says how it went.
 
