@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.08 (29 Oct 2026)
+- **Improved:** Settings > Back up & restore now includes your saved replays (My matches) in the backup file. Restoring a backup adds its replays to My matches and keeps any already there ("Undo the last restore" leaves them too). Older backups, without replays, still restore as before.
+
 ## v4.07 (29 Oct 2026)
 - **Changed:** I Like to Watch's line on the main menu now reads "Replay your saved matches, or any match from fumbbl.com", and its window explains both: your own matches in My matches (saved at full time, or a match file someone sent you), or a FUMBBL match by its number. The list heading is now "Pick a match", as it holds My matches as well as the featured FUMBBL ones.
 

@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.07</title>
+    <title>BludBowl 4.08</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1022,7 +1022,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.07</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.08</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1071,7 +1071,7 @@
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
-            <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
+            <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress, your saved replays (My matches) and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
             <input type="file" id="bk-file" accept=".json,application/json" class="hidden">
             <div id="bk-note" class="sv-note hidden" role="status"></div>
@@ -7465,12 +7465,41 @@
                 const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
                 return true;
             }
+            // the saved replays (My matches) live apart from the rest, in IndexedDB: in the file each one's replay is base64 text
+            const repWords = n => n ? `, ${pl(n, 'saved replay')}` : '';
+            async function packReplays() {
+                let list = []; try { list = await REC.list(); } catch (e) { return []; }
+                const out = [];
+                for (const r of list) {
+                    try {
+                        const u = new Uint8Array(await r.blob.arrayBuffer()); let bin = '';
+                        for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+                        const m = Object.assign({}, r); delete m.blob; m.type = r.blob.type || 'application/gzip'; m.b64 = btoa(bin); out.push(m);
+                    } catch (e) { console.error('backup replay', e); }
+                }
+                return out;
+            }
+            async function unpackReplays(list) {   // added to My matches (any already here are kept); returns how many
+                let n = 0;
+                for (const m of Array.isArray(list) ? list : []) {
+                    try {
+                        if (!m || typeof m.id !== 'string' || typeof m.b64 !== 'string') continue;
+                        const bin = atob(m.b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+                        const rec = { id: m.id.slice(0, 80), at: +m.at || Date.now(), size: u.length, title: String(m.title || 'Match').slice(0, 100), comp: String(m.comp || '').slice(0, 90),
+                            races: Array.isArray(m.races) ? m.races.map(String).slice(0, 2) : [], date: String(m.date || '').slice(0, 10), partial: !!m.partial,
+                            blob: new Blob([u], { type: m.type === 'application/json' ? 'application/json' : 'application/gzip' }) };
+                        await REC.put(rec); n++;
+                    } catch (e) { console.error('restore replay', e); }
+                }
+                return n;
+            }
             async function backup() {
                 const at = Date.now(), d = grab(); delete d[LAST];
-                const doc = { app: 'BludBowl', kind: 'backup', v: V, at, data: d };
+                const replays = await packReplays();
+                const doc = { app: 'BludBowl', kind: 'backup', v: V, at, data: d, replays };
                 const day = new Date(at).toISOString().slice(0, 10);
                 const ok = await share(`bludbowl-backup-${day}.json`, JSON.stringify(doc));
-                if (ok) { try { localStorage.setItem(LAST, String(at)); } catch (e) {} paint(); say(`Backup made: ${summary(d)}.`); }
+                if (ok) { try { localStorage.setItem(LAST, String(at)); } catch (e) {} paint(); say(`Backup made: ${summary(d)}${repWords(replays.length)}.`); }
             }
             // a file chosen to restore: check it, then ask
             function load(text, from) {
@@ -7480,17 +7509,20 @@
                 if (doc.v !== V) { say("That backup is from a different version of the game and can't be restored."); return; }
                 const bad = Object.keys(doc.data).filter(k => !k.startsWith('bb-') || typeof doc.data[k] !== 'string');
                 if (bad.length) { say("That backup looks damaged, so nothing was changed."); return; }
+                const nr = Array.isArray(doc.replays) ? doc.replays.length : 0;
                 ask(`Restore the backup from ${stamp(doc.at)}?`,
-                    `It holds ${summary(doc.data)}. Restoring replaces everything the game has saved on this device (now: ${summary(grab())}). If you change your mind, "Undo the last restore" in Settings puts it back.`,
+                    `It holds ${summary(doc.data)}${repWords(nr)}. Restoring replaces everything the game has saved on this device (now: ${summary(grab())}). If you change your mind, "Undo the last restore" in Settings puts it back.`
+                    + (nr ? ` Its saved replays are added to My matches, alongside the ones already here (an undo leaves them there).` : ''),
                     'Restore', () => restore(doc));
             }
-            function restore(doc) {
+            async function restore(doc) {
                 try {
                     localStorage.setItem(UNDO, JSON.stringify({ at: Date.now(), data: grab() }));
                     keys().forEach(k => localStorage.removeItem(k));
                     Object.entries(doc.data).forEach(([k, v]) => localStorage.setItem(k, v));
                 } catch (e) { console.error('restore', e); say("Couldn't restore: the phone's storage for the game is full."); return; }
-                restart('Backup restored.');
+                const nr = Array.isArray(doc.replays) ? doc.replays.length : 0, n = nr ? await unpackReplays(doc.replays) : 0;
+                restart('Backup restored.' + (nr ? n === nr ? ` ${pl(n, 'saved replay')} added to My matches.` : ` ${n} of its ${nr} saved replays could be added to My matches.` : ''));
             }
             function undo() {
                 const u = J(localStorage.getItem(UNDO) || 'null'); if (!u) return;
@@ -22397,6 +22429,7 @@
             async function save() { if (!done || saved || busy) return false; busy = true; try { await keep(done); saved = true; return true; } finally { busy = false; } }
             const list = async () => ((await tx('readonly', s => s.getAll())) || []).sort((a, b) => b.at - a.at);
             const get = id => tx('readonly', s => s.get(id));
+            const put = rec => tx('readwrite', s => s.put(rec));
             const del = id => tx('readwrite', s => s.delete(id));
             async function load(id) {
                 const r = await get(id); if (!r) throw new Error('That match is no longer saved.');
@@ -22416,7 +22449,7 @@
                 setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
                 return 'saved';
             }
-            return { install, save, list, load, share, del, keep, replay, has: () => !!done && !saved, saved: () => saved, debug: () => ({ cur, done, now: () => cur && build(cur) }) };
+            return { install, save, list, load, share, del, keep, replay, put, has: () => !!done && !saved, saved: () => saved, debug: () => ({ cur, done, now: () => cur && build(cur) }) };
         })();
 
         // ---------- Ball & Chain ----------
