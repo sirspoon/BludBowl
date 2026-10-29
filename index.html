@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.82</title>
+    <title>BludBowl 3.83</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1015,7 +1015,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.82</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.83</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -21706,6 +21706,7 @@
                 const first = D.frames.findIndex(F => F.pos.some((v, j) => j % 2 === 0 && v >= 0 && v < CFG.cols));
                 jump(Math.max(0, first)); startFrameLoop(); play();
                 try { MUSIC.matchStart(); } catch (e) {}   // the match music (if it's on), its mood following the replay
+                try { WAKE.sync(); } catch (e) {}   // (and keep the screen on while it plays)
             }
             // ---- tap a player for their card (the game's unit panel: name, position, characteristics, skills, state) ----
             let inspect = null;
@@ -26309,6 +26310,27 @@
         window.addEventListener('orientationchange', () => {
             setTimeout(resizeCanvas, 150);
         });
+        // ---------- keep the screen on while there's a match to watch (a FUMBBL replay, or the computer playing itself) ----------
+        // Phones dim and then lock when nothing has been tapped for a while. A page that's showing can ask them not to (the Screen
+        // Wake Lock; Chrome, Safari 16.4+): asked again whenever it comes back into view, and let go as soon as there's nothing to watch.
+        const WAKE = (() => {
+            let lock = null, busy = false;
+            const wanted = () => { try { return FREP.on() || (!!state.live && !state.isGameOver && AI.isAI(0) && AI.isAI(1)); } catch (e) { return false; } };
+            async function sync() {
+                const want = wanted() && document.visibilityState === 'visible' && !!(navigator.wakeLock && navigator.wakeLock.request);
+                if (want && !lock && !busy) {
+                    busy = true;
+                    try { lock = await navigator.wakeLock.request('screen'); lock.addEventListener('release', () => { lock = null; }); } catch (e) { lock = null; }   // (refused: low battery, or no tap yet on some phones)
+                    busy = false;
+                } else if (!want && lock) { const l = lock; lock = null; try { await l.release(); } catch (e) {} }
+            }
+            if (!CLOCK.sim) {
+                setInterval(sync, 2000);
+                document.addEventListener('visibilitychange', sync);
+                document.addEventListener('pointerup', sync);   // (some phones only grant it straight after a tap)
+            }
+            return { sync, held: () => !!lock };
+        })();
         window.onload = init;
     </script>
 <div id="act-banner" class="hidden"></div>

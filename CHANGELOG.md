@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.83 (29 Oct 2026)
+- **Improved:** the screen stays on while you watch a FUMBBL replay or a match where the computer plays both sides, so the phone doesn't dim or lock when nothing's been tapped for a while. It goes back to normal as soon as you leave. (Works in Chrome on Android and Safari on iPhone from iOS 16.4; the phone can still dim it in battery-saving mode.)
+
 ## v3.82 (29 Oct 2026)
 - **Changed:** the "right between the legs!" voice is now about a tenth as common: it plays for 1 in 25 players Stunned (was 2 in 5), and as rarely among the crowd's reactions.
 
