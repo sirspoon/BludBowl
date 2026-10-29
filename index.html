@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.80</title>
+    <title>BludBowl 3.81</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1015,7 +1015,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.80</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.81</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -21231,7 +21231,7 @@
                     else if (k === 'handOver') add(sideOf(r.catcherId), `hands the ball to ${who(r.catcherId)}`, 'info');
                     else if (k === 'spellEffectRoll' && r.specialEffect === 'bomb' && (blasted || !bombAt || (fx.push({ t: 'boom', x: bombAt[0], y: bombAt[1] }), blasted = true))) add(sideOf(r.playerId), `💥 ${who(r.playerId)} ${r.successful ? 'is hit by the blast' : 'escapes the blast'}`, r.successful ? 'hurt' : 'info');
                     else if (k === 'kickoffScatter') { inPlay = true; fx.push({ t: 'kick' }); }   // (the kick: the ball is in the air from here)
-                    else if (k === 'kickoffResult' && r.kickoffResult) add(-1, `Kick-off: <b>${esc(r.kickoffResult)}</b>`, 'big');
+                    else if (k === 'kickoffResult' && r.kickoffResult && (fx.push({ t: 'kevent', name: plain(r.kickoffResult), total: Array.isArray(r.kickoffRoll) ? r.kickoffRoll.reduce((a, b) => a + b, 0) : 0 }), true)) add(-1, `Kick-off: <b>${esc(r.kickoffResult)}</b>`, 'big');
                     else if (k === 'weather' && r.weather) add(-1, `Weather: ${esc(r.weather)}`, 'info');
                     else if (k === 'startHalf') add(-1, `— Half ${esc(r.half)} —`, 'turn');
                     else if (k === 'referee' && r.foulingPlayerBanned && (fx.push({ t: 'whistle' }), true)) add(-1, 'The referee saw that: the fouler is <b>sent off</b>!', 'bad');
@@ -21291,6 +21291,14 @@
                     blasted = false;
                     if (seen || lines.length || fx.length) snap(moved.length === 1 ? 'move' : moved.length > 2 ? 'setup' : 'other', moved.length === 1 ? moved[0] : -1);
                 }
+                // a run of single steps by one player (nothing else in between) is played as one walk, like the game's own
+                const step1 = (i, j) => { const A = frames[i - 1], B = frames[i]; return A && B && Math.max(Math.abs(A.pos[j * 2] - B.pos[j * 2]), Math.abs(A.pos[j * 2 + 1] - B.pos[j * 2 + 1])) === 1 && A.pos[j * 2] >= 0; };
+                const isStep = i => { const F = frames[i]; return F && F.kind === 'move' && F.mover >= 0 && !F.lines.length && !(F.fx || []).length && !F.fly && step1(i, F.mover); };
+                frames.forEach((F, i) => {
+                    if (!isStep(i)) return;
+                    const prev = isStep(i - 1) && frames[i - 1].mover === F.mover, next = isStep(i + 1) && frames[i + 1].mover === F.mover;
+                    F.walk = prev && next ? 'mid' : prev ? 'last' : next ? 'first' : 'solo';
+                });
                 return { teams, roster, frames, turns, id: g.gameId };
             }
             const ACTIONS = { move: 'moves', block: 'blocks', blitz: 'blitzes', blitzMove: 'blitzes', foul: 'fouls', foulMove: 'fouls', pass: 'passes', passMove: 'passes',
@@ -21306,6 +21314,11 @@
                 animosityRoll: 'Animosity', escapeRoll: 'Escape', projectileVomit: 'Projectile Vomit', breatheFire: 'Breathe Fire', throwTeamMateRoll: 'Throw Team-mate', standUpRoll: 'Stand Up',
                 tentaclesShadowingRoll: 'Shadowing', confusionRoll: 'Bone Head' };
             const FACE = ['', 'Skull', 'Both Down', 'Push', 'Push', 'Stumble', 'POW'];   // FUMBBL's block die: 1-6 (the same numbering as FACES)
+            // what the kick-off events that need no choices do (the game's table only describes the ones it asks you about)
+            const KICK_TXT = { 2: 'The crowd turns on the ref: each team gets a free Bribe for the rest of the game.', 3: 'The referee adjusts the clock: the turn markers move by one.',
+                6: 'The fans cheer their team on: whoever cheers loudest gets a Prayer to Nuffle.', 7: 'The coaches shout instructions: whoever does best gets an extra team re-roll for this drive.',
+                8: 'The weather changes: roll again on the weather table.', 11: 'Somebody ate something they shouldn\'t have: a player may not be at their best.',
+                12: 'The crowd storms the pitch: players of the team with fewer fans may be Stunned.' };
             const TO_ROLLS = { dodgeRoll: 'Failed Dodge!', goForItRoll: 'Failed Rush!', pickUpRoll: 'Failed pick-up!', catchRoll: 'The ball was not caught!', passRoll: 'Failed pass!', leapRoll: 'Failed Leap!' };
             // the game's own roll window titles
             const ROLL_TITLE = { dodgeRoll: 'DODGE', goForItRoll: 'RUSH', pickUpRoll: 'PICKUP', catchRoll: 'CATCH', passRoll: 'PASS', interceptionRoll: 'INTERCEPT', rightStuffRoll: 'LANDING',
@@ -21531,6 +21544,10 @@
                     else if (x.t === 'turnover') out.push(annWin('TURNOVER!', x.why, 'bg-red-900/80', 2500));
                     else if (x.t === 'half') out.push(x.half >= 3 ? annWin('EXTRA TIME', 'Level after two halves! Sudden death: the first touchdown wins.', 'bg-red-900/90', 4000) : annWin('HALF TIME', 'Teams swap sides!', 'bg-blue-900/90', 2500));
                     else if (x.t === 'weather') { const w = WEATHER_TABLE[x.w] || null; out.push(annWin(w ? `${w.icon} ${w.name.toUpperCase()}` : x.name.toUpperCase(), w ? w.desc : '', x.w === 'perfect' ? 'bg-sky-900/90' : 'bg-indigo-900/90', 4000)); }
+                    else if (x.t === 'kevent') {   // the game's own kick-off announcement: the event's name and colour, the roll and what it means
+                        const ev = KICKOFF_EVENTS[x.total] || null;
+                        out.push(annWin((ev ? ev.name : x.name).toUpperCase(), `Roll ${x.total || '?'}: ${(ev && ev.intro) || KICK_TXT[x.total] || x.name}`, ev ? ev.color : 'bg-fuchsia-900/90', 3400));
+                    }
                     else if (x.t === 'swban' && x.names.length) out.push(annWin('SECRET WEAPONS', `Sent-off: ${x.names.join(', ')}`, 'bg-red-900/90', 3000));
                 });
                 return out.filter(Boolean);
@@ -21600,7 +21617,11 @@
                     p.isDown = onP && (s === 3 || s === 4 || s === 11 || s === 17); p.isStunned = onP && s === 4;
                     if (onP) { p.x = x; p.y = y; } else { p.x = -9; p.y = -9; }
                     const far = Math.max(Math.abs(ox - x), Math.abs(oy - y)), flown = (F.fx || []).some(e => e.t === 'fly' && e.p === j);
-                    if (animate && onP && wasOn && far && (far <= 2 || flown)) slideTo(p, ox, oy, flown ? Math.min(900, 200 + far * 70) / speed : slideMs);
+                    if (animate && F.walk && j === F.mover && onP && wasOn && far === 1) {   // a step of a walk: linear in the middle, easing in and out at the ends
+                        const d = walkMs(F);
+                        p.walkAnim = { fx: ox, fy: oy, t0: performance.now(), dur: d, keep: true,
+                            ease: F.walk === 'mid' ? (k => k) : F.walk === 'first' ? (k => k * k * 0.5 + k * 0.5) : (k => 1 - (1 - k) * (1 - k)) };
+                    } else if (animate && onP && wasOn && far && (far <= 2 || flown)) slideTo(p, ox, oy, flown ? Math.min(900, 200 + far * 70) / speed : slideMs);
                     else p.walkAnim = null;
                     p.hasActed = false;
                 });
@@ -21621,12 +21642,15 @@
             }
 
             // ---- playback ----
+            const walkMs = F => (F.walk === 'mid' ? 150 : F.walk === 'first' ? 190 : 230) / speed;   // (a step of a walk)
             function delay(F) {
-                const base = F.kind === 'move' ? 240 : F.kind === 'setup' ? 500 : 420;
+                if (F.walk && F.walk !== 'last' && F.walk !== 'solo') return walkMs(F);
+                const base = F.kind === 'move' ? 300 : F.kind === 'setup' ? 550 : 520;
+                const actStart = F.lines.some(l => l[2] === 'act') ? 750 : 0;   // (time to read who's acting, and how)
                 const quiet = F.kind === 'other' && !F.lines.length && !F.fly;
                 const fly = F.fly ? (F.fly.kick ? 1300 : F.fly.d <= 1 ? 200 : Math.min(900, 260 + F.fly.d * 55)) + 120 : 0;
                 const hit = (F.fx || []).some(e => e.t === 'block') ? 850 : (F.fx || []).some(e => e.t === 'boom' || (e.t === 'hurt' && e.inj >= 5)) ? 350 : 0;
-                return Math.max(winMs + 120, (Math.max(quiet ? 200 : base, fly) + hit + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed);
+                return Math.max(winMs + 120, (Math.max(quiet ? 220 : base, fly) + hit + actStart + (F.start ? 900 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed);
             }
             function stop() { playing = false; clearTimeout(timer); timer = null; clearWindows(); paintBar(); }
             function tick() {
@@ -21651,7 +21675,7 @@
                 const b = $('frep-bar'); if (!b || !D) return;
                 const F = D.frames[at] || {};
                 $('frep-pp').textContent = playing ? '⏸' : '▶';
-                $('frep-speed').textContent = speed + '×';
+                $('frep-speed').textContent = (speed === 0.5 ? '½' : speed) + '×';
                 { const w = $('frep-where'); let s = -1; D.turns.forEach(f => { if (f <= at) s = f; }); if (document.activeElement !== w) w.value = String(s); }
                 const r = $('frep-range'); r.max = String(D.frames.length - 1); if (document.activeElement !== r) r.value = String(at);
             }
@@ -21826,7 +21850,7 @@
                 $('frep-fwd').addEventListener('click', () => { stop(); if (at < D.frames.length - 1) { at++; show(at, true); } });
                 $('frep-prevturn').addEventListener('click', () => { const was = playing; stop(); stepTurn(-1); if (was) play(); });
                 $('frep-nextturn').addEventListener('click', () => { const was = playing; stop(); stepTurn(1); if (was) play(); });
-                $('frep-speed').addEventListener('click', () => { speed = speed >= 8 ? 1 : speed * 2; paintBar(); });
+                $('frep-speed').addEventListener('click', () => { speed = speed >= 8 ? 0.5 : speed * 2; paintBar(); });
                 $('frep-exit').addEventListener('click', leave);
                 $('frep-where').addEventListener('change', e => { const v = +e.target.value, was = playing; stop(); jump(v < 0 ? 0 : v); e.target.blur(); if (was) play(); });
                 const r = $('frep-range');
