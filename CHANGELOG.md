@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.01 (29 Oct 2026)
+- I Like to Watch: an action banner, a pointer and a ring show who's acting, and a red ring their target.
+
 ## v4.00 (29 Oct 2026)
 Everything since 3.0, in brief:
 - **I Like to Watch** (main menu): watch any match from FUMBBL on BludBowl's own pitch. Type its number or pick from the featured matches (FUMBBL's recent top games, or our picks). Smooth moves, flying balls and thrown team-mates, the game's own roll, block, re-roll and choice windows showing each coach's decision, kick-off events, touchdowns and turnovers, a running commentary with the dice, a camera that follows the action, a turn picker, speeds from ½× to 8×, and tap a player for their card. With match music, and the screen stays on.

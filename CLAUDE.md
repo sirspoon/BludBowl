@@ -10,9 +10,9 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
   The version is the `#app-version` text on the title screen in `index.html`.
   Changes that don't touch the game (like this file) don't bump it.
 - With each version bump, add an entry at the top of `CHANGELOG-FULL.md` (version, date, what
-  changed in plain words, linking any issue it closes) and a short line or two under the newest
-  heading of `CHANGELOG.md`, which is what the game's "What's new" shows (a condensed summary,
-  rolled up at each major version, like v4.00). Pushing tags is blocked in cloud sessions, so
+  changed in plain words, linking any issue it closes) and a short entry (its heading and a line
+  or two) at the top of `CHANGELOG.md`, which is what the game's "What's new" shows (a condensed
+  summary, rolled up into one entry at each major version, like v4.00). Pushing tags is blocked in cloud sessions, so
   the full log is the version history.
 - When a change fixes an issue, comment on it saying which version fixed it and what changed
   (`gh api -X POST repos/sirspoon/BludBowl/issues/N/comments -f body=...`). Leave the issue

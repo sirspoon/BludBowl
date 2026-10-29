@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.00</title>
+    <title>BludBowl 4.01</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,6 +49,7 @@
         #act-banner.ab-blitz { background: rgba(120,53,15,.9); border-color: #f59e0b; color: #fde68a; }
         #act-banner.ab-foul { background: rgba(68,64,60,.92); border-color: #a8a29e; color: #f5f5f4; }
         #act-banner.ab-pass { background: rgba(12,74,110,.9); border-color: #38bdf8; color: #e0f2fe; }
+        #act-banner.ab-move { background: rgba(30,41,59,.92); border-color: #facc15; color: #fef9c3; }
         #act-banner.ab-handoff { background: rgba(6,78,59,.9); border-color: #34d399; color: #d1fae5; }
         @keyframes actPulse { 0%, 100% { opacity: .72; transform: translateX(-50%) scale(1); } 50% { opacity: 1; transform: translateX(-50%) scale(1.05); } }
         @keyframes skillpop {
@@ -1015,7 +1016,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.00</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.01</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -19157,6 +19158,7 @@
             }
             drawPitchPick(ts);
             WFX.air(ctx, CFG.cols * ts, CFG.rows * ts, ts, performance.now(), wxFX, wxDim, wxStill());
+            try { if (FREP.on()) FREP.overlay(ctx, ts); } catch (e) {}   // (a FUMBBL replay: who's acting, and their target)
             if (state.floaters && state.floaters.length) drawFloaters(ts);
 
             ctx.restore();
@@ -21129,7 +21131,7 @@
                 const pos = new Int16Array(n * 2).fill(-99), st = new Uint8Array(n).fill(9);
                 let ball = null, inPlay = false, score = [0, 0], half = 1, turn = [0, 0], homePlaying = true, act = -1, rr = [T[0].reRolls || 0, T[1].reRolls || 0], weather = 'perfect';
                 const W = { NICE: 'perfect', NICE_WEATHER: 'perfect', VERY_SUNNY: 'sunny', POURING_RAIN: 'rain', BLIZZARD: 'blizzard', SWELTERING_HEAT: 'heat' };
-                const frames = [], turns = [], seenTurns = new Set(); let lines = [], fx = [], bombAt = null, blasted = false, prevCarrier = -1, prevBall = null, bombLive = false, thrownNow = -1;
+                const frames = [], turns = [], seenTurns = new Set(); let lines = [], fx = [], bombAt = null, blasted = false, prevCarrier = -1, prevBall = null, bombLive = false, thrownNow = -1, curAct = null, tgt = -1;
                 const UP = [1, 2, 12];   // standing (or moving, or being blocked): can hold the ball
                 // ---- the commentary: FUMBBL's reports as lines for the match log, [side, html, style] (names are escaped: they're
                 // whatever FUMBBL's coaches typed) ----
@@ -21182,7 +21184,9 @@
                         else if (e.kind === 'argue' && k === 'argueTheCall') settle(e, 0);
                     });
                     if (k === 'playerAction' || k === 'turnEnd') settleAll();
-                    if (k === 'playerAction') toFail = null;
+                    if (k === 'playerAction') { toFail = null; curAct = r.playerAction || null; tgt = -1; }
+                    if ((k === 'block' || k === 'foul' || k === 'selectBlitzTarget') && ix.has(String(r.defenderId))) tgt = ix.get(String(r.defenderId));
+                    if (k === 'handOver' && ix.has(String(r.catcherId))) tgt = ix.get(String(r.catcherId));
                     if (k === 'turnEnd') { if (toFail && !r.playerIdTouchdown) fx.push({ t: 'turnover', why: toFail.why, side: homePlaying ? 0 : 1 }); toFail = null; }
                     if (k === 'injury' && act >= 0 && String(r.defenderId) === roster[act].fid && /^block/.test(String(r.injuryType))) toFail = { p: r.defenderId, why: 'Player knocked down!' };
                     if (k === 'startHalf' && r.half > 1) fx.push({ t: 'half', half: r.half });
@@ -21258,7 +21262,7 @@
                     if (!fly && ball && fx.some(e => e.t === 'kick')) { const from = [ball[0] < 13 ? 19 : 6, 7]; fly = { from, to: ball.slice(), d: Math.max(Math.abs(from[0] - ball[0]), Math.abs(from[1] - ball[1])), kick: true }; }
                     prevBall = ball && inPlay ? ball.slice() : null; prevCarrier = carrier;
                     frames.push({ pos: pos.slice(), st: st.slice(), ball: ball ? ball.slice() : null, inPlay, score: score.slice(), half, turn: turn.slice(), side: homePlaying ? 0 : 1,
-                        act, rr: rr.slice(), weather, kind, mover, start, lines, fx, fly });
+                        act, rr: rr.slice(), weather, kind, mover, start, lines, fx, fly, action: act >= 0 ? curAct : null, tgt: act >= 0 ? tgt : -1 });
                     lines = []; fx = [];
                 };
                 for (const c of d.gameLog.commandArray || []) {
@@ -21424,9 +21428,9 @@
                 if (!cells.length || state.drag.active || performance.now() - camUserAt < 1500) return;
                 const W = window.innerWidth, H = window.innerHeight, ts = CFG.tileSize, cam = state.camera;
                 const rect = id => { const e = $(id); if (!e || getComputedStyle(e).display === 'none') return null; const r = e.getBoundingClientRect(); return r.width && r.height ? r : null; };   // (fixed panels have no offsetParent)
-                const tb = rect('top-bar-panel'), bar = rect('frep-bar'), lg = rect('panel-log-container'), dice = rect('frep-dice');
-                // (T: below the top bar, and below the dice while they show)
-                const L = 8, R = W - 8, T = Math.max(tb ? tb.bottom : 0, dice ? dice.bottom : 0) + 8, B = Math.min(bar ? bar.top : H, lg ? lg.top : H) - 8;
+                const tb = rect('top-bar-panel'), bar = rect('frep-bar'), lg = rect('panel-log-container'), dice = rect('frep-dice'), ab = rect('act-banner');
+                // (T: below the top bar, the action banner, and the dice while they show)
+                const L = 8, R = W - 8, T = Math.max(tb ? tb.bottom : 0, dice ? dice.bottom : 0, ab ? ab.bottom : 0) + 8, B = Math.min(bar ? bar.top : H, lg ? lg.top : H) - 8;
                 if (B - T < ts) return;
                 const xs = cells.map(c => (c.x + 0.5) * ts), ys = cells.map(c => (c.y + 0.5) * ts);
                 const minX = Math.min(...xs) - ts * 1.1, maxX = Math.max(...xs) + ts * 1.1, minY = Math.min(...ys) - ts * 1.1, maxY = Math.max(...ys) + ts * 1.1;
@@ -21641,6 +21645,7 @@
                     try { focusFrame(F); } catch (e) {}
                 }
                 paintBar(); if (inspect != null) paintInfo();
+                try { paintActor(); } catch (e) {}
             }
 
             // ---- playback ----
@@ -21740,6 +21745,48 @@
                 const p = state.players.find(q => !q.isReserve && !q.isKO && !q.isCasualty && !q.isEjected && q.x === x && q.y === y);
                 inspect = p ? state.players.indexOf(p) : null;
                 paintInfo(); if (p) sfx('selectPlayer');
+            }
+            // ---- who's acting: the game's action banner (as when you declare an action) and a marker on the pitch ----
+            const BANNER = { block: ['block', '👊 Block'], multipleBlock: ['block', '👊 Block'], blitz: ['blitz', '⚡ Blitz'], blitzMove: ['blitz', '⚡ Blitz'], foul: ['foul', '🥾 Foul'], foulMove: ['foul', '🥾 Foul'],
+                pass: ['pass', '🏈 Pass'], passMove: ['pass', '🏈 Pass'], hailMaryPass: ['pass', '🏈 Hail Mary'], handOver: ['handoff', '🤝 Hand-off'], handOverMove: ['handoff', '🤝 Hand-off'],
+                throwTeamMate: ['pass', '🤾 Throw Team-mate'], throwTeamMateMove: ['pass', '🤾 Throw Team-mate'], kickTeamMate: ['pass', '🦶 Kick Team-mate'], kickTeamMateMove: ['pass', '🦶 Kick Team-mate'],
+                throwBomb: ['foul', '💣 Bomb'], move: ['move', '🏃 Move'], standUp: ['move', '🏃 Stand up'], standUpBlitz: ['blitz', '⚡ Blitz'], gaze: ['pass', '👁 Gaze'], gazeMove: ['pass', '👁 Gaze'],
+                stab: ['block', '🗡 Stab'], chainsaw: ['block', '🪚 Chainsaw'], projectileVomit: ['block', '🤮 Vomit'], secureTheBall: ['handoff', '🏈 Secure the ball'] };
+            let bannerKey = '';
+            function paintActor() {
+                const el = $('act-banner'); if (!el || !D) return;
+                const F = D.frames[at], f = F && F.act >= 0 ? D.roster[F.act] : null, b = f && F.action ? (BANNER[F.action] || ['move', actionName(F.action)]) : null;
+                const key = b ? F.act + '|' + F.action : '';
+                if (key === bannerKey) return; bannerKey = key;
+                if (!b) { el.className = 'hidden'; return; }
+                el.className = 'ab-' + b[0]; el.innerHTML = '';
+                el.append(document.createTextNode(b[1]));
+                const sm = document.createElement('small'); sm.textContent = (plain(f.name) || plain(f.pos)) + ' #' + f.nr; el.append(sm);
+                const tb = $('top-bar-panel'); if (tb) el.style.top = Math.round(tb.getBoundingClientRect().bottom + 6) + 'px';
+            }
+            // drawn on the pitch, over the players: a bobbing pointer and a pulsing ring on whoever is acting, and for a block,
+            // blitz, foul or hand-off a red ring on the target with a dashed line to it
+            function overlay(c, ts) {
+                if (!D) return; const F = D.frames[at]; if (!F || F.act < 0) return;
+                const p = state.players[F.act]; if (!p || p.isReserve || p.x < 0) return;
+                const dp = drawPos(p), cx = (dp.x + 0.5) * ts, cy = (dp.y + 0.5) * ts, k = 0.5 + 0.5 * Math.sin(performance.now() / 210);
+                c.save();
+                c.strokeStyle = `rgba(250,204,21,${0.55 + 0.45 * k})`; c.lineWidth = ts * 0.08;
+                c.beginPath(); c.arc(cx, cy, ts * (0.53 + 0.05 * k), 0, Math.PI * 2); c.stroke();
+                const by = cy - ts * (0.98 + 0.12 * k);
+                c.fillStyle = '#facc15'; c.strokeStyle = '#1b1d2a'; c.lineWidth = ts * 0.05;
+                c.beginPath(); c.moveTo(cx - ts * 0.22, by - ts * 0.2); c.lineTo(cx + ts * 0.22, by - ts * 0.2); c.lineTo(cx, by + ts * 0.08); c.closePath(); c.fill(); c.stroke();
+                if (F.tgt >= 0) {
+                    const q = state.players[F.tgt];
+                    if (q && !q.isReserve && q.x >= 0) {
+                        const dq = drawPos(q), tx = (dq.x + 0.5) * ts, ty = (dq.y + 0.5) * ts, L = Math.hypot(tx - cx, ty - cy) || 1, ux = (tx - cx) / L, uy = (ty - cy) / L;
+                        if (L > ts * 1.1) { c.setLineDash([ts * 0.14, ts * 0.1]); c.strokeStyle = 'rgba(248,113,113,0.9)'; c.lineWidth = ts * 0.06;
+                            c.beginPath(); c.moveTo(cx + ux * ts * 0.55, cy + uy * ts * 0.55); c.lineTo(tx - ux * ts * 0.55, ty - uy * ts * 0.55); c.stroke(); c.setLineDash([]); }
+                        c.strokeStyle = `rgba(239,68,68,${0.6 + 0.4 * k})`; c.lineWidth = ts * 0.08;
+                        c.beginPath(); c.arc(tx, ty, ts * (0.5 + 0.05 * k), 0, Math.PI * 2); c.stroke();
+                    }
+                }
+                c.restore();
             }
             function leave() {   // back to the main menu (as after a match), not the title screen
                 stop(); try { MUSIC.matchEnd(); } catch (e) {}
@@ -21861,7 +21908,7 @@
             }
             // (tests) the players a replay would put on the pitch, with FUMBBL's position name beside ours
             function debugBuild(d) { const keep = D; D = d; try { buildMatch(); return state.players.map((p, i) => ({ team: p.team, type: p.type, star: p.star, ffb: d.roster[i].pos })); } finally { D = keep; } }
-            return { wire, on: () => on, parse, start, tap, debugBuild, debug: () => ({ D, at }) };
+            return { wire, on: () => on, parse, start, tap, overlay, debugBuild, debug: () => ({ D, at }) };
         })();
 
         // ---------- Ball & Chain ----------
