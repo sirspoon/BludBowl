@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.77</title>
+    <title>BludBowl 3.78</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -635,6 +635,22 @@
         #frep-list .fr-t { font-weight: 800; font-size: 14px; }
         #frep-list .fr-s { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
         #frep-list .fr-msg { font-size: 12.5px; color: #94a3b8; margin: 6px 2px; }
+        /* a coach's decision in a FUMBBL replay: the game's question card, answered by itself (nothing to tap) */
+        #frep-askcard { position: fixed; inset: 0; z-index: 47; display: flex; align-items: center; justify-content: center; pointer-events: none; background: rgba(0,0,0,.18); padding: 16px; }
+        #frep-askcard.hidden { display: none; }
+        #frep-askcard .fa-card { background: #0f172a; border: 2px solid #eab308; border-radius: 12px; padding: 12px 14px; width: min(300px, 100%); box-shadow: 0 10px 30px rgba(0,0,0,.6); text-align: center; }
+        #frep-askcard .fa-team { font-size: 10.5px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; }
+        #frep-askcard .fa-title { font-size: 26px; line-height: 1; color: #eab308; margin: 2px 0 6px; }
+        #frep-askcard .fa-box { background: rgba(2,6,23,.8); border: 1px solid #334155; border-radius: 8px; padding: 6px 8px; margin-bottom: 8px; }
+        #frep-askcard .fa-sub { font-size: 12px; font-weight: 700; color: #e2e8f0; margin: 0; }
+        #frep-askcard .fa-line { font-size: 12px; color: #fcd34d; margin: 2px 0 0; }
+        #frep-askcard .fa-line:empty { display: none; }
+        #frep-askcard .fa-q { font-size: 13px; font-weight: 700; color: #cbd5e1; margin: 0 0 8px; }
+        #frep-askcard .fa-btns { display: flex; gap: 8px; }
+        #frep-askcard .fa-opt { flex: 1 1 0; padding: 8px 4px; border-radius: 8px; background: #334155; color: #fff; font-size: 11px; font-weight: 800; text-transform: uppercase; transition: all .15s; }
+        #frep-askcard .fa-opt:first-child { background: #a16207; }
+        #frep-askcard .fa-opt.on { background: #059669 !important; outline: 2px solid #6ee7b7; transform: scale(1.04); }
+        #frep-askcard .fa-opt.off { opacity: .35; }
         #frep-dice { position: fixed; left: 50%; transform: translateX(-50%); z-index: 46; pointer-events: none; background: rgba(2,6,23,.86); border: 1px solid #475569;
             border-radius: 12px; padding: 5px 10px 6px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.5); max-width: calc(100vw - 16px); }
         #frep-dice.hidden { display: none; }
@@ -988,7 +1004,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.77</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.78</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1258,6 +1274,11 @@
         </div>
     </div>
 
+    <div id="frep-askcard" class="hidden" aria-live="polite"><div class="fa-card">
+        <div class="fa-team"></div><h2 class="fa-title fantasy-font"></h2>
+        <div class="fa-box"><p class="fa-sub"></p><p class="fa-line"></p></div>
+        <p class="fa-q"></p><div class="fa-btns"><div class="fa-opt"></div><div class="fa-opt"></div></div>
+    </div></div>
     <div id="frep-dice" class="hidden" aria-live="polite"><div class="fd-who"></div><div class="fd-row"></div><div class="fd-res"></div></div>
     <div id="frep-bar" class="hidden" role="toolbar" aria-label="Replay controls">
         <select id="frep-where" aria-label="Go to a turn"></select>
@@ -21105,13 +21126,58 @@
                 const sum = a => Array.isArray(a) ? a.reduce((x, y) => x + y, 0) : null;
                 const mods = r => (r.rollModifiers || []).length ? ` <span class="opacity-60">(${esc(r.rollModifiers.join(', '))})</span>` : '';
                 const words2 = t => esc(String(t || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase());
-                let lastAct = '', lastLine = '';
+                let lastAct = '', lastLine = '', lastRoll = null, blockFrom = null;
+                // the questions FUMBBL put to the coaches: each becomes a card shown when it was asked, its answer filled in from what
+                // happened next (a re-roll used or not, the blocker stepping up or not...)
+                const teamSide = id => String(id) === String(g.teamHome.teamId) ? 0 : String(id) === String(g.teamAway.teamId) ? 1 : -1;
+                let pend = [];
+                const settle = (e, choice, label) => { e.choice = choice; if (label) e.opts[0] = label; pend = pend.filter(x => x !== e); };
+                const settleAll = keepToss => { pend.slice().forEach(e => { if (keepToss && (e.kind === 'coin' || e.kind === 'receive')) return; if (e.kind === 'blockrr') e.drop = true; settle(e, 1); }); };
+                const ask = v => {
+                    const k = v.dialogId; let e = null;
+                    if (k === 'reRollProperties' && v.playerId != null) {
+                        const j = ix.get(String(v.playerId)), lr = lastRoll && lastRoll.p === j ? lastRoll : null;
+                        const opts = (v.reRollProperties || []).map(x => esc({ TRR: 'Team re-roll', PRO: 'Pro', LONER: 'Loner', SKILL: v.skill || 'Skill' }[x] || String(x)));
+                        e = { kind: 'reroll', p: j, rolled: !!lr, side: sideOf(v.playerId), title: 'Roll failed!', sub: `${who(v.playerId)}: ${esc(String(v.reRolledAction || 'roll').split('.').pop().replace(/([a-z])([A-Z])/g, '$1 $2'))}`,
+                            line: v.minimumRoll ? `Needed ${v.minimumRoll}+${lr ? ', rolled ' + lr.roll : ''}` : '', q: 'Use a re-roll?', opts: [opts[0] || 'Re-roll', 'Accept failure'] };
+                    } else if (k === 'blockRollProperties' && (v.reRollProperties || []).length) {
+                        e = { kind: 'blockrr', side: teamSide(v.choosingTeamId), title: 'Block dice', sub: (v.blockRoll || []).map(f => FACE[f] || '?').join(' · '), line: '', q: 'Re-roll the block dice?', opts: ['Re-roll', 'Keep them'] };
+                    } else if (k === 'followupChoice' && act >= 0) {
+                        e = { kind: 'follow', side: roster[act].side, a: act, sq: blockFrom, title: 'Follow up?', sub: who(roster[act].fid), line: '', q: 'Step into the square?', opts: ['Follow up', 'Stay'], quick: true };
+                    } else if (k === 'skillUse' && v.playerId != null && v.skill) {
+                        e = { kind: 'skill', skill: v.skill, side: sideOf(v.playerId), title: 'Use ' + esc(v.skill) + '?', sub: who(v.playerId), line: '', q: '', opts: ['Use it', 'No'] };
+                    } else if (k === 'useApothecary' && v.playerId != null) {
+                        e = { kind: 'apo', side: sideOf(v.playerId), title: 'Apothecary?', sub: `${who(v.playerId)} is ${STATE[v.playerState] || 'hurt'}${v.seriousInjury ? ' (' + esc(v.seriousInjury) + ')' : ''}`, line: '', q: 'Use the apothecary?', opts: ['Use it', 'No'] };
+                    } else if (k === 'coinChoice') e = { kind: 'coin', side: 1, title: 'Coin toss', sub: '', line: '', q: 'Call it:', opts: ['Heads', 'Tails'] };
+                    else if (k === 'receiveChoice') e = { kind: 'receive', side: teamSide(v.choosingTeamId), title: 'Won the toss', sub: '', line: '', q: 'Kick or receive?', opts: ['Receive', 'Kick'] };
+                    else if (k === 'argueTheCall') e = { kind: 'argue', side: teamSide(v.teamId), title: 'Argue the call?', sub: (v.playerIds || []).map(who).join(', ') + ' sent off', line: '', q: '', opts: ['Argue', 'Accept it'] };
+                    if (!e) return;
+                    settleAll(true);   // (the toss's answers come in the same step as the next question)
+                    e.t = 'ask'; e.choice = null; e.team = e.side >= 0 ? esc(teams[e.side].name) : '';
+                    fx.push(e); pend.push(e);
+                };
                 const say = r => {
                     const k = r.reportId, add = (side, html, st) => { if (html === lastLine) return; lastLine = html; lines.push([side, html, st]); };
+                    pend.slice().forEach(e => {
+                        if (e.kind === 'reroll' && k === 'reRoll') settle(e, 0, 'Re-roll (' + esc(r.reRollSource || 're-roll') + ')');
+                        else if (e.kind === 'blockrr' && (k === 'reRoll' || k === 'blockReRoll')) settle(e, 0, 'Re-roll (' + esc(r.reRollSource || 're-roll') + ')');
+                        else if (e.kind === 'blockrr' && k === 'blockChoice') { e.drop = true; settle(e, 1); }   // (kept: the dice tray shows that)
+                        else if (e.kind === 'skill' && k === 'skillUse' && r.skill === e.skill) settle(e, r.used ? 0 : 1);
+                        else if (e.kind === 'apo' && (k === 'apothecaryRoll' || k === 'apothecaryChoice')) settle(e, 0);
+                        else if (e.kind === 'coin' && k === 'coinThrow') { e.team = esc(r.coach || ''); settle(e, r.coinChoiceHeads ? 0 : 1); }
+                        else if (e.kind === 'receive' && k === 'receiveChoice') settle(e, r.receiveChoice ? 0 : 1);
+                        else if (e.kind === 'argue' && k === 'argueTheCall') settle(e, 0);
+                    });
+                    if (k === 'playerAction' || k === 'turnEnd') settleAll();
+                    if (ROLLS[k] !== undefined && r.playerId != null && r.roll != null) {
+                        lastRoll = { p: ix.get(String(r.playerId)), roll: r.roll };
+                        const rn = k === 'confusionRoll' ? (r.confusionSkill || 'Bone Head') : k === 'passRoll' && r.bomb ? 'Bomb' : ROLLS[k];
+                        pend.forEach(e => { if (e.kind === 'reroll' && e.p === lastRoll.p && !e.rolled) { e.rolled = true; e.line += (e.line ? ', rolled ' : 'Rolled ') + r.roll; e.sub = `${who(r.playerId)}: ${esc(rn)}`; } });   // (the roll comes in the same step as the question)
+                    }
                     if (k === 'playerAction' && r.actingPlayerId != null) {
                         const key = r.actingPlayerId + ':' + r.playerAction; if (key === lastAct) return; lastAct = key;
                         const p = P(r.actingPlayerId); if (p) add(p.side, `${who(r.actingPlayerId)}${p.name ? ' <span class="opacity-70">(' + esc(p.name) + ')</span>' : ''}: ${esc(actionName(r.playerAction))}`, 'act');
-                    } else if (k === 'block' || k === 'foul') { add(sideOf(r.defenderId), `against ${who(r.defenderId)}`, 'info'); if (k === 'foul') fx.push({ t: 'foul', a: act, d: ix.get(String(r.defenderId)) }); }
+                    } else if ((k === 'block' || k === 'foul') && ((blockFrom = ix.has(String(r.defenderId)) ? [pos[ix.get(String(r.defenderId)) * 2], pos[ix.get(String(r.defenderId)) * 2 + 1]] : null), true)) { add(sideOf(r.defenderId), `against ${who(r.defenderId)}`, 'info'); if (k === 'foul') fx.push({ t: 'foul', a: act, d: ix.get(String(r.defenderId)) }); }
                     else if (k === 'selectBlitzTarget') add(sideOf(r.defenderId), `blitz target: ${who(r.defenderId)}`, 'info');
                     else if (k === 'blockChoice') {
                         const dice = (r.blockRoll || []).map((f, i) => `<img src="${dieURL(f)}" alt="${FACE[f] || '?'}" title="${FACE[f] || '?'}" style="display:inline-block;width:17px;height:17px;vertical-align:-4px;margin:0 1px;border-radius:4px;${i === r.diceIndex ? 'outline:2px solid #fbbf24;outline-offset:1px' : 'opacity:.5'}">`).join('');
@@ -21180,8 +21246,11 @@
                             case 'fieldModelSetPlayerCoordinate': { const i = ix.get(String(key)); if (i == null || !v) break; if (pos[i * 2] !== v[0] || pos[i * 2 + 1] !== v[1]) {
                                 // a thrown (or kicked) team-mate lands a moment after the throw is rolled: they fly there
                                 if (i === thrownNow && pos[i * 2] >= 0 && Math.max(Math.abs(pos[i * 2] - v[0]), Math.abs(pos[i * 2 + 1] - v[1])) > 1) { fx.push({ t: 'fly', p: i }); thrownNow = -1; }
-                                moved.push(i); pos[i * 2] = v[0]; pos[i * 2 + 1] = v[1]; seen = true; } break; }
+                                moved.push(i); pos[i * 2] = v[0]; pos[i * 2 + 1] = v[1]; seen = true;
+                                pend.slice().forEach(e => { if (e.kind === 'follow' && e.a === i && (!e.sq || (e.sq[0] === v[0] && e.sq[1] === v[1]))) settle(e, 0); });   // (the blocker stepped into the square)
+                            } break; }
                             case 'fieldModelSetBombMoving': bombLive = !!v; break;
+                            case 'gameSetDialogParameter': if (v && v.dialogId) { try { ask(v); } catch (er) {} } break;
                             case 'fieldModelSetPlayerState': { const i = ix.get(String(key)); if (i == null || typeof v !== 'number') break; if (st[i] !== (v & 0xFF)) { st[i] = v & 0xFF; seen = true; } break; }
                             case 'fieldModelRemovePlayer': { const i = ix.get(String(key)); if (i != null) { pos[i * 2] = -99; seen = true; } break; }
                             case 'fieldModelSetBallCoordinate': ball = Array.isArray(v) ? v.slice() : null; seen = true; break;
@@ -21251,6 +21320,10 @@
                 D.teams.forEach((t, i) => { const R = ROSTERS[i]; R.name = plain(t.name) || ('Team ' + (i + 1)); R.baseName = R.name.length > 24 ? R.name.slice(0, 23) + '…' : R.name; if (!t.race) R.style = null; });   // (baseName: the end-zone lettering)
                 ROSTERS[0].oppName = ROSTERS[1].name; ROSTERS[1].oppName = ROSTERS[0].name;
                 applyTeamLabels();
+                {   // the home team's own ground, as for a league match (otherwise it stayed whatever the team screen last showed)
+                    const pick = homeRace; homeRace = () => ROSTERS[0].race || ROSTERS[0].key;
+                    try { PITCH.style = pitchFor('home'); } finally { homeRace = pick; }
+                }
                 try { resizeCanvas(); buildPitchTexture(); } catch (e) { console.error(e); }
                 byFid = new Map();
                 state.players = D.roster.map((f, i) => {
@@ -21270,6 +21343,23 @@
                 state.moves = []; state.targets = []; state.bloodSplatters = [];
                 state.ball = { x: -1, y: -1, carrierId: null };
                 try { AI.set(0, false); AI.set(1, false); } catch (e) {}
+            }
+            let askT = [];
+            const askMs = e => (e.quick ? Math.max(500, 900 / speed) : Math.max(700, 1700 / speed));
+            function showAsk(e) {
+                const box = $('frep-askcard'); if (!box || e.drop || e.choice == null) return;
+                askT.forEach(clearTimeout); askT = [];
+                box.querySelector('.fa-team').innerHTML = e.team ? e.team + ' decide' + (e.kind === 'coin' ? 's' : '') : '';
+                box.querySelector('.fa-title').innerHTML = e.title;
+                box.querySelector('.fa-sub').innerHTML = e.sub || ''; box.querySelector('.fa-line').innerHTML = e.line || '';
+                box.querySelector('.fa-box').style.display = e.sub || e.line ? '' : 'none';
+                box.querySelector('.fa-q').innerHTML = e.q || ''; box.querySelector('.fa-q').style.display = e.q ? '' : 'none';
+                const btns = box.querySelectorAll('.fa-opt');
+                btns.forEach((b, i) => { b.innerHTML = e.opts[i] || ''; b.className = 'fa-opt'; });
+                box.classList.remove('hidden');
+                const T = askMs(e);
+                askT.push(setTimeout(() => btns.forEach((b, i) => { b.className = 'fa-opt ' + (i === e.choice ? 'on' : 'off'); if (i === e.choice) b.innerHTML = '✓ ' + b.innerHTML; }), T * 0.45));
+                askT.push(setTimeout(() => box.classList.add('hidden'), T));
             }
             let trayT = null;
             function showDice(e) {
@@ -21353,6 +21443,7 @@
                         else if (e.t === 'boom') { bombFx.blasts.push({ x: e.x, y: e.y, t0: performance.now() }); sfx('boom'); sfx('crowdOoooh', 400); }
                         else if (e.t === 'kick') sfx('kickOff');
                         else if (e.t === 'whistle') sfx('whistle');
+                        else if (e.t === 'ask') { showAsk(e); if (!e.drop && e.choice != null) setTimeout(() => sfx('menuClick'), askMs(e) * 0.45); }
                         else if (e.t === 'td') { sfx('touchdown'); sfx('crowdHuge', 200); floater(P(e.p), 'TOUCHDOWN!'); }
                     } catch (er) { console.error('FREP fx', er); }
                 });
@@ -21396,7 +21487,8 @@
                 const quiet = F.kind === 'other' && !F.lines.length && !F.fly;
                 const fly = F.fly ? (F.fly.kick ? 1300 : F.fly.d <= 1 ? 200 : Math.min(900, 260 + F.fly.d * 55)) + 120 : 0;
                 const hit = (F.fx || []).some(e => e.t === 'block') ? 850 : (F.fx || []).some(e => e.t === 'boom' || (e.t === 'hurt' && e.inj >= 5)) ? 350 : 0;
-                return (Math.max(quiet ? 200 : base, fly) + hit + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed;
+                const asked = (F.fx || []).filter(e => e.t === 'ask' && !e.drop && e.choice != null).reduce((m, e) => Math.max(m, askMs(e) * speed + 150), 0);
+                return (Math.max(quiet ? 200 : base, fly, asked) + hit + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed;
             }
             function stop() { playing = false; clearTimeout(timer); timer = null; paintBar(); }
             function tick() {
@@ -21406,7 +21498,7 @@
                 timer = setTimeout(tick, delay(D.frames[at]));
             }
             function play() { if (!D) return; if (at >= D.frames.length - 1) at = 0; playing = true; paintBar(); clearTimeout(timer); timer = setTimeout(tick, 150); }
-            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); try { state.ballAnimation.active = false; } catch (e) {} { const t = $('frep-dice'); if (t) t.classList.add('hidden'); }
+            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); try { state.ballAnimation.active = false; } catch (e) {} { const t = $('frep-dice'); if (t) t.classList.add('hidden'); const c = $('frep-askcard'); if (c) c.classList.add('hidden'); askT.forEach(clearTimeout); }
                 show(at, false); logTurn(at); try { focusFrame(D.frames[at]); } catch (e) {} }
             function stepTurn(dir) {
                 const T = D.turns; if (!T.length) return;

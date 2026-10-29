@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.78 (29 Oct 2026)
+- **Improved:** FUMBBL replays show the coaches' decisions the way the game asks you them: a card with the question and both answers comes up, then the one the coach chose lights up and the replay carries on. Re-roll a failed roll (with what was needed and rolled, and which re-roll was used) or accept the failure; re-roll the block dice; use a skill (Sidestep, Stand Firm, Dodge…); follow up after a block (shown briefly, as it comes up so often); use the apothecary; the coin toss; kick or receive; argue the call.
+- **Fixed:** a FUMBBL replay is now played on the home team's own ground (as a league match is), instead of whichever pitch the team screen last showed.
+
 ## v3.77 (29 Oct 2026)
 - **New:** Featured matches in Watch a FUMBBL Match, below the match-number box (which stays). "Recent top games" looks through FUMBBL's latest 150 or so matches and lists the best: close results, lots of touchdowns, bloody games and strong coaches first (with their ratings), Competitive division first. The list is kept for 20 minutes; ↻ looks again. "Our picks" is a hand-picked ten from the matches studied for the computer's play (five-touchdown thrillers, a bloodbath with Gnoblars flying, a seven-bomb Goblin game and more). A team filter shows only matches with that team. Tap a match to watch it.
 
