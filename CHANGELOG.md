@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.68 (29 Oct 2026)
+- **Changed:** saved formations now belong to the race, not the team: any team of that race on this device shares them. There's one set for defence (when you kick) and one for offence (when you receive), picked automatically, and the label above the buttons says which. When a formation is loaded, players are matched by name and position first, then by position, then to whoever is the nearest kind of player (Move, Strength, Agility, Armour and skills), so a formation saved with one team fits another of the same race. Formations saved before this still show until you save over them.
+- **New:** a secret. Tap "By SirSpoon" on the title screen eight times.
+
 ## v3.67 (29 Oct 2026)
 - **Improved (AI):** on the last turn of a half the computer works harder to get the ball over the line. If its carrier's way in needs dodges or Rushes, it first blocks whoever is in the way, when that makes scoring likelier overall, before making the run (as strong coaches do). And if the carrier can't get there alone, it will now dodge or Rush to reach a team-mate who can take a hand-off or pass and run it in (before, it only looked for team-mates it could reach without any dice). Over 240 test matches against v3.66: 178-153 touchdowns.
 

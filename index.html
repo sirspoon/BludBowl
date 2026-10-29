@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.67</title>
+    <title>BludBowl 3.68</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -949,8 +949,8 @@
     <div id="start-screen" class="opacity-0 transition-opacity duration-300 absolute inset-0 z-[100] flex flex-col items-center justify-center pointer-events-auto bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-black to-black">
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
-        <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">By SirSpoon</p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.67</button>
+        <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.68</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -7386,6 +7386,7 @@
             const getMode = () => { try { return localStorage.getItem('bb-ex-ind') || 'std'; } catch (e) { return 'std'; } };
             const setMode = m => { try { localStorage.setItem('bb-ex-ind', m); } catch (e) {} };
             function gold(i, mode) {   // what side i may spend
+                if (X && !X.net && !X.career && !X.mp[i] && CHEAT.opt('gold') && CHEAT.humanSide() === i) return 9999999;   // (secret options)
                 if (!X || X.mp[i] || mode === 'off') return 0;
                 const extra = /^\d+$/.test(mode) ? +mode : 0, d = X.tv[1 - i] - X.tv[i];
                 return Math.max(0, d) + extra;
@@ -7428,7 +7429,7 @@
                 X = { keys: [k0, k1], R, tv: R.map(tvOf), mode: getMode(), ind: [{}, {}], mp: R.map(r => !!r.matched), career, fmt: sev ? 'sevens' : 'std', net: !!net, ready: [false, false], tabs: [0, 1] };
                 X.ind = [0, 1].map(i => X.mp[i] ? JSON.parse(JSON.stringify(R[i].mpInd || {})) : {});
                 // a few thousand gold (two standard teams' values often differ by 15k or so) isn't worth stopping for
-                if (X.mode === 'off' || ![0, 1].some(i => gold(i, X.mode) >= 50)) { go(); return; }
+                if (![0, 1].some(i => gold(i, X.mode) >= 50)) { go(); return; }   // (gold is 0 with inducements off, unless the secret options give some)
                 [0, 1].forEach(i => { if (!X.mp[i] && AI.isOn(i)) autoBuy(i); });
                 // open on the first side a person is shopping for (else the first side with gold)
                 if (X.net) X.tab = 0; else X.tab = [0, 1].find(i => !AI.isOn(i) && !X.mp[i] && gold(i, X.mode) > 0) ?? [0, 1].find(i => gold(i, X.mode) > 0) ?? 0;
@@ -7436,7 +7437,7 @@
                 render();
             }
             function go() {
-                const opts = { career: X.career, fmt: X.fmt };
+                const opts = { career: X.career, fmt: X.fmt, exhibition: !X.net };
                 if (X.net) { opts.replaceOk = true; opts.netCareer = NET.careerSides(); const tc = NET.tieCup(); if (tc) opts.cup = tc; NET.begin(); }
                 const any = X.ind.some(d => Object.keys(d).some(key => key === 'stars' ? (d.stars || []).length : d[key]));
                 if (any) opts.ind = X.ind.map(d => JSON.parse(JSON.stringify(d)));
@@ -7896,35 +7897,87 @@
             }
         });
 
-        // ---------- Saved formations: five slots per team for your own kick-off set-ups ----------
-        // A saved team keeps them with the rest of its details (so they're in backups too); a default team keeps them in this
-        // browser. Squares are stored as the left-hand team's, so a formation works from either end. Players are matched back
-        // by name and position, then by position, then anyone.
+        // ---------- Secret options: tap "By SirSpoon" on the title screen 8 times ----------
+        // For an exhibition match against the computer only, and only for the person's team: 99 team re-rolls, 9,999,999k to
+        // spend on Star Players and inducements, kicking off first, and setting up the computer's team as well as their own.
+        const CHEAT = (function () {
+            const LS = 'bb-secret', KEYS = [['rr', '99 team re-rolls'], ['gold', '9,999,999k to spend on Star Players and inducements'], ['kick', 'Kick off first'], ['place', "Set up the computer's players too"]];
+            let o = {};
+            try { o = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) {}
+            const save = () => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch (e) {} };
+            const any = () => KEYS.some(([k]) => o[k]);
+            // the person's side in an exhibition match against the computer, or null (one side the computer, the other not, on one device)
+            const humanSide = () => (AI.isOn(0) !== AI.isOn(1) && !(NET.on && NET.on())) ? (AI.isOn(0) ? 1 : 0) : null;
+            // in a match: is this option on for this side?
+            const on = (k, t) => !!o[k] && state.cheatSide != null && t === state.cheatSide;
+            // set up the computer's team by hand (the main set-up only, not a kick-off result's re-arrangement)
+            const placesFor = t => !!o.place && state.cheatSide != null && t === 1 - state.cheatSide && state.mode === MODES.SETUP && !state.setup.eventSetup && !state.setup.restrictIds;
+            const $ = id => document.getElementById(id);
+            function paintTag() { const t = $('secret-tag'); if (t) t.style.display = any() ? '' : 'none'; }
+            function open() {
+                let m = $('secret-menu');
+                if (!m) {
+                    m = document.createElement('div'); m.id = 'secret-menu';
+                    m.style.cssText = 'position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,23,.82)';
+                    m.innerHTML = `<div style="width:100%;max-width:360px;border:2px solid #fbbf24;border-radius:12px;background:#0f172a;padding:20px;box-shadow:0 0 40px rgba(251,191,36,.35);font-family:inherit">
+                        <div style="color:#fcd34d;font-weight:900;text-transform:uppercase;letter-spacing:.15em;text-align:center;font-size:18px;margin-bottom:4px">Secret options</div>
+                        <div style="color:#cbd5e1;font-size:12px;text-align:center;margin-bottom:16px">Only in an exhibition match against the computer, and only for your team.</div>
+                        <div style="display:flex;flex-direction:column;gap:12px">${KEYS.map(([k, lab]) => `<label style="display:flex;align-items:center;gap:12px;color:#f1f5f9;font-size:14px;cursor:pointer;user-select:none"><input type="checkbox" data-secret="${k}" style="width:20px;height:20px;accent-color:#fbbf24;flex:none"> ${lab}</label>`).join('')}</div>
+                        <button type="button" id="secret-close" style="margin-top:20px;width:100%;border-radius:8px;background:#f59e0b;color:#0f172a;font-weight:700;padding:9px;border:0;cursor:pointer">Done</button></div>`;
+                    document.body.appendChild(m);
+                    m.addEventListener('change', e => { const k = e.target && e.target.dataset && e.target.dataset.secret; if (k) { o[k] = !!e.target.checked; save(); paintTag(); try { sfx('menuClick'); } catch (er) {} } });
+                    $('secret-close').addEventListener('click', () => { m.style.display = 'none'; });
+                    m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; });
+                }
+                m.querySelectorAll('[data-secret]').forEach(b => { b.checked = !!o[b.dataset.secret]; });
+                m.style.display = 'flex';
+            }
+            function hook() {
+                const by = $('by-sirspoon'); if (!by) return;
+                let n = 0, last = 0;
+                by.addEventListener('click', () => {
+                    const now = Date.now(); n = now - last > 1500 ? 1 : n + 1; last = now;
+                    if (n >= 8) { n = 0; try { sfx('secret'); } catch (e) {} open(); }
+                });
+                paintTag();
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else hook();
+            return { on, placesFor, humanSide, opt: k => !!o[k] };
+        })();
+
+        // ---------- Saved formations: five slots for your own kick-off set-ups ----------
+        // Kept in this browser for each race (any team of that race shares them), one set for defence (kicking) and one for
+        // offence (receiving). Squares are stored as the left-hand team's, so a formation works from either end. Players are
+        // matched back by name and position, then by position, then by the nearest in Move, Strength, Agility, Armour and skills.
+        // (Before v3.68 a saved team kept its own five, and a default team one set for its race: those show until saved over.)
         const FORMS = (function () {
             const N = 5, LS = 'bb-formations';
             const $ = id => document.getElementById(id);
             const fmt = () => (GEO.sev ? 'sevens' : 'std');
             const idOf = team => { const k = String(ROSTERS[team].key || ''); return k.startsWith('custom:') && TB.get(k.slice(7)) ? k.slice(7) : null; };
-            const lsKey = team => fmt() + ':' + (ROSTERS[team].race || ROSTERS[team].key);
+            const raceKey = team => fmt() + ':' + (ROSTERS[team].race || ROSTERS[team].key);
+            const kicking = team => !!(state.kickoff && state.kickoff.kickingTeam === team);
+            const lsKey = team => raceKey(team) + ':' + (kicking(team) ? 'def' : 'off');
             function slots(team) {
-                let all = null;
-                const id = idOf(team);
-                if (id) all = (TB.get(id).formations || {})[fmt()];
-                else { try { all = (JSON.parse(localStorage.getItem(LS) || '{}'))[lsKey(team)]; } catch (e) {} }
+                let all = null, m = {};
+                try { m = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) {}
+                if (Array.isArray(m[lsKey(team)])) all = m[lsKey(team)];
+                else {   // nothing saved yet for this race and side: the older formations, if any, until a slot is saved
+                    const id = idOf(team), own = id ? ((TB.get(id) || {}).formations || {})[fmt()] : null;
+                    all = Array.isArray(own) && own.some(Boolean) ? own : m[raceKey(team)];
+                }
                 const a = Array.isArray(all) ? all.slice(0, N) : [];
                 while (a.length < N) a.push(null);
                 return a;
             }
             function write(team, a) {
-                const id = idOf(team);
-                if (id) { const t = TB.get(id); t.formations = Object.assign({}, t.formations || {}, { [fmt()]: a }); TB.put(t); return; }
-                try { const m = JSON.parse(localStorage.getItem(LS) || '{}'); m[lsKey(team)] = a; localStorage.setItem(LS, JSON.stringify(m)); } catch (e) {}
+                try { const m = JSON.parse(localStorage.getItem(LS) || '{}') || {}; m[lsKey(team)] = a; localStorage.setItem(LS, JSON.stringify(m)); } catch (e) {}
             }
             const setupPlayers = team => state.players.filter(p => p.team === team && !p.isCasualty && !p.isEjected && !p.isKO && !p.isReserve && p.x >= 0 && p.x < CFG.cols);
             const fx = (team, x) => (team === TEAMS.HUMAN ? x : CFG.cols - 1 - x);
             function capture(team) {   // the line of scrimmage first, so a short-handed team fills those squares first
                 const los = GEO.los(0);
-                return setupPlayers(team).map(p => ({ x: fx(team, p.x), y: p.y, pos: p.posKey, name: p.name || null }))
+                return setupPlayers(team).map(p => ({ x: fx(team, p.x), y: p.y, pos: p.posKey, name: p.name || null, ma: p.ma, st: p.st, ag: p.ag, av: p.av, sk: (p.skills || []).slice(0, 12) }))
                     .sort((a, b) => (b.x === los) - (a.x === los) || b.x - a.x || a.y - b.y);
             }
             function apply(team, sq) {
@@ -7934,7 +7987,14 @@
                 const pass = test => squares.forEach(s => { if (at.has(s)) return; const p = [...free].find(p => test(p, s)); if (p) { at.set(s, p); free.delete(p); } });
                 pass((p, s) => s.name && p.name === s.name && p.posKey === s.pos);
                 pass((p, s) => p.posKey === s.pos);
-                pass(() => true);
+                // then the nearest kind of player: Move, Strength, Agility, Armour and skills like the one saved there (an older
+                // save has no stats: the race's own figures for that position, if it has one)
+                const types = (ROSTERS[team] && ROSTERS[team].types) || {};
+                const prof = s => s.st != null ? s : (types[s.pos] || null);
+                const far = (p, s) => { const f = prof(s); if (!f) return 0;
+                    const sk = new Set(f.sk || f.skills || []), shared = (p.skills || []).filter(x => sk.has(x)).length;
+                    return Math.abs((p.ma || 6) - (f.ma || 6)) + Math.abs(p.st - f.st) * 2 + Math.abs(p.ag - f.ag) + Math.abs(p.av - f.av) * 0.7 - shared * 0.5; };
+                squares.forEach(s => { if (at.has(s) || !free.size) return; let b = null, bd = 1e9; free.forEach(p => { const d = far(p, s); if (d < bd) { bd = d; b = p; } }); if (b) { at.set(s, b); free.delete(b); } });
                 const old = new Map(ps.map(p => [p, [p.x, p.y]]));
                 ps.forEach(p => { p.x = -50; p.y = -50; });
                 at.forEach((p, s) => { p.x = s.x; p.y = s.y; });
@@ -7957,16 +8017,17 @@
                 const t = state.setup.currentSettingTeam;
                 if (t == null) return null;
                 if (NET.on()) return t === NET.myTeam() ? t : null;
-                return AI.isAI(t) ? null : t;
+                return AI.isAI(t) && !CHEAT.placesFor(t) ? null : t;
             }
             function paint() {
                 const box = $('form-slots'); if (!box) return;
                 const t = myTeam();
                 box.classList.toggle('hidden', t == null);
                 if (t == null) { saving = false; return; }
-                const a = slots(t), sig = t + '|' + saving + '|' + a.map(x => (x ? x.at : 0)).join(',');
+                const a = slots(t), sig = t + '|' + lsKey(t) + '|' + saving + '|' + a.map(x => (x ? x.at : 0)).join(',');
                 if (box.dataset.sig === sig) return;
                 box.dataset.sig = sig;
+                const cap = box.querySelector('.fs-cap'); if (cap) cap.textContent = kicking(t) ? 'Defensive formations' : 'Offensive formations';
                 box.classList.toggle('saving', saving);
                 const save = box.querySelector('[data-fsave]');
                 save.textContent = saving ? 'Cancel' : 'Save';
@@ -7985,7 +8046,7 @@
                 const i = +b.dataset.fslot;
                 if (saving) {
                     const a = slots(t); a[i] = { sq: capture(t), at: Date.now() }; write(t, a); saving = false;
-                    log(`  Set-up saved as formation ${i + 1}.`, 'text-slate-400');
+                    log(`  Set-up saved as ${kicking(t) ? 'defensive' : 'offensive'} formation ${i + 1}, for any team of this race.`, 'text-slate-400');
                     try { sfx('menuClick'); } catch (er) {}
                 } else {
                     const f = slots(t)[i]; if (!f) return;
@@ -10208,6 +10269,7 @@
     'rollFail': () => { tone(220, 110, 0.32, 'sawtooth', 0.26); tone(165, 82, 0.32, 'square', 0.14, 0.02); },
     'teamReroll': () => { tone(200, 1200, 0.28, 'triangle', 0.3); tone(260, 1500, 0.28, 'p25', 0.12, 0.03); },
     'menuClick': () => { tone(N.A5, N.A5, 0.04, 'square', 0.2); },
+    'secret': () => { arp(['G4', 'C5', 'E5', 'G5', 'C6'], 0.075, 'p25', 0.24, 0.16); arp(['E6', 'C6', 'E6', 'C6', 'E6'], 0.05, 'triangle', 0.14, 0.07); tone(N.C4, N.C4, 0.6, 'triangle', 0.22, 0.38); tone(N.G4, N.G4, 0.6, 'triangle', 0.16, 0.38); },
     'friendOnline': () => { tone(N.E5, N.E5, 0.12, 'triangle', 0.22); tone(N.A5, N.A5, 0.22, 'triangle', 0.22, 0.12); },
     'selectPlayer': () => { tone(N.E5, N.E5, 0.035, 'p25', 0.22); tone(N.A5, N.A5, 0.05, 'p25', 0.22, 0.04); },
     'blockHit': () => { noise(0.16, 0.7, 0, 3500, 300); tone(150, 45, 0.16, 'square', 0.4); },
@@ -22655,6 +22717,7 @@
             function ownsTarget(el) {
                 if ((!started && !NET.on()) || internal || !el || !el.closest) return false;
                 const t = ownerTeam(el);
+                if (t != null && CHEAT.placesFor(t)) return false;   // (secret options) setting up the computer's team by hand
                 return t != null && (isAI(t) || NET.isRemote(t));
             }
             document.addEventListener('click', e => { if (ownsTarget(e.target)) { e.stopPropagation(); e.preventDefault(); } }, true);
@@ -24748,7 +24811,7 @@
                 if (state.ballAnimation.active || state.flightAnimation.active || REPLAY.busy()) return;   // (and a replay playing)
                 const d = decider();
                 switch (state.mode) {
-                    case MODES.SETUP: plan = null; if (isAI(d)) after('setup', 1300, () => setupTeam(d)); return;
+                    case MODES.SETUP: plan = null; if (isAI(d) && !CHEAT.placesFor(d)) after('setup', 1300, () => setupTeam(d)); return;
                     case MODES.KICKOFF_TARGET: if (isAI(d)) after('kick', 1300, kickTarget); return;
                     case MODES.TOUCHBACK_CHOICE: if (isAI(d)) after('touchback', 1200, touchback); return;
                     case MODES.INTERCEPT_CHOICE: if (isAI(d)) after('intercept', 1000, interception); return;
@@ -25138,6 +25201,9 @@
                 if (opts.ind) hireForMatch(opts.ind);
                 buildPlayers();
                 state.indLines = opts.ind ? applyInducements(opts.ind) : [];
+                // (secret options) an exhibition match on this device, one side the computer: the person's side may use them
+                state.cheatSide = opts.exhibition && !opts.career && !opts.league && !opts.cup ? CHEAT.humanSide() : null;
+                if (CHEAT.on('rr', state.cheatSide)) { const h = state.cheatSide; ROSTERS[h].rerolls = 99; state.rr[h] = 99; }
                 updateTopBar();
                 showLineupModal(beginMatch);
             };
@@ -25154,6 +25220,8 @@
                     let winner = Math.random() < 0.5 ? TEAMS.HUMAN : TEAMS.ORC;
                     let receiver = winner; 
                     let kicker = (receiver === TEAMS.HUMAN) ? TEAMS.ORC : TEAMS.HUMAN;
+                    const kickFirst = CHEAT.on('kick', state.cheatSide);   // (secret options) the person's team kicks off
+                    if (kickFirst) { winner = state.cheatSide; kicker = winner; receiver = 1 - winner; }
                     
                     state.initialKickingTeam = kicker;
                     sfx('coinToss'); MUSIC.matchStart(); AI.start(); state.live = true;
@@ -25163,7 +25231,7 @@
                     const pre = (i, go) => { if (i > 1) { go(); return; } const e = teams.find(x => x.t === i); if (!e) { prayerPicks(() => pre(i + 1, go), i); return; } showInducementsPanel(e, () => prayerPicks(() => pre(i + 1, go), i)); };
                     pre(0, () => prayerPicks(() => runPreGame(() => announce(
                         "COIN TOSS", 
-                        `${ROSTERS[winner].name} win the toss & choose to receive! ${ROSTERS[kicker].name} deploy first.`,
+                        kickFirst ? `${ROSTERS[winner].name} win the toss & choose to kick! ${ROSTERS[kicker].name} deploy first.` : `${ROSTERS[winner].name} win the toss & choose to receive! ${ROSTERS[kicker].name} deploy first.`,
                         "bg-amber-800/90", 
                         () => {
                             startDriveSequence(kicker, receiver);
