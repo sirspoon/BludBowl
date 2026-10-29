@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.02</title>
+    <title>BludBowl 4.03</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1016,7 +1016,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.02</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.03</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -21141,7 +21141,7 @@
                 const sum = a => Array.isArray(a) ? a.reduce((x, y) => x + y, 0) : null;
                 const mods = r => (r.rollModifiers || []).length ? ` <span class="opacity-60">(${esc(r.rollModifiers.join(', '))})</span>` : '';
                 const words2 = t => esc(String(t || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase());
-                let lastAct = '', lastLine = '', lastRoll = null, blockFrom = null, toFail = null;
+                let lastAct = '', lastLine = '', lastRoll = null, blockFrom = null, toFail = null, skillWait = [];
                 // the questions FUMBBL put to the coaches: each becomes a card shown when it was asked, its answer filled in from what
                 // happened next (a re-roll used or not, the blocker stepping up or not...)
                 const teamSide = id => String(id) === String(g.teamHome.teamId) ? 0 : String(id) === String(g.teamAway.teamId) ? 1 : -1;
@@ -21228,7 +21228,10 @@
                     if (k === 'startHalf' && r.half > 1) fx.push({ t: 'half', half: r.half });
                     if (k === 'weather' && r.weather) fx.push({ t: 'weather', w: W[String(r.weather).toUpperCase().replace(/ /g, '_')] || null, name: plain(r.weather) });
                     if (k === 'secretWeaponBan') fx.push({ t: 'swban', names: (r.playerIds || []).map(id => { const q = P(id); return q ? `${q.pos} #${q.nr}` : ''; }).filter(Boolean) });
-                    if (k === 'skillUse' && r.used && r.skill) fx.push({ t: 'skill', skill: plain(r.skill) });
+                    // a skill that needs a roll (Steady Footing, Regeneration...) only pops up if the roll works, as in the game
+                    if (k === 'skillUse' && r.used && r.skill) { const e = { t: 'skill', skill: plain(r.skill), need: SKILL_ROLL[r.skill] || null, p: r.playerId, ok: null }; fx.push(e); if (e.need) skillWait.push(e); }
+                    if (ROLLS[k] !== undefined && r.playerId != null) skillWait = skillWait.filter(e => { if (e.need !== k || String(e.p) !== String(r.playerId)) return true; e.ok = !!r.successful; return false; });
+                    if (k === 'playerAction' || k === 'turnEnd') skillWait = [];
                     if (k === 'referee' && r.foulingPlayerBanned && act >= 0) fx.push({ t: 'sentoff', p: act });
                     if (ROLLS[k] !== undefined && r.playerId != null && r.roll != null) {
                         lastRoll = { p: ix.get(String(r.playerId)), roll: r.roll };
@@ -21267,7 +21270,7 @@
                         if (r.thrownPlayerId != null && ix.has(String(r.thrownPlayerId))) thrownNow = ix.get(String(r.thrownPlayerId));
                         add(sideOf(r.playerId), `${r.successful ? '✓' : '✗'} ${who(r.playerId)} ${esc(name)} ${r.minimumRoll}+: ${r.roll}${extra}${r.reRolled ? ' (re-roll)' : ''}${mods(r)}`, r.successful ? 'ok' : 'bad');
                     } else if (k === 'reRoll' && (fx.push({ t: 'reroll', team: /Team|Coaching|Leader/.test(r.reRollSource || '') }), true)) add(sideOf(r.playerId), `↻ ${esc(r.reRollSource || 're-roll')}${r.roll && !r.successful ? ' - failed' : ''}`, 'info');
-                    else if (k === 'skillUse' && r.used) add(sideOf(r.playerId), `${who(r.playerId)} uses ${esc(r.skill)}`, 'info');
+                    else if (k === 'skillUse' && r.used && !SKILL_ROLL[r.skill]) add(sideOf(r.playerId), `${who(r.playerId)} uses ${esc(r.skill)}`, 'info');   // (one with a roll: the roll's line says how it went)
                     else if (k === 'scatterBall') add(-1, `${bombLive ? 'The bomb scatters' : 'The ball bounces'} ${esc((r.directionArray || []).join(', ').toLowerCase())}`, 'info');
                     else if (k === 'throwIn') add(-1, 'The crowd throws the ball back in', 'info');
                     else if (k === 'handOver') add(sideOf(r.catcherId), `hands the ball to ${who(r.catcherId)}`, 'info');
@@ -21392,6 +21395,10 @@
                 6: 'The fans cheer their team on: whoever cheers loudest gets a Prayer to Nuffle.', 7: 'The coaches shout instructions: whoever does best gets an extra team re-roll for this drive.',
                 8: 'The weather changes: roll again on the weather table.', 11: 'Somebody ate something they shouldn\'t have: a player may not be at their best.',
                 12: 'The crowd storms the pitch: players of the team with fewer fans may be Stunned.' };
+            // skills whose use depends on a roll: FUMBBL reports them as used before the roll, the game only once they've worked
+            const SKILL_ROLL = { 'Steady Footing': 'steadyFootingRoll', 'Regeneration': 'regenerationRoll', 'Dauntless': 'dauntlessRoll', 'Foul Appearance': 'foulAppearanceRoll',
+                'Jump Up': 'jumpUpRoll', 'Leap': 'leapRoll', 'Pogo Stick': 'leapRoll', 'Shadowing': 'tentaclesShadowingRoll', 'Tentacles': 'tentaclesShadowingRoll', 'Hypnotic Gaze': 'hypnoticGazeRoll',
+                'Bloodlust': 'bloodLustRoll', 'Animosity': 'animosityRoll', 'Always Hungry': 'alwaysHungryRoll', 'Chainsaw': 'chainsawRoll', 'Projectile Vomit': 'projectileVomit', 'Breathe Fire': 'breatheFire' };
             const TO_ROLLS = { dodgeRoll: 'Failed Dodge!', goForItRoll: 'Failed Rush!', pickUpRoll: 'Failed pick-up!', catchRoll: 'The ball was not caught!', passRoll: 'Failed pass!', leapRoll: 'Failed Leap!' };
             // the game's own roll window titles
             const ROLL_TITLE = { dodgeRoll: 'DODGE', goForItRoll: 'RUSH', pickUpRoll: 'PICKUP', catchRoll: 'CATCH', passRoll: 'PASS', interceptionRoll: 'INTERCEPT', rightStuffRoll: 'LANDING',
@@ -21638,7 +21645,7 @@
                             const desc = e.inj === 5 ? "KO'd - Stretchered to Dugout" : e.inj === 8 ? 'Dead - R.I.P.' : e.inj === 6 ? 'Badly Hurt' : (e.si || 'Seriously Injured');
                             showRemovalNotice(e.inj === 5 ? 'KNOCKED OUT' : 'CASUALTY', `${teamOf(f.side)} ${plain(f.pos)} #${f.nr}: ${desc}`);
                         } else if (e.t === 'sentoff') { const f = D.roster[e.p]; if (f) showRemovalNotice('SENT OFF', `${teamOf(f.side)} ${plain(f.pos)} #${f.nr}: sent off for fouling`); }
-                        else if (e.t === 'skill') skillPop(e.skill);
+                        else if (e.t === 'skill' && (!e.need || e.ok)) skillPop(e.skill);
                     } catch (er) {}
                 });
             }

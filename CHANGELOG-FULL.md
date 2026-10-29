@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.03 (29 Oct 2026)
+- **Fixed:** in I Like to Watch, a skill that needs a roll to work (Steady Footing, Regeneration, Dauntless, Foul Appearance, Jump Up, Leap, Shadowing, Hypnotic Gaze and the like) only gets its pop-up when the roll succeeds, as in the game. FUMBBL marks the skill as used before rolling for it, so a failed Steady Footing (it needs a 6) still popped up. The log no longer says "uses" for these either: the roll's ✓ or ✗ line says how it went.
+
 ## v4.02 (29 Oct 2026)
 - **New:** I Like to Watch now has the game's close-up action replays: after a pass, a thrown (or kicked) team-mate or a bomb, the slow-motion 16-bit replay plays it from behind the thrower, just as in a normal match. Passes show the throw, any interception, the catch or drop, the bounces and throw-ins; thrown team-mates their flight and a safe or crash landing; bombs each throw (a caught bomb thrown on) and the blast. They follow the Replays setting, play at ½× to 2×, and can be tapped to skip.
 
