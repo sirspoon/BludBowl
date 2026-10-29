@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.67 (29 Oct 2026)
+- **Improved (AI):** on the last turn of a half the computer works harder to get the ball over the line. If its carrier's way in needs dodges or Rushes, it first blocks whoever is in the way, when that makes scoring likelier overall, before making the run (as strong coaches do). And if the carrier can't get there alone, it will now dodge or Rush to reach a team-mate who can take a hand-off or pass and run it in (before, it only looked for team-mates it could reach without any dice). Over 240 test matches against v3.66: 178-153 touchdowns.
+
 ## v3.66 (28 Oct 2026)
 - **Improved (AI):** the computer now orders its turn like strong human coaches, safest first. When the thing it most wants to do is risky (a dodge, a Rush, picking up or handing off the ball, a foul), it first makes its blocks and its moves that need no dice, so if the risky part fails, fewer players lose their go. Before its ball carrier moves, it works out where the carrier will stop and moves team-mates into the cage squares round that spot first; the carrier steps in last. Its team re-rolls changed too: it now re-rolls a block or blitz on the other side's ball carrier that wouldn't knock them over, and treats a failed Rush as worth a re-roll (both things strong coaches do). Over 144 test matches against v3.65: 134-99 touchdowns, 57-39 wins.
 

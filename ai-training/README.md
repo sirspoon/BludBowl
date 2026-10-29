@@ -649,3 +649,30 @@ FLAGS argument is '' for every switch on). "Other" = not their carrier, nor mark
   like the coaches': a blitz in 87% of turns (89%), "other" targets 62% (78%), with their ball the carrier 47% (25%) and
   a cage corner 12% (12%), target down 63% (67%); blocks 38 a match. Against v3.66: 36-35, 17-18 over 48, then 63-70,
   30-37 over 96: 99-105 touchdowns, 47-55 wins, turnovers 669-635, casualties 212-187. Level at best. Not released.
+
+## The end of a half (Oct 2026)
+`late-turns.py` (100 replays) and `bb-lateturns.js` (v3.66, 96 mirror matches): turns 7 and 8 of a half that start
+with the side's carrier on its feet, by how far it is from the end zone against its Move, and how the turn ends.
+
+| turn 8: touchdown / tried and failed / short | coaches | BludBowl |
+|---|---|---|
+| can walk in (to go <= MA) | 96 / 4 / 0% (98 turns) | 92 / 8 / 0% (13) |
+| needs a Rush or two | 86 / 14 / 0% (14) | 70 / 30 / 0% (10) |
+| 3-6 beyond its Move | 32 / 32 / 13% (31; hand-offs 6 of 10) | 0 / 40 / 60% (55) |
+| further | 19 / 69 / 0% (16) | 0 / 31 / 69% (51) |
+
+- Coaches start their last turn with the carrier able to walk in 62% of the time (the computer 10%): they use turn 7 to
+  set it up, and often hold the ball on turn 7 rather than score (only 28% of turn-7 carriers who could walk in did),
+  so the other side has no time to reply. From further out they score mostly by hand-off.
+- `endgame` / `egclear` (released in v3.67): on the last turn, (1) the carrier may dodge or Rush to reach a team-mate
+  for a hand-off or pass (`throwToScore`'s `passMove` 40 instead of 100; the odds count it against the throw), and (2) if
+  the way in isn't safe, it first blocks whoever makes it hard when (1 - turnover) x (knockdown x the odds with them
+  down + otherwise the odds now) beats the odds now by 0.04 (`egMargin`). Against v3.66: (1) alone 45-24, 24-13 over 48,
+  then 68-71, 30-37 over 96 (113-95, 54-50); (1) and (2) 65-58, 30-29 over 96. Together 178-153 over 240.
+  The last-turn numbers themselves hardly moved (these cases are rare), so most of that is luck: the changes are small
+  and only act in the last turn, which is why they were kept.
+- Tried and switched off (AIP, default 0): on turn 7, a bonus for stopping where the carrier can walk in next turn
+  (`egWalk` 4, `egRush` 2) and more weight on ground (`egProg` 1), and runners sent ahead to within a run of the end zone
+  (`egRun`). With all of them: 26-42 touchdowns, 14-23 wins over 48 (pushing the carrier on left it exposed on their
+  turn 7); the runners alone with (1): 36-32, 18-17.
+- Still the big gap: the computer arrives at its last turn too far away (69% 3+ squares beyond its Move, coaches 30%).
