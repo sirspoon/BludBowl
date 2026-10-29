@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.07 (29 Oct 2026)
+- I Like to Watch's description now mentions your saved matches as well as FUMBBL's.
+
 ## v4.06 (29 Oct 2026)
 - I Like to Watch: the BludBowl epics list is gone; My matches keeps your saved and added matches.
 

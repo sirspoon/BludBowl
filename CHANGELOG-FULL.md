@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.07 (29 Oct 2026)
+- **Changed:** I Like to Watch's line on the main menu now reads "Replay your saved matches, or any match from fumbbl.com", and its window explains both: your own matches in My matches (saved at full time, or a match file someone sent you), or a FUMBBL match by its number. The list heading is now "Pick a match", as it holds My matches as well as the featured FUMBBL ones.
+
 ## v4.06 (29 Oct 2026)
 - **Removed:** the BludBowl epics list in I Like to Watch > Our picks (and the epic/ folder behind it). Saved matches, and match files someone sends you (added with "＋ Add a match file…"), are all kept in My matches instead.
 

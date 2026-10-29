@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.06</title>
+    <title>BludBowl 4.07</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1022,7 +1022,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.06</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.07</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1036,7 +1036,7 @@
             <button type="button" class="mm-btn" data-go="league"><span class="mm-t">League</span><span class="mm-s">On this device: seasons, fixtures, a league table and play-offs</span></button>
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">On this device: knockout cups and Swiss events for tournament teams</span></button>
             <button type="button" class="mm-btn" data-go="teams"><span class="mm-t">Teams</span><span class="mm-s">Build, manage and back up your teams and their careers</span></button>
-            <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">I Like to Watch</span><span class="mm-s">Replay any match from fumbbl.com by its match number</span></button>
+            <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">I Like to Watch</span><span class="mm-s">Replay your saved matches, or any match from fumbbl.com</span></button>
             <button type="button" class="mm-btn" data-go="settings"><span class="mm-t">Settings</span><span class="mm-s">Sound, music, text size, pitch and animations</span></button>
             <button type="button" class="sv-import" data-sv="import">Load a saved match or a backup from a file…</button>
             <input type="file" id="sv-file" accept=".json,application/json" class="hidden">
@@ -1048,13 +1048,13 @@
             <div class="sv-btns"><button type="button" class="sv-btn sv-go" data-ask="resume">Resume it</button><button type="button" class="sv-btn sv-bad" data-ask="go">Start new match</button><button type="button" class="sv-btn" data-ask="back">Cancel</button></div></div></div>
         <div id="frep-ask" class="sv-ask hidden" role="dialog" aria-modal="true" aria-labelledby="frep-h"><div class="sv-ask-card">
             <div class="sv-head" id="frep-h">I Like to Watch</div>
-            <p class="sv-ask-text">Type the match number from fumbbl.com (or paste the match page's address). The replay is downloaded from FUMBBL and played on the pitch here.</p>
+            <p class="sv-ask-text">Watch a match again on the pitch here: one of yours from <b>My matches</b> below (saved at full time, or a match file someone sent you), or any match from fumbbl.com: type its match number (or paste the match page's address).</p>
             <input id="frep-id" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="e.g. 4749985" aria-label="FUMBBL match number"
                 style="width:100%;box-sizing:border-box;background:#020617;color:#e2e8f0;border:2px solid #475569;border-radius:10px;padding:8px 10px;font-size:16px;margin-bottom:8px">
             <p id="frep-note" role="status" style="min-height:1.2em;font-size:12px;margin:0 0 10px;color:#94a3b8"></p>
             <div class="sv-btns"><button type="button" class="sv-btn sv-go" id="frep-go">▶ Watch</button><label class="sv-btn" style="cursor:pointer">Open a file…<input type="file" id="frep-file" accept=".gz,.json,application/gzip,application/json" class="hidden"></label><button type="button" class="sv-btn" id="frep-cancel">Cancel</button></div>
             <div class="fr-feat">
-                <div class="sv-head" style="margin-top:14px">Featured matches</div>
+                <div class="sv-head" style="margin-top:14px">Pick a match</div>
                 <div class="fr-tabs" role="tablist"><button type="button" data-ft="recent" class="on" role="tab">Recent top games</button><button type="button" data-ft="picks" role="tab">Our picks</button><button type="button" data-ft="mine" role="tab">My matches</button><button type="button" id="frep-refresh" title="Look again" aria-label="Look again">↻</button></div>
                 <select id="frep-race" aria-label="Team"><option value="">Any team</option></select>
                 <div id="frep-list" role="list"></div>
