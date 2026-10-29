@@ -2,6 +2,10 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.76 (29 Oct 2026)
+- **Improved:** FUMBBL replays show the block dice. Each block pops up a tray under the top bar with who's blocking whom, the dice rolled (the game's own die faces) and the one chosen ringed in gold, the others faded, plus "defender picks" when it was their choice; the same dice appear as little pictures in the match log. Blocks pause a moment longer so there's time to see them.
+- **Improved:** the replay's camera now keeps the action in view when you're zoomed in: whoever is moving, both players in a block, the whole of a pass or kick, a hurt player or a bomb blast stay in the part of the screen the top bar, the log, the controls and the dice leave clear. It keeps the zoom you chose (widening for a long kick, then coming back), and leaves the view alone for a moment after you pan or pinch.
+
 ## v3.75 (29 Oct 2026)
 - **Improved:** FUMBBL replays now look and sound like a match. Kick-offs sail through the air, passes, hand-offs and throw-ins fly in an arc, bounces hop, and thrown team-mates fly to where they land. Blocks show the attacker lunging in and the defender rocking back, with the result (POW!, Push, Both Down…) floating over them; armour breaks, KOs and casualties have their sounds, blood and a "KO", "CAS" or "DEAD" label, bombs explode, fouls stomp, and touchdowns get the crowd going. Re-rolls, pick-ups, catches, failed rolls and the referee's whistle have sounds too, and the replay waits for each flight or hit before moving on. (The sound follows the game's sound setting.) A scattering bomb is now called a bomb in the log, not the ball.
 

@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.75</title>
+    <title>BludBowl 3.76</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -621,6 +621,14 @@
         #frep-pp { background: #065f46 !important; border-color: #10b981 !important; }
         #frep-range { width: 100%; accent-color: #f59e0b; }
         #frep-bar .fs-wrap { display: block; width: 100%; }
+        #frep-dice { position: fixed; left: 50%; transform: translateX(-50%); z-index: 46; pointer-events: none; background: rgba(2,6,23,.86); border: 1px solid #475569;
+            border-radius: 12px; padding: 5px 10px 6px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.5); max-width: calc(100vw - 16px); }
+        #frep-dice.hidden { display: none; }
+        #frep-dice .fd-who { font-size: 11px; font-weight: 700; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #frep-dice .fd-row { display: flex; gap: 6px; justify-content: center; margin: 4px 0 2px; }
+        #frep-dice .fd-die { width: 38px; height: 38px; opacity: .45; border-radius: 8px; }
+        #frep-dice .fd-die.on { opacity: 1; outline: 3px solid #fbbf24; outline-offset: 1px; }
+        #frep-dice .fd-res { font-size: 13px; font-weight: 800; color: #fcd34d; letter-spacing: .02em; }
         #frep-bar .fs-btn { font-size: 12px; min-height: 28px; padding: 3px 10px; color: #fcd34d; background: #0f172a; border-color: #334155; }
         @media (orientation: portrait) { body.frep-on #panel-log-container { bottom: calc(118px + env(safe-area-inset-bottom)) !important; } }   /* (the log sits above the controls) */
         @media (orientation: landscape) { #frep-bar { left: auto; right: max(8px, env(safe-area-inset-right)); transform: none; width: min(380px, 42vw); } }   /* (where the unit panel goes) */
@@ -966,7 +974,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.75</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.76</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1230,6 +1238,7 @@
         </div>
     </div>
 
+    <div id="frep-dice" class="hidden" aria-live="polite"><div class="fd-who"></div><div class="fd-row"></div><div class="fd-res"></div></div>
     <div id="frep-bar" class="hidden" role="toolbar" aria-label="Replay controls">
         <select id="frep-where" aria-label="Go to a turn"></select>
         <div class="frep-row">
@@ -21085,9 +21094,9 @@
                     } else if (k === 'block' || k === 'foul') { add(sideOf(r.defenderId), `against ${who(r.defenderId)}`, 'info'); if (k === 'foul') fx.push({ t: 'foul', a: act, d: ix.get(String(r.defenderId)) }); }
                     else if (k === 'selectBlitzTarget') add(sideOf(r.defenderId), `blitz target: ${who(r.defenderId)}`, 'info');
                     else if (k === 'blockChoice') {
-                        const dice = (r.blockRoll || []).map(f => FACE[f] || '?').join(', ');
+                        const dice = (r.blockRoll || []).map((f, i) => `<img src="${dieURL(f)}" alt="${FACE[f] || '?'}" title="${FACE[f] || '?'}" style="display:inline-block;width:17px;height:17px;vertical-align:-4px;margin:0 1px;border-radius:4px;${i === r.diceIndex ? 'outline:2px solid #fbbf24;outline-offset:1px' : 'opacity:.5'}">`).join('');
                         const res = RES[r.blockResult] || words2(r.blockResult);
-                        fx.push({ t: 'block', a: act, d: ix.get(String(r.defenderId)), res: r.blockResult });
+                        fx.push({ t: 'block', a: act, d: ix.get(String(r.defenderId)), res: r.blockResult, dice: (r.blockRoll || []).slice(), pick: r.diceIndex, nr: r.nrOfDice });
                         add(-1, `🎲 ${Math.abs(r.nrOfDice || 1)} ${Math.abs(r.nrOfDice || 1) === 1 ? 'die' : 'dice'}${r.nrOfDice < 0 ? ' (defender picks)' : ''}: ${dice} → <b>${res}</b>`, r.blockResult === 'SKULL' ? 'bad' : r.blockResult === 'BOTH DOWN' ? 'info' : 'ok');
                     } else if (k === 'blockReRoll') add(-1, `↻ block dice re-rolled (${esc(r.reRollSource || 're-roll')})`, 'info');
                     else if (k === 'injury') {
@@ -21185,7 +21194,18 @@
                 regenerationRoll: 'Regeneration', leapRoll: 'Leap', alwaysHungryRoll: 'Always Hungry', jumpUpRoll: 'Jump Up', chainsawRoll: 'Chainsaw', interceptionRoll: 'Interception',
                 animosityRoll: 'Animosity', escapeRoll: 'Escape', projectileVomit: 'Projectile Vomit', breatheFire: 'Breathe Fire', throwTeamMateRoll: 'Throw Team-mate', standUpRoll: 'Stand Up',
                 tentaclesShadowingRoll: 'Shadowing', confusionRoll: 'Bone Head' };
-            const FACE = ['', 'Skull', 'Both Down', 'Push', 'Push', 'Stumble', 'POW'];   // FUMBBL's block die: 1-6
+            const FACE = ['', 'Skull', 'Both Down', 'Push', 'Push', 'Stumble', 'POW'];   // FUMBBL's block die: 1-6 (the same numbering as FACES)
+            function dieCanvas(face, sz) {
+                const cv = document.createElement('canvas'); cv.width = cv.height = sz;
+                const g = cv.getContext('2d'), sym = document.createElement('canvas'); sym.width = sym.height = sz;
+                try { renderDieIcon(sym.getContext('2d'), face, sz); } catch (e) {}
+                g.fillStyle = '#cbd5e1'; g.beginPath(); if (g.roundRect) g.roundRect(1, 1, sz - 2, sz - 2, sz * 0.2); else g.rect(1, 1, sz - 2, sz - 2); g.fill();
+                g.strokeStyle = '#64748b'; g.lineWidth = Math.max(1, sz / 24); g.stroke();
+                g.drawImage(sym, sz * 0.08, sz * 0.08, sz * 0.84, sz * 0.84);
+                return cv;
+            }
+            const dieUrls = {};
+            const dieURL = f => dieUrls[f] || (dieUrls[f] = dieCanvas(f, 48).toDataURL());
             const RES = { PUSHBACK: 'Push', POW: 'POW!', 'POW/PUSH': 'Stumble', 'BOTH DOWN': 'Both Down', SKULL: 'Skull' };
             const STATE = { 1: 'unhurt', 3: 'Prone', 4: 'Stunned', 5: "KO'd", 6: 'Badly Hurt', 7: 'Seriously Injured', 8: 'DEAD' };
             const STYLE = { ok: 'text-green-400', bad: 'text-red-400', hurt: 'text-orange-300', big: 'text-amber-300 font-bold', td: 'text-amber-300 font-bold text-[11px]', info: 'text-slate-400', turn: 'text-amber-400 font-bold' };
@@ -21231,6 +21251,59 @@
                 state.ball = { x: -1, y: -1, carrierId: null };
                 try { AI.set(0, false); AI.set(1, false); } catch (e) {}
             }
+            let trayT = null;
+            function showDice(e) {
+                const t = $('frep-dice'); if (!t || !e.dice || !e.dice.length) return;
+                const a = D.roster[e.a], d = D.roster[e.d];
+                t.querySelector('.fd-who').textContent = (a ? `${a.pos} #${a.nr}` : '?') + '  →  ' + (d ? `${d.pos} #${d.nr}` : '?');
+                const row = t.querySelector('.fd-row'); row.innerHTML = '';
+                e.dice.forEach((f, i) => { const c = dieCanvas(f, 72); c.className = 'fd-die' + (i === e.pick ? ' on' : ''); row.appendChild(c); });
+                t.querySelector('.fd-res').textContent = (RES[e.res] || e.res || '') + (e.nr < 0 ? '  (defender picks)' : '');
+                const tb = $('top-bar-panel'); t.style.top = Math.round((tb ? tb.getBoundingClientRect().bottom : 60) + 8) + 'px';
+                t.classList.remove('hidden'); clearTimeout(trayT);
+                trayT = setTimeout(() => t.classList.add('hidden'), Math.max(900, 1700 / speed));
+            }
+            // ---- the replay's camera: whoever is involved in this step stays on screen, in the part the top bar, the log and the
+            // controls leave clear (the game's own follow doesn't know about those). Keeps the zoom unless it has to widen, and
+            // leaves the view alone for a moment after a pan or pinch ----
+            let prefZoom = null, prefAt = -1;   // the zoom the viewer chose (it widens for a long kick, then comes back)
+            function focus(cells, ms) {
+                if (prefZoom == null || camUserAt !== prefAt) { prefZoom = state.camera.zoom; prefAt = camUserAt; }
+                cells = cells.filter(c => c && c.x != null && c.x >= 0 && c.x < CFG.cols && c.y >= 0 && c.y < CFG.rows);
+                if (!cells.length || state.drag.active || performance.now() - camUserAt < 1500) return;
+                const W = window.innerWidth, H = window.innerHeight, ts = CFG.tileSize, cam = state.camera;
+                const rect = id => { const e = $(id); if (!e || getComputedStyle(e).display === 'none') return null; const r = e.getBoundingClientRect(); return r.width && r.height ? r : null; };   // (fixed panels have no offsetParent)
+                const tb = rect('top-bar-panel'), bar = rect('frep-bar'), lg = rect('panel-log-container'), dice = rect('frep-dice');
+                // (T: below the top bar, and below the dice while they show)
+                const L = 8, R = W - 8, T = Math.max(tb ? tb.bottom : 0, dice ? dice.bottom : 0) + 8, B = Math.min(bar ? bar.top : H, lg ? lg.top : H) - 8;
+                if (B - T < ts) return;
+                const xs = cells.map(c => (c.x + 0.5) * ts), ys = cells.map(c => (c.y + 0.5) * ts);
+                const minX = Math.min(...xs) - ts * 1.1, maxX = Math.max(...xs) + ts * 1.1, minY = Math.min(...ys) - ts * 1.1, maxY = Math.max(...ys) + ts * 1.1;
+                const seen = (wx, wy) => { const sx = cam.x + wx * cam.zoom, sy = cam.y + wy * cam.zoom; return sx >= L && sx <= R && sy >= T && sy <= B; };
+                const z = Math.max(0.25, Math.min(prefZoom, (R - L) / (maxX - minX), (B - T) / (maxY - minY)));
+                if (Math.abs(z - cam.zoom) < 0.02 && seen(minX, minY) && seen(maxX, maxY)) return;
+                let x = (L + R) / 2 - (minX + maxX) / 2 * z, y = (T + B) / 2 - (minY + maxY) / 2 * z;
+                const pw = CFG.cols * ts * z, ph = CFG.rows * ts * z;   // (no further than the pitch's edge needs)
+                x = pw <= R - L ? (L + R - pw) / 2 : Math.min(L, Math.max(R - pw, x));
+                y = ph <= B - T ? (T + B - ph) / 2 : Math.min(T, Math.max(B - ph, y));
+                const from = { zoom: cam.zoom, x: cam.x, y: cam.y }, to = { zoom: z, x, y }, t0 = performance.now(), id = {}; camTween = id;
+                const step = () => {
+                    if (camTween !== id || state.drag.active) return;
+                    const k = Math.max(0, Math.min(1, (performance.now() - t0) / ms)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+                    cam.zoom = from.zoom + (to.zoom - from.zoom) * e; cam.x = from.x + (to.x - from.x) * e; cam.y = from.y + (to.y - from.y) * e;
+                    if (k < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            }
+            function focusFrame(F) {
+                const P = j => (j != null && j >= 0 ? state.players[j] : null), cells = [];
+                const add = p => { if (p && !p.isReserve && p.x >= 0) cells.push({ x: p.x, y: p.y }); };
+                if (F.mover >= 0) add(P(F.mover));
+                (F.fx || []).forEach(e => { if (e.t === 'block' || e.t === 'foul') { add(P(e.a)); add(P(e.d)); } else if (e.t === 'hurt' || e.t === 'td') add(P(e.d != null ? e.d : e.p)); else if (e.t === 'fly') add(P(e.p)); else if (e.t === 'boom') cells.push({ x: e.x, y: e.y }); });
+                if (F.fly) { cells.push({ x: F.fly.from[0], y: F.fly.from[1] }); cells.push({ x: F.fly.to[0], y: F.fly.to[1] }); }
+                if (!cells.length && F.lines.some(l => l[2] === 'act')) add(P(F.act));
+                if (cells.length) focus(cells, Math.max(90, Math.min(420 / speed, delay(F) * 0.7)));   // (done before the next step)
+            }
             const floater = (p, text) => { if (p && !p.isReserve) (state.floaters = state.floaters || []).push({ id: p.id, x: p.x, y: p.y, text, t0: performance.now() }); };
             function playFx(F) {
                 const P = j => (j != null && j >= 0 ? state.players[j] : null);
@@ -21242,6 +21315,7 @@
                                 if (e.t === 'foul') { pitchBump(a, d.x, d.y, 0.22); sfx('stompThump'); setTimeout(() => sfx('stompThump'), 180); return; }
                                 // the pictures only (the positions already moved): the attacker lunges in, the defender rocks back
                                 pitchBump(a, d.x, d.y, 0.32); pitchBump(d, d.x + (d.x - a.x), d.y + (d.y - a.y), 0.16, 110);
+                                if (e.t === 'block') showDice(e);
                                 sfx(e.res === 'POW' || e.res === 'POW/PUSH' ? 'bigHit' : 'blockHit');
                                 floater(e.res === 'SKULL' ? a : d, RES[e.res] || e.res);
                             }
@@ -21291,8 +21365,7 @@
                 if (animate) {
                     playFx(F);
                     logFrame(F);
-                    const mover = F.mover >= 0 ? state.players[F.mover] : F.act >= 0 ? state.players[F.act] : null;
-                    if (mover && !mover.isReserve) try { followAction([mover], 400 / speed); } catch (e) {}
+                    try { focusFrame(F); } catch (e) {}
                 }
                 paintBar();
             }
@@ -21302,7 +21375,7 @@
                 const base = F.kind === 'move' ? 240 : F.kind === 'setup' ? 500 : 420;
                 const quiet = F.kind === 'other' && !F.lines.length && !F.fly;
                 const fly = F.fly ? (F.fly.kick ? 1300 : F.fly.d <= 1 ? 200 : Math.min(900, 260 + F.fly.d * 55)) + 120 : 0;
-                const hit = (F.fx || []).some(e => e.t === 'block' || e.t === 'boom' || (e.t === 'hurt' && e.inj >= 5)) ? 350 : 0;
+                const hit = (F.fx || []).some(e => e.t === 'block') ? 850 : (F.fx || []).some(e => e.t === 'boom' || (e.t === 'hurt' && e.inj >= 5)) ? 350 : 0;
                 return (Math.max(quiet ? 200 : base, fly) + hit + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed;
             }
             function stop() { playing = false; clearTimeout(timer); timer = null; paintBar(); }
@@ -21313,7 +21386,8 @@
                 timer = setTimeout(tick, delay(D.frames[at]));
             }
             function play() { if (!D) return; if (at >= D.frames.length - 1) at = 0; playing = true; paintBar(); clearTimeout(timer); timer = setTimeout(tick, 150); }
-            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); try { state.ballAnimation.active = false; } catch (e) {} show(at, false); logTurn(at); }
+            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); try { state.ballAnimation.active = false; } catch (e) {} { const t = $('frep-dice'); if (t) t.classList.add('hidden'); }
+                show(at, false); logTurn(at); try { focusFrame(D.frames[at]); } catch (e) {} }
             function stepTurn(dir) {
                 const T = D.turns; if (!T.length) return;
                 if (dir > 0) { const n = T.find(f => f > at); jump(n != null ? n : D.frames.length - 1); }
