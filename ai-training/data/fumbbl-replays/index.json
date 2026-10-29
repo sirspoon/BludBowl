@@ -1,5 +1,24 @@
 [
  {
+  "match": 4744600,
+  "replay": 1941152,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Snotling",
+   "coach": "Hiyoko",
+   "rating": 1789,
+   "score": 1,
+   "team": "Skifidol Slime"
+  },
+  "away": {
+   "race": "Chaos Chosen",
+   "coach": "Pugz",
+   "rating": 1580,
+   "score": 0,
+   "team": "League Practices"
+  }
+ },
+ {
   "match": 4745576,
   "replay": 1951606,
   "date": "2026-10-13",
@@ -73,6 +92,25 @@
    "rating": 1634,
    "score": 2,
    "team": "BB bones and roll"
+  }
+ },
+ {
+  "match": 4744538,
+  "replay": 1951726,
+  "date": "2026-10-09",
+  "home": {
+   "race": "Ogre",
+   "coach": "Truncher",
+   "rating": 1715,
+   "score": 3,
+   "team": "Gnoblars rule"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "Lewdgrip",
+   "rating": 1607,
+   "score": 0,
+   "team": "Bad Moon Toothbreakers"
   }
  },
  {
@@ -323,6 +361,25 @@
   }
  },
  {
+  "match": 4744636,
+  "replay": 1951844,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Goblin",
+   "coach": "Keithabix",
+   "rating": 1672,
+   "score": 1,
+   "team": "Key Positioning"
+  },
+  "away": {
+   "race": "Necromantic Horror",
+   "coach": "maol",
+   "rating": 1644,
+   "score": 1,
+   "team": "BB18 Bencroc"
+  }
+ },
+ {
   "match": 4744637,
   "replay": 1951849,
   "date": "2026-10-10",
@@ -399,6 +456,25 @@
   }
  },
  {
+  "match": 4744676,
+  "replay": 1951890,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Bretonnian",
+   "coach": "Padster61",
+   "rating": 1651,
+   "score": 2,
+   "team": "Knights Of NI BBT17"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "Keithabix",
+   "rating": 1670,
+   "score": 2,
+   "team": "Key Positioning"
+  }
+ },
+ {
   "match": 4744677,
   "replay": 1951897,
   "date": "2026-10-10",
@@ -472,6 +548,25 @@
    "rating": 1690,
    "score": 1,
    "team": "[BBT18] Ljudotine"
+  }
+ },
+ {
+  "match": 4744732,
+  "replay": 1951945,
+  "date": "2026-10-10",
+  "home": {
+   "race": "Snotling",
+   "coach": "BBWill",
+   "rating": 1551,
+   "score": 0,
+   "team": "Throwing all the fun"
+  },
+  "away": {
+   "race": "Bretonnian",
+   "coach": "Moural666",
+   "rating": 1650,
+   "score": 2,
+   "team": "BBT Niantonbre"
   }
  },
  {
@@ -643,6 +738,25 @@
    "rating": 1602,
    "score": 1,
    "team": "Meanest Ever"
+  }
+ },
+ {
+  "match": 4744952,
+  "replay": 1952208,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Tomb Kings",
+   "coach": "zagori",
+   "rating": 1635,
+   "score": 2,
+   "team": "BBT Zagos Friedhof"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "Keithabix",
+   "rating": 1685,
+   "score": 1,
+   "team": "Key Positioning"
   }
  },
  {
@@ -893,6 +1007,25 @@
   }
  },
  {
+  "match": 4745164,
+  "replay": 1952451,
+  "date": "2026-10-11",
+  "home": {
+   "race": "Necromantic Horror",
+   "coach": "proff70",
+   "rating": 1650,
+   "score": 2,
+   "team": "[BT18] Mordheim Morbids"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "Keithabix",
+   "rating": 1687,
+   "score": 1,
+   "team": "Key Positioning"
+  }
+ },
+ {
   "match": 4745177,
   "replay": 1952459,
   "date": "2026-10-11",
@@ -909,6 +1042,25 @@
    "rating": 1614,
    "score": 1,
    "team": "EliminNorsicans"
+  }
+ },
+ {
+  "match": 4745203,
+  "replay": 1952493,
+  "date": "2026-10-12",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "Rib-Goaty",
+   "rating": 1736,
+   "score": 1,
+   "team": "OWA Right There [BBT18]"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "Keithabix",
+   "rating": 1673,
+   "score": 0,
+   "team": "Key Positioning"
   }
  },
  {
@@ -1273,6 +1425,25 @@
   }
  },
  {
+  "match": 4745669,
+  "replay": 1953047,
+  "date": "2026-10-13",
+  "home": {
+   "race": "Snotling",
+   "coach": "Hagymacsipos",
+   "rating": 1781,
+   "score": 0,
+   "team": "stuntyyy"
+  },
+  "away": {
+   "race": "Orc",
+   "coach": "StarFerret",
+   "rating": 1697,
+   "score": 2,
+   "team": "Bangers BBT18"
+  }
+ },
+ {
   "match": 4745712,
   "replay": 1953101,
   "date": "2026-10-13",
@@ -1634,6 +1805,25 @@
   }
  },
  {
+  "match": 4746030,
+  "replay": 1953443,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Snotling",
+   "coach": "Raindy",
+   "rating": 1550,
+   "score": 1,
+   "team": "Snots Are Here 18"
+  },
+  "away": {
+   "race": "Chaos Chosen",
+   "coach": "TobyEatWorld",
+   "rating": 1658,
+   "score": 0,
+   "team": "BBT18 - TobyeatGoat"
+  }
+ },
+ {
   "match": 4746035,
   "replay": 1953451,
   "date": "2026-10-15",
@@ -1669,6 +1859,25 @@
    "rating": 1781,
    "score": 2,
    "team": "Kono Dio da!"
+  }
+ },
+ {
+  "match": 4746045,
+  "replay": 1953467,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Goblin",
+   "coach": "Urrghs",
+   "rating": 1641,
+   "score": 0,
+   "team": "Pitch Hazard Company"
+  },
+  "away": {
+   "race": "Imperial Nobility",
+   "coach": "mr_mesmer",
+   "rating": 1738,
+   "score": 2,
+   "team": "[BB18] MMM Nobs"
   }
  },
  {
@@ -1726,6 +1935,25 @@
    "rating": 1571,
    "score": 1,
    "team": "Slow N Slappy"
+  }
+ },
+ {
+  "match": 4746081,
+  "replay": 1953507,
+  "date": "2026-10-15",
+  "home": {
+   "race": "Goblin",
+   "coach": "reelhooman",
+   "rating": 1551,
+   "score": 0,
+   "team": "BBT18 Gobboseys"
+  },
+  "away": {
+   "race": "High Elf",
+   "coach": "Bluegill87",
+   "rating": 1575,
+   "score": 3,
+   "team": "BBT18 Teclis Mage Guild"
   }
  },
  {
@@ -1897,6 +2125,576 @@
    "rating": 1667,
    "score": 2,
    "team": "BB18 ChaotiquesNuls"
+  }
+ },
+ {
+  "match": 4748731,
+  "replay": 1956615,
+  "date": "2026-10-25",
+  "home": {
+   "race": "Snotling",
+   "coach": "oudinot",
+   "rating": 1621,
+   "score": 0,
+   "team": "Secondbecausesecond"
+  },
+  "away": {
+   "race": "Nurgle",
+   "coach": "Men-o-maN",
+   "rating": 1580,
+   "score": 2,
+   "team": "Please do!!"
+  }
+ },
+ {
+  "match": 4748790,
+  "replay": 1956692,
+  "date": "2026-10-25",
+  "home": {
+   "race": "Snotling",
+   "coach": "oudinot",
+   "rating": 1613,
+   "score": 2,
+   "team": "Uotuer"
+  },
+  "away": {
+   "race": "Skaven",
+   "coach": "Sami99",
+   "rating": 1351,
+   "score": 1,
+   "team": "Skaven nevaks1"
+  }
+ },
+ {
+  "match": 4748812,
+  "replay": 1956704,
+  "date": "2026-10-25",
+  "home": {
+   "race": "Goblin",
+   "coach": "GARNET",
+   "rating": 1550,
+   "score": 1,
+   "team": "Courage Fuyons II SP BBOX"
+  },
+  "away": {
+   "race": "Dwarf",
+   "coach": "Netovic",
+   "rating": 1362,
+   "score": 2,
+   "team": "Dwarf wall"
+  }
+ },
+ {
+  "match": 4748838,
+  "replay": 1956723,
+  "date": "2026-10-25",
+  "home": {
+   "race": "Snotling",
+   "coach": "albator2001",
+   "rating": 1535,
+   "score": 0,
+   "team": "[BBT17] Snotlings"
+  },
+  "away": {
+   "race": "Bretonnian",
+   "coach": "Aragorn92",
+   "rating": 1686,
+   "score": 2,
+   "team": "Hail to the king!"
+  }
+ },
+ {
+  "match": 4748830,
+  "replay": 1956725,
+  "date": "2026-10-25",
+  "home": {
+   "race": "Goblin",
+   "coach": "Heroic_Tackle",
+   "rating": 1733,
+   "score": 1,
+   "team": "BBT18 Achtung Kobold!"
+  },
+  "away": {
+   "race": "Bretonnian",
+   "coach": "highsididy",
+   "rating": 1594,
+   "score": 2,
+   "team": "Musketteers"
+  }
+ },
+ {
+  "match": 4748884,
+  "replay": 1956808,
+  "date": "2026-10-25",
+  "home": {
+   "race": "Snotling",
+   "coach": "dolce",
+   "rating": 1769,
+   "score": 2,
+   "team": "Third Wheel Traitors"
+  },
+  "away": {
+   "race": "Ogre",
+   "coach": "Deepfruit",
+   "rating": 1487,
+   "score": 0,
+   "team": "Grr P\u00e9\u00e9ps"
+  }
+ },
+ {
+  "match": 4748916,
+  "replay": 1956844,
+  "date": "2026-10-25",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "Zelmor",
+   "rating": 1825,
+   "score": 1,
+   "team": "Eald Weorold Ge-\u00feoftscipe"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "placaplaca",
+   "rating": 1599,
+   "score": 2,
+   "team": "BBT_18 Rompe Orte"
+  }
+ },
+ {
+  "match": 4749022,
+  "replay": 1956970,
+  "date": "2026-10-26",
+  "home": {
+   "race": "Snotling",
+   "coach": "SparTaNxX",
+   "rating": 1510,
+   "score": 2,
+   "team": "Snotos"
+  },
+  "away": {
+   "race": "Human",
+   "coach": "favenviro",
+   "rating": 1427,
+   "score": 1,
+   "team": "Killerbunny Training Squad"
+  }
+ },
+ {
+  "match": 4749089,
+  "replay": 1957043,
+  "date": "2026-10-26",
+  "home": {
+   "race": "Snotling",
+   "coach": "XtremeXwing",
+   "rating": 1796,
+   "score": 1,
+   "team": "Top Snot"
+  },
+  "away": {
+   "race": "Human",
+   "coach": "gnome",
+   "rating": 1598,
+   "score": 1,
+   "team": "Very Serious Humans"
+  }
+ },
+ {
+  "match": 4749114,
+  "replay": 1957077,
+  "date": "2026-10-26",
+  "home": {
+   "race": "Orc",
+   "coach": "MattDakka",
+   "rating": 1705,
+   "score": 2,
+   "team": "Red Krushaz"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "aky123",
+   "rating": 1532,
+   "score": 1,
+   "team": "Pale Horse BB17"
+  }
+ },
+ {
+  "match": 4749145,
+  "replay": 1957120,
+  "date": "2026-10-26",
+  "home": {
+   "race": "Goblin",
+   "coach": "aky123",
+   "rating": 1527,
+   "score": 0,
+   "team": "Pale Horse BB17"
+  },
+  "away": {
+   "race": "Skaven",
+   "coach": "XavierM",
+   "rating": 1393,
+   "score": 3,
+   "team": "Cloacas de Barcelona"
+  }
+ },
+ {
+  "match": 4749167,
+  "replay": 1957153,
+  "date": "2026-10-26",
+  "home": {
+   "race": "Snotling",
+   "coach": "DrClaes",
+   "rating": 1657,
+   "score": 0,
+   "team": "Bumbling Feelbads"
+  },
+  "away": {
+   "race": "Snotling",
+   "coach": "dolce",
+   "rating": 1799,
+   "score": 1,
+   "team": "Third Wheel Traitors"
+  }
+ },
+ {
+  "match": 4749271,
+  "replay": 1957251,
+  "date": "2026-10-26",
+  "home": {
+   "race": "Ogre",
+   "coach": "SideshowBob",
+   "rating": 1656,
+   "score": 3,
+   "team": "Smashing through da boundaries"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "aky123",
+   "rating": 1514,
+   "score": 0,
+   "team": "Pale Horse BB17"
+  }
+ },
+ {
+  "match": 4749290,
+  "replay": 1957282,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Old World Alliance",
+   "coach": "Gary_Gygax",
+   "rating": 1589,
+   "score": 1,
+   "team": "Old World Rules"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "James_",
+   "rating": 1574,
+   "score": 2,
+   "team": "\u2605 Doomed Divers \u2605"
+  }
+ },
+ {
+  "match": 4749330,
+  "replay": 1957326,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Goblin",
+   "coach": "angusosborne",
+   "rating": 1593,
+   "score": 1,
+   "team": "Stop Out"
+  },
+  "away": {
+   "race": "Chaos Renegade",
+   "coach": "highsididy",
+   "rating": 1596,
+   "score": 1,
+   "team": "Morgs Minions"
+  }
+ },
+ {
+  "match": 4749359,
+  "replay": 1957350,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Snotling",
+   "coach": "jnewman",
+   "rating": 1679,
+   "score": 1,
+   "team": "NoRRRookieshere"
+  },
+  "away": {
+   "race": "Amazon",
+   "coach": "DoctorMidnight",
+   "rating": 1688,
+   "score": 2,
+   "team": "GIRRRLZ are back"
+  }
+ },
+ {
+  "match": 4749374,
+  "replay": 1957383,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Snotling",
+   "coach": "SparTaNxX",
+   "rating": 1523,
+   "score": 1,
+   "team": "Snotos"
+  },
+  "away": {
+   "race": "Nurgle",
+   "coach": "BabyPickles",
+   "rating": 1426,
+   "score": 1,
+   "team": "{BBT18} Bloatborn Blitzers"
+  }
+ },
+ {
+  "match": 4749458,
+  "replay": 1957466,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Nurgle",
+   "coach": "hammer_ortiz",
+   "rating": 1573,
+   "score": 1,
+   "team": "Papa Pus"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "Kreed",
+   "rating": 1613,
+   "score": 1,
+   "team": "Getz Themzz"
+  }
+ },
+ {
+  "match": 4749522,
+  "replay": 1957573,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Snotling",
+   "coach": "DrClaes",
+   "rating": 1643,
+   "score": 0,
+   "team": "Bumbling Feelbads"
+  },
+  "away": {
+   "race": "Chaos Renegade",
+   "coach": "highsididy",
+   "rating": 1589,
+   "score": 2,
+   "team": "Dorian's Lost Marauders"
+  }
+ },
+ {
+  "match": 4749577,
+  "replay": 1957635,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Snotling",
+   "coach": "jnewman",
+   "rating": 1671,
+   "score": 1,
+   "team": "NoRRRookieshere"
+  },
+  "away": {
+   "race": "Halfling",
+   "coach": "gnome",
+   "rating": 1590,
+   "score": 2,
+   "team": "BBT Leaflet Drop"
+  }
+ },
+ {
+  "match": 4749619,
+  "replay": 1957671,
+  "date": "2026-10-27",
+  "home": {
+   "race": "Chaos Renegade",
+   "coach": "highsididy",
+   "rating": 1606,
+   "score": 0,
+   "team": "Dorian's Lost Marauders"
+  },
+  "away": {
+   "race": "Snotling",
+   "coach": "jnewman",
+   "rating": 1660,
+   "score": 3,
+   "team": "Gnomes with fake moustaches"
+  }
+ },
+ {
+  "match": 4749651,
+  "replay": 1957698,
+  "date": "2026-10-28",
+  "home": {
+   "race": "Snotling",
+   "coach": "TalonBay",
+   "rating": 1641,
+   "score": 1,
+   "team": "BBT18 TB Snots"
+  },
+  "away": {
+   "race": "Snotling",
+   "coach": "dolce",
+   "rating": 1820,
+   "score": 1,
+   "team": "Third Wheel Traitors"
+  }
+ },
+ {
+  "match": 4749810,
+  "replay": 1957869,
+  "date": "2026-10-28",
+  "home": {
+   "race": "Snotling",
+   "coach": "XtremeXwing",
+   "rating": 1772,
+   "score": 1,
+   "team": "No Secret Weapons Here"
+  },
+  "away": {
+   "race": "Black Orc",
+   "coach": "tripio",
+   "rating": 1549,
+   "score": 0,
+   "team": "[BB18] DirtyOrcs"
+  }
+ },
+ {
+  "match": 4749855,
+  "replay": 1957926,
+  "date": "2026-10-28",
+  "home": {
+   "race": "Wood Elf",
+   "coach": "chaoshugs_",
+   "rating": 1747,
+   "score": 1,
+   "team": "Perry-sipping Poindexters"
+  },
+  "away": {
+   "race": "Goblin",
+   "coach": "depp",
+   "rating": 1501,
+   "score": 2,
+   "team": "Pits kids"
+  }
+ },
+ {
+  "match": 4749879,
+  "replay": 1957940,
+  "date": "2026-10-28",
+  "home": {
+   "race": "Goblin",
+   "coach": "angusosborne",
+   "rating": 1589,
+   "score": 2,
+   "team": "Stop Out"
+  },
+  "away": {
+   "race": "High Elf",
+   "coach": "e1f0",
+   "rating": 1435,
+   "score": 3,
+   "team": "Ellirion Dark Pegasus"
+  }
+ },
+ {
+  "match": 4749872,
+  "replay": 1957953,
+  "date": "2026-10-28",
+  "home": {
+   "race": "Snotling",
+   "coach": "DrClaes",
+   "rating": 1629,
+   "score": 0,
+   "team": "Bumbling Feelbads"
+  },
+  "away": {
+   "race": "Vampire",
+   "coach": "ZmijaTeutonska",
+   "rating": 1635,
+   "score": 2,
+   "team": "[BB18] Uberwald"
+  }
+ },
+ {
+  "match": 4749921,
+  "replay": 1958030,
+  "date": "2026-10-28",
+  "home": {
+   "race": "Goblin",
+   "coach": "placaplaca",
+   "rating": 1615,
+   "score": 1,
+   "team": "BBT_18 Rompe Orte"
+  },
+  "away": {
+   "race": "Skaven",
+   "coach": "Rib-Goaty",
+   "rating": 1792,
+   "score": 3,
+   "team": "Bet On Rat [BBT18]"
+  }
+ },
+ {
+  "match": 4749931,
+  "replay": 1958038,
+  "date": "2026-10-29",
+  "home": {
+   "race": "Goblin",
+   "coach": "Deklar",
+   "rating": 1309,
+   "score": 1,
+   "team": "Full Moon Plunder"
+  },
+  "away": {
+   "race": "Snotling",
+   "coach": "Hobbelknopf",
+   "rating": 1577,
+   "score": 1,
+   "team": "Everblasters"
+  }
+ },
+ {
+  "match": 4749937,
+  "replay": 1958049,
+  "date": "2026-10-29",
+  "home": {
+   "race": "Goblin",
+   "coach": "placaplaca",
+   "rating": 1608,
+   "score": 1,
+   "team": "BBT_18 Rompe Orte"
+  },
+  "away": {
+   "race": "Necromantic Horror",
+   "coach": "chigrero",
+   "rating": 1713,
+   "score": 2,
+   "team": "Wof Wof"
+  }
+ },
+ {
+  "match": 4749958,
+  "replay": 1958072,
+  "date": "2026-10-29",
+  "home": {
+   "race": "Goblin",
+   "coach": "angusosborne",
+   "rating": 1571,
+   "score": 1,
+   "team": "Stop Out"
+  },
+  "away": {
+   "race": "Norse",
+   "coach": "diegx09",
+   "rating": 1297,
+   "score": 3,
+   "team": "hijos de thorrr"
   }
  }
 ]

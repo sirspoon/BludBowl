@@ -719,3 +719,46 @@ opponent was hurt), next to their carrier, or just up the pitch.
   opponent 12%; turn 8 24% (coaches 31%). Accuracy is low (27% accurate, 19% fumbled).
 - Against v3.70 over the nine throwing teams: 33-30 touchdowns, 17-13 wins, turnovers 151-174 over 45. Level. Released
   because the teams now play to type without doing worse.
+
+## Bombs (Oct 2026)
+`fumbbl-bombs.py` (the replays, plus 42 more Goblin and Snotling matches: 12 from the top-coaches list, 30 found with
+`fumbbl-race-replays.py`, which pages back through FUMBBL's match list for a race with a coach rated 1500+) and
+`bb-bombs.js` (v3.71, 24 mirror matches each of Goblins and Snotlings, the two teams with a bomber in their default
+line-up: the Bomma and the Fungus Flinga). "At whom" is what was in the blast (the target square and the eight round it).
+
+| | coaches (25 team-matches) | BludBowl (48) |
+|---|---|---|
+| bombs a match | 1.7 (Goblin 1.9, Snotling 1.6) | 0.12-0.17 (18 in 120 team-matches over three runs; Goblins 2 in 60) |
+| team-turns starting with the bomber on their feet | 3.3 a match | 7.0 a match |
+| ...a bomb thrown in | 51% of them | 2% |
+| at their ball carrier (in the blast) | 33% | 50% (of 6) |
+| at a crowd (2+ standing opponents) | 50% | 50% |
+| at one standing player | 10% | 0% |
+| aimed right at an opponent's square | 38% | 0-50% (small sample) |
+| standing opponents in the blast | 2.9 | 3.8 |
+| own standing player in the blast | 14% | 0% (never allowed) |
+| accurate / inaccurate / fumbled | 38 / 33 / 26%, re-rolled 29% | 50 / 0 / 50% (of 6) |
+| opponents knocked down a bomb | 0.71 (none 40%) | 0.83 |
+| own player knocked down (a turnover) | 40% | 33% |
+| range: quick / short | 50 / 48% | 50 / 50% |
+| bomber's nearest opponent as it throws: next to it / 2-3 / 4+ | 19 / 69 / 12% | 0 / 100 / 0% |
+| when in the turn | 0.80 of the way through, last action 50% | 0.97, last 67% |
+| turns 1-5 of the half | 95% | about half |
+
+- **Coaches bomb about every other turn the bomber is up.** The bomber is sent off at the end of every drive anyway
+  (Secret Weapon), so a bomb not thrown is wasted. They throw at whatever is bunched up, half the time a crowd and a
+  third of the time their ball carrier; mostly at linemen, as that's who stands on the line (52%).
+- **They accept a lot of risk:** only 38% accurate, 26% fumbled, and 40% of bombs knock over one of their own (a
+  turnover). They manage it by throwing late: the bomb is the last action half the time, so the turnover costs little.
+- **They keep the bomber 2-3 squares from the opposition** (69%): in range of a quick or short bomb (no move is allowed
+  before throwing) but not marked (19%).
+- **The computer hardly ever throws.** Over 29 turns with its bomber standing (4 matches with counters in the code),
+  the best bomb on offer passed its bar (0.6) only 2-3 times, and 11 of the 29 started with the bomber next to an
+  opponent; 17 of 46 turns started with the bomber on the floor. Why the bar is so rarely met (`bombPlan`/`bombSquare`):
+  - a fumble always costs 1.5, plus 0.6 for each team-mate still to act - but late in the turn, with none of our players
+    next to the bomber, a fumble only knocks over a player who's going to be sent off anyway, and ends a turn that's
+    over;
+  - any square with one of our standing players in the blast is ruled out (coaches: 14%);
+  - nothing counts the bomber being sent off at the end of the drive (use it or lose it);
+  - the bomber isn't kept back for the end of the turn (it joins the cage and the screens), and nothing puts it 2-3
+    squares behind our line, out of reach, for the next turn's bomb.
