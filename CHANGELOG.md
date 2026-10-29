@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.77 (29 Oct 2026)
+- **New:** Featured matches in Watch a FUMBBL Match, below the match-number box (which stays). "Recent top games" looks through FUMBBL's latest 150 or so matches and lists the best: close results, lots of touchdowns, bloody games and strong coaches first (with their ratings), Competitive division first. The list is kept for 20 minutes; ↻ looks again. "Our picks" is a hand-picked ten from the matches studied for the computer's play (five-touchdown thrillers, a bloodbath with Gnoblars flying, a seven-bomb Goblin game and more). A team filter shows only matches with that team. Tap a match to watch it.
+
 ## v3.76 (29 Oct 2026)
 - **Improved:** FUMBBL replays show the block dice. Each block pops up a tray under the top bar with who's blocking whom, the dice rolled (the game's own die faces) and the one chosen ringed in gold, the others faded, plus "defender picks" when it was their choice; the same dice appear as little pictures in the match log. Blocks pause a moment longer so there's time to see them.
 - **Improved:** the replay's camera now keeps the action in view when you're zoomed in: whoever is moving, both players in a block, the whole of a pass or kick, a hurt player or a bomb blast stay in the part of the screen the top bar, the log, the controls and the dice leave clear. It keeps the zoom you chose (widening for a long kick, then coming back), and leaves the view alone for a moment after you pan or pinch.

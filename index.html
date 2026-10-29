@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.76</title>
+    <title>BludBowl 3.77</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -621,6 +621,20 @@
         #frep-pp { background: #065f46 !important; border-color: #10b981 !important; }
         #frep-range { width: 100%; accent-color: #f59e0b; }
         #frep-bar .fs-wrap { display: block; width: 100%; }
+        #frep-ask .sv-ask-card { max-height: calc(100dvh - 32px); overflow-y: auto; }
+        #frep-ask .fr-tabs { display: flex; gap: 6px; margin: 6px 0; }
+        #frep-ask .fr-tabs button { flex: 1 1 auto; padding: 6px 8px; border-radius: 9px; border: 1px solid #475569; background: #1e293b; color: #cbd5e1; font-weight: 700; font-size: 13px; }
+        #frep-ask .fr-tabs button.on { background: #065f46; border-color: #10b981; color: #fff; }
+        #frep-ask .fr-tabs #frep-refresh { flex: 0 0 auto; }
+        #frep-race { width: 100%; background: #020617; color: #e2e8f0; border: 1px solid #475569; border-radius: 9px; padding: 6px 8px; font-size: 14px; margin-bottom: 6px; }
+        #frep-ask .fs-wrap { display: block; width: 100%; }
+        #frep-ask .fs-btn { width: 100%; background: #020617; color: #e2e8f0; border: 1px solid #475569; border-radius: 9px; padding: 6px 10px; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+        #frep-list { display: flex; flex-direction: column; gap: 6px; }
+        #frep-list .fr-row { text-align: left; padding: 8px 10px; border-radius: 10px; border: 1px solid #334155; background: #0b1222; color: #e2e8f0; }
+        #frep-list .fr-row:hover, #frep-list .fr-row:active { border-color: #f59e0b; }
+        #frep-list .fr-t { font-weight: 800; font-size: 14px; }
+        #frep-list .fr-s { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
+        #frep-list .fr-msg { font-size: 12.5px; color: #94a3b8; margin: 6px 2px; }
         #frep-dice { position: fixed; left: 50%; transform: translateX(-50%); z-index: 46; pointer-events: none; background: rgba(2,6,23,.86); border: 1px solid #475569;
             border-radius: 12px; padding: 5px 10px 6px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.5); max-width: calc(100vw - 16px); }
         #frep-dice.hidden { display: none; }
@@ -974,7 +988,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.76</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.77</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1005,6 +1019,12 @@
                 style="width:100%;box-sizing:border-box;background:#020617;color:#e2e8f0;border:2px solid #475569;border-radius:10px;padding:8px 10px;font-size:16px;margin-bottom:8px">
             <p id="frep-note" role="status" style="min-height:1.2em;font-size:12px;margin:0 0 10px;color:#94a3b8"></p>
             <div class="sv-btns"><button type="button" class="sv-btn sv-go" id="frep-go">▶ Watch</button><label class="sv-btn" style="cursor:pointer">Open a file…<input type="file" id="frep-file" accept=".gz,.json,application/gzip,application/json" class="hidden"></label><button type="button" class="sv-btn" id="frep-cancel">Cancel</button></div>
+            <div class="fr-feat">
+                <div class="sv-head" style="margin-top:14px">Featured matches</div>
+                <div class="fr-tabs" role="tablist"><button type="button" data-ft="recent" class="on" role="tab">Recent top games</button><button type="button" data-ft="picks" role="tab">Our picks</button><button type="button" id="frep-refresh" title="Look again" aria-label="Look again">↻</button></div>
+                <select id="frep-race" aria-label="Team"><option value="">Any team</option></select>
+                <div id="frep-list" role="list"></div>
+            </div>
         </div></div>
         <section id="settings-panel" class="hidden" aria-label="Settings">
             <h2 class="fantasy-font text-xl md:text-2xl text-slate-300 uppercase tracking-widest mb-3 text-center">Settings</h2>
@@ -21426,18 +21446,100 @@
                 jump(Math.max(0, first)); startFrameLoop(); play();
             }
             function leave() { stop(); location.reload(); }
+            const PICKS = [{"id": 4745896, "rid": 1953280, "races": ["Bretonnian", "Skaven"], "score": [3, 2], "coaches": ["proff70", "Aelendil"], "cr": [1658, 1697], "note": "Five touchdowns, decided by one", "date": "2026-10-14"}, {"id": 4749879, "rid": 1957940, "races": ["Goblin", "High Elf"], "score": [2, 3], "coaches": ["angusosborne", "e1f0"], "cr": [1589, 1435], "note": "Five touchdowns, and Goblin bombs", "date": "2026-10-28"}, {"id": 4745631, "rid": 1952984, "races": ["Ogre", "Orc"], "score": [1, 1], "coaches": ["Zelmor", "Willking"], "cr": [1786, 1783], "note": "A bloodbath, with Gnoblars flying", "date": "2026-10-13"}, {"id": 4745789, "rid": 1953182, "races": ["Wood Elf", "Shambling Undead"], "score": [2, 2], "coaches": ["Bazakastine", "Wargraith"], "cr": [1938, 1629], "note": "A 1938-rated coach's Wood Elves", "date": "2026-10-14"}, {"id": 4746128, "rid": 1953567, "races": ["Ogre", "Skaven"], "score": [2, 1], "coaches": ["Joost", "Hagymacsipos"], "cr": [1840, 1762], "note": "Two top coaches; Ogres throwing Gnoblars", "date": "2026-10-15"}, {"id": 4749330, "rid": 1957326, "races": ["Goblin", "Chaos Renegade"], "score": [1, 1], "coaches": ["angusosborne", "highsididy"], "cr": [1593, 1596], "note": "Seven bombs", "date": "2026-10-27"}, {"id": 4745410, "rid": 1952736, "races": ["High Elf", "Chaos Renegade"], "score": [2, 2], "coaches": ["yan64", "darkmage"], "cr": [1722, 1790], "note": "Close and high-scoring, both coaches 1700+", "date": "2026-10-12"}, {"id": 4745990, "rid": 1953380, "races": ["Chaos Chosen", "Khorne"], "score": [1, 2], "coaches": ["AlRonno", "MTM"], "cr": [1715, 1804], "note": "Chaos v Khorne: brutal", "date": "2026-10-14"}, {"id": 4745809, "rid": 1953200, "races": ["Old World Alliance", "Snotling"], "score": [1, 1], "coaches": ["zagori", "Force_unlocked"], "cr": [1653, 1858], "note": "A Snotling swarm, coached by an 1858", "date": "2026-10-14"}, {"id": 4745828, "rid": 1953223, "races": ["Amazon", "Wood Elf"], "score": [1, 0], "coaches": ["Beltroniko", "CrisisChris"], "cr": [1844, 1732], "note": "Two elite coaches, a tight elf game", "date": "2026-10-14"}];
+            // ---- featured matches: our picks (above, from ai-training's downloads), and the best of FUMBBL's latest, found from its
+            // public match list (newest first, 25 a page): close, high-scoring, bloody, between strong coaches. Kept for 20 minutes so
+            // opening the list again doesn't ask FUMBBL again ----
+            const FEAT_KEY = 'bb-frep-recent', FEAT_MS = 20 * 60e3;
+            let featTab = 'recent', featRace = '', pool = null, poolBusy = null;
+            function interest(it) {
+                const td = it.score[0] + it.score[1], diff = Math.abs(it.score[0] - it.score[1]);
+                let v = td * 1.2 + (diff <= 1 ? 1.5 : 0) + Math.min(it.cas || 0, 10) * 0.25 + (it.div === 'Competitive' ? 2 : 0);
+                if (it.cr && it.cr[0] && it.cr[1]) v += Math.max(0, ((it.cr[0] + it.cr[1]) / 2 - 1450) / 80);
+                return v;
+            }
+            function why(it) {
+                const td = it.score[0] + it.score[1], diff = Math.abs(it.score[0] - it.score[1]), bits = [];
+                if (td >= 4) bits.push(td + ' touchdowns'); if (diff === 1 && td >= 1) bits.push('decided by one'); if (diff === 0 && td >= 2) bits.push('level');
+                if ((it.cas || 0) >= 6) bits.push('bloody (' + it.cas + ' casualties)');
+                return bits.join(', ');
+            }
+            async function recentPool(note, force) {
+                if (!force) { try { const c = JSON.parse(localStorage.getItem(FEAT_KEY) || 'null'); if (c && Date.now() - c.at < FEAT_MS && Array.isArray(c.items)) return c.items; } catch (e) {} }
+                const items = []; let last = null;
+                for (let pg = 0; pg < 6; pg++) {
+                    note(`Looking through FUMBBL's latest matches (${pg * 25})…`);
+                    const r = await fetch('https://fumbbl.com/api/match/list' + (last ? '/' + last : ''));
+                    if (!r.ok) { if (!items.length) throw new Error('FUMBBL did not answer (' + r.status + ').'); break; }
+                    const page = await r.json(); if (!Array.isArray(page) || !page.length) break;
+                    for (const m of page) {
+                        last = m.id;
+                        if (!m.replayId || m.conceded !== 'None' || !m.team1 || !m.team2 || items.some(x => x.id === +m.id)) continue;   // (pages overlap when new matches arrive)
+                        const T = [m.team1, m.team2], cas = T.map(t => t.casualties ? (+t.casualties.bh || 0) + (+t.casualties.si || 0) + (+t.casualties.rip || 0) : 0);
+                        items.push({ id: +m.id, rid: +m.replayId, div: String(m.division || ''), date: String(m.date || ''), races: T.map(t => String(t.roster && t.roster.name || '?')),
+                            score: T.map(t => +t.score || 0), coaches: T.map(t => String(t.coach && t.coach.name || '?')), cas: cas[0] + cas[1], cr: null });
+                    }
+                }
+                // the coaches' ratings, for the most promising ones (one look-up each)
+                const top = items.slice().sort((a, b) => interest(b) - interest(a)).slice(0, 10);
+                for (const it of top) {
+                    note('Checking the coaches…');
+                    try { const v = await (await fetch('https://fumbbl.com/api/match/get/' + it.id + '?verbose=1')).json();
+                        const cr = k => { const c = v && v[k] && v[k].coach && v[k].coach.rating && v[k].coach.rating.pre; return c && +c.cr ? Math.round(+c.cr) : null; };
+                        it.cr = [cr('team1'), cr('team2')]; } catch (e) {}
+                }
+                try { localStorage.setItem(FEAT_KEY, JSON.stringify({ at: Date.now(), items })); } catch (e) {}
+                return items;
+            }
+            function paintFeat(msg) {
+                const box = $('frep-list'); if (!box) return;
+                document.querySelectorAll('#frep-ask [data-ft]').forEach(b => b.classList.toggle('on', b.dataset.ft === featTab));
+                box.innerHTML = '';
+                const note = t => { const p = document.createElement('p'); p.className = 'fr-msg'; p.textContent = t; box.appendChild(p); };
+                if (msg) { note(msg); return; }
+                const keyOf = n => raceKey(n);
+                let list = featTab === 'picks' ? PICKS.slice() : (pool || []).slice().sort((a, b) => interest(b) - interest(a));
+                if (featRace) list = list.filter(it => it.races.some(n => keyOf(n) === featRace));
+                list = list.slice(0, 12);
+                if (!list.length) { note(featTab === 'picks' ? 'None of our picks has that team.' : 'No recent matches with that team. Try another, or Our picks.'); return; }
+                list.forEach(it => {   // (FUMBBL's names go in as text, never as HTML)
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'fr-row'; b.setAttribute('role', 'listitem');
+                    const t = document.createElement('div'); t.className = 'fr-t'; t.textContent = `${it.races[0]} ${it.score[0]}–${it.score[1]} ${it.races[1]}`;
+                    const sub = document.createElement('div'); sub.className = 'fr-s';
+                    const coach = i => it.coaches[i] + (it.cr && it.cr[i] ? ' ' + it.cr[i] : '');
+                    sub.textContent = `${coach(0)} v ${coach(1)}` + ((it.note || why(it)) ? ' · ' + (it.note || why(it)) : '') + (it.div && it.div !== 'Competitive' ? ' · ' + it.div : '') + (it.date ? ' · ' + it.date : '');
+                    b.appendChild(t); b.appendChild(sub);
+                    b.addEventListener('click', () => { $('frep-id').value = String(it.id); loadFrom('replay ' + it.rid); });
+                    box.appendChild(b);
+                });
+            }
+            async function showFeat(force) {
+                if (featTab === 'picks') { paintFeat(); return; }
+                if (pool && !force) { paintFeat(); return; }
+                if (poolBusy) return;
+                poolBusy = recentPool(t => paintFeat(t), force).then(items => { pool = items; paintFeat(); })
+                    .catch(e => { console.error(e); paintFeat("Couldn't reach FUMBBL just now" + (e && e.message ? ' (' + e.message + ')' : '') + '. Our picks still work.'); })
+                    .finally(() => { poolBusy = null; });
+            }
+            let loadFrom = () => {};
             function wire() {
                 const ask = $('frep-ask'), inp = $('frep-id'), note = $('frep-note'), go = $('frep-go');
                 const say = (t, bad) => { note.textContent = t; note.style.color = bad ? '#fca5a5' : '#94a3b8'; };
                 const btn = $('mm-fumbbl');
-                if (btn) btn.addEventListener('click', () => { ask.classList.remove('hidden'); say(''); setTimeout(() => inp.focus(), 50); });
+                if (btn) btn.addEventListener('click', () => { ask.classList.remove('hidden'); say(''); showFeat(false); });
+                document.querySelectorAll('#frep-ask [data-ft]').forEach(b => b.addEventListener('click', () => { featTab = b.dataset.ft; showFeat(false); }));
+                { const sel = $('frep-race');
+                  Object.values(RACES).forEach(R => { const o = document.createElement('option'); o.value = R.key; o.textContent = R.name; sel.appendChild(o); });
+                  sel.addEventListener('change', () => { featRace = sel.value; paintFeat(); }); }
+                $('frep-refresh').addEventListener('click', () => { featTab = 'recent'; pool = null; showFeat(true); });
                 $('frep-cancel').addEventListener('click', () => ask.classList.add('hidden'));
-                const load = async () => {
+                loadFrom = async what => {
                     go.disabled = true;
-                    try { const d = await fetchReplay(inp.value, t => say(t)); say('Starting…'); ask.classList.add('hidden'); start(d); }
+                    try { const d = await fetchReplay(what, t => say(t)); say('Starting…'); ask.classList.add('hidden'); start(d); }
                     catch (e) { console.error(e); say(e && e.message ? e.message : 'Something went wrong.', true); }
                     finally { go.disabled = false; }
                 };
+                const load = () => loadFrom(inp.value);
                 go.addEventListener('click', load);
                 inp.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
                 $('frep-file').addEventListener('change', async e => {
