@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.06 (29 Oct 2026)
+- **Removed:** the BludBowl epics list in I Like to Watch > Our picks (and the epic/ folder behind it). Saved matches, and match files someone sends you (added with "＋ Add a match file…"), are all kept in My matches instead.
+
 ## v4.05 (29 Oct 2026)
 - **New:** recorded matches (My matches) now keep the coaches' decisions, shown in the game's own windows with the answer picked, as for FUMBBL replays: re-rolling a failed roll or accepting it (team re-roll or Pro), re-rolling the block dice, every question the game asks a coach (Apothecary, Wrestle, Diving Tackle, Stand Firm, bribes, Desperate Measures, picks from several options...), and who won the coin toss and whether they chose to kick or receive.
 - **New:** recorded matches keep the close-up action replays of passes, thrown team-mates and bombs, and play them in I Like to Watch (with the Replays setting on, at ½× to 2×). They're recorded even in a match where the computer plays both sides, where they aren't shown live.

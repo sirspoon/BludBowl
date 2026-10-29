@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.05</title>
+    <title>BludBowl 4.06</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1022,7 +1022,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.05</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.06</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -21981,20 +21981,6 @@
                 if (msg) { note(msg); return; }
                 if (featTab === 'mine') { paintMine(box, note); return; }
                 const keyOf = n => raceKey(n);
-                if (featTab === 'picks') {   // the BludBowl epics first (the owner's pick of matches played here), then FUMBBL's
-                    if (epics === null) { epicList().then(() => { if (featTab === 'picks') paintFeat(); }); }
-                    const ep = (epics || []).filter(it => !featRace || it.races.includes(featRace));
-                    if (ep.length) {
-                        const h = document.createElement('p'); h.className = 'fr-msg'; h.textContent = 'BludBowl epics'; box.appendChild(h);
-                        ep.forEach(it => {
-                            const b = document.createElement('button'); b.type = 'button'; b.className = 'fr-row'; b.setAttribute('role', 'listitem');
-                            const t = document.createElement('div'); t.className = 'fr-t'; t.textContent = it.title;
-                            const sub = document.createElement('div'); sub.className = 'fr-s'; sub.textContent = [it.note, it.comp, it.date].filter(Boolean).join(' · ');
-                            b.append(t, sub); b.addEventListener('click', () => loadEpic(it)); box.appendChild(b);
-                        });
-                        const h2 = document.createElement('p'); h2.className = 'fr-msg'; h2.textContent = 'From FUMBBL'; box.appendChild(h2);
-                    }
-                }
                 let list = featTab === 'picks' ? PICKS.slice() : (pool || []).slice().sort((a, b) => interest(b) - interest(a));
                 if (featRace) list = list.filter(it => it.races.some(n => keyOf(n) === featRace));
                 list = list.slice(0, 12);
@@ -22009,25 +21995,6 @@
                     b.addEventListener('click', () => { $('frep-id').value = String(it.id); loadFrom('replay ' + it.rid); });
                     box.appendChild(b);
                 });
-            }
-            // ---- the BludBowl epics: matches played here that the owner picked, kept in the project (epic/index.json lists them) ----
-            let epics = null;
-            async function epicList() {
-                try {
-                    const r = await fetch('epic/index.json', { cache: 'no-cache' }); const j = r.ok ? await r.json() : [];
-                    epics = (Array.isArray(j) ? j : []).filter(it => it && /^epic\/[A-Za-z0-9._-]+$/.test(String(it.file || ''))).slice(0, 40).map(it => ({ file: String(it.file),
-                        title: plain(it.title) || 'Match', note: String(it.note || '').slice(0, 80), comp: String(it.comp || '').slice(0, 90), date: String(it.date || '').slice(0, 10),
-                        races: Array.isArray(it.races) ? it.races.map(String) : [] }));
-                } catch (e) { epics = []; }
-                return epics;
-            }
-            async function loadEpic(it) {
-                const n = $('frep-note'); if (n) { n.textContent = 'Loading ' + it.title + '…'; n.style.color = '#94a3b8'; }
-                try {
-                    const r = await fetch(it.file); if (!r.ok) throw new Error('That match is missing (' + r.status + ').');
-                    const d = JSON.parse(await gunzipText(await r.arrayBuffer())); if (!d || !d.game || !d.gameLog) throw new Error('That match could not be read.');
-                    $('frep-ask').classList.add('hidden'); start(d);
-                } catch (e) { console.error(e); if (n) { n.textContent = e && e.message ? e.message : 'Something went wrong.'; n.style.color = '#fca5a5'; } }
             }
             // ---- My matches: the ones saved at full time (REC), kept on this device; each can be watched, sent on as a file, or deleted ----
             async function paintMine(box, note) {
