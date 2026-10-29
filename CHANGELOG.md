@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.09 (29 Oct 2026)
+- Fixed: a big text size (the Aa button) no longer pushes the top bar's buttons off the screen, so you can always tap Aa again to go back down.
+
 ## v4.08 (29 Oct 2026)
 - Settings > Back up & restore now includes your saved replays (My matches).
 

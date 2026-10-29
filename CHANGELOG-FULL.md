@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.09 (29 Oct 2026)
+- **Fixed:** the top bar cut off whatever didn't fit across the screen, so a bigger text size (the Aa button) pushed its buttons off the side, Aa itself included, leaving no way to make it smaller again. On a landscape phone the End Turn and fullscreen buttons were already cut off at the normal size. The top bar is now only ever as big as fits the screen's width (the other panels and pop-ups still take the size you pick), so every button stays in reach.
+- **Improved:** tapping Aa shows the size it has switched to for a moment (Auto, 100%, 125%... 200%, then back to Auto).
+
 ## v4.08 (29 Oct 2026)
 - **Improved:** Settings > Back up & restore now includes your saved replays (My matches) in the backup file. Restoring a backup adds its replays to My matches and keeps any already there ("Undo the last restore" leaves them too). Older backups, without replays, still restore as before.
 

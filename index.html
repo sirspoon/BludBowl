@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.08</title>
+    <title>BludBowl 4.09</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,6 +118,7 @@
         #log-grip:hover span, #log-grip.drag span { background: #fbbf24; }
         #top-bar-wrap, #panel-log-container, #panel-unit-container, #setup-controls-container, #event-panel,
         .modal-bg > div, #removal-toast > div, #skill-tip, #team-panel { zoom: var(--ui); }
+        #top-bar-wrap { zoom: var(--ui-bar, var(--ui)); }   /* the top bar: the same size, unless that would push its buttons off the screen (fitTopBar) */
         /* pop-ups fill the part of the screen you can actually see (on a phone the address bar can make the page taller than the
            screen, which pushed the bottom panels off the bottom) */
         .modal-bg { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: auto !important; height: 100vh; height: var(--app-h, 100dvh) !important; }
@@ -1022,7 +1023,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.08</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.09</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1744,7 +1745,26 @@
             };
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', go) : go();
         })();
-        function applyUiScale() { document.documentElement.style.setProperty('--ui', String(uiScale())); }
+        function applyUiScale() { document.documentElement.style.setProperty('--ui', String(uiScale())); fitTopBar(); }
+        // The top bar is one line (two in portrait) and cuts off whatever doesn't fit, which at a big text size (or a narrow
+        // landscape phone) was its buttons, the Aa one included. So it's made only as big as fits the screen's width.
+        function fitTopBar() {
+            const root = document.documentElement, row = document.getElementById('top-bar-row-actions'), panel = document.getElementById('top-bar-panel');
+            let z = uiScale(); root.style.setProperty('--ui-bar', String(z));
+            if (!row || !panel || !panel.clientWidth) return;
+            for (let i = 0; i < 4; i++) {
+                const over = row.scrollWidth - row.clientWidth; if (over <= 1 || z <= 0.6) break;
+                z = Math.max(0.6, Math.floor(z * panel.clientWidth / (panel.clientWidth + over) * 100) / 100);
+                root.style.setProperty('--ui-bar', String(z));
+            }
+        }
+        {   // (again whenever the bar appears or changes width: a match starting, the score, the screen turning)
+            let queued = false;
+            const later = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; try { fitTopBar(); } catch (e) {} }); };
+            addEventListener('resize', later);
+            const watch = () => { try { const ro = new ResizeObserver(later); ['top-bar-panel', 'top-bar-row-match', 'top-bar-row-status'].forEach(id => { const e = document.getElementById(id); if (e) ro.observe(e); }); } catch (e) {} };
+            document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', watch) : watch();
+        }
         applyUiScale();
         window.addEventListener('resize', applyUiScale);
         {   // the height of the screen you can see (it changes as a phone's address bar comes and goes)
@@ -26522,7 +26542,9 @@
             try { localStorage.setItem('bb-ui-scale', String(uiPref)); } catch (e) {}
             applyUiScale();
             const txt = uiPref === 'auto' ? `Auto (${Math.round(autoUiScale() * 100)}% on this screen)` : `${Math.round(uiPref * 100)}%`;
-            document.getElementById('btn-uiscale').title = `Text size: ${txt}`;
+            const b = document.getElementById('btn-uiscale'); b.title = `Text size: ${txt}`;
+            b.textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';   // (what it's now, for a moment: tap again for the next size, after 200% back to Auto)
+            fitTopBar(); clearTimeout(b._t); b._t = setTimeout(() => { b.textContent = 'Aa'; fitTopBar(); }, 1500);
             log(`  Text size: ${txt}.`, 'text-slate-400');
         });
 
