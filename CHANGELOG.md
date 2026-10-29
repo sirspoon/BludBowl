@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.82 (29 Oct 2026)
+- **Changed:** the "right between the legs!" voice is now about a tenth as common: it plays for 1 in 25 players Stunned (was 2 in 5), and as rarely among the crowd's reactions.
+
 ## v3.81 (29 Oct 2026)
 - **Improved:** FUMBBL replays show the kick-off event the way the game does: a big announcement in the event's colour with its name, the roll and what it means (Blitz, High Kick, Cheering Fans, Pitch Invasion…).
 - **Improved:** moves in FUMBBL replays are smooth: a player's run plays as one continuous walk (easing in and out at the ends) instead of hopping a square at a time.

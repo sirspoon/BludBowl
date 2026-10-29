@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.81</title>
+    <title>BludBowl 3.82</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1015,7 +1015,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.81</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.82</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -10386,7 +10386,9 @@
       src.start(ctx.currentTime + base + (0.1 + Math.random() * 0.6) * spread);
     }
     for (let i = 0; i < layers; i++) {
-      const useExtra = Math.random() < 0.3, name = pick(useExtra ? pool.extra : pool.main), b = voxBuf[name]; if (!b) continue;
+      const useExtra = Math.random() < 0.3; let name = pick(useExtra ? pool.extra : pool.main);
+      if (name === 'nuts' && Math.random() < 0.9) name = pick(pool.extra.filter(n => n !== 'nuts'));   // (in the crowd as rarely as on the pitch)
+      const b = voxBuf[name]; if (!b) continue;
       const src = ctx.createBufferSource(), g = ctx.createGain(), lp = ctx.createBiquadFilter(), p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
       const bell = (Math.random() + Math.random()) / 2;                         // onsets bunch up in the middle of the spread
       const far = Math.random();                                                // 0 = near the mic, 1 = far back in the stand
@@ -26090,7 +26092,7 @@
                     const o = seen.get(p.id), off = p.isReserve || p.isCasualty || p.isEjected || p.isKO;
                     if (o && !off) {
                         if (p.isDown && !o.down) { downs++; first = first || p; }
-                        if (p.isStunned && !o.stun && !SFX.isMuted() && Math.random() < 0.4) sfxVoice('nuts', p, 600);
+                        if (p.isStunned && !o.stun && !SFX.isMuted() && Math.random() < 0.04) sfxVoice('nuts', p, 600);   // ("right between the legs": a rare treat)
                     }
                     seen.set(p.id, { down: p.isDown, stun: p.isStunned });
                 });
