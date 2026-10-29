@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.05 (29 Oct 2026)
+- **New:** recorded matches (My matches) now keep the coaches' decisions, shown in the game's own windows with the answer picked, as for FUMBBL replays: re-rolling a failed roll or accepting it (team re-roll or Pro), re-rolling the block dice, every question the game asks a coach (Apothecary, Wrestle, Diving Tackle, Stand Firm, bribes, Desperate Measures, picks from several options...), and who won the coin toss and whether they chose to kick or receive.
+- **New:** recorded matches keep the close-up action replays of passes, thrown team-mates and bombs, and play them in I Like to Watch (with the Replays setting on, at ½× to 2×). They're recorded even in a match where the computer plays both sides, where they aren't shown live.
+- **New:** a saved match says what kind of match it was: Exhibition, Career match, "League: <league name> · Round 3" (or Semi-final, Third-place match, Final, Friendly), "Tournament: <cup name> · Quarter-finals" (or Final, or a Swiss round), plus Sevens, Online, and "after extra time" or who won on penalties. It's shown in the My matches list and kept in the exported file.
+- **New:** I Like to Watch > Our picks starts with **BludBowl epics**: matches played in BludBowl that are picked out as worth watching, kept with the game (the epic/ folder). Send one in by exporting it from My matches. (The list is empty until the first is added.)
+
 ## v4.04 (29 Oct 2026)
 - **New: My matches.** Every match you play (or watch the computer play) is now recorded quietly as it goes, in the same form as a FUMBBL replay. Nothing is kept unless you ask: at full time the match summary has a "💾 Save this match" button, so you can decide afterwards whether it was one worth keeping. Saved matches go in a new **My matches** tab in I Like to Watch, where each one can be:
   - **watched** on the pitch like a FUMBBL replay (same team colours, pitch and format, Sevens included), with the moves, falls and injuries, the ball, score and turns, each player's action, the rolls and re-rolls, block dice, armour and injury rolls, kick-off events, skills and touchdowns;

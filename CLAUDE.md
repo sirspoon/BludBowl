@@ -41,3 +41,7 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
   stats per team) and keeps the scripts to re-run it. Main finding so far: the AI throws about half as many blocks as
   good coaches (24 v 46 a match) and is too cautious generally (few 1-die blocks, hard dodges, rushes or re-rolls).
   Read `ai-training/README.md` before working on the AI.
+- Epic matches: I Like to Watch > Our picks lists "BludBowl epics" from `epic/index.json`. The owner exports a match
+  (My matches > Share / export) and sends the `.json.gz` file (attached to a GitHub issue, or in the session); add it with
+  `node tools/add-epic.js <file> "why it's worth watching"`, which copies it into `epic/` and lists it. That's a game change
+  only in content, so no version bump is needed.

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.05 (29 Oct 2026)
+- **My matches:** saved matches now replay the coaches' decisions (re-rolls, Apothecary and the like), the coin toss and the close-up pass and throw replays, and say what kind of match it was (league and round, cup final...). Our picks has a new list of BludBowl epics.
+
 ## v4.04 (29 Oct 2026)
 - **My matches:** every match is quietly recorded; at full time, "💾 Save this match" keeps a replay of it in I Like to Watch > My matches, to watch again, share as a file, or delete.
 
