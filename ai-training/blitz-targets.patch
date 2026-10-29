@@ -1,8 +1,8 @@
 diff --git a/index.html b/index.html
-index ce2cd7b..23ff7e3 100644
+index ce2cd7b..77afe9a 100644
 --- a/index.html
 +++ b/index.html
-@@ -23430,9 +23430,34 @@
+@@ -23430,9 +23430,50 @@
              }
  
              // ---- general blitz: knock someone over where it helps most ----
@@ -16,7 +16,17 @@ index ce2cd7b..23ff7e3 100644
 +                const opp = state.players.filter(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned);
 +                // their deepest player: nearest the end zone we attack
 +                const deep = opp.slice().sort((a, b) => Math.abs(a.x - endX(me)) - Math.abs(b.x - endX(me)))[0] || null;
-+                return { theirC, ourC, deep, loose: !c && state.ball.x >= 0 };
++                // our two quickest players (not the carrier), whose routes up the pitch a knockdown could open
++                const runners = state.players.filter(q => q.team === me && onPitch(q) && !q.isDown && !q.isStunned && (!ourC || q.id !== ourC.id) && (q.ma || 6) >= 6)
++                    .sort((a, b) => (b.ma || 6) - (a.ma || 6)).slice(0, 2);
++                return { theirC, ourC, deep, loose: !c && state.ball.x >= 0, runners, base: new Map() };
++            }
++            // how much further q could run next turn (no dodges) with d knocked over
++            function routeGain(q, d, X) {
++                if (!X.base.has(q.id)) X.base.set(q.id, nextTurnLane(q, q.x, q.y));
++                const was = d.isDown; d.isDown = true;
++                let g = 0; try { g = Math.max(0, nextTurnLane(q, q.x, q.y) - X.base.get(q.id)); } finally { d.isDown = was; }
++                return g;
 +            }
 +            function blitzBonus(me, d, X) {
 +                let b = 0;
@@ -28,6 +38,12 @@ index ce2cd7b..23ff7e3 100644
 +                let tied = 0;
 +                state.players.forEach(q => { if (q.team === me && onPitch(q) && !q.isDown && cheb(q, d) === 1 && state.players.some(o => o.team !== me && o.id !== d.id && onPitch(o) && !o.isDown && cheb(o, q) === 1)) tied++; });
 +                b += Math.min(1.5, tied * 0.5);
++                // (routes) a knockdown that opens a way through for our carrier, this turn or next, or for a quick team-mate next turn
++                if (AIX.p(me, 'bzRoutes', 1)) {
++                    if (X.ourC && cheb(d, X.ourC) <= 6) b += Math.min(3, Math.max(X.ourC.hasActed ? 0 : laneGain(X.ourC, d), routeGain(X.ourC, d, X))) * AIX.p(me, 'bzLane', 0.6);
++                    let rg = 0; X.runners.forEach(q => { if (cheb(d, q) <= 4) rg += Math.min(2, routeGain(q, d, X)) * AIX.p(me, 'bzRun', 0.3); });
++                    b += Math.min(1, rg);
++                }
 +                return b;
 +            }
              function blitzPlan(me, act) {
@@ -37,7 +53,7 @@ index ce2cd7b..23ff7e3 100644
                  act.forEach(p => {
                      const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                      if (c && c.id === p.id) return;
-@@ -23444,12 +23469,15 @@
+@@ -23444,12 +23485,15 @@
                              blitzCtx = true; const e = blockEval(p, d, m.x, m.y); blitzCtx = false;
                              if (e.pTurn > 0.12) return;
                              const pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
@@ -55,7 +71,7 @@ index ce2cd7b..23ff7e3 100644
                  return blitzOn(best.p, best.d.id);
              }
              function blitzOn(p, tid) {
-@@ -23864,6 +23892,14 @@
+@@ -23864,6 +23908,14 @@
                  // 3. blocks with almost no risk come first
                  const safe = blocks.find(b => b.e.pTurn < 0.05);
                  if (safe) return blockPlan(safe);

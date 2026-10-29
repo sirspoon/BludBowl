@@ -643,3 +643,9 @@ FLAGS argument is '' for every switch on). "Other" = not their carrier, nor mark
 - So far nothing about the blitz (more of them, earlier, or better-chosen targets) has changed results against the
   computer. It may still matter more against people, whose defence (keeping their distance) differs from the
   computer's (going hard after the ball), but the tests here can't show that.
+- Routes (`blitz-targets.patch` now includes them; AIP `bzRoutes`): a target whose knockdown opens a way through for our
+  carrier, this turn (`laneGain`) or next (`routeGain`: `nextTurnLane` with them knocked over), x 0.6 (`bzLane`), and for
+  our two quickest players next turn, x 0.3 each (`bzRun`, up to 1). With the early blitz as well, blitzing now looks
+  like the coaches': a blitz in 87% of turns (89%), "other" targets 62% (78%), with their ball the carrier 47% (25%) and
+  a cage corner 12% (12%), target down 63% (67%); blocks 38 a match. Against v3.66: 36-35, 17-18 over 48, then 63-70,
+  30-37 over 96: 99-105 touchdowns, 47-55 wins, turnovers 669-635, casualties 212-187. Level at best. Not released.
