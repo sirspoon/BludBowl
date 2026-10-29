@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.11 (29 Oct 2026)
+- When full screen is refused, the message now includes the browser's own reason.
+
 ## v4.10 (29 Oct 2026)
 - Fixed: a league or career match stays saved at full time until its result is recorded, so if the game closes on the match summary you can pick it up there.
 - The full-screen button says why when the browser won't go full screen.
