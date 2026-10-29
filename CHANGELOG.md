@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.13 (29 Oct 2026)
+- Full screen: the game no longer sends a second request while one is waiting, which may have left Chrome stuck; the note gives more detail.
+
 ## v4.12 (29 Oct 2026)
 - The full-screen button explains what happened when it doesn't work, to help track down a problem.
 

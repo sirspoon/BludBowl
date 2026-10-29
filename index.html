@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.12</title>
+    <title>BludBowl 4.13</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1023,7 +1023,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.12</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.13</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -6696,11 +6696,14 @@
             const say = msg => { if (tell === true) fsNote(msg); };
             const elsewhere = 'If the game is open inside another app (from a link in it), open it in Chrome or Safari itself instead.';
 
+            if (!isFs && fsReq.waiting && performance.now() - fsReq.at < 1500) { if (tell === true) fsWatch(false, true); return; }   // (one request at a time: two in one tap seemed to leave Chrome on Android stuck)
             if (tell === true) fsWatch(!!isFs);
             if (!isFs) {
                 if (!requestFs) { say("This browser doesn't let web pages go full screen (iPhones don't). " + elsewhere); return; }
                 const why = e => { const m = String(e && e.message || e || '').replace(/[<>]/g, '').slice(0, 90); return m ? ` (it said: "${m}")` : ''; };   // (the browser's own reason, to track down why)
-                try { Promise.resolve(requestFs.call(docEl)).then(() => { fsDiag.res = 'ok'; }, e => { fsDiag.res = 'refused'; say('The browser said no to full screen' + why(e) + '. ' + elsewhere); }); }   // (old Safari's version returns nothing)
+                fsReq.made++; fsReq.waiting = true; fsReq.at = performance.now(); fsReq.focus = document.hasFocus(); fsReq.vis = document.visibilityState;
+                const answered = r => { fsReq.waiting = false; fsReq.answered++; fsReq.last = r; fsReq.ms = Math.round(performance.now() - fsReq.at); if (fsReq.ms > 1500) { const n = document.getElementById('fs-note'); if (n) n.textContent += ` [Later: the browser answered after ${(fsReq.ms / 1000).toFixed(1)}s: ${r}.]`; } };
+                try { Promise.resolve(requestFs.call(docEl)).then(() => { fsDiag.res = 'ok'; answered('ok'); }, e => { fsDiag.res = 'refused'; answered('refused'); say('The browser said no to full screen' + why(e) + '. ' + elsewhere); }); }   // (old Safari's version returns nothing)
                 catch (e) { say('The browser said no to full screen' + why(e) + '. ' + elsewhere); }
             } else {
                 if (exitFs) try { Promise.resolve(exitFs.call(doc)).catch(() => {}); } catch (e) {}
@@ -6717,20 +6720,22 @@
         }
         // Full screen stopped working on one phone (Chrome, no refusal message): when the button doesn't end in full screen,
         // say what happened, to track down why
-        const fsDiag = { res: '', changes: 0 };
-        function fsWatch(wasOn) {
-            fsDiag.res = wasOn ? 'leaving' : 'no answer'; fsDiag.changes = 0;
+        const fsDiag = { res: '', changes: 0 }, fsReq = { made: 0, answered: 0, waiting: false, at: 0, focus: null, vis: '', last: '', ms: 0 };
+        function fsWatch(wasOn, skipped) {
+            fsDiag.res = wasOn ? 'leaving' : skipped ? 'not sent (an earlier one is still waiting)' : 'no answer'; fsDiag.changes = 0;
             setTimeout(() => {
                 const d = document, on = !!(d.fullscreenElement || d.webkitFullscreenElement);
                 if (wasOn ? fsDiag.changes > 0 : on) return;   // (it worked: left full screen, or came on)
                 if (fsDiag.res === 'refused') return;   // (already explained)
                 let wake = false; try { wake = WAKE.held(); } catch (e) {}
                 const bits = [wasOn ? 'the browser says the game is already full screen' + (on ? ', and leaving it did nothing' : '') : 'request: ' + fsDiag.res,
-                    'changes seen: ' + fsDiag.changes, 'screen-on lock: ' + (wake ? 'held' : 'not held'), 'page ' + innerWidth + '×' + innerHeight + ', screen ' + screen.width + '×' + screen.height,
+                    'changes seen: ' + fsDiag.changes, `requests this visit: ${fsReq.made} sent, ${fsReq.answered} answered`, 'focus: ' + (fsReq.focus ? 'yes' : 'no') + ', ' + fsReq.vis,
+                    'from the menu after a match/replay: ' + (fsBackToMenu ? 'yes' : 'no'), 'screen-on lock: ' + (wake ? 'held' : 'not held'), 'page ' + innerWidth + '×' + innerHeight + ', screen ' + screen.width + '×' + screen.height,
                     'standalone: ' + (matchMedia('(display-mode: fullscreen)').matches ? 'fullscreen' : matchMedia('(display-mode: standalone)').matches ? 'app' : 'browser')];
                 fsNote("Full screen didn't come on. Details (please send these): " + bits.join('; ') + '.');
             }, 1500);
         }
+        let fsBackToMenu = false;   // (this page was opened straight to the main menu, after a match or replay)
         function updateFullscreenIcon() {
             fsDiag.changes++;
             const d = document, isFs = !!(d.fullscreenElement || d.webkitFullscreenElement || d.mozFullScreenElement || d.msFullscreenElement);
@@ -26827,8 +26832,10 @@
                 const ss = document.getElementById('start-screen'); if (ss) ss.classList.remove('opacity-0');
                 // a touch only counts as a tap (which the browser needs before going full screen) once the finger lifts, so
                 // this listens for the click; it keeps trying on each tap until full screen has actually come on
-                const reFs = () => {
+                fsBackToMenu = true;
+                const reFs = e => {
                     SFX.unlock();
+                    if (e && e.target && e.target.closest && e.target.closest('[data-fs], #btn-fullscreen')) return;   // (that button asks for it itself)
                     const isFs = document.fullscreenElement || document.webkitFullscreenElement;
                     if (isFs) { document.removeEventListener('click', reFs, true); return; }
                     try { toggleFullscreen(); } catch (e) {}
