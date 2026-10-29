@@ -676,3 +676,30 @@ with the side's carrier on its feet, by how far it is from the end zone against 
   (`egRun`). With all of them: 26-42 touchdowns, 14-23 wins over 48 (pushing the carrier on left it exposed on their
   turn 7); the runners alone with (1): 36-32, 18-17.
 - Still the big gap: the computer arrives at its last turn too far away (69% 3+ squares beyond its Move, coaches 30%).
+
+## Throw Team-mate (Oct 2026)
+`fumbbl-ttm.py` (100 replays) and `bb-ttm.js` (v3.70, 54 mirror matches of the nine teams whose default line-up has
+both a thrower and a Right Stuff player: Black Orc, Chaos Renegade, Gnome, Goblin, Halfling, Human, Ogre, Orc, Snotling).
+Purpose from where the thrown player ended up: the ball (they were carrying it), onto an opponent (landed on one, or an
+opponent was hurt), next to their carrier, or just up the pitch.
+
+| | coaches | BludBowl |
+|---|---|---|
+| throws a match (teams able to) | 0.80 (39 in 49 team-matches) | 0.07 (8 in 108) |
+| ...Ogre / Gnome / Halfling / Goblin | 2.1 / 3.5 / 5.0 / 2.0 (7, 2, 1, 1 matches) | 0.17 / 0.17 / 0.08 / 0.08 |
+| ...Black Orc / Orc / Human | 0.7 / 0.2 / 0.2 | 0.08 / 0 / 0 |
+| kicked (Kick Team-mate) rather than thrown | 23% | 25% |
+| with the ball | 0% | 0% |
+| up the pitch | 69%: 4.3 squares, on their feet 48% | 88%: 2.6 squares, on their feet 57% |
+| next to their carrier | 13% | 12% |
+| onto an opponent | 18%: accurate 86%, an opponent hurt every time | 0% |
+| on their last turn (turn 8) | 31% | 0% |
+
+- The coaches who throw are the teams built round it (Ogres with Gnoblars, Gnomes, Halflings, Goblins); Orcs, Humans and
+  Black Orcs hardly bother. Most throws move a small player up the pitch; about one in five is aimed at an opponent
+  (four of the seven were Ogre Punters kicking Gnoblars into the opposition); none carried the ball. A third come on
+  the last turn of a half, when a failure costs nothing (and a successful throw earns SPP).
+- The computer throws about a tenth as often. It only throws when a Right Stuff player happens to be standing next to
+  the thrower at the end of its turn (`ttmPair` / `getAdjacentRightStuffTeammate`): nothing ever moves one into place
+  (only `ttmHandoffPlan` does, for a ball carrier to score). And it never aims at an opponent in practice.
+- Small samples: 39 coach throws in all, and only one or two matches for some teams.
