@@ -2,6 +2,9 @@
 
 Every change to BludBowl, newest first. The version number is shown at the bottom of the title screen.
 
+## v3.75 (29 Oct 2026)
+- **Improved:** FUMBBL replays now look and sound like a match. Kick-offs sail through the air, passes, hand-offs and throw-ins fly in an arc, bounces hop, and thrown team-mates fly to where they land. Blocks show the attacker lunging in and the defender rocking back, with the result (POW!, Push, Both Down…) floating over them; armour breaks, KOs and casualties have their sounds, blood and a "KO", "CAS" or "DEAD" label, bombs explode, fouls stomp, and touchdowns get the crowd going. Re-rolls, pick-ups, catches, failed rolls and the referee's whistle have sounds too, and the replay waits for each flight or hit before moving on. (The sound follows the game's sound setting.) A scattering bomb is now called a bomb in the log, not the ball.
+
 ## v3.74 (29 Oct 2026)
 - **Improved:** Watching a FUMBBL match now has a running commentary in the match log: each player's action and target, the block dice and which was picked, armour and injury rolls with the result (Stunned, KO'd, Badly Hurt, Seriously Injured with the injury, Dead), dodges, Rushes, pick-ups, catches, passes, bombs and other rolls with the number needed and rolled, re-rolls and the skills used, bounces, kick-off events, weather, send-offs and touchdowns. The label above the controls is now a turn picker: choose any turn of the match to jump straight to it, and the log shows that turn from its start.
 - **Fixed:** team and player names from a FUMBBL replay are now shown as plain text everywhere, so a name containing web code can't do anything.

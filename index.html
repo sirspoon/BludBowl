@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 3.74</title>
+    <title>BludBowl 3.75</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -610,7 +610,7 @@
         .sv-note { font-size: 12.5px; color: #fde68a; text-align: center; }
         /* watching a FUMBBL replay: the game's own controls step aside for the replay's */
         body.frep-on #btn-end-turn, body.frep-on #btn-saveexit, body.frep-on #btn-simspeed, body.frep-on #btn-aifast, body.frep-on #panel-unit-container,
-        body.frep-on #setup-controls-container, body.frep-on #ind-chip, body.frep-on #btn-rosters { display: none !important; }
+        body.frep-on #setup-controls-container, body.frep-on #ind-chip, body.frep-on #btn-rosters, body.frep-on #bribe-indicator { display: none !important; }
         #frep-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(8px, env(safe-area-inset-bottom)); z-index: 45; width: min(440px, calc(100vw - 16px));
             background: rgba(2,6,23,.88); border: 1px solid #475569; border-radius: 14px; padding: 6px 8px 4px; box-shadow: 0 6px 24px rgba(0,0,0,.5); color: #e2e8f0; }
         #frep-bar.hidden { display: none; }
@@ -966,7 +966,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.74</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v3.75</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -21066,7 +21066,8 @@
                 const pos = new Int16Array(n * 2).fill(-99), st = new Uint8Array(n).fill(9);
                 let ball = null, inPlay = false, score = [0, 0], half = 1, turn = [0, 0], homePlaying = true, act = -1, rr = [T[0].reRolls || 0, T[1].reRolls || 0], weather = 'perfect';
                 const W = { NICE: 'perfect', VERY_SUNNY: 'sunny', POURING_RAIN: 'rain', BLIZZARD: 'blizzard', SWELTERING_HEAT: 'heat' };
-                const frames = [], turns = [], seenTurns = new Set(); let lines = [];
+                const frames = [], turns = [], seenTurns = new Set(); let lines = [], fx = [], bombAt = null, blasted = false, prevCarrier = -1, prevBall = null, bombLive = false, thrownNow = -1;
+                const UP = [1, 2, 12];   // standing (or moving, or being blocked): can hold the ball
                 // ---- the commentary: FUMBBL's reports as lines for the match log, [side, html, style] (names are escaped: they're
                 // whatever FUMBBL's coaches typed) ----
                 const P = id => roster[ix.get(String(id))];
@@ -21081,11 +21082,12 @@
                     if (k === 'playerAction' && r.actingPlayerId != null) {
                         const key = r.actingPlayerId + ':' + r.playerAction; if (key === lastAct) return; lastAct = key;
                         const p = P(r.actingPlayerId); if (p) add(p.side, `${who(r.actingPlayerId)}${p.name ? ' <span class="opacity-70">(' + esc(p.name) + ')</span>' : ''}: ${esc(actionName(r.playerAction))}`, 'act');
-                    } else if (k === 'block' || k === 'foul') add(sideOf(r.defenderId), `against ${who(r.defenderId)}`, 'info');
+                    } else if (k === 'block' || k === 'foul') { add(sideOf(r.defenderId), `against ${who(r.defenderId)}`, 'info'); if (k === 'foul') fx.push({ t: 'foul', a: act, d: ix.get(String(r.defenderId)) }); }
                     else if (k === 'selectBlitzTarget') add(sideOf(r.defenderId), `blitz target: ${who(r.defenderId)}`, 'info');
                     else if (k === 'blockChoice') {
                         const dice = (r.blockRoll || []).map(f => FACE[f] || '?').join(', ');
                         const res = RES[r.blockResult] || words2(r.blockResult);
+                        fx.push({ t: 'block', a: act, d: ix.get(String(r.defenderId)), res: r.blockResult });
                         add(-1, `🎲 ${Math.abs(r.nrOfDice || 1)} ${Math.abs(r.nrOfDice || 1) === 1 ? 'die' : 'dice'}${r.nrOfDice < 0 ? ' (defender picks)' : ''}: ${dice} → <b>${res}</b>`, r.blockResult === 'SKULL' ? 'bad' : r.blockResult === 'BOTH DOWN' ? 'info' : 'ok');
                     } else if (k === 'blockReRoll') add(-1, `↻ block dice re-rolled (${esc(r.reRollSource || 're-roll')})`, 'info');
                     else if (k === 'injury') {
@@ -21097,26 +21099,30 @@
                         if (r.seriousInjury) t += ` (${esc(r.seriousInjury)})`;
                         if ((r.armorModifiers || []).length || (r.injuryModifiers || []).length) t += ` <span class="opacity-60">(${esc([...(r.armorModifiers || []), ...(r.injuryModifiers || [])].join(', '))})</span>`;
                         add(sideOf(r.defenderId), t, r.injury >= 5 ? 'big' : r.armorBroken ? 'hurt' : 'info');
+                        fx.push({ t: 'hurt', d: ix.get(String(r.defenderId)), broken: !!r.armorBroken || !r.armorRoll, inj: r.injury });
                     } else if (ROLLS[k] !== undefined && r.playerId != null && r.roll != null && r.minimumRoll != null) {
                         let name = k === 'confusionRoll' ? (r.confusionSkill || 'Bone Head') : ROLLS[k];
                         if (k === 'passRoll' && r.bomb) name = 'Bomb';
                         const extra = r.passResult ? ` → ${words2(r.passResult)}` : '';
+                        fx.push({ t: 'roll', ok: !!r.successful, k, p: ix.get(String(r.playerId)), thrown: r.thrownPlayerId != null ? ix.get(String(r.thrownPlayerId)) : null });
+                        if (r.thrownPlayerId != null && ix.has(String(r.thrownPlayerId))) thrownNow = ix.get(String(r.thrownPlayerId));
                         add(sideOf(r.playerId), `${r.successful ? '✓' : '✗'} ${who(r.playerId)} ${esc(name)} ${r.minimumRoll}+: ${r.roll}${extra}${r.reRolled ? ' (re-roll)' : ''}${mods(r)}`, r.successful ? 'ok' : 'bad');
-                    } else if (k === 'reRoll') add(sideOf(r.playerId), `↻ ${esc(r.reRollSource || 're-roll')}${r.roll && !r.successful ? ' - failed' : ''}`, 'info');
+                    } else if (k === 'reRoll' && (fx.push({ t: 'reroll', team: /Team|Coaching|Leader/.test(r.reRollSource || '') }), true)) add(sideOf(r.playerId), `↻ ${esc(r.reRollSource || 're-roll')}${r.roll && !r.successful ? ' - failed' : ''}`, 'info');
                     else if (k === 'skillUse' && r.used) add(sideOf(r.playerId), `${who(r.playerId)} uses ${esc(r.skill)}`, 'info');
-                    else if (k === 'scatterBall') add(-1, `The ball bounces ${esc((r.directionArray || []).join(', ').toLowerCase())}`, 'info');
+                    else if (k === 'scatterBall') add(-1, `${bombLive ? 'The bomb scatters' : 'The ball bounces'} ${esc((r.directionArray || []).join(', ').toLowerCase())}`, 'info');
                     else if (k === 'throwIn') add(-1, 'The crowd throws the ball back in', 'info');
                     else if (k === 'handOver') add(sideOf(r.catcherId), `hands the ball to ${who(r.catcherId)}`, 'info');
-                    else if (k === 'spellEffectRoll' && r.specialEffect === 'bomb') add(sideOf(r.playerId), `💥 ${who(r.playerId)} ${r.successful ? 'is hit by the blast' : 'escapes the blast'}`, r.successful ? 'hurt' : 'info');
+                    else if (k === 'spellEffectRoll' && r.specialEffect === 'bomb' && (blasted || !bombAt || (fx.push({ t: 'boom', x: bombAt[0], y: bombAt[1] }), blasted = true))) add(sideOf(r.playerId), `💥 ${who(r.playerId)} ${r.successful ? 'is hit by the blast' : 'escapes the blast'}`, r.successful ? 'hurt' : 'info');
+                    else if (k === 'kickoffScatter') { inPlay = true; fx.push({ t: 'kick' }); }   // (the kick: the ball is in the air from here)
                     else if (k === 'kickoffResult' && r.kickoffResult) add(-1, `Kick-off: <b>${esc(r.kickoffResult)}</b>`, 'big');
                     else if (k === 'weather' && r.weather) add(-1, `Weather: ${esc(r.weather)}`, 'info');
                     else if (k === 'startHalf') add(-1, `— Half ${esc(r.half)} —`, 'turn');
-                    else if (k === 'referee' && r.foulingPlayerBanned) add(-1, 'The referee saw that: the fouler is <b>sent off</b>!', 'bad');
+                    else if (k === 'referee' && r.foulingPlayerBanned && (fx.push({ t: 'whistle' }), true)) add(-1, 'The referee saw that: the fouler is <b>sent off</b>!', 'bad');
                     else if (k === 'argueTheCall') add(sideOf(r.playerId), `Argue the call (${esc(r.roll)}): ${r.successful ? 'the ref changes their mind' : 'no luck'}${r.coachBanned ? ' - and the coach is thrown out' : ''}`, 'info');
                     else if (k === 'apothecaryRoll' && r.playerId) add(sideOf(r.playerId), `The apothecary sees to ${who(r.playerId)}`, 'info');
                     else if (k === 'stallerDetected') add(sideOf(r.playerId), `${who(r.playerId)} is stalling`, 'info');
                     else if (k === 'secretWeaponBan') add(-1, 'Secret weapons are sent off at the end of the drive', 'info');
-                    else if (k === 'turnEnd' && r.playerIdTouchdown) { const p = P(r.playerIdTouchdown); if (p) add(p.side, `TOUCHDOWN! ${who(r.playerIdTouchdown)}${p.name ? ' (' + esc(p.name) + ')' : ''}`, 'td'); }
+                    else if (k === 'turnEnd' && r.playerIdTouchdown) { const p = P(r.playerIdTouchdown); fx.push({ t: 'td', p: ix.get(String(r.playerIdTouchdown)) }); if (p) add(p.side, `TOUCHDOWN! ${who(r.playerIdTouchdown)}${p.name ? ' (' + esc(p.name) + ')' : ''}`, 'td'); }
                 };
                 const snap = (kind, mover) => {
                     // a turn starts the first time its number shows (FUMBBL hands over to the other side for their choices mid-turn, and
@@ -21124,9 +21130,17 @@
                     const tk = half + ':' + (homePlaying ? 0 : 1) + ':' + turn[homePlaying ? 0 : 1];
                     const start = !seenTurns.has(tk) && turn[homePlaying ? 0 : 1] > 0;
                     if (start) { seenTurns.add(tk); turns.push(frames.length); lastAct = ''; const sd = homePlaying ? 0 : 1; lines.unshift([sd, `— ${esc(teams[sd].name)}: turn ${turn[sd]} (half ${half}) —`, 'turn']); }
+                    // who has the ball, and whether it flew (a pass, kick, throw-in or bounce) rather than being carried
+                    let carrier = -1;
+                    if (ball && inPlay) for (let j = 0; j < n; j++) if (pos[j * 2] === ball[0] && pos[j * 2 + 1] === ball[1] && UP.includes(st[j])) { carrier = j; break; }
+                    let fly = null;
+                    if (ball && inPlay && prevBall && (prevBall[0] !== ball[0] || prevBall[1] !== ball[1]) && !(carrier >= 0 && carrier === prevCarrier) && kind !== 'setup')
+                        fly = { from: prevBall.slice(), to: ball.slice(), d: Math.max(Math.abs(prevBall[0] - ball[0]), Math.abs(prevBall[1] - ball[1])) };
+                    if (!fly && ball && fx.some(e => e.t === 'kick')) { const from = [ball[0] < 13 ? 19 : 6, 7]; fly = { from, to: ball.slice(), d: Math.max(Math.abs(from[0] - ball[0]), Math.abs(from[1] - ball[1])), kick: true }; }
+                    prevBall = ball && inPlay ? ball.slice() : null; prevCarrier = carrier;
                     frames.push({ pos: pos.slice(), st: st.slice(), ball: ball ? ball.slice() : null, inPlay, score: score.slice(), half, turn: turn.slice(), side: homePlaying ? 0 : 1,
-                        act, rr: rr.slice(), weather, kind, mover, start, lines });
-                    lines = [];
+                        act, rr: rr.slice(), weather, kind, mover, start, lines, fx, fly });
+                    lines = []; fx = [];
                 };
                 for (const c of d.gameLog.commandArray || []) {
                     const mc = (c.modelChangeList && c.modelChangeList.modelChangeArray) || [];
@@ -21134,7 +21148,11 @@
                     for (const m of mc) {
                         const k = m.modelChangeId, v = m.modelChangeValue, key = m.modelChangeKey;
                         switch (k) {
-                            case 'fieldModelSetPlayerCoordinate': { const i = ix.get(String(key)); if (i == null || !v) break; if (pos[i * 2] !== v[0] || pos[i * 2 + 1] !== v[1]) { moved.push(i); pos[i * 2] = v[0]; pos[i * 2 + 1] = v[1]; seen = true; } break; }
+                            case 'fieldModelSetPlayerCoordinate': { const i = ix.get(String(key)); if (i == null || !v) break; if (pos[i * 2] !== v[0] || pos[i * 2 + 1] !== v[1]) {
+                                // a thrown (or kicked) team-mate lands a moment after the throw is rolled: they fly there
+                                if (i === thrownNow && pos[i * 2] >= 0 && Math.max(Math.abs(pos[i * 2] - v[0]), Math.abs(pos[i * 2 + 1] - v[1])) > 1) { fx.push({ t: 'fly', p: i }); thrownNow = -1; }
+                                moved.push(i); pos[i * 2] = v[0]; pos[i * 2 + 1] = v[1]; seen = true; } break; }
+                            case 'fieldModelSetBombMoving': bombLive = !!v; break;
                             case 'fieldModelSetPlayerState': { const i = ix.get(String(key)); if (i == null || typeof v !== 'number') break; if (st[i] !== (v & 0xFF)) { st[i] = v & 0xFF; seen = true; } break; }
                             case 'fieldModelRemovePlayer': { const i = ix.get(String(key)); if (i != null) { pos[i * 2] = -99; seen = true; } break; }
                             case 'fieldModelSetBallCoordinate': ball = Array.isArray(v) ? v.slice() : null; seen = true; break;
@@ -21146,10 +21164,12 @@
                             case 'turnDataSetReRolls': rr[key === 'away' ? 1 : 0] = v; break;
                             case 'actingPlayerSetPlayerId': act = v == null ? -1 : (ix.has(String(v)) ? ix.get(String(v)) : -1); break;
                             case 'fieldModelSetWeather': weather = W[v] || weather; seen = true; break;
+                            case 'fieldModelSetBombCoordinate': if (Array.isArray(v)) bombAt = v.slice(); break;
                         }
                     }
                     for (const r of (c.reportList && c.reportList.reports) || []) { try { say(r); } catch (e) {} }
-                    if (seen || lines.length) snap(moved.length === 1 ? 'move' : moved.length > 2 ? 'setup' : 'other', moved.length === 1 ? moved[0] : -1);
+                    blasted = false;
+                    if (seen || lines.length || fx.length) snap(moved.length === 1 ? 'move' : moved.length > 2 ? 'setup' : 'other', moved.length === 1 ? moved[0] : -1);
                 }
                 return { teams, roster, frames, turns, id: g.gameId };
             }
@@ -21211,6 +21231,42 @@
                 state.ball = { x: -1, y: -1, carrierId: null };
                 try { AI.set(0, false); AI.set(1, false); } catch (e) {}
             }
+            const floater = (p, text) => { if (p && !p.isReserve) (state.floaters = state.floaters || []).push({ id: p.id, x: p.x, y: p.y, text, t0: performance.now() }); };
+            function playFx(F) {
+                const P = j => (j != null && j >= 0 ? state.players[j] : null);
+                (F.fx || []).forEach(e => {
+                    try {
+                        if (e.t === 'block' || e.t === 'foul') {
+                            const a = P(e.a), d = P(e.d);
+                            if (a && d && !a.isReserve && !d.isReserve) {
+                                if (e.t === 'foul') { pitchBump(a, d.x, d.y, 0.22); sfx('stompThump'); setTimeout(() => sfx('stompThump'), 180); return; }
+                                // the pictures only (the positions already moved): the attacker lunges in, the defender rocks back
+                                pitchBump(a, d.x, d.y, 0.32); pitchBump(d, d.x + (d.x - a.x), d.y + (d.y - a.y), 0.16, 110);
+                                sfx(e.res === 'POW' || e.res === 'POW/PUSH' ? 'bigHit' : 'blockHit');
+                                floater(e.res === 'SKULL' ? a : d, RES[e.res] || e.res);
+                            }
+                        } else if (e.t === 'hurt') {
+                            const d = P(e.d); if (!d) return;
+                            if (e.inj >= 5) { if (d.x >= 0) addBloodSplatter(d.x, d.y); sfx(e.inj >= 6 ? 'squish' : 'bigHit'); sfx(e.inj >= 6 ? 'crowdBig' : 'crowdOoooh', 150);
+                                floater(d, e.inj === 5 ? 'KO' : e.inj === 8 ? 'DEAD' : 'CAS'); }
+                            else sfx(e.broken ? 'armourBreak' : 'armourHolds');
+                        } else if (e.t === 'roll') {
+                            if (e.k === 'pickUpRoll' && e.ok) sfx('pickUp');
+                            else if (e.k === 'catchRoll' && e.ok) sfx('catch');
+                            else if (e.k === 'passRoll' || e.k === 'throwTeamMateRoll') sfx(e.ok ? 'passThrown' : 'fumble');
+                            else if (!e.ok) sfx('rollFail');
+                        } else if (e.t === 'reroll') { if (e.team) sfx('teamReroll'); }
+                        else if (e.t === 'boom') { bombFx.blasts.push({ x: e.x, y: e.y, t0: performance.now() }); sfx('boom'); sfx('crowdOoooh', 400); }
+                        else if (e.t === 'kick') sfx('kickOff');
+                        else if (e.t === 'whistle') sfx('whistle');
+                        else if (e.t === 'td') { sfx('touchdown'); sfx('crowdHuge', 200); floater(P(e.p), 'TOUCHDOWN!'); }
+                    } catch (er) { console.error('FREP fx', er); }
+                });
+                if (F.fly) {   // the ball in the air: an arc for a pass, kick or throw-in, a little hop for a bounce
+                    const d = F.fly.d, dur = (F.fly.kick ? 1300 : d <= 1 ? 200 : Math.min(900, 260 + d * 55)) / speed;
+                    try { animateBallFlight(F.fly.from[0], F.fly.from[1], F.fly.to[0], F.fly.to[1], dur, null, d >= 2); if (d <= 1) sfx('ballBounce'); } catch (er) {}
+                }
+            }
             function show(i, animate) {
                 const F = D.frames[i]; if (!F) return;
                 const slideMs = Math.max(60, 230 / speed);
@@ -21221,7 +21277,8 @@
                     p.isKO = s === 5; p.isCasualty = s >= 6 && s <= 8; p.isEjected = s === 13; p.isReserve = !onP && !p.isKO && !p.isCasualty && !p.isEjected;
                     p.isDown = onP && (s === 3 || s === 4 || s === 11 || s === 17); p.isStunned = onP && s === 4;
                     if (onP) { p.x = x; p.y = y; } else { p.x = -9; p.y = -9; }
-                    if (animate && onP && wasOn && (ox !== x || oy !== y) && Math.max(Math.abs(ox - x), Math.abs(oy - y)) <= 2) slideTo(p, ox, oy, slideMs);
+                    const far = Math.max(Math.abs(ox - x), Math.abs(oy - y)), flown = (F.fx || []).some(e => e.t === 'fly' && e.p === j);
+                    if (animate && onP && wasOn && far && (far <= 2 || flown)) slideTo(p, ox, oy, flown ? Math.min(900, 200 + far * 70) / speed : slideMs);
                     else p.walkAnim = null;
                     p.hasActed = false;
                 });
@@ -21232,6 +21289,7 @@
                 state.selectedId = F.act >= 0 ? F.act + 1 : null;
                 try { updateTopBar(); } catch (e) {}
                 if (animate) {
+                    playFx(F);
                     logFrame(F);
                     const mover = F.mover >= 0 ? state.players[F.mover] : F.act >= 0 ? state.players[F.act] : null;
                     if (mover && !mover.isReserve) try { followAction([mover], 400 / speed); } catch (e) {}
@@ -21242,8 +21300,10 @@
             // ---- playback ----
             function delay(F) {
                 const base = F.kind === 'move' ? 240 : F.kind === 'setup' ? 500 : 420;
-                const quiet = F.kind === 'other' && !F.lines.length;
-                return ((quiet ? 200 : base) + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed;
+                const quiet = F.kind === 'other' && !F.lines.length && !F.fly;
+                const fly = F.fly ? (F.fly.kick ? 1300 : F.fly.d <= 1 ? 200 : Math.min(900, 260 + F.fly.d * 55)) + 120 : 0;
+                const hit = (F.fx || []).some(e => e.t === 'block' || e.t === 'boom' || (e.t === 'hurt' && e.inj >= 5)) ? 350 : 0;
+                return (Math.max(quiet ? 200 : base, fly) + hit + (F.start ? 700 : 0) + (F.lines.some(l => l[2] === 'td') ? 1800 : 0) + (F.lines.some(l => l[2] === 'big') ? 500 : 0)) / speed;
             }
             function stop() { playing = false; clearTimeout(timer); timer = null; paintBar(); }
             function tick() {
@@ -21253,7 +21313,7 @@
                 timer = setTimeout(tick, delay(D.frames[at]));
             }
             function play() { if (!D) return; if (at >= D.frames.length - 1) at = 0; playing = true; paintBar(); clearTimeout(timer); timer = setTimeout(tick, 150); }
-            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); show(at, false); logTurn(at); }
+            function jump(i) { if (!D) return; at = Math.max(0, Math.min(D.frames.length - 1, i)); try { state.ballAnimation.active = false; } catch (e) {} show(at, false); logTurn(at); }
             function stepTurn(dir) {
                 const T = D.turns; if (!T.length) return;
                 if (dir > 0) { const n = T.find(f => f > at); jump(n != null ? n : D.frames.length - 1); }
