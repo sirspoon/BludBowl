@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.17 (30 Oct 2026)
+- **Changed:** the kick-off close-up replays (v4.15) have their own setting, Settings > Kick-off replays, off to start with; it only applies with Replays on. They're still recorded in saved matches, so switching it on shows them there too.
+
 ## v4.16 (30 Oct 2026)
 - **New:** Kick Team-mate gets its own close-up replay (it had none in a match, and FUMBBL replays showed it as a throw): the team-mate is lined up at the kicker's feet, the run-up and the boot ("BOOTED!"), a higher flight off the ground, then the landing, crash or crowd as for a throw. A fumbled kick shows the team-mate booted into the turf where they stand. In matches, in I Like to Watch (FUMBBL marks these throws as kicked) and in saved matches.
 - **Fixed:** in FUMBBL replays, a thrown or kicked team-mate who was knocked out or hurt and carried off was shown going "into the crowd".

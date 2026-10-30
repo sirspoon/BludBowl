@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.16</title>
+    <title>BludBowl 4.17</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1023,7 +1023,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.16</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.17</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -1070,7 +1070,8 @@
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="moot">Mootland Green</option><option value="khemri">Khemri</option><option value="warpstone">Warped Flagstones</option></select></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
-            <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
+            <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
+            <div class="st-row"><span>Kick-off replays<small>a close-up of each kick-off too, once the ball has come down (with Replays on)</small></span><button type="button" class="st-tog" id="st-replay-kick"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress, your saved replays (My matches) and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
@@ -21187,6 +21188,7 @@
         const REPLAY = (() => {
             let rec = null, waiting = false;
             const enabled = () => { try { return localStorage.getItem('bb-replays') !== '0'; } catch (e) { return true; } };
+            const kickEnabled = () => { try { return localStorage.getItem('bb-replays-kick') === '1'; } catch (e) { return false; } };   // (kick-offs: off unless asked for)
             const wanted = () => enabled() && !window.FAST_ANIM && !(AI.isAI(0) && AI.isAI(1)) && !(NET.guest && NET.guest());
             const onPitch = p => p.x >= 0 && p.y >= 0 && p.x < CFG.cols && p.y < CFG.rows && !p.isCasualty && !p.isKO && !p.isReserve && !p.isEjected && !p.isFading;
             // the team whose point of view the colours take: this device's team, or the person's against the computer, or (hot-seat) the thrower's
@@ -21194,12 +21196,13 @@
             return {
                 enabled,
                 setEnabled(on) { try { localStorage.setItem('bb-replays', on ? '1' : '0'); } catch (e) {} },
+                kickEnabled, setKickEnabled(on) { try { localStorage.setItem('bb-replays-kick', on ? '1' : '0'); } catch (e) {} },
                 start(kind, data) {
                     rec = null; if (FREP.on()) return;   // (kept even when it won't be shown: a recorded match wants it)
                     const b = state.ball;
                     rec = Object.assign({ kind, at: Date.now(), drive: state.driveId,
                         players: state.players.filter(onPitch).map(p => ({ id: p.id, x: p.x, y: p.y, down: !!(p.isDown || p.isStunned) })),
-                        gb: b.carrierId != null ? { id: b.carrierId } : { x: b.x, y: b.y } }, data, { show: wanted() });
+                        gb: b.carrierId != null ? { id: b.carrierId } : { x: b.x, y: b.y } }, data, { show: wanted() && (kind !== 'kick' || kickEnabled()) });   // (a kick-off is still recorded for My matches)
                 },
                 set(k, v, once) { if (rec && !(once && rec[k] != null)) rec[k] = v; },
                 // each bounce or throw-in of the ball after the throw, in order, and who caught it
@@ -21993,7 +21996,7 @@
                 at++; show(at, true);
                 const F = D.frames[at];
                 // a pass, thrown team-mate or bomb: the game's close-up replay (when Replays is on and the speed is 2x or less), then on
-                if (F.replay && speed <= 2 && REPLAY.enabled()) {
+                if (F.replay && speed <= 2 && REPLAY.enabled() && (F.replay.kind !== 'kick' || REPLAY.kickEnabled())) {
                     later(() => { try { PASSFX.play(F.replay, F.replay.kind === 'kick' ? 1 - F.replay.team : F.replay.team, () => { if (playing) { clearTimeout(timer); timer = setTimeout(tick, 250); } }); } catch (e) { if (playing) timer = setTimeout(tick, 250); } }, winMs + 250);
                     return;
                 }
@@ -26959,6 +26962,8 @@
                 on('st-music', MUSIC.isEnabled(), 'On', 'Off');
                 on('st-anim', !window.FAST_ANIM, 'Full', 'Quick');
                 on('st-replay', REPLAY.enabled(), 'On', 'Off');
+                on('st-replay-kick', REPLAY.kickEnabled(), 'On', 'Off');
+                { const k = document.getElementById('st-replay-kick'); if (k) k.disabled = !REPLAY.enabled(); }
                 on('st-move', twoTapPref, 'Tap twice', 'Tap once');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
                 document.getElementById('st-text').textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';
@@ -26973,6 +26978,7 @@
                 paintSettings();
             });
             document.getElementById('st-replay').addEventListener('click', () => { REPLAY.setEnabled(!REPLAY.enabled()); paintSettings(); });
+            document.getElementById('st-replay-kick').addEventListener('click', () => { REPLAY.setKickEnabled(!REPLAY.kickEnabled()); paintSettings(); });
             document.getElementById('st-move').addEventListener('click', () => { twoTapPref = !twoTapPref; try { localStorage.setItem('bb-two-tap', twoTapPref ? '1' : '0'); } catch (e) {} state.movePlan = null; paintSettings(); });
             document.getElementById('st-weather').addEventListener('click', () => {
                 wxFX = wxFX === 1 ? 0.55 : wxFX > 0 ? 0 : 1;

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.17 (30 Oct 2026)
+- Kick-off replays now have their own setting (Settings > Kick-off replays), off to start with.
+
 ## v4.16 (30 Oct 2026)
 - Close-up replays of Kick Team-mate: the boot, the flight and the landing, or a fumbled kick into the turf.
 
