@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.15</title>
+    <title>BludBowl 4.16</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1023,7 +1023,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.15</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.16</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -14898,8 +14898,7 @@
             thrower.remainingMA = 0;
             thrower.rushes = 0;
             thrown.wasProne = !!thrown.isDown;
-            if (state.ttmKick) REPLAY.cancel();
-            else REPLAY.start('ttm', { thr: thrower.id, thrown: thrown.id, ball: state.ball.carrierId === thrown.id, tgt: { x: targetX, y: targetY }, team: thrower.team });
+            REPLAY.start('ttm', { thr: thrower.id, thrown: thrown.id, ball: state.ball.carrierId === thrown.id, tgt: { x: targetX, y: targetY }, team: thrower.team, kick: !!state.ttmKick });   // (kick: Kick Team-mate)
 
             const oppTeam = thrower.team === TEAMS.HUMAN ? TEAMS.ORC : TEAMS.HUMAN;
             const throwTZs = getTackleZones(thrower.x, thrower.y, oppTeam), dp = dpCount(thrower);
@@ -14910,7 +14909,7 @@
             setupRoll('THROW TEAMMATE', thrower, paTarget, 'None',
                 (finalRoll) => {
                     if (state.ttmKick) {   // Kick Team-mate keeps its own rules: a good kick lands on target
-                        log(`  ACCURATE KICK! ${thrower.type} boots ${thrown.type} on target!`, 'text-fuchsia-400 font-bold');
+                        log(`  ACCURATE KICK! ${thrower.type} boots ${thrown.type} on target!`, 'text-fuchsia-400 font-bold'); REPLAY.set('res', 'acc');
                         state.ttmData = { thrower, thrown, targetX, targetY, isAccurate: true };
                         animatePlayerFlight(thrown, thrown.x, thrown.y, targetX, targetY, 800, () => resolveTTMLanding(thrown, targetX, targetY, true));
                         return;
@@ -14922,7 +14921,7 @@
                     if (isFumbleRoll(finalRoll, totalModifier)) {
                         if (state.ttmKick) {
                             // Kick Team-mate fumble: an injury roll for the kicked player, Stunned counts as KO
-                            log(`  FUMBLED KICK! ${thrower.type} boots ${thrown.type} into the turf!`, 'text-red-500 font-bold');
+                            log(`  FUMBLED KICK! ${thrower.type} boots ${thrown.type} into the turf!`, 'text-red-500 font-bold'); REPLAY.set('res', 'fumble');
                             thrown.isDown = true;
                             if (state.ball.carrierId === thrown.id) dropBall(thrown);
                             harm({ kind: 'ttm-kick', by: thrower }, () => rollInjury(thrown));
@@ -14940,7 +14939,7 @@
                         log(`  SUBPAR THROW! ${thrown.type} hurtles wildly, scatters 3 times and will find it harder to land (-1).`, 'text-yellow-400 font-bold'); REPLAY.set('res', 'subpar');
                         ttmScatterOrSwoop(thrower, thrown, targetX, targetY, false);
                     } else {
-                        log(`  INACCURATE THROW! ${thrown.type} hurtles wildly and scatters 3 times!`, 'text-yellow-400 font-bold');
+                        log(`  INACCURATE KICK! ${thrown.type} hurtles wildly and scatters 3 times!`, 'text-yellow-400 font-bold'); REPLAY.set('res', 'inacc');
                         let landingX = targetX, landingY = targetY;
                         let scatterPath = [];
                         for (let i = 0; i < 3; i++) {
@@ -21002,18 +21001,25 @@
                 const put = (p, x, y) => { p.x = x - 0.5; p.y = y - 0.5; };
                 if (r.ball) { ball.on = true; ball.holder = Hf; }
                 camTo(1000, behind);
-                add(450, u => { const e = ease(u); put(Hf, lerp(start.x, from.x + L.dir.x * 0.2, e), lerp(start.y, from.y + L.dir.y * 0.2, e)); Hf.z = 1.1 * e; Hf.lean = -0.4 * e; Hf.down = false; });   // the thrower picks them up
+                // Kick Team-mate: they stand at the kicker's feet and are booted off the ground, not picked up and thrown
+                const kick = !!r.kick, z0 = kick ? 0.15 : 1.1, held = kick ? { x: from.x + L.dir.x * 0.55, y: from.y + L.dir.y * 0.55 } : { x: from.x + L.dir.x * 0.2, y: from.y + L.dir.y * 0.2 };
+                add(450, u => { const e = ease(u); put(Hf, lerp(start.x, held.x, e), lerp(start.y, held.y, e)); Hf.z = kick ? 0 : 1.1 * e; Hf.lean = kick ? 0 : -0.4 * e; Hf.down = false; });   // the thrower picks them up (or the kicker lines them up)
                 const crashes = r.crashes || [], outFirst = r.out && !crashes.length;   // straight into the crowd, or only after bouncing off someone
                 const upright = r.landed === true && !crashes.length && !r.out, L2 = lineOf(from, land);
-                if (r.res === 'fumble') {   // dropped: they tumble out of the thrower's grip into the next square
+                if (r.res === 'fumble' && kick) {   // a fumbled kick: booted into the turf where they stand
+                    add(320, u => { O.lean = -0.3 * ease(u); });
+                    add(260, u => { O.lean = -0.3 + 0.8 * ease(u); }, { banner: ['FUMBLE!', tone(1 - Hf.team)] });
+                    add(700, u => { O.lean = 0.5 * (1 - ease(u)); Hf.z = 0.5 * Math.sin(Math.PI * Math.min(1, u * 1.3)); Hf.lean = Math.PI / 2 * ease(Math.min(1, u * 1.3)); }, { slow: 0.5 });
+                } else if (r.res === 'fumble') {   // dropped: they tumble out of the thrower's grip into the next square
                     add(320, u => { O.lean = -0.25 * Math.sin(Math.PI * u); });
                     add(700, u => { put(Hf, lerp(from.x + L.dir.x * 0.2, land.x, u), lerp(from.y + L.dir.y * 0.2, land.y, u)); Hf.z = 1.1 * (1 - u) + 0.6 * Math.sin(Math.PI * u); Hf.lean = -0.4 + u * (upright ? 0.4 : 1.4); }, { slow: 0.5, banner: ['FUMBLE!', tone(1 - O.team)] });
                 } else {
-                    add(320, u => { O.lean = -0.4 * Math.sin(Math.PI * u); Hf.lean = -0.4 - 0.5 * u; });
-                    const flightMs = 900 + 80 * L2.dist, arc = 1.4 + 0.12 * L2.dist;
+                    if (kick) { add(300, u => { O.lean = -0.35 * ease(u); }); add(200, u => { O.lean = -0.35 + 0.85 * ease(u); }, { banner: ['BOOTED!', tone(O.team)] }); add(1, () => { O.lean = 0; }); }   // the run-up and the boot
+                    else add(320, u => { O.lean = -0.4 * Math.sin(Math.PI * u); Hf.lean = -0.4 - 0.5 * u; });
+                    const flightMs = 900 + 80 * L2.dist, arc = (kick ? 2.0 : 1.4) + 0.12 * L2.dist, f0 = kick ? held : from;
                     const fly = (t0, t1, ms, opt = {}) => add(ms, u => {
                         const t = lerp(t0, t1, u);
-                        put(Hf, lerp(from.x, land.x, t), lerp(from.y, land.y, t)); Hf.z = lerp(1.1, 0, t) + arc * 4 * t * (1 - t);
+                        put(Hf, lerp(f0.x, land.x, t), lerp(f0.y, land.y, t)); Hf.z = lerp(z0, 0, t) + arc * 4 * t * (1 - t);
                         Hf.lean = upright ? lerp(-0.9, Math.PI * 2, t) : -0.9 + t * Math.PI * 2.4;   // a somersault: a safe landing comes round to upright
                         const k = Math.min(1, t / 0.2), hx = Hf.x + 0.5, hy = Hf.y + 0.5;
                         cam.x = lerp(behind.x, hx - L2.dir.x * V.back, ease(k)); cam.y = lerp(behind.y, hy - L2.dir.y * V.back, ease(k)); cam.h = V.h + V.bob * Math.sin(Math.PI * t) * k; cam.a = V.a + V.da * Math.sin(Math.PI * t); cam.hd = L2.hd;
@@ -21021,9 +21027,10 @@
                     fly(0, 0.8, flightMs * 0.8);
                     fly(0.8, 1, flightMs * 0.2, upright ? { slow: 0.3 } : outFirst ? { banner: ['INTO THE CROWD!', tone(1 - Hf.team)] } : {});
                 }
-                let end = land;
+                let end = kick && r.res === 'fumble' ? start : land;
                 const inj = r.inj || {}, bled = {}, hurt = p => { if (p && inj[p.id] && !bled[p.id]) { bled[p.id] = true; bleed(p, inj[p.id]); } };
-                if (outFirst) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); if ((r.hops || []).length) end = hops(r, end); }
+                if (kick && r.res === 'fumble') { add(600, u => { if (u > 0.1) hurt(Hf); }); }
+                else if (outFirst) { add(400, () => { Hf.gone = true; if (r.ball) ball.on = false; }); if ((r.hops || []).length) end = hops(r, end); }
                 else if (crashes.length) {   // crash landings: whoever is landed on goes down, and the thrown player bounces off (maybe onto someone else) and falls
                     let at = land;
                     crashes.forEach((c, i) => {
@@ -21409,7 +21416,7 @@
                         else if (k === 'throwTeamMateRoll' && J(r.playerId) && J(r.thrownPlayerId) && ep && ep.kind === 'ttm' && ep.thr === J(r.playerId) && ep.thrown === J(r.thrownPlayerId)) ep.res = r.passResult === 'FUMBLE' ? 'fumble' : 'ok';   // (a re-roll)
                         else if (k === 'throwTeamMateRoll' && J(r.playerId) && J(r.thrownPlayerId)) {
                             endEp(); const t = J(r.playerId), h = J(r.thrownPlayerId);
-                            ep = { kind: 'ttm', team: roster[t - 1].side, thr: t, thrown: h, tgt: passTgt || { x: posStart[(h - 1) * 2], y: posStart[(h - 1) * 2 + 1] }, res: r.passResult === 'FUMBLE' ? 'fumble' : 'ok',
+                            ep = { kind: 'ttm', kick: !!r.kicked, team: roster[t - 1].side, thr: t, thrown: h, tgt: passTgt || { x: posStart[(h - 1) * 2], y: posStart[(h - 1) * 2 + 1] }, res: r.passResult === 'FUMBLE' ? 'fumble' : 'ok',
                                 players: snapPlayers(), ball: carrierNow() === h - 1, inj: {} };
                         } else if (k === 'rightStuffRoll' && ep && ep.kind === 'ttm' && J(r.playerId) === ep.thrown) ep.landed = !!r.successful;
                         else if (k === 'injury' && ep && ep.kind === 'ttm' && J(r.defenderId)) ep.inj[J(r.defenderId)] = r.injury >= 6 ? 'cas' : r.injury === 5 ? 'ko' : 'stun';
@@ -21568,7 +21575,7 @@
                                 if (i === thrownNow && pos[i * 2] >= 0 && Math.max(Math.abs(pos[i * 2] - v[0]), Math.abs(pos[i * 2 + 1] - v[1])) > 1) { fx.push({ t: 'fly', p: i }); thrownNow = -1; }
                                 moved.push(i); pos[i * 2] = v[0]; pos[i * 2 + 1] = v[1]; seen = true;
                                 pend.slice().forEach(e => { if (e.kind === 'follow' && e.a === i && (!e.sq || (e.sq[0] === v[0] && e.sq[1] === v[1]))) settle(e, 0); });   // (the blocker stepped into the square)
-                                if (ep && ep.kind === 'ttm' && ep.thrown === i + 1) { if (v[0] >= 0 && v[0] < 26 && v[1] >= 0 && v[1] < 15) ep.land = { x: v[0], y: v[1] }; else ep.out = true; }
+                                if (ep && ep.kind === 'ttm' && ep.thrown === i + 1) { if (v[0] >= 0 && v[0] < 26 && v[1] >= 0 && v[1] < 15) ep.land = { x: v[0], y: v[1] }; else if (![5, 6, 7, 8].includes(st[i])) ep.out = true; }   // (knocked out or hurt: carried off, not thrown into the crowd)
                             } break; }
                             case 'fieldModelSetBombMoving': bombLive = !!v; break;
                             case 'gameSetDialogParameter': if (v && v.dialogId) { try { ask(v); } catch (er) {} } break;

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.16 (30 Oct 2026)
+- Close-up replays of Kick Team-mate: the boot, the flight and the landing, or a fumbled kick into the turf.
+
 ## v4.15 (30 Oct 2026)
 - Close-up replays of kick-offs, in matches and in I Like to Watch.
 - Fixed: inaccurate passes and Hail Marys in FUMBBL replays showed a black close-up.
