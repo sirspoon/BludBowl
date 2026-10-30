@@ -2,6 +2,9 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.18 (30 Oct 2026)
+- **Fixed:** when a block pushed a player onto the loose ball, the ball bounced straight away and the follow-up was asked afterwards, so the ball could come to rest in the empty square the blocker then followed up into, and stay there under them with no catch or pick-up. The rules say the follow-up is decided before any other dice are rolled: now the blocker follows up (or not) first, then the ball bounces, and if it bounces onto them they try to catch it.
+
 ## v4.17 (30 Oct 2026)
 - **Changed:** the kick-off close-up replays (v4.15) have their own setting, Settings > Kick-off replays, off to start with; it only applies with Replays on. They're still recorded in saved matches, so switching it on shows them there too.
 

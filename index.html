@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.17</title>
+    <title>BludBowl 4.18</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1023,7 +1023,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.17</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.18</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -16962,6 +16962,13 @@
 
         function finalizeBlock() {
             releaseBlock();
+            if (state.combat && state.combat.pendingBounce) {   // the ball the push landed on bounces now, after the follow-up (onto the follower: a catch roll)
+                const pb = state.combat.pendingBounce; state.combat.pendingBounce = null;
+                log(`  Ball bounced by pushed player!`, 'text-yellow-400');
+                state.mode = MODES.LOCKED;
+                scatterBall(pb.x, pb.y, () => finalizeBlock());
+                return;
+            }
             let { atk, def, atkDown, defDown } = state.combat;
 
             if (state.combat.placedProne) { // Wrestle: both players are Placed Prone (no armour rolls, no Turnover)
@@ -19777,11 +19784,10 @@
                         if (state.ball.carrierId === pushed.id) { state.ball.x = s.x; state.ball.y = s.y; }
                         log(`  ${pushed.type} pushed to [${s.x}, ${s.y}].`);
 
-                        if (!state.ball.carrierId && state.ball.x === s.x && state.ball.y === s.y) {
-                            log(`  Ball bounced by pushed player!`, 'text-yellow-400');
-                            state.mode = MODES.LOCKED; bounced = true;
-                            scatterBall(s.x, s.y);
-                        }
+                        // pushed onto the loose ball: it bounces, but only once the follow-up has been decided (the rules: that's decided
+                        // before any other dice are rolled). Bounced first, it could stop in the square the attacker then followed up into,
+                        // leaving the ball under them with no catch or pick-up
+                        if (!state.ball.carrierId && state.ball.x === s.x && state.ball.y === s.y) state.combat.pendingBounce = { x: s.x, y: s.y };
                     }
 
                     if (pushed === state.combat.def && state.combat.atk && state.combat.atk.skills.includes('Eye Gouge') && pushed.team !== state.combat.atk.team) { pushed.eyeGouged = true; log(`  Eye Gouge! ${pushed.type} can't give assists until they next act.`, 'text-rose-300 font-bold'); skillPop('Eye Gouge'); }
