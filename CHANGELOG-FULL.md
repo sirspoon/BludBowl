@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.15 (30 Oct 2026)
+- **New:** kick-offs get a close-up replay, like passes, thrown team-mates and bombs: the kicker's boot, the ball high in the air with the camera following it up, then the catch, drop, bounces or touchback. In a match it plays once the ball has come down, before the receiving team's first turn (with the Replays setting on). In I Like to Watch it's built from FUMBBL's kick-off (the kicker is the one who used Kick, or else the kicking team's player nearest the middle), and saved matches in My matches keep theirs too.
+- **Fixed:** in FUMBBL replays, the close-up of an inaccurate pass (a Hail Mary is always one) went black. FUMBBL puts the ball on the target square before it scatters, and the viewer took that as the landing square, in a form the close-up couldn't draw. It now lands where the ball really came down, and a player catching it there is shown catching it.
+- **Fixed:** in a match, a Hail Mary thrown well was replayed as an accurate pass (it always scatters), and the log said "Accurate pass targeting undefined!" for a Hail Mary to an empty square.
+
 ## v4.14 (29 Oct 2026)
 - **Changed:** full screen not working turned out to be Chrome itself: it had stopped answering full-screen requests from any page, and fully closing and reopening Chrome fixed it. The detailed diagnostic note from v4.12-4.13 is replaced by a plain one: if the full-screen button gets no answer, it says Chrome isn't responding and suggests closing and reopening it. (The one-request-at-a-time change from v4.13 stays.) The test page fstest.html is removed.
 

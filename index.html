@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.14</title>
+    <title>BludBowl 4.15</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1023,7 +1023,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.14</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.15</button>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
         </button>
@@ -9695,7 +9695,10 @@
         }
 
         function landKick(landingX, landingY) {
+            // the kick's close-up replay: from the kicker's boot to wherever the ball ends up (played before the receiving team's first turn)
+            if (state.kickoff.kickerId != null) REPLAY.start('kick', { thr: state.kickoff.kickerId, tgt: state.kickoff.target || { x: landingX, y: landingY }, land: { x: landingX, y: landingY }, team: state.kickoff.kickingTeam, gb: null });
             if (!kickInBounds(landingX, landingY, state.kickoff.receivingTeam)) {
+                REPLAY.set('tb', true);
                 triggerTouchback(landingX, landingY, "landed outside the receiving team's half");
                 return;
             }
@@ -9709,6 +9712,7 @@
 
                 setupRoll('CATCH', p, withRaw(cTarget, cRaw), 'Catch',
                     () => {
+                        REPLAY.set('catch', { id: p.id, ok: true }, true);
                         log(`  ${p.type} catches the kick on the full!`, 'text-green-400 font-bold');
                         state.ball.carrierId = p.id;
                         state.ball.x = -1;
@@ -9716,6 +9720,7 @@
                         beginDriveActivePhase();
                     },
                     () => {
+                        REPLAY.set('catch', { id: p.id, ok: false }, true);
                         log(`  ${p.type} failed to catch the kick! Ball bounces!`, 'text-yellow-400');
                         scatterBall(landingX, landingY);
                     },
@@ -9752,6 +9757,7 @@
 
             const landingX = targetX + (chosenDir[0] * dist);
             const landingY = targetY + (chosenDir[1] * dist);
+            state.kickoff.target = { x: targetX, y: targetY };   // (for the kick's close-up replay)
 
             log(`  Kick deviates ${dist} squares from [${targetX}, ${targetY}] toward [${landingX}, ${landingY}].`);
 
@@ -9810,6 +9816,7 @@
         }
 
         function beginDriveActivePhase() {
+            { const r = REPLAY.get(); if (r && r.kind === 'kick') { REPLAY.then(() => beginDriveActivePhase()); return; } }   // the kick-off's close-up replay first
             state.isResolvingKickoff = false;
             state.activeTeam = state.kickoff.receivingTeam;
 
@@ -14465,7 +14472,7 @@
         }
 
         function processPassFlight(thrower, target, isAccurate, finalRoll) {
-            if (state.hailMary && isAccurate) { isAccurate = false; log(`  Hail Mary! Even a good throw comes down somewhere near the target...`, 'text-purple-300 font-bold'); skillPop('Hail Mary Pass'); }
+            if (state.hailMary && isAccurate) { isAccurate = false; REPLAY.set('res', 'inacc'); log(`  Hail Mary! Even a good throw comes down somewhere near the target...`, 'text-purple-300 font-bold'); skillPop('Hail Mary Pass'); }
             let landingX = target.x;
             let landingY = target.y;
             let scatterPath = [];
@@ -14569,7 +14576,7 @@
 
                 setupRoll('PASS', thrower, pTarget, 'Pass',
                     (finalRoll) => { 
-                        log(`  Accurate pass targeting ${receiver.type}!`, 'text-purple-400 font-bold'); REPLAY.set('res', 'acc');
+                        log(`  Accurate pass targeting ${receiver.isSquare ? `the square [${receiver.x}, ${receiver.y}]` : receiver.type}!`, 'text-purple-400 font-bold'); REPLAY.set('res', 'acc');
                         state.ball.carrierId = null;
                         thrower.hasActed = true; thrower.remainingMA = 0; thrower.rushes = 0;
                         processPassFlight(thrower, receiver, true, finalRoll);
@@ -21051,6 +21058,45 @@
                 outro(end); return true;
             }
 
+            // a kick-off: the kicker's boot, the ball high in the air (the camera chasing it), then the catch, drop, bounces or touchback
+            function buildKick(r) {
+                const T = pl(r.thr); if (!T || !r.land) return false;
+                const from = C(T), land = sq(r.land), L = lineOf(from, land), behind = behindOf(from, L), recv = 1 - T.team;
+                const foot = { x: from.x + L.dir.x * 0.4, y: from.y + L.dir.y * 0.4 };
+                ball.on = true; ball.bomb = false; ball.holder = null; ball.x = foot.x; ball.y = foot.y; ball.z = 0.12;
+                camTo(1000, behind);
+                add(320, u => { T.lean = -0.3 * ease(u); });   // the run-up...
+                add(200, u => { T.lean = -0.3 + 0.75 * ease(u); }, { banner: ['KICK-OFF!', tone(T.team)] });   // ...and the boot
+                add(1, () => { T.lean = 0; });
+                const Cc = r.catch ? pl(r.catch.id) : null, endZ = Cc ? 1.0 + CATCH_HANDS : 0.05, peak = 2.4 + 0.16 * L.dist;
+                const path = t => ({ x: lerp(foot.x, land.x, t), y: lerp(foot.y, land.y, t), z: lerp(0.12, endZ, t) + peak * 4 * t * (1 - t) });
+                const lift = t => { cam.h += ball.z * 0.45; cam.a += Math.min(0.32, ball.z * 0.06); };   // (the camera rises with the ball, so it stays in view)
+                const fms = 1300 + 70 * L.dist;
+                flight(path, L, behind, 0, 0.82, fms * 0.82, lift);
+                let end = land;
+                if (Cc) {
+                    flight(path, L, behind, 0.82, 0.94, fms * 0.12, t => { lift(t); jump(Cc, t, 1, 0.2, CATCH_JUMP); });
+                    flight(path, L, behind, 0.94, 1, fms * 0.06, t => jump(Cc, t, 1, 0.2, CATCH_JUMP), r.catch.ok ? { slow: 0.22 } : {});
+                    if (r.catch.ok) {
+                        add(420, () => { ball.holder = Cc; Cc.z = CATCH_JUMP; }, { star: Cc, banner: ['CAUGHT!', tone(Cc.team)] });
+                        add(900, u => { ball.holder = Cc; Cc.z = CATCH_JUMP * (1 - ease(u)); }, { slow: 0.6 });
+                        end = C(Cc);
+                    } else {
+                        const z0 = 1.0 + CATCH_HANDS;
+                        add(450, u => { ball.holder = null; ball.x = land.x; ball.y = land.y; ball.z = z0 + 0.6 * Math.sin(Math.PI * u) - 0.4 * u; ball.spin += 0.3; Cc.z = CATCH_JUMP * (1 - ease(u)); },
+                            { banner: ['DROPPED!', tone(1 - Cc.team)] });
+                        end = hops(r, land, z0 - 0.4);
+                    }
+                } else {
+                    flight(path, L, behind, 0.82, 1, fms * 0.18, lift, r.tb ? { banner: [offPitch(r.land) ? 'OUT OF BOUNDS!' : 'TOUCHBACK!', tone(recv)] } : {});
+                    end = r.tb ? land : hops(r, land);
+                }
+                if (r.tb) {   // the receiving team gets the ball: shown in their player's hands
+                    const Q = r.gbEnd && r.gbEnd.id != null ? pl(r.gbEnd.id) : null;
+                    if (Q) { add(400, () => {}); add(600, () => { ball.on = true; ball.holder = Q; }, { star: Q, banner: ['TOUCHBACK!', tone(Q.team)] }); end = C(Q); }
+                }
+                outro(end); return true;
+            }
             function buildBomb(r) {
                 const legs = r.legs || []; if (!legs.length || !pl(legs[0].from)) return false;
                 ball.on = true; ball.bomb = true; ball.holder = pl(legs[0].from);
@@ -21105,11 +21151,11 @@
                 prepGround();
                 P = (r.players || []).map(s => { const q = state.players.find(p => p.id === s.id); const spr = q ? spriteCanvas(q) : null; return spr && { id: s.id, team: q.team, x: s.x, y: s.y, z: 0, lean: s.down ? Math.PI / 2 : 0, down: s.down, spr }; }).filter(Boolean);
                 ball = { x: 0, y: 0, z: 0, on: false, spin: 0, holder: null, bomb: false };
-                if (r.kind !== 'bomb' && r.gb) { if (r.gb.id != null) { ball.on = true; ball.holder = pl(r.gb.id) || null; ball.on = !!ball.holder; } else if (r.gb.x >= 0) { ball.on = true; ball.x = r.gb.x + 0.5; ball.y = r.gb.y + 0.5; } }
+                if (r.kind !== 'bomb' && r.kind !== 'kick' && r.gb) { if (r.gb.id != null) { ball.on = true; ball.holder = pl(r.gb.id) || null; ball.on = !!ball.holder; } else if (r.gb.x >= 0) { ball.on = true; ball.x = r.gb.x + 0.5; ball.y = r.gb.y + 0.5; } }
                 blasts = []; gore = []; banner = null; flashT0 = -1e9; segs = []; si = 0; segT0 = 0; clockMs = 0;
                 const T = pl(r.thr || (r.legs && r.legs[0] && r.legs[0].from));
                 if (T) { cam.x = T.x + 0.5; cam.y = T.y + 0.5; } cam.h = 13; cam.a = Math.PI / 2 - 0.001; cam.hd = -Math.PI / 2;
-                return r.kind === 'pass' ? buildPass(r) : r.kind === 'ttm' ? buildTTM(r) : r.kind === 'bomb' ? buildBomb(r) : false;
+                return r.kind === 'pass' ? buildPass(r) : r.kind === 'ttm' ? buildTTM(r) : r.kind === 'bomb' ? buildBomb(r) : r.kind === 'kick' ? buildKick(r) : false;
             }
             function finish() {
                 if (!script) return;
@@ -21273,7 +21319,7 @@
                 const words2 = t => esc(String(t || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase());
                 let lastAct = '', lastLine = '', lastRoll = null, blockFrom = null, toFail = null, skillWait = [], ownRep = null;
                 // a close-up replay from one of our own matches: only numbers, true/false and the game's own words get through (files can come from anyone)
-                const REP_WORDS = new Set(['pass', 'ttm', 'bomb', 'acc', 'inacc', 'fumble', 'subpar', 'superb', 'saved', 'stun', 'ko', 'cas']);
+                const REP_WORDS = new Set(['pass', 'ttm', 'bomb', 'kick', 'acc', 'inacc', 'fumble', 'subpar', 'superb', 'saved', 'stun', 'ko', 'cas']);
                 const cleanRep = (v, d = 0) => {
                     if (typeof v === 'number') return isFinite(v) ? v : 0;
                     if (typeof v === 'boolean') return v;
@@ -21342,12 +21388,23 @@
                         } else if (k === 'interceptionRoll' && J(r.playerId)) {
                             if (ep && ep.kind === 'pass' && !ep.int) ep.int = { id: J(r.playerId), ok: !!r.successful };
                             if (ep && ep.kind === 'bomb') { const lg = ep.legs[ep.legs.length - 1]; if (lg && !lg.int) lg.int = { id: J(r.playerId), ok: !!r.successful }; }
-                        } else if (k === 'catchRoll' && J(r.playerId)) {
+                        } else if (k === 'catchRoll' && J(r.playerId) && !(ep && ep.kind === 'kick')) {
                             if (ep && ep.kind === 'pass') {
-                                const bounced = ep.moves.length > (ep.res === 'inacc' || ep.res === 'acc' ? 1 : 0);
+                                // (FUMBBL puts the ball on the target first: after that an accurate pass has no more squares before the catch,
+                                // an inaccurate one just the one it scattered to)
+                                let n = 0; while (n < ep.moves.length && ep.moves[n][0] === ep.tgt.x && ep.moves[n][1] === ep.tgt.y) n++;
+                                const bounced = ep.moves.length - n > (ep.res === 'inacc' ? 1 : 0);
                                 if (!ep.catch && !bounced && ep.res !== 'fumble') ep.catch = { id: J(r.playerId), ok: !!r.successful };
                                 else if (r.successful && ep.moves.length) ep.moves[ep.moves.length - 1][3] = J(r.playerId);
                             } else if (ep && ep.kind === 'bomb' && r.bomb) { const lg = ep.legs[ep.legs.length - 1]; if (lg && !lg.catch) lg.catch = { id: J(r.playerId), ok: !!r.successful }; }
+                        } else if (k === 'catchRoll' && ep && ep.kind === 'kick' && J(r.playerId)) {
+                            if (!ep.catch && !ep.moves.length) ep.catch = { id: J(r.playerId), ok: !!r.successful };
+                            else if (r.successful && ep.moves.length) ep.moves[ep.moves.length - 1][3] = J(r.playerId);
+                        } else if (k === 'skillUse' && r.skill === 'Kick' && J(r.playerId)) kickUser = J(r.playerId);
+                        else if (k === 'kickoffScatter' && Array.isArray(r.ballCoordinateEnd)) {   // the kick: where it came down (and so where it was aimed)
+                            const D8 = { North: [0, -1], Northeast: [1, -1], East: [1, 0], Southeast: [1, 1], South: [0, 1], Southwest: [-1, 1], West: [-1, 0], Northwest: [-1, -1] };
+                            const e = r.ballCoordinateEnd, d = D8[r.scatterDirection] || [0, 0], n = +r.rollScatterDistance || 0;
+                            pendKick = { land: { x: e[0], y: e[1] }, tgt: { x: e[0] - d[0] * n, y: e[1] - d[1] * n }, thr: kickUser };
                         } else if (k === 'throwIn') crowdNext = true;
                         else if (k === 'throwTeamMateRoll' && J(r.playerId) && J(r.thrownPlayerId) && ep && ep.kind === 'ttm' && ep.thr === J(r.playerId) && ep.thrown === J(r.thrownPlayerId)) ep.res = r.passResult === 'FUMBLE' ? 'fumble' : 'ok';   // (a re-roll)
                         else if (k === 'throwTeamMateRoll' && J(r.playerId) && J(r.thrownPlayerId)) {
@@ -21453,7 +21510,23 @@
                 };
                 // ---- the close-up replays (the game's PASSFX): a throw is followed from its roll until the next action starts, then its
                 // record goes on the last step it covers: { kind: 'pass' | 'ttm' | 'bomb', thr, tgt, res, land, catch, int, hops, gbEnd, ... } ----
-                let ep = null, passTgt = null, cmdBall = [], posStart = pos.slice(), stStart = st.slice(), crowdNext = false;
+                let ep = null, passTgt = null, cmdBall = [], posStart = pos.slice(), stStart = st.slice(), crowdNext = false, pendKick = null, kickUser = null;
+                // the kick-off's close-up: begun when the ball comes down (after the kick-off event); the kicker is the one who used Kick,
+                // or else the kicking team's player nearest the middle, off the line of scrimmage and out of the wide zones
+                const startKick = () => {
+                    const K = pendKick; pendKick = null; endEp();
+                    const kt = K.tgt.x < 13 ? 1 : 0;   // (it's aimed into the receiving team's half: home's is the left)
+                    let thr = kickUser && roster[kickUser - 1] && roster[kickUser - 1].side === kt ? kickUser : null; kickUser = null;
+                    if (!thr) {
+                        const los = kt === 0 ? 12 : 13; let best = null;
+                        roster.forEach((f, j) => { if (f.side !== kt) return; const x = pos[j * 2], y = pos[j * 2 + 1]; if (x < 0 || x > 25 || y < 0 || y > 14 || ![1, 2].includes(st[j])) return;
+                            const sc = (x === los ? 20 : 0) + (y < 4 || y > 10 ? 10 : 0) + Math.abs(y - 7); if (!best || sc < best.sc) best = { sc, j }; });
+                        thr = best ? best.j + 1 : null;
+                    }
+                    if (!thr) return;
+                    const off = K.land.x < 0 || K.land.x > 25 || K.land.y < 0 || K.land.y > 14, wrongHalf = kt === 1 ? K.land.x > 12 : K.land.x < 13;
+                    ep = { kind: 'kick', team: kt, thr, tgt: K.tgt, land: K.land, players: snapPlayers(), moves: [], tb: off || wrongHalf };
+                };
                 const snapPlayers = () => roster.map((f, j) => ({ id: j + 1, x: posStart[j * 2], y: posStart[j * 2 + 1], down: stStart[j] === 3 || stStart[j] === 4 }))
                     .filter(q => q.x >= 0 && q.x < 26 && q.y >= 0 && q.y < 15 && ![5, 6, 7, 8, 9, 10, 13].includes(stStart[q.id - 1]));
                 const RES3 = { ACCURATE: 'acc', INACCURATE: 'inacc', WILDLY_INACCURATE: 'inacc', FUMBLE: 'fumble' };
@@ -21463,12 +21536,19 @@
                     try {
                         if (e.kind === 'pass') {
                             const mv = e.moves.slice();
-                            if (e.res === 'inacc') e.land = mv.shift() || e.tgt;
-                            else if (e.res === 'acc') { if (mv.length && mv[0][0] === e.tgt.x && mv[0][1] === e.tgt.y) mv.shift(); }
+                            // FUMBBL puts the ball on the target square first, then (inaccurate) where it scattered to: the landing is the
+                            // first square after the target ones (as {x, y}: an [x, y] here left the close-up with nowhere to draw, all black)
+                            if (e.res === 'inacc' || e.res === 'acc') while (mv.length && mv[0][0] === e.tgt.x && mv[0][1] === e.tgt.y) mv.shift();
+                            if (e.res === 'inacc') { const m = mv.shift(); e.land = m ? { x: m[0], y: m[1] } : { x: e.tgt.x, y: e.tgt.y }; }
                             const from = e.res === 'fumble' ? (e.thrFrom || e.tgt) : (e.land || e.tgt);
                             let fx = from.x, fy = from.y;
                             e.hops = mv.slice(0, 12).map(m => { const h = { fx, fy, x: m[0], y: m[1] }; if (m[2]) h.crowd = true; if (m[3] != null) h.caught = m[3]; fx = m[0]; fy = m[1]; return h; });
                             if (e.int && e.int.ok) e.hops = [];
+                        }
+                        if (e.kind === 'kick') {   // the bounces from where it came down
+                            const mv = e.moves.slice(); while (mv.length && mv[0][0] === e.land.x && mv[0][1] === e.land.y) mv.shift();
+                            let fx = e.land.x, fy = e.land.y;
+                            e.hops = e.tb ? [] : mv.slice(0, 12).map(m => { const h = { fx, fy, x: m[0], y: m[1] }; if (m[2]) h.crowd = true; if (m[3] != null) h.caught = m[3]; fx = m[0]; fy = m[1]; return h; });
                         }
                         const c = carrierNow(); e.gbEnd = c >= 0 ? { id: c + 1 } : ball ? { x: ball[0], y: ball[1] } : { x: -1, y: -1 };
                         delete e.moves;
@@ -21495,10 +21575,10 @@
                             case 'fieldModelSetPlayerState': { const i = ix.get(String(key)); if (i == null || typeof v !== 'number') break; if (st[i] !== (v & 0xFF)) { st[i] = v & 0xFF; seen = true; } break; }
                             case 'fieldModelRemovePlayer': { const i = ix.get(String(key)); if (i != null) { pos[i * 2] = -99; seen = true; } break; }
                             case 'fieldModelSetBallCoordinate': ball = Array.isArray(v) ? v.slice() : null; seen = true;
-                                if (ball) { cmdBall.push(ball.slice()); if (ep && ep.kind === 'pass') { ep.moves.push([ball[0], ball[1], crowdNext || undefined]); crowdNext = false; } }
+                                if (ball) { cmdBall.push(ball.slice()); if (ep && (ep.kind === 'pass' || ep.kind === 'kick')) { ep.moves.push([ball[0], ball[1], crowdNext || undefined]); crowdNext = false; } }
                                 break;
                             case 'gameSetPassCoordinate': if (Array.isArray(v)) passTgt = { x: v[0], y: v[1] }; break;
-                            case 'fieldModelSetBallInPlay': inPlay = !!v; seen = true; break;
+                            case 'fieldModelSetBallInPlay': inPlay = !!v; seen = true; if (v && pendKick) { try { startKick(); } catch (er) { pendKick = null; } } break;
                             case 'teamResultSetScore': score[key === 'away' ? 1 : 0] = v; seen = true; break;
                             case 'gameSetHalf': half = v; seen = true; break;
                             case 'turnDataSetTurnNr': turn[key === 'away' ? 1 : 0] = v; seen = true; break;
@@ -21907,7 +21987,7 @@
                 const F = D.frames[at];
                 // a pass, thrown team-mate or bomb: the game's close-up replay (when Replays is on and the speed is 2x or less), then on
                 if (F.replay && speed <= 2 && REPLAY.enabled()) {
-                    later(() => { try { PASSFX.play(F.replay, F.replay.team, () => { if (playing) { clearTimeout(timer); timer = setTimeout(tick, 250); } }); } catch (e) { if (playing) timer = setTimeout(tick, 250); } }, winMs + 250);
+                    later(() => { try { PASSFX.play(F.replay, F.replay.kind === 'kick' ? 1 - F.replay.team : F.replay.team, () => { if (playing) { clearTimeout(timer); timer = setTimeout(tick, 250); } }); } catch (e) { if (playing) timer = setTimeout(tick, 250); } }, winMs + 250);
                     return;
                 }
                 timer = setTimeout(tick, delay(F));
