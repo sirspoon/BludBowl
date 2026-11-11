@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.35 (11 Nov 2026)
+- A short note on the title screen: BludBowl is an unofficial fan project, not connected with Games Workshop. The code is now
+  open source (GPL-3.0).
+
 ## v4.34 (6 Nov 2026)
 - On defence the computer keeps two players back while your ball carrier is still in your own half, so a break past its front line
   doesn't find the whole team chasing back.

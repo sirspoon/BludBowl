@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.35 (11 Nov 2026)
+- **New:** a line on the title screen, above the version number, saying BludBowl is an unofficial, free, non-commercial fan
+  project and that Blood Bowl is a trademark of Games Workshop Limited, with no affiliation or endorsement. It's hidden on
+  the Settings and Exhibition screens, like the version number.
+- **Licence:** BludBowl's own code is now under the GNU GPL, version 3 or later (`LICENSE`). The README explains the licence,
+  the fan-project disclaimer, and what it doesn't cover (Games Workshop's IP, FUMBBL replay data in `ai-training/data/`,
+  fonts and other third-party material).
+- The browser tab's title shows the current version again (it had stayed at 4.23).
+
 ## v4.34 (6 Nov 2026)
 - **Improved (AI):** two safeties (`dep1`): with the other side's carrier still in his own half, two defenders go just beyond his
   run this turn (his move plus three squares towards our end zone), three rows either side of him, straight after the screen.
