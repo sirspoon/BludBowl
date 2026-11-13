@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.56 (13 Nov 2026)
+- **Improved (graphics):** more of Varag Ghoul-Chewer from further photos of the owner's miniature: the darker Black Orc green for
+  his face; a skull worn as a cap (with its nub on top and its teeth as the rim) instead of a bald head with a small skull on it; a
+  plume of black hair streaming off the cap to one side (it has fallen off the model); and two big curved bone tusks bound with dark
+  straps, sweeping down from his forearms on both sides, in place of the small spike in his hand
+  ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.55 (13 Nov 2026)
 - **Improved (graphics):** Varag Ghoul-Chewer's open mouth read as a big pink nose (the owner spotted it). It now has a nose with
   two nostrils above it, a row of fangs along the top of a dark open mouth, and a small dark-red tongue at the bottom

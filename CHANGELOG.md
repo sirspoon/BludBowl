@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.56 (13 Nov 2026)
+- Varag looks more like a Black Orc: a darker face, a skull cap with a black plume of hair streaming off it, and two big bone
+  tusks sweeping down from his forearms.
+
 ## v4.55 (13 Nov 2026)
 - Varag's open mouth no longer looks like a big pink nose: a row of fangs, a dark mouth and a nose above it.
 
