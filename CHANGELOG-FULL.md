@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.68 (13 Nov 2026)
+- **Improved (help and training):** diagrams in Help and the training windows, drawn on a little pitch with the game's own sprites:
+  the pitch at set-up (end zones, line of scrimmage, wide zones and an example line-up for each side) in The aim; a red player's
+  tackle zone with one blue player who has to Dodge and one who moves freely in Tackle zones; an assisting team-mate (+1) and a
+  marked one who can't help in Blocking; the four pass range bands spreading from the thrower in Passing; and the eight directions
+  a loose ball can bounce in The ball. Each has a one-line caption.
+
 ## v4.67 (13 Nov 2026)
 - **New (help and training):** a "Throwing team-mates" topic in Help: who can throw whom (Throw Team-mate and the Right Stuff), once a
   turn, Quick or Short range only, Superb and Subpar throws (three scatters, a harder landing for Subpar) and fumbles, the landing

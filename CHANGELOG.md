@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.68 (13 Nov 2026)
+- Help has pictures: the pitch at set-up, tackle zones, assists in a block, the pass ranges and how the ball bounces.
+
 ## v4.67 (13 Nov 2026)
 - Help has a "Throwing team-mates" topic (Throw and Kick Team-mate), and training explains it the first time you throw one.
 
