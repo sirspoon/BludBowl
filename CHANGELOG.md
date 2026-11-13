@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.47 (13 Nov 2026)
+- Every team's players and the Star Players now breathe while standing, with the gentle one-pixel crouch from v4.45.
+
 ## v4.46 (13 Nov 2026)
 - The High Elf and Orc idle animation is now easy to see: a deeper, smoother crouch.
 

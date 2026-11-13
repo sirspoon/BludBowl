@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.47 (13 Nov 2026)
+- **Changed:** the idle animation is back to v4.45's one-pixel crouch (the owner preferred it on a second look), and now covers every
+  team, every alternative sprite set and the Star Players (Fancy Socks Morg and Your Mum included): crouched for 40% of a
+  1.5-2.4 second breath, each player on their own timing. The Deathroller and the Pump Wagon stay still. Players lying down,
+  moving or in the air don't move, and nothing changes in the quick test mode.
+
 ## v4.46 (13 Nov 2026)
 - **Changed (trial, High Elves and Orcs):** the idle animation from v4.45 was working but too small to see on a phone (one pixel of
   a 32-pixel sprite is about one screen pixel). Each breath now sinks two pixels with an in-between pose on the way down and
