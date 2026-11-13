@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.42 (13 Nov 2026)
+- Your Mum has a wider mouth and a pair of tusks, like Morg's.
+
 ## v4.41 (13 Nov 2026)
 - Fancy Socks Morg's glow is back as it was in v4.39: the Star Player glow, with his socks pulsing blue and yellow.
 

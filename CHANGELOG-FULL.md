@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.42 (13 Nov 2026)
+- **Changed (secret options):** Your Mum's lipstick mouth is a little wider again (fitting an ogre), with a white tusk rising from
+  each corner of her lower lip past the top lip, like Morg 'n' Thorg's.
+
 ## v4.41 (13 Nov 2026)
 - **Changed back (secret options):** Fancy Socks Morg 'n' Thorg's glow is as it was in v4.39 again: the usual Star Player gold glow
   round him, with his socks lighting up blue and yellow in turn. (The "comet" in the v4.40 pictures was the pitch's centre-spot
