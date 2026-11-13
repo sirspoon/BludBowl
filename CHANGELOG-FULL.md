@@ -2,6 +2,19 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.37 (13 Nov 2026)
+- **New (secret options):** two more options in the secret menu. Like the others, they're only for your side in an exhibition
+  match against the computer.
+  - **Fancy Socks:** a Morg 'n' Thorg you hire gets a new look based on the owner's painted miniature: bald and grinning, a cream
+    shoulder pad, a spiked gauntlet and sword, a horned skull on his chest, blue shorts and blue and yellow striped socks above
+    iron-shod boots. The socks glow, pulsing blue and yellow. He also gains Hypnotic Gaze.
+  - **Your Mum:** a Star Player any team can hire for 30k: MA 5, ST 2, AG 3+, PA 4+, AV 8+, with Dirty Player, Fend,
+    Monstrous Mouth, Pro, Strip Ball, Sure Feet, Sure Hands and Tackle. She's drawn small: a grey-streaked perm, specs, pearls, a
+    cardigan in the team's colours, a handbag and a very large mouth. She's only offered on the exhibition shopping screen (never
+    in leagues, tournaments, Matched Play or the Team Builder), so she's never saved to a team. With the option on, your side
+    always has at least 30k to spend, so she can be hired even when there's no other gold.
+- **Fixed:** since v4.36 an empty coach card showed in the top-left corner during matches that weren't training matches.
+
 ## v4.36 (13 Nov 2026)
 - **New: Training mode.** A "Training" button on the main menu opens the match set-up with Team 2 as the computer and a new
   "Training" option ticked (it can also be ticked for any exhibition match on this device). In a training match a coach explains
