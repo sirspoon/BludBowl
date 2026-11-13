@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.38 (13 Nov 2026)
+- **Changed (secret options):** Fancy Socks Morg 'n' Thorg's grin is now closed-lipped with a couple of tusks at each corner (as
+  on the miniature), not a full row of teeth. Your Mum's mouth is a little smaller, a bright red lipstick shape with a cupid's
+  bow and only a few teeth showing, and she now wears a sleeveless top in the team's colours, a short skirt, bare legs and red
+  heels (still with her pearls, specs and handbag).
+
 ## v4.37 (13 Nov 2026)
 - **New (secret options):** two more options in the secret menu. Like the others, they're only for your side in an exhibition
   match against the computer.

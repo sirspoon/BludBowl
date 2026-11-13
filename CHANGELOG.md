@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.38 (13 Nov 2026)
+- Fancy Socks Morg now has just a few tusks showing, and Your Mum has a classic red-lipstick mouth and a skimpier outfit.
+
 ## v4.37 (13 Nov 2026)
 - Two new secret options: **Fancy Socks** (Morg 'n' Thorg in his finest glowing blue and yellow socks, with Hypnotic Gaze) and
   **Your Mum** (a 30k Star Player for any team, in exhibition matches).
