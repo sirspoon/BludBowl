@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.57 (13 Nov 2026)
+- Varag's head after a close-up of the miniature: a rusty iron cross on his skull cap, orange eyes, a jutting jaw of fangs and red
+  gums inside a black collar, and his left tusk angled out.
+
 ## v4.56 (13 Nov 2026)
 - Varag looks more like a Black Orc: a darker face, a skull cap with a black plume of hair streaming off it, and two big bone
   tusks sweeping down from his forearms.

@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.57 (13 Nov 2026)
+- **Improved (graphics):** Varag Ghoul-Chewer from a close-up photo of the owner's miniature: the rusty iron cross strapped over his
+  skull cap, orange eyes, a jutting lower jaw with big fangs and red gums, the black armour collar rising either side of his jaw,
+  and his left tusk angled out and down like the long spike on the model ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.56 (13 Nov 2026)
 - **Improved (graphics):** more of Varag Ghoul-Chewer from further photos of the owner's miniature: the darker Black Orc green for
   his face; a skull worn as a cap (with its nub on top and its teeth as the rim) instead of a bald head with a small skull on it; a
