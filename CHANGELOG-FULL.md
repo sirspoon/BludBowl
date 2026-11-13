@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.60 (13 Nov 2026)
+- **Improved (graphics):** the zigzag on Varag Ghoul-Chewer's armour bib was a few scattered dark dots; it's now one continuous bold
+  black zigzag across the plate, in any team colour ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.59 (13 Nov 2026)
 - **Changed (graphics):** Varag Ghoul-Chewer now wears a black cap (the black plume still streams off it) with a smaller skull on its
   front, in place of the large skull cap and its iron cross. His eyes are bright red, and the bone in his left hand is replaced by
