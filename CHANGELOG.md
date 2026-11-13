@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.41 (13 Nov 2026)
+- Fancy Socks Morg's glow is back as it was in v4.39: the Star Player glow, with his socks pulsing blue and yellow.
+
 ## v4.40 (13 Nov 2026)
 - Fancy Socks Morg loses the Star Player glow: just a soft golden glow round his socks. Your Mum is more of an ogre now (and
   has Throw Team-mate).

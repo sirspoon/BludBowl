@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.41 (13 Nov 2026)
+- **Changed back (secret options):** Fancy Socks Morg 'n' Thorg's glow is as it was in v4.39 again: the usual Star Player gold glow
+  round him, with his socks lighting up blue and yellow in turn. (The "comet" in the v4.40 pictures was the pitch's centre-spot
+  artwork behind him, not the glow.)
+
 ## v4.40 (13 Nov 2026)
 - **Changed (secret options):** Fancy Socks Morg 'n' Thorg no longer has the Star Players' gold glow round his whole figure: only
   his socks glow, softly and in gold, pulsing slowly. Your Mum is more ogre-like: ogre skin, pointed ears poking out of her perm,

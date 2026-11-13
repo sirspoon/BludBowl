@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.40</title>
+    <title>BludBowl 4.41</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1055,7 +1055,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.40</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.41</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -17851,20 +17851,21 @@
             const prev = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false;
             const h = size * spriteSquash(p);
             const draw = () => { if (down || opts.flying) ctx.drawImage(cv, -size / 2, -h / 2, size, h); else ctx.drawImage(cv, -size / 2, ts * 0.355 - h, size, h); };   // feet planted on the middle of the base
-            if (p.star && !opts.noGlow && !p.fancySocks) {   // Star Players: a faint gold glow that breathes slowly (Fancy Socks: only the socks glow)
+            if (p.star && !opts.noGlow) {   // Star Players: a faint gold glow that breathes slowly
                 const k = 0.5 + 0.5 * Math.sin(performance.now() / 650 + p.id), a = (opts.dim ? 0.5 : 0.7) + 0.3 * k;
                 ctx.save(); ctx.shadowColor = `rgba(253,224,71,${a.toFixed(2)})`; ctx.shadowBlur = ts * (0.2 + 0.1 * k) * (state.camera.zoom || 1); ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
                 draw(); if (!opts.dim) draw(); ctx.restore();   // two passes: brighter while they can still act
             }
             draw();
-            if (p.fancySocks && !opts.dim) {   // Fancy Socks: a soft golden glow round the socks only
+            if (p.fancySocks && !opts.dim) {   // Fancy Socks: light pours off the stripes, blue then yellow
                 const R = ROSTERS[p.team] || {}, fl = (spriteSetFor(R.race || R.key, R.spriteSet) || {})._face === 'right' && p.team === 1;
-                const now = performance.now(), k = 0.5 + 0.5 * Math.sin(now / 650 + p.id), x0 = -size / 2, y0 = down || opts.flying ? -h / 2 : ts * 0.355 - h, u = size / 32, v = h / 32;
+                const now = performance.now(), k = 0.5 + 0.5 * Math.sin(now / 280 + p.id), x0 = -size / 2, y0 = down || opts.flying ? -h / 2 : ts * 0.355 - h, u = size / 32, v = h / 32;
                 ctx.save(); ctx.globalCompositeOperation = 'lighter';
                 [11.5, 22.5].forEach((sx, i) => {
-                    const cx = x0 + (fl ? 32 - sx : sx) * u, cy = y0 + 27.5 * v, r = u * (3.6 + 0.8 * k), col = '253,224,71';
+                    const cx = x0 + (fl ? 32 - sx : sx) * u, cy = y0 + 27.5 * v, r = u * (5.5 + 2.5 * k);
+                    const col = (i + Math.floor(now / 700)) % 2 ? '250,204,21' : '59,130,246';
                     const gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-                    gr.addColorStop(0, `rgba(${col},${(0.2 + 0.1 * k).toFixed(2)})`); gr.addColorStop(0.6, `rgba(${col},${(0.08 + 0.05 * k).toFixed(2)})`); gr.addColorStop(1, `rgba(${col},0)`);
+                    gr.addColorStop(0, `rgba(${col},${(0.5 + 0.35 * k).toFixed(2)})`); gr.addColorStop(0.5, `rgba(${col},${(0.22 + 0.15 * k).toFixed(2)})`); gr.addColorStop(1, `rgba(${col},0)`);
                     ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
                 });
                 ctx.restore();
