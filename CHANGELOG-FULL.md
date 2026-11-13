@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.59 (13 Nov 2026)
+- **Changed (graphics):** Varag Ghoul-Chewer now wears a black cap (the black plume still streams off it) with a smaller skull on its
+  front, in place of the large skull cap and its iron cross. His eyes are bright red, and the bone in his left hand is replaced by
+  a short iron spike ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.58 (13 Nov 2026)
 - **Fixed (graphics):** Varag Ghoul-Chewer's two big tusks grow from his jaw, not his forearms (the owner put it right): they now
   come out of black armour brackets at the corners of his jaw and curve down in front of him. The tusk on his right forearm is

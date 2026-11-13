@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.59 (13 Nov 2026)
+- Varag wears a black cap with a smaller skull on it, has bright red eyes, and holds an iron spike instead of the bone.
+
 ## v4.58 (13 Nov 2026)
 - Varag's two big tusks now come from his jaw, as on the miniature, and his arm tusk is gone.
 
