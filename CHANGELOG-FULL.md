@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.58 (13 Nov 2026)
+- **Fixed (graphics):** Varag Ghoul-Chewer's two big tusks grow from his jaw, not his forearms (the owner put it right): they now
+  come out of black armour brackets at the corners of his jaw and curve down in front of him. The tusk on his right forearm is
+  gone (his arm is the Black Orc's again), the long spike stays in his left hand, and the inside of his mouth is deep red between
+  the rows of fangs ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.57 (13 Nov 2026)
 - **Improved (graphics):** Varag Ghoul-Chewer from a close-up photo of the owner's miniature: the rusty iron cross strapped over his
   skull cap, orange eyes, a jutting lower jaw with big fangs and red gums, the black armour collar rising either side of his jaw,
