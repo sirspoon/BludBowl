@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.64 (13 Nov 2026)
+- Training: your first block or blitz opens a window explaining the block dice, and the opening overview explains tackle zones.
+
 ## v4.63 (13 Nov 2026)
 - The training overview also explains player stats and skills (tap a skill to see what it does).
 

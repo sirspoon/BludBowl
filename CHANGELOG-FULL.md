@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.64 (13 Nov 2026)
+- **New (training):** the first time you block or blitz in a training match, a "Blocking" window comes up before the dice are rolled:
+  what a Block and a Blitz are, how Strength and assists decide the number of dice and who picks, each block die face with its
+  picture and what it does, and what happens after (follow-up, armour and injury rolls, a loose ball). "Got it: block!" carries on
+  with the block.
+- **Improved (training):** the "How a match works" window has a "Tackle zones" section: a standing player marks the 8 squares around
+  them, so leaving needs a Dodge, being marked makes catching, passing and pick-ups harder and stops assists, and players lying
+  down don't mark anyone.
+
 ## v4.63 (13 Nov 2026)
 - **Improved (training):** the "How a match works" window has a short "Your players" section: tap a player to see them in the Unit
   Panel, what MA, ST, AG, PA and AV mean, and that tapping a skill shows what it does.

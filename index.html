@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.63</title>
+    <title>BludBowl 4.64</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -917,6 +917,9 @@
 #coach-intro h3 { font-size: 13px; font-weight: 800; color: #fde68a; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
 #coach-intro p { margin: 0 0 6px; } #coach-intro ol { margin: 0; padding-left: 22px; list-style: decimal; } #coach-intro li { margin-bottom: 6px; } #coach-intro li::marker { color: #7dd3fc; font-weight: 800; }
 #coach-intro b { color: #f8fafc; } #coach-intro .ci-dim { color: #94a3b8; margin-top: 10px; }
+#coach-intro .ci-faces { display: flex; flex-direction: column; gap: 8px; }
+#coach-intro .ci-face { display: flex; gap: 10px; align-items: center; }
+#coach-intro .ci-face canvas { flex: 0 0 auto; width: 44px; height: 44px; background: #e2e8f0; border: 2px solid #94a3b8; border-radius: 6px; }
 #coach-intro .ci-go { display: block; margin: 14px 0 2px auto; padding: 9px 18px; border-radius: 9px; border: 0; background: #0284c7; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
 #coach-intro .ci-go:hover, #coach-intro .ci-go:focus-visible { background: #0ea5e9; outline: none; }
 #coach-card[data-kind="lesson"] { border-left-color: #fbbf24; }
@@ -1066,7 +1069,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.63</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.64</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8413,6 +8416,11 @@
                     <b>ST</b> (Strength, for blocks), <b>AG</b> (Agility: the score needed to dodge, catch or pick up, e.g. 3+), <b>PA</b>
                     (Passing: the score needed to throw) and <b>AV</b> (Armour: what the other team must roll to hurt them). Skills such as
                     Block, Dodge or Sure Hands are special abilities: <b>tap a skill to see what it does</b>.</p>
+                    <h3>Tackle zones</h3>
+                    <p>A standing player <b>marks</b> the 8 squares around them: that's their <b>tackle zone</b>. It matters almost everywhere.
+                    Moving out of a square next to an opponent needs a <b>Dodge</b> roll, and each opponent marking the square you step into
+                    makes it harder. Being marked also makes catching, passing and picking up the ball harder, and a marked team-mate can't help
+                    (assist) in a block. Players lying down don't mark anyone.</p>
                     <h3>Before the first turn</h3>
                     <ol>
                       <li><b>Fans and weather.</b> Each team's crowd is counted, then 2D6 (two dice added up) are rolled for the weather. Most of the
@@ -8437,7 +8445,37 @@
                 m.hidden = false;
                 m.querySelector('.ci-go').onclick = () => { m.hidden = true; done(); };
             }
-            return { on, reset, intro, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            // the first block or blitz the person makes: what the block dice mean, before they're rolled
+            function blockWin(atk, done) {
+                if (!on() || !atk || AI.isAI(atk.team) || (state.coachSeen || []).includes('blockwin')) return false;
+                (state.coachSeen = state.coachSeen || []).push('blockwin');
+                let m = $('coach-intro');
+                if (!m) { m = document.createElement('div'); m.id = 'coach-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); document.body.appendChild(m); }
+                const faces = [[1, 'Attacker Down', 'Your player is knocked down (armour roll) and it\'s a turnover.'],
+                    [2, 'Both Down', 'Both players are knocked down, unless one has the Block skill (then only the other one falls). If yours falls, it\'s a turnover.'],
+                    [3, 'Push', 'The defender is pushed back one square. Nobody falls. Two of the six faces are Pushes.'],
+                    [5, 'Defender Stumbles', 'Pushed back and knocked down, unless the defender has Dodge (then just pushed). Tackle cancels Dodge.'],
+                    [6, 'Defender Down', 'Pushed back and knocked down (armour roll).']];
+                m.innerHTML = `<div class="ci-card"><div class="ci-badge">🎓 Training match</div><h2>Blocking</h2>
+                    <p>A <b>Block</b> is a hit on an opponent standing next to your player. A <b>Blitz</b> (once a turn) lets one player move
+                    and block in the same action; the block costs one square of their movement.</p>
+                    <h3>How many dice, and who picks</h3>
+                    <p>Compare the two players' <b>Strength</b>, adding 1 for each <b>assist</b>: a team-mate next to the other player who isn't
+                    being marked by anyone else. Equal: 1 die. Stronger: 2 dice. More than twice as strong: 3 dice. With 2 or 3 dice, the
+                    <b>stronger side chooses</b> which one counts, so blocking a stronger player is risky.</p>
+                    <h3>The block dice</h3>
+                    <div class="ci-faces">${faces.map(([f, n, t]) => `<div class="ci-face"><canvas width="44" height="44" data-face="${f}"></canvas><div><b>${n}</b><br>${t}</div></div>`).join('')}</div>
+                    <h3>Afterwards</h3>
+                    <p>After a push your player may <b>follow up</b> into the empty square. A player knocked down gets an armour roll; if it
+                    breaks, an injury roll. If the defender had the ball, it bounces loose.</p>
+                    <p class="ci-dim">The block window shows the Strength sums, the dice and what each would do, with the coach's pick.</p>
+                    <button type="button" class="ci-go">Got it: block! →</button></div>`;
+                m.querySelectorAll('canvas[data-face]').forEach(cv => { try { renderDieIcon(cv.getContext('2d'), +cv.dataset.face, 44); } catch (e) {} });
+                m.hidden = false;
+                m.querySelector('.ci-go').onclick = () => { m.hidden = true; done(); };
+                return true;
+            }
+            return { on, reset, intro, blockWin, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -15690,6 +15728,7 @@
             return true;
         }
         function startBlock(atkId, defId, dauntR) {
+            if (dauntR == null && !state.bncBlock && state.trickDone == null && COACH.blockWin(getPlayerById(atkId), () => startBlock(atkId, defId, dauntR))) return;   // (training: the first block explained first)
             if (dauntR == null) {   // Trickster first (asked once per block)
                 const a = getPlayerById(atkId), d = getPlayerById(defId), k = atkId + '>' + defId;
                 if (state.trickDone === k) state.trickDone = null;
