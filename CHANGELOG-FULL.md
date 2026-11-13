@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.44 (13 Nov 2026)
+- **Fixed:** players were drawn in team-list order, so one standing further up the pitch on screen (further back) could be drawn
+  over the player in front of them, such as an Ogre's head disappearing under the feet of the player behind (the owner spotted
+  it). They're now drawn back to front: the lower on the screen, the later they're drawn. A foul's stomp still goes on top.
+
 ## v4.43 (13 Nov 2026)
 - **Changed (secret options):** Your Mum's special rule, Excellent Ball Handling, now starts "Her ball handling skills are
   legendary." on her unit panel and the shopping screen.

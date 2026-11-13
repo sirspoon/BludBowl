@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.44 (13 Nov 2026)
+- Players further back no longer appear on top of the players in front of them.
+
 ## v4.43 (13 Nov 2026)
 - Your Mum's Excellent Ball Handling description now opens: "Her ball handling skills are legendary."
 
