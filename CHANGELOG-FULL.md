@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.50 (13 Nov 2026)
+- **Improved (graphics):** Eldril Sidewinder's face and hair tidied up from pictures of the miniature (the owner sent them): a
+  narrower bald head with a tall, narrow red-orange mohawk crest, long pointed elf ears, and blue war paint streaked across one
+  eye and cheek. The red hair trailing down the side and the purple eyes are gone ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.49 (13 Nov 2026)
 - **Improved (graphics):** the Wood Elf Wardancer's green headband and the angular leafy spikes at its sides read as a hat. He
   now has his blond hair swept up into a top-knot tied with green. Eldril Sidewinder (built on the Wardancer) had the same band

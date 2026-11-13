@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.50 (13 Nov 2026)
+- Eldril Sidewinder's head now matches his miniature: bald with a tall red mohawk, pointed elf ears and blue war paint.
+
 ## v4.49 (13 Nov 2026)
 - The Wood Elf Wardancer and Eldril Sidewinder no longer look like they're wearing hats: a top-knot for the Wardancer, a red
   mohawk for Eldril.
