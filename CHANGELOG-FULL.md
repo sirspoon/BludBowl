@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.54 (13 Nov 2026)
+- **Improved (graphics):** Varag Ghoul-Chewer is hunched like the owner's miniature: his shoulders rise up level with his eyes and his
+  head sits two pixels lower between them, with the armour bib below. He also holds a bone spike, pointing down from his hand
+  ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.53 (13 Nov 2026)
 - **Improved (graphics):** Varag Ghoul-Chewer redrawn from a photo of the owner's painted miniature: a bright green bald head with a
   skull sitting on top, a gaping mouth full of fangs with a pink tongue, the zigzag "toothy" armour plate under his chin (in the
