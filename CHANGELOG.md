@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.49 (13 Nov 2026)
+- The Wood Elf Wardancer and Eldril Sidewinder no longer look like they're wearing hats: a top-knot for the Wardancer, a red
+  mohawk for Eldril.
+
 ## v4.48 (13 Nov 2026)
 - 18 of the plainer Star Players have new sprites in the style of the upgraded teams, each with something of their own
   (Helmut's chainsaw, Thorsson's mead keg, Kiroth's kraken helmet, Grombrindal's wings and more).

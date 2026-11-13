@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.49 (13 Nov 2026)
+- **Improved (graphics):** the Wood Elf Wardancer's green headband and the angular leafy spikes at its sides read as a hat. He
+  now has his blond hair swept up into a top-knot tied with green. Eldril Sidewinder (built on the Wardancer) had the same band
+  under his crest, so he looked like he wore a plumed hat: he now has red hair, shaved at the sides, with a tall mohawk crest
+  ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.48 (13 Nov 2026)
 - **Improved (graphics):** a first pass at the Star Players that looked plain next to the upgraded team sprites
   ([#35](https://github.com/sirspoon/BludBowl/issues/35)). Each is now built on their team's matching position, plus their own
