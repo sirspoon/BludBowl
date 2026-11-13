@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.46 (13 Nov 2026)
+- The High Elf and Orc idle animation is now easy to see: a deeper, smoother crouch.
+
 ## v4.45 (13 Nov 2026)
 - A trial: High Elf and Orc players now breathe, dipping into a slight crouch and back up again, each in their own time.
 

@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.45</title>
+    <title>BludBowl 4.46</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1055,7 +1055,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.45</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.46</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -17806,31 +17806,31 @@
         }
         const spriteCache = new Map();
         // a 32x32 canvas of the sprite in this team's colours (dim = the faded look of a player who has acted)
-        // Idle animation (a trial, for the High Elves and Orcs): each standing player shifts now and then between their sprite and a
-        // slightly crouched copy of it (the body a pixel lower, the knees a pixel more bent), each on their own timing
+        // Idle animation (a trial, for the High Elves and Orcs): each standing player breathes, sinking into a crouch and rising
+        // again (the body 1, then 2 pixels lower, the legs that much more bent), each on their own timing
         const IDLE_RACES = ['highelf', 'orc'];
-        const crouchMemo = new WeakMap();
-        function crouchGrid(grid) {
-            let g = crouchMemo.get(grid); if (g) return g;
+        const crouchMemo = [new WeakMap(), new WeakMap(), new WeakMap()];
+        function crouchGrid(grid, n = 1) {
+            let g = crouchMemo[n].get(grid); if (g) return g;
             const filled = r => /[^.]/.test(r);
             let B = grid.length - 1; while (B > 0 && !filled(grid[B])) B--;
             let T = 0; while (T < B && !filled(grid[T])) T++;
-            const K = B - 5;   // the row above the knees: everything down to here sinks a pixel, and one leg row goes
-            g = K - T < 8 ? grid : ['.'.repeat(grid[0].length)].concat(grid.slice(0, K + 1), grid.slice(K + 2));
-            crouchMemo.set(grid, g); return g;
+            const K = B - 4 - n;   // everything down to this row (above the knees) sinks n pixels, and n leg rows go
+            g = K - T < 8 || T + n > grid.length ? grid : Array(n).fill('.'.repeat(grid[0].length)).concat(grid.slice(0, K + 1), grid.slice(K + 1 + n));
+            crouchMemo[n].set(grid, g); return g;
         }
         function idleFrame(p) {
             const R = ROSTERS[p.team] || {};
             if (p.star || !IDLE_RACES.includes(R.race || R.key) || CLOCK.sim || p.isDown || p.isStunned || p.walkAnim || p.foulAnim) return 0;
-            const period = 1500 + (p.id * 389) % 900, at = (performance.now() + (p.id * 7919) % period) % period;
-            return at < period * 0.4 ? 1 : 0;   // crouched for 40% of each breath
+            const period = 1600 + (p.id * 389) % 1000, k = ((performance.now() + (p.id * 7919) % period) % period) / period;
+            return k < 0.12 ? 1 : k < 0.38 ? 2 : k < 0.5 ? 1 : 0;   // down, hold, up, then standing for half the breath
         }
         function spriteCanvas(p, dim, frame = 0) {
             const grid0 = spriteFor(p); if (!grid0) return null;
-            const grid = frame ? crouchGrid(grid0) : grid0;
+            const grid = frame ? crouchGrid(grid0, frame) : grid0;
             const st = teamStyle(p.team), kit = (st.fill || '#ffffff').slice(0, 7), trim = (st.text || '#000000').slice(0, 7);
             const R = ROSTERS[p.team], race = R.race || R.key, set = spriteSetFor(race, R.spriteSet) || {}, flip = set._face === 'right' && p.team === 1;   // face the way the team attacks
-            const key = race + '|' + (R.spriteSet || '') + '|' + p.type + '|' + (p.spriteVar != null ? p.spriteVar : '') + '|' + kit + '|' + trim + '|' + (dim ? 1 : 0) + '|' + (flip ? 1 : 0) + (p.fancySocks ? '|socks' : '') + (grid !== grid0 ? '|crouch' : '');
+            const key = race + '|' + (R.spriteSet || '') + '|' + p.type + '|' + (p.spriteVar != null ? p.spriteVar : '') + '|' + kit + '|' + trim + '|' + (dim ? 1 : 0) + '|' + (flip ? 1 : 0) + (p.fancySocks ? '|socks' : '') + (grid !== grid0 ? '|crouch' + frame : '');
             let cv = spriteCache.get(key);
             if (cv) return cv;
             cv = paintSprite(grid, kit, trim, dim, flip);

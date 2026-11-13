@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.46 (13 Nov 2026)
+- **Changed (trial, High Elves and Orcs):** the idle animation from v4.45 was working but too small to see on a phone (one pixel of
+  a 32-pixel sprite is about one screen pixel). Each breath now sinks two pixels with an in-between pose on the way down and
+  up (down, hold, up, then standing for half the breath), over 1.6-2.6 seconds, each player on their own timing.
+
 ## v4.45 (13 Nov 2026)
 - **New (a trial, High Elves and Orcs only):** an idle animation. Each standing player alternates between their sprite and a slightly
   crouched copy of it (the body a pixel lower and the knees a pixel more bent), crouched for 40% of a 1.5-2.4 second "breath".
