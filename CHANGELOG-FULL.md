@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.55 (13 Nov 2026)
+- **Improved (graphics):** Varag Ghoul-Chewer's open mouth read as a big pink nose (the owner spotted it). It now has a nose with
+  two nostrils above it, a row of fangs along the top of a dark open mouth, and a small dark-red tongue at the bottom
+  ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.54 (13 Nov 2026)
 - **Improved (graphics):** Varag Ghoul-Chewer is hunched like the owner's miniature: his shoulders rise up level with his eyes and his
   head sits two pixels lower between them, with the armour bib below. He also holds a bone spike, pointing down from his hand

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.55 (13 Nov 2026)
+- Varag's open mouth no longer looks like a big pink nose: a row of fangs, a dark mouth and a nose above it.
+
 ## v4.54 (13 Nov 2026)
 - Varag is hunched now, his head low between his shoulders, with a bone spike in his hand.
 
