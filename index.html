@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.38</title>
+    <title>BludBowl 4.39</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1055,7 +1055,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.38</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.39</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -3141,7 +3141,7 @@
             morg:    { name: "Morg 'n' Thorg", label: 'MT', cost: 340, mega: true, big: true, ma: 6, st: 6, ag: 3, pa: 4, av: 11, skills: ['Block', 'Bullseye', 'Hatred (Undead)', 'Loner (4+)', 'Mighty Blow', 'Thick Skull', 'Throw Team Mate'],
                        rule: 'The Ballista', text: 'Once per game, when Morg performs a Throw Team-mate Action, he may re-roll the Passing Ability Test.', leagues: 'any' },
             mum:     { name: 'Your Mum', label: 'YM', cost: 30, secret: true, ma: 5, st: 2, ag: 3, pa: 4, av: 8, skills: ['Dirty Player', 'Fend', 'Monstrous Mouth', 'Pro', 'Strip Ball', 'Sure Feet', 'Sure Hands', 'Tackle'],
-                       rule: 'Because I Said So', text: 'No special rule. She has never needed one.', leagues: 'any' },   // (secret options: exhibition matches only)
+                       rule: 'Excellent Ball Handling', text: 'Once per game, one of her passes, her hand-offs (the catch) or her catches succeeds on a 2+.', leagues: 'any' },   // (secret options: exhibition matches only)
             zug:     { name: 'The Mighty Zug', label: 'MZ', cost: 220, ma: 5, st: 5, ag: 4, pa: 6, av: 10, skills: ['Block', 'Loner (4+)', 'Mighty Blow', 'Unsteady'],
                        rule: 'Crushing Blow', text: "Once per game, when an opposition player is Knocked Down by Zug's Block, he may add +1 to the Armour Roll after seeing it.", leagues: ['OWC', 'WESL'] },
             karla:   { name: 'Karla von Kill', label: 'KK', cost: 210, ma: 6, st: 4, ag: 3, pa: 3, av: 9, skills: ['Block', 'Dauntless', 'Dodge', 'Jump Up', 'Loner (4+)'],
@@ -12850,7 +12850,7 @@
             return { griff: 'pro', morg: 'ballista', zug: 'crush', karla: 'indom', varag: 'krump', ripper: 'tmt' + state.half, hakflem: 'treach', glotl: 'primal', jordell: 'swift', roxanna: 'nails' + state.half, zolcath: 'zoat',
                 anqi: 'savage', boa: 'eyes', cindy: 'ayce', eldril: 'dance' + state.half, estelle: 'hex', glart: 'rush' + state.half, gloriel: 'shot', grak: 'carry' + state.half, grim: 'slayer', grombrindal: 'wisdom', helmut: 'oldpro',
                 ivar: 'raid' + (state.driveId || 0), bilerot: 'regurg' + state.half, grashnak: 'gored', guffle: 'bite', borak: 'lord', max: 'carnage', rumbelow: 'ram', scyla: 'blood', withergrasp: 'watch' + (state.driveId || 0), zzharg: 'blast' + state.half, jeremiah: 'blade', josef: 'grit', kiroth: 'ink', kreek: 'back', maple: 'vines' + state.half, nobbla: 'kick', puggy: 'luck', rashnak: 'toxin', rodney: 'catch' + state.half,
-                rowana: 'bound', scrappa: 'yoink', skitter: 'assassin', skrorg: 'pump', skrull: 'spg', gretchen: 'ghost', ivan: 'scourge', wilhelm: 'maul', karina: 'morsel', luthor: 'show', swiftvine: 'outburst' + state.half, thorsson: 'bash' + (state.driveId || 0), willow: 'fury', bomber: 'kaboom' }[p.star];
+                rowana: 'bound', scrappa: 'yoink', mum: 'ebh', skitter: 'assassin', skrorg: 'pump', skrull: 'spg', gretchen: 'ghost', ivan: 'scourge', wilhelm: 'maul', karina: 'morsel', luthor: 'show', swiftvine: 'outburst' + state.half, thorsson: 'bash' + (state.driveId || 0), willow: 'fury', bomber: 'kaboom' }[p.star];
         }
         function starUsedNote(p) {   // "(used)" once a once-per-game / once-per-half rule has gone
             const key = starRuleKey(p);
@@ -12956,7 +12956,12 @@
             return starIs(p, 'blackgobbo') || f.some(id => starIs(getPlayerById(id), 'blackgobbo'));
         }
         // a once-only help a Star chooses before a roll
-        function starRollOption(pl, type, target) {
+        function starRollOption(pl, type, target, ex) {
+            {   // Your Mum's Excellent Ball Handling (secret options): her pass, her catch, or the catch of her hand-off, on a 2+
+                const mum = starIs(pl, 'mum') ? pl : type === 'CATCH' && ex && starIs(ex.handoffFrom, 'mum') ? ex.handoffFrom : null;
+                if (mum && ['PASS', 'CATCH'].includes(type) && starFree(mum, 'ebh') && target > 2)
+                    return { key: 'ebh', label: 'Excellent Ball Handling', what: 'succeeds on a 2+', often: 'once per game', set: 2, aiUse: target >= 4, owner: mum };
+            }
             if (starIs(pl, 'jordell') && ['DODGE', 'LEAP', 'JUMP', 'RUSH'].includes(type) && starFree(pl, 'swift') && pl.team === state.activeTeam && target > 2)
                 return { key: 'swift', label: 'Swift as the Breeze', what: 'passes on a 2+', often: 'once per game', set: 2, aiUse: target >= 4 };
             if (starIs(pl, 'rowana') && type === 'LEAP' && starFree(pl, 'bound') && pl.team === state.activeTeam)
@@ -14502,7 +14507,7 @@
             {   // a Star's own help with this roll, decided before rolling
                 let sw = document.getElementById('btn-star-swift');
                 if (!sw) { sw = document.createElement('button'); sw.id = 'btn-star-swift'; sw.type = 'button'; btBox.after(sw); }
-                const opt = starRollOption(player, type, target);
+                const opt = starRollOption(player, type, target, extraData);
                 sw.classList.toggle('hidden', !opt || AI.isAI(player.team) || !!opt.auto);
                 const paint = () => { sw.textContent = state.pendingRoll.force ? `★ ${opt.label}: ${opt.what}` : `★ Use ${opt.label} (${opt.what}, ${opt.often})`;
                     sw.className = 'w-full mt-1 text-[10px] font-bold py-1 px-2 rounded border uppercase ' + (state.pendingRoll.force ? 'bg-yellow-600 text-white border-yellow-300' : 'bg-slate-800 text-yellow-200 border-yellow-700'); };
@@ -14572,7 +14577,7 @@
                 }
             }
 
-            if (pData.force) { pData.target = pData.force.set; starSpend(pData.player, pData.force.key, pData.force.label); log(`  ${pData.force.label.toUpperCase()} ${pData.player.name}: ${pData.force.what}.`, 'text-yellow-300 font-bold'); }
+            if (pData.force) { const ow = pData.force.owner || pData.player; pData.target = pData.force.set; starSpend(ow, pData.force.key, pData.force.label); log(`  ${pData.force.label.toUpperCase()} ${ow.name || ow.type}: ${pData.force.what}.`, 'text-yellow-300 font-bold'); }
             const btApplied = pData.type === 'DODGE' && pData.usingBreakTackle && pData.availableBtMod > 0;
             const btMadeDifference = r => btApplied && r !== 6 && r < pData.baseTarget;
             let roll = Math.floor(Math.random()*6)+1; 
@@ -14973,7 +14978,7 @@
                             thrower.hasActed = true; thrower.remainingMA = 0; thrower.rushes = 0; 
                             scatterBall(receiver.x, receiver.y, () => checkTurnoverPass(thrower.team)); 
                         }, 
-                        { desc: 'Attempting to catch the ball.', prevMode: prevMode, skillAllowed: true,
+                        { desc: 'Attempting to catch the ball.', prevMode: prevMode, skillAllowed: true, handoffFrom: thrower,
                         explainFail: () => ({ title: 'Dropped Hand-off', text: 'The ball bounces from the receiver\'s square. If your team ends up without the ball, it is a TURNOVER.' }) }
                     );
                 }, false);

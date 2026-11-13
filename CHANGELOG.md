@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.39 (13 Nov 2026)
+- Your Mum has a special rule, **Excellent Ball Handling**: once per game, one of her passes, hand-offs or catches succeeds on a 2+.
+
 ## v4.38 (13 Nov 2026)
 - Fancy Socks Morg now has just a few tusks showing, and Your Mum has a classic red-lipstick mouth and a skimpier outfit.
 

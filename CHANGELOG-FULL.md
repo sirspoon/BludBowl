@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.39 (13 Nov 2026)
+- **New (secret options):** Your Mum's special rule, **Excellent Ball Handling**: once per game, a pass she throws, the catch of a
+  hand-off she makes, or a catch she makes succeeds on a 2+, whatever the modifiers (a natural 1 still fails). It's a button in
+  the roll dialog ("★ Use Excellent Ball Handling"), offered when the roll would need more than 2+, like Jordell's Swift as the
+  Breeze. Once used, it isn't offered again that match.
+
 ## v4.38 (13 Nov 2026)
 - **Changed (secret options):** Fancy Socks Morg 'n' Thorg's grin is now closed-lipped with a couple of tusks at each corner (as
   on the miniature), not a full row of teeth. Your Mum's mouth is a little smaller, a bright red lipstick shape with a cupid's
