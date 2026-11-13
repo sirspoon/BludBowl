@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.36 (13 Nov 2026)
+- **Training mode** (new on the main menu): play the computer with a coach who explains the rules as you go: what each roll
+  needs and why, what happens if it fails, why you get the block dice you do and what each one would do, why the ball
+  bounces, and armour, injuries and turnovers, with a short lesson the first time each comes up.
+
 ## v4.35 (11 Nov 2026)
 - A short note on the title screen: BludBowl is an unofficial fan project, not connected with Games Workshop. The code is now
   open source (GPL-3.0).

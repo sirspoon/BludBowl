@@ -2,6 +2,23 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.36 (13 Nov 2026)
+- **New: Training mode.** A "Training" button on the main menu opens the match set-up with Team 2 as the computer and a new
+  "Training" option ticked (it can also be ticked for any exhibition match on this device). In a training match a coach explains
+  the rules as you play:
+  - **Rolls:** the roll dialog shows why that score is needed (e.g. "Agility 3+ · −1 for 1 opponent marking the square they
+    step into → you need 4+"), the chance with and without a skill or team re-roll, what a fail would mean, and a warning
+    when a fail would cost players who haven't acted yet.
+  - **Blocks:** the block dialog shows each side's Strength with assists (who is assisting, and who can't because they're
+    marked), why that many dice and who picks, what each rolled face would do for these two players (Block, Dodge, Tackle,
+    Wrestle, Stand Firm, Juggernaut, Strip Ball, the ball carrier), and the coach's pick when it's your choice.
+  - **The coach card** over the pitch: why the ball bounces (dropped, not caught, a failed pick-up, landed on a player lying
+    down...), throw-ins, kick-offs and touchbacks, accurate and inaccurate passes, armour and injury rolls, turnovers,
+    touchdowns, the computer's rolls and blocks, and a tip at the start of each of your turns. The first time each comes up it
+    gives a longer lesson. Notes can be stepped back through, and the card can be hidden (tap "🎓 Coach" to bring it back).
+  - The computer plays a little slower in training matches, to give time to read. A saved training match carries on in
+    training when resumed. Nothing changes in other matches.
+
 ## v4.35 (11 Nov 2026)
 - **New:** a line on the title screen, above the version number, saying BludBowl is an unofficial, free, non-commercial fan
   project and that Blood Bowl is a trademark of Games Workshop Limited, with no affiliation or endorsement. It's hidden on

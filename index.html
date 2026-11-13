@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.35</title>
+    <title>BludBowl 4.36</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -904,6 +904,35 @@
 #app-version { order: 99; align-self: flex-end; flex-shrink: 0; margin: 10px max(4px, env(safe-area-inset-right)) max(2px, env(safe-area-inset-bottom)) 0; padding: 3px 9px;   /* (below everything else on the screen, so it never sits on top of the menu) */ border-radius: 999px;
     border: 1px solid #a16207; background: rgba(120,53,15,.35); color: #fbbf24; font: 700 11px/1.2 Inter, system-ui, sans-serif; letter-spacing: .08em; cursor: pointer; transition: background .15s, border-color .15s; }
 #app-version.hidden, #fan-note.hidden { display: none; }
+/* Training mode: the coach card over the pitch, and the coach boxes in the roll and block dialogs */
+#coach-card { position: fixed; z-index: 35; display: flex; flex-direction: column; background: rgba(7,22,38,.95); border: 1px solid #0369a1; border-left: 4px solid #38bdf8; border-radius: 10px;
+    color: #e2e8f0; font: 12px/1.45 Inter, system-ui, sans-serif; box-shadow: 0 8px 26px rgba(0,0,0,.55); pointer-events: auto; }
+#coach-card[data-kind="lesson"] { border-left-color: #fbbf24; }
+#coach-card[data-kind="bad"] { border-left-color: #f43f5e; }
+#coach-card .cc-head { display: flex; align-items: center; gap: 6px; padding: 5px 5px 2px 9px; }
+#coach-card .cc-badge { font-weight: 800; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #7dd3fc; white-space: nowrap; }
+#coach-card .cc-kind { font-weight: 800; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #fbbf24; }
+#coach-card .cc-kind:empty { display: none; }
+#coach-card[data-kind="bad"] .cc-kind { color: #fda4af; }
+#coach-card .cc-title { flex: 1; min-width: 0; font-weight: 800; color: #f8fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#coach-card .cc-pos { font-size: 10px; color: #64748b; font-variant-numeric: tabular-nums; }
+#coach-card .cc-btn { width: 26px; height: 24px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #cbd5e1; font-size: 13px; line-height: 1; cursor: pointer; }
+#coach-card .cc-btn:disabled { opacity: .35; cursor: default; }
+#coach-card .cc-body { padding: 2px 10px 8px 9px; overflow-y: auto; min-height: 0; flex: 1 1 auto; }
+#coach-card .cc-body p { margin: 0 0 5px; } #coach-card .cc-body p:last-child { margin: 0; }
+#coach-card .cc-body ul { margin: 2px 0 5px; padding-left: 16px; }
+#coach-card b { color: #fde68a; } #coach-card .dim { color: #94a3b8; } #coach-card .bad { color: #fca5a5; } #coach-card .good { color: #86efac; }
+#coach-pill { position: fixed; z-index: 35; transform: translateX(-50%); padding: 5px 12px; border-radius: 999px; border: 1px solid #0369a1; background: rgba(7,22,38,.92); color: #7dd3fc;
+    font: 800 11px/1.2 Inter, system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(0,0,0,.5); cursor: pointer; }
+#coach-pill .cc-new { margin-left: 4px; padding: 0 6px; border-radius: 999px; background: #0284c7; color: #fff; }
+#coach-pill .cc-new:empty { display: none; }
+.coach-box { width: 100%; margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; border: 1px solid #0369a1; background: rgba(8,47,73,.55); color: #e2e8f0;
+    font: 11.5px/1.45 Inter, system-ui, sans-serif; text-align: left; }
+.coach-box .cb-h { font-weight: 800; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #7dd3fc; margin-bottom: 3px; }
+.coach-box p { margin: 0 0 5px; } .coach-box p:last-child { margin: 0; }
+.coach-box ul { margin: 2px 0 5px; padding-left: 16px; }
+.coach-box b { color: #fde68a; } .coach-box .dim { color: #94a3b8; } .coach-box .bad { color: #fca5a5; } .coach-box .good { color: #86efac; }
+#dice-modal-card { max-height: calc(100dvh - 16px); overflow-y: auto; overscroll-behavior: contain; }
 /* the fan-project disclaimer, just above the version number */
 #fan-note { order: 98; max-width: min(560px, 92vw); margin: 18px 12px 0; text-align: center; color: #64748b; font: 400 10px/1.4 Inter, system-ui, sans-serif; user-select: none; pointer-events: none; }
 #app-version:hover, #app-version:focus-visible { background: rgba(180,83,9,.5); border-color: #f59e0b; color: #fde68a; outline: none; }
@@ -1025,7 +1054,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.35</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.36</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1036,6 +1065,7 @@
                 <div class="sv-btns"><button type="button" class="sv-btn sv-go" data-sv="resume">▶ Resume</button><button type="button" class="sv-btn" data-sv="export">Export</button><button type="button" class="sv-btn sv-bad" data-sv="discard">Discard</button></div>
             </div>
             <button type="button" class="mm-btn mm-hero" data-go="exhibition"><span class="mm-t">Exhibition Match</span><span class="mm-s">A one-off game with default or saved teams</span></button>
+            <button type="button" class="mm-btn" id="mm-train"><span class="mm-t">Training</span><span class="mm-s">Learn the rules: play the computer with a coach explaining every roll, block and bounce</span></button>
             <button type="button" class="mm-btn" data-go="online"><span class="mm-t">Online</span><span class="mm-s">Friends on their own devices: matches, shared leagues and tournaments</span></button>
             <button type="button" class="mm-btn" data-go="league"><span class="mm-t">League</span><span class="mm-s">On this device: seasons, fixtures, a league table and play-offs</span></button>
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">On this device: knockout cups and Swiss events for tournament teams</span></button>
@@ -1084,7 +1114,7 @@
         </section>
         <div id="team-panel" class="hidden flex-col items-center w-full px-3">
         <button type="button" class="mm-back mm-back-top" data-go="menu">← Menu</button>
-        <h2 class="fantasy-font text-xl md:text-2xl text-slate-300 uppercase tracking-widest mb-4">Exhibition Match</h2>
+        <h2 id="ex-title" class="fantasy-font text-xl md:text-2xl text-slate-300 uppercase tracking-widest mb-4">Exhibition Match</h2>
         <div class="flex items-center justify-center gap-2 mb-4 -mt-1 pointer-events-auto">
             <label for="sel-fmt" class="text-amber-300 font-bold uppercase tracking-widest text-[10px]">Game</label>
             <select id="sel-fmt" class="bg-slate-900 text-slate-200 border border-amber-700/70 rounded-lg px-2 py-1 font-bold text-xs">
@@ -1133,6 +1163,9 @@
                 <option value="1000">Standard + 1,000k each</option>
             </select>
         </div>
+        <label id="train-opt" class="mb-3 -mt-2 flex items-center gap-2 text-[11px] font-bold text-sky-300 pointer-events-auto cursor-pointer">
+            <input id="chk-train" type="checkbox" class="accent-sky-500"> <span>Training: a coach explains every roll, block and bounce</span>
+        </label>
         <label id="career-opt" class="mb-3 -mt-2 flex items-center gap-2 text-[11px] font-bold text-slate-300 pointer-events-auto cursor-pointer" style="display:none">
             <input id="chk-career" type="checkbox" class="accent-amber-500"> <span>Count for saved teams' careers (SPP, winnings, injuries)</span>
         </label>
@@ -7397,6 +7430,7 @@
                     Object.assign(state, { mode: MODES.IDLE, selectedId: null, pendingRoll: null, choice: null, live: true });
                     MATCH.load(decode(d.match, new Map()));
                     AI.set(0, d.ai[0]); AI.set(1, d.ai[1]); AI.start();
+                    COACH.reset();   // (a training match carries on with its coach: a fresh card)
                     applyTeamLabels();
                     if (d.pitch && d.pitch.style) { PITCH.style = d.pitch.style; PITCH.seed = d.pitch.seed; }
                     try { buildPitchTexture(); } catch (e) {}
@@ -7693,7 +7727,7 @@
                 render();
             }
             function go() {
-                const opts = { career: X.career, fmt: X.fmt, exhibition: !X.net };
+                const opts = { career: X.career, fmt: X.fmt, exhibition: !X.net, training: !X.net && !!($('chk-train') || {}).checked };
                 if (X.net) { opts.replaceOk = true; opts.netCareer = NET.careerSides(); const tc = NET.tieCup(); if (tc) opts.cup = tc; NET.begin(); }
                 const any = X.ind.some(d => Object.keys(d).some(key => key === 'stars' ? (d.stars || []).length : d[key]));
                 if (any) opts.ind = X.ind.map(d => JSON.parse(JSON.stringify(d)));
@@ -7993,6 +8027,365 @@
         function afterSettled(ms, fn) {
             setTimeout(function wait() { if (state.isGameOver || playSettled()) fn(); else setTimeout(wait, 120); }, ms);
         }
+        // ---------- Training mode: a coach who explains the rules while you play (Training on the main menu) ----------
+        // The roll and block dialogs get a Coach box: the score needed and where it comes from, what a fail means, the re-rolls,
+        // why that many block dice, who picks, what each face does for these two players. Everything else (bounces, throw-ins,
+        // kick-offs, passes, armour, injuries, turnovers, touchdowns, the computer's rolls) goes in the coach card over the pitch,
+        // with a longer lesson the first time each comes up in the match. state.training / state.coachSeen go in the save.
+        const COACH = (function () {
+            const $ = id => document.getElementById(id);
+            const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const on = () => !!state.training && !document.body.classList.contains('frep-on');
+            const who = p => p ? esc(p.name ? `${p.name} (${p.type})` : p.type) : '';
+            const team = t => esc((ROSTERS[t] || {}).name || 'Team');
+            const mine = p => !!p && !AI.isAI(p.team);
+            const pct = x => Math.round(Math.max(0, Math.min(1, x)) * 100) + '%';
+            const chance = t => (7 - Math.max(2, Math.min(6, t))) / 6;
+            const plural = (n, a, b) => n === 1 ? a : (b || a + 's');
+            const standing = q => q && !q.isDown && !q.isStunned && !q.isReserve && !q.isKO && !q.isCasualty && !q.isEjected && q.x >= 0 && q.x < CFG.cols;
+            let notes = [], at = -1, hidden = false, unread = 0, cause = null, tip = 0;
+
+            // ---- the coach card (non-blocking: play carries on underneath) ----
+            function card() {
+                let c = $('coach-card');
+                if (c) return c;
+                c = document.createElement('div'); c.id = 'coach-card'; c.hidden = true; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite');
+                c.innerHTML = `<div class="cc-head"><span class="cc-badge">🎓 Coach</span><span class="cc-kind"></span><span class="cc-title"></span>
+                    <button type="button" class="cc-btn" data-cc="prev" aria-label="Previous note">‹</button><span class="cc-pos"></span><button type="button" class="cc-btn" data-cc="next" aria-label="Next note">›</button>
+                    <button type="button" class="cc-btn" data-cc="hide" aria-label="Hide the coach" title="Hide (tap 🎓 Coach to bring it back)">✕</button></div><div class="cc-body"></div>`;
+                document.body.appendChild(c);
+                const pill = document.createElement('button'); pill.type = 'button'; pill.id = 'coach-pill'; pill.hidden = true; pill.innerHTML = '🎓 Coach <span class="cc-new"></span>';
+                document.body.appendChild(pill);
+                c.addEventListener('click', e => {
+                    const b = e.target.closest('[data-cc]'); if (!b) return; e.stopPropagation();
+                    const k = b.dataset.cc;
+                    if (k === 'prev') at = Math.max(0, at - 1); else if (k === 'next') at = Math.min(notes.length - 1, at + 1); else hidden = true;
+                    paint();
+                });
+                pill.addEventListener('click', e => { e.stopPropagation(); hidden = false; unread = 0; at = notes.length - 1; paint(); });
+                window.addEventListener('resize', place);
+                return c;
+            }
+            // between the match log and the unit panel when there's room (wide screens), otherwise just above them
+            function place() {
+                const c = $('coach-card'), pill = $('coach-pill'); if (!c) return;
+                const box = el => { if (!el) return null; const r = el.getBoundingClientRect(); return r.width && r.height ? r : null; };
+                const L = box($('panel-log-container')), U = box($('panel-unit-container')), W = window.innerWidth, H = window.innerHeight;
+                let w = Math.min(360, W - 24), left = (W - w) / 2, bottom = 10;
+                if (L && U) {
+                    const a = L.right + 8, b = U.left - 8;
+                    if (b - a >= Math.min(300, w)) { w = Math.min(w, b - a); left = a + (b - a - w) / 2; }
+                    else bottom = H - Math.min(L.top, U.top) + 8;
+                }
+                Object.assign(c.style, { left: left + 'px', width: w + 'px', bottom: bottom + 'px', maxHeight: Math.max(110, Math.min(H * 0.42, H - bottom - 90)) + 'px' });
+                if (pill) Object.assign(pill.style, { left: (left + w / 2) + 'px', bottom: bottom + 'px' });
+            }
+            function paint() {
+                const c = card(), pill = $('coach-pill');
+                const show = on() && notes.length > 0;
+                c.hidden = !show || hidden; pill.hidden = !show || !hidden;
+                if (!show) return;
+                if (hidden) { pill.querySelector('.cc-new').textContent = unread ? String(Math.min(unread, 99)) : ''; place(); return; }
+                const n = notes[at];
+                c.dataset.kind = n.kind;
+                c.querySelector('.cc-kind').textContent = n.kind === 'lesson' ? 'Lesson' : n.kind === 'bad' ? 'Turnover' : '';
+                c.querySelector('.cc-title').textContent = n.title;
+                c.querySelector('.cc-body').innerHTML = n.html;
+                c.querySelector('.cc-pos').textContent = `${at + 1}/${notes.length}`;
+                c.querySelector('[data-cc="prev"]').disabled = at <= 0;
+                c.querySelector('[data-cc="next"]').disabled = at >= notes.length - 1;
+                c.querySelector('.cc-body').scrollTop = 0;
+                place();
+            }
+            function note(title, html, kind = 'info') {
+                if (!on()) return;
+                notes.push({ title, html, kind }); if (notes.length > 60) notes.shift();
+                at = notes.length - 1;
+                if (hidden) unread++;
+                paint();
+            }
+            // a longer explanation, the first time something comes up in this match: true if it was shown
+            function lesson(key, title, html) {
+                if (!on()) return false;
+                state.coachSeen = state.coachSeen || [];
+                if (state.coachSeen.includes(key)) return false;
+                state.coachSeen.push(key); note(title, html, 'lesson');
+                return true;
+            }
+            function reset() { notes = []; at = -1; hidden = false; unread = 0; cause = null; tip = 0; paint(); }
+
+            // ---- rolls: what's needed and why ----
+            const NAMES = { DODGE: 'Dodge', RUSH: 'Rush', PICKUP: 'Pick-up', CATCH: 'Catch', INTERCEPT: 'Interception', PASS: 'Pass', LANDING: 'Landing',
+                'THROW TEAMMATE': 'Throw Team-mate', 'JUMP UP': 'Jump Up', 'STAND UP': 'Stand up', 'THROW BOMB': 'Bomb throw', CHAINSAW: 'Chainsaw',
+                'ALWAYS HUNGRY': 'Always Hungry', 'EAT TEAM-MATE': 'Eat Team-mate' };
+            function rollWhy(pr) {
+                const p = pr.player, t = pr.target, ed = pr.extraData || {}, type = pr.type, opp = oppOf(p.team), parts = [];
+                let base = null, baseLbl = '', what = '';
+                const range = /\((Quick|Short|Long|Bomb)\)/.exec(ed.desc || '');
+                switch (type) {
+                    case 'DODGE':
+                        what = `${who(p)} is leaving a square next to an opponent (an opponent standing next to a player <b>marks</b> them), so they must <b>Dodge</b>: an Agility test.`;
+                        base = p.ag; baseLbl = `Agility ${p.ag}+`;
+                        if (ed.landingTZs) parts.push([ed.landingTZs, `${ed.landingTZs} ${plural(ed.landingTZs, 'opponent')} marking the square they step into`]);
+                        break;
+                    case 'RUSH':
+                        what = `${who(p)} has used all ${p.ma} squares of their Movement (MA), so this extra square is a <b>Rush</b>. A player can Rush ${p.skills.includes('Sprint') ? 3 : 2} squares a turn.`;
+                        base = 2; baseLbl = 'a Rush needs 2+';
+                        break;
+                    case 'PICKUP':
+                        if (p.actionTaken === 'secure_ball') { what = `Securing the ball: a pick-up on a 2+ whatever the modifiers.`; base = 2; baseLbl = 'Secure the Ball: 2+'; break; }
+                        what = `Picking up the ball is an Agility test.`; base = p.ag; baseLbl = `Agility ${p.ag}+`;
+                        { const tz = getTackleZones(state.ball.x, state.ball.y, opp); if (tz) parts.push([tz, `${tz} ${plural(tz, 'opponent')} marking the ball's square`]); }
+                        break;
+                    case 'CATCH':
+                        what = `${who(p)} has to <b>catch</b> the ball: an Agility test.`; base = p.ag; baseLbl = `Agility ${p.ag}+`;
+                        { const tz = getTackleZones(p.x, p.y, opp); if (tz) parts.push([tz, `${tz} ${plural(tz, 'opponent')} marking ${p.name || 'the catcher'}`]); }
+                        if (/\(-1\)/.test(ed.desc || '')) parts.push([1, 'a bouncing ball or a throw-in is harder to catch']);
+                        break;
+                    case 'INTERCEPT':
+                        what = `${who(p)} is in the way of the pass and tries to <b>intercept</b> it: an Agility test with a big penalty (−3, or −2 if the pass was inaccurate).`;
+                        base = p.ag; baseLbl = `Agility ${p.ag}+`;
+                        break;
+                    case 'PASS':
+                        what = `Throwing is a <b>Passing Ability</b> (PA) test. The longer the pass, the harder.`; base = p.pa; baseLbl = `Passing Ability ${p.pa}+`;
+                        if (range) { const n = { Quick: 0, Short: 1, Long: 2, Bomb: 3 }[range[1]]; parts.push([n, `${range[1] === 'Bomb' ? 'Long Bomb' : range[1] + ' Pass'} range`]); }
+                        { const tz = getTackleZones(p.x, p.y, opp); if (tz) parts.push([tz, `${tz} ${plural(tz, 'opponent')} marking the thrower`]); }
+                        break;
+                    case 'LANDING':
+                        what = `${who(p)} was thrown and must <b>land</b> on their feet: an Agility test. If they fail they fall over (but it's only a turnover if they had the ball).`;
+                        base = p.ag; baseLbl = `Agility ${p.ag}+`;
+                        break;
+                    case 'THROW TEAMMATE':
+                        what = `Throwing a team-mate is a Passing Ability test (Quick or Short range only).`; base = p.pa; baseLbl = `Passing Ability ${p.pa}+`;
+                        break;
+                    case 'STAND UP':
+                        what = `${who(p)} has a Movement of less than 3, so standing up needs a 4+ (it normally costs 3 squares of movement and no roll).`;
+                        break;
+                    case 'JUMP UP':
+                        what = `Jump Up: standing up for free to Block, on an Agility test with −1.`; base = p.ag; baseLbl = `Agility ${p.ag}+`; parts.push([1, 'Jump Up']);
+                        break;
+                    default:
+                        what = `${esc(NAMES[type] || type)}: roll a D6 (a six-sided dice).`;
+                }
+                const wm = weatherTargetMod(type);   // (Big Hand's help below cancels it out again)
+                if (wm) parts.push([wm, esc(state.weather.name)]);
+                (ed.helps || []).forEach(([nm, n]) => { if (n) parts.push([-n, esc(nm)]); });
+                if (type === 'DODGE' && pr.usingBreakTackle && pr.availableBtMod) parts.push([-pr.availableBtMod, 'Break Tackle']);
+                let maths = '';
+                if (base != null && !pr.force) {
+                    const sum = base + parts.reduce((a, x) => a + x[0], 0);
+                    if (Math.max(2, Math.min(6, sum)) !== t) parts.push([t - sum, 'other effects (listed above)']);
+                    const bits = parts.filter(x => x[0]).map(([n, l]) => `<span class="${n > 0 ? 'bad' : 'good'}">${n > 0 ? '−' + n : '+' + -n}</span> for ${l}`);
+                    if (range && range[1] === 'Quick') bits.unshift('<span class="dim">no penalty</span> for a Quick Pass');
+                    maths = `${baseLbl}${bits.length ? ' · ' + bits.join(' · ') : ''} → you need <b>${t}+</b>.`;
+                    if (parts.some(x => x[0] > 0)) maths += ` <span class="dim">(Each −1 to the roll means you need 1 more.)</span>`;
+                } else maths = `You need <b>${t}+</b>.`;
+                if (t <= 2 || t >= 6 || (base != null && base + parts.reduce((a, x) => a + x[0], 0) !== t)) maths += ` <span class="dim">A roll is never easier than 2+ or harder than 6+: a 1 always fails and a 6 always succeeds.</span>`;
+                // the chances, with the re-rolls there are
+                const b = chance(t);
+                const skillRR = pr.skillAllowed && pr.skill && pr.skill !== 'None' && p.skills.includes(pr.skill) && !p.usedSkills.includes(pr.skill);
+                const teamRR = p.team === state.activeTeam && (state.rr[p.team] || 0) > 0;
+                let odds = `Chance: <b>${pct(b)}</b>.`;
+                if (skillRR) odds += ` <b>${esc(pr.skill)}</b> (a skill) re-rolls it for free if it fails: <b>${pct(1 - (1 - b) * (1 - b))}</b>.`;
+                else if (teamRR && mine(p)) odds += ` With a team re-roll if it fails (you have ${state.rr[p.team]}): <b>${pct(1 - (1 - b) * (1 - b))}</b>.${lonerNeed(p) ? ` <span class="dim">Loner: a team re-roll only works on a ${lonerNeed(p)}+.</span>` : ''}`;
+                if (type === 'DODGE' && !pr.skillAllowed && p.skills.includes('Dodge')) odds += ` <span class="bad">An opponent with Tackle is marking ${p.name || 'them'}, so the Dodge skill can't be used.</span>`;
+                // what a fail means
+                let fail = '';
+                if (type === 'PASS') fail = `<b>${t}+</b> (or any 6): an accurate pass. Less: <b>inaccurate</b>, and the ball scatters 3 times from the target square. A 1 (or 1 or less after modifiers): a <b>fumble</b>, the ball bounces from the thrower and it's a turnover.`;
+                else if (ed.explainFail) { try { const x = ed.explainFail(2); if (x && x.text) fail = `If it fails: ${esc(x.text).replace(/TURNOVER/g, '<b class="bad">turnover</b>')}`; } catch (e) {} }
+                // the usual advice for the person's own risky rolls
+                let adv = '';
+                if (mine(p) && p.team === state.activeTeam && ['DODGE', 'RUSH', 'PICKUP'].includes(type) && t >= 3) {
+                    const left = state.players.filter(q => q.team === p.team && q.id !== p.id && !q.hasActed && standing(q)).length;
+                    if (left) adv = `Tip: a fail ends your turn at once, and your ${left} ${plural(left, 'player')} who haven't acted yet lose their go. Good coaches make the safe moves first and the risky rolls last.`;
+                }
+                return { what, maths, odds, fail, adv };
+            }
+            function rollBox() {
+                let b = $('coach-roll');
+                if (!b) {
+                    const cardEl = $('modal-roll').firstElementChild;
+                    b = document.createElement('div'); b.id = 'coach-roll'; b.className = 'coach-box';
+                    cardEl.insertBefore(b, cardEl.lastElementChild);
+                }
+                return b;
+            }
+            function roll(pr) {
+                const b = rollBox();
+                b.hidden = !on() || !pr;
+                if (b.hidden) return;
+                const w = rollWhy(pr);
+                b.innerHTML = `<div class="cb-h">🎓 Coach: why ${pr.target}+?</div><p>${w.what}</p><p>${w.maths}</p><p>${w.odds}</p>${w.fail ? `<p>${w.fail}</p>` : ''}${w.adv ? `<p class="dim">${w.adv}</p>` : ''}`;
+            }
+            // the computer's rolls flash past: say what they needed in the card
+            function rollNote(pr) {
+                if (!on() || !pr || mine(pr.player)) return;
+                const w = rollWhy(pr);
+                note(`${team(pr.player.team)}: ${esc(NAMES[pr.type] || pr.type)} by ${pr.player.name || pr.player.type}`, `<p>${w.what}</p><p>${w.maths}</p><p>${w.odds.replace(/ With a team re-roll[^]*$/, '')}</p>`);
+            }
+
+            // ---- blocks: why that many dice, who picks, and what each face means here ----
+            const FACE_NAME = { 1: 'Attacker Down', 2: 'Both Down', 3: 'Push', 4: 'Push', 5: 'Defender Stumbles', 6: 'Defender Down (POW!)' };
+            function around(q, fn) { const out = []; for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) { if (!dx && !dy) continue; const r = getPlayer(q.x + dx, q.y + dy); if (r && fn(r)) out.push(r); } return out; }
+            function faceText(f, atk, def) {
+                const has = (q, s) => q.skills.includes(s), ball = id => state.ball.carrierId === id;
+                const A = who(atk), D = who(def), blitz = atk.actionTaken === 'blitz';
+                const dropD = ball(def.id) ? ' The ball bounces out of their hands.' : '', dropA = ball(atk.id) ? ' The ball bounces out of their hands.' : '';
+                switch (f) {
+                    case 1: return `<span class="bad">${A} is knocked down</span>: an armour roll, and it's a turnover.${dropA}`;
+                    case 2:
+                        if (has(atk, 'Wrestle') || has(def, 'Wrestle')) return `Wrestle: both players can just be put on the ground (no armour rolls, no turnover).`;
+                        if (blitz && has(atk, 'Juggernaut')) return `Juggernaut on a Blitz: counts as a Push instead.`;
+                        if (has(atk, 'Block') && has(def, 'Block')) return `Both have the Block skill, so <b>nobody falls</b>. No turnover.`;
+                        if (has(atk, 'Block')) return `<span class="good">${A} has Block, ${D} doesn't: only ${D} falls</span> (armour roll).${dropD}`;
+                        if (has(def, 'Block')) return `<span class="bad">${D} has Block: only ${A} falls</span>, and it's a turnover.${dropA}`;
+                        return `<span class="bad">Both fall</span>: armour rolls for both, and it's a turnover because ${A} went down.`;
+                    case 3: case 4: {
+                        if (has(def, 'Stand Firm') && !def.isDistracted) return `${D} has Stand Firm and doesn't move: nothing happens.`;
+                        const strip = ball(def.id) && has(atk, 'Strip Ball') && !has(def, 'Sure Hands');
+                        return `${D} is <b>pushed back</b> one square; nobody falls.${strip ? ' Strip Ball: the ball comes loose and bounces!' : ''} ${A} may follow up into the empty square.`;
+                    }
+                    case 5:
+                        if (has(def, 'Dodge') && !has(atk, 'Tackle')) return `${D} has Dodge, so they just get <b>pushed back</b> (Tackle would cancel that).`;
+                        return `<span class="good">${D} is pushed back and knocked down</span> (armour roll).${has(def, 'Dodge') ? ` ${A}'s Tackle cancels ${D}'s Dodge.` : ''}${dropD}`;
+                    case 6: return `<span class="good">${D} is pushed back and knocked down</span> (armour roll).${dropD}`;
+                }
+                return '';
+            }
+            let blk = null;
+            function blockBox() {
+                let b = $('coach-block');
+                if (!b) { b = document.createElement('div'); b.id = 'coach-block'; b.className = 'coach-box'; b.style.marginTop = '10px'; $('dice-modal-card').appendChild(b); }
+                return b;
+            }
+            function block(o) {
+                const b = blockBox(), c = state.combat;
+                b.hidden = !on() || !c || !c.atk || !c.def;
+                blk = null;
+                if (b.hidden) return;
+                const atk = c.atk, def = c.def, A = (o.atkSt || atk.st) + (c.atkAssists || 0), D = def.st + (c.defAssists || 0);
+                const helpA = around(def, q => q.team === atk.team && q.id !== atk.id && canAssist(q, def.team));
+                const helpD = around(atk, q => q.team === def.team && q.id !== def.id && canAssist(q, atk.team));
+                const markedA = around(def, q => q.team === atk.team && q.id !== atk.id && !q.isDown && !q.isStunned && !canAssist(q, def.team));
+                const nm = l => l.map(q => esc(q.name || q.type)).join(', ');
+                const stTxt = `${o.atkSt !== atk.st ? `${o.atkSt} (${esc((o.stNotes || []).join(', '))})` : atk.st}`;
+                const picker = o.dice === 1 ? 'it counts whatever it shows' : c.chooser === atk.team ? (mine(atk) ? '<b>you</b> choose which one counts' : `the <b>${team(atk.team)}</b> choose`) : (mine(def) ? '<b>you</b> choose which one counts (your player is stronger)' : `the <b>${team(def.team)}</b> choose (their player is stronger), so they'll pick the result worst for you`);
+                let h = `<div class="cb-h">🎓 Coach: why ${o.dice} ${plural(o.dice, 'die', 'dice')}?</div>`;
+                h += `<p><b>Strength</b>: ${who(atk)} ST ${stTxt} + ${c.atkAssists || 0} ${plural(c.atkAssists || 0, 'assist')} = <b>${A}</b>, against ${who(def)} ST ${def.st} + ${c.defAssists || 0} ${plural(c.defAssists || 0, 'assist')} = <b>${D}</b>.</p>`;
+                if (helpA.length || helpD.length) h += `<p class="dim">Assists come from team-mates next to the other player who aren't being marked by anyone else: ${helpA.length ? `${nm(helpA)} for ${team(atk.team)}` : ''}${helpA.length && helpD.length ? '; ' : ''}${helpD.length ? `${nm(helpD)} for ${team(def.team)}` : ''}.</p>`;
+                if (markedA.length) h += `<p class="dim">${nm(markedA)} can't assist: another opponent is marking them (the Guard skill gets round that).</p>`;
+                h += `<p>Equal Strength: 1 die. Stronger: 2 dice. More than twice as strong: 3 dice. So: <b>${o.dice} ${plural(o.dice, 'die', 'dice')}</b>, and ${picker}.</p>`;
+                if (mine(atk) && A < D) h += `<p class="dim">Tip: blocking a stronger player is risky, because they pick the die. Get team-mates next to the target first, or block someone else.</p>`;
+                blk = { atk, def, chooser: c.chooser, dice: o.dice, head: h };
+                b.innerHTML = h;
+                lesson('block', 'Blocking', `<p>A <b>Block</b> is how players hit each other: a player hits an opponent standing next to them. A <b>Blitz</b> (once a turn) lets a player move and block in the same action.</p>
+                    <p>Compare Strength (plus assists) to see how many block dice are rolled and who picks one. Each die shows: <b>Attacker Down</b>, <b>Both Down</b>, <b>Push</b> (two faces), <b>Defender Stumbles</b> and <b>Defender Down</b>.</p>
+                    <p>A player knocked down gets an armour roll. If the attacker goes down, it's a turnover.</p>`);
+                if (!mine(atk)) note(`${team(atk.team)} block`, `<p>${who(atk)} (${A}) blocks ${who(def)} (${D}): ${o.dice} ${plural(o.dice, 'die', 'dice')}, ${picker}.</p>`);
+            }
+            function blockDice() {
+                const b = $('coach-block'), c = state.combat;
+                if (!on() || !b || !blk || !c || !c.dice) return;
+                const faces = [...new Set(c.dice.map(f => f === 4 ? 3 : f))].sort((x, y) => y - x);
+                let h = blk.head + `<p><b>What these dice would do:</b></p><ul>${faces.map(f => `<li><b>${FACE_NAME[f]}</b>: ${faceText(f, blk.atk, blk.def)}</li>`).join('')}</ul>`;
+                const myPick = c.dice.length > 1 && !AI.isAI(blk.chooser);
+                if (myPick && AI.coachFace) {
+                    const atkSide = blk.chooser === blk.atk.team;
+                    let best = c.dice[0], bs = atkSide ? -1e9 : 1e9;
+                    c.dice.forEach(f => { let s = 0; try { s = AI.coachFace(f, blk.atk, blk.def); } catch (e) {} if (atkSide ? s > bs : s < bs) { bs = s; best = f; } });
+                    h += `<p>Coach's pick: <b>${FACE_NAME[best]}</b>.</p>`;
+                }
+                b.innerHTML = h;
+            }
+
+            // ---- the ball ----
+            const CAUSE = {
+                drop: p => `${who(p)} went down holding the ball and dropped it.`,
+                under: p => `${who(p)} fell over on top of the loose ball.`,
+                pickup: p => `${who(p)} failed to pick the ball up.`,
+                catch: p => `${who(p)} didn't catch it.`,
+                prone: p => `It landed on ${who(p)}, who is lying down and can't catch it.`,
+                turf: () => `It came down in an empty square.`,
+                fumble: p => `${who(p)} fumbled the pass.`,
+                strip: p => `Strip Ball knocked it out of ${who(p)}'s hands.`
+            };
+            function setCause(kind, p) { cause = { kind, p, t: performance.now() }; }
+            function bounce() {
+                if (!on()) { cause = null; return; }
+                const c = cause && performance.now() - cause.t < 8000 ? cause : null; cause = null;
+                const why = c && CAUSE[c.kind] ? CAUSE[c.kind](c.p) + ' ' : '';
+                if (lesson('bounce', 'The ball bounces', `<p>${why}Whenever the ball ends up loose on the ground (dropped, not caught, not picked up, or landing in an empty square), it <b>bounces</b>: one square in a random direction (a D8 picks one of the 8 squares around it).</p>
+                    <p>If it bounces onto a standing player, they must try to catch it (−1 to the roll for a bouncing ball). A player lying down can't catch, so it bounces again. Off the pitch, the crowd throws it back in.</p>`)) return;
+                note('The ball bounces', `<p>${why}It bounces one square in a random direction.</p>`);
+            }
+            function throwIn(dist) {
+                note('Throw-in', `<p>The ball went off the pitch, so the crowd throws it back in: ${dist} squares (${GEO.sev ? 'D6+2' : '2D6'}) back towards the pitch in a random direction. Whoever it lands on must catch it, or it bounces.</p>`);
+            }
+            function kick(dist, kicker) {
+                if (lesson('kickoff', 'The kick-off', `<p>Each drive starts with a <b>kick-off</b>. The kicking team picks a square in the other half, then the kick goes off target: D6 squares in a random direction (here ${dist}${kicker && kicker.skills.includes('Kick') ? ', halved because the kicker has Kick' : ''}).</p>
+                    <p>While the ball is in the air a <b>Kick-off Event</b> is rolled (2D6), such as a Blitz, a High Kick or a change in the weather. If the ball lands outside the receiving team's half it's a <b>touchback</b>: the receiving team gives it to any of their players.</p>`)) return;
+                note('Kick-off', `<p>The kick goes off target by ${dist} ${plural(dist, 'square')} (a D6) in a random direction, then a Kick-off Event is rolled while it's in the air.</p>`);
+            }
+            function touchback(reason) { note('Touchback', `<p>The ball ${esc(reason)}, so it's a touchback: ${team(state.kickoff.receivingTeam)} give it to any of their standing players.</p>`); }
+            function pass(acc) {
+                if (acc) note('Accurate pass', `<p>The pass is accurate: it arrives at its target, who must catch it (an Agility test, −1 for each opponent marking them).</p>`);
+                else note('Inaccurate pass', `<p>The ball misses the target and <b>scatters 3 times</b> from the target square (one square in a random direction each time). Whoever is standing where it ends up must try to catch it; if it lands in an empty square, it bounces.</p>`);
+            }
+
+            // ---- armour, injuries, turnovers, turns, touchdowns ----
+            function armour(p, total, broken) {
+                if (!on() || !p) return;
+                const l = lesson('armour', 'Armour rolls', `<p>A player who is knocked down or falls over gets an <b>armour roll</b>: 2D6 (two dice added up) against their Armour Value (AV ${p.av}+ for ${who(p)}).</p>
+                    <p>If the total reaches the AV, the armour is <b>broken</b> and an injury roll follows. If not, the player is just lying on the ground (Prone) and can stand up in their next turn (it costs 3 squares of movement). Here: ${total}, ${broken ? 'broken' : 'held'}.</p>`);
+                if (!l) note(`Armour roll: ${who(p)}`, `<p>2D6 = <b>${total}</b> against AV ${p.av}+: ${broken ? '<span class="bad">broken</span>, so an injury roll follows.' : '<span class="good">it holds</span>. They just lie on the ground until they stand up.'}</p>`);
+            }
+            function injury(p, roll, inj, bonus) {
+                if (!on() || !p) return;
+                const st = p.skills.includes('Stunty'), ko = st ? 7 : 8, cas = st ? 9 : 10;
+                const out = inj.out === 'stun' ? `<b>Stunned</b>${inj.saved ? ' (Thick Skull turned a KO into a Stun)' : ''}: they lie face down and stay down for a turn before they can get up.`
+                    : inj.out === 'ko' ? `<b>KO'd</b>: carried off to the dugout. Before each kick-off they get a 4+ roll to come back.`
+                    : `<b>a Casualty</b>: out for the rest of the match (a further roll says how badly hurt).`;
+                const table = `2–${ko - 1} Stunned, ${ko}–${cas - 1} KO'd, ${cas}+ Casualty${st ? ' (Stunty players are easier to hurt)' : ''}`;
+                if (lesson('injury', 'Injury rolls', `<p>When armour breaks, the player makes an <b>injury roll</b>: 2D6${bonus ? ` +${bonus}` : ''}. ${table}.</p><p>${who(p)} rolled ${roll}: ${out}</p>`)) return;
+                note(`Injury roll: ${who(p)}`, `<p>${roll}${bonus ? ` (with +${bonus})` : ''}: ${out}</p><p class="dim">${table}.</p>`);
+            }
+            function turnover(reason) {
+                if (!on()) return;
+                const t = state.activeTeam, you = !AI.isAI(t);
+                const head = `${you ? 'Your' : team(t) + "'s"} turn ends at once: ${esc(reason)}`;
+                if (lesson('turnover', 'Turnover!', `<p>${head}</p><p>A <b>turnover</b> ends the turn straight away, even if players haven't moved yet. It happens when a player on the moving team falls over or is knocked down, the ball isn't caught by their team after a pass or hand-off (or a pick-up fails), a fouler is sent off, or the ball carrier is thrown and doesn't land well.</p>
+                    <p>That's why good coaches do the safe things first and the risky rolls last.</p>`)) return;
+                note('Turnover', `<p>${head}</p>`, 'bad');
+            }
+            const TIPS = [
+                'Move the players who need no dice first, and leave risky Dodges, Rushes and pick-ups until last: a fail ends the turn.',
+                'Before blocking, put team-mates next to the target. Each one who isn\'t marked by another opponent adds an assist, for more block dice.',
+                'Keep your ball carrier surrounded by team-mates (a "cage"): opponents then have to dodge in to reach them.',
+                'A Blitz (once a turn) is the only way to move and block in the same action: use it on the opponent\'s ball carrier.',
+                'Players lying face up (Prone) can stand up in your turn for 3 squares of movement. Stunned players (face down) can\'t.',
+                'You don\'t have to score as fast as you can: taking your time while keeping the ball safe stops the other team scoring too.',
+                'Team re-rolls are limited: save them for rolls that matter, like a pick-up or a pass, not an unimportant Dodge.',
+                'Spread out on defence: an opponent who has to dodge past your players to get through can fall over.',
+                'A player standing next to an opponent "marks" them: moving away needs a Dodge. Use that to slow opponents down.',
+                'End your turn with your players not lined up for easy blocks: leave gaps so opponents can\'t gang up on one player.'];
+            function turn(t) {
+                if (!on() || AI.isAI(t)) return;
+                cause = null;
+                if (lesson('turn', 'Your turn', `<p>In your turn each player can take one <b>action</b>: tap a player, then pick it.</p>
+                    <ul><li><b>Move</b>: up to their Movement (MA) squares, plus up to 2 Rushes (2+ each).</li><li><b>Block</b>: hit an opponent next to them.</li>
+                    <li><b>Blitz</b> (once a turn): move, then block.</li><li><b>Pass</b> and <b>Hand-off</b> (once a turn each): give the ball to a team-mate.</li><li><b>Foul</b> (once a turn): kick a player who is down; the referee may send the fouler off.</li></ul>
+                    <p>Each half is ${TURNS} turns a side. Get the ball and carry it into the other team's end zone to score a <b>touchdown</b>. Press End Turn when you're done.</p>`)) return;
+                note(`Your turn ${state.turn[t]} of ${TURNS}`, `<p>Team re-rolls left this half: <b>${state.rr[t] || 0}</b>.</p><p class="dim">Tip: ${esc(TIPS[tip++ % TIPS.length])}</p>`);
+            }
+            function td(p) { note('Touchdown!', `<p>${who(p)} carried the ball into the end zone: a touchdown for ${team(p.team)}. Both teams set up again and the team that scored kicks off.</p>`); }
+            function setup(t) {
+                if (!on() || AI.isAI(t)) return;
+                lesson('setup', 'Setting up', `<p>Place up to ${MAX_ON_PITCH} players in your half. At least 3 must stand on the <b>line of scrimmage</b> (the middle line), and no more than 2 in each <b>wide zone</b> (the strips down the sides).</p>
+                    <p>Tap a player, then a square. Press Confirm when you're done.</p>`);
+            }
+            return { on, reset, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+        })();
+
         function triggerTurnover(reason, delay = 0) {
             if (state.isGameOver) return;
             if (REPLAY.get()) { REPLAY.then(() => triggerTurnover(reason, delay)); return; }   // a pass / Throw Team-mate / bomb replay first
@@ -8020,6 +8413,7 @@
             if(p) { p.hasActed = true; p.remainingMA = 0; p.rushes = 0; }
             refreshSelection(null);
             state.mode = MODES.LOCKED;   // nobody acts while the turnover plays out
+            COACH.turnover(reason);
 
             afterSettled(delay, () => {
                 log(`  TURNOVER! ${reason}`, 'text-red-500 font-bold text-sm');
@@ -8109,6 +8503,7 @@
             state.selectedId = null;
             updateTopBar();
             updateSetupHUD();
+            COACH.setup(team);
             render();
 
             let roleName = isKicking ? "Kicking Team" : "Receiving Team";
@@ -8562,7 +8957,7 @@
             state.isResolvingKickoff = false;
             state.mode = MODES.TOUCHBACK_CHOICE;
             updateTopBar();
-            log(`  TOUCHBACK! Ball ${reason}!`, 'text-amber-400 font-bold');
+            log(`  TOUCHBACK! Ball ${reason}!`, 'text-amber-400 font-bold'); COACH.touchback(reason);
             announce("TOUCHBACK!", `${ROSTERS[state.kickoff.receivingTeam].name}: Tap a standing player to give them the ball.`, "bg-amber-700/90", null, 3000);
         }
 
@@ -9733,7 +10128,7 @@
                 );
             } else {
                 if (!p && tryDivingCatch(landingX, landingY, state.kickoff.receivingTeam, () => beginDriveActivePhase(), () => scatterBall(landingX, landingY))) return;
-                log(`  The ball hits the turf at [${landingX}, ${landingY}] and bounces!`, 'text-yellow-400');
+                log(`  The ball hits the turf at [${landingX}, ${landingY}] and bounces!`, 'text-yellow-400'); COACH.cause('turf');
                 scatterBall(landingX, landingY);
             }
         }
@@ -9764,6 +10159,7 @@
             state.kickoff.target = { x: targetX, y: targetY };   // (for the kick's close-up replay)
 
             log(`  Kick deviates ${dist} squares from [${targetX}, ${targetY}] toward [${landingX}, ${landingY}].`);
+            COACH.kick(dist, getPlayerById(state.kickoff.kickerId));
 
             animateBallFlight(targetX, targetY, landingX, landingY, 1200, () => {
                 // The ball is still in the air: the Kick-off Event happens before it lands
@@ -9784,7 +10180,7 @@
                 if (carrier.hungry) { feed(carrier, false); if (carrier.isDistracted) return true; }   // Bloodlust: no bite, no touchdown
                 state.players.forEach(q => { q.stallWatch = false; });
                 state.score[carrier.team]++;
-                MATCH.note('td', carrier.team, carrier);
+                MATCH.note('td', carrier.team, carrier); COACH.td(carrier);
                 sppGain(carrier, 'td');
                 if (starIs(carrier, 'luthor') && starFree(carrier, 'show')) {   // Star of the Show: a team re-roll until the end of the next drive
                     starSpend(carrier, 'show', 'Star of the Show'); const t = carrier.team;
@@ -9955,6 +10351,7 @@
             showTurnBanner(state.activeTeam);
             updateTopBar();
             refreshSelection(null);
+            COACH.turn(state.activeTeam);
         }
 
         function rollInjury(player, isCrowdSurfed = false, injuryBonus = 0) {
@@ -9975,6 +10372,7 @@
             }
 
             REPLAY.injury(player.id, inj.out);
+            COACH.injury(player, roll, inj, injuryBonus);
             if (inj.out === 'stun') {
                 if (inj.saved) {
                     log(`  Thick Skull saves ${player.type} from KO! Stunned instead.`, 'text-yellow-400 font-bold'); skillPop('Thick Skull');
@@ -13223,13 +13621,14 @@
             if(finalArmorRoll >= player.av || clawsBreak) {
                 if (clawsBreak && finalArmorRoll < player.av) { log(`  Claws! A natural ${baseRoll} breaks ${player.type}'s armour whatever its value.`, 'text-red-400 font-bold'); skillPop('Claws'); }
                 else log(`  Armor broken (${finalArmorRoll} >= AV${player.av}+).`, 'text-red-400');
+                COACH.armour(player, finalArmorRoll, true);
                 // a Ball & Chain player's hits are a Special Action: their casualties only earn SPP through Violent Innovator
                 const bncHit = attacker && state.combat && state.combat.bnc && state.combat.atk === attacker;
                 injCause = bncHit ? (attacker.skills.includes('Violent Innovator') ? attacker : null) : (attacker || opts.cause || null);
                 const viWas = viCause; if (bncHit && injCause) viCause = injCause;
                 rollInjury(player, false, mbInjuryBonus); injCause = null; viCause = viWas;
             } else { 
-                log(`  Armor held (${finalArmorRoll} vs AV${player.av}+).`); 
+                log(`  Armor held (${finalArmorRoll} vs AV${player.av}+).`); COACH.armour(player, finalArmorRoll, false); 
             }
         }
 
@@ -13255,6 +13654,7 @@
             if (dx === 0 && dy === 0) dx = fromX < CFG.cols / 2 ? 1 : -1;
 
             const dist = GEO.sev ? Math.floor(Math.random() * 6) + 1 + 2 : Math.floor(Math.random()*6)+1 + Math.floor(Math.random()*6)+1;   // (Sevens: D6+2) 
+            COACH.throwIn(dist);
             let nx = fromX < 0 ? 0 : fromX >= CFG.cols ? CFG.cols - 1 : fromX;
             let ny = fromY < 0 ? 0 : fromY >= CFG.rows ? CFG.rows - 1 : fromY;
 
@@ -13296,13 +13696,14 @@
                 } else {
                     const caught = q => { if (checkTouchdown()) return; if (onResolved) onResolved(q); updateValidActions(getPlayerById(state.selectedId)); };
                     if (!p && tryDivingCatch(nx, ny, state.activeTeam, caught, () => scatterBall(nx, ny, onResolved), 1)) return;   // -1: a thrown-in ball
-                    log(`  The throw-in lands at [${nx}, ${ny}] and bounces!`, 'text-yellow-400');
+                    log(`  The throw-in lands at [${nx}, ${ny}] and bounces!`, 'text-yellow-400'); COACH.cause('turf');
                     scatterBall(nx, ny, onResolved);
                 }
             }, true);
         }
 
         function scatterBall(fromX, fromY, onResolved = null) {
+            COACH.bounce();
             state.ball.carrierId = null;
             state.ball.x = -1;
             state.ball.y = -1;
@@ -13350,7 +13751,7 @@
             }
             
             if (p.isDown || p.isStunned) {
-                log(`  Ball bounces off prone ${p.type}!`);
+                log(`  Ball bounces off prone ${p.type}!`); COACH.cause('prone', p);
                 holdBall(nx, ny, 450, () => scatterBall(nx, ny, onResolved));
                 return;
             }
@@ -13393,7 +13794,7 @@
         function bounceLooseBallUnder(player) {
             if (state.ball.carrierId || state.ball.x < 0 || state.ball.x !== player.x || state.ball.y !== player.y) return;
             log(`  ${player.type} falls on the ball and it bounces away!`, 'text-yellow-400');
-            scatterBall(player.x, player.y);
+            COACH.cause('under', player); scatterBall(player.x, player.y);
         }
         function dropBall(player) {
             // Safe Pair of Hands: going down with the ball, they place it in an empty square next to them instead
@@ -13416,7 +13817,7 @@
                 }
             }
             log(`  ${player.type} drops the ball!`, 'text-red-500 font-bold');
-            scatterBall(player.x, player.y);
+            COACH.cause('drop', player); scatterBall(player.x, player.y);
         }
 
         // Big Guys (Ogre, Troll) cannot declare a Secure the Ball Action (Big Un has the Unsteady trait instead)
@@ -13986,6 +14387,7 @@
 
             document.getElementById('roll-target').textContent = `${currentTarget}+`;
             document.getElementById('roll-odds').textContent = `(${Math.round(baseProb * 100)}% Chance)`;
+            COACH.roll(pData);
         }
 
         // a roll target that also carries its uncapped value, so later modifiers are added before the 2-6 cap
@@ -14002,6 +14404,7 @@
         }
         function setupRoll(type, player, target, skill, onPass, onFail, extraData) {
             if (type === 'CATCH' && state.players.some(q => starIs(q, 'guffle') && q.team !== player.team)) { const op = onPass; onPass = (...a) => { op(...a); quickBite(player); }; }
+            if (type === 'CATCH' || type === 'PICKUP') { const of = onFail; onFail = (...a) => { COACH.cause(type === 'PICKUP' ? 'pickup' : 'catch', player); of(...a); }; }   // (why the ball then bounces)
             const uncapped = ['CATCH', 'INTERCEPT', 'PICKUP'].includes(type);
             let rawT = target && target.raw != null ? target.raw : Number(target);
             target = Number(target);
@@ -14105,6 +14508,7 @@
             }
 
             updateModalRollDisplay();
+            COACH.rollNote(state.pendingRoll);
             // only a roll the player chose to attempt can be called off: one forced on them mid-play (a landing, a catch,
             // anything while the game is locked) has to be made, or the game would be left stuck
             const pr = state.pendingRoll, forced = !pr || pr.prevMode === MODES.LOCKED || ['LANDING', 'CATCH', 'INTERCEPT', 'EAT TEAM-MATE', 'ALWAYS HUNGRY'].includes(pr.type);
@@ -14400,7 +14804,7 @@
                 const dc = !p && divingCatcher(x, y, thrower.team);
                 const caught = () => { if (dc) REPLAY.set('catch', { id: dc.id, ok: true, dive: true }, true); REPLAY.then(() => { if (checkTouchdown()) return; checkTurnoverPass(thrower.team); }); };
                 if (!p && tryDivingCatch(x, y, thrower.team, caught, () => { if (dc) REPLAY.set('catch', { id: dc.id, ok: false, dive: true }, true); scatterBall(x, y, () => checkTurnoverPass(thrower.team)); })) return;
-                log(`  Pass hits the turf and bounces!`);
+                log(`  Pass hits the turf and bounces!`); COACH.cause('turf');
                 scatterBall(x, y, () => checkTurnoverPass(thrower.team));
             }
         }
@@ -14495,6 +14899,7 @@
                 }
             }
 
+            COACH.pass(isAccurate);
             let lineSquares = getRulerSquares(thrower.x, thrower.y, target.x, target.y);   // the ruler goes to the target, wherever the ball ends up
             let interceptors = [];
             const oppTeam = thrower.team === TEAMS.HUMAN ? TEAMS.ORC : TEAMS.HUMAN;
@@ -14598,7 +15003,7 @@
                             return;
                         }
                         if (isFumbleRoll(finalRoll, totalModifier)) {
-                            log(`  FUMBLED PASS! Ball drops at thrower's feet!`, 'text-red-500 font-bold'); REPLAY.set('res', 'fumble');
+                            log(`  FUMBLED PASS! Ball drops at thrower's feet!`, 'text-red-500 font-bold'); REPLAY.set('res', 'fumble'); COACH.cause('fumble', thrower);
                             sfx('fumble'); sfx('crowdOoooh', 250);
                             scatterBall(thrower.x, thrower.y, () => triggerTurnover("Fumbled Pass!"));
                         } else {
@@ -15329,6 +15734,7 @@
             paintDiceChooser(chooser, NET.on() ? chooser !== NET.myTeam() : chooser !== atk.team);
             
             state.combat.chooser = chooser;
+            COACH.block({ atkSt, stNotes, dice });
             let drawDice = function (rolledArray) {
                 c.innerHTML = '';
                 state.combat.dice = rolledArray.slice();
@@ -15339,6 +15745,7 @@
                     const cv = document.createElement('canvas'); cv.width = 50; cv.height = 50;
                     b.appendChild(cv); c.appendChild(b); renderDieIcon(cv.getContext('2d'), face, 50);
                 });
+                COACH.blockDice();
             };
             
             const rolled = []; for(let i=0; i<dice; i++) rolled.push(Math.floor(Math.random()*6)+1);
@@ -24398,7 +24805,7 @@
             // wait a moment before each decision so people can follow what happens
             function after(key, ms, fn) {
                 const t = now();
-                if (pk !== key) { pk = key; pt = t + ms * speed; return; }
+                if (pk !== key) { pk = key; pt = t + ms * speed * (state.training ? 1.6 : 1); return; }   // (training: time to read the coach)
                 if (t >= pt) { pk = null; fn(); }
             }
 
@@ -27599,7 +28006,7 @@
             return {
                 debugAdapt: t => adaptOffence(t, (GEO.sev ? SETUPS7 : SETUPS).offence),
                 bridge,   // (tools/bridge-server.js)
-                isAI, act, ownerTeam, decider, isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),
+                isAI, act, ownerTeam, decider, coachFace: (f, a, d) => faceScore(f, a, d), isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),
                 set(t, v) { on[t] = !!v; save(); },
                 start() { started = true; },
                 setSpeed(s) { speed = s; },
@@ -27881,6 +28288,7 @@
                 }
                 const b = e.target.closest('[data-go]'); if (!b || b.disabled) return;
                 const go = b.dataset.go;
+                if (go === 'exhibition') { const ct = document.getElementById('chk-train'); if (ct) { ct.checked = false; ct.dispatchEvent(new Event('change')); } }
                 if (go === 'teams') HUB.open(() => { fillPickers(); refreshPick(); });
                 else if (go === 'league') LEAGUE.open(null, 'local');
                 else if (go === 'tournament') CUP.open();
@@ -27941,6 +28349,7 @@
                 }
                 state.league = opts.league || null;
                 state.cup = opts.cup || null;
+                state.training = !!opts.training && !opts.league && !opts.cup; state.coachSeen = []; COACH.reset();   // (Training: the coach explains the rules)
                 (opts.extraRR || []).forEach((n, i) => { if (n) { ROSTERS[i].rerolls = (ROSTERS[i].rerolls || 0) + n; state.rr[i] = ROSTERS[i].rerolls; } });
                 const pick = homeRace; homeRace = () => ROSTERS[0].race || ROSTERS[0].key;
                 if (opts.league || opts.cup) {   // a league or tournament match is always at the home team's ground, whatever the Pitch setting
@@ -27959,6 +28368,16 @@
                 updateTopBar();
                 showLineupModal(beginMatch);
             };
+            {   // Training: an exhibition against the computer with the coach on
+                const ct = document.getElementById('chk-train'), title = document.getElementById('ex-title');
+                ct.addEventListener('change', () => { title.textContent = ct.checked ? 'Training Match' : 'Exhibition Match'; });
+                document.getElementById('mm-train').addEventListener('click', () => {
+                    if (!AI.isOn(0) && !AI.isOn(1)) AI.set(1, true);
+                    if (AI.isOn(0) && AI.isOn(1)) AI.set(0, false);
+                    ct.checked = true; ct.dispatchEvent(new Event('change'));
+                    window.showMenuPanel('exhibition');
+                });
+            }
             document.getElementById('btn-start-match').addEventListener('click', () => {
                 EXIND.start(teamKey(0), teamKey(1), document.getElementById('chk-career').checked, sevensOn() ? 'sevens' : 'std');
             });
