@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.66 (13 Nov 2026)
+- **Help**, from the main menu or the **?** button during a match: how to play in ten topics, from the aim of the game to blocking,
+  passing, the ball, injuries and turnovers.
+
 ## v4.65 (13 Nov 2026)
 - Training: your first pass or hand-off opens a window explaining passing: ranges, accurate and inaccurate throws, fumbles,
   interceptions and turnovers.

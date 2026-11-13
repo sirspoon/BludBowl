@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.66 (13 Nov 2026)
+- **New:** a Help window, opened from **Help** on the main menu or the **?** button in the match's top bar (in any match, not just
+  training). It gathers the training explanations into ten topics picked from a row of tabs: The aim (and the steps before the
+  first turn), Players & skills, Tackle zones (with Rushing), Your turn (the actions, standing up, team re-rolls), Blocking (with
+  the dice faces), Passing (with the range bands), The ball (pick-ups, bounces, throw-ins), Armour & injuries, Turnovers and
+  Training. It remembers the last topic read. The training windows (the opening overview, the first block, the first pass) now
+  show the same text.
+
 ## v4.65 (13 Nov 2026)
 - **New (training):** the first time you pick Pass or Hand-off in a training match, a "Passing" window explains it before you choose a
   target: one Pass and one Hand-off a turn, the hand-off (no throw, just the catch), the Passing Ability test and the four range

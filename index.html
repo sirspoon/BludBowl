@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.65</title>
+    <title>BludBowl 4.66</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -917,6 +917,15 @@
 #coach-intro h3 { font-size: 13px; font-weight: 800; color: #fde68a; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
 #coach-intro p { margin: 0 0 6px; } #coach-intro ol { margin: 0; padding-left: 22px; list-style: decimal; } #coach-intro li { margin-bottom: 6px; } #coach-intro li::marker { color: #7dd3fc; font-weight: 800; }
 #coach-intro b { color: #f8fafc; } #coach-intro .ci-dim { color: #94a3b8; margin-top: 10px; }
+#coach-intro .ci-help { display: flex; flex-direction: column; padding-top: 12px; }
+#coach-intro .ci-top { display: flex; align-items: center; justify-content: space-between; }
+#coach-intro .ci-top h2 { margin: 0; }
+#coach-intro .ci-x { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #475569; background: transparent; color: #cbd5e1; font-size: 15px; cursor: pointer; }
+#coach-intro .ci-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 4px; }
+#coach-intro .ci-tabs button { padding: 4px 9px; border-radius: 999px; border: 1px solid #334155; background: #0b1424; color: #cbd5e1; font: 700 11.5px/1.2 Inter, system-ui, sans-serif; cursor: pointer; }
+#coach-intro .ci-tabs button.on { background: #0369a1; border-color: #38bdf8; color: #fff; }
+#coach-intro .ci-h { font-size: 15px; margin-top: 10px; }
+#coach-intro ul.ci-list { list-style: disc; margin: 2px 0 8px; padding-left: 20px; } #coach-intro ul.ci-list li { margin-bottom: 4px; }
 #coach-intro ul.ci-bands { list-style: none; margin: 4px 0 8px; padding: 0; display: flex; flex-direction: column; gap: 3px; }
 #coach-intro .ci-band { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 8px; vertical-align: -2px; }
 #coach-intro .ci-faces { display: flex; flex-direction: column; gap: 8px; }
@@ -1071,7 +1080,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.65</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.66</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1088,6 +1097,7 @@
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">On this device: knockout cups and Swiss events for tournament teams</span></button>
             <button type="button" class="mm-btn" data-go="teams"><span class="mm-t">Teams</span><span class="mm-s">Build, manage and back up your teams and their careers</span></button>
             <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">I Like to Watch</span><span class="mm-s">Replay your saved matches, or any match from fumbbl.com</span></button>
+            <button type="button" class="mm-btn" id="mm-help"><span class="mm-t">Help</span><span class="mm-s">How to play: the aim, turns, blocking, passing, the ball, injuries and more</span></button>
             <button type="button" class="mm-btn" data-go="settings"><span class="mm-t">Settings</span><span class="mm-s">Sound, music, text size, pitch and animations</span></button>
             <button type="button" class="sv-import" data-sv="import">Load a saved match or a backup from a file…</button>
             <input type="file" id="sv-file" accept=".json,application/json" class="hidden">
@@ -1399,6 +1409,7 @@
                         <button id="btn-rosters" title="Team Rosters & Dugouts" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow flex items-center gap-1">
                             <span>📋</span> <span class="hidden sm:inline">Rosters</span>
                         </button>
+                        <button id="btn-help" type="button" title="Help: how to play" aria-label="Help" class="bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow">?</button>
 
  <button id="btn-sound" title="Sound on / off" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow">
                             <span id="sound-icon">🔊</span>
@@ -8403,89 +8414,65 @@
                 lesson('setup', 'Setting up', `<p>Place up to ${MAX_ON_PITCH} players in your half. At least 3 must stand on the <b>line of scrimmage</b> (the middle line), and no more than 2 in each <b>wide zone</b> (the strips down the sides).</p>
                     <p>Tap a player, then a square. Press Confirm when you're done.</p>`);
             }
-            // Training: what the game is about and what happens before the first turn, before the match starts
-            function intro(done) {
-                if (!on()) { done(); return; }
-                let m = $('coach-intro');
-                if (!m) { m = document.createElement('div'); m.id = 'coach-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); document.body.appendChild(m); }
-                const you = [0, 1].find(t => !AI.isAI(t)), them = you == null ? null : 1 - you;
-                m.innerHTML = `<div class="ci-card"><div class="ci-badge">🎓 Training match</div><h2>How a match works</h2>
-                    <h3>The aim</h3>
-                    <p>Score more <b>touchdowns</b> than the other team. You score when one of your players carries the ball into the other team's
-                    <b>end zone</b> (the far end of the pitch). A match is two halves, and each team has ${TURNS} turns in each half.</p>
-                    <h3>Your players</h3>
-                    <p>Tap a player to see their stats and skills in the Unit Panel. The five stats: <b>MA</b> (Movement, squares a turn),
-                    <b>ST</b> (Strength, for blocks), <b>AG</b> (Agility: the score needed to dodge, catch or pick up, e.g. 3+), <b>PA</b>
-                    (Passing: the score needed to throw) and <b>AV</b> (Armour: what the other team must roll to hurt them). Skills such as
-                    Block, Dodge or Sure Hands are special abilities: <b>tap a skill to see what it does</b>.</p>
-                    <h3>Tackle zones</h3>
-                    <p>A standing player <b>marks</b> the 8 squares around them: that's their <b>tackle zone</b>. It matters almost everywhere.
-                    Moving out of a square next to an opponent needs a <b>Dodge</b> roll, and each opponent marking the square you step into
-                    makes it harder. Being marked also makes catching, passing and picking up the ball harder, and a marked team-mate can't help
-                    (assist) in a block. Players lying down don't mark anyone.</p>
+            // ---- the help: every explanation in one place, by topic (the main menu's Help, the ? button in a match), and the
+            // training windows (the opening overview, the first block, the first pass), which show the same text ----
+            const blank = () => '';
+            const HELP = [
+                ['match', 'The aim', ctx => `<p>Score more <b>touchdowns</b> than the other team. You score when one of your players carries the ball into
+                    the other team's <b>end zone</b> (the far end of the pitch). A match is two halves, and each team has ${TURNS} turns in each half.</p>
                     <h3>Before the first turn</h3>
                     <ol>
                       <li><b>Fans and weather.</b> Each team's crowd is counted, then 2D6 (two dice added up) are rolled for the weather. Most of the
                       time it's fine, but heat, rain, sun or a blizzard each change something, such as rain making the ball harder to catch.</li>
-                      <li><b>Coin toss.</b> The winner chooses to kick or receive. ${you != null ? `In training you always receive, so ${team(you)} get the first turn.` : 'The receiving team gets the first turn.'}</li>
-                      <li><b>Set-up.</b> The kicking team${them != null ? ` (${team(them)})` : ''} places its players first, then the receiving team: up to ${MAX_ON_PITCH} in
+                      <li><b>Coin toss.</b> The winner chooses to kick or receive. ${ctx.you != null ? `In training you always receive, so ${team(ctx.you)} get the first turn.` : 'The receiving team gets the first turn.'}</li>
+                      <li><b>Set-up.</b> The kicking team${ctx.them != null ? ` (${team(ctx.them)})` : ''} places its players first, then the receiving team: up to ${MAX_ON_PITCH} in
                       your own half, at least 3 on the line of scrimmage (the middle line) and no more than 2 in each wide zone (the strips down
                       the sides).</li>
                       <li><b>Kick-off.</b> The kicking team aims at a square in the receiving half, and the kick goes off target by a D6 (one dice)
                       squares. While the ball is in the air a <b>Kick-off Event</b> is rolled on a 2D6 table: anything from a Blitz (the kicking team
                       gets a free move) or a High Kick to a change in the weather or a pitch invasion. If the ball lands outside the receiving half
                       it's a <b>touchback</b>: the receiving team gives it to any of its players.</li>
-                      <li><b>Your first turn.</b> Pick the ball up (or catch the kick), keep your ball carrier surrounded by team-mates, and work
+                      <li><b>The first turn.</b> Pick the ball up (or catch the kick), keep your ball carrier surrounded by team-mates, and work
                       your way up the pitch.</li>
                     </ol>
                     <h3>Afterwards</h3>
                     <p>After a touchdown both teams set up again and the team that scored kicks off. At half-time the team that kicked off first
-                    receives.</p>
-                    <p class="ci-dim">During the match the coach card explains what's going on, and the dice windows say what you need and why.
-                    Hide the card with ✕ and bring it back with 🎓 Coach.</p>
-                    <button type="button" class="ci-go">Let's play →</button></div>`;
-                m.hidden = false;
-                m.querySelector('.ci-go').onclick = () => { m.hidden = true; done(); };
-            }
-            // the first block or blitz the person makes: what the block dice mean, before they're rolled
-            function blockWin(atk, done) {
-                if (!on() || !atk || AI.isAI(atk.team) || (state.coachSeen || []).includes('blockwin')) return false;
-                (state.coachSeen = state.coachSeen || []).push('blockwin');
-                let m = $('coach-intro');
-                if (!m) { m = document.createElement('div'); m.id = 'coach-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); document.body.appendChild(m); }
-                const faces = [[1, 'Attacker Down', 'Your player is knocked down (armour roll) and it\'s a turnover.'],
-                    [2, 'Both Down', 'Both players are knocked down, unless one has the Block skill (then only the other one falls). If yours falls, it\'s a turnover.'],
-                    [3, 'Push', 'The defender is pushed back one square. Nobody falls. Two of the six faces are Pushes.'],
-                    [5, 'Defender Stumbles', 'Pushed back and knocked down, unless the defender has Dodge (then just pushed). Tackle cancels Dodge.'],
-                    [6, 'Defender Down', 'Pushed back and knocked down (armour roll).']];
-                m.innerHTML = `<div class="ci-card"><div class="ci-badge">🎓 Training match</div><h2>Blocking</h2>
-                    <p>A <b>Block</b> is a hit on an opponent standing next to your player. A <b>Blitz</b> (once a turn) lets one player move
+                    receives.</p>`],
+                ['players', 'Players & skills', () => `<p>Tap a player to see their stats and skills in the Unit Panel. The five stats: <b>MA</b> (Movement,
+                    squares a turn), <b>ST</b> (Strength, for blocks), <b>AG</b> (Agility: the score needed to dodge, catch or pick up, e.g. 3+),
+                    <b>PA</b> (Passing: the score needed to throw) and <b>AV</b> (Armour: what the other team must roll to hurt them).</p>
+                    <p>Skills such as Block, Dodge or Sure Hands are special abilities: <b>tap a skill to see what it does</b>. Skills shown in gold are
+                    extras: an advancement, or a gift from an inducement or a secret option. 📋 Rosters shows both teams' players.</p>`],
+                ['zones', 'Tackle zones', () => `<p>A standing player <b>marks</b> the 8 squares around them: that's their <b>tackle zone</b>. It matters almost
+                    everywhere. Moving out of a square next to an opponent needs a <b>Dodge</b> roll (Agility), and each opponent marking the square
+                    you step into makes it harder. Being marked also makes catching, passing and picking up the ball harder, and a marked team-mate
+                    can't help (assist) in a block. Players lying down don't mark anyone.</p>
+                    <h3>Rushing</h3>
+                    <p>After using all their Movement a player can <b>Rush</b> up to 2 more squares (3 with Sprint), each on a 2+. A failed Dodge or
+                    Rush means the player falls over: an armour roll, and a turnover.</p>`],
+                ['turn', 'Your turn', () => `<p>In your turn each player can take one <b>action</b>: tap a player, then pick it.</p>
+                    <ul class="ci-list"><li><b>Move</b>: up to their Movement (MA) squares, plus up to 2 Rushes.</li><li><b>Block</b>: hit an opponent next to them.</li>
+                    <li><b>Blitz</b> (once a turn): move, then block.</li><li><b>Pass</b> and <b>Hand-off</b> (once a turn each): give the ball to a team-mate.</li>
+                    <li><b>Foul</b> (once a turn): kick a player who is down; the referee may send the fouler off.</li></ul>
+                    <p>A player lying face up stands up at the start of their action for 3 squares of movement; a Stunned player (face down) can't act
+                    this turn. Press <b>End Turn</b> when you're done. Each team has <b>team re-rolls</b> for the half: one re-rolls any one failed roll.</p>`],
+                ['block', 'Blocking', () => `<p>A <b>Block</b> is a hit on an opponent standing next to your player. A <b>Blitz</b> (once a turn) lets one player move
                     and block in the same action; the block costs one square of their movement.</p>
                     <h3>How many dice, and who picks</h3>
                     <p>Compare the two players' <b>Strength</b>, adding 1 for each <b>assist</b>: a team-mate next to the other player who isn't
                     being marked by anyone else. Equal: 1 die. Stronger: 2 dice. More than twice as strong: 3 dice. With 2 or 3 dice, the
                     <b>stronger side chooses</b> which one counts, so blocking a stronger player is risky.</p>
                     <h3>The block dice</h3>
-                    <div class="ci-faces">${faces.map(([f, n, t]) => `<div class="ci-face"><canvas width="44" height="44" data-face="${f}"></canvas><div><b>${n}</b><br>${t}</div></div>`).join('')}</div>
+                    <div class="ci-faces">${[[1, 'Attacker Down', 'Your player is knocked down (armour roll) and it\'s a turnover.'],
+                        [2, 'Both Down', 'Both players are knocked down, unless one has the Block skill (then only the other one falls). If yours falls, it\'s a turnover.'],
+                        [3, 'Push', 'The defender is pushed back one square. Nobody falls. Two of the six faces are Pushes.'],
+                        [5, 'Defender Stumbles', 'Pushed back and knocked down, unless the defender has Dodge (then just pushed). Tackle cancels Dodge.'],
+                        [6, 'Defender Down', 'Pushed back and knocked down (armour roll).']].map(([f, n, t]) => `<div class="ci-face"><canvas width="44" height="44" data-face="${f}"></canvas><div><b>${n}</b><br>${t}</div></div>`).join('')}</div>
                     <h3>Afterwards</h3>
                     <p>After a push your player may <b>follow up</b> into the empty square. A player knocked down gets an armour roll; if it
-                    breaks, an injury roll. If the defender had the ball, it bounces loose.</p>
-                    <p class="ci-dim">The block window shows the Strength sums, the dice and what each would do, with the coach's pick.</p>
-                    <button type="button" class="ci-go">Got it: block! →</button></div>`;
-                m.querySelectorAll('canvas[data-face]').forEach(cv => { try { renderDieIcon(cv.getContext('2d'), +cv.dataset.face, 44); } catch (e) {} });
-                m.hidden = false;
-                m.querySelector('.ci-go').onclick = () => { m.hidden = true; done(); };
-                return true;
-            }
-            // the first pass or hand-off the person goes for: how passing works, before they pick a target
-            function passWin(p) {
-                if (!on() || !p || AI.isAI(p.team) || (state.coachSeen || []).includes('passwin')) return;
-                (state.coachSeen = state.coachSeen || []).push('passwin');
-                let m = $('coach-intro');
-                if (!m) { m = document.createElement('div'); m.id = 'coach-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); document.body.appendChild(m); }
-                const band = (c, n, sq, mod) => `<li><span class="ci-band" style="background:${c}"></span><b>${n}</b> (${sq}): ${mod}</li>`;
-                m.innerHTML = `<div class="ci-card"><div class="ci-badge">🎓 Training match</div><h2>Passing</h2>
-                    <p>Each turn your team may make <b>one Pass</b> and <b>one Hand-off</b>. Pick the action, move the player first if you like,
+                    breaks, an injury roll. If the defender had the ball, it bounces loose.</p>`],
+                ['pass', 'Passing', () => { const band = (c, n, sq, mod) => `<li><span class="ci-band" style="background:${c}"></span><b>${n}</b> (${sq}): ${mod}</li>`;
+                    return `<p>Each turn your team may make <b>one Pass</b> and <b>one Hand-off</b>. Pick the action, move the player first if you like,
                     then choose who to give the ball to.</p>
                     <h3>Hand-off</h3>
                     <p>Give the ball to a team-mate standing next to you. There's no throw to roll: the receiver just has to catch it (an Agility
@@ -8497,17 +8484,91 @@
                     <p><b>Accurate</b> (you made the score, or rolled a 6): it reaches the target, who must catch it. <b>Inaccurate</b> (you
                     missed it): it scatters three times from the target square and anyone standing where it lands can try to catch it.
                     <b>Fumble</b> (a 1, or 1 or less after the penalties): it drops at the thrower's feet and bounces.</p>
-                    <p>An opponent standing on the ball's path can try to <b>intercept</b> it, but that's a hard roll.</p>
-                    <h3>Turnover</h3>
-                    <p>If the ball doesn't end up held by one of your players (dropped, fumbled, intercepted or caught by the other team), your
-                    turn ends at once.</p>
+                    <p>An opponent standing on the ball's path can try to <b>intercept</b> it, but that's a hard roll. If the ball doesn't end up held
+                    by one of your players, it's a turnover.</p>
                     <p class="ci-dim">Tip: pass to a team-mate nobody is marking, and move the thrower closer first, since a shorter pass is easier.
-                    Pass or hand off last in your turn, after the safe moves.</p>
-                    <button type="button" class="ci-go">Got it →</button></div>`;
-                m.hidden = false;
-                m.querySelector('.ci-go').onclick = () => { m.hidden = true; };
+                    Pass or hand off last in your turn, after the safe moves.</p>`; }],
+                ['ball', 'The ball', () => `<p><b>Picking up</b> the ball is an Agility test, harder for each opponent marking the ball's square. A failed pick-up
+                    is a turnover.</p>
+                    <p>Whenever the ball ends up loose on the ground (dropped, not caught, not picked up, or landing in an empty square) it
+                    <b>bounces</b>: one square in a random direction. If it bounces onto a standing player, they must try to catch it; a player lying
+                    down can't, so it bounces again.</p>
+                    <p>If it goes off the pitch the crowd <b>throws it in</b>: 2D6 squares back towards the pitch in a random direction.</p>
+                    <p>A player holding the ball who gets knocked down or falls over drops it, and it bounces.</p>`],
+                ['injury', 'Armour & injuries', () => `<p>A player who is knocked down or falls over gets an <b>armour roll</b>: 2D6 against their Armour Value (AV).
+                    If the total reaches the AV, the armour is broken and an <b>injury roll</b> follows. If not, they're just lying on the ground (Prone)
+                    and can stand up in their next turn.</p>
+                    <p>Injury roll, 2D6: <b>2–7 Stunned</b> (face down, stays down for a turn), <b>8–9 KO'd</b> (off to the dugout; a 4+ before each
+                    kick-off to come back), <b>10+ Casualty</b> (out for the rest of the match). Stunty players are easier to hurt; Thick Skull turns an
+                    8 into a Stun.</p>`],
+                ['turnover', 'Turnovers', () => `<p>A <b>turnover</b> ends your turn straight away, even if players haven't moved yet. It happens when:</p>
+                    <ul class="ci-list"><li>one of your players falls over or is knocked down (a failed Dodge or Rush, Attacker Down, Both Down without Block);</li>
+                    <li>a pick-up fails, or a pass or hand-off isn't caught by your team (or is fumbled or intercepted);</li>
+                    <li>a fouler is sent off, or a thrown team-mate holding the ball doesn't land well.</li></ul>
+                    <p>That's why good coaches do the safe things first and the risky rolls last.</p>`],
+                ['training', 'Training', () => `<p><b>Training</b> on the main menu starts a match against the computer with a coach who explains the rules as
+                    you play. You always receive the kick-off, so you get the first turn.</p>
+                    <ul class="ci-list"><li>The <b>roll window</b> shows the score you need and why, your chance, and what a fail would mean.</li>
+                    <li>The <b>block window</b> shows the Strength sums, why that many dice, what each die would do and the coach's pick.</li>
+                    <li>The <b>coach card</b> explains bounces, armour, injuries, turnovers and the computer's rolls. Hide it with ✕ and bring it back
+                    with 🎓 Coach.</li>
+                    <li>The first block and first pass of the match open a longer explanation.</li></ul>`]
+            ];
+            const helpOf = key => (HELP.find(h => h[0] === key) || HELP[0]);
+            function helpModal() {
+                let m = $('coach-intro');
+                if (!m) { m = document.createElement('div'); m.id = 'coach-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); document.body.appendChild(m); }
+                return m;
             }
-            return { on, reset, intro, blockWin, passWin, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            function showWin(html, label, done) {
+                const m = helpModal();
+                m.innerHTML = `<div class="ci-card">${html}<button type="button" class="ci-go">${label}</button></div>`;
+                m.querySelectorAll('canvas[data-face]').forEach(cv => { try { renderDieIcon(cv.getContext('2d'), +cv.dataset.face, 44); } catch (e) {} });
+                m.hidden = false; m.querySelector('.ci-card').scrollTop = 0;
+                m.querySelector('.ci-go').onclick = () => { m.hidden = true; if (done) done(); };
+            }
+            const badge = '<div class="ci-badge">🎓 Training match</div>';
+            const ctxNow = () => { const you = state.training ? [0, 1].find(t => !AI.isAI(t)) : null; return { you, them: you == null ? null : 1 - you }; };
+            // Training: what the game is about and what happens before the first turn, before the match starts
+            function intro(done) {
+                if (!on()) { done(); return; }
+                const c = ctxNow();
+                showWin(`${badge}<h2>How a match works</h2><h3>The aim</h3>${helpOf('match')[2](c)}<h3>Your players</h3>${helpOf('players')[2](c)}<h3>Tackle zones</h3>${helpOf('zones')[2](c)}
+                    <p class="ci-dim">During the match the coach card explains what's going on, and the dice windows say what you need and why. All of
+                    this is in Help (the ? button) too.</p>`, "Let's play →", done);
+            }
+            // the first block or blitz the person makes: what the block dice mean, before they're rolled
+            function blockWin(atk, done) {
+                if (!on() || !atk || AI.isAI(atk.team) || (state.coachSeen || []).includes('blockwin')) return false;
+                (state.coachSeen = state.coachSeen || []).push('blockwin');
+                showWin(`${badge}<h2>Blocking</h2>${helpOf('block')[2]()}<p class="ci-dim">The block window shows the Strength sums, the dice and what each would do, with the coach's pick.</p>`, 'Got it: block! →', done);
+                return true;
+            }
+            // the first pass or hand-off the person goes for: how passing works, before they pick a target
+            function passWin(p) {
+                if (!on() || !p || AI.isAI(p.team) || (state.coachSeen || []).includes('passwin')) return;
+                (state.coachSeen = state.coachSeen || []).push('passwin');
+                showWin(`${badge}<h2>Passing</h2>${helpOf('pass')[2]()}`, 'Got it →');
+            }
+            // Help: every topic, picked from a row of tabs
+            function help(key) {
+                const m = helpModal(), c = ctxNow();
+                const paint = k => {
+                    const h = helpOf(k);
+                    m.innerHTML = `<div class="ci-card ci-help"><div class="ci-top"><h2>Help</h2><button type="button" class="ci-x" aria-label="Close">✕</button></div>
+                        <div class="ci-tabs" role="tablist">${HELP.map(([k2, t]) => `<button type="button" role="tab" data-help="${k2}" class="${k2 === h[0] ? 'on' : ''}" aria-selected="${k2 === h[0]}">${t}</button>`).join('')}</div>
+                        <div class="ci-body"><h3 class="ci-h">${h[1]}</h3>${h[2](c)}</div></div>`;
+                    m.querySelectorAll('canvas[data-face]').forEach(cv => { try { renderDieIcon(cv.getContext('2d'), +cv.dataset.face, 44); } catch (e) {} });
+                    m.querySelector('.ci-x').onclick = () => { m.hidden = true; };
+                    m.querySelectorAll('[data-help]').forEach(b => b.onclick = () => { paint(b.dataset.help); try { localStorage.setItem('bb-help-tab', b.dataset.help); } catch (e) {} });
+                    const body = m.querySelector('.ci-body'); if (body) body.scrollTop = 0;
+                };
+                let k = key; if (!k) { try { k = localStorage.getItem('bb-help-tab'); } catch (e) {} }
+                paint(k || 'match');
+                m.hidden = false;
+                m.onclick = e => { if (e.target === m) m.hidden = true; };
+            }
+            return { on, reset, intro, blockWin, passWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -28546,6 +28607,8 @@
                     window.showMenuPanel('exhibition');
                 });
             }
+            document.getElementById('mm-help').addEventListener('click', () => COACH.help());
+            document.getElementById('btn-help').addEventListener('click', e => { e.stopPropagation(); COACH.help(); });
             document.getElementById('btn-start-match').addEventListener('click', () => {
                 EXIND.start(teamKey(0), teamKey(1), document.getElementById('chk-career').checked, sevensOn() ? 'sevens' : 'std');
             });
