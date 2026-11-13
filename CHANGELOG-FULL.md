@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.51 (13 Nov 2026)
+- **Improved (graphics):** the second pass at the Star Players that looked odd or hard to read
+  ([#35](https://github.com/sirspoon/BludBowl/issues/35)), again each built on their team's matching position with features from the
+  miniatures: Hakflem Skuttlespike (a Skaven with two heads and four arms), Glart Smashrip (a Skaven Blitzer with a huge clawed
+  gauntlet), Skitter Stab-Stab (a Gutter Runner in a dark hooded cloak with a warpstone-poisoned blade), Kreek 'the Verminator'
+  Rustgouger (a Rat Ogre swinging a glowing warpstone ball and chain), Scrappa Sorehead (the Goblin Pogoer with a bandaged head),
+  Varag Ghoul-Chewer (a Black Orc chewing a bone), Borak the Despoiler (a Chaos Chosen with taller horns and a gold Chaos star),
+  Zzharg Madeye (a Chaos Dwarf with one huge mad eye and a brass blunderbuss), Withergrasp Doubledrool (a two-headed Beastman with
+  tentacles), Scyla Anfingrimm (the Bloodspawn with a brass collar and matching striped socks on both legs), Ivan 'the Animal'
+  Deathshroud (a Wight with a horned helmet and red-glowing eyes) and the Mighty Zug (a bald, stubbly brute with taped fists).
+  Borak and Scyla had been exact copies of their team's player.
+
 ## v4.50 (13 Nov 2026)
 - **Improved (graphics):** Eldril Sidewinder's face and hair tidied up from pictures of the miniature (the owner sent them): a
   narrower bald head with a tall, narrow red-orange mohawk crest, long pointed elf ears, and blue war paint streaked across one

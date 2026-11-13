@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.51 (13 Nov 2026)
+- 12 more Star Players redrawn in the style of their teams: Hakflem's two heads and four arms, Kreek's warpstone ball and chain,
+  Scrappa's bandaged head, Zzharg's mad eye and blunderbuss, Withergrasp's two heads and tentacles, and more.
+
 ## v4.50 (13 Nov 2026)
 - Eldril Sidewinder's head now matches his miniature: bald with a tall red mohawk, pointed elf ears and blue war paint.
 
