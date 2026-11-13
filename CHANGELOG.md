@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.65 (13 Nov 2026)
+- Training: your first pass or hand-off opens a window explaining passing: ranges, accurate and inaccurate throws, fumbles,
+  interceptions and turnovers.
+
 ## v4.64 (13 Nov 2026)
 - Training: your first block or blitz opens a window explaining the block dice, and the opening overview explains tackle zones.
 

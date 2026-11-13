@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.65 (13 Nov 2026)
+- **New (training):** the first time you pick Pass or Hand-off in a training match, a "Passing" window explains it before you choose a
+  target: one Pass and one Hand-off a turn, the hand-off (no throw, just the catch), the Passing Ability test and the four range
+  bands with their colours and penalties (Quick up to 3 squares, Short up to 6, Long up to 10, Long Bomb up to 13), accurate,
+  inaccurate (three scatters) and fumbled throws, interceptions, and the turnover if the ball isn't held by your team, with a tip.
+
 ## v4.64 (13 Nov 2026)
 - **New (training):** the first time you block or blitz in a training match, a "Blocking" window comes up before the dice are rolled:
   what a Block and a Blitz are, how Strength and assists decide the number of dice and who picks, each block die face with its

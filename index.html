@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.64</title>
+    <title>BludBowl 4.65</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -917,6 +917,8 @@
 #coach-intro h3 { font-size: 13px; font-weight: 800; color: #fde68a; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
 #coach-intro p { margin: 0 0 6px; } #coach-intro ol { margin: 0; padding-left: 22px; list-style: decimal; } #coach-intro li { margin-bottom: 6px; } #coach-intro li::marker { color: #7dd3fc; font-weight: 800; }
 #coach-intro b { color: #f8fafc; } #coach-intro .ci-dim { color: #94a3b8; margin-top: 10px; }
+#coach-intro ul.ci-bands { list-style: none; margin: 4px 0 8px; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+#coach-intro .ci-band { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 8px; vertical-align: -2px; }
 #coach-intro .ci-faces { display: flex; flex-direction: column; gap: 8px; }
 #coach-intro .ci-face { display: flex; gap: 10px; align-items: center; }
 #coach-intro .ci-face canvas { flex: 0 0 auto; width: 44px; height: 44px; background: #e2e8f0; border: 2px solid #94a3b8; border-radius: 6px; }
@@ -1069,7 +1071,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.64</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.65</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8475,7 +8477,37 @@
                 m.querySelector('.ci-go').onclick = () => { m.hidden = true; done(); };
                 return true;
             }
-            return { on, reset, intro, blockWin, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            // the first pass or hand-off the person goes for: how passing works, before they pick a target
+            function passWin(p) {
+                if (!on() || !p || AI.isAI(p.team) || (state.coachSeen || []).includes('passwin')) return;
+                (state.coachSeen = state.coachSeen || []).push('passwin');
+                let m = $('coach-intro');
+                if (!m) { m = document.createElement('div'); m.id = 'coach-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); document.body.appendChild(m); }
+                const band = (c, n, sq, mod) => `<li><span class="ci-band" style="background:${c}"></span><b>${n}</b> (${sq}): ${mod}</li>`;
+                m.innerHTML = `<div class="ci-card"><div class="ci-badge">🎓 Training match</div><h2>Passing</h2>
+                    <p>Each turn your team may make <b>one Pass</b> and <b>one Hand-off</b>. Pick the action, move the player first if you like,
+                    then choose who to give the ball to.</p>
+                    <h3>Hand-off</h3>
+                    <p>Give the ball to a team-mate standing next to you. There's no throw to roll: the receiver just has to catch it (an Agility
+                    test, harder for each opponent marking them).</p>
+                    <h3>Pass</h3>
+                    <p>Throwing is a <b>Passing Ability (PA)</b> test, harder the further it goes and for each opponent marking the thrower.
+                    The pitch shows the range in colour:</p>
+                    <ul class="ci-bands">${band('#22c55e', 'Quick', 'up to 3 squares', 'no penalty')}${band('#eab308', 'Short', 'up to 6', '−1')}${band('#f97316', 'Long', 'up to 10', '−2')}${band('#ef4444', 'Long Bomb', 'up to 13', '−3')}</ul>
+                    <p><b>Accurate</b> (you made the score, or rolled a 6): it reaches the target, who must catch it. <b>Inaccurate</b> (you
+                    missed it): it scatters three times from the target square and anyone standing where it lands can try to catch it.
+                    <b>Fumble</b> (a 1, or 1 or less after the penalties): it drops at the thrower's feet and bounces.</p>
+                    <p>An opponent standing on the ball's path can try to <b>intercept</b> it, but that's a hard roll.</p>
+                    <h3>Turnover</h3>
+                    <p>If the ball doesn't end up held by one of your players (dropped, fumbled, intercepted or caught by the other team), your
+                    turn ends at once.</p>
+                    <p class="ci-dim">Tip: pass to a team-mate nobody is marking, and move the thrower closer first, since a shorter pass is easier.
+                    Pass or hand off last in your turn, after the safe moves.</p>
+                    <button type="button" class="ci-go">Got it →</button></div>`;
+                m.hidden = false;
+                m.querySelector('.ci-go').onclick = () => { m.hidden = true; };
+            }
+            return { on, reset, intro, blockWin, passWin, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -20684,8 +20716,8 @@
             if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-razzle').onclick = () => { const p = getPlayerById(state.selectedId); if (!p || !dmAvail(p.team, 2) || p.razzle) return; dmUse(p.team, 2, `${p.name || p.type} will take two Actions`); p.razzle = 'armed'; updateValidActions(p); };
         document.getElementById('btn-action-foul').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='foul'; state.mode=MODES.ACTION_FOUL; p.foulPrev = { used: state.foulUsed, n: (state.foulers || []).length }; if (state.foulUsed && dmAvail(p.team, 4) && !(starIs(p, 'blackgobbo') && (state.foulers || []).length < 2)) { p.onCommit = onCommitFor(p, () => { dmUse(p.team, 4, `${p.name || p.type} fouls again, and can't be Sent-off for it`); p.grudge = true; }); } else if (state.foulUsed) log(`  SNEAKIEST OF THE LOT! A second Foul this turn.`, 'text-yellow-300 font-bold'); state.foulUsed=true; (state.foulers = state.foulers || []).push(p.id); log(`  ${p.type} declares a FOUL!`, 'text-stone-400 font-bold'); if(!declareAction(p)) return; updateValidActions(p); };
-        document.getElementById('btn-action-pass').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='pass'; state.mode=MODES.ACTION_PASS; state.passUsed=true; log(`  ${p.type} declares a Pass Action.`); if(!declareAction(p)) return; updateValidActions(p); };
-        document.getElementById('btn-action-handoff').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='handoff'; state.mode=MODES.ACTION_HANDOFF; state.handoffUsed=true; log(`  ${p.type} declares Hand-off Action.`); if(!declareAction(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-pass').onclick = () => { let p = getPlayerById(state.selectedId); COACH.passWin(p); handleStandUp(p); p.actionTaken='pass'; state.mode=MODES.ACTION_PASS; state.passUsed=true; log(`  ${p.type} declares a Pass Action.`); if(!declareAction(p)) return; updateValidActions(p); };
+        document.getElementById('btn-action-handoff').onclick = () => { let p = getPlayerById(state.selectedId); COACH.passWin(p); handleStandUp(p); p.actionTaken='handoff'; state.mode=MODES.ACTION_HANDOFF; state.handoffUsed=true; log(`  ${p.type} declares Hand-off Action.`); if(!declareAction(p)) return; updateValidActions(p); };
         
         document.getElementById('btn-action-ttm').onclick = () => {
             let p = getPlayerById(state.selectedId);
