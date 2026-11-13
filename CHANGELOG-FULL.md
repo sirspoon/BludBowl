@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.61 (13 Nov 2026)
+- **Improved (graphics):** the design on Varag Ghoul-Chewer's armour bib looks like the miniature's: the top of the plate is black,
+  with the zigzag of team-coloured "teeth" rising into it like an open mouth. The black band also keeps the bib apart from his red
+  gums in a red kit ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.60 (13 Nov 2026)
 - **Improved (graphics):** the zigzag on Varag Ghoul-Chewer's armour bib was a few scattered dark dots; it's now one continuous bold
   black zigzag across the plate, in any team colour ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
