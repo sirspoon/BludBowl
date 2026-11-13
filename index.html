@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.66</title>
+    <title>BludBowl 4.67</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1080,7 +1080,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.66</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.67</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8488,6 +8488,24 @@
                     by one of your players, it's a turnover.</p>
                     <p class="ci-dim">Tip: pass to a team-mate nobody is marking, and move the thrower closer first, since a shorter pass is easier.
                     Pass or hand off last in your turn, after the safe moves.</p>`; }],
+                ['ttm', 'Throwing team-mates', () => `<p>A player with <b>Throw Team-mate</b> (such as an Ogre, a Troll or Morg 'n' Thorg) can throw a
+                    small team-mate with the <b>Right Stuff</b> (a Goblin, Halfling, Snotling and the like) who is standing next to them. It's an
+                    action of its own, once a turn: move the thrower first if you like, then pick the team-mate and a square to aim at.</p>
+                    <h3>The throw</h3>
+                    <p>It's a <b>Passing Ability (PA)</b> test, like a pass, but only at <b>Quick</b> or <b>Short</b> range (up to 6 squares). It's
+                    harder for Short range and for each opponent marking the thrower.</p>
+                    <ul class="ci-list"><li><b>Superb throw</b> (made the score): the thrown player flies to the target and scatters three times from there.</li>
+                    <li><b>Subpar throw</b> (missed): they still scatter three times, and landing is 1 harder.</li>
+                    <li><b>Fumble</b> (a 1, or 1 or less after the penalties): they're dropped in a square next to the thrower.</li></ul>
+                    <h3>The landing</h3>
+                    <p>The thrown player must <b>land</b> on their feet: an Agility test, harder for each opponent marking the square. If they fail they
+                    fall over (an armour roll), but it's only a turnover if they had the ball. Landing on another player knocks that player down
+                    and the thrown player bounces on; landing off the pitch means the crowd beats them up.</p>
+                    <p>A thrown player can carry the ball: land in the end zone holding it and it's a touchdown.</p>
+                    <h3>Kick Team-mate</h3>
+                    <p>Some players kick their small team-mates instead. It works much the same as a throw (once a turn, on top of a throw): an accurate
+                    kick lands on target, an inaccurate one scatters three times, and a fumbled kick means an injury roll for the kicked player and a
+                    turnover.</p>`],
                 ['ball', 'The ball', () => `<p><b>Picking up</b> the ball is an Agility test, harder for each opponent marking the ball's square. A failed pick-up
                     is a turnover.</p>
                     <p>Whenever the ball ends up loose on the ground (dropped, not caught, not picked up, or landing in an empty square) it
@@ -8550,6 +8568,12 @@
                 (state.coachSeen = state.coachSeen || []).push('passwin');
                 showWin(`${badge}<h2>Passing</h2>${helpOf('pass')[2]()}`, 'Got it →');
             }
+            // the first Throw (or Kick) Team-mate the person declares
+            function ttmWin(p) {
+                if (!on() || !p || AI.isAI(p.team) || (state.coachSeen || []).includes('ttmwin')) return;
+                (state.coachSeen = state.coachSeen || []).push('ttmwin');
+                showWin(`${badge}<h2>Throwing team-mates</h2>${helpOf('ttm')[2]()}`, 'Got it →');
+            }
             // Help: every topic, picked from a row of tabs
             function help(key) {
                 const m = helpModal(), c = ctxNow();
@@ -8568,7 +8592,7 @@
                 m.hidden = false;
                 m.onclick = e => { if (e.target === m) m.hidden = true; };
             }
-            return { on, reset, intro, blockWin, passWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            return { on, reset, intro, blockWin, passWin, ttmWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -20785,12 +20809,12 @@
             handleStandUp(p);
             p.actionTaken = 'ttm';
             state.mode = MODES.ACTION_TTM;
-            state.ttmUsed = true; state.ttmKick = false;
+            state.ttmUsed = true; state.ttmKick = false; COACH.ttmWin(p);
             log(`  ${p.type} declares Throw Teammate. Move into position or select target.`, 'text-fuchsia-400 font-bold');
             if(!declareAction(p)) return; updateValidActions(p);
         };
         document.getElementById('btn-action-ktm').onclick = () => {
-            let p = getPlayerById(state.selectedId);
+            let p = getPlayerById(state.selectedId); COACH.ttmWin(p);
             handleStandUp(p);
             p.actionTaken = 'ttm';
             state.mode = MODES.ACTION_TTM;

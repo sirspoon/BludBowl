@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.67 (13 Nov 2026)
+- **New (help and training):** a "Throwing team-mates" topic in Help: who can throw whom (Throw Team-mate and the Right Stuff), once a
+  turn, Quick or Short range only, Superb and Subpar throws (three scatters, a harder landing for Subpar) and fumbles, the landing
+  roll (a fall is only a turnover with the ball), landing on a player or in the crowd, carrying the ball in, and Kick Team-mate. In a
+  training match the same explanation opens the first time you choose Throw or Kick Team-mate.
+
 ## v4.66 (13 Nov 2026)
 - **New:** a Help window, opened from **Help** on the main menu or the **?** button in the match's top bar (in any match, not just
   training). It gathers the training explanations into ten topics picked from a row of tabs: The aim (and the steps before the

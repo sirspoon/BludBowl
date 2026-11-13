@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.67 (13 Nov 2026)
+- Help has a "Throwing team-mates" topic (Throw and Kick Team-mate), and training explains it the first time you throw one.
+
 ## v4.66 (13 Nov 2026)
 - **Help**, from the main menu or the **?** button during a match: how to play in ten topics, from the aim of the game to blocking,
   passing, the ball, injuries and turnovers.
