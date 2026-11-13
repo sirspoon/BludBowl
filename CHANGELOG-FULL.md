@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.43 (13 Nov 2026)
+- **Changed (secret options):** Your Mum's special rule, Excellent Ball Handling, now starts "Her ball handling skills are
+  legendary." on her unit panel and the shopping screen.
+
 ## v4.42 (13 Nov 2026)
 - **Changed (secret options):** Your Mum's lipstick mouth is a little wider again (fitting an ogre), with a white tusk rising from
   each corner of her lower lip past the top lip, like Morg 'n' Thorg's.
