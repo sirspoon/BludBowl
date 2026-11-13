@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.40 (13 Nov 2026)
+- Fancy Socks Morg loses the Star Player glow: just a soft golden glow round his socks. Your Mum is more of an ogre now (and
+  has Throw Team-mate).
+
 ## v4.39 (13 Nov 2026)
 - Your Mum has a special rule, **Excellent Ball Handling**: once per game, one of her passes, hand-offs or catches succeeds on a 2+.
 

@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.40 (13 Nov 2026)
+- **Changed (secret options):** Fancy Socks Morg 'n' Thorg no longer has the Star Players' gold glow round his whole figure: only
+  his socks glow, softly and in gold, pulsing slowly. Your Mum is more ogre-like: ogre skin, pointed ears poking out of her perm,
+  a heavy brow, a big jaw and thick neck, broad shoulders, big arms and hands, sturdy legs, and drawn at full size instead of
+  small (the lipstick mouth, pearls, outfit and handbag are unchanged). She also gains Throw Team-mate.
+
 ## v4.39 (13 Nov 2026)
 - **New (secret options):** Your Mum's special rule, **Excellent Ball Handling**: once per game, a pass she throws, the catch of a
   hand-off she makes, or a catch she makes succeeds on a 2+, whatever the modifiers (a natural 1 still fails). It's a button in
