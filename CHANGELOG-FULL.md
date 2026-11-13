@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.53 (13 Nov 2026)
+- **Improved (graphics):** Varag Ghoul-Chewer redrawn from a photo of the owner's painted miniature: a bright green bald head with a
+  skull sitting on top, a gaping mouth full of fangs with a pink tongue, the zigzag "toothy" armour plate under his chin (in the
+  team's colours, with black zigzags), and a great curved bone spike rising from his shoulder. The bone in his teeth from v4.51 is
+  gone, and there's no ghoul for now ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.52 (13 Nov 2026)
 - **Improved (graphics):** Eldril Sidewinder has the chequered leg wraps from his miniature, from his shorts down to his boots, in the
   hiring team's kit and trim colours ([#35](https://github.com/sirspoon/BludBowl/issues/35)).

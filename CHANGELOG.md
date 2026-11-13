@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.53 (13 Nov 2026)
+- Varag Ghoul-Chewer redrawn after the owner's painted miniature: a skull on his head, a gaping fanged mouth, a jagged armour bib
+  and a great curved bone spike.
+
 ## v4.52 (13 Nov 2026)
 - Eldril Sidewinder wears his chequered leg wraps, in his team's colours.
 
