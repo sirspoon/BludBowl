@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.62 (13 Nov 2026)
+- **New (training):** a "How a match works" window before a training match starts (once the line-ups are picked): the aim of the
+  game (touchdowns, two halves of 8 turns a side, 6 in Sevens), then the steps before the first turn in order (fans and the
+  weather roll, the coin toss, set-up with its rules, the kick-off with deviation, the Kick-off Event table and touchbacks), what
+  happens after a touchdown and at half-time, and how the coach card works.
+- **Changed (training):** against the computer, you always win the coin toss and receive, so your team takes the first turn (the
+  coin toss banner says so). The secret "Kick off first" option still wins if it's on.
+
 ## v4.61 (13 Nov 2026)
 - **Improved (graphics):** the design on Varag Ghoul-Chewer's armour bib looks like the miniature's: the top of the plate is black,
   with the zigzag of team-coloured "teeth" rising into it like an open mouth. The black band also keeps the bib apart from his red

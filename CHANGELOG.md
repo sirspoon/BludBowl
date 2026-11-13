@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.62 (13 Nov 2026)
+- Training matches open with an overview of how a match works, and you always receive, so you get the first turn.
+
 ## v4.61 (13 Nov 2026)
 - Varag's bib is painted like an open mouth: black across the top with the zigzag of teeth rising into it.
 

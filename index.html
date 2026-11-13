@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.61</title>
+    <title>BludBowl 4.62</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -907,7 +907,18 @@
 /* Training mode: the coach card over the pitch, and the coach boxes in the roll and block dialogs */
 #coach-card { position: fixed; z-index: 35; display: flex; flex-direction: column; background: rgba(7,22,38,.95); border: 1px solid #0369a1; border-left: 4px solid #38bdf8; border-radius: 10px;
     color: #e2e8f0; font: 12px/1.45 Inter, system-ui, sans-serif; box-shadow: 0 8px 26px rgba(0,0,0,.55); pointer-events: auto; }
-#coach-card[hidden], #coach-pill[hidden], .coach-box[hidden] { display: none !important; }
+#coach-card[hidden], #coach-pill[hidden], .coach-box[hidden], #coach-intro[hidden] { display: none !important; }
+#coach-intro { position: fixed; inset: 0; z-index: 260; display: grid; place-items: center; padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+    background: rgba(2,6,23,.82); font: 13px/1.5 Inter, system-ui, sans-serif; color: #e2e8f0; }
+#coach-intro .ci-card { width: min(560px, 100%); max-height: 92vh; overflow-y: auto; overscroll-behavior: contain; background: #0f1b2d; border: 1px solid #0369a1;
+    border-top: 4px solid #38bdf8; border-radius: 12px; padding: 16px 18px; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+#coach-intro .ci-badge { font-weight: 800; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #7dd3fc; }
+#coach-intro h2 { font-family: 'Teko', 'Impact', sans-serif; font-size: 30px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: #fbbf24; margin: 4px 0 6px; }
+#coach-intro h3 { font-size: 13px; font-weight: 800; color: #fde68a; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
+#coach-intro p { margin: 0 0 6px; } #coach-intro ol { margin: 0; padding-left: 22px; list-style: decimal; } #coach-intro li { margin-bottom: 6px; } #coach-intro li::marker { color: #7dd3fc; font-weight: 800; }
+#coach-intro b { color: #f8fafc; } #coach-intro .ci-dim { color: #94a3b8; margin-top: 10px; }
+#coach-intro .ci-go { display: block; margin: 14px 0 2px auto; padding: 9px 18px; border-radius: 9px; border: 0; background: #0284c7; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
+#coach-intro .ci-go:hover, #coach-intro .ci-go:focus-visible { background: #0ea5e9; outline: none; }
 #coach-card[data-kind="lesson"] { border-left-color: #fbbf24; }
 #coach-card[data-kind="bad"] { border-left-color: #f43f5e; }
 #coach-card .cc-head { display: flex; align-items: center; gap: 6px; padding: 5px 5px 2px 9px; }
@@ -1055,7 +1066,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.61</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.62</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8387,7 +8398,41 @@
                 lesson('setup', 'Setting up', `<p>Place up to ${MAX_ON_PITCH} players in your half. At least 3 must stand on the <b>line of scrimmage</b> (the middle line), and no more than 2 in each <b>wide zone</b> (the strips down the sides).</p>
                     <p>Tap a player, then a square. Press Confirm when you're done.</p>`);
             }
-            return { on, reset, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            // Training: what the game is about and what happens before the first turn, before the match starts
+            function intro(done) {
+                if (!on()) { done(); return; }
+                let m = $('coach-intro');
+                if (!m) { m = document.createElement('div'); m.id = 'coach-intro'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); document.body.appendChild(m); }
+                const you = [0, 1].find(t => !AI.isAI(t)), them = you == null ? null : 1 - you;
+                m.innerHTML = `<div class="ci-card"><div class="ci-badge">🎓 Training match</div><h2>How a match works</h2>
+                    <h3>The aim</h3>
+                    <p>Score more <b>touchdowns</b> than the other team. You score when one of your players carries the ball into the other team's
+                    <b>end zone</b> (the far end of the pitch). A match is two halves, and each team has ${TURNS} turns in each half.</p>
+                    <h3>Before the first turn</h3>
+                    <ol>
+                      <li><b>Fans and weather.</b> Each team's crowd is counted, then 2D6 (two dice added up) are rolled for the weather. Most of the
+                      time it's fine, but heat, rain, sun or a blizzard each change something, such as rain making the ball harder to catch.</li>
+                      <li><b>Coin toss.</b> The winner chooses to kick or receive. ${you != null ? `In training you always receive, so ${team(you)} get the first turn.` : 'The receiving team gets the first turn.'}</li>
+                      <li><b>Set-up.</b> The kicking team${them != null ? ` (${team(them)})` : ''} places its players first, then the receiving team: up to ${MAX_ON_PITCH} in
+                      your own half, at least 3 on the line of scrimmage (the middle line) and no more than 2 in each wide zone (the strips down
+                      the sides).</li>
+                      <li><b>Kick-off.</b> The kicking team aims at a square in the receiving half, and the kick goes off target by a D6 (one dice)
+                      squares. While the ball is in the air a <b>Kick-off Event</b> is rolled on a 2D6 table: anything from a Blitz (the kicking team
+                      gets a free move) or a High Kick to a change in the weather or a pitch invasion. If the ball lands outside the receiving half
+                      it's a <b>touchback</b>: the receiving team gives it to any of its players.</li>
+                      <li><b>Your first turn.</b> Pick the ball up (or catch the kick), keep your ball carrier surrounded by team-mates, and work
+                      your way up the pitch.</li>
+                    </ol>
+                    <h3>Afterwards</h3>
+                    <p>After a touchdown both teams set up again and the team that scored kicks off. At half-time the team that kicked off first
+                    receives.</p>
+                    <p class="ci-dim">During the match the coach card explains what's going on, and the dice windows say what you need and why.
+                    Hide the card with ✕ and bring it back with 🎓 Coach.</p>
+                    <button type="button" class="ci-go">Let's play →</button></div>`;
+                m.hidden = false;
+                m.querySelector('.ci-go').onclick = () => { m.hidden = true; done(); };
+            }
+            return { on, reset, intro, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -28413,7 +28458,7 @@
                 if (CHEAT.on('rr', state.cheatSide)) { const h = state.cheatSide; ROSTERS[h].rerolls = 99; state.rr[h] = 99; }
                 if (CHEAT.on('socks', state.cheatSide)) state.players.forEach(p => { if (p.team === state.cheatSide && p.star === 'morg') { p.fancySocks = true; if (!p.skills.includes('Hypnotic Gaze')) p.skills.push('Hypnotic Gaze'); } });
                 updateTopBar();
-                showLineupModal(beginMatch);
+                showLineupModal(state.training ? () => COACH.intro(beginMatch) : beginMatch);
             };
             {   // Training: an exhibition against the computer with the coach on
                 const ct = document.getElementById('chk-train'), title = document.getElementById('ex-title');
@@ -28440,6 +28485,9 @@
                     let kicker = (receiver === TEAMS.HUMAN) ? TEAMS.ORC : TEAMS.HUMAN;
                     const kickFirst = CHEAT.on('kick', state.cheatSide);   // (secret options) the person's team kicks off
                     if (kickFirst) { winner = state.cheatSide; kicker = winner; receiver = 1 - winner; }
+                    // Training against the computer: the person always wins the toss and receives, so they take the first turn
+                    const trainSide = state.training && AI.isOn(0) !== AI.isOn(1) ? (AI.isOn(0) ? 1 : 0) : null;
+                    if (trainSide != null && !kickFirst) { winner = trainSide; receiver = winner; kicker = 1 - winner; }
                     
                     state.initialKickingTeam = kicker;
                     sfx('coinToss'); MUSIC.matchStart(); AI.start(); state.live = true;
@@ -28449,7 +28497,7 @@
                     const pre = (i, go) => { if (i > 1) { go(); return; } const e = teams.find(x => x.t === i); if (!e) { prayerPicks(() => pre(i + 1, go), i); return; } showInducementsPanel(e, () => prayerPicks(() => pre(i + 1, go), i)); };
                     pre(0, () => prayerPicks(() => runPreGame(() => announce(
                         "COIN TOSS", 
-                        kickFirst ? `${ROSTERS[winner].name} win the toss & choose to kick! ${ROSTERS[kicker].name} deploy first.` : `${ROSTERS[winner].name} win the toss & choose to receive! ${ROSTERS[kicker].name} deploy first.`,
+                        kickFirst ? `${ROSTERS[winner].name} win the toss & choose to kick! ${ROSTERS[kicker].name} deploy first.` : `${ROSTERS[winner].name} win the toss & choose to receive! ${ROSTERS[kicker].name} deploy first.${trainSide != null && !kickFirst ? ' (Training: you always receive, so you get the first turn.)' : ''}`,
                         "bg-amber-800/90", 
                         () => {
                             startDriveSequence(kicker, receiver);
