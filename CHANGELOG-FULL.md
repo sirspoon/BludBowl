@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.52 (13 Nov 2026)
+- **Improved (graphics):** Eldril Sidewinder has the chequered leg wraps from his miniature, from his shorts down to his boots, in the
+  hiring team's kit and trim colours ([#35](https://github.com/sirspoon/BludBowl/issues/35)).
+
 ## v4.51 (13 Nov 2026)
 - **Improved (graphics):** the second pass at the Star Players that looked odd or hard to read
   ([#35](https://github.com/sirspoon/BludBowl/issues/35)), again each built on their team's matching position with features from the
