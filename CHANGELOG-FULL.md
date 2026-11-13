@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.63 (13 Nov 2026)
+- **Improved (training):** the "How a match works" window has a short "Your players" section: tap a player to see them in the Unit
+  Panel, what MA, ST, AG, PA and AV mean, and that tapping a skill shows what it does.
+
 ## v4.62 (13 Nov 2026)
 - **New (training):** a "How a match works" window before a training match starts (once the line-ups are picked): the aim of the
   game (touchdowns, two halves of 8 turns a side, 6 in Sevens), then the steps before the first turn in order (fans and the
