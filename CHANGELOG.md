@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.48 (13 Nov 2026)
+- 18 of the plainer Star Players have new sprites in the style of the upgraded teams, each with something of their own
+  (Helmut's chainsaw, Thorsson's mead keg, Kiroth's kraken helmet, Grombrindal's wings and more).
+
 ## v4.47 (13 Nov 2026)
 - Every team's players and the Star Players now breathe while standing, with the gentle one-pixel crouch from v4.45.
 

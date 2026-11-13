@@ -2,6 +2,20 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.48 (13 Nov 2026)
+- **Improved (graphics):** a first pass at the Star Players that looked plain next to the upgraded team sprites
+  ([#35](https://github.com/sirspoon/BludBowl/issues/35)). Each is now built on their team's matching position, plus their own
+  look from the miniatures: Eldril Sidewinder (a Wardancer with a flame-red crest, hypnotic purple eyes and twin blades),
+  Gloriel Summerbloom (a Wood Elf thrower with a flower garland), Kiroth Krakeneye (a Dark Elf blitzer in a tentacled kraken
+  helmet), Jeremiah Kool (an Elf thrower in shades with the Flashing Blade), Lucien and Valen Swift (blond twins, a blitzer and a
+  thrower with a gold circlet), Estelle la Veneaux (the Amazons' swamp witch, with a frog in her hand and a hex in the other),
+  Helmut Wulf (a moustached lineman with a chainsaw), Ivar Eriksson (a red-bearded Norse raider with a painted shield), Thorsson
+  Stoutmead (a blond-bearded Norseman with his mead keg), Rumbelow Sheepskin (a Halfling with ram's horns), Puggy Baconbreath (a
+  Halfling in a leather cap with a rasher of bacon), Cindy Piewhistle (a red-haired Halfling in an apron with a pie), Rodney
+  Roachbait (a Gnome angler with rod, line and fish), Rowana Forestfoot (a forest Gnome with antlers and leafy hair), Skrull
+  Halfheight (a black-bearded Dwarf with a skull on his helmet and the ball), Josef Bugman (a Dwarf with a foaming tankard) and
+  Grombrindal (the White Dwarf, with a winged helmet and gold crown band). They still wear the hiring team's colours.
+
 ## v4.47 (13 Nov 2026)
 - **Changed:** the idle animation is back to v4.45's one-pixel crouch (the owner preferred it on a second look), and now covers every
   team, every alternative sprite set and the Star Players (Fancy Socks Morg and Your Mum included): crouched for 40% of a
