@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.45 (13 Nov 2026)
+- **New (a trial, High Elves and Orcs only):** an idle animation. Each standing player alternates between their sprite and a slightly
+  crouched copy of it (the body a pixel lower and the knees a pixel more bent), crouched for 40% of a 1.5-2.4 second "breath".
+  Each player has their own timing, so they don't all move together. The crouched copy is made from each sprite automatically
+  (no new drawings), so it works for every position and sprite set. Players lying down, moving or in the air don't do it, nor do
+  Star Players; nothing changes for the other teams yet.
+
 ## v4.44 (13 Nov 2026)
 - **Fixed:** players were drawn in team-list order, so one standing further up the pitch on screen (further back) could be drawn
   over the player in front of them, such as an Ogre's head disappearing under the feet of the player behind (the owner spotted
