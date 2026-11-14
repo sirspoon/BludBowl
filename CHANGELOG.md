@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.99 (14 Nov 2026)
+- The Chaos Wastes pitch has its own music: a grinding drone, warped synths sliding in and out of tune, war drums, tritone guitars,
+  a whispering choir and crackles of warp lightning, and its own crowd taunt.
+
 ## v4.98 (14 Nov 2026)
 - The Weather choice is now only for the Glory on the Gridiron 2 tournament, and all its matches are played on the Chaos Wastes
   pitch. (The pitch is still a choice for exhibition and two-device matches.)

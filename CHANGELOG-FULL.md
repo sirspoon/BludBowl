@@ -2,6 +2,22 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.99 (14 Nov 2026)
+- **New: music for the Chaos Wastes pitch.** It used to borrow the Brimstone (Khorne) music; now it has a track of its own, warped
+  and unsettling rather than straight metal. Around 84 beats a minute (60 when calm, 96 when tense), rooted on D with the tritone
+  always close (D, G#, E flat, C#):
+  - a low, grinding drone whose filter breathes open and shut, with the tritone creeping in;
+  - a "warp synth": two detuned saws whose tuning drifts apart and back, bending into each note, holding long chords when it's quiet
+    and playing a crooked melody over the chorus (an octave up the second time round);
+  - war drums when it's quiet, a lurching half-time kit otherwise, double kicks in the drive;
+  - distorted guitars and bass that bend up into the tritone, chugging in the drive, crushing hits in the stab, and an out-of-tune
+    guitar wailing in the breakdown;
+  - a whispering choir on a clashing chord (root, a semitone and the tritone), breathy whispers drifting about, and crackling
+    strikes of warp lightning now and then (and leading into each new section).
+  - Its own crowd taunt (after a sending-off): the warp synth on the tune over the choir, war drums, and a lightning strike at the end.
+  Measured in the browser against the Brimstone and Plague Garden music: every section (main, chorus, drive, stab, breakdown, calm)
+  and the taunt play at about the same loudness, with no errors.
+
 ## v4.98 (14 Nov 2026)
 - **Changed: the Chaos Wastes weather and pitch belong to the Glory on the Gridiron 2 tournament.** The Weather row in the tournament
   forms (on this device and online) now only appears when the rules are Example: Glory on the Gridiron 2 (11 a side); it starts on

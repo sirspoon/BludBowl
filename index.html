@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.98</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.99</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -13859,6 +13859,68 @@ ol.ci-steps li::marker { content: none; }
     // into the next section: a slow roll down the toms and a squelch
     if (fillNext) { [0, 0.33, 0.66].forEach((b, k) => tom(B.main, t + (3 + b) * s, 40 - k * 3, 0.5 + k * 0.1, 0.3)); squelch(B, t + 3.5 * s, 0.15); flies(B, t + 2.6 * s, s * 1.4, 0.42, { swoop: 1 }); }
   }
+  // ---------- CHAOS WASTES: warped, unsettling doom where reality bends - a grinding drone, detuned synths sliding in and out of tune,
+  // war drums and distorted guitars bending on the tritone, a whispering choir on clashing chords, and crackles of warp lightning.
+  // Around 84 beats a minute, rooted on D with the tritone (G#) always close.
+  const CW_BPM = { calm: 60, normal: 84, tense: 96 };
+  const CWM_ROOTS = [38, 44, 39, 37];   // D, G# (the tritone), E flat, C#: never quite settling
+  // the warp line: a slow, crooked melody for the synth in the chorus [semitones over the root, beat, beats]
+  const CWM_LINE = [[[12, 0, 1.5], [13, 1.5, 0.5], [18, 2, 2]], [[12, 0, 1], [11, 1, 1], [6, 2, 2]], [[13, 0, 2], [12, 2, 1], [7, 3, 1]], [[18, 0, 1.5], [17, 1.5, 0.5], [12, 2, 2]]];
+  // the warp synth: two detuned saws whose tuning drifts apart and back (a slow wobble), bending into each note
+  const warpSyn = (B, m, t, dur, v, o = {}) => {
+    const g = ctx.createGain(), f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 3; f.frequency.setValueAtTime(o.cut || 1400, t); f.frequency.exponentialRampToValueAtTime(o.cutTo || 500, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + (o.a ?? 0.12)); g.gain.setValueAtTime(v * 0.85, t + Math.max(0.15, dur - 0.25)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.05);
+    const w = ctx.createOscillator(), wg = ctx.createGain(); w.frequency.value = o.wob || (0.3 + Math.random() * 0.5); wg.gain.value = o.depth || 38; w.connect(wg);
+    [-1, 1].forEach(sd => { const os = ctx.createOscillator(), og = ctx.createGain(); os.type = 'sawtooth'; os.frequency.setValueAtTime(hz(o.from ?? (m + sd * 0.4)), t); os.frequency.exponentialRampToValueAtTime(hz(m), t + (o.bend || 0.35)); os.detune.value = sd * 14;
+      const inv = ctx.createGain(); inv.gain.value = sd; wg.connect(inv); inv.connect(os.detune);   // (the two drift in opposite directions)
+      og.gain.value = 0.5; os.connect(og); og.connect(f); os.start(t); os.stop(t + dur + 0.1); });
+    f.connect(g); g.connect(o.bus || B.pad); const s2 = ctx.createGain(); s2.gain.value = o.verb ?? 0.5; g.connect(s2); s2.connect(verbIn);
+    w.start(t); w.stop(t + dur + 0.1);
+  };
+  // the drone: a low, grinding growl whose filter breathes open and shut
+  const cwDrone = (B, m, t, dur, v) => { note(B.pad, 'sawtooth', m, t, dur, v, { a: 0.6, r: 0.6, cut: 380, cutTo: 160, q: 6, det: -9 }); note(B.pad, 'square', m - 12, t, dur, v * 0.55, { a: 0.8, r: 0.6, cut: 220, q: 2 }); note(B.pad, 'sawtooth', m + 6, t + dur * 0.4, dur * 0.6, v * 0.25, { a: dur * 0.3, r: 0.4, cut: 500, cutTo: 200, q: 4 }); };   // (the tritone creeping in)
+  // whispers: breathy noise through shifting vowel filters, drifting about
+  const whisper = (B, t, dur, v) => { const f0 = 900 + Math.random() * 1500; nz(B.pad, t, dur, v, 'bandpass', f0, f0 * (0.5 + Math.random()), 6, 0.7); nz(B.pad, t + dur * 0.3, dur * 0.6, v * 0.7, 'bandpass', 2600 + Math.random() * 1500, 1800, 8, 0.7); };
+  // warp lightning: a crack, then a jittery zap whose pitch falls away, and a fizz
+  const warpZap = (B, t, v) => {
+    const d = 0.22 + Math.random() * 0.2, o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter(); o.type = 'square'; lp.type = 'lowpass'; lp.frequency.value = 3200;
+    for (let k = 0; k * 0.014 < d; k++) o.frequency.setValueAtTime((900 - k * 30) * (0.5 + Math.random()), t + k * 0.014);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(lp); lp.connect(g); g.connect(B.pad); const s2 = ctx.createGain(); s2.gain.value = 0.5; g.connect(s2); s2.connect(verbIn); o.start(t); o.stop(t + d + 0.02);
+    nz(B.main, t, 0.025, v * 2.2, 'highpass', 1800, null, 0.7, 0.6); nz(B.pad, t, d * 1.4, v * 1.2, 'bandpass', 7000, 900, 1.5, 0.6);
+  };
+  const cwClash = r => [r, r + 1, r + 6];   // the choir's chord: root, a semitone and the tritone
+  function cwBar(kind, i, t, s, B, tense, fillNext, ph, nextKind, prevKind) {
+    const r = CWM_ROOTS[i], e = s / 2, quiet = kind === 'calm' || kind === 'lull';
+    // the wastes: the drone always grinding underneath, whispers in the quiet, and lightning now and then
+    if (i % 2 === 0 && kind !== 'stab') cwDrone(B, r - 12, t, s * 7.9, quiet ? 0.07 : 0.06);
+    for (let k = 0; k < (quiet || kind === 'breakdown' ? 3 : 1); k++) whisper(B, t + Math.random() * s * 3, s * (0.8 + Math.random()), quiet ? 0.09 : 0.06);
+    if (Math.random() < (kind === 'calm' ? 0.25 : kind === 'stab' ? 1 : 0.35)) warpZap(B, t + (kind === 'stab' ? 0 : Math.floor(Math.random() * 4)) * s + Math.random() * e, quiet ? 0.05 : 0.07);
+    // the drums: war drums when it's quiet, a lurching half-time kit otherwise (a missing beat makes it limp), double kicks in the drive
+    if (kind === 'calm') { if (i % 2 === 0) taiko(B, t, 0.5); taiko(B, t + 2.5 * s, 0.35); }
+    else if (kind === 'lull') [0, 0.75, 2, 3.25].forEach((b, k) => taiko(B, t + b * s, k % 2 ? 0.4 : 0.6));
+    else if (kind === 'breakdown') { tom(B.main, t, 33, 0.6, 0.5); if (i % 2) tom(B.main, t + 2.5 * s, 36, 0.45, 0.5); }
+    else if (kind === 'stab') { [0, 1.5, 3].forEach(b => { kick(B.main, t + b * s, 0.95); taiko(B, t + b * s, 0.7); }); crash(B.main, t, 0.12); khSnare(B, t + 3.5 * s, 0.7); }
+    else if (kind === 'drive') { for (let k = 0; k < 8; k++) kick(B.main, t + k * e, k % 2 ? 0.6 : 0.85); [1, 3].forEach(b => khSnare(B, t + b * s, 0.75)); for (let k = 0; k < 4; k++) hat(B.main, t + k * s + e, 0.1); [0, 2].forEach(b => taiko(B, t + b * s, 0.55)); }
+    else if (kind === 'main' || kind === 'chorus') { kick(B.main, t, 0.95); kick(B.main, t + 1.75 * s, 0.6); if (tense) kick(B.main, t + 2.75 * s, 0.6); khSnare(B, t + 2 * s, 0.8); [0, 1, 2, 3].forEach(b => hat(B.main, t + b * s + (b === 3 ? e * 0.5 : 0), 0.08, b === 1)); taiko(B, t + 3.5 * s, 0.45); if (i === 0) crash(B.main, t, 0.1); }
+    // the guitars: slow chords that bend up into the tritone, chugging in the drive, crushing hits in the stab
+    if (kind === 'main' || kind === 'chorus') { khGuitar(B, power(r), t, s * 1.9, 0.06, { r: 0.5 }); khGuitar(B, [r + 6, r + 13], t + 2 * s, s * 1.4, 0.055, { r: 0.4, slideFrom: r + 5 }); khGuitar(B, power(r), t + 3.5 * s, e, 0.05, { mute: true }); }
+    else if (kind === 'drive') for (let k = 0; k < 8; k++) k === 0 || k === 5 ? khGuitar(B, power(k === 5 ? r + 6 : r), t + k * e, e * 0.95, 0.055) : khGuitar(B, [r], t + k * e, e * 0.8, 0.05, { mute: true });
+    else if (kind === 'stab') [0, 1.5, 3].forEach((b, k) => khGuitar(B, power(k === 1 ? r + 6 : r), t + b * s, s * 1.2, 0.07, { r: 0.6 }));
+    else if (kind === 'breakdown' && i === 3) khGuitar(B, [r + 12], t, s * 3.8, 0.03, { lead: true, bus: B.pad, vib: 40, r: 1.2, slideFrom: r + 11 });   // a guitar wailing, out of tune
+    // the bass: following the guitars, low and dirty
+    if (kind === 'main' || kind === 'chorus') { khBass(B, r - 12, t, s * 1.9, 0.11); khBass(B, r - 6, t + 2 * s, s * 1.4, 0.1); }
+    else if (kind === 'drive') for (let k = 0; k < 8; k++) khBass(B, (k === 5 ? r - 6 : r - 12), t + k * e, e * 0.85, 0.1);
+    else if (kind === 'stab') [0, 1.5, 3].forEach(b => khBass(B, r - 12, t + b * s, s * 1.1, 0.12));
+    // the warp synth: long chords sliding in and out of tune; the crooked line over the chorus (an octave up the second time round)
+    if (kind === 'calm' || kind === 'lull' || kind === 'breakdown') warpSyn(B, r + 12, t, s * 3.9, quiet ? 0.035 : 0.045, { from: r + 11, bend: 0.9, depth: 55 });
+    if (kind === 'main' && i % 2 === 1) warpSyn(B, r + 18, t, s * 2, 0.03, { from: r + 19, bend: 0.5 });
+    if (kind === 'chorus') CWM_LINE[i].forEach(([x, b, d], k) => warpSyn(B, r + x + (ph >= 4 ? 12 : 0), t + b * s, d * s * 0.95, 0.045, { from: r + x - 1, bend: 0.12, cut: 2200, cutTo: 900, bus: B.main, verb: 0.4 }));
+    // the choir: whispering a clashing chord when it's calm and in the breakdown, swelling in the chorus
+    if (kind === 'breakdown' || kind === 'calm') cwClash(r + 12).forEach(m => khChoir(B, m, t, s * 3.8, kind === 'calm' ? 0.07 : 0.11, 2));
+    if (kind === 'chorus' && i % 2 === 0) cwClash(r + 12).forEach(m => khChoir(B, m, t, s * 3.9, 0.12, 2));
+    // into the next section: the toms tumbling down, a rising whoosh and a strike of lightning
+    if (fillNext) { [0, 0.25, 0.5, 0.75].forEach((b, k) => tom(B.main, t + (3 + b) * s, 42 - k * 3, 0.5 + k * 0.1, 0.35)); nz(B.pad, t + 2 * s, 2 * s, 0.07, 'bandpass', 300, 5000, 2, 0.5); warpZap(B, t + 3.9 * s, 0.07); }
+  }
   // ---------- BRETONNIAN CASTLE (Bretonnia): a courtly dance for tourney day - a fingerpicked lute leading, a recorder and a reedy shawm
   // on the tune, a tabor and a tambourine, a low drone, and herald trumpets sounding fanfares. In D (D, C, G, A), around 104 beats a minute.
   const BR_BPM = { calm: 70, normal: 104, tense: 118 };
@@ -14148,7 +14210,8 @@ ol.ci-steps li::marker { content: none; }
     moot: (B, t, s) => tauntPlay(B, t, 74, 1.5, (C, m, at, d, hi, last) => { whistle(C, m, at, d * 0.95, 0.07); concertina(C, [m - 12], at, d * 0.95, 0.04, { a: 0.01 }); if (hi) spoons(C, at, 0.25); if (last) { potClang(C, at, 0.12); oi(C, at + d * 0.5, 0.15); } }, { n: tauntNote(s) }),
     khemri: (B, t, s) => tauntPlay(B, t, 62, 1.5, (C, m, at, d, hi, last) => { mizmar(C, m + 12, at, d * 0.95, 0.04); luth(C, m, at, 0.05); if (hi) bodhran(C, at, 0.6); if (last) { zill(C, at, 0.07); boneRattle(C, at + d * 0.5, 0.14); } }, { n: tauntNote(s) }),
   };
-  TAUNTS.chaos = TAUNTS.brimstone;   // (the Chaos Wastes: the brimstone guitars and choir)
+  // the Chaos Wastes: the warp synth on the tune, bending into every note, over the whispering choir; lightning strikes at the end
+  TAUNTS.chaos = (B, t, s) => tauntPlay(B, t, 62, 1.6, (C, m, at, d, hi, last) => { warpSyn(C, m + 12, at, d * 1.02, 0.07, { from: m + 11, bend: 0.06, a: 0.02, cut: 2600, cutTo: 1200, bus: C.main, verb: 0.4, depth: 22 }); khChoir(C, m, at, d * 1.02, 0.05, 2); if (hi) taiko(C, at, 0.4); if (last) { warpZap(C, at + d * 0.5, 0.08); khGuitar(C, power(38), at, d * 2, 0.08, { r: 0.8 }); } }, { n: tauntNote(s), dip: 0.6 });
   const EL_POOL = { normal: ['chorus', 'breakdown', 'lull', 'stab', 'drive'], tense: ['chorus', 'drive', 'stab', 'chorus'], calm: [] };
   const EL_BPM = { calm: 110, normal: 128, tense: 140 };
   function elPick(el, after) {
@@ -14175,7 +14238,7 @@ ol.ci-steps li::marker { content: none; }
     return { bus, main, pad, sc, far, band, chant };
   }
   // which music: the pitch's own style if it has one (jungle, elven, graveyard, flagstone, worn, brimstone, woodland, warpstone, blackark, shanty, dwarfhold, wastes, plague, bretonnia, ziggurat, altdorf, fjord, moot, khemri), otherwise the electro track
-  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, chaos: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 }, plague: { bar: (...a) => pgBar(...a), bpm: PG_BPM }, bretonnia: { bar: (...a) => brBar(...a), bpm: BR_BPM, gain: 1.9 }, ziggurat: { bar: (...a) => zgBar(...a), bpm: ZG_BPM, gain: 0.9 }, altdorf: { bar: (...a) => trBar(...a), bpm: TR_BPM }, fjord: { bar: (...a) => fjBar(...a), bpm: FJ_BPM, gain: 0.85 }, moot: { bar: (...a) => moBar(...a), bpm: MO_BPM, gain: 1.35 }, khemri: { bar: (...a) => kmBar(...a), bpm: KM_BPM, gain: 1.6 } };   // (altdorf: the same terrace band and chanting as muddy grass)   // (bretonnia: the lute and recorder are gentle, so it's lifted to match)   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
+  const STYLES = { electro: { bar: (...a) => elBar(...a), bpm: EL_BPM }, jungle: { bar: (...a) => jgBar(...a), bpm: JG_BPM }, elven: { bar: (...a) => efBar(...a), bpm: EF_BPM, gain: 2.3 }, graveyard: { bar: (...a) => gyBar(...a), bpm: GY_BPM }, flagstone: { bar: (...a) => cvBar(...a), bpm: CV_BPM }, worn: { bar: (...a) => trBar(...a), bpm: TR_BPM }, brimstone: { bar: (...a) => khBar(...a), bpm: KH_BPM, gain: 0.75 }, chaos: { bar: (...a) => cwBar(...a), bpm: CW_BPM, gain: 0.85 }, woodland: { bar: (...a) => wlBar(...a), bpm: WL_BPM, gain: 1.4 }, warpstone: { bar: (...a) => wpBar(...a), bpm: CV_BPM }, blackark: { bar: (...a) => baBar(...a), bpm: BA_BPM, gain: 0.72 }, shanty: { bar: (...a) => shBar(...a), bpm: SH_BPM }, dwarfhold: { bar: (...a) => dhBar(...a), bpm: DH_BPM, gain: 1.6 }, wastes: { bar: (...a) => ogBar(...a), bpm: OG_BPM, gain: 0.5 }, plague: { bar: (...a) => pgBar(...a), bpm: PG_BPM }, bretonnia: { bar: (...a) => brBar(...a), bpm: BR_BPM, gain: 1.9 }, ziggurat: { bar: (...a) => zgBar(...a), bpm: ZG_BPM, gain: 0.9 }, altdorf: { bar: (...a) => trBar(...a), bpm: TR_BPM }, fjord: { bar: (...a) => fjBar(...a), bpm: FJ_BPM, gain: 0.85 }, moot: { bar: (...a) => moBar(...a), bpm: MO_BPM, gain: 1.35 }, khemri: { bar: (...a) => kmBar(...a), bpm: KM_BPM, gain: 1.6 } };   // (altdorf: the same terrace band and chanting as muddy grass)   // (bretonnia: the lute and recorder are gentle, so it's lifted to match)   // (ogre wastes: war drums and guitars are loud, so it's turned down to match)   // (dwarf hold: the choir and the hall's echo are gentle, so it's lifted to match)   // (black ark: the shanty, turned down to match)   // (warped flagstones: the cave music, with the ratmen and their machinery)   // (brimstone: the guitars are loud, so it's turned down to match)   // (gain: the harp and strings are gentler than drums, so the elven music is lifted to match)
   const styleNow = () => { try { return STYLES[PITCH.style] ? PITCH.style : 'electro'; } catch (x) { return 'electro'; } };
   function tick() {
     if (!run || !ctx) return; const e = run.el, B = run.B;
