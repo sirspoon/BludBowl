@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.97 (14 Nov 2026)
+- Tournaments (on this device and online) now have a Weather choice: Standard or Chaos Wastes. With the Glory on the Gridiron 2
+  rules it starts on Chaos Wastes.
+
 ## v4.96 (14 Nov 2026)
 - New match option: the **Chaos Wastes weather table** (from Glory on the Gridiron 2 - Getting Wasted), on the exhibition screen and in
   the two-device lobby. Warpfire, mutations, gravity flux, the Gaze of the Gods, the Slavering Maw and more.

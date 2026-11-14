@@ -47,6 +47,34 @@ async function sim(browser, races, hook) {
     check(!errors.length, 'no page errors on the menu', errors);
     await ctx.close();
   }
+  // 1b. tournaments: the Weather choice in the form (Chaos Wastes by default with the Glory on the Gridiron 2 rules), kept by the cup and used in its matches
+  {
+    const { ctx, page, errors } = await openGame(browser, { device: 'Pixel 7' });
+    const chip = () => page.evaluate(() => { const on = document.querySelector('#cup-hub [data-cset^="weather|"].on'); return on ? on.dataset.cset.split('|')[1] : null; });
+    await page.evaluate(() => { CUP.open(); document.querySelector('[data-cact="new"]').click(); }); await page.waitForTimeout(200);
+    await setSelect(page, '#cp-rules', 'gw'); await page.waitForTimeout(100);
+    check(await chip() === 'std', 'tournament form: Weather is Standard with GW rules', await chip());
+    await setSelect(page, '#cp-rules', 'gotg2'); await page.waitForTimeout(100);
+    check(await chip() === 'chaos', 'tournament form: Weather defaults to Chaos Wastes with the Glory on the Gridiron 2 rules', await chip());
+    await page.screenshot({ path: OUT + '/chaos-cup-form.png', fullPage: false });
+    await page.evaluate(() => document.querySelector('[data-cset="weather|std"]').click()); await page.waitForTimeout(100);
+    check(await chip() === 'std', 'tournament form: Weather can be switched to Standard');
+    await page.evaluate(() => document.querySelector('[data-cset="weather|chaos"]').click()); await page.waitForTimeout(100);
+    await page.evaluate(() => document.querySelector('[data-cact="create"]').click()); await page.waitForTimeout(400);
+    const cp = await page.evaluate(() => { const raw = JSON.parse(localStorage.getItem('bb-cups') || '[]'), l = Array.isArray(raw) ? raw : (raw.cups || Object.values(raw)); const c = l.find(x => x && x.rules === 'gotg2'); return c ? { wx: c.wx, rules: c.rules } : null; });
+    check(cp && cp.wx === 'chaos' && cp.rules === 'gotg2', 'the new cup keeps the Chaos Wastes weather', cp);
+    check(await page.evaluate(() => /Chaos Wastes weather/.test(document.getElementById('cup-hub').textContent)), 'the cup page says it uses the Chaos Wastes weather');
+    check(await page.evaluate(() => { state.wtable = null; window.launchMatch('orc', 'human', { replaceOk: true, cup: { cid: 'x', key: '0:0', ko: true, wx: 'chaos' } }); return state.wtable; }) === 'chaos', 'a tie launched from it plays with the Chaos Wastes table');
+    check(await page.evaluate(() => { window.launchMatch('orc', 'human', { replaceOk: true, cup: { cid: 'x', key: '0:0', ko: true } }); return state.wtable; }) === 'std', 'a cup without it (older cups) keeps the standard table');
+    check(await page.evaluate(() => { return typeof CUP.weatherField === 'function' && CUP.wxOf({ rules: 'gotg2' }) === 'chaos' && CUP.wxOf({ rules: 'gotg2', fmt: 'sevens' }) === 'std'; }), 'the online tournament form uses the same choice');
+    await page.evaluate(() => { document.getElementById('cup-hub').classList.add('hidden'); OTOUR.open(); const b = document.querySelector('#otour-hub [data-ot="new"]'); if (b) b.click(); }); await page.waitForTimeout(200);
+    await setSelect(page, '#ot-rules', 'gotg2'); await page.waitForTimeout(100);
+    const ot = await page.evaluate(() => { const on = document.querySelector('#otour-hub [data-k="weather"].on'); return on ? on.dataset.v : null; });
+    check(ot === 'chaos', 'online tournament form: Weather defaults to Chaos Wastes with the Glory on the Gridiron 2 rules', ot);
+    await page.screenshot({ path: OUT + '/chaos-otour-form.png' });
+    check(!errors.length, 'tournament form: no page errors', errors);
+    await ctx.close();
+  }
   // 2. every result on the pre-match roll
   const ONLY = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1].split(',').map(Number) : null;
   const totals = ONLY || (QUICK ? [2, 3, 11, 12] : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);

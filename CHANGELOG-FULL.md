@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.97 (14 Nov 2026)
+- **New: a Weather choice for tournaments.** Setting up a tournament (Tournaments, and Organise a tournament online) now has a Weather
+  row under the Rules: Standard (BB2025) or Chaos Wastes (the v4.96 table). It starts on Chaos Wastes when the rules are
+  Example: Glory on the Gridiron 2 (that pack's own table) and on Standard for other rules; changing the rules resets it to their
+  default, and it can be switched either way. Sevens tournaments always use the standard table. The cup keeps the choice and its
+  page says "Chaos Wastes weather"; every tie in it uses that table, whether played against the computer, on one device or on two
+  devices in an online tournament (the host's device takes it from the tournament). Tournaments made before this keep the standard table.
+- `tools/ui-tests/chaos-wastes.js` checks the tournament forms too (and has `--only 2,9` to force just some results).
+
 ## v4.96 (14 Nov 2026)
 - **New: the Chaos Wastes weather table, as a match option.** Next to the Pitch on the exhibition screen there is now a Weather
   choice: Standard (BB2025, the default) or Chaos Wastes, the table from the "Glory on the Gridiron 2 - Getting Wasted" pack. The
