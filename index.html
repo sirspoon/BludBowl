@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.82</title>
+    <title>BludBowl 4.83</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -107,7 +107,12 @@
         #teams-hub .th-ctbl .th-cs { text-align: center; font-weight: 700; width: 2.6em; } #teams-hub .th-ctbl .th-cs.th-up { color: #4ade80; } #teams-hub .th-ctbl .th-cs.th-dn { color: #f87171; }
         #teams-hub .th-ctbl .th-cn { width: 1.4em; text-align: right; padding-left: 0; } #teams-hub .th-ctbl .th-cpos b { color: #e2e8f0; }
         #teams-hub .th-ctbl .th-c2 td { line-height: 1.9; } #teams-hub .th-ctbl .th-cname { color: #cbd5e1; margin-right: 4px; } #teams-hub .th-ctbl .th-out td { opacity: .55; }
-        #teams-hub .th-clist { display: flex; flex-direction: column; } #teams-hub .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+        #teams-hub .th-clist { display: flex; flex-direction: column; }
+        #teams-hub .th-fhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; } #teams-hub .th-fbtn { padding: 4px 10px; font-size: 12px; } #teams-hub .th-fbtn.on { border-color: var(--pg-amber); color: var(--pg-amber); }
+        #teams-hub .pg-btn.lg-inline { padding: 1px 6px; font-size: 11.5px; }
+        #teams-hub .th-fbox { display: flex; flex-direction: column; gap: 8px; background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 8px; padding: 8px; margin-bottom: 2px; }
+        #teams-hub .th-frow { display: flex; flex-direction: column; gap: 4px; } #teams-hub .th-flbl { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); font-weight: 700; }
+        #teams-hub .th-fbox .pg-chip { padding: 3px 9px; font-size: 12px; } #teams-hub .th-fsel { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 5px 8px; font: inherit; width: 100%; } #teams-hub .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
         #teams-hub .th-crow { display: flex; gap: 8px; padding: 6px 2px; border-bottom: 1px solid #1c263a; } #teams-hub .th-crow:last-child { border-bottom: 0; }
         #teams-hub .th-cn { width: 18px; flex: 0 0 auto; text-align: right; padding-top: 1px; } #teams-hub .th-cmain { min-width: 0; flex: 1; }
         #teams-hub .th-chead { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; } #teams-hub .th-crow .pl-stats { margin-top: 2px; }
@@ -1177,7 +1182,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.82</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.83</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -4652,6 +4657,7 @@ ol.ci-steps li::marker { content: none; }
             const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
             const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
             function open(done) {
+                Object.assign(flt, { open: false, type: '', race: '', rules: '', played: '' });   // filters start off each time
                 onClose = done || onClose;
                 $('teams-hub').classList.remove('hidden');
                 const l = TB.list().filter(t => !t.cpu);
@@ -4737,10 +4743,35 @@ ol.ci-steps li::marker { content: none; }
                     <section class="pg-card"><h3>Competitions</h3>${comps}</section>`
                     : '<section class="pg-card"><div class="pg-dim">Nothing won yet. Finish a league season, a cup or a Swiss event and the podium goes up here.</div></section>'}`;
             }
+            // filtering the list: by type of team, race, tournament rules and whether it has played (all off until the coach turns one on)
+            const flt = { open: false, type: '', race: '', rules: '', played: '' };
+            const typeOf = t => TB.isSev(t) ? (TB.isMP(t) ? 'sevmp' : 'sev') : TB.isMP(t) ? 'mp' : 'league';
+            const TYPES = [['', 'All'], ['league', 'League'], ['mp', 'Tournament'], ['sev', 'Sevens'], ['sevmp', 'Sevens tournament']];
+            const fltOn = () => !!(flt.type || flt.race || flt.rules || flt.played);
+            const passes = t => (!flt.type || typeOf(t) === flt.type) && (!flt.race || t.race === flt.race) && (!flt.rules || (typeOf(t) === 'mp' && TB.rulesOf(t).id === flt.rules))
+                && (!flt.played || (flt.played === 'yes') === CAREER.started(t));
+            function filterHtml(all, shown) {
+                const head = `<div class="th-fhead"><button type="button" class="pg-btn th-fbtn${fltOn() ? ' on' : ''}" data-flt="toggle" aria-expanded="${flt.open}">Filter teams ${flt.open ? '▴' : '▾'}</button>
+                    ${fltOn() ? `<span class="pg-dim">${shown} of ${all.length}</span><button type="button" class="pg-btn lg-inline" data-flt="clear">Clear</button>` : ''}</div>`;
+                if (!flt.open) return head;
+                const n = ty => all.filter(t => !ty || typeOf(t) === ty).length;
+                const races = [...new Set(all.map(t => t.race))].map(rc => [rc, (RACES[rc] || {}).name || rc]).sort((a, b) => a[1].localeCompare(b[1]));
+                const rules = [...new Set(all.filter(t => typeOf(t) === 'mp').map(t => TB.rulesOf(t).id))].map(id => [id, (TRULES.get(id) || TRULES.GW).name]);
+                const chip = (key, v, l) => `<button type="button" class="pg-chip ${flt[key] === v ? 'on' : ''}" data-flt="${key}|${v}" aria-pressed="${flt[key] === v}">${l}</button>`;
+                return head + `<div class="th-fbox">
+                    <div class="th-frow"><span class="th-flbl">Type</span><div class="lg-seg">${TYPES.filter(([v]) => !v || n(v)).map(([v, l]) => chip('type', v, `${l} <span class="pg-dim">${n(v)}</span>`)).join('')}</div></div>
+                    ${races.length > 1 ? `<label class="th-frow"><span class="th-flbl">Race</span><select class="lg-sel th-fsel" data-fsel="race"><option value="">Any race</option>${races.map(([v, l]) => `<option value="${v}"${flt.race === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>` : ''}
+                    ${flt.type === 'mp' && rules.length > 1 ? `<label class="th-frow"><span class="th-flbl">Tournament rules</span><select class="lg-sel th-fsel" data-fsel="rules"><option value="">Any rules</option>${rules.map(([v, l]) => `<option value="${esc(v)}"${flt.rules === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label>` : ''}
+                    <div class="th-frow"><span class="th-flbl">Played</span><div class="lg-seg">${chip('played', '', 'Any')}${chip('played', 'yes', 'Has played')}${chip('played', 'no', 'Not played yet')}</div></div></div>`;
+            }
+            // after the filter changes, a team it hides stops being the one shown (the first that matches takes over)
+            function refilter() { const vis = TB.list().filter(x => !x.cpu && passes(x)); if (sel !== '__board' && vis.length && !vis.some(x => x.id === sel)) sel = vis[0].id; render(); }
             function render() {
-                const list = TB.list().filter(x => !x.cpu), t = list.find(x => x.id === sel);
-                if (sel === '__board') { $('th-list').innerHTML = list.map(card).join(''); $('th-detail').innerHTML = boardHtml(); return; }
-                $('th-list').innerHTML = (list.length ? list.map(card).join('') : '<div class="pg-dim" style="padding:8px">No saved teams yet. Make one with New team.</div>');
+                const all = TB.list().filter(x => !x.cpu), list = all.filter(passes), t = all.find(x => x.id === sel);
+                const listHtml = () => filterHtml(all, list.length) + (all.length ? (list.length ? list.map(card).join('') : '<div class="pg-dim" style="padding:8px">No teams match the filter.</div>') : '<div class="pg-dim" style="padding:8px">No saved teams yet. Make one with New team.</div>');
+                const enh = () => $('th-list').querySelectorAll('select').forEach(FANCY_SELECT.enhance);
+                if (sel === '__board') { $('th-list').innerHTML = listHtml(); enh(); $('th-detail').innerHTML = boardHtml(); return; }
+                $('th-list').innerHTML = listHtml(); enh();
                 $('th-detail').innerHTML = t ? detail(CAREER.normTeam(JSON.parse(JSON.stringify(t)))) : '<section class="pg-card"><div class="pg-dim">Pick a team on the left, or make a new one.</div></section>';
             }
             function wire() {
@@ -4755,6 +4786,12 @@ ol.ci-steps li::marker { content: none; }
                     if (b.id === 'th-rules') { TRULES.open(() => render()); return; }
                     if (b.id === 'th-export-all') { const l = TB.list(); if (!l.length) { msg('No saved teams yet.', true); return; } TB.download('bludbowl-teams.json', { version: 1, teams: l }); msg(`Exported ${l.length} team${l.length === 1 ? '' : 's'}.`); return; }
                     if (d.sel) { sel = d.sel; armed = { del: 0, reset: 0 }; msg(''); render(); return; }
+                    if (d.flt) {
+                        if (d.flt === 'toggle') flt.open = !flt.open;
+                        else if (d.flt === 'clear') Object.assign(flt, { type: '', race: '', rules: '', played: '' });
+                        else { const [key, v] = d.flt.split('|'); flt[key] = v; if (key === 'type' && v !== 'mp') flt.rules = ''; }
+                        refilter(); return;
+                    }
                     if (d.rview) { compact = d.rview === 'compact'; try { localStorage.setItem('bb-roster-compact', compact ? '1' : '0'); } catch (e) {} const y = $('teams-hub').scrollTop; render(); $('teams-hub').scrollTop = y; return; }
                     if (!t) return;
                     if (d.fallen != null) { HONOURS.show(t, 'fallen', +d.fallen); return; }
@@ -4784,6 +4821,7 @@ ol.ci-steps li::marker { content: none; }
                     render();
                 });
                 root.addEventListener('change', e => {
+                    if (e.target.dataset && e.target.dataset.fsel) { flt[e.target.dataset.fsel] = e.target.value; refilter(); return; }
                     if (e.target.id !== 'th-file') return;
                     const f = e.target.files && e.target.files[0]; if (!f) return;
                     const r = new FileReader();

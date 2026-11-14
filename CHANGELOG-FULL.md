@@ -2,6 +2,17 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.83 (14 Nov 2026)
+- **New (Teams screen): Filter teams.** A button above the team list opens filters, all off to start with (every team shown):
+  - **Type:** All, League, Tournament, Sevens and Sevens tournament, each with how many teams it has (types you have none of
+    aren't shown).
+  - **Race:** the races you have teams of.
+  - **Tournament rules:** with Tournament picked, the rulesets your tournament teams are built under (e.g. only your Glory on the
+    Gridiron teams).
+  - **Played:** any, has played, or not played yet.
+  While a filter is on, the button turns gold and shows "3 of 9" with a Clear button; if the team on show is filtered out, the
+  first team that matches is shown instead. Filters are off again each time the Teams screen opens.
+
 ## v4.82 (14 Nov 2026)
 - **Improved (Teams screen, Stats & skills only):** each player now takes two lines: their position in bold with MA, ST, AG, PA
   and AV in columns (headed once at the top, lined up down the roster so players are easy to compare; improved characteristics

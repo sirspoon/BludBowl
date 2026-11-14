@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.83 (14 Nov 2026)
+- Teams screen: a Filter teams button above the list: by type (League, Tournament, Sevens, Sevens tournament), race, tournament
+  rules and whether a team has played. Off until you use it.
+
 ## v4.82 (14 Nov 2026)
 - Teams screen, Stats & skills only: each player's position (bold) and characteristics in lined-up columns, then their name and skills.
 
