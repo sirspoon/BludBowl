@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.89 (14 Nov 2026)
+- Team Builder: the tabs live in the summary box, so they're always on screen; Star Players are hired on the Hire players tab,
+  and Inducements have a tab of their own.
+
 ## v4.88 (14 Nov 2026)
 - Team Builder: the hiring list fits a phone screen again, and hired Star Players show at the foot of the roster (also on the
   Teams screen).

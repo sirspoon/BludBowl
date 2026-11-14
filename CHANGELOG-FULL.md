@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.89 (14 Nov 2026)
+- **Changed (Team Builder):**
+  - The tabs are now part of the summary box at the top, which stays on screen, so they're always there however far down the
+    page you are. On a phone they sit in one row that scrolls sideways (faded at the edge when there are more).
+  - Star Players are hired on the **Hire players** tab, under the positions (tournament teams; Sevens has none).
+  - **Inducements** are on a tab of their own (tournament teams, Sevens tournament teams included: their inducements tab had
+    gone missing in v4.87).
+  - Switching tabs further down the page goes back to the top of the new section.
+
 ## v4.88 (14 Nov 2026)
 - **Fixed (Team Builder):** on a phone the Hire players list was laid out wider than the screen, pushing the price buttons off
   the right-hand edge. It now fits, in one column on a phone and several on a wide screen.

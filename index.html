@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.88</title>
+    <title>BludBowl 4.89</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -509,7 +509,10 @@
         #team-builder .tb-grid > [data-pane="team"], #team-builder .tb-grid > [data-pane="staff"] { max-width: 640px; width: 100%; justify-self: center; }
         #team-builder #tb-hire { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); column-gap: 18px; }
         #team-builder .tb-plstar .tb-startok { background: #78350f; color: #fde68a; } #team-builder .tb-sname { font-weight: 800; padding: 5px 0 2px; } #team-builder .tb-plstar .tb-no { color: var(--tb-amber); }
-        #team-builder .tb-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        #team-builder .tb-tabs { display: flex; gap: 6px; flex-wrap: wrap; grid-column: 1 / -1; order: 9; border-top: 1px solid var(--tb-edge); padding-top: 8px; margin-top: 2px; }
+        #team-builder .tb-hirestars { margin-top: 14px; border-top: 1px solid var(--tb-edge); padding-top: 8px; }
+        #team-builder #tb-mpstars { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr)); column-gap: 18px; } #team-builder #tb-mpstars > .tb-hint { grid-column: 1 / -1; }
+        #team-builder .tb-grid > [data-pane="extras"] { max-width: 760px; width: 100%; justify-self: center; }
         #team-builder .tb-tabs button { background: transparent; color: #e2e8f0; border: 1px solid var(--tb-edge); border-radius: 8px; padding: 7px 13px; font: inherit; font-weight: 700; cursor: pointer; }
         #team-builder .tb-tabs button:hover { border-color: #64748b; } #team-builder .tb-tabs button[aria-selected="true"] { border-color: var(--tb-amber); color: var(--tb-amber); background: rgba(245,158,11,.08); }
         #team-builder .tb-tabs button[hidden] { display: none; } #team-builder .tb-tabn { font-weight: 600; opacity: .8; font-size: .9em; } #team-builder .tb-tabn.bad { color: var(--tb-bad); opacity: 1; }
@@ -588,7 +591,8 @@
         #team-builder .tb-mpwarn { color: var(--tb-bad); font-size: 11.5px; margin: 4px 0 0; }
         #team-builder .tb-mpwarn div::before { content: '• '; }
         @media (max-width: 900px) {
-            #team-builder .tb-grid { grid-template-columns: minmax(0, 1fr); } #team-builder .tb-tabs button { padding: 6px 10px; font-size: 12.5px; }
+            #team-builder .tb-grid { grid-template-columns: minmax(0, 1fr); } #team-builder .tb-tabs button { padding: 6px 10px; font-size: 12.5px; flex: 0 0 auto; }
+            #team-builder .tb-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 2px -12px 0; padding: 7px 12px 1px; } #team-builder .tb-tabs::-webkit-scrollbar { display: none; } #team-builder .tb-tabs { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); mask-image: linear-gradient(to right, #000 88%, transparent); }
             #team-builder .tb-sum { grid-template-columns: 1fr 1fr; } #team-builder .tb-sum-spent { grid-column: 1 / -1; order: 3; }
             #team-builder .tb-pt { display: none; }
             #team-builder .tb-big { font-size: 24px; } #team-builder .tb-sum { padding: 8px 12px; gap: 6px; }
@@ -1200,7 +1204,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.88</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.89</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1416,10 +1420,10 @@ ol.ci-steps li::marker { content: none; }
           <div><div class="tb-cap">Team value</div><div id="tb-tv" class="tb-big"></div><div class="tb-dim">players, staff &amp; re-rolls</div></div>
           <div class="tb-sum-spent"><div id="tb-spentcap" class="tb-cap">Spent</div><div id="tb-spent" class="tb-big"></div><div class="tb-barwrap"><div id="tb-bar"></div></div><div id="tb-left" class="tb-dim"></div></div>
           <div><div class="tb-cap">Players</div><div id="tb-count" class="tb-big"></div><div id="tb-countnote" class="tb-dim"></div></div>
+          <nav id="tb-tabs" class="tb-tabs" role="tablist" aria-label="Team Builder sections">
+            <button type="button" role="tab" data-tbtab="team">Team</button><button type="button" role="tab" data-tbtab="staff">Staff &amp; costs</button><button type="button" role="tab" data-tbtab="hire">Hire players</button><button type="button" role="tab" data-tbtab="roster">Roster <span id="tb-tabn" class="tb-tabn"></span></button><button type="button" role="tab" data-tbtab="extras">Inducements</button><button type="button" role="tab" data-tbtab="honours">Honours</button>
+          </nav>
         </section>
-        <nav id="tb-tabs" class="tb-tabs" role="tablist" aria-label="Team Builder sections">
-          <button type="button" role="tab" data-tbtab="team">Team</button><button type="button" role="tab" data-tbtab="staff">Staff &amp; costs</button><button type="button" role="tab" data-tbtab="hire">Hire players</button><button type="button" role="tab" data-tbtab="roster">Roster <span id="tb-tabn" class="tb-tabn"></span></button><button type="button" role="tab" data-tbtab="extras">Stars &amp; inducements</button><button type="button" role="tab" data-tbtab="honours">Honours</button>
-        </nav>
         <div class="tb-grid">
           <section class="tb-card" data-pane="team">
             <h3>Team</h3>
@@ -1448,6 +1452,7 @@ ol.ci-steps li::marker { content: none; }
           <section class="tb-card" data-pane="hire">
             <h3>Hire players</h3>
             <div id="tb-hire"></div>
+            <div id="tb-hirestars" class="tb-hirestars"><h3>Star Players</h3><div id="tb-mpstars"></div></div>
           </section>
           <section class="tb-card" data-pane="roster">
             <div class="tb-h3row"><h3>Roster</h3><span class="tb-h3btns"><button id="tb-sortpos" type="button" class="tb-ghost tb-small" data-sortpos="1">Positionals first</button><button id="tb-names" type="button" class="tb-ghost tb-small">Random names</button></span></div>
@@ -1456,10 +1461,7 @@ ol.ci-steps li::marker { content: none; }
           </section>
           <section id="tb-honours" class="tb-card tb-mpcard" data-pane="honours"><h3>Honours</h3><div id="tb-hon"></div></section>
           <section id="tb-mpcard" class="tb-card tb-mpcard" data-pane="extras">
-            <div class="tb-mpcols">
-              <div><h3>Star Players</h3><div id="tb-mpstars"></div></div>
-              <div><h3>Inducements</h3><p class="tb-dim tb-hint">Bought onto the draft list and used in every game this team plays.</p><div id="tb-mpind"></div></div>
-            </div>
+            <h3>Inducements</h3><p class="tb-dim tb-hint">Bought onto the draft list and used in every game this team plays.</p><div id="tb-mpind"></div>
           </section>
         </div>
         <footer class="tb-foot">
@@ -4257,7 +4259,7 @@ ol.ci-steps li::marker { content: none; }
                 $('tb-break').innerHTML = [['Players', c.players], ['Sideline staff & re-rolls', c.staff], ['Dedicated fans', c.fans], ['Star Players', c.stars], ['Inducements', c.induce]]
                     .map(([a, b]) => `<tr><td>${a}</td><td>${k(b)}</td></tr>`).join('') + `<tr class="tb-total"><td>Total spent</td><td>${k(c.spent)}</td></tr>`;
                 // Star Players (none in Sevens)
-                $('tb-mpstars').parentNode.style.display = sv ? 'none' : '';
+                $('tb-hirestars').style.display = sv ? 'none' : '';
                 const ks = sv || (!mx && !(t.stars || []).length) ? [] : starsFor(t.race, t.league, t.favoured);
                 $('tb-mpstars').innerHTML = (gw ? `<p class="tb-dim tb-hint">Their price in gold plus <span class="tb-sp">2 skill points</span> (a Mega-star <span class="tb-sp">4</span>). A pair counts as one Star but takes two places. Star Players get no extra skills.</p>`
                     : `<p class="tb-dim tb-hint">Paid from the budget${gd && C.star ? `, plus ${c$(C.star)} from the ${poolW} (a Mega-star ${c$(C.mega)})` : ''}. Tier ${tier}: ${mx ? `up to <span class="tb-sp">${mx}</span> Star Player${mx === 1 ? '' : 's'}` : 'no Star Players'}${r.mega ? r.mega === 1 ? ', one Mega-star at most' : `, ${r.mega} Mega-stars at most` : ', no Mega-stars'}. A pair counts as one Star but takes two places. Star Players get no extra skills.</p>`) +
@@ -4291,7 +4293,7 @@ ol.ci-steps li::marker { content: none; }
                 $('tb-rosterhint').textContent = sev ? 'The first 7 start the match (you can change who starts before kick-off). Up to 11 players; at most 4 without the Lineman keyword. One Lineman is your Veteran: MA 1 lower, and once a game a re-roll.'
                     : isMP(t) && (t.stars || []).length ? 'Star Players (at the bottom) count towards the 11 and the 16. The first players make up the rest of the starting eleven; you can still change it before kick-off.'
                     : 'The first 11 start the match; you can still change the starting eleven before kick-off.';
-                $('tb-mpwrap').style.display = isMP(t) ? '' : 'none'; $('tb-mpcard').style.display = isMP(t) ? '' : 'none';
+                $('tb-mpwrap').style.display = isMP(t) ? '' : 'none'; $('tb-mpcard').style.display = isMP(t) ? '' : 'none'; if (!isMP(t)) $('tb-hirestars').style.display = 'none';
                 $('tb-race').innerHTML = Object.values(RACES).filter(r => r.positions).map(r => `<option value="${r.key}" ${r.key === t.race ? 'selected' : ''}>${esc(r.name)}</option>`).join('');
                 $('tb-col1').style.background = t.primary; $('tb-col2').style.background = t.secondary;
                 const tok = $('tb-token'); tok.style.background = t.primary; tok.style.color = t.secondary; tok.textContent = R.types[Object.keys(R.positions)[0]].label;
@@ -4385,7 +4387,7 @@ ol.ci-steps li::marker { content: none; }
             // the sections are on tabs: Team, Staff & costs, Hire players, Roster, then Stars & inducements (tournament teams) and Honours (when there are any)
             let tab = 'team';
             function paintTabs(t, hon, n, MINP, MAXP) {
-                const have = { extras: isMP(t) && !isSev(t), honours: !!hon };
+                const have = { extras: isMP(t), honours: !!hon };
                 if (have[tab] === false) tab = 'team';
                 $('tb-tabs').querySelectorAll('[data-tbtab]').forEach(b => { const v = b.dataset.tbtab; b.hidden = have[v] === false; b.setAttribute('aria-selected', String(v === tab)); });
                 document.querySelectorAll('#team-builder .tb-grid > [data-pane]').forEach(sec => sec.classList.toggle('tb-on', sec.dataset.pane === tab));
@@ -4502,8 +4504,9 @@ ol.ci-steps li::marker { content: none; }
                     if (b.closest('#tb-picker')) return;   // the colour picker handles its own buttons
                     if (d.tbtab) {   // switch section; if the page has scrolled past the tabs, bring them back just under the summary bar
                         tab = d.tbtab; render();
-                        const box = $('team-builder'), tb = $('tb-tabs'), sum = document.querySelector('#team-builder .tb-sum');
-                        const top = tb.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - sum.offsetHeight - 8;
+                        const box = $('team-builder'), grid = document.querySelector('#team-builder .tb-grid'), sum = document.querySelector('#team-builder .tb-sum');
+                        const top = grid.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - sum.offsetHeight - 12;
+                        const on = $('tb-tabs').querySelector('[aria-selected="true"]'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
                         if (box.scrollTop > top) box.scrollTop = Math.max(0, top);
                         return;
                     }
