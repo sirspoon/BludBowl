@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.94 (14 Nov 2026)
+- **Fixed (match replays): a thrown team-mate with the ball.** While a thrown player is in the air the game parks them off the
+  board (so their old square is free to bounce into), and the match recorder saved that as them leaving the pitch, with the ball
+  left loose on their old square. In the replay they vanished, then the ball flew off on its own and they reappeared where they
+  landed.
+  - The recorder now keeps an airborne player on their last square, ball in hand, until they come down.
+  - The replay viewer, when a ball carrier goes two squares or more in one step still holding the ball (a thrown team-mate, or
+    a leap), flies them there in an arc with the ball in their hands, as the live game does. Replays saved before this keep the
+    old look for fumbled throws and crash landings.
+  - A replay's close-up now always uses the game's own record of the throw when the file has one, instead of the one rebuilt
+    from the match log, and crash landings in saved files point at the right player.
+
 ## v4.93 (14 Nov 2026)
 - **Fixed (skill tags, touch screens):** after tapping a skill tag and closing its description, the tag stayed highlighted,
   because phones keep a tapped element's "hover" look until something else is tapped. The hover highlight now only applies with

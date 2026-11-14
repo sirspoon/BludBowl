@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.93</title>
+    <title>BludBowl 4.94</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.93</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.94</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -23586,7 +23586,7 @@ ol.ci-steps li::marker { content: none; }
                     prevBall = ball && inPlay ? ball.slice() : null; prevCarrier = carrier;
                     frames.push({ pos: pos.slice(), st: st.slice(), ball: ball ? ball.slice() : null, inPlay, score: score.slice(), half, turn: turn.slice(), side: homePlaying ? 0 : 1,
                         act, rr: rr.slice(), weather, kind, mover, start, lines, fx, fly, action: act >= 0 ? curAct : null, tgt: act >= 0 ? tgt : -1 });
-                    if (ownRep) { frames[frames.length - 1].replay = ownRep; ownRep = null; }
+                    if (ownRep) { frames[frames.length - 1].replay = ownRep; frames[frames.length - 1].ownRep = true; ownRep = null; }
                     lines = []; fx = [];
                 };
                 // ---- the close-up replays (the game's PASSFX): a throw is followed from its roll until the next action starts, then its
@@ -23633,7 +23633,7 @@ ol.ci-steps li::marker { content: none; }
                         }
                         const c = carrierNow(); e.gbEnd = c >= 0 ? { id: c + 1 } : ball ? { x: ball[0], y: ball[1] } : { x: -1, y: -1 };
                         delete e.moves;
-                        const F = frames[frames.length - 1]; if (F && (e.kind !== 'pass' || e.res !== 'saved')) F.replay = e;
+                        const F = frames[frames.length - 1]; if (F && !F.ownRep && (e.kind !== 'pass' || e.res !== 'saved')) F.replay = e;   // (the game's own close-up, when the file has one, is kept)
                     } catch (er) {}
                 };
                 for (const c of d.gameLog.commandArray || []) {
@@ -23673,7 +23673,7 @@ ol.ci-steps li::marker { content: none; }
                     for (const r of (c.reportList && c.reportList.reports) || []) { try { say(r); } catch (e) {} }
                     blasted = false;
                     if (seen || lines.length || fx.length) snap(moved.length === 1 ? 'move' : moved.length > 2 ? 'setup' : 'other', moved.length === 1 ? moved[0] : -1);
-                    if (ownRep && frames.length) { frames[frames.length - 1].replay = ownRep; ownRep = null; }   // (a close-up on its own: it goes with the step it follows)
+                    if (ownRep && frames.length) { frames[frames.length - 1].replay = ownRep; frames[frames.length - 1].ownRep = true; ownRep = null; }   // (a close-up on its own: it goes with the step it follows)
                 }
                 endEp();
                 // a run of single steps by one player (nothing else in between) is played as one walk, like the game's own
@@ -24004,14 +24004,17 @@ ol.ci-steps li::marker { content: none; }
                         else if (e.t === 'td') { sfx('touchdown'); sfx('crowdHuge', 200); floater(P(e.p), 'TOUCHDOWN!'); }
                     } catch (er) { console.error('FREP fx', er); }
                 });
-                if (F.fly) {   // the ball in the air: an arc for a pass, kick or throw-in, a little hop for a bounce
+                if (F._carry) {   // a player flying with the ball (drawn in their hands by the flight layer)
+                    const c = F._carry, dur = Math.min(1000, 320 + c.far * 70) / speed;
+                    try { animatePlayerFlight(c.p, c.ox, c.oy, c.x, c.y, dur, null, { arc: Math.min(2.4, 0.8 + c.far * 0.25), spin: 2, silent: speed > 2 }); } catch (er) {}
+                } else if (F.fly) {   // the ball in the air: an arc for a pass, kick or throw-in, a little hop for a bounce
                     const d = F.fly.d, dur = (F.fly.kick ? 1300 : d <= 1 ? 200 : Math.min(900, 260 + d * 55)) / speed;
                     try { animateBallFlight(F.fly.from[0], F.fly.from[1], F.fly.to[0], F.fly.to[1], dur, null, d >= 2); if (d <= 1) sfx('ballBounce'); } catch (er) {}
                 }
             }
             function show(i, animate) {
                 const F = D.frames[i]; if (!F) return;
-                const slideMs = Math.max(60, 230 / speed);
+                const slideMs = Math.max(60, 230 / speed); F._carry = null;
                 state.players.forEach((p, j) => {
                     const x = F.pos[j * 2], y = F.pos[j * 2 + 1], s = F.st[j];
                     const onP = x >= 0 && x < CFG.cols && y >= 0 && y < CFG.rows && ![5, 6, 7, 8, 9, 10, 13, 14].includes(s);
@@ -24020,7 +24023,11 @@ ol.ci-steps li::marker { content: none; }
                     p.isDown = onP && (s === 3 || s === 4 || s === 11 || s === 17); p.isStunned = onP && s === 4;
                     if (onP) { p.x = x; p.y = y; } else { p.x = -9; p.y = -9; }
                     const far = Math.max(Math.abs(ox - x), Math.abs(oy - y)), flown = (F.fx || []).some(e => e.t === 'fly' && e.p === j);
-                    if (animate && F.walk && j === F.mover && onP && wasOn && far === 1) {   // a step of a walk: linear in the middle, easing in and out at the ends
+                    // the ball and the player who has it go the same way, two squares or more: a thrown team-mate (or a leap), ball in hand
+                    const pb = i > 0 && D.frames[i - 1].ball, hadBall = pb && pb[0] === ox && pb[1] === oy;
+                    const carried = animate && onP && wasOn && far >= 2 && hadBall && F.ball && F.ball[0] === x && F.ball[1] === y && !(F.fly && F.fly.kick);
+                    if (carried) { p.walkAnim = null; F._carry = { p, ox, oy, x, y, far }; }
+                    else if (animate && F.walk && j === F.mover && onP && wasOn && far === 1) {   // a step of a walk: linear in the middle, easing in and out at the ends
                         const d = walkMs(F);
                         p.walkAnim = { fx: ox, fy: oy, t0: performance.now(), dur: d, keep: true,
                             ease: F.walk === 'mid' ? (k => k) : F.walk === 'first' ? (k => k * k * 0.5 + k * 0.5) : (k => 1 - (1 - k) * (1 - k)) };
@@ -24350,7 +24357,7 @@ ol.ci-steps li::marker { content: none; }
             }
             // (tests) the players a replay would put on the pitch, with FUMBBL's position name beside ours
             function debugBuild(d) { const keep = D; D = d; try { buildMatch(); return state.players.map((p, i) => ({ team: p.team, type: p.type, star: p.star, ffb: d.roster[i].pos })); } finally { D = keep; } }
-            return { wire, on: () => on, parse, start, tap, overlay, debugBuild, raceOf: raceKey, debug: () => ({ D, at }) };
+            return { wire, on: () => on, parse, start, tap, overlay, debugBuild, raceOf: raceKey, debug: () => ({ D, at, show: (i, a) => { at = i; show(i, a); } }) };
         })();
 
         // ---------- My matches: each match is quietly recorded as it's played, in the same form as a FUMBBL replay (the subset
@@ -24389,16 +24396,17 @@ ol.ci-steps li::marker { content: none; }
                 const side = state.activeTeam, turn = [state.turn[0] || 0, state.turn[1] || 0];
                 if (P.side >= 0 && (side !== P.side || turn[0] !== P.turn[0] || turn[1] !== P.turn[1] || state.half !== P.half)) pre.push({ reportId: 'turnEnd' });
                 const pos = new Map(), st = new Map();
+                const airborne = p => p.x === -20 && p.y === -20 && P.pos.get(p.id) && P.pos.get(p.id)[0] >= 0;   // a thrown team-mate in the air (parked off the board meanwhile)
                 state.players.forEach(p => {
                     if (!C.seen.has(p.id)) C.seen.set(p.id, p);
-                    const on = onPitch(p), xy = on ? [p.x, p.y] : [-1, -1], s = pState(p), k = sid(p);
+                    const air = airborne(p), on = onPitch(p), xy = air ? P.pos.get(p.id) : on ? [p.x, p.y] : [-1, -1], s = air ? P.st.get(p.id) : pState(p), k = sid(p);
                     pos.set(p.id, xy); st.set(p.id, s);
                     const was = P.pos.get(p.id);
                     if (!was || was[0] !== xy[0] || was[1] !== xy[1]) ch('fieldModelSetPlayerCoordinate', k, xy);
                     if (P.st.get(p.id) !== s) ch('fieldModelSetPlayerState', k, s);
                 });
                 const carrier = state.ball && state.ball.carrierId != null ? state.players.find(p => p.id === state.ball.carrierId) : null;
-                const b = carrier && onPitch(carrier) ? [carrier.x, carrier.y] : state.ball && state.ball.x >= 0 && state.ball.x < CFG.cols && state.ball.y >= 0 && state.ball.y < CFG.rows ? [state.ball.x, state.ball.y] : null;
+                const b = carrier && airborne(carrier) ? P.pos.get(carrier.id).slice() : carrier && onPitch(carrier) ? [carrier.x, carrier.y] : state.ball && state.ball.x >= 0 && state.ball.x < CFG.cols && state.ball.y >= 0 && state.ball.y < CFG.rows ? [state.ball.x, state.ball.y] : null;
                 const bk = b ? b.join(',') : '', inPlay = !!b;
                 if (bk !== P.ball) { ch('fieldModelSetBallCoordinate', null, b); if (b && C.kick) { post.unshift({ reportId: 'kickoffScatter' }); C.kick = false; } }
                 if (inPlay !== P.inPlay) ch('fieldModelSetBallInPlay', null, inPlay);
@@ -24610,6 +24618,7 @@ ol.ci-steps li::marker { content: none; }
                 if (o.inj) { const m = {}; Object.keys(o.inj).forEach(k => { m[n(+k)] = o.inj[k]; }); o.inj = m; }
                 if (o.legs) o.legs.forEach(l => { if (l.from != null) l.from = n(l.from); ['catch', 'int'].forEach(k => { if (l[k] && l[k].id != null) l[k].id = n(l[k].id); }); });
                 if (o.boom && o.boom.hit) o.boom.hit = o.boom.hit.map(n);
+                if (o.crashes) o.crashes.forEach(c => { if (c.on != null) c.on = n(c.on); });   // who a thrown team-mate crash-landed on
                 return o;
             }
             // what kind of match it was, in words: 'League: Old World League · Final', 'Tournament: Spring Cup · Semi-finals', 'Exhibition'...
