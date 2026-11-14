@@ -2,6 +2,30 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.00 (14 Nov 2026)
+- **New Star Player: Da Red Gobbo's Squigmobile.** 200k; MA 5, ST 6, AG 5+, PA –, AV 10+ (Big Guy, Goblin, Special); Bombardier,
+  Break Tackle, Dirty Player, Hail Mary Pass, Hatred (Dwarf), Juggernaut, Loner (4+), Mighty Blow, No Ball, Secret Weapon, Stand Firm.
+  - **Exhibition Play only** (a new `exhib` flag on the Star; `starsFor(..., exhib)` only lists such Stars when asked): he's on the
+    exhibition inducements list (yours and the computer's shopping) but never for league teams, tournament or Matched Play teams,
+    the computer's tournament drafting or an online tournament's tie. He plays for any team except Dwarfs (`notFor`).
+  - **Have a Present, Ya Git:** at the first kick-off of each half his team gets one extra Bribe (if he isn't a casualty). The
+    Bribe indicator shows it as a red +1; a send-off uses it before any bought Bribe; an unused one is gone at the end of the half
+    (it doesn't stack). His card shows whether this half's Bribe is ready or gone.
+  - **Hail Mary bombs:** a Bombardier with Hail Mary Pass can now throw a bomb at any square on the pitch (out of normal range
+    it's a Hail Mary: a Long Bomb, never accurate, so it scatters three times from the target, and can't be intercepted; not in a
+    Blizzard). With PA – he needs a 6, as the game already treated a "–" Passing Ability for bombs, so a Hail Mary bomb fumbles on
+    1-4. The computer weighs Hail Mary bombs too (rarely worth it) and now considers bombs by a player with no PA.
+  - His other skills use the existing rules (as for the Deathroller and H'thark): Juggernaut turns Both Down into a Push on a
+    Blitz, Secret Weapon sends him off at the end of the drive (that's where the extra Bribe comes in), No Ball, Hatred (Dwarf),
+    Big Guy for Hatred (Big Guy).
+  - **Sprite** after the 2026 festive miniature: Da Red Gobbo in a candy-striped helmet with a star on top, goggles and a red
+    coat with white fur, on a tracked squig-bike whose front is a Squig's huge toothy mouth with glowing eyes and a green bauble,
+    a sack with a bomb "present" in it behind him, and a black bomb sidecar with his elf's striped leg (in the team's colours)
+    kicking up out of it. Big Guy size, with the idle bounce.
+  - New check: `node tools/ui-tests/red-gobbo.js` (who can hire him, the shop list, the extra Bribe, and fast computer matches with
+    him on both sides).
+- "What's new" rolled up for the new major version: one entry for everything since 4.0.
+
 ## v4.99 (14 Nov 2026)
 - **New: music for the Chaos Wastes pitch.** It used to borrow the Brimstone (Khorne) music; now it has a track of its own, warped
   and unsettling rather than straight metal. Around 84 beats a minute (60 when calm, 96 when tense), rooted on D with the tritone
