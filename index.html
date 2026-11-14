@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.72</title>
+    <title>BludBowl 4.73</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -986,6 +986,11 @@
 .coach-box .cb-h { font-weight: 800; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #7dd3fc; margin-bottom: 3px; }
 .coach-box p { margin: 0 0 5px; } .coach-box p:last-child { margin: 0; }
 .coach-box ul { margin: 2px 0 5px; padding-left: 16px; }
+.coach-box .cb-zoom { display: block; width: 100%; height: auto; margin: 4px auto 3px; border-radius: 6px; border: 1px solid #334155; }
+.coach-box .cb-key { font-size: 10.5px; color: #94a3b8; text-align: center; margin-bottom: 6px; }
+.coach-box .cb-key span { font-weight: 800; margin-left: 6px; } .coach-box .k-atk { color: #facc15; } .coach-box .k-def { color: #ef4444; } .coach-box .k-as { color: #22c55e; } .coach-box .k-no { color: #94a3b8; }
+.coach-box .cb-ok { display: flex; justify-content: flex-end; margin-top: 8px; position: sticky; bottom: 0; }
+.coach-box .cb-ok button { padding: 7px 14px; border-radius: 8px; border: 0; background: #0284c7; color: #fff; font: 800 12px/1.2 Inter, system-ui, sans-serif; cursor: pointer; box-shadow: 0 -4px 10px rgba(8,47,73,.9); }
 .coach-box b { color: #fde68a; } .coach-box .dim { color: #94a3b8; } .coach-box .bad { color: #fca5a5; } .coach-box .good { color: #86efac; }
 #dice-modal-card { max-height: calc(100dvh - 16px); overflow-y: auto; overscroll-behavior: contain; }
 /* the fan-project disclaimer, just above the version number */
@@ -1109,7 +1114,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.72</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.73</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8170,7 +8175,8 @@
             const openEl = id => { const e = $(id); return !!e && !e.hidden; };
             function holding() {
                 if (CLOCK.sim || !on()) return false;
-                return (!hidden && ack < notes.length) || openEl('coach-intro') || openEl('coach-tour');
+                const shown = id => { const e = $(id); return !!e && !e.classList.contains('hidden'); };
+                return (!hidden && ack < notes.length) || openEl('coach-intro') || openEl('coach-tour') || (rollWait && shown('modal-roll')) || (blkWait && shown('modal-dice'));
             }
             function nudge() { const c = $('coach-card'); if (!c || c.hidden) return; c.classList.remove('cc-nudge'); void c.offsetWidth; c.classList.add('cc-nudge'); }
             function note(title, html, kind = 'info') {
@@ -8286,18 +8292,21 @@
                 }
                 return b;
             }
+            let rollWait = false, blkWait = false;   // the computer's roll / block dice waiting for the person's OK (in the window itself)
+            const okBtn = (label, key) => `<div class="cb-ok"><button type="button" data-cbok="${key}">${label}</button></div>`;
             function roll(pr) {
                 const b = rollBox();
                 b.hidden = !on() || !pr;
                 if (b.hidden) return;
-                const w = rollWhy(pr);
-                b.innerHTML = `<div class="cb-h">🎓 Coach: why ${pr.target}+?</div><p>${w.what}</p><p>${w.maths}</p><p>${w.odds}</p>${w.fail ? `<p>${w.fail}</p>` : ''}${w.adv ? `<p class="dim">${w.adv}</p>` : ''}`;
+                const w = rollWhy(pr), theirs = !mine(pr.player);
+                b.innerHTML = `<div class="cb-h">🎓 Coach: why ${pr.target}+?</div>${theirs ? `<p><b>${team(pr.player.team)}</b> are rolling for ${who(pr.player)}.</p>` : ''}<p>${w.what}</p><p>${w.maths}</p><p>${theirs ? w.odds.replace(/ With a team re-roll[^]*$/, '') : w.odds}</p>${w.fail ? `<p>${w.fail}</p>` : ''}${w.adv ? `<p class="dim">${w.adv}</p>` : ''}${theirs && rollWait ? okBtn(`OK: let ${team(pr.player.team)} roll →`, 'roll') : ''}`;
+                const ok = b.querySelector('[data-cbok]'); if (ok) ok.onclick = e => { e.stopPropagation(); rollWait = false; roll(pr); };
             }
-            // the computer's rolls flash past: say what they needed in the card
+            // a new roll: the computer's waits for the person's OK
             function rollNote(pr) {
-                if (!on() || !pr || mine(pr.player)) return;
-                const w = rollWhy(pr);
-                note(`${team(pr.player.team)}: ${esc(NAMES[pr.type] || pr.type)} by ${pr.player.name || pr.player.type}`, `<p>${w.what}</p><p>${w.maths}</p><p>${w.odds.replace(/ With a team re-roll[^]*$/, '')}</p>`);
+                if (!on() || !pr) return;
+                rollWait = !mine(pr.player) && !CLOCK.sim;
+                roll(pr);
             }
 
             // ---- blocks: why that many dice, who picks, and what each face means here ----
@@ -8352,12 +8361,42 @@
                 if (markedA.length) h += `<p class="dim">${nm(markedA)} can't assist: another opponent is marking them (the Guard skill gets round that).</p>`;
                 h += `<p>Equal Strength: 1 die. Stronger: 2 dice. More than twice as strong: 3 dice. So: <b>${o.dice} ${plural(o.dice, 'die', 'dice')}</b>, and ${picker}.</p>`;
                 if (mine(atk) && A < D) h += `<p class="dim">Tip: blocking a stronger player is risky, because they pick the die. Get team-mates next to the target first, or block someone else.</p>`;
-                blk = { atk, def, chooser: c.chooser, dice: o.dice, head: h };
-                b.innerHTML = h;
-                lesson('block', 'Blocking', `<p>A <b>Block</b> is how players hit each other: a player hits an opponent standing next to them. A <b>Blitz</b> (once a turn) lets a player move and block in the same action.</p>
-                    <p>Compare Strength (plus assists) to see how many block dice are rolled and who picks one. Each die shows: <b>Attacker Down</b>, <b>Both Down</b>, <b>Push</b> (two faces), <b>Defender Stumbles</b> and <b>Defender Down</b>.</p>
-                    <p>A player knocked down gets an armour roll. If the attacker goes down, it's a turnover.</p>`);
-                if (!mine(atk)) note(`${team(atk.team)} block`, `<p>${who(atk)} (${A}) blocks ${who(def)} (${D}): ${o.dice} ${plural(o.dice, 'die', 'dice')}, ${picker}.</p>`);
+                h = h.replace('</div>', `</div><canvas class="cb-zoom" data-zoom="1"></canvas><div class="cb-key"><span class="k-atk">●</span> blocker <span class="k-def">●</span> target <span class="k-as">+1</span> assist <span class="k-no">✕</span> marked, can't assist</div>`);
+                blkWait = AI.isAI(c.chooser) && !CLOCK.sim;   // the computer picks the die (or decides on a re-roll): wait for the person's OK
+                blk = { atk, def, chooser: c.chooser, dice: o.dice, head: h, helpA, helpD, markedA };
+                paintBlock(b, h);
+            }
+            function paintBlock(b, h) {
+                b.innerHTML = h + (blkWait ? okBtn(`OK: let ${team(blk.chooser)} choose →`, 'blk') : '');
+                const cv = b.querySelector('canvas[data-zoom]'); if (cv) zoomBlock(cv);
+                const ok = b.querySelector('[data-cbok]'); if (ok) ok.onclick = e => { e.stopPropagation(); blkWait = false; paintBlock(b, h); };
+            }
+            // the block close up: the squares round the two players, with the blocker, the target and the assists picked out
+            function zoomBlock(cv) {
+                const { atk, def, helpA, helpD, markedA } = blk, S = 36, all = [atk, def, ...helpA, ...helpD, ...markedA];
+                let x0 = Math.min(...all.map(q => q.x)) - 1, x1 = Math.max(...all.map(q => q.x)) + 1, y0 = Math.min(...all.map(q => q.y)) - 1, y1 = Math.max(...all.map(q => q.y)) + 1;
+                while (x1 - x0 < 5) { if (x0 > 0) x0--; if (x1 - x0 < 5 && x1 < CFG.cols - 1) x1++; if (x0 <= 0 && x1 >= CFG.cols - 1) break; }
+                while (y1 - y0 < 3) { if (y0 > 0) y0--; if (y1 - y0 < 3 && y1 < CFG.rows - 1) y1++; if (y0 <= 0 && y1 >= CFG.rows - 1) break; }
+                x0 = Math.max(0, x0); y0 = Math.max(0, y0); x1 = Math.min(CFG.cols - 1, x1); y1 = Math.min(CFG.rows - 1, y1);
+                const cols = x1 - x0 + 1, rows = y1 - y0 + 1;
+                cv.width = cols * S; cv.height = rows * S; cv.style.maxWidth = Math.min(cols * S, 360) + 'px';
+                const c = cv.getContext('2d');
+                for (let x = 0; x < cols; x++) for (let y = 0; y < rows; y++) { c.fillStyle = (x + y) % 2 ? '#3f7d3a' : '#46883f'; c.fillRect(x * S, y * S, S, S); }
+                const ring = (q, col) => { const cx = (q.x - x0 + 0.5) * S, cy = (q.y - y0 + 0.82) * S; c.strokeStyle = col; c.lineWidth = 3; c.beginPath(); c.ellipse(cx, cy, S * 0.36, S * 0.13, 0, 0, Math.PI * 2); c.stroke(); };
+                const tag = (q, t, col) => { const cx = (q.x - x0 + 0.84) * S, cy = (q.y - y0 + 0.18) * S; c.fillStyle = col; c.strokeStyle = '#0f172a'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, S * 0.19, 0, Math.PI * 2); c.fill(); c.stroke();
+                    c.fillStyle = '#fff'; c.font = `800 ${Math.round(S * 0.24)}px Inter, system-ui, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, cx, cy + 0.5); };
+                const marks = new Map(); helpA.concat(helpD).forEach(q => marks.set(q.id, ['+1', '#16a34a'])); markedA.forEach(q => marks.set(q.id, ['✕', '#64748b']));
+                [atk, def].forEach((q, i) => ring(q, i ? '#ef4444' : '#facc15'));
+                marks.forEach((m, id) => { const q = getPlayerById(id); if (q) ring(q, m[1]); });
+                c.imageSmoothingEnabled = false;
+                state.players.filter(q => q.x >= x0 && q.x <= x1 && q.y >= y0 && q.y <= y1 && !q.isReserve && !q.isKO && !q.isCasualty && !q.isEjected).forEach(q => {
+                    const sp = spriteCanvas(q, false); if (!sp) return;
+                    const px = (q.x - x0) * S, py = (q.y - y0) * S;
+                    if (q.isDown) { c.save(); c.globalAlpha = 0.7; c.translate(px + S / 2, py + S * 0.55); c.rotate(Math.PI / 2); c.drawImage(sp, -S * 0.4, -S * 0.4, S * 0.8, S * 0.8); c.restore(); }
+                    else c.drawImage(sp, px + S * 0.06, py - S * 0.04, S * 0.88, S * 0.88);
+                    if (state.ball.carrierId === q.id) { c.fillStyle = '#92400e'; c.strokeStyle = '#1c1917'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(px + S * 0.22, py + S * 0.7, S * 0.13, S * 0.09, -0.5, 0, Math.PI * 2); c.fill(); c.stroke(); }
+                });
+                marks.forEach((m, id) => { const q = getPlayerById(id); if (q) tag(q, m[0], m[1]); });
             }
             function blockDice() {
                 const b = $('coach-block'), c = state.combat;
@@ -8371,7 +8410,7 @@
                     c.dice.forEach(f => { let s = 0; try { s = AI.coachFace(f, blk.atk, blk.def); } catch (e) {} if (atkSide ? s > bs : s < bs) { bs = s; best = f; } });
                     h += `<p>Coach's pick: <b>${FACE_NAME[best]}</b>.</p>`;
                 }
-                b.innerHTML = h;
+                paintBlock(b, h);
             }
 
             // ---- the ball ----

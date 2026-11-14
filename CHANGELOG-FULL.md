@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.73 (14 Nov 2026)
+- **Changed (training):** the coach no longer puts a separate card over blocks and rolls (it got in the way of their own
+  explanations). The block window's coach box now has a close-up of the squares round the two players, drawn with the real players:
+  the blocker ringed yellow, the target red, each assist on either side marked +1 and a marked team-mate who can't assist marked
+  ✕, with a key. When the computer is about to choose its block die (or decide on a re-roll), or make one of its rolls, the OK button
+  is in that window ("OK: let the Orcs choose →", "OK: let the Orcs roll →") and play waits for it; your own blocks and rolls don't
+  need one. The other coach notes (bounces, armour, injuries, turnovers, the start of the match) still use the card.
+
 ## v4.72 (14 Nov 2026)
 - **New (training):** the first drive of a training match is explained step by step as it happens, "Step 1 of 9" to "Step 9 of 9":
   1 fans and weather, 2 the coin toss, 3 the kicking team sets up, 4 the receiving team sets up, 5 the kicking team aims, 6 the kick
