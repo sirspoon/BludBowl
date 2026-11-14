@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.80</title>
+    <title>BludBowl 4.81</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -99,6 +99,12 @@
         #teams-hub .th-tbl tr.th-main td { border-bottom: 0; padding-bottom: 2px; }
         #teams-hub .th-tbl tr.th-sub td { padding-top: 0; padding-bottom: 8px; }
         #teams-hub .th-tbl tr.th-sub .pl-stats { margin-top: 0; }
+        #teams-hub .th-rhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; } #teams-hub .th-rhead h3 { margin: 0; }
+        #teams-hub .th-clist { display: flex; flex-direction: column; } #teams-hub .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+        #teams-hub .th-crow { display: flex; gap: 8px; padding: 6px 2px; border-bottom: 1px solid #1c263a; } #teams-hub .th-crow:last-child { border-bottom: 0; }
+        #teams-hub .th-cn { width: 18px; flex: 0 0 auto; text-align: right; padding-top: 1px; } #teams-hub .th-cmain { min-width: 0; flex: 1; }
+        #teams-hub .th-chead { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; } #teams-hub .th-crow .pl-stats { margin-top: 2px; }
+        #teams-hub .th-crow.th-out { opacity: .55; } #teams-hub .th-crow .pl-skills:has(.pl-none) { display: none; }
         .pl-stats { display: flex; flex-wrap: wrap; gap: 2px 9px; font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 3px; }
         .pl-stats b { color: #e2e8f0; font-weight: 700; }
         .pl-stats .pst.up b { color: #4ade80; } .pl-stats .pst.dn b { color: #f87171; }
@@ -1164,7 +1170,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.80</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.81</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -4655,6 +4661,16 @@ ol.ci-steps li::marker { content: none; }
                     <span class="th-tmain"><span class="th-tname">${esc(t.name)}${(t.fallen || []).length ? `<span class="th-mini" title="${t.fallen.length} fallen">✝${t.fallen.length > 1 ? t.fallen.length : ''}</span>` : ''}${(t.trophies || []).length ? `<span class="th-mini" aria-label="${t.trophies.length} trophies">${t.trophies.slice().sort((x, y) => x.place - y.place).slice(0, 5).map(tr => TROPHY.svg(tr.kind, 14)).join('')}${t.trophies.length > 5 ? '+' + (t.trophies.length - 5) : ''}</span>` : ''}</span>
                     <span class="pg-dim">${esc(R.name)} · ${TB.isSev(t) ? 'Sevens · ' : ''}${TB.isMP(t) ? `Matched Play · ${k(t.budget)}` : car ? `${t.played} played · ${rc.w}-${rc.d}-${rc.l}` : 'not played yet'} · TV ${k(CAREER.tv(t))}</span></span></button>`;
             }
+            // the roster can show just each player's characteristics and skills (no SPP, games or value), remembered on this device
+            let compact = false; try { compact = localStorage.getItem('bb-roster-compact') === '1'; } catch (e) {}
+            function compactRoster(t) {
+                const R = RACES[t.race];
+                return `<div class="th-clist">${t.players.map((p, i) => {
+                    const ty = R.types[p.pos] || { type: p.pos }, inj = CAREER.injTags(p);
+                    return `<div class="th-crow ${p.mng ? 'th-out' : ''}"><span class="pg-dim th-cn">${i + 1}</span><div class="th-cmain"><div class="th-chead"><b>${esc(p.name)}</b> <span class="pg-dim">${esc(ty.type)}</span></div>
+                        ${statSkillHtml(t.race, TB.mpView(t, p))}${inj ? `<div class="th-inj">${inj}</div>` : ''}</div></div>`;
+                }).join('')}</div>`;
+            }
             function detail(t) {
                 const R = RACES[t.race], car = CAREER.started(t), rc = t.record;
                 const rows = t.players.map((p, i) => {
@@ -4688,8 +4704,9 @@ ol.ci-steps li::marker { content: none; }
                             <button type="button" class="pg-btn th-danger" data-act="reset" ${car ? '' : 'disabled'}>${armed.reset > Date.now() ? 'Tap again to reset' : 'Reset career'}</button>
                             <button type="button" class="pg-btn th-danger" data-act="del">${armed.del > Date.now() ? 'Tap again to delete' : 'Delete'}</button>
                         </div></section>
-                    <section class="pg-card"><h3>Roster</h3><div class="th-scroll"><table class="th-tbl"><thead><tr><th></th><th>Player</th><th>SPP</th><th>GP</th><th>TD</th><th>CAS</th><th>CP</th><th>INT</th><th>MVP</th><th>Value</th></tr></thead><tbody>${rows}</tbody></table></div>
-                        <div class="pg-dim" style="margin-top:6px">SPP shows points still to spend. GP games played · CP completions · INT interceptions.</div></section>
+                    <section class="pg-card"><div class="th-rhead"><h3>Roster</h3><div class="lg-seg th-rview" role="group" aria-label="Roster view"><button type="button" class="pg-chip ${compact ? '' : 'on'}" data-rview="full" aria-pressed="${!compact}">Full</button><button type="button" class="pg-chip ${compact ? 'on' : ''}" data-rview="compact" aria-pressed="${compact}">Stats &amp; skills only</button></div></div>
+                        ${compact ? compactRoster(t) : `<div class="th-scroll"><table class="th-tbl"><thead><tr><th></th><th>Player</th><th>SPP</th><th>GP</th><th>TD</th><th>CAS</th><th>CP</th><th>INT</th><th>MVP</th><th>Value</th></tr></thead><tbody>${rows}</tbody></table></div>
+                        <div class="pg-dim" style="margin-top:6px">SPP shows points still to spend. GP games played · CP completions · INT interceptions.</div>`}</section>
                     <section class="pg-card"><h3>Recent results</h3>${hist || '<div class="pg-dim">No career matches yet.</div>'}</section>`;
             }
             // every podium finish there has been, newest first, and the most decorated teams
@@ -4727,6 +4744,7 @@ ol.ci-steps li::marker { content: none; }
                     if (b.id === 'th-rules') { TRULES.open(() => render()); return; }
                     if (b.id === 'th-export-all') { const l = TB.list(); if (!l.length) { msg('No saved teams yet.', true); return; } TB.download('bludbowl-teams.json', { version: 1, teams: l }); msg(`Exported ${l.length} team${l.length === 1 ? '' : 's'}.`); return; }
                     if (d.sel) { sel = d.sel; armed = { del: 0, reset: 0 }; msg(''); render(); return; }
+                    if (d.rview) { compact = d.rview === 'compact'; try { localStorage.setItem('bb-roster-compact', compact ? '1' : '0'); } catch (e) {} const y = $('teams-hub').scrollTop; render(); $('teams-hub').scrollTop = y; return; }
                     if (!t) return;
                     if (d.fallen != null) { HONOURS.show(t, 'fallen', +d.fallen); return; }
                     if (d.trophy != null) { HONOURS.show(t, 'trophy', +d.trophy); return; }

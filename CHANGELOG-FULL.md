@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.81 (14 Nov 2026)
+- **New (Teams screen):** the Roster card has a Full / Stats & skills only switch. Stats & skills only shows each player's name,
+  position, characteristics and skills (and any injury), without the SPP, games, touchdowns, casualties, completions,
+  interceptions, MVPs, value or level, and leaves out the "No skills" line, so the list is much shorter. The choice is remembered
+  on this device.
+
 ## v4.80 (14 Nov 2026)
 - **Changed: Tournament Rules is now Rulesets** (main menu card, Teams screen button and the links on the tournament forms), with
   four sections along the top:

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.81 (14 Nov 2026)
+- Teams screen: a "Stats & skills only" switch on the roster hides the career numbers for a tighter list.
+
 ## v4.80 (14 Nov 2026)
 - Tournament Rules is now Rulesets, with sections for Tournaments, Sevens tournaments, Leagues and Sevens leagues. The last three
   show GW's official rules the game uses (team building, SPP, advancements, winnings, re-drafting).
