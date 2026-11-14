@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.91 (14 Nov 2026)
+- **Improved (Team Builder roster):** each row now has a top line with the order arrows and number, the player's token, their
+  position in bold, the name box, cost and ✕; underneath, the characteristics, skills and extra-skill pick use the full width
+  (skills sit beside the characteristics where there's room, and the "No skills" line is gone). Rows are about a third shorter
+  on a phone (about 96 pixels instead of 145) and the characteristics no longer wrap. The "reserve" label is replaced by a note
+  that players below the dashed line are reserves. On a wide screen the extra-skill menu is kept to a sensible width.
+- **Star Players on the roster** are numbered after the players (e.g. 13 and 14), with the same layout. They have no move
+  arrows: Star Players join the squad as extra players at kick-off, where you choose who starts, so the roster order doesn't
+  apply to them.
+
 ## v4.90 (14 Nov 2026)
 - **Improved (Team Builder, phone in landscape):** on a short, wide screen the summary box that stays at the top used the
   stacked phone layout and took about half the screen. It now packs into one slim row: team value, money spent with its bar,

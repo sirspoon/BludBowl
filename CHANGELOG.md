@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.91 (14 Nov 2026)
+- Team Builder roster: tighter rows, each player's position in bold beside their name, and Star Players numbered after the players.
+
 ## v4.90 (14 Nov 2026)
 - Team Builder on a phone held sideways: the summary box at the top packs into one slim row, leaving more room below.
 
