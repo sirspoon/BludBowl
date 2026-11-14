@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.93 (14 Nov 2026)
+- **Fixed (skill tags, touch screens):** after tapping a skill tag and closing its description, the tag stayed highlighted,
+  because phones keep a tapped element's "hover" look until something else is tapped. The hover highlight now only applies with
+  a mouse; on a touch screen a tag is highlighted only while its description is open.
+
 ## v4.92 (14 Nov 2026)
 - **Fixed (skill tags, touch screens):**
   - A skill's description opened the moment a finger touched its tag, so a swipe to scroll that happened to start on a tag

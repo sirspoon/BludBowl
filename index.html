@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.92</title>
+    <title>BludBowl 4.93</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -95,7 +95,8 @@
             background: rgba(51,65,85,0.85); border: 1px solid rgba(100,116,139,0.8); color: #e2e8f0;
             font-size: 0.92em; line-height: 1.5; white-space: nowrap; font-weight: 600;
         }
-        .skill-tag:hover, .skill-tag.active { background: rgba(180,83,9,0.8); border-color: #fbbf24; color: #fff; }
+        .skill-tag.active { background: rgba(180,83,9,0.8); border-color: #fbbf24; color: #fff; }
+        @media (hover: hover) { .skill-tag:hover { background: rgba(180,83,9,0.8); border-color: #fbbf24; color: #fff; } }   /* phones keep :hover after a tap, so only a mouse gets it */
         #teams-hub .th-tbl tr.th-main td { border-bottom: 0; padding-bottom: 2px; }
         #teams-hub .th-tbl tr.th-sub td { padding-top: 0; padding-bottom: 8px; }
         #teams-hub .th-tbl tr.th-sub .pl-stats { margin-top: 0; }
@@ -123,7 +124,8 @@
         .pl-skills { margin-top: 3px; line-height: 1.75; font-size: 10.5px; } .pl-skills .pl-none { color: #64748b; font-style: italic; }
         .skill-tag.skill-extra { background: rgba(113,63,18,0.85); border-color: #f59e0b; color: #fcd34d; }
         .skill-tag.inj-tag { background: #450a0a; border-color: #991b1b; color: #fca5a5; cursor: pointer; }
-        .skill-tag.inj-tag:hover, .skill-tag.inj-tag.active { background: #7f1d1d; border-color: #f87171; color: #fff; }
+        .skill-tag.inj-tag.active { background: #7f1d1d; border-color: #f87171; color: #fff; }
+        @media (hover: hover) { .skill-tag.inj-tag:hover { background: #7f1d1d; border-color: #f87171; color: #fff; } }
         .th-inj, .pg-injtags { margin-top: 2px; font-size: 11px; }
         /* the action buttons: big enough to tap without hitting the one next to it */
         #action-toolbar { gap: 5px !important; padding: 5px !important; }
@@ -1229,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.92</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.93</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game

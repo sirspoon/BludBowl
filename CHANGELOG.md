@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.93 (14 Nov 2026)
+- Skill tags on a touch screen no longer stay highlighted after their description is closed.
+
 ## v4.92 (14 Nov 2026)
 - Skill tags on a touch screen: a swipe that starts on a tag now scrolls instead of opening it, and after closing a description
   you can scroll straight away.
