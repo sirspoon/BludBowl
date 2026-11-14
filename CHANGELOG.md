@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.88 (14 Nov 2026)
+- Team Builder: the hiring list fits a phone screen again, and hired Star Players show at the foot of the roster (also on the
+  Teams screen).
+
 ## v4.87 (14 Nov 2026)
 - Team Builder: its sections are on tabs (Team, Staff & costs, Hire players, Roster, Stars & inducements, Honours) instead of
   one long page.

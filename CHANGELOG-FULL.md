@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.88 (14 Nov 2026)
+- **Fixed (Team Builder):** on a phone the Hire players list was laid out wider than the screen, pushing the price buttons off
+  the right-hand edge. It now fits, in one column on a phone and several on a wide screen.
+- **Improved:** a tournament team's hired Star Players are listed at the foot of its roster: in the Team Builder (name,
+  characteristics, skills, their special rule, price and a ✕ to let them go), and on the Teams screen in both the full and the
+  Stats & skills only views. The roster note says they count towards the 11 and the 16.
+- **Fixed:** the last player's "move down" arrow on the Team Builder roster was active when the team had Star Players.
+
 ## v4.87 (14 Nov 2026)
 - **Changed: the Team Builder is on tabs.** Under the summary bar (which still stays at the top), tabs show one section at a time:
   **Team** (name, race, format, tournament rules and budget, colours, sprites, league), **Staff & costs** (re-rolls, staff,

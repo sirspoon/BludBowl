@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.87</title>
+    <title>BludBowl 4.88</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -507,7 +507,8 @@
         /* one section at a time, picked on the tabs */
         #team-builder .tb-grid > [data-pane]:not(.tb-on) { display: none !important; }
         #team-builder .tb-grid > [data-pane="team"], #team-builder .tb-grid > [data-pane="staff"] { max-width: 640px; width: 100%; justify-self: center; }
-        #team-builder #tb-hire { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); column-gap: 18px; }
+        #team-builder #tb-hire { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); column-gap: 18px; }
+        #team-builder .tb-plstar .tb-startok { background: #78350f; color: #fde68a; } #team-builder .tb-sname { font-weight: 800; padding: 5px 0 2px; } #team-builder .tb-plstar .tb-no { color: var(--tb-amber); }
         #team-builder .tb-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
         #team-builder .tb-tabs button { background: transparent; color: #e2e8f0; border: 1px solid var(--tb-edge); border-radius: 8px; padding: 7px 13px; font: inherit; font-weight: 700; cursor: pointer; }
         #team-builder .tb-tabs button:hover { border-color: #64748b; } #team-builder .tb-tabs button[aria-selected="true"] { border-color: var(--tb-amber); color: var(--tb-amber); background: rgba(245,158,11,.08); }
@@ -1199,7 +1200,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.87</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.88</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -4202,6 +4203,16 @@ ol.ci-steps li::marker { content: none; }
                 }
                 return html;
             }
+            // hired Star Players at the foot of the roster (they count towards the eleven); removed here or on the Stars & inducements tab
+            function starRows(t) {
+                if (!isMP(t)) return '';
+                return (t.stars || []).map(sk => { const S = STARS[sk]; return starMembers(sk).map((m, j) => `<div class="tb-pl tb-plstar"><span class="tb-ord"><span class="tb-no">★</span></span><span class="tb-tok tb-startok" aria-hidden="true">★</span>
+                    <div class="tb-pnwrap"><div class="tb-sname">${esc(m.name || S.name)}${S.mega ? ' <span class="tb-mega">MEGA-STAR</span>' : ''}</div>
+                        <div class="pl-stats"><span class="pst">MA <b>${m.ma}</b></span><span class="pst">ST <b>${m.st}</b></span><span class="pst">AG <b>${m.ag}+</b></span><span class="pst">PA <b>${m.pa ? m.pa + '+' : '–'}</b></span><span class="pst">AV <b>${m.av}+</b></span></div>
+                        <div class="pl-skills">${skillTags(m.skills || [], '')}</div><div class="tb-plx">${S.members && !/pair/i.test(S.text) ? 'Hired as a pair · ' : ''}${esc(S.rule)}: ${esc(S.text)}</div></div>
+                    <span class="tb-dim tb-pt">Star Player</span><span class="tb-dim">${j ? '' : k(S.cost)}</span>
+                    ${j ? '<span></span>' : `<button type="button" class="tb-x" data-mpstar="${sk}" aria-label="Remove ${esc(S.name)}">✕</button>`}</div>`).join(''); }).join('');
+            }
             function mpStarWhy(t, sk, c) {
                 const S = STARS[sk], mine = t.stars || [], tier = tierOf(t), mx = starMax(t), mg = megaMax(t);
                 if (mine.includes(sk)) return '';
@@ -4278,6 +4289,7 @@ ol.ci-steps li::marker { content: none; }
                 $('tb-format').value = t.format || ''; $('tb-format').disabled = car;
                 $('tb-format').parentNode.title = car ? 'A team with a career keeps its format (use Fresh copy on the Teams screen)' : '';
                 $('tb-rosterhint').textContent = sev ? 'The first 7 start the match (you can change who starts before kick-off). Up to 11 players; at most 4 without the Lineman keyword. One Lineman is your Veteran: MA 1 lower, and once a game a re-roll.'
+                    : isMP(t) && (t.stars || []).length ? 'Star Players (at the bottom) count towards the 11 and the 16. The first players make up the rest of the starting eleven; you can still change it before kick-off.'
                     : 'The first 11 start the match; you can still change the starting eleven before kick-off.';
                 $('tb-mpwrap').style.display = isMP(t) ? '' : 'none'; $('tb-mpcard').style.display = isMP(t) ? '' : 'none';
                 $('tb-race').innerHTML = Object.values(RACES).filter(r => r.positions).map(r => `<option value="${r.key}" ${r.key === t.race ? 'selected' : ''}>${esc(r.name)}</option>`).join('');
@@ -4342,12 +4354,12 @@ ol.ci-steps li::marker { content: none; }
                     const vet = sev && sevLineman(t.race, p.pos) ? (car ? (p.vet ? '<div class="tb-vetrow"><span class="tb-vet on">★ Veteran</span></div>' : '')
                         : `<div class="tb-vetrow"><button type="button" class="tb-vet ${p.vet ? 'on' : ''}" data-vet="${i}" aria-pressed="${!!p.vet}">${p.vet ? '★ Veteran' : 'Make Veteran'}</button></div>`) : '';
                     const noFire = sev && car;   // Sevens leagues: no firing players
-                    return `<div class="tb-pl"><span class="tb-ord"><button type="button" class="tb-mv" data-up="${i}" ${i ? '' : 'disabled'} aria-label="Move ${esc(p.name)} up">▲</button><span class="tb-no">${i + 1}</span><button type="button" class="tb-mv" data-dn="${i}" ${i < n - 1 ? '' : 'disabled'} aria-label="Move ${esc(p.name)} down">▼</button></span><span class="tb-tok" style="background:${t.primary};color:${t.secondary}">${sev && p.vet ? 'V' : ty.label}</span>
+                    return `<div class="tb-pl"><span class="tb-ord"><button type="button" class="tb-mv" data-up="${i}" ${i ? '' : 'disabled'} aria-label="Move ${esc(p.name)} up">▲</button><span class="tb-no">${i + 1}</span><button type="button" class="tb-mv" data-dn="${i}" ${i < t.players.length - 1 ? '' : 'disabled'} aria-label="Move ${esc(p.name)} down">▼</button></span><span class="tb-tok" style="background:${t.primary};color:${t.secondary}">${sev && p.vet ? 'V' : ty.label}</span>
                         <div class="tb-pnwrap"><input id="tb-pn-${i}" class="tb-in tb-pname" data-pn="${i}" value="${esc(p.name)}" maxlength="24" aria-label="Name of player ${i + 1}">${statSkillHtml(t.race, mpView(t, p))}${vet}${extra}</div>
                         <span class="tb-dim tb-pt">${esc(ty.type)}${i >= MINP ? ' · reserve' : ''}</span>
                         <span class="tb-dim">${k(CAREER.value(t.race, p))}</span>
                         ${noFire ? '<span></span>' : `<button type="button" class="tb-x" data-fire="${i}" aria-label="Release ${esc(p.name)}">✕</button>`}</div>`;
-                }).join('') : `<div class="tb-empty">No players yet. Hire them from the list.</div>`;
+                }).join('') + starRows(t) : `<div class="tb-empty">No players yet. Hire them from the list.</div>`;
                 // staff
                 const rrP = priceOf('rerolls', t), stP = priceOf('coaches', t), fanP = priceOf('fans', t), apoP = priceOf('apo', t);
                 $('tb-staff').innerHTML =
@@ -4791,8 +4803,12 @@ ol.ci-steps li::marker { content: none; }
                     const sk = skillTags(e.skills, '', ty.skills);
                     return `<tr class="th-c1 ${p.mng ? 'th-out' : ''}"><td class="pg-dim th-cn">${i + 1}</td><td class="th-cpos"><b>${esc(ty.type)}</b></td>${cell(e.ma, ty.ma)}${cell(e.st, ty.st)}${cell(e.ag, ty.ag, true, true)}${cell(e.pa, ty.pa, true, true)}${cell(e.av, ty.av, true)}</tr>
                         <tr class="th-c2 ${p.mng ? 'th-out' : ''}"><td></td><td colspan="6"><span class="th-cname">${esc(p.name)}</span>${sk ? ' ' + sk : ''}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td></tr>`;
-                }).join('')}</tbody></table></div>`;
+                }).join('')}${starsOf(t).map(({ m, S }) => `<tr class="th-c1"><td class="pg-dim th-cn">★</td><td class="th-cpos"><b>Star Player</b></td><td class="th-cs">${m.ma}</td><td class="th-cs">${m.st}</td><td class="th-cs">${m.ag}+</td><td class="th-cs">${m.pa ? m.pa + '+' : '–'}</td><td class="th-cs">${m.av}+</td></tr>
+                        <tr class="th-c2"><td></td><td colspan="6"><span class="th-cname">${esc(m.name || S.name)}</span> ${skillTags(m.skills || [], '')}</td></tr>`).join('')}</tbody></table></div>`;
             }
+            // a tournament team's Star Players, for the foot of the roster
+            const starsOf = t => TB.isMP(t) ? (t.stars || []).flatMap(sk => starMembers(sk).map((m, j) => ({ sk, m, S: STARS[sk], first: !j }))) : [];
+            const starStats = m => `<div class="pl-stats"><span class="pst">MA <b>${m.ma}</b></span><span class="pst">ST <b>${m.st}</b></span><span class="pst">AG <b>${m.ag}+</b></span><span class="pst">PA <b>${m.pa ? m.pa + '+' : '–'}</b></span><span class="pst">AV <b>${m.av}+</b></span></div><div class="pl-skills">${skillTags(m.skills || [], '')}</div>`;
             function detail(t) {
                 const R = RACES[t.race], car = CAREER.started(t), rc = t.record;
                 const rows = t.players.map((p, i) => {
@@ -4804,7 +4820,9 @@ ol.ci-steps li::marker { content: none; }
                         <td class="th-num">${p.spp}</td><td class="th-num">${s.gp}</td><td class="th-num">${s.td}</td><td class="th-num">${s.cas}</td><td class="th-num">${s.cp}</td><td class="th-num">${s.int}</td><td class="th-num">${s.mvp}</td>
                         <td class="th-num">${k(CAREER.value(t.race, p))}</td></tr>
                         <tr class="th-sub ${p.mng ? 'th-out' : ''}"><td></td><td colspan="9">${statSkillHtml(t.race, TB.mpView(t, p))}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td></tr>`;
-                }).join('');
+                }).join('') + starsOf(t).map(({ m, S, first }) => `<tr class="th-main"><td class="pg-dim">★</td><td><b>${esc(m.name || S.name)}</b><div class="pg-dim">Star Player${S.mega ? ' · Mega-star' : ''}</div></td>
+                        <td class="th-num">–</td><td class="th-num">–</td><td class="th-num">–</td><td class="th-num">–</td><td class="th-num">–</td><td class="th-num">–</td><td class="th-num">–</td><td class="th-num">${first ? k(S.cost) : ''}</td></tr>
+                        <tr class="th-sub"><td></td><td colspan="9">${starStats(m)}</td></tr>`).join('');
                 const hist = (t.history || []).slice(0, 10).map(h => `<div class="th-res"><span class="th-badge th-${h.res}">${h.res}</span> ${h.f}–${h.a} v ${esc(h.opp)} <span class="pg-dim">${esc(h.date)}</span></div>`).join('');
                 const fallen = (t.fallen || []).map(f => `<div class="th-res">✝ <b>${esc(f.name)}</b> <span class="pg-dim">${esc((R.types[f.pos] || {}).type || f.pos)} · ${f.gp} games · ${f.td} TD · ${f.cas} CAS · ${f.spp} SPP · ${esc(f.date)}</span></div>`).join('');
                 return `<section class="pg-card th-headcard" style="border-top-color:${t.primary}">
