@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.71 (14 Nov 2026)
+- Training: coach messages now wait for you to tap OK before play carries on, so you can read what the computer did. Hide the coach
+  (✕) to let play run without stopping.
+
 ## v4.70 (14 Nov 2026)
 - Training: the first time you can follow up after a block, a window explains following up (it's your choice) and the skills that
   change it. It's in Help too.

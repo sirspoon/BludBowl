@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.70</title>
+    <title>BludBowl 4.71</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -961,6 +961,13 @@
 #coach-card .cc-body { padding: 2px 10px 8px 9px; overflow-y: auto; min-height: 0; flex: 1 1 auto; }
 #coach-card .cc-body p { margin: 0 0 5px; } #coach-card .cc-body p:last-child { margin: 0; }
 #coach-card .cc-body ul { margin: 2px 0 5px; padding-left: 16px; }
+#coach-card .cc-foot { display: flex; justify-content: flex-end; padding: 0 8px 8px; flex: 0 0 auto; }
+#coach-card .cc-foot[hidden] { display: none; }
+#coach-card .cc-ok { padding: 6px 16px; border-radius: 8px; border: 0; background: #0284c7; color: #fff; font: 800 12px/1.2 Inter, system-ui, sans-serif; cursor: pointer; }
+#coach-card .cc-ok:hover, #coach-card .cc-ok:focus-visible { background: #0ea5e9; outline: none; }
+#coach-card[data-wait="1"] { box-shadow: 0 0 0 2px #38bdf8, 0 8px 26px rgba(0,0,0,.55); }
+#coach-card.cc-nudge { animation: ccNudge .5s; }
+@keyframes ccNudge { 0%, 100% { transform: none; } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 #coach-card b { color: #fde68a; } #coach-card .dim { color: #94a3b8; } #coach-card .bad { color: #fca5a5; } #coach-card .good { color: #86efac; }
 #coach-pill { position: fixed; z-index: 35; transform: translateX(-50%); padding: 5px 12px; border-radius: 999px; border: 1px solid #0369a1; background: rgba(7,22,38,.92); color: #7dd3fc;
     font: 800 11px/1.2 Inter, system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(0,0,0,.5); cursor: pointer; }
@@ -1094,7 +1101,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.70</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.71</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8088,7 +8095,7 @@
             const chance = t => (7 - Math.max(2, Math.min(6, t))) / 6;
             const plural = (n, a, b) => n === 1 ? a : (b || a + 's');
             const standing = q => q && !q.isDown && !q.isStunned && !q.isReserve && !q.isKO && !q.isCasualty && !q.isEjected && q.x >= 0 && q.x < CFG.cols;
-            let notes = [], at = -1, hidden = false, unread = 0, cause = null, tip = 0;
+            let notes = [], at = -1, hidden = false, unread = 0, cause = null, tip = 0, ack = 0;   // ack: how many notes have been OK'd
 
             // ---- the coach card (non-blocking: play carries on underneath) ----
             function card() {
@@ -8097,17 +8104,21 @@
                 c = document.createElement('div'); c.id = 'coach-card'; c.hidden = true; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite');
                 c.innerHTML = `<div class="cc-head"><span class="cc-badge">🎓 Coach</span><span class="cc-kind"></span><span class="cc-title"></span>
                     <button type="button" class="cc-btn" data-cc="prev" aria-label="Previous note">‹</button><span class="cc-pos"></span><button type="button" class="cc-btn" data-cc="next" aria-label="Next note">›</button>
-                    <button type="button" class="cc-btn" data-cc="hide" aria-label="Hide the coach" title="Hide (tap 🎓 Coach to bring it back)">✕</button></div><div class="cc-body"></div>`;
+                    <button type="button" class="cc-btn" data-cc="hide" aria-label="Hide the coach" title="Hide (tap 🎓 Coach to bring it back)">✕</button></div><div class="cc-body"></div>
+                    <div class="cc-foot"><button type="button" class="cc-ok" data-cc="ok">OK</button></div>`;
                 document.body.appendChild(c);
                 const pill = document.createElement('button'); pill.type = 'button'; pill.id = 'coach-pill'; pill.hidden = true; pill.innerHTML = '🎓 Coach <span class="cc-new"></span>';
                 document.body.appendChild(pill);
                 c.addEventListener('click', e => {
                     const b = e.target.closest('[data-cc]'); if (!b) return; e.stopPropagation();
                     const k = b.dataset.cc;
-                    if (k === 'prev') at = Math.max(0, at - 1); else if (k === 'next') at = Math.min(notes.length - 1, at + 1); else hidden = true;
+                    if (k === 'prev') at = Math.max(0, at - 1);
+                    else if (k === 'next') at = Math.min(notes.length - 1, at + 1);
+                    else if (k === 'ok') { ack = Math.max(ack, at + 1); at = ack < notes.length ? ack : notes.length - 1; }   // the next unread note, or stay on this one
+                    else { hidden = true; ack = notes.length; }   // hidden: play doesn't wait for the coach
                     paint();
                 });
-                pill.addEventListener('click', e => { e.stopPropagation(); hidden = false; unread = 0; at = notes.length - 1; paint(); });
+                pill.addEventListener('click', e => { e.stopPropagation(); hidden = false; unread = 0; ack = notes.length; at = notes.length - 1; paint(); });
                 window.addEventListener('resize', place);
                 return c;
             }
@@ -8140,13 +8151,25 @@
                 c.querySelector('[data-cc="prev"]').disabled = at <= 0;
                 c.querySelector('[data-cc="next"]').disabled = at >= notes.length - 1;
                 c.querySelector('.cc-body').scrollTop = 0;
+                const waiting = at >= ack, more = notes.length - at - 1;
+                c.dataset.wait = waiting ? '1' : '';
+                c.querySelector('.cc-foot').hidden = !waiting;
+                c.querySelector('.cc-ok').textContent = more > 0 ? `OK · ${more} more` : 'OK';
+                c.style.zIndex = waiting ? '45' : '';   // (while it waits for OK it sits over the dice windows, so it can always be seen and answered)
                 place();
             }
+            // play waits for the coach: an unread note on show, or one of the training windows open (never in the quick test mode)
+            const openEl = id => { const e = $(id); return !!e && !e.hidden; };
+            function holding() {
+                if (CLOCK.sim || !on()) return false;
+                return (!hidden && ack < notes.length) || openEl('coach-intro') || openEl('coach-tour');
+            }
+            function nudge() { const c = $('coach-card'); if (!c || c.hidden) return; c.classList.remove('cc-nudge'); void c.offsetWidth; c.classList.add('cc-nudge'); }
             function note(title, html, kind = 'info') {
                 if (!on()) return;
-                notes.push({ title, html, kind }); if (notes.length > 60) notes.shift();
-                at = notes.length - 1;
-                if (hidden) unread++;
+                notes.push({ title, html, kind }); if (notes.length > 60) { notes.shift(); ack = Math.max(0, ack - 1); }
+                if (hidden) { unread++; ack = notes.length; at = notes.length - 1; }
+                else at = Math.min(ack, notes.length - 1);   // the oldest note not yet OK'd: they're read in order
                 paint();
             }
             // a longer explanation, the first time something comes up in this match: true if it was shown
@@ -8157,7 +8180,7 @@
                 state.coachSeen.push(key); note(title, html, 'lesson');
                 return true;
             }
-            function reset() { notes = []; at = -1; hidden = false; unread = 0; cause = null; tip = 0; paint(); }
+            function reset() { notes = []; at = -1; hidden = false; unread = 0; cause = null; tip = 0; ack = 0; paint(); }
 
             // ---- rolls: what's needed and why ----
             const NAMES = { DODGE: 'Dodge', RUSH: 'Rush', PICKUP: 'Pick-up', CATCH: 'Catch', INTERCEPT: 'Interception', PASS: 'Pass', LANDING: 'Landing',
@@ -8780,7 +8803,7 @@
                 m.hidden = false;
                 m.onclick = e => { if (e.target === m) m.hidden = true; };
             }
-            return { on, reset, intro, blockWin, passWin, ttmWin, blitzWin, followWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            return { on, reset, holding, nudge, intro, blockWin, passWin, ttmWin, blitzWin, followWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -20450,6 +20473,7 @@
         // a tap on a pitch square (people via the canvas, the computer coach directly)
         function handleGridClick(x, y) {
             if (FREP.on()) { FREP.tap(x, y); return; }   // (watching a FUMBBL replay: a tap shows that player's card)
+            if (COACH.holding()) { COACH.nudge(); return; }   // (training: OK the coach's note first)
             if(x<-1 || x>CFG.cols || y<-1 || y>CFG.rows) return; 
             if (pitchPickTap(x, y)) return;   // picking a square or player for a spell or ability
             if (isWalking()) return;   // taps while a player is still walking would start a second move on top of the first
@@ -27919,6 +27943,7 @@
             function tick() {
                 if (!started || state.isGameOver || paused) return;
                 if (!on[0] && !on[1]) return;
+                if (COACH.holding()) return;   // (training: a coach note or window waiting to be read)
                 const t = now();
                 if (vis('modal-lineup') || vis('modal-roster')) return;
                 if (vis('modal-announce')) {

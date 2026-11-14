@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.71 (14 Nov 2026)
+- **Changed (training):** each coach note has an **OK** button and play waits for it: the computer doesn't carry on (move, roll,
+  pick its block dice) and taps on the pitch are held (the card gives a shake) until the note is OK'd. Notes that arrive meanwhile
+  queue up and are shown in order ("OK · 2 more"). While a note waits, the card sits above the dice windows so it can always be read
+  and answered. Hiding the coach (✕) lets play run on without stopping; 🎓 Coach brings it back. The quick test mode never waits, and
+  nothing changes outside training matches.
+
 ## v4.70 (14 Nov 2026)
 - **New (training and help):** the first time one of your blocks pushes a player back and you get the choice to follow up, a
   "Following up" window: what it is (free, no movement and no Dodge), that it's your choice (tap FOLLOW UP or Stay put), when each is
