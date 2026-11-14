@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.85 (14 Nov 2026)
+- Roster PDF: each position's keywords; a Ruleset check box listing every limit the team's rules set, what the team uses and
+  OK or OVER, with LEGAL or NOT LEGAL at the top; Elite Skills the rules limit in orange; and a note on whether extra skills count
+  towards the total.
+
 ## v4.84 (14 Nov 2026)
 - Roster PDF: Export PDF on the Teams screen (or Roster PDF in the Team Builder) saves a printable team sheet: team details,
   every player's characteristics, skills and cost, and a page saying what each skill does.

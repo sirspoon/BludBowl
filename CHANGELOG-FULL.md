@@ -2,6 +2,22 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.85 (14 Nov 2026)
+- **Improved (roster PDF):** made so another coach can check the team is legal.
+  - **Keywords:** a line under the player table with each position's BB2025 keywords (e.g. "Dragon Prince: Blitzer, Elf,
+    Runner"). The game now has the keywords for every position on every team (taken from the team lists on bloodbowlbase.ru).
+  - **Ruleset check:** a box under the table names the rules (and tier) and lists every limit they set, with what the team uses
+    against what's allowed and OK or OVER: budget, skill points or skill gold, primary and secondary skills, stacked skills and
+    stat increases, each Elite Skill, Star Players and Mega-stars, inducements on the pack's list, extra skills per player,
+    players, team re-rolls, dedicated fans and position limits (Sevens: non-Linemen and the Veteran). The top says LEGAL in green
+    or NOT LEGAL in red, with what's wrong listed underneath.
+  - **Elite Skills:** where the rules limit them (GW Matched Play: four players each; Sevens: two in the team; any ruleset with
+    an Elite limit), Elite Skills given as extra skills are in bold orange, and the key under the table says what the limit is.
+  - **Skills value:** the summary's skills line is starred, with a note saying whether it counts: tournament extra skills are
+    paid for with skill points or skill gold, or are free by tier, so they're not in the total spent; a league team's skills and
+    advances are part of each player's cost and the team value.
+- **New (internal):** a ruleset check for any team (used by the PDF), built from the same checks the Team Builder uses.
+
 ## v4.84 (14 Nov 2026)
 - **New: roster PDF.** "Export PDF" on the Teams screen and "Roster PDF" in the Team Builder save the team as a printable A4
   landscape sheet, laid out like a tournament roster:
