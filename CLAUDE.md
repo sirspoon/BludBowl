@@ -26,7 +26,32 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
   `core_rules/rules_and_regulations/`). The WebFetch tool can't reach it, but `curl` from
   the shell can: fetch the page and strip the HTML to read it.
 
+## Working style
+- The owner often keeps one long "control room" chat for planning and discussing bigger issues, and can have it start separate
+  cloud sessions for individual jobs. A session started for one job should stick to it, push to `main` as usual (pull and
+  rebase first: another session may have pushed meanwhile), and finish with a short report of what changed and the version.
+- The owner tests on an Android phone (portrait and landscape) as well as desktop: check phone widths (~400px) and touch.
+
+## Where things live in index.html (search for these names)
+- `TB`: the Team Builder (tabs inside the sticky summary box `.tb-sum`; `render`, `mpRender`, `starRows`, `rulesCheck`).
+- `TRULES`: rulesets. Built in: `gw` (GW Matched Play, skill points, uses the `MP` object), `gotg2` and `uktc11` (examples,
+  deletable: hidden via `bb-tourn-hidden`). Custom rulesets in localStorage `bb-tourn-rules`. A ruleset's `skill` is `count`
+  (primary/secondary per tier), `points` or `gold` (a pool per tier, with costs, stacks `p.mp2`, stat-ups `p.mp.kind 'C'`,
+  Star Player costs); optional `raceBudget`. The Rulesets screen (`#trules`) also shows GW's League / Sevens rules read-only.
+  A team stores `t.rules`; tournaments (`CUP`, online `OTOUR`) store `cp.rules`, check entries with `CUP.unfit`, and draft
+  computer teams with `draftRules`. `TB.rulesCheck(t)` lists every limit and OK/OVER (used by the roster PDF).
+- `ROSTER_PDF`: the roster sheet (jsPDF loaded from cdnjs on first use). `KEYWORDS`: each position's BB2025 keywords.
+- `FANCY_SELECT`: the game's styled drop-down; it enhances every `<select>` automatically (a MutationObserver), with option
+  groups as headings and a disabled option's " – reason" shown underneath.
+- `setupSkillTips`: skill-tag descriptions (touch: open on tap only; closing doesn't block scrolling).
+- Replays: `REPLAY` records close-ups during play, `PASSFX` draws them, `REC` saves "My matches" in FUMBBL's format, `FREP`
+  is the viewer for our own and FUMBBL replays (FUMBBL player states: 16 picked up, 21 in the air while being thrown).
+
 ## Testing
+- Browser checks for the Team Builder, Rulesets, touch gestures, the roster PDF and replays: `tools/ui-tests/` (see its
+  README; e.g. `node tools/ui-tests/team-builder.js`). Each prints PASS/FAIL. Add a check there when fixing something fiddly.
+- FUMBBL replays can be downloaded from the shell (`https://fumbbl.com/api/match/get/<id>` gives `replayId`, then
+  `https://fumbbl.com/api/replay/get/<replayId>/gz`) and loaded with `FREP.start(json)` to test the viewer on real data.
 - Two-device play (`NET` in `index.html`) uses PeerJS, which can't reach its server from a cloud session. Adding `?nettest`
   to the address swaps the network for a BroadcastChannel, so two tabs in one browser context can play each other.
   Add `&dev=A` (any letters) as well to give each tab its own saved data, like separate devices (needed to test shared leagues).
