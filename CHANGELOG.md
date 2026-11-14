@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.92 (14 Nov 2026)
+- Skill tags on a touch screen: a swipe that starts on a tag now scrolls instead of opening it, and after closing a description
+  you can scroll straight away.
+
 ## v4.91 (14 Nov 2026)
 - Team Builder roster: tighter rows, each player's position in bold beside their name, and Star Players numbered after the players.
 

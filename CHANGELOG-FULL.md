@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.92 (14 Nov 2026)
+- **Fixed (skill tags, touch screens):**
+  - A skill's description opened the moment a finger touched its tag, so a swipe to scroll that happened to start on a tag
+    opened it instead. It now opens only on a tap (the finger lifts without moving); a swipe scrolls as normal.
+  - Closing a description by tapping elsewhere blocked touches for the next 0.7 seconds, so it took a second tap before the
+    page would scroll. Now the closing tap only stops a button underneath from being pressed by accident; a swipe right after
+    scrolls at once (and scrolling with a description open closes it).
+  - With a mouse nothing changes: hover shows a description, and clicking elsewhere closes it.
+
 ## v4.91 (14 Nov 2026)
 - **Improved (Team Builder roster):** each row now has a top line with the order arrows and number, the player's token, their
   position in bold, the name box, cost and ✕; underneath, the characteristics, skills and extra-skill pick use the full width

@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.91</title>
+    <title>BludBowl 4.92</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1229,7 +1229,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.91</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.92</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -12323,14 +12323,33 @@ ol.ci-steps li::marker { content: none; }
             const block = e => { if (swallow) { e.stopImmediatePropagation(); e.preventDefault(); } };
             ['pointerup','mousedown','mouseup','touchstart','touchend','touchmove','click','dblclick','contextmenu'].forEach(ev =>
                 document.addEventListener(ev, e => { if (!swallow || (e.target.closest && e.target.closest('[data-tip-pass] button'))) return; block(e); if (ev === 'click') { swallow = false; clearTimeout(swallowTimer); } }, { capture: true, passive: false }));
+            // Touch: a skill tag opens only on a tap (the finger lifts without moving), so a swipe that starts on a tag still scrolls.
+            // A tap elsewhere closes the description; it's kept from also pressing whatever is underneath, but a swipe scrolls at once.
+            let pend = null, eatClick = false, eatTimer = null;
+            const clickOnly = () => { eatClick = true; clearTimeout(eatTimer); eatTimer = setTimeout(() => { eatClick = false; }, 500); };
+            ['mousedown', 'mouseup', 'click'].forEach(ev => document.addEventListener(ev, e => {
+                if (!eatClick || (e.target.closest && e.target.closest('[data-tip-pass] button'))) return;
+                e.stopImmediatePropagation(); e.preventDefault(); if (ev === 'click') { eatClick = false; clearTimeout(eatTimer); }
+            }, true));
             document.addEventListener('pointerdown', e => {
                 const t = tagOf(e);
-                if (t) {
-                    startSwallow(); e.stopImmediatePropagation();
-                    if (e.pointerType !== 'mouse') { if (t === activeTag && tip) hide(); else show(t); } // touch: one tap opens it
-                    else if (t !== activeTag) show(t);
-                } else if (tip && e.target.closest && e.target.closest('[data-tip-pass] button')) hide();   // a panel's own buttons (e.g. OK) work straight away
-                else if (tip) { startSwallow(); e.stopImmediatePropagation(); e.preventDefault(); hide(); } // any click elsewhere only closes it
+                if (e.pointerType === 'mouse') {
+                    if (t) { startSwallow(); e.stopImmediatePropagation(); if (t !== activeTag) show(t); }
+                    else if (tip && e.target.closest && e.target.closest('[data-tip-pass] button')) hide();   // a panel's own buttons (e.g. OK) work straight away
+                    else if (tip) { startSwallow(); e.stopImmediatePropagation(); e.preventDefault(); hide(); } // any click elsewhere only closes it
+                    return;
+                }
+                if (t) { pend = { t, x: e.clientX, y: e.clientY, id: e.pointerId }; return; }   // tap or swipe? decided when the finger lifts
+                if (tip && e.target.closest && e.target.closest('[data-tip-pass] button')) { hide(); return; }
+                if (tip) { hide(); clickOnly(); }
+            }, true);
+            document.addEventListener('pointermove', e => { if (pend && e.pointerId === pend.id && Math.hypot(e.clientX - pend.x, e.clientY - pend.y) > 10) pend = null; }, true);
+            document.addEventListener('pointercancel', () => { pend = null; }, true);   // the browser took the touch for scrolling
+            document.addEventListener('pointerup', e => {
+                if (!pend || e.pointerId !== pend.id) return;
+                const t = pend.t; pend = null;
+                if (t === activeTag && tip) hide(); else show(t);
+                clickOnly();   // the tap opens the description and nothing else
             }, true);
             document.addEventListener('mouseover', e => { const t = tagOf(e); if (t && t !== activeTag && !swallow) show(t); });
             document.addEventListener('mouseout', e => { const t = tagOf(e); if (t && !(e.relatedTarget && t.contains(e.relatedTarget)) && !('ontouchstart' in window)) hide(); });
