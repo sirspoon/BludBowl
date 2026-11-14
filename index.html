@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.85</title>
+    <title>BludBowl 4.86</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -643,6 +643,15 @@
         .fs-menu button.on { color: #fbbf24; background: rgba(245,158,11,.12); }
         .fs-menu button.on::after { content: '✓'; float: right; }
         .fs-menu button:disabled { opacity: .45; cursor: default; }
+        .fs-menu .fs-grp { padding: 8px 12px 3px; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: #fbbf24; border-top: 1px solid #1e293b; margin-top: 2px; }
+        .fs-menu .fs-grp:first-child { border-top: 0; margin-top: 0; } .fs-menu button.fs-in { padding-left: 18px; }
+        .fs-menu .fs-why { display: block; font-weight: 500; font-size: 11px; color: #94a3b8; margin-top: 1px; }
+        /* places that styled the browser's own menus directly: the same for the game's */
+        #ex-ind .ex-gold .fs-btn { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 4px 6px; font-weight: 700; }
+        #trules .tr-pickrow .fs-wrap { min-width: 240px; max-width: 100%; } #team-builder .tb-rulesrow .fs-wrap { flex: 1; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-cpu .fs-wrap { flex: 1; min-width: 0; }
+        #net-lobby .fs-btn { background: #0b1220; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 16px; min-width: 0; }
+        #net-lobby .nl-sel .fs-wrap, #net-lobby .nl-opt .fs-wrap { flex: 1; min-width: 0; }
         /* main menu */
         #main-menu, #settings-panel { display: flex; flex-direction: column; gap: 10px; width: min(440px, 100%); padding: 0 8px; margin-bottom: auto; }
         #main-menu.hidden, #settings-panel.hidden { display: none; }
@@ -1182,7 +1191,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.85</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.86</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -2471,9 +2480,15 @@ ol.ci-steps li::marker { content: none; }
                 if (open) { const same = open.sel === sel; close(); if (same) return; }
                 const menu = document.createElement('div');
                 menu.className = 'fs-menu'; menu.setAttribute('role', 'listbox');
+                let grp = null;
                 [...sel.options].forEach((o, i) => {
+                    const g = o.parentNode && o.parentNode.tagName === 'OPTGROUP' ? o.parentNode : null;
+                    if (g !== grp) { grp = g; if (g) { const h = document.createElement('div'); h.className = 'fs-grp'; h.textContent = g.label; h.setAttribute('role', 'presentation'); menu.appendChild(h); } }
                     const b = document.createElement('button');
-                    b.type = 'button'; b.textContent = o.textContent; b.disabled = o.disabled; b.setAttribute('role', 'option');
+                    b.type = 'button'; b.disabled = o.disabled; b.setAttribute('role', 'option'); if (g) b.classList.add('fs-in');
+                    // an option that can't be picked says why after a dash: show the reason dimmer, on its own line
+                    const txt = o.textContent, cut = o.disabled ? txt.indexOf(' – ') : -1;
+                    if (cut > 0) { b.textContent = txt.slice(0, cut); const w = document.createElement('span'); w.className = 'fs-why'; w.textContent = txt.slice(cut + 3); b.appendChild(w); } else b.textContent = txt;
                     if (i === sel.selectedIndex) { b.classList.add('on'); b.setAttribute('aria-selected', 'true'); }
                     b.addEventListener('click', e => {
                         e.stopPropagation();
@@ -2529,6 +2544,12 @@ ol.ci-steps li::marker { content: none; }
             document.addEventListener('scroll', e => { if (open && !open.menu.contains(e.target)) close(); }, true);
             const all = () => document.querySelectorAll('select').forEach(enhance);
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', all) : all();
+            // menus drawn later (Team Builder skill picks, tournament forms, the online lobby...) get the same look as they appear
+            const fresh = new Set(); let queued = false;
+            new MutationObserver(list => {
+                list.forEach(m => m.addedNodes.forEach(nd => { if (nd.nodeType === 1 && (nd.tagName === 'SELECT' || nd.getElementsByTagName('select').length)) fresh.add(nd); }));
+                if (fresh.size && !queued) { queued = true; queueMicrotask(() => { queued = false; const nodes = [...fresh]; fresh.clear(); nodes.forEach(nd => (nd.tagName === 'SELECT' ? [nd] : [...nd.getElementsByTagName('select')]).forEach(sel => { if (sel.isConnected && !sel.multiple && !sel.dataset.native) enhance(sel); })); }); }
+            }).observe(document.documentElement, { childList: true, subtree: true });
             return { enhance, close };
         })();
         // ---------- Careers (BB2025 League Play): Star Player Points, advancement, injuries and the post-game sequence ----------

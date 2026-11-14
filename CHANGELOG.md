@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.86 (14 Nov 2026)
+- Every drop-down menu now uses the game's own styled menu, including the Team Builder's extra-skill picker, with group headings
+  and the reason a choice isn't available.
+
 ## v4.85 (14 Nov 2026)
 - Roster PDF: each position's keywords; a Ruleset check box listing every limit the team's rules set, what the team uses and
   OK or OVER, with LEGAL or NOT LEGAL at the top; Elite Skills the rules limit in orange; and a note on whether extra skills count

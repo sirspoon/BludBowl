@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.86 (14 Nov 2026)
+- **Improved: all drop-down menus look the same.** The game's own menu (dark, gold edge) was only given to menus that existed
+  when the page loaded; menus drawn later still opened the phone's system list. Now every menu gets it as soon as it appears:
+  the Team Builder's extra-skill and stacked-skill pickers, the tournament forms (computer team races, rules), the Teams screen
+  filters, the league screens, the online lobby and tournament team pickers, and the inducements gold setting.
+  - Option groups show as gold headings (e.g. "Primary · 1 skill point", "Secondary · 2 skill points", "Stat increase").
+  - A choice that can't be picked shows why underneath in smaller grey text (e.g. "Tier 2: 3 primary") instead of after a dash.
+  - Places that styled the browser's menus directly (the online lobby, the inducements gold, rules and computer-team rows) give
+    the game's menu the same look and width.
+
 ## v4.85 (14 Nov 2026)
 - **Improved (roster PDF):** made so another coach can check the team is legal.
   - **Keywords:** a line under the player table with each position's BB2025 keywords (e.g. "Dragon Prince: Blitzer, Elf,
