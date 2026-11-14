@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.79 (14 Nov 2026)
+- Tournament rules: the two packs are now marked as examples and can be deleted (and brought back). GW Matched Play is what the screen
+  opens on, and it can be copied and edited. The dropdowns use the game's own menu.
+
 ## v4.78 (14 Nov 2026)
 - Tournaments (on this device and online) now have a Rules choice: GW Matched Play, Glory on the Gridiron 2, UKTC XI or your own.
   Only teams built under those rules can enter, and computer teams are drafted to them.

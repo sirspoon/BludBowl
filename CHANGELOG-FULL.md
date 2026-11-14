@@ -2,6 +2,20 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.79 (14 Nov 2026)
+- **Changed (Tournament rules):** Glory on the Gridiron 2 and UKTC XI are renamed "Example: …" with an Example badge, and can be
+  deleted like your own rulesets. Being built in, they're only hidden: "Bring back the examples" on the screen restores them, and
+  one comes back by itself if you join an online tournament that uses it. GW Matched Play is marked official.
+- **Changed:** the Tournament Rules screen opens on GW Matched Play (or, from the Team Builder or a tournament form, on the rules in use).
+- **New: copy GW Matched Play.** "Copy & edit" on GW Matched Play makes an editable ruleset that works like it, using a new
+  kind of extra-skill rule, "Skill points per tier": each tier's skill points (6, 8, 9, 10) and secondary limit (1 to 4),
+  primary 1 point, secondary 2, a Star Player 2 points and a Mega-star 4 on top of their price, Elite Skills on four players each,
+  every inducement. GW leaves the budget to each event, so the copy starts at 1,150k for every tier. Rules that buy skills from a
+  pool (skill points or skill gold) can now also cap secondary skills per tier and charge Star Players from the pool. Computer
+  teams in tournaments are drafted to these too.
+- **Improved:** the dropdowns on the Tournament Rules screen and the Rules dropdown on the tournament setup forms use the game's own
+  styled menu instead of the browser's. The styled menus also stop their background check once they're gone from the screen.
+
 ## v4.78 (14 Nov 2026)
 - **New: tournaments use tournament rules.** Setting up a tournament on this device (Tournaments, + New tournament) or online
   (Online, Organise a tournament) now has a Rules dropdown listing every ruleset on the Tournament Rules screen, with a link to it.
