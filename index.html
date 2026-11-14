@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.79</title>
+    <title>BludBowl 4.80</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -265,6 +265,7 @@
         #otour-hub { z-index: 150; }
         #trules { z-index: 160; }
         :is(#cup-hub,#otour-hub) .pg-btn.lg-inline { padding: 1px 6px; font-size: 11.5px; font-weight: 700; }
+        #trules .tr-tabs { margin-bottom: -2px; } #trules .tr-list { margin: 4px 0 8px 18px; list-style: disc; line-height: 1.5; color: #cbd5e1; max-width: 80ch; } #trules .tr-card h3 + .tr-scroll { margin-top: 2px; }
         #trules .tr-pickrow { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 10px; } #trules .tr-pickrow .lg-field { margin-bottom: 0; } #trules .tr-pickrow select { min-width: 240px; max-width: 100%; }
         #trules .tr-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; } #trules .tr-h h3 { margin: 0; }
         #trules .tr-badge { font-size: 9.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: #1e293b; color: var(--pg-amber); }
@@ -1163,7 +1164,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.79</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.80</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1179,7 +1180,7 @@ ol.ci-steps li::marker { content: none; }
             <button type="button" class="mm-btn" data-go="league"><span class="mm-t">League</span><span class="mm-s">On this device: seasons, fixtures, a league table and play-offs</span></button>
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">On this device: knockout cups and Swiss events for tournament teams</span></button>
             <button type="button" class="mm-btn" data-go="teams"><span class="mm-t">Teams</span><span class="mm-s">Build, manage and back up your teams and their careers</span></button>
-            <button type="button" class="mm-btn" id="mm-trules"><span class="mm-t">Tournament Rules</span><span class="mm-s">Set up a tournament pack's team rules (budgets, skills, Star Players, inducements), then build teams that fit</span></button>
+            <button type="button" class="mm-btn" id="mm-trules"><span class="mm-t">Rulesets</span><span class="mm-s">The rules teams are built and played to: tournament packs (and your own), Sevens and leagues</span></button>
             <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">I Like to Watch</span><span class="mm-s">Replay your saved matches, or any match from fumbbl.com</span></button>
             <button type="button" class="mm-btn" id="mm-help"><span class="mm-t">Help</span><span class="mm-s">How to play: the aim, turns, blocking, passing, the ball, injuries and more</span></button>
             <button type="button" class="mm-btn" data-go="settings"><span class="mm-t">Settings</span><span class="mm-s">Sound, music, text size, pitch and animations</span></button>
@@ -1295,14 +1296,14 @@ ol.ci-steps li::marker { content: none; }
     </div>
     <div id="trules" class="hidden" role="dialog" aria-modal="true" aria-labelledby="tr-title">
       <div class="pg-wrap">
-        <header class="pg-head"><button id="tr-back" type="button" class="pg-btn">← Back</button><h2 id="tr-title">Tournament rules</h2><button type="button" class="fsc-btn" data-fs title="Full screen" aria-label="Full screen">⛶</button></header>
+        <header class="pg-head"><button id="tr-back" type="button" class="pg-btn">← Back</button><h2 id="tr-title">Rulesets</h2><button type="button" class="fsc-btn" data-fs title="Full screen" aria-label="Full screen">⛶</button></header>
         <div id="tr-body" class="tr-body"></div>
       </div>
     </div>
     <div id="teams-hub" class="hidden" role="dialog" aria-modal="true" aria-labelledby="th-title">
       <div class="pg-wrap">
         <header class="pg-head"><button id="th-close" type="button" class="pg-btn">← Back</button><h2 id="th-title">Teams</h2><button type="button" class="fsc-btn" data-fs title="Full screen" aria-label="Full screen">⛶</button>
-          <div class="th-top"><button id="th-new" type="button" class="pg-primary">+ New team</button><button id="th-import" type="button" class="pg-btn">Import file</button><button id="th-export-all" type="button" class="pg-btn">Export all</button><button id="th-board" type="button" class="pg-btn">🏆 Honours board</button><button id="th-rules" type="button" class="pg-btn">Tournament rules</button><input id="th-file" type="file" accept=".json,application/json" hidden></div></header>
+          <div class="th-top"><button id="th-new" type="button" class="pg-primary">+ New team</button><button id="th-import" type="button" class="pg-btn">Import file</button><button id="th-export-all" type="button" class="pg-btn">Export all</button><button id="th-board" type="button" class="pg-btn">🏆 Honours board</button><button id="th-rules" type="button" class="pg-btn">Rulesets</button><input id="th-file" type="file" accept=".json,application/json" hidden></div></header>
         <div id="th-msg" class="pg-dim" aria-live="polite"></div>
         <div class="th-layout"><nav id="th-list" class="th-list" aria-label="Saved teams"></nav><div id="th-detail" class="th-detail"></div></div>
       </div>
@@ -3239,7 +3240,7 @@ ol.ci-steps li::marker { content: none; }
                 if (!$('post-game').classList.contains('hidden')) render();
             }
             const refresh = () => { if (!$('post-game').classList.contains('hidden')) render(); };
-            return { canImprove, addReport, refresh, reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS, aiPicks, autoAdvance,
+            return { COST, STAT_VALUE, LASTING, canImprove, addReport, refresh, reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS, aiPicks, autoAdvance,
                 started: t => (t.played || 0) > 0, statLine };
         })();
 
@@ -3500,7 +3501,40 @@ ol.ci-steps li::marker { content: none; }
             const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
             // ---- the Tournament rules screen: every ruleset, and an editor for the coach's own
-            let draft = null, onDone = null, delArmed = '', showId = '';
+            let draft = null, onDone = null, delArmed = '', showId = '', section = 'tour';
+            // the Rulesets screen has a section per kind of game: tournament packs (editable), and GW's rules for Sevens and for leagues
+            const SECTIONS = [['tour', 'Tournaments'], ['sevtour', 'Sevens tournaments'], ['league', 'Leagues'], ['sevleague', 'Sevens leagues']];
+            const tabs = () => `<div class="pg-tabs tr-tabs" role="tablist">${SECTIONS.map(([v, l]) => `<button type="button" class="pg-tab${section === v ? ' on' : ''}" role="tab" aria-selected="${section === v}" data-trsec="${v}">${l}</button>`).join('')}</div>`;
+            const tbl = (head, rows, cls) => `<div class="tr-scroll"><table class="lg-tbl tr-tbl ${cls || ''}"><thead><tr>${head.map((h, i) => `<th${i ? '' : ' class="l"'}>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td${i ? '' : ' class="l"'}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+            const officialCard = (name, intro, body) => `<section class="pg-card tr-card"><div class="tr-h"><h3>${esc(name)}</h3><span class="tr-badge">Official · built in</span></div><div class="tr-notes">${intro}</div>${body}</section>
+                <section class="pg-card"><div class="pg-dim">These are the rules the game uses for this kind of team. It's the only ruleset here for now: when you have a pack with different rules for ${section === 'league' ? 'leagues' : 'Sevens'}, they can be added like tournament rulesets.</div></section>`;
+            function infoView() {
+                const C = CAREER, lv = ['1st', '2nd', '3rd', '4th', '5th', '6th'];
+                const advRows = [['Random primary skill', 'rp'], ['Chosen primary skill', 'cp'], ['Chosen secondary skill', 'cs'], ['Characteristic improvement', 'ch']].map(([n, key]) => [n, ...C.COST[key].map(v => v + ' SPP')]);
+                const sppRows = Object.keys(C.SPP).filter(key => C.SPP_NAME[key]).map(key => [esc(C.SPP_NAME[key]), C.SPP[key]]);
+                const statRows = Object.entries(C.STAT_VALUE).map(([st, v]) => ['+1 ' + st.toUpperCase(), '+' + k(v)]);
+                const byTier = (tierOfRace, n) => Array.from({ length: n }, (_, i) => i + 1).map(t => [`<b>${t}</b>`, races().filter(rc => tierOfRace(rc) === t).map(raceName).sort().join(', ') || '<span class="pg-dim">none</span>', t]);
+                if (section === 'league') return officialCard('GW League Play (BB2025)', 'How a league team is built and how its career runs from match to match (the Blood Bowl 2025 League Play rules).',
+                    `<h3>Building the team</h3><ul class="tr-list"><li>Budget <b>1,000k</b>; 11 to 16 players (Journeymen fill the team up to 11 for a match).</li>
+                        <li>Team re-rolls up to 8 at the race's price; once the team has played they cost double.</li><li>Apothecary 50k (for teams that can have one); assistant coaches and cheerleaders 10k each, up to 6.</li>
+                        <li>Dedicated fans: 1 free, up to 3 at 5k each when the team is made (up to 7 later in its career).</li><li>Gold not spent goes into the treasury.</li></ul>
+                    <h3>Star Player Points</h3>${tbl(['Action', 'SPP'], sppRows)}<div class="pg-dim">Some teams earn more (Brawlin' Brutes: 3 for a Casualty, 2 for a Touchdown).</div>
+                    <h3>Advancements</h3>${tbl(['Spent on', ...lv], advRows)}<div class="pg-dim">Up to six advancements. A player value rises 20k for a primary skill, 40k for a secondary, 10k more for an Elite Skill (Block, Dodge, Guard, Mighty Blow), and for characteristics:</div>
+                    ${tbl(['Characteristic', 'Value'], statRows)}
+                    <h3>After each match</h3><ul class="tr-list"><li>Winnings: fan attendance ÷ 2 × 10k, plus 10k per touchdown, plus 10k unless a player was caught Stalling.</li>
+                        <li>Expensive Mistakes when the treasury holds 100k or more.</li><li>Casualties can leave lasting injuries (a characteristic lowered) or kill; Journeymen can be hired permanently.</li></ul>
+                    <h3>Between seasons</h3><ul class="tr-list"><li>Re-drafting: 1,000k + the treasury + 20k per game played, 20k per win and 10k per draw, capped at 1,300k.</li></ul>`);
+                if (section === 'sevleague') return officialCard('GW Sevens League Play (BB2025)', 'Seven-a-side teams in a league: a smaller budget and squad, the same career system.',
+                    `<h3>Building the team</h3><ul class="tr-list"><li>Budget <b>${k(SEV.BUDGET)}</b>; ${SEV.MINP} to ${SEV.MAXP} players, at most 4 of them without the Lineman keyword.</li>
+                        <li>One Lineman is the Veteran: MA 1 lower, and once a game a re-roll.</li><li>Team re-rolls ${k(SEV.RR)} each; assistant coaches and cheerleaders ${k(SEV.STAFF)} each, up to 3; apothecary ${k(SEV.APO)}; dedicated fans ${k(SEV.FAN)} each.</li>
+                        <li>Players and sideline staff can't be fired.</li></ul>
+                    <h3>Careers</h3><ul class="tr-list"><li>Star Player Points and advancements as in League Play (see Leagues), except that a Sevens player never gains ${SEV.NO_ADV.join(' or ')}.</li></ul>
+                    <h3>Between seasons</h3><ul class="tr-list"><li>Re-drafting: ${k(SEV.BUDGET)} + the treasury + 10k per win, capped at ${k(SEV.CAP)}.</li></ul>`);
+                return officialCard('GW Sevens Matched Play (BB2025)', 'Seven-a-side tournament teams: draft to a budget, then add extra skills with your tier\'s skill points. Nothing carries over between games.',
+                    `<div class="pg-dim">Budget: the event chooses, ${SEV.MP_BUDGETS.map(k).join(', ')} (${k(600)} is usual). ${SEV.MINP} to ${SEV.MAXP} players, at most 4 without the Lineman keyword, one Lineman as the Veteran.</div>
+                    ${tbl(['Tier', 'Teams', 'Skill points'], byTier(rc => SEV.TIER[rc] || 2, 4))}
+                    <ul class="tr-list"><li>One extra skill per player: primary 1 skill point, secondary 2.</li><li>One secondary skill in the whole team; two Elite Skills (Block, Dodge, Guard, Mighty Blow) in all.</li><li>No Star Players.</li></ul>`);
+            }
             const $r = id => document.getElementById(id);
             function summary(r) {
                 const byTier = t => races().filter(k => tierOf(r, k) === t).map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n))
@@ -3518,7 +3552,7 @@ ol.ci-steps li::marker { content: none; }
                     <div class="pg-dim"><b>Inducements allowed:</b> ${r.ind.length ? r.ind.map(indName).map(esc).join(', ') : 'none'} (Star Players: per tier, above).</div>`;
             }
             function listView() {
-                return `<section class="pg-card"><div class="pg-dim tr-intro">A ruleset is how a tournament pack says teams are built: the budget, extra skills and Star Players for each tier, and which inducements may be bought.
+                return `<section class="pg-card"><div class="pg-dim tr-intro">A tournament ruleset is how a tournament pack says teams are built: the budget, extra skills and Star Players for each tier, and which inducements may be bought.
                     Choose one for a team in the Team Builder (Format: Tournament team) and the builder checks the team against it: it won't save until the team fits.</div>
                     <div class="tr-pickrow"><label class="lg-field"><span>Ruleset</span><select id="tr-pick" class="lg-sel">${list().map(x => `<option value="${esc(x.id)}"${x.id === showId ? ' selected' : ''}>${esc(x.name)}${x.gw ? ' (official)' : ''}</option>`).join('')}</select></label>
                     <button type="button" class="pg-primary" data-trnew="1">+ New ruleset</button></div>
@@ -3578,13 +3612,13 @@ ol.ci-steps li::marker { content: none; }
                     <div class="pg-chips"><button type="button" class="pg-primary" data-trsave="1">Save ruleset</button><button type="button" class="pg-btn" data-trcancel="1">Cancel</button><span id="tr-msg" class="pg-dim" aria-live="polite"></span></div>`;
             }
             function render() {
-                $r('tr-title').textContent = draft ? (get(draft.id) ? 'Edit rules' : 'New rules') : 'Tournament rules';
+                $r('tr-title').textContent = draft ? (get(draft.id) ? 'Edit rules' : 'New rules') : 'Rulesets';
                 if (!draft) picked = '';
-                $r('tr-body').innerHTML = draft ? editView() : listView();
+                $r('tr-body').innerHTML = draft ? editView() : tabs() + (section === 'tour' ? listView() : infoView());
                 $r('tr-body').querySelectorAll('select').forEach(FANCY_SELECT.enhance);   // the game's own dropdown, not the browser's
             }
-            function open(done, id) {
-                onDone = done; draft = null; delArmed = ''; showId = id && get(id) ? id : 'gw';
+            function open(done, id, sec) {
+                onDone = done; draft = null; delArmed = ''; showId = id && get(id) ? id : 'gw'; section = sec || 'tour';
                 $r('trules').classList.remove('hidden'); $r('trules').scrollTop = 0; render();
             }
             function close() { $r('trules').classList.add('hidden'); if (onDone) onDone(); }
@@ -3644,6 +3678,7 @@ ol.ci-steps li::marker { content: none; }
                     const d = b.dataset;
                     if (b.id === 'tr-back') { if (draft) { draft = null; render(); } else close(); return; }
                     if (d.trnew) { const g = norm(Object.assign({}, GOTG, { id: '', name: 'My tournament', notes: '' })); draft = g; render(); root.scrollTop = 0; return; }
+                    if (d.trsec) { section = d.trsec; delArmed = ''; render(); return; }
                     if (d.trrestore) { hidden.clear(); saveHidden(); render(); return; }
                     if (d.trcopy && d.trcopy === 'gw') { draft = gwCopy(); render(); root.scrollTop = 0; return; }
                     if (d.trcopy) { const s = get(d.trcopy); draft = norm(Object.assign(JSON.parse(JSON.stringify(s)), { id: '', name: ('Copy of ' + s.name).slice(0, 50) })); render(); root.scrollTop = 0; return; }
@@ -3692,7 +3727,7 @@ ol.ci-steps li::marker { content: none; }
                 };
                 root.addEventListener('input', edit); root.addEventListener('change', edit);
             }
-            const openW = (done, id) => { wire(); open(done, id); };
+            const openW = (done, id, sec) => { wire(); open(done, id, sec); };
             return { GW, STATS, pooled, unit, cst, secCap, list, get, tierOf, at, budgetFor, last, remember, defsFor, addMissing, indName, open: openW };
         })();
         const TB = (function () {
@@ -6482,7 +6517,7 @@ ol.ci-steps li::marker { content: none; }
                 const r = TRULES.get(id) || TRULES.GW;
                 return `<div class="lg-field"><span class="lg-lbl">Rules</span><select id="${elId}" class="lg-sel">${TRULES.list().map(x => `<option value="${esc(x.id)}"${x.id === r.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
                     <span class="pg-dim">${r.gw ? 'GW Matched Play: every team spends up to the budget below, then its tier\'s skill points.' : `Each team's budget comes from ${r.raceBudget ? 'the rules for its race' : 'its tier'}${rulesRange(r)}. Only teams built under ${esc(r.name)} can enter.`}
-                    Set up or edit rules on the <button type="button" class="pg-btn lg-inline" data-trulesopen="${esc(r.id)}">Tournament Rules</button> screen.</span></div>`;
+                    Set up or edit rules on the <button type="button" class="pg-btn lg-inline" data-trulesopen="${esc(r.id)}">Rulesets</button> screen.</span></div>`;
             }
             const rulesRange = r => { const v = LEAGUE.raceKeys().map(rc => TRULES.budgetFor(r, rc)), lo = Math.min(...v), hi = Math.max(...v); return lo === hi ? ` (${k(lo)})` : ` (${k(lo)} to ${k(hi)})`; };
             const rulesName = cp => cp.fmt === 'sevens' ? 'Sevens Matched Play' : (TRULES.get(cp.rules) || TRULES.GW).name;

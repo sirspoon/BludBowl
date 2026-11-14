@@ -2,6 +2,19 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.80 (14 Nov 2026)
+- **Changed: Tournament Rules is now Rulesets** (main menu card, Teams screen button and the links on the tournament forms), with
+  four sections along the top:
+  - **Tournaments:** the tournament rulesets as before (GW Matched Play, the examples and your own, editable).
+  - **Sevens tournaments:** GW Sevens Matched Play: the budgets an event can choose, the Sevens tiers and their skill points, one
+    secondary skill per team, two Elite Skills in all, no Star Players.
+  - **Leagues:** GW League Play: building the team (1,000k, 11 to 16 players, re-roll prices, staff and fans), the Star Player
+    Points table, the advancement costs and value increases, winnings, Expensive Mistakes, injuries and re-drafting between seasons.
+  - **Sevens leagues:** GW Sevens League Play: the 600k budget and squad limits, the Veteran, Sevens prices, no firing, and
+    re-drafting.
+  The league and Sevens rules are shown from the game's own data (so they always match what it does) and aren't editable yet:
+  custom ones can be added the same way as tournament rulesets when there's a pack to copy.
+
 ## v4.79 (14 Nov 2026)
 - **Changed (Tournament rules):** Glory on the Gridiron 2 and UKTC XI are renamed "Example: …" with an Example badge, and can be
   deleted like your own rulesets. Being built in, they're only hidden: "Bring back the examples" on the screen restores them, and
