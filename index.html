@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.73</title>
+    <title>BludBowl 4.74</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -907,6 +907,15 @@
 /* Training mode: the coach card over the pitch, and the coach boxes in the roll and block dialogs */
 #coach-card { position: fixed; z-index: 35; display: flex; flex-direction: column; background: rgba(7,22,38,.95); border: 1px solid #0369a1; border-left: 4px solid #38bdf8; border-radius: 10px;
     color: #e2e8f0; font: 12px/1.45 Inter, system-ui, sans-serif; box-shadow: 0 8px 26px rgba(0,0,0,.55); pointer-events: auto; }
+ol.ci-steps { list-style: none; margin: 2px 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 3px 4px; }
+ol.ci-steps li { display: inline-flex; align-items: center; gap: 4px; margin: 0 !important; padding: 2px 7px 2px 3px; border-radius: 999px; border: 1px solid #334155;
+    background: #0b1424; color: #64748b; font: 700 10.5px/1.3 Inter, system-ui, sans-serif; white-space: nowrap; }
+ol.ci-steps li span { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: #1e293b; color: #94a3b8; font-size: 9.5px; }
+ol.ci-steps li.done { color: #86efac; border-color: #166534; } ol.ci-steps li.done span { background: #166534; color: #dcfce7; }
+ol.ci-steps li.on { color: #0f172a; background: #fbbf24; border-color: #fbbf24; } ol.ci-steps li.on span { background: #0f172a; color: #fbbf24; }
+ol.ci-steps li::marker { content: none; }
+#coach-intro ol.ci-steps, #coach-tour ol.ci-steps, #coach-card ol.ci-steps { list-style: none; padding: 0; margin: 2px 0 8px; display: flex; flex-wrap: wrap; gap: 3px 4px; }
+#coach-intro ol.ci-steps li, #coach-tour ol.ci-steps li { margin: 0; }
 #coach-card[hidden], #coach-pill[hidden], .coach-box[hidden], #coach-intro[hidden] { display: none !important; }
 #coach-intro { position: fixed; inset: 0; z-index: 260; display: grid; place-items: center; padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
     background: rgba(2,6,23,.82); font: 13px/1.5 Inter, system-ui, sans-serif; color: #e2e8f0; }
@@ -957,6 +966,9 @@
 #coach-intro .ci-go:hover, #coach-intro .ci-go:focus-visible { background: #0ea5e9; outline: none; }
 #coach-card[data-kind="lesson"] { border-left-color: #fbbf24; }
 #coach-card[data-kind="bad"] { border-left-color: #f43f5e; }
+#coach-card[data-kind="stage"] .cc-title { white-space: normal; line-height: 1.25; }
+#coach-card[data-kind="stage"] .cc-kind { display: none; }
+#coach-card[data-kind="stage"] { border-left-color: #fbbf24; }
 #coach-card .cc-head { display: flex; align-items: center; gap: 6px; padding: 5px 5px 2px 9px; }
 #coach-card .cc-badge { font-weight: 800; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #7dd3fc; white-space: nowrap; }
 #coach-card .cc-kind { font-weight: 800; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #fbbf24; }
@@ -1114,7 +1126,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.73</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.74</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8809,7 +8821,7 @@
                 const marks = [[box($('top-bar-panel')), 1], [pr, 2], [box($('panel-unit-container')), 3], [box($('panel-log-container')), 4]];
                 const pad = 3;
                 ov.innerHTML = marks.filter(m => m[0]).map(([r, n]) => `<div class="ct-box" style="left:${r.left - pad}px;top:${r.top - pad}px;width:${r.width + pad * 2}px;height:${r.height + pad * 2}px"><span class="ct-num">${n}</span></div>`).join('')
-                    + `<div class="ci-card ct-card">${badge}<h2>${stepOf('turn')}: The screen</h2><ol>
+                    + `<div class="ci-card ct-card">${badge}<h2>${stepOf('turn')}: The screen</h2>${strip('turn')}<ol>
                     <li><b>The top bar.</b> On the left, your team's turn (such as 1/8) with your team re-rolls in brackets, then the score, the half
                     and the weather. On the right: 📋 Rosters, <b>?</b> Help, sound, save, full screen, and <b>End Turn</b> for when you're done.</li>
                     <li><b>The pitch.</b> Tap one of your players to pick them. The squares they can reach light up; squares that need a dice roll
@@ -8839,10 +8851,14 @@
             // ---- the start of the match, step by step (the first drive of a training match) ----
             const STEPS = ['weather', 'toss', 'setupKick', 'setupRecv', 'target', 'deviation', 'event', 'landing', 'turn'];
             const stepOf = key => `Step ${STEPS.indexOf(key) + 1} of ${STEPS.length}`;
+            const STEP_NAMES = { weather: 'Weather', toss: 'Coin toss', setupKick: 'Kickers set up', setupRecv: 'Receivers set up', target: 'Aim the kick',
+                deviation: 'Kick deviates', event: 'Kick-off event', landing: 'Ball lands', turn: 'First turn' };
+            // the whole start-up sequence in order, the step being explained picked out (and the ones already done ticked)
+            const strip = key => { const at = STEPS.indexOf(key); return `<ol class="ci-steps">${STEPS.map((k, i) => `<li class="${i === at ? 'on' : i < at ? 'done' : ''}"><span>${i < at ? '✓' : i + 1}</span>${STEP_NAMES[k]}</li>`).join('')}</ol>`; };
             const seenOnce = k => { state.coachSeen = state.coachSeen || []; if (state.coachSeen.includes(k)) return true; state.coachSeen.push(k); return false; };
             function stage(key, title, html) {
                 if (!on() || seenOnce('st-' + key)) return false;
-                note(`${stepOf(key)}: ${title}`, html, 'stage'); return true;
+                note(`${stepOf(key)}: ${title}`, strip(key) + html, 'stage'); return true;
             }
             const table = (rows, hit) => `<table class="ci-table"><thead><tr><th>2D6</th><th>Result</th></tr></thead><tbody>${rows.map(([r, n, d], i) =>
                 `<tr class="${i === hit ? 'hit' : ''}"><td>${r}</td><td><b>${n}</b>${d ? `<br><span>${d}</span>` : ''}</td></tr>`).join('')}</tbody></table>`;
@@ -8852,7 +8868,7 @@
                 const W = WEATHER_TABLE, rows = [['2', W.heat.name, W.heat.desc], ['3', W.sunny.name, W.sunny.desc], ['4–10', W.perfect.name, W.perfect.desc], ['11', W.rain.name, W.rain.desc], ['12', W.blizzard.name, W.blizzard.desc]];
                 const hit = total <= 2 ? 0 : total === 3 ? 1 : total <= 10 ? 2 : total === 11 ? 3 : 4;
                 const ff = [0, 1].map(t => `${team(t)} ${state.fanFactor[t] || 0}`).join(', ');
-                showWin(`${badge}<h2>${stepOf('weather')}: Fans and weather</h2>
+                showWin(`${badge}<h2>${stepOf('weather')}: Fans and weather</h2>${strip('weather')}
                     <p>First each team's <b>Fan Factor</b> is worked out: its dedicated fans plus a D3 of fair-weather fans (${ff}). It counts in some
                     Kick-off Events, such as a Pitch Invasion.</p>
                     <p>Then 2D6 are rolled on the <b>Weather table</b>. This time: <b>${total}</b>, ${esc(rows[hit][1])}.</p>
@@ -8874,7 +8890,7 @@
                     rows.push([String(r), esc(ev.name), esc(ev.intro && GEO.sev && SEVENS_EVENTS[r] ? ev.intro : KO_TEXT[r] || '')]);
                 }
                 const ev = (GEO.sev && SEVENS_EVENTS[total]) || KICKOFF_EVENTS[total];
-                showWin(`${badge}<h2>${stepOf('event')}: The Kick-off Event</h2>
+                showWin(`${badge}<h2>${stepOf('event')}: The Kick-off Event</h2>${strip('event')}
                     <p>While the ball is in the air, the kicking team rolls 2D6 on the <b>Kick-off Event table</b>. Something happens on every kick-off,
                     from a free move for one side to a change in the weather. This time: <b>${total}</b>, ${esc(ev ? ev.name : '')}.</p>
                     ${table(rows, rows.findIndex(r => r[0] === String(total)))}

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.74 (14 Nov 2026)
+- Training: each start-of-match message shows the whole sequence of steps in order at the top, with the current step highlighted.
+
 ## v4.73 (14 Nov 2026)
 - Training: blocks and rolls are explained in their own windows, with the OK button there when the computer is about to choose or
   roll, and the block window shows a close-up of the players with the assists picked out. No more separate coach card on top.

@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.74 (14 Nov 2026)
+- **Improved (training):** the start-of-match messages (the coach cards, the Weather and Kick-off Event table windows and the screen
+  tour) open with the whole sequence as a row of numbered steps (Weather, Coin toss, Kickers set up, Receivers set up, Aim the kick,
+  Kick deviates, Kick-off event, Ball lands, First turn): the step being explained is highlighted in gold and the ones already done
+  are ticked in green. Their card titles now wrap instead of being cut off.
+
 ## v4.73 (14 Nov 2026)
 - **Changed (training):** the coach no longer puts a separate card over blocks and rolls (it got in the way of their own
   explanations). The block window's coach box now has a close-up of the squares round the two players, drawn with the real players:
