@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.72 (14 Nov 2026)
+- **New (training):** the first drive of a training match is explained step by step as it happens, "Step 1 of 9" to "Step 9 of 9":
+  1 fans and weather, 2 the coin toss, 3 the kicking team sets up, 4 the receiving team sets up, 5 the kicking team aims, 6 the kick
+  goes off target (D6 squares, D8 direction), 7 the Kick-off Event, 8 the ball comes down (catch, bounce or touchback), 9 your first
+  turn (the screen tour). Steps 1 and 7 open a window with the full Weather table and Kick-off Event table (a line on what each
+  result does) and the result rolled picked out; the others are coach notes, which wait for OK like the rest.
+
 ## v4.71 (14 Nov 2026)
 - **Changed (training):** each coach note has an **OK** button and play waits for it: the computer doesn't carry on (move, roll,
   pick its block dice) and taps on the pitch are held (the card gives a shake) until the note is OK'd. Notes that arrive meanwhile

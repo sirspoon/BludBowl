@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.72 (14 Nov 2026)
+- Training walks you through the start of the match step by step as it happens (weather, coin toss, set-ups, the kick, its
+  deviation, the Kick-off Event, the landing, your first turn), showing the Weather and Kick-off Event tables with the result
+  rolled picked out.
+
 ## v4.71 (14 Nov 2026)
 - Training: coach messages now wait for you to tap OK before play carries on, so you can read what the computer did. Hide the coach
   (✕) to let play run without stopping.

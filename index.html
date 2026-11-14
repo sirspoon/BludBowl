@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.71</title>
+    <title>BludBowl 4.72</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -928,6 +928,14 @@
 #coach-tour ol { margin: 0; padding-left: 22px; list-style: decimal; } #coach-tour li { margin-bottom: 6px; } #coach-tour li::marker { color: #38bdf8; font-weight: 800; }
 #coach-tour b { color: #f8fafc; } #coach-tour .ci-dim { color: #94a3b8; margin: 6px 0 0; }
 #coach-tour .ci-go { position: sticky; bottom: 0; box-shadow: 0 -6px 12px rgba(15,27,45,.95); display: block; margin: 10px 0 0 auto; padding: 8px 16px; border-radius: 9px; border: 0; background: #0284c7; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
+#coach-intro .ci-table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; font-size: 12.5px; }
+#coach-intro .ci-table th { text-align: left; color: #7dd3fc; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 3px 6px; border-bottom: 1px solid #334155; }
+#coach-intro .ci-table td { padding: 5px 6px; border-bottom: 1px solid #1e293b; vertical-align: top; }
+#coach-intro .ci-table td:first-child { width: 44px; font-weight: 800; color: #cbd5e1; white-space: nowrap; }
+#coach-intro .ci-table td span { color: #94a3b8; font-size: 11.5px; }
+#coach-intro .ci-table tr.hit td { background: rgba(251,191,36,.18); }
+#coach-intro .ci-table tr.hit td:first-child { color: #fbbf24; box-shadow: inset 4px 0 0 #fbbf24; }
+#coach-intro .ci-table tr.hit b { color: #fde68a; }
 #coach-intro .ci-fig { margin: 8px 0 10px; }
 #coach-intro .ci-fig canvas { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid #334155; }
 #coach-intro .ci-fig figcaption { font-size: 11.5px; line-height: 1.4; color: #94a3b8; margin-top: 4px; }
@@ -1101,7 +1109,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.71</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.72</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8144,7 +8152,7 @@
                 if (hidden) { pill.querySelector('.cc-new').textContent = unread ? String(Math.min(unread, 99)) : ''; place(); return; }
                 const n = notes[at];
                 c.dataset.kind = n.kind;
-                c.querySelector('.cc-kind').textContent = n.kind === 'lesson' ? 'Lesson' : n.kind === 'bad' ? 'Turnover' : '';
+                c.querySelector('.cc-kind').textContent = n.kind === 'lesson' ? 'Lesson' : n.kind === 'bad' ? 'Turnover' : n.kind === 'stage' ? 'Getting started' : '';
                 c.querySelector('.cc-title').textContent = n.title;
                 c.querySelector('.cc-body').innerHTML = n.html;
                 c.querySelector('.cc-pos').textContent = `${at + 1}/${notes.length}`;
@@ -8390,6 +8398,8 @@
                 note('Throw-in', `<p>The ball went off the pitch, so the crowd throws it back in: ${dist} squares (${GEO.sev ? 'D6+2' : '2D6'}) back towards the pitch in a random direction. Whoever it lands on must catch it, or it bounces.</p>`);
             }
             function kick(dist, kicker) {
+                if (stage('deviation', 'The kick goes off target', `<p>Kicks are never exact: the ball goes off target by a <b>D6</b> (one dice) squares${kicker && kicker.skills.includes('Kick') ? ', halved because the kicker has the Kick skill' : ''} in a random direction (a D8). This time: <b>${dist}</b> ${plural(dist, 'square')}.</p>
+                    <p>The arrow on the pitch shows where it's heading. While it's still in the air, the Kick-off Event is rolled next.</p>`)) { seenOnce('kickoff'); return; }
                 if (lesson('kickoff', 'The kick-off', `<p>Each drive starts with a <b>kick-off</b>. The kicking team picks a square in the other half, then the kick goes off target: D6 squares in a random direction (here ${dist}${kicker && kicker.skills.includes('Kick') ? ', halved because the kicker has Kick' : ''}).</p>
                     <p>While the ball is in the air a <b>Kick-off Event</b> is rolled (2D6), such as a Blitz, a High Kick or a change in the weather. If the ball lands outside the receiving team's half it's a <b>touchback</b>: the receiving team gives it to any of their players.</p>`)) return;
                 note('Kick-off', `<p>The kick goes off target by ${dist} ${plural(dist, 'square')} (a D6) in a random direction, then a Kick-off Event is rolled while it's in the air.</p>`);
@@ -8449,8 +8459,16 @@
                 note(`Your turn ${state.turn[t]} of ${TURNS}`, `<p>Team re-rolls left this half: <b>${state.rr[t] || 0}</b>.</p><p class="dim">Tip: ${esc(TIPS[tip++ % TIPS.length])}</p>`);
             }
             function td(p) { note('Touchdown!', `<p>${who(p)} carried the ball into the end zone: a touchdown for ${team(p.team)}. Both teams set up again and the team that scored kicks off.</p>`); }
-            function setup(t) {
-                if (!on() || AI.isAI(t)) return;
+            function setup(t, isKicking) {
+                if (!on()) return;
+                const kicking = !!isKicking, you = !AI.isAI(t), other = 1 - t;
+                if (kicking && stage('setupKick', 'The kicking team sets up', `<p>The <b>kicking team</b> places its players first${you ? '' : `: here, ${team(t)} (the computer)`}. Up to ${MAX_ON_PITCH} go in their own half,
+                    at least 3 on the <b>line of scrimmage</b> (the middle line) and no more than 2 in each <b>wide zone</b> (the strips down the sides).</p>
+                    <p>${you ? 'Tap a player, then a square. Press Confirm when you\'re done.' : `Then ${team(other)} set up, knowing where the kickers are.`}</p>`)) return;
+                if (!kicking && stage('setupRecv', 'The receiving team sets up', `<p>Now the <b>receiving team</b>${you ? ' (you)' : ''} places its players, with the same rules: up to ${MAX_ON_PITCH} in their half, at least 3 on the
+                    line of scrimmage and no more than 2 in each wide zone.</p>
+                    <p>${you ? 'Tip: keep a couple of players back to collect the kick, and put your strongest players on the line. Tap a player, then a square; press Confirm when you\'re done.' : 'Then the ball is kicked.'}</p>`)) return;
+                if (AI.isAI(t)) return;
                 lesson('setup', 'Setting up', `<p>Place up to ${MAX_ON_PITCH} players in your half. At least 3 must stand on the <b>line of scrimmage</b> (the middle line), and no more than 2 in each <b>wide zone</b> (the strips down the sides).</p>
                     <p>Tap a player, then a square. Press Confirm when you're done.</p>`);
             }
@@ -8752,7 +8770,7 @@
                 const marks = [[box($('top-bar-panel')), 1], [pr, 2], [box($('panel-unit-container')), 3], [box($('panel-log-container')), 4]];
                 const pad = 3;
                 ov.innerHTML = marks.filter(m => m[0]).map(([r, n]) => `<div class="ct-box" style="left:${r.left - pad}px;top:${r.top - pad}px;width:${r.width + pad * 2}px;height:${r.height + pad * 2}px"><span class="ct-num">${n}</span></div>`).join('')
-                    + `<div class="ci-card ct-card">${badge}<h2>The screen</h2><ol>
+                    + `<div class="ci-card ct-card">${badge}<h2>${stepOf('turn')}: The screen</h2><ol>
                     <li><b>The top bar.</b> On the left, your team's turn (such as 1/8) with your team re-rolls in brackets, then the score, the half
                     and the weather. On the right: 📋 Rosters, <b>?</b> Help, sound, save, full screen, and <b>End Turn</b> for when you're done.</li>
                     <li><b>The pitch.</b> Tap one of your players to pick them. The squares they can reach light up; squares that need a dice roll
@@ -8779,6 +8797,51 @@
                 }
                 ov.querySelector('.ci-go').onclick = () => { ov.hidden = true; };
             }
+            // ---- the start of the match, step by step (the first drive of a training match) ----
+            const STEPS = ['weather', 'toss', 'setupKick', 'setupRecv', 'target', 'deviation', 'event', 'landing', 'turn'];
+            const stepOf = key => `Step ${STEPS.indexOf(key) + 1} of ${STEPS.length}`;
+            const seenOnce = k => { state.coachSeen = state.coachSeen || []; if (state.coachSeen.includes(k)) return true; state.coachSeen.push(k); return false; };
+            function stage(key, title, html) {
+                if (!on() || seenOnce('st-' + key)) return false;
+                note(`${stepOf(key)}: ${title}`, html, 'stage'); return true;
+            }
+            const table = (rows, hit) => `<table class="ci-table"><thead><tr><th>2D6</th><th>Result</th></tr></thead><tbody>${rows.map(([r, n, d], i) =>
+                `<tr class="${i === hit ? 'hit' : ''}"><td>${r}</td><td><b>${n}</b>${d ? `<br><span>${d}</span>` : ''}</td></tr>`).join('')}</tbody></table>`;
+            // the weather (and the fans before it): the table, with the result rolled picked out
+            function weatherWin(total, done) {
+                if (!on() || seenOnce('st-weather')) return false;
+                const W = WEATHER_TABLE, rows = [['2', W.heat.name, W.heat.desc], ['3', W.sunny.name, W.sunny.desc], ['4–10', W.perfect.name, W.perfect.desc], ['11', W.rain.name, W.rain.desc], ['12', W.blizzard.name, W.blizzard.desc]];
+                const hit = total <= 2 ? 0 : total === 3 ? 1 : total <= 10 ? 2 : total === 11 ? 3 : 4;
+                const ff = [0, 1].map(t => `${team(t)} ${state.fanFactor[t] || 0}`).join(', ');
+                showWin(`${badge}<h2>${stepOf('weather')}: Fans and weather</h2>
+                    <p>First each team's <b>Fan Factor</b> is worked out: its dedicated fans plus a D3 of fair-weather fans (${ff}). It counts in some
+                    Kick-off Events, such as a Pitch Invasion.</p>
+                    <p>Then 2D6 are rolled on the <b>Weather table</b>. This time: <b>${total}</b>, ${esc(rows[hit][1])}.</p>
+                    ${table(rows, hit)}
+                    <p class="ci-dim">The weather lasts until a Changing Weather kick-off event (or a Weather Mage) changes it. It's shown in the top bar.</p>`, 'Got it →', done);
+                return true;
+            }
+            const KO_TEXT = { 2: 'Each team gets a free Bribe for the match.', 3: 'Late in the half the turn markers go back one, otherwise forward one.',
+                4: 'The kicking team may set some players up again.', 5: 'A receiving player may move under the ball to catch it.',
+                6: 'Each side rolls D6 + cheerleaders: the winner gets an extra assist in a block.', 7: 'Each side rolls D6 + assistant coaches: the winner gets an extra team re-roll.',
+                8: 'Roll again on the Weather table.', 9: 'The receiving team may move some players one square.', 10: 'The kicking team gets a free move with some players.',
+                11: 'Each side rolls a D6: on the lower roll a random player is unwell for the drive.', 12: 'Each side rolls D6 + Fan Factor: the fans may stun some players on the lower side.' };
+            // the Kick-off Event: the table, with the result rolled picked out (true if shown: done carries on)
+            function kickoffWin(total, done) {
+                if (!on() || seenOnce('st-event')) return false;
+                const rows = [];
+                for (let r = 2; r <= 12; r++) {
+                    const ev = (GEO.sev && SEVENS_EVENTS[r]) || KICKOFF_EVENTS[r]; if (!ev) continue;
+                    rows.push([String(r), esc(ev.name), esc(ev.intro && GEO.sev && SEVENS_EVENTS[r] ? ev.intro : KO_TEXT[r] || '')]);
+                }
+                const ev = (GEO.sev && SEVENS_EVENTS[total]) || KICKOFF_EVENTS[total];
+                showWin(`${badge}<h2>${stepOf('event')}: The Kick-off Event</h2>
+                    <p>While the ball is in the air, the kicking team rolls 2D6 on the <b>Kick-off Event table</b>. Something happens on every kick-off,
+                    from a free move for one side to a change in the weather. This time: <b>${total}</b>, ${esc(ev ? ev.name : '')}.</p>
+                    ${table(rows, rows.findIndex(r => r[0] === String(total)))}
+                    <p class="ci-dim">Once the event is over, the ball comes down.</p>`, 'Got it →', done);
+                return true;
+            }
             // the first time the person can follow up after a block
             function followWin(a) {
                 if (!on() || !a || AI.isAI(a.team) || (state.coachSeen || []).includes('followwin')) return;
@@ -8803,7 +8866,7 @@
                 m.hidden = false;
                 m.onclick = e => { if (e.target === m) m.hidden = true; };
             }
-            return { on, reset, holding, nudge, intro, blockWin, passWin, ttmWin, blitzWin, followWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            return { on, reset, holding, nudge, stage, weatherWin, kickoffWin, intro, blockWin, passWin, ttmWin, blitzWin, followWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -8923,7 +8986,7 @@
             state.selectedId = null;
             updateTopBar();
             updateSetupHUD();
-            COACH.setup(team);
+            COACH.setup(team, isKicking);
             render();
 
             let roleName = isKicking ? "Kicking Team" : "Receiving Team";
@@ -8945,6 +9008,8 @@
         }
 
         function startDriveSequence(kickingTeam, receivingTeam) {
+            COACH.stage('toss', 'The coin toss', `<p>${ROSTERS[receivingTeam].name} won the toss and chose to <b>receive</b>, so ${ROSTERS[kickingTeam].name} <b>kick off</b>.
+                The receiving team gets the first turn; at half-time it's the other way round.</p><p>Next, both teams set up: the kicking team first.</p>`);
             state.kickoff.kickingTeam = kickingTeam;
             state.kickoff.receivingTeam = receivingTeam;
             state.ball.carrierId = null;
@@ -9214,6 +9279,9 @@
             state.players.forEach(p => { p.playedDrive = !p.isReserve && !p.isCasualty && !p.isKO && !p.isEjected && p.x >= 0 && p.x < CFG.cols; if (p.playedDrive) p.playedMatch = true; });   // for Secret Weapons (and who played, for MVP)
             state.mode = MODES.KICKOFF_TARGET;
             log(`  ${ROSTERS[kickingTeam].name} are kicking off! Select target square in ${ROSTERS[receivingTeam].name}'s half.`, 'text-amber-400 font-bold');
+            COACH.stage('target', 'The kicking team aims', AI.isAI(kickingTeam)
+                ? `<p>${ROSTERS[kickingTeam].name} pick a square in ${ROSTERS[receivingTeam].name}' half to aim the kick at: usually somewhere awkward, deep or out wide, away from the best catchers.</p>`
+                : `<p>Tap a square in ${ROSTERS[receivingTeam].name}' half to aim the kick at. Deep or out wide makes it harder for them to pick the ball up.</p>`);
             updateTopBar();
             render();
         }
@@ -10083,7 +10151,7 @@
             setWeather(key, total);
             log(`  WEATHER (${r1}+${r2}=${total}): ${state.weather.name}. ${state.weather.desc}`, 'text-sky-300 font-bold');
             announce(`${state.weather.icon} ${state.weather.name.toUpperCase()}`, state.weather.desc,
-                key === 'perfect' ? 'bg-sky-900/90' : 'bg-indigo-900/90', next, 4000);
+                key === 'perfect' ? 'bg-sky-900/90' : 'bg-indigo-900/90', () => { if (!COACH.weatherWin(total, next)) next(); }, 4000);   // (training: the table)
         }
 
         // ---------- end-of-drive effects (weather first) ----------
@@ -10491,13 +10559,16 @@
             const r1 = rollD6(), r2 = rollD6(), total = r1 + r2;
             const ev = (GEO.sev && SEVENS_EVENTS[total]) || KICKOFF_EVENTS[total];
             log(`  KICK-OFF EVENT (${r1}+${r2}=${total}): ${ev.name}`, 'text-fuchsia-300 font-bold');
-            if (ev.interactive) {
-                announce(ev.name.toUpperCase(), `Roll ${total}: ${ev.intro}`, ev.color, () => ev.start(), 3000);
-            } else {
-                const res = ev.resolve();
-                log(`  ${res.text}`, 'text-fuchsia-200');
-                announce(ev.name.toUpperCase(), `Roll ${total}: ${res.text}`, ev.color, res.then || finishKickoffEvent, 3800);
-            }
+            const go = () => {
+                if (ev.interactive) {
+                    announce(ev.name.toUpperCase(), `Roll ${total}: ${ev.intro}`, ev.color, () => ev.start(), 3000);
+                } else {
+                    const res = ev.resolve();
+                    log(`  ${res.text}`, 'text-fuchsia-200');
+                    announce(ev.name.toUpperCase(), `Roll ${total}: ${res.text}`, ev.color, res.then || finishKickoffEvent, 3800);
+                }
+            };
+            if (!COACH.kickoffWin(total, go)) go();   // (training: the table first)
         }
 
         // After the event: the ball comes down
@@ -10515,6 +10586,9 @@
         }
 
         function landKick(landingX, landingY) {
+            COACH.stage('landing', 'The ball comes down', `<p>If the ball lands in the receiving team's half on a <b>standing player</b>, they try to catch it (an Agility test). In an
+                <b>empty square</b> it bounces once. If it ends up outside the receiving half (or bounces out of it) it's a <b>touchback</b>: the receiving team
+                gives the ball to any of its players.</p><p>Then the receiving team takes the first turn.</p>`);
             // the kick's close-up replay: from the kicker's boot to wherever the ball ends up (played before the receiving team's first turn)
             if (state.kickoff.kickerId != null) REPLAY.start('kick', { thr: state.kickoff.kickerId, tgt: state.kickoff.target || { x: landingX, y: landingY }, land: { x: landingX, y: landingY }, team: state.kickoff.kickingTeam, gb: null });
             if (!kickInBounds(landingX, landingY, state.kickoff.receivingTeam)) {
