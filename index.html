@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.68</title>
+    <title>BludBowl 4.69</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -917,6 +917,17 @@
 #coach-intro h3 { font-size: 13px; font-weight: 800; color: #fde68a; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: .06em; }
 #coach-intro p { margin: 0 0 6px; } #coach-intro ol { margin: 0; padding-left: 22px; list-style: decimal; } #coach-intro li { margin-bottom: 6px; } #coach-intro li::marker { color: #7dd3fc; font-weight: 800; }
 #coach-intro b { color: #f8fafc; } #coach-intro .ci-dim { color: #94a3b8; margin-top: 10px; }
+#coach-tour { position: fixed; inset: 0; z-index: 255; background: rgba(2,6,23,.55); font: 13px/1.5 Inter, system-ui, sans-serif; color: #e2e8f0; }
+#coach-tour[hidden] { display: none !important; }
+#coach-tour .ct-box { position: fixed; z-index: 2; border: 3px solid #38bdf8; border-radius: 10px; box-shadow: 0 0 0 2px rgba(2,6,23,.6), 0 0 18px rgba(56,189,248,.6); pointer-events: none; }
+#coach-tour .ct-num { position: absolute; top: -12px; left: -12px; width: 24px; height: 24px; border-radius: 50%; background: #0284c7; color: #fff; font-weight: 800; font-size: 13px; display: grid; place-items: center; border: 2px solid #0f172a; }
+#coach-tour .ct-card { position: fixed; z-index: 1; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 32px)); max-height: 62vh; overflow-y: auto; overscroll-behavior: contain;
+    background: rgba(15,27,45,.97); border: 1px solid #0369a1; border-top: 4px solid #38bdf8; border-radius: 12px; padding: 12px 14px; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+#coach-tour .ci-badge { font-weight: 800; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #7dd3fc; }
+#coach-tour h2 { font-family: 'Teko', 'Impact', sans-serif; font-size: 26px; line-height: 1; text-transform: uppercase; color: #fbbf24; margin: 4px 0 6px; }
+#coach-tour ol { margin: 0; padding-left: 22px; list-style: decimal; } #coach-tour li { margin-bottom: 6px; } #coach-tour li::marker { color: #38bdf8; font-weight: 800; }
+#coach-tour b { color: #f8fafc; } #coach-tour .ci-dim { color: #94a3b8; margin: 6px 0 0; }
+#coach-tour .ci-go { position: sticky; bottom: 0; box-shadow: 0 -6px 12px rgba(15,27,45,.95); display: block; margin: 10px 0 0 auto; padding: 8px 16px; border-radius: 9px; border: 0; background: #0284c7; color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
 #coach-intro .ci-fig { margin: 8px 0 10px; }
 #coach-intro .ci-fig canvas { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid #334155; }
 #coach-intro .ci-fig figcaption { font-size: 11.5px; line-height: 1.4; color: #94a3b8; margin-top: 4px; }
@@ -1083,7 +1094,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.68</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.69</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8405,6 +8416,9 @@
             function turn(t) {
                 if (!on() || AI.isAI(t)) return;
                 cause = null;
+                if (!(state.coachSeen || []).includes('layout')) {   // (once the turn banner has gone; seen only once it has really shown)
+                    setTimeout(() => { if (on() && state.activeTeam === t && !AI.isAI(t) && !(state.coachSeen || []).includes('layout')) { state.coachSeen = (state.coachSeen || []).concat('layout'); layoutWin(); } }, 2000);
+                }
                 if (lesson('turn', 'Your turn', `<p>In your turn each player can take one <b>action</b>: tap a player, then pick it.</p>
                     <ul><li><b>Move</b>: up to their Movement (MA) squares, plus up to 2 Rushes (2+ each).</li><li><b>Block</b>: hit an opponent next to them.</li>
                     <li><b>Blitz</b> (once a turn): move, then block.</li><li><b>Pass</b> and <b>Hand-off</b> (once a turn each): give the ball to a team-mate.</li><li><b>Foul</b> (once a turn): kick a player who is down; the referee may send the fouler off.</li></ul>
@@ -8628,6 +8642,15 @@
                     with 🎓 Coach.</li>
                     <li>The first block and first pass of the match open a longer explanation.</li></ul>`]
             ];
+            const BLITZ = () => `<ul class="ci-list"><li>A <b>Blitz</b> is the only way for a player to <b>move and block</b> in the same action.</li>
+                    <li>Your team gets <b>one Blitz each turn</b>, so save it for the block that matters most, such as the ball carrier.</li>
+                    <li>You must <b>choose Blitz before the player moves</b>. A player who starts with Move can't decide to block halfway.</li>
+                    <li>The player moves as normal, then blocks an opponent next to them. The block uses up <b>one square of their movement</b> (it can
+                    be a Rush if they have none left).</li>
+                    <li>If the block goes well and your player is still standing, they can <b>carry on moving</b> with the movement they have left, for
+                    example to follow the ball or get clear.</li>
+                    <li>If your player is knocked down, it's a turnover, just as in any block.</li></ul>`;
+            HELP.splice(HELP.findIndex(h => h[0] === 'pass'), 0, ['blitz', 'Blitzing', BLITZ]);
             const helpOf = key => (HELP.find(h => h[0] === key) || HELP[0]);
             function helpModal() {
                 let m = $('coach-intro');
@@ -8670,6 +8693,55 @@
                 (state.coachSeen = state.coachSeen || []).push('ttmwin');
                 showWin(`${badge}<h2>Throwing team-mates</h2>${helpOf('ttm')[2]()}`, 'Got it →');
             }
+            // the first Blitz the person declares
+            function blitzWin(p) {
+                if (!on() || !p || AI.isAI(p.team) || (state.coachSeen || []).includes('blitzwin')) return;
+                (state.coachSeen = state.coachSeen || []).push('blitzwin');
+                showWin(`${badge}<h2>Blitzing</h2>${BLITZ()}<p class="ci-dim">Now move your player next to the opponent you want to hit, then tap that opponent to block.</p>`, 'Got it →');
+            }
+            // the screen, at the person's first turn: what's where, with the parts of the screen picked out
+            function layoutWin() {
+                let ov = $('coach-tour');
+                if (!ov) { ov = document.createElement('div'); ov.id = 'coach-tour'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); document.body.appendChild(ov); }
+                const box = el => { if (!el) return null; const r = el.getBoundingClientRect(); return r.width && r.height ? r : null; };
+                const cv = document.querySelector('canvas'), cr = box(cv);
+                const z = state.camera.zoom || 1, ts = CFG.tileSize, W = window.innerWidth, H = window.innerHeight;
+                const at = q => ({ left: cr.left + state.camera.x + q.x * ts * z, top: cr.top + state.camera.y + q.y * ts * z, width: ts * z, height: ts * z });
+                // one of your players, on screen and as far from the middle as possible, so the card can sit clear of them
+                const mine = cr ? state.players.filter(q => !AI.isAI(q.team) && q.team === state.activeTeam && !q.isDown && q.x >= 0 && q.x < CFG.cols && !q.isReserve)
+                    .map(q => ({ q, r: at(q) })).filter(o => o.r.left > 8 && o.r.top > 60 && o.r.left + o.r.width < W - 8 && o.r.top + o.r.height < H - 8) : [];
+                mine.sort((a, b) => Math.hypot(b.r.left - W / 2, b.r.top - H / 2) - Math.hypot(a.r.left - W / 2, a.r.top - H / 2));
+                const pr = mine.length ? mine[0].r : null;
+                const marks = [[box($('top-bar-panel')), 1], [pr, 2], [box($('panel-unit-container')), 3], [box($('panel-log-container')), 4]];
+                const pad = 3;
+                ov.innerHTML = marks.filter(m => m[0]).map(([r, n]) => `<div class="ct-box" style="left:${r.left - pad}px;top:${r.top - pad}px;width:${r.width + pad * 2}px;height:${r.height + pad * 2}px"><span class="ct-num">${n}</span></div>`).join('')
+                    + `<div class="ci-card ct-card">${badge}<h2>The screen</h2><ol>
+                    <li><b>The top bar.</b> On the left, your team's turn (such as 1/8) with your team re-rolls in brackets, then the score, the half
+                    and the weather. On the right: 📋 Rosters, <b>?</b> Help, sound, save, full screen, and <b>End Turn</b> for when you're done.</li>
+                    <li><b>The pitch.</b> Tap one of your players to pick them. The squares they can reach light up; squares that need a dice roll
+                    show your chance. Tap a square to move there, or tap an opponent next to them to block.</li>
+                    <li><b>The unit panel.</b> The picked player's stats and skills (tap a skill to see what it does), and below them the
+                    <b>actions</b> they can take: Move, Block, Blitz, Pass, Hand-off, Foul and so on.</li>
+                    <li><b>The match log.</b> Every roll and what happened. Drag its top edge to make it taller.</li></ol>
+                    <p class="ci-dim">The coach card pops up as things happen. All of this is in Help (the ? button) too.</p>
+                    <button type="button" class="ci-go">Let's go →</button></div>`;
+                ov.hidden = false;
+                {   // keep the card clear of the picked-out player: the middle if it's clear, else above, below, left or right of them
+                    const card = ov.querySelector('.ct-card'), cw = card.offsetWidth, ch = card.offsetHeight, tb = box($('top-bar-panel'));
+                    const top0 = tb ? tb.bottom + 8 : 8, hit = (l, t) => pr && l < pr.left + pr.width + 10 && l + cw > pr.left - 10 && t < pr.top + pr.height + 10 && t + ch > pr.top - 10;
+                    const spots = [[(W - cw) / 2, (H - ch) / 2], [(W - cw) / 2, top0], [(W - cw) / 2, H - ch - 8], [8, (H - ch) / 2], [W - cw - 8, (H - ch) / 2], [8, top0], [W - cw - 8, top0]];
+                    const ok = spots.find(([l, t]) => l >= 0 && t >= 0 && !hit(l, t));
+                    if (ok) Object.assign(card.style, { left: ok[0] + 'px', top: ok[1] + 'px', transform: 'none' });
+                    else if (pr) {   // no room as it is (a phone held upright): a shorter, scrolling card in the bigger gap above or below them
+                        const above = pr.top - 14 - top0, below = H - (pr.top + pr.height) - 22;
+                        if (Math.max(above, below) >= 170) {
+                            const up = above >= 170, hgt = up ? above : below, t = up ? top0 : pr.top + pr.height + 14;   // (above first: the panels are below)
+                            Object.assign(card.style, { left: (W - cw) / 2 + 'px', top: t + 'px', transform: 'none', maxHeight: hgt + 'px' });
+                        }
+                    }
+                }
+                ov.querySelector('.ci-go').onclick = () => { ov.hidden = true; };
+            }
             // Help: every topic, picked from a row of tabs
             function help(key) {
                 const m = helpModal(), c = ctxNow();
@@ -8688,7 +8760,7 @@
                 m.hidden = false;
                 m.onclick = e => { if (e.target === m) m.hidden = true; };
             }
-            return { on, reset, intro, blockWin, passWin, ttmWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            return { on, reset, intro, blockWin, passWin, ttmWin, blitzWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -20889,7 +20961,7 @@
         document.getElementById('btn-action-move').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='move'; if (p.skills.includes('Sprint') && p.rushes === 2) p.rushes = 3; state.mode=MODES.ACTION_MOVE; if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-block').onclick = () => { let p = getPlayerById(state.selectedId); if (p.isDown && p.skills.includes('Jump Up')) { jumpUpBlock(p); return; } p.actionTaken='block'; state.mode=MODES.ACTION_BLOCK; if(!declareAction(p)) return; updateValidActions(p); };
         document.getElementById('btn-action-secure').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='secure_ball'; state.mode=MODES.ACTION_SECURE_BALL; state.secureUsed=true; log(`  ${p.type} declares Secure Ball.`); if(!declareAction(p)) return; updateValidActions(p); };
-        document.getElementById('btn-action-blitz').onclick = () => { let p = getPlayerById(state.selectedId); handleStandUp(p); p.actionTaken='blitz'; state.mode=MODES.ACTION_BLITZ; state.blitzUsed=true; log(`  ${p.type} BLITZ!`, 'text-amber-400 font-bold');
+        document.getElementById('btn-action-blitz').onclick = () => { let p = getPlayerById(state.selectedId); COACH.blitzWin(p); handleStandUp(p); p.actionTaken='blitz'; state.mode=MODES.ACTION_BLITZ; state.blitzUsed=true; log(`  ${p.type} BLITZ!`, 'text-amber-400 font-bold');
             p.onCommit = onCommitFor(p, () => {
             if (starIs(p, 'glart') && starFree(p, 'rush' + state.half) && !p.skills.includes('Frenzy')) { starSpend(p, 'rush' + state.half, 'Frenzied Rush'); tempSkill(p, ['Frenzy'], ['Grab']); log(`  FRENZIED RUSH! Glart has Frenzy for this Blitz (no Grab this turn).`, 'text-yellow-300 font-bold'); }
             if (starIs(p, 'roxanna') && starFree(p, 'nails' + state.half) && !p.skills.includes('Claws')) { starSpend(p, 'nails' + state.half, 'Slashing Nails'); p.skills.push('Claws'); p.tempClaws = true; log(`  SLASHING NAILS! Roxanna has Claws for this Blitz.`, 'text-yellow-300 font-bold'); }

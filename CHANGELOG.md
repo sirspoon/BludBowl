@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.69 (14 Nov 2026)
+- Training: your first turn opens a tour of the screen (top bar, pitch, unit panel and its actions, match log), and your first
+  Blitz explains the rules for Blitzing. Help has a new Blitzing topic.
+
 ## v4.68 (13 Nov 2026)
 - Help has pictures: the pitch at set-up, tackle zones, assists in a block, the pass ranges and how the ball bounces.
 

@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.69 (14 Nov 2026)
+- **New (training):** at the start of your first turn, "The screen": the top bar, one of your players on the pitch, the unit panel and
+  the match log are outlined and numbered, with a card explaining each (the turn counter and re-rolls, the buttons and End Turn;
+  tapping players and squares, and the % chance on squares that need a roll; the player's stats, skills and action buttons; the
+  log). The card keeps clear of the outlined player (beside them in landscape; a shorter, scrolling card above them on an upright
+  phone).
+- **New (training and help):** the first time you choose Blitz in a training match, a "Blitzing" window: the only way to move and
+  block in one action, once a turn, chosen before the player moves, the block costs a square of movement (or a Rush), and if your
+  player stays up they can carry on moving afterwards. Help has the same as a new "Blitzing" topic.
+
 ## v4.68 (13 Nov 2026)
 - **Improved (help and training):** diagrams in Help and the training windows, drawn on a little pitch with the game's own sprites:
   the pitch at set-up (end zones, line of scrimmage, wide zones and an example line-up for each side) in The aim; a red player's
