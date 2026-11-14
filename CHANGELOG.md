@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.78 (14 Nov 2026)
+- Tournaments (on this device and online) now have a Rules choice: GW Matched Play, Glory on the Gridiron 2, UKTC XI or your own.
+  Only teams built under those rules can enter, and computer teams are drafted to them.
+- Tournament Rules screen: pick a ruleset from a dropdown to see just that one.
+
 ## v4.77 (14 Nov 2026)
 - Tournament rules editor: team tiers are now a box per tier with the teams in; drag a team to another tier (or tap it, then tap the tier).
 

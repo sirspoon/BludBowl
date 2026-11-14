@@ -2,6 +2,22 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.78 (14 Nov 2026)
+- **New: tournaments use tournament rules.** Setting up a tournament on this device (Tournaments, + New tournament) or online
+  (Online, Organise a tournament) now has a Rules dropdown listing every ruleset on the Tournament Rules screen, with a link to it.
+  - GW Matched Play works as before: choose the budget every team spends up to.
+  - Under any other ruleset there's no budget to choose: each team's budget comes from its tier (or its race, for UKTC), and the
+    form shows the range. Only teams built under those rules can enter; any other tournament team says which rules it was built
+    under. Teams are checked against the rules when entering and again before each tie.
+  - Computer teams are drafted to the chosen rules: their tier's budget, Star Players and Mega-star limits, extra skills counted
+    or bought with skill gold (taking their tier's stacked skills, and sometimes the stat increase, under UKTC-style rules), and
+    only the inducements allowed.
+  - Online, a ruleset you made yourself travels with the lobby, so players who join get it on their device and can build teams
+    to it straight away.
+  - The tournament's header and the online lobby show which rules it uses.
+- **Improved (Tournament rules screen):** a Ruleset dropdown at the top picks which ruleset to show, instead of listing all of
+  them one after another. It opens on the ruleset in use (from the Team Builder or a tournament form) or the last one used.
+
 ## v4.77 (14 Nov 2026)
 - **Improved (Tournament rules editor):** the Team tiers section is now a box for each tier holding its teams, in place of a
   dropdown for every team. Drag a team into another tier with the mouse; on a touch screen drag it by its ⠿ handle (so the page
