@@ -53,7 +53,7 @@ async function sim(browser, races, hook) {
     const chip = () => page.evaluate(() => { const on = document.querySelector('#cup-hub [data-cset^="weather|"].on'); return on ? on.dataset.cset.split('|')[1] : null; });
     await page.evaluate(() => { CUP.open(); document.querySelector('[data-cact="new"]').click(); }); await page.waitForTimeout(200);
     await setSelect(page, '#cp-rules', 'gw'); await page.waitForTimeout(100);
-    check(await chip() === 'std', 'tournament form: Weather is Standard with GW rules', await chip());
+    check(await page.evaluate(() => !document.querySelector('#cup-hub [data-cset^="weather|"]')), 'tournament form: no Weather row with GW rules');
     await setSelect(page, '#cp-rules', 'gotg2'); await page.waitForTimeout(100);
     check(await chip() === 'chaos', 'tournament form: Weather defaults to Chaos Wastes with the Glory on the Gridiron 2 rules', await chip());
     await page.screenshot({ path: OUT + '/chaos-cup-form.png', fullPage: false });
@@ -64,9 +64,10 @@ async function sim(browser, races, hook) {
     const cp = await page.evaluate(() => { const raw = JSON.parse(localStorage.getItem('bb-cups') || '[]'), l = Array.isArray(raw) ? raw : (raw.cups || Object.values(raw)); const c = l.find(x => x && x.rules === 'gotg2'); return c ? { wx: c.wx, rules: c.rules } : null; });
     check(cp && cp.wx === 'chaos' && cp.rules === 'gotg2', 'the new cup keeps the Chaos Wastes weather', cp);
     check(await page.evaluate(() => /Chaos Wastes weather/.test(document.getElementById('cup-hub').textContent)), 'the cup page says it uses the Chaos Wastes weather');
-    check(await page.evaluate(() => { state.wtable = null; window.launchMatch('orc', 'human', { replaceOk: true, cup: { cid: 'x', key: '0:0', ko: true, wx: 'chaos' } }); return state.wtable; }) === 'chaos', 'a tie launched from it plays with the Chaos Wastes table');
-    check(await page.evaluate(() => { window.launchMatch('orc', 'human', { replaceOk: true, cup: { cid: 'x', key: '0:0', ko: true } }); return state.wtable; }) === 'std', 'a cup without it (older cups) keeps the standard table');
-    check(await page.evaluate(() => { return typeof CUP.weatherField === 'function' && CUP.wxOf({ rules: 'gotg2' }) === 'chaos' && CUP.wxOf({ rules: 'gotg2', fmt: 'sevens' }) === 'std'; }), 'the online tournament form uses the same choice');
+    check(await page.evaluate(() => { state.wtable = null; setPitchPref('blades'); window.launchMatch('orc', 'human', { replaceOk: true, cup: { cid: 'x', key: '0:0', ko: true, wx: 'chaos', pitch: 'chaos' } }); return state.wtable + ' ' + PITCH.style; }) === 'chaos chaos', 'a tie launched from it plays with the Chaos Wastes table on the Chaos Wastes pitch');
+    check(await page.evaluate(() => { const l = JSON.parse(localStorage.getItem('bb-cups') || '[]'), c = (Array.isArray(l) ? l : l.cups || []).find(x => x.rules === 'gotg2'); return CUP.pitchOfCup(c) === 'chaos' && CUP.pitchOfCup({ rules: 'gw' }) === null; }), 'the Gridiron tournament is played on the Chaos Wastes pitch, others at the home ground');
+    check(await page.evaluate(() => { window.launchMatch('orc', 'human', { replaceOk: true, cup: { cid: 'x', key: '0:0', ko: true } }); return state.wtable + ' ' + PITCH.style; }) === 'std ' + await page.evaluate(() => HOME_PITCH.orc), 'any other tournament: the standard table at the home team\'s ground');
+    check(await page.evaluate(() => { return typeof CUP.weatherField === 'function' && CUP.wxOf({ rules: 'gotg2' }) === 'chaos' && CUP.wxOf({ rules: 'gw', weather: 'chaos' }) === 'std' && CUP.wxOf({ rules: 'gotg2', fmt: 'sevens' }) === 'std'; }), 'the online tournament form uses the same choice');
     await page.evaluate(() => { document.getElementById('cup-hub').classList.add('hidden'); OTOUR.open(); const b = document.querySelector('#otour-hub [data-ot="new"]'); if (b) b.click(); }); await page.waitForTimeout(200);
     await setSelect(page, '#ot-rules', 'gotg2'); await page.waitForTimeout(100);
     const ot = await page.evaluate(() => { const on = document.querySelector('#otour-hub [data-k="weather"].on'); return on ? on.dataset.v : null; });

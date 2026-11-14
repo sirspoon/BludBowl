@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.98 (14 Nov 2026)
+- **Changed: the Chaos Wastes weather and pitch belong to the Glory on the Gridiron 2 tournament.** The Weather row in the tournament
+  forms (on this device and online) now only appears when the rules are Example: Glory on the Gridiron 2 (11 a side); it starts on
+  Chaos Wastes and can be switched to Standard. Tournaments with any other rules always use the standard table (a v4.97 tournament
+  that already picked Chaos Wastes keeps it).
+- **New: the Gridiron tournament is played on the Chaos Wastes pitch.** Every match in a tournament with those rules, on this device
+  or in an online tournament (computer ties, one device or two), is played on the Chaos Wastes pitch instead of the home team's
+  ground; its page says "Chaos Wastes pitch". This also applies to Gridiron tournaments made before this version. The pitch stays a
+  choice everywhere else (the exhibition screen, the Pitch setting and the two-device lobby).
+
 ## v4.97 (14 Nov 2026)
 - **New: a Weather choice for tournaments.** Setting up a tournament (Tournaments, and Organise a tournament online) now has a Weather
   row under the Rules: Standard (BB2025) or Chaos Wastes (the v4.96 table). It starts on Chaos Wastes when the rules are

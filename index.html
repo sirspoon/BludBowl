@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.97</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.98</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -6337,7 +6337,7 @@ ol.ci-steps li::marker { content: none; }
                     return { key, h, a, third: !!f.third, room: f.room || '', r: f.r ? { s: f.r.s, pen: f.r.pen ? { h: f.r.pen.h, a: f.r.pen.a } : null, et: !!f.r.et, sim: !!f.r.sim, forfeit: !!f.r.forfeit } : null };
                 }));
                 const sw = CUP.isSwiss(cp), main = CUP.mainTies(cp.rounds[cp.at] || []);
-                return { cid: cp.id, type: cp.type, stage: cp.stage, at: cp.at, nRounds: cp.nRounds, rounds, cpuTeams, wx: cp.wx || 'std',
+                return { cid: cp.id, type: cp.type, stage: cp.stage, at: cp.at, nRounds: cp.nRounds, rounds, cpuTeams, wx: cp.wx || 'std', pitch: CUP.pitchOfCup(cp),
                     label: cp.stage === 'done' ? 'Finished' : sw ? `Round ${cp.at + 1} of ${cp.nRounds}` : CUP.ROUND(main.length),
                     standings: sw ? CUP.standings(cp).map(x => { const sd = side(x.id); return { name: sd.name, coach: sd.coach, dev: sd.dev, p: x.p, w: x.w, d: x.d, l: x.l, tf: x.tf, ta: x.ta, pts: x.pts }; }) : null,
                     champ: cp.champ ? side(cp.champ) : null };
@@ -6670,7 +6670,7 @@ ol.ci-steps li::marker { content: none; }
                     const mineSide = f.h.dev === DEV.id ? f.h : f.a, own = TB.get(mineSide.id);
                     if (!own || own.ext) { flash(`${mineSide.name} isn't on this device any more, so it can't play.`, true); return; }
                     const pr = teamProblems(own, t); if (pr.length) { flash(`${own.name} no longer fits the tournament: ${pr.join('; ')}. Fix it in Teams to play this tie.`, true); return; }
-                    const cup = { cid: V.cid, key: f.key, ko: V.type !== 'swiss', otid: t.id, wx: V.wx || CUP.wxOf(t) };
+                    const cup = { cid: V.cid, key: f.key, ko: V.type !== 'swiss', otid: t.id, wx: V.wx || CUP.wxOf(t), pitch: V.pitch || CUP.pitchOfCup(t) };
                     if (a === 'tplay') {
                         if (isOrg(t)) { close(); try { ONLINE.close(); } catch (er) {} CUP.playTie(V.cid, f.key); return; }
                         const cpuSide = f.h.dev ? f.a : f.h, cpu = V.cpuTeams && V.cpuTeams[cpuSide.id];
@@ -6748,12 +6748,16 @@ ol.ci-steps li::marker { content: none; }
             const mainTies = rd => rd.filter(f => !f.third && !f.bye);
             const pairKey = (a, b) => [a, b].sort().join('|');
             // the tournament's rules: a ruleset from the Tournament Rules screen (its budget, skills, Star Players and inducements)
-            // a tournament's weather table: picked in the form, or the Chaos Wastes table by default with the Glory on the Gridiron 2 rules (its pack's table)
-            const wxOf = d => d.fmt === 'sevens' ? 'std' : d.weather === 'chaos' || d.weather === 'std' ? d.weather : d.rules === 'gotg2' ? 'chaos' : 'std';
+            // The Glory on the Gridiron 2 tournament (its pack is "Getting Wasted"): only it offers the Chaos Wastes weather table (on unless switched
+            // off), and all its matches are played on the Chaos Wastes pitch. Every other tournament has the standard weather and the home team's ground.
+            const gridiron = d => !!d && d.fmt !== 'sevens' && d.rules === 'gotg2';
+            const wxOf = d => !gridiron(d) ? 'std' : d.weather === 'std' ? 'std' : 'chaos';
+            const pitchOfCup = d => gridiron(d) ? 'chaos' : null;
             function weatherField(d, attr) {
+                if (!gridiron(d)) return '';
                 const cur = wxOf(d);
                 return `<div class="lg-field"><span class="lg-lbl">Weather</span><div class="lg-seg">${[['std', 'Standard (BB2025)'], ['chaos', 'Chaos Wastes']].map(([v, l]) => `<button type="button" class="pg-chip ${cur === v ? 'on' : ''}" ${attr(v)}>${l}</button>`).join('')}</div>
-                    <span class="pg-dim">${cur === 'chaos' ? 'Every match rolls on the Chaos Wastes weather table from Glory on the Gridiron 2 - Getting Wasted (warpfire, mutations, the Slavering Maw...).' : 'The usual BB2025 weather table.'}</span></div>`;
+                    <span class="pg-dim">${cur === 'chaos' ? 'Every match rolls on the Chaos Wastes weather table from Glory on the Gridiron 2 - Getting Wasted (warpfire, mutations, the Slavering Maw...).' : 'The usual BB2025 weather table.'} All its matches are played on the Chaos Wastes pitch.</span></div>`;
             }
             function rulesField(id, elId) {
                 const r = TRULES.get(id) || TRULES.GW;
@@ -7092,7 +7096,7 @@ ol.ci-steps li::marker { content: none; }
                 prevAI = [AI.isOn(0), AI.isOn(1)];
                 AI.set(0, watch || !isYou(cp, f.h)); AI.set(1, watch || !isYou(cp, f.a));
                 close();
-                window.launchMatch('custom:' + f.h, 'custom:' + f.a, { cup: { cid: cp.id, key, ko: !isSwiss(cp), wx: cp.wx || 'std' }, fmt: cp.fmt === 'sevens' ? 'sevens' : 'std' });
+                window.launchMatch('custom:' + f.h, 'custom:' + f.a, { cup: { cid: cp.id, key, ko: !isSwiss(cp), wx: cp.wx || 'std', pitch: pitchOfCup(cp) }, fmt: cp.fmt === 'sevens' ? 'sevens' : 'std' });
             }
 
             // ---- screen
@@ -7155,7 +7159,7 @@ ol.ci-steps li::marker { content: none; }
             }
             function cupHtml(cp) {
                 const rd = cp.rounds[cp.at], cpuLeft = cp.stage !== 'done' && rd.some(f => !f.bye && !f.r && !isYou(cp, f.h) && !isYou(cp, f.a));
-                const about = (cp.fmt === 'sevens' ? 'Sevens · ' : '') + `${esc(rulesName(cp))} · ` + (cp.wx === 'chaos' ? 'Chaos Wastes weather · ' : '') + (isSwiss(cp) ? `${cp.teams.length} teams · Swiss: ${cp.nRounds} rounds, each team meets an opponent on a similar record · win ${cp.scoring === '210' ? 2 : 3}, draw 1 · ${(TRULES.get(cp.rules) || TRULES.GW).gw || cp.fmt === 'sevens' ? k(cp.budget) + ' budget' : 'budget by tier'}`
+                const about = (cp.fmt === 'sevens' ? 'Sevens · ' : '') + `${esc(rulesName(cp))} · ` + (pitchOfCup(cp) ? 'Chaos Wastes pitch · ' : '') + (cp.wx === 'chaos' ? 'Chaos Wastes weather · ' : '') + (isSwiss(cp) ? `${cp.teams.length} teams · Swiss: ${cp.nRounds} rounds, each team meets an opponent on a similar record · win ${cp.scoring === '210' ? 2 : 3}, draw 1 · ${(TRULES.get(cp.rules) || TRULES.GW).gw || cp.fmt === 'sevens' ? k(cp.budget) + ' budget' : 'budget by tier'}`
                     : `${cp.size} teams · knockout: a drawn tie goes to extra time, then penalties${cp.third !== false ? ' · third-place match' : ''} · ${(TRULES.get(cp.rules) || TRULES.GW).gw || cp.fmt === 'sevens' ? k(cp.budget) + ' budget for every team' : 'budget by tier'}`);
                 return `<section class="pg-card th-headcard"><div class="lg-card"><div><h3 class="th-h">${esc(cp.name)}</h3>
                         <div class="pg-dim">${about}</div></div>
@@ -7318,7 +7322,7 @@ ol.ci-steps li::marker { content: none; }
             // a tie's event and stage, in words ('Spring Cup', 'Semi-finals')
             const describe = (cid, key) => { try { load(); const cp = get(cid); if (!cp) return null; const r = +String(key).split(':')[0];
                 return { name: cp.name || 'Tournament', stage: isSwiss(cp) ? `Round ${r + 1}${cp.nRounds ? ' of ' + cp.nRounds : ''}` : cp.rounds[r] ? ROUND(cp.rounds[r].length) : '' }; } catch (e) { return null; } };
-            return { open, close, recordLive, draftTeam, standings, unfit, rulesField, weatherField, wxOf, rulesName, liveResult, createOnline, ROUND, isSwiss, describe,
+            return { open, close, recordLive, draftTeam, standings, unfit, rulesField, weatherField, wxOf, pitchOfCup, rulesName, liveResult, createOnline, ROUND, isSwiss, describe,
                 played: (cid, key) => { load(); const cp = get(cid), f = cp && byKey(cp, key); return !f || !!f.r || !!f.bye; },   // (a saved match for it is out of date)
                 applyResult: (cid, key, R) => { load(); const cp = get(cid); if (!cp || !putResult(cp, key, R)) return false; save(); return true; },
                 sim: (cid, key) => { load(); const cp = get(cid); if (!cp) return; simTie(cp, key); save(); },
@@ -30439,8 +30443,8 @@ ol.ci-steps li::marker { content: none; }
                 state.training = !!opts.training && !opts.league && !opts.cup; state.coachSeen = []; COACH.reset();   // (Training: the coach explains the rules)
                 (opts.extraRR || []).forEach((n, i) => { if (n) { ROSTERS[i].rerolls = (ROSTERS[i].rerolls || 0) + n; state.rr[i] = ROSTERS[i].rerolls; } });
                 const pick = homeRace; homeRace = () => ROSTERS[0].race || ROSTERS[0].key;
-                if (opts.league || opts.cup) {   // a league or tournament match is always at the home team's ground, whatever the Pitch setting
-                    const want = pitchFor('home');
+                if (opts.league || opts.cup) {   // a league or tournament match is always at the home team's ground, whatever the Pitch setting (the Gridiron tournament: the Chaos Wastes)
+                    const want = opts.cup && PITCH_STYLES.includes(opts.cup.pitch) ? opts.cup.pitch : pitchFor('home');
                     if (want !== PITCH.style || !PITCH.tex) { PITCH.style = want; try { buildPitchTexture(); } catch (e) { console.error(e); } }
                 } else homePitchCheck();
                 homeRace = pick;

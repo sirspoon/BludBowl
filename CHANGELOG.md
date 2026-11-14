@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.98 (14 Nov 2026)
+- The Weather choice is now only for the Glory on the Gridiron 2 tournament, and all its matches are played on the Chaos Wastes
+  pitch. (The pitch is still a choice for exhibition and two-device matches.)
+
 ## v4.97 (14 Nov 2026)
 - Tournaments (on this device and online) now have a Weather choice: Standard or Chaos Wastes. With the Glory on the Gridiron 2
   rules it starts on Chaos Wastes.
