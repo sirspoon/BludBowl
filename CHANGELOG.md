@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.77 (14 Nov 2026)
+- Tournament rules editor: team tiers are now a box per tier with the teams in; drag a team to another tier (or tap it, then tap the tier).
+
 ## v4.76 (14 Nov 2026)
 - Tournament rules: UKTC XI built in. Each team has its own budget, and extra skills are bought from a separate pot of skill gold,
   with stacked skills and stat increases (from the fork's version, checked against the UKTC Rules Pack).

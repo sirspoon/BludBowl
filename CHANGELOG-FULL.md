@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.77 (14 Nov 2026)
+- **Improved (Tournament rules editor):** the Team tiers section is now a box for each tier holding its teams, in place of a
+  dropdown for every team. Drag a team into another tier with the mouse; on a touch screen drag it by its ⠿ handle (so the page
+  still scrolls when you swipe over the teams), or tap a team and then tap the tier (or a team in that tier) to move it there.
+  The boxes the picked team can go to are outlined, the page scrolls while you drag near the top or bottom, and keyboard users can
+  move a focused team with the number keys or the arrow keys. Each box shows how many teams it has and its budget; with budgets
+  set per team, each team's budget box sits on its tag.
+
 ## v4.76 (14 Nov 2026)
 - **New: UKTC XI tournament rules** (UK Team Challenge, Manchester, 9-10 January 2027), built in alongside GW Matched Play and
   Glory on the Gridiron 2. Taken from the fork's v4.35 version and checked against the UKTC Rules Pack, Tables 1.1 and 1.2: each

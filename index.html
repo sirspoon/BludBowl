@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.76</title>
+    <title>BludBowl 4.77</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -272,6 +272,21 @@
         #trules .tr-card > .pg-dim { margin-top: 4px; line-height: 1.45; }
         #trules .lg-in.tr-num { width: 80px; text-align: right; } #trules .tr-edit td { vertical-align: middle; }
         #trules .tr-row2 { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+        #trules .tr-boxes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 8px; }
+        #trules .tr-box { border: 1px dashed var(--pg-edge); border-radius: 8px; padding: 8px; background: #0d1424; min-width: 0; transition: border-color .15s, background .15s; }
+        #trules .tr-box.tr-target { border-color: #a16207; cursor: pointer; } #trules .tr-box.tr-over { border: 1px solid var(--pg-amber); background: #1a2236; }
+        #trules .tr-boxh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; } #trules .tr-boxh b { color: var(--pg-amber); font-family: 'Teko', 'Impact', sans-serif; font-size: 18px; letter-spacing: .04em; text-transform: uppercase; }
+        #trules .tr-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 34px; align-content: flex-start; }
+        #trules .tr-chip { display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px 4px 4px; cursor: grab; user-select: none; -webkit-user-select: none; max-width: 100%; }
+        #trules .tr-chip:hover { border-color: #64748b; } #trules .tr-chip.on { border-color: var(--pg-amber); box-shadow: 0 0 0 1px var(--pg-amber); }
+        #trules .tr-chip:focus-visible { outline: 2px solid var(--pg-amber); outline-offset: 1px; }
+        #trules .tr-chip.tr-dragging { opacity: .35; } #trules .tr-chip.tr-moved { animation: trMoved .7s ease-out; }
+        @keyframes trMoved { from { background: #78350f; } to { background: #1e293b; } }
+        #trules .tr-grip { color: #64748b; font-size: 15px; line-height: 1; padding: 4px 3px; touch-action: none; cursor: grab; }
+        #trules .tr-cn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #trules .lg-in.tr-cb { width: 66px; padding: 2px 4px; font-size: 12px; }
+        #trules .tr-ghost { position: fixed; z-index: 200; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.5); border-color: var(--pg-amber); opacity: .95; cursor: grabbing; }
+        #trules .tr-none { font-style: italic; padding: 6px 2px; }
         #trules .tr-races { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px 14px; }
         #trules .tr-races.tr-wide { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); } #trules .tr-rctl { display: flex; gap: 6px; align-items: center; }
         #trules .tr-costs { margin-top: 8px; } #trules .tr-costs .lg-field { margin-bottom: 4px; }
@@ -1146,7 +1161,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.76</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.77</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -3493,6 +3508,25 @@ ol.ci-steps li::marker { content: none; }
                             <button type="button" class="pg-btn tr-del" data-trdel="${esc(r.id)}">${delArmed === r.id ? (used ? `Delete? ${plural(used, 'team')} go${used === 1 ? 'es' : ''} back to GW rules` : 'Click again to delete') : 'Delete'}</button>`}</div></section>`;
                     }).join('');
             }
+            // the Team tiers editor: a box per tier with its teams in, moved by dragging or by tapping a team then a tier
+            let picked = '';
+            function tiersHtml() {
+                const r = draft, T = Array.from({ length: r.tiers }, (_, i) => i + 1);
+                const all = races().map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n));
+                return T.map(t => {
+                    const mine2 = all.filter(x => tierOf(r, x.k2) === t);
+                    return `<div class="tr-box${picked && tierOf(r, picked) !== t ? ' tr-target' : ''}" data-trbox="${t}"><div class="tr-boxh"><b>Tier ${t}</b><span class="pg-dim">${plural(mine2.length, 'team')}${r.raceBudget ? '' : ' · ' + k(at(r, 'budget', t))}</span></div>
+                        <div class="tr-chips">${mine2.map(({ k2, n }) => `<div class="tr-chip${picked === k2 ? ' on' : ''}" data-trchip="${k2}" role="button" tabindex="0" aria-pressed="${picked === k2}" aria-label="${esc(n)}, Tier ${t}"><span class="tr-grip" aria-hidden="true">⠿</span><span class="tr-cn">${esc(n)}</span>${r.raceBudget
+                            ? `<input type="number" class="lg-in tr-num tr-cb" data-trrb="${k2}" min="100" max="3000" step="5" value="${r.raceBudget[k2]}" aria-label="${esc(n)} budget">` : ''}</div>`).join('') || '<div class="pg-dim tr-none">No teams: drop one here</div>'}</div></div>`;
+                }).join('');
+            }
+            function moveTeam(race, t) {
+                if (!draft || !race || !(t >= 1 && t <= draft.tiers)) return;
+                draft.tier[race] = t; picked = '';
+                const box = $r('tr-tierbox'); if (box) box.innerHTML = tiersHtml();
+                const el = document.querySelector(`#tr-tierbox [data-trchip="${race}"]`); if (el) { el.classList.add('tr-moved'); setTimeout(() => el.classList.remove('tr-moved'), 700); }
+            }
+            const repaintTiers = () => { const box = $r('tr-tierbox'); if (box) box.innerHTML = tiersHtml(); };
             function editView() {
                 const r = draft, T = Array.from({ length: r.tiers }, (_, i) => i + 1), gold = r.skill === 'gold';
                 const num = (f, t, lo, hi, step) => `<input type="number" class="lg-in tr-num" data-trf="${f}" data-trt="${t}" min="${lo}" max="${hi}" step="${step || 1}" value="${at(r, f, t)}" aria-label="Tier ${t} ${f}">`;
@@ -3512,8 +3546,8 @@ ol.ci-steps li::marker { content: none; }
                     <div class="pg-dim">The budget pays for players, re-rolls, sideline staff, dedicated fans, Star Players and inducements.</div>
                     <div class="tr-row2"><label class="lg-field"><span>Mega-stars, at most</span><input id="tr-mega" type="number" class="lg-in tr-num" min="0" max="2" value="${r.mega}"></label>
                     <label class="lg-field"><span>Players with each Elite Skill, at most (0: no limit)</span><input id="tr-elite" type="number" class="lg-in tr-num" min="0" max="16" value="${r.elite}"></label></div></section>
-                    <section class="pg-card"><h3>Team tiers${r.raceBudget ? ' and budgets' : ''}</h3><div class="tr-races${r.raceBudget ? ' tr-wide' : ''}">${races().map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n)).map(({ k2, n }) =>
-                        `<label class="tr-race"><span>${esc(n)}</span><span class="tr-rctl">${r.raceBudget ? `<input type="number" class="lg-in tr-num" data-trrb="${k2}" min="100" max="3000" step="5" value="${r.raceBudget[k2]}" aria-label="${esc(n)} budget">` : ''}<select class="lg-sel" data-trrace="${k2}">${T.map(t => `<option value="${t}"${tierOf(r, k2) === t ? ' selected' : ''}>Tier ${t}</option>`).join('')}</select></span></label>`).join('')}</div></section>
+                    <section class="pg-card"><h3>Team tiers${r.raceBudget ? ' and budgets' : ''}</h3><div class="pg-dim tr-draghint">Drag a team into another tier (on a phone, drag it by its ⠿ handle), or tap a team and then tap the tier to move it to.</div>
+                        <div id="tr-tierbox" class="tr-boxes">${tiersHtml()}</div></section>
                     <section class="pg-card"><h3>Inducements allowed</h3><div class="tr-inds">${inds.map(it => `<label class="tr-ind"><input type="checkbox" data-trind="${it.key}"${r.ind.includes(it.key) ? ' checked' : ''}> <span>${esc(it.name)} <span class="pg-dim">${k(it.cost)}</span></span></label>`).join('')}</div>
                         <div class="pg-dim">Star Players are set per tier above.</div></section>
                     <section class="pg-card"><h3>Notes</h3><textarea id="tr-notes" class="lg-in tr-notes-in" rows="3" maxlength="800" placeholder="Anything else from the pack (shown in the Team Builder)">${esc(r.notes)}</textarea></section>
@@ -3521,6 +3555,7 @@ ol.ci-steps li::marker { content: none; }
             }
             function render() {
                 $r('tr-title').textContent = draft ? (get(draft.id) ? 'Edit rules' : 'New rules') : 'Tournament rules';
+                if (!draft) picked = '';
                 $r('tr-body').innerHTML = draft ? editView() : listView();
             }
             function open(done, id) {
@@ -3531,6 +3566,55 @@ ol.ci-steps li::marker { content: none; }
             function close() { $r('trules').classList.add('hidden'); if (onDone) onDone(); }
             function wire() {
                 const root = $r('trules'); if (!root || root.dataset.wired) return; root.dataset.wired = '1';
+                // tap a team, then a tier (or drag it there)
+                let drag = null;
+                const boxAt = (x, y) => { const el = document.elementFromPoint(x, y); return el && el.closest('#tr-tierbox [data-trbox]'); };
+                root.addEventListener('pointerdown', e => {
+                    const chip = e.target.closest('[data-trchip]'); if (!chip || e.target.closest('input') || e.button > 0) return;
+                    if (e.pointerType !== 'mouse' && !e.target.closest('.tr-grip')) return;   // on a touch screen only the handle drags, so the page still scrolls
+                    drag = { race: chip.dataset.trchip, chip, x: e.clientX, y: e.clientY, ghost: null, over: null, id: e.pointerId };
+                    if (e.pointerType !== 'mouse') e.preventDefault();
+                });
+                window.addEventListener('pointermove', e => {
+                    if (!drag || e.pointerId !== drag.id) return;
+                    if (!drag.ghost) {
+                        if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+                        const r0 = drag.chip.getBoundingClientRect(), g = drag.chip.cloneNode(true);
+                        g.classList.add('tr-ghost'); g.style.width = r0.width + 'px'; drag.dx = drag.x - r0.left; drag.dy = drag.y - r0.top;
+                        root.appendChild(g); drag.ghost = g; drag.chip.classList.add('tr-dragging'); picked = '';
+                    }
+                    drag.ghost.style.left = (e.clientX - drag.dx) + 'px'; drag.ghost.style.top = (e.clientY - drag.dy) + 'px';
+                    const box = boxAt(e.clientX, e.clientY);
+                    if (box !== drag.over) { if (drag.over) drag.over.classList.remove('tr-over'); if (box) box.classList.add('tr-over'); drag.over = box; }
+                    if (e.clientY < 70) root.scrollTop -= 14; else if (e.clientY > innerHeight - 70) root.scrollTop += 14;   // scroll while dragging near an edge
+                    e.preventDefault();
+                }, { passive: false });
+                const endDrag = e => {
+                    if (!drag || (e && e.pointerId !== drag.id)) return;
+                    const d0 = drag; drag = null;
+                    if (!d0.ghost) return;   // no movement: a tap (handled by click)
+                    d0.ghost.remove(); d0.chip.classList.remove('tr-dragging');
+                    if (d0.over) d0.over.classList.remove('tr-over');
+                    d0.dragged = true; root.dataset.justDragged = '1'; setTimeout(() => { delete root.dataset.justDragged; }, 0);
+                    if (d0.over && e.type === 'pointerup') moveTeam(d0.race, +d0.over.dataset.trbox); else repaintTiers();
+                };
+                window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
+                root.addEventListener('click', e => {
+                    if (!draft || root.dataset.justDragged || e.target.closest('input')) return;
+                    const chip = e.target.closest('[data-trchip]'), box = e.target.closest('#tr-tierbox [data-trbox]');
+                    if (chip && !(picked && picked !== chip.dataset.trchip && tierOf(draft, picked) !== tierOf(draft, chip.dataset.trchip))) { picked = picked === chip.dataset.trchip ? '' : chip.dataset.trchip; repaintTiers(); return; }
+                    if (box && picked) moveTeam(picked, +box.dataset.trbox);   // tapping a team in another tier also drops the picked team there
+                });
+                root.addEventListener('keydown', e => {
+                    const chip = e.target.closest && e.target.closest('[data-trchip]'); if (!chip || !draft) return;
+                    const t = tierOf(draft, chip.dataset.trchip);
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); chip.click(); }
+                    else if (/^[1-8]$/.test(e.key)) { moveTeam(chip.dataset.trchip, +e.key); }
+                    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                        e.preventDefault(); const nt = t + (e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1); moveTeam(chip.dataset.trchip, nt);
+                        const nc = document.querySelector(`#tr-tierbox [data-trchip="${chip.dataset.trchip}"]`); if (nc) nc.focus();
+                    }
+                });
                 root.addEventListener('click', e => {
                     const b = e.target.closest('button'); if (!b) return;
                     const d = b.dataset;
