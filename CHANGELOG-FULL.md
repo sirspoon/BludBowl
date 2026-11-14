@@ -2,6 +2,22 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.76 (14 Nov 2026)
+- **New: UKTC XI tournament rules** (UK Team Challenge, Manchester, 9-10 January 2027), built in alongside GW Matched Play and
+  Glory on the Gridiron 2. Taken from the fork's v4.35 version and checked against the UKTC Rules Pack, Tables 1.1 and 1.2: each
+  team's own budget (Team Gold, 1,090k to 1,200k) and tier; extra skills bought from Skill Gold by tier (120k to 200k), primary 20k,
+  secondary 30k; from Tier 3 a player whose extra is a primary can stack a second primary (20k + 10k; Tier 3 one stack, Tiers 4
+  and 5 two); Tier 5 can give one player a stat increase instead of a skill (AV 10k, MA or PA 20k, AG 40k, ST 50k), within the
+  characteristic's limits; no Star Players; inducements: Biased Referee, Kegs (2: the pack's number, its web page says 1), Bribes,
+  Master Chef, Mascot, Riotous Rookies and Wandering Apothecaries. The pack's Slann, Mortuary Assistant, Plague Doctor and
+  Bretonnian Pastry aren't in the game. Stacked skills and stat increases show on the roster and Teams screen and reach the match,
+  the quick cup simulator and cup team listings.
+- **Tournament rules screen:** a ruleset can now buy extra skills with skill gold (setting each tier's skill gold, stacks and
+  stat-ups, and the price of each kind of skill and stat increase) instead of counting them, and can give each team its own budget
+  instead of one per tier. Copy UKTC XI to make a pack that works the same way.
+- **Team Builder:** when a ruleset allows no Star Players, the Star Player list is replaced by a one-line note. Switching a team to
+  rules without skill gold removes its stacked skills and stat increases.
+
 ## v4.75 (14 Nov 2026)
 - **New: tournament rules.** A Tournament Rules screen (from the main menu, the Teams screen, or "Edit rules…" in the Team Builder)
   lists rulesets: how a tournament pack says teams are built. Each one gives every tier a budget, a number of extra primary and

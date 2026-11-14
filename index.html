@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.75</title>
+    <title>BludBowl 4.76</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -273,6 +273,8 @@
         #trules .lg-in.tr-num { width: 80px; text-align: right; } #trules .tr-edit td { vertical-align: middle; }
         #trules .tr-row2 { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
         #trules .tr-races { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px 14px; }
+        #trules .tr-races.tr-wide { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); } #trules .tr-rctl { display: flex; gap: 6px; align-items: center; }
+        #trules .tr-costs { margin-top: 8px; } #trules .tr-costs .lg-field { margin-bottom: 4px; }
         #trules .tr-race { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px solid #1c263a; }
         #trules .tr-inds { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 14px; margin-bottom: 6px; }
         #trules .tr-ind { display: flex; align-items: center; gap: 8px; cursor: pointer; } #trules .tr-ind input { accent-color: #f59e0b; width: 16px; height: 16px; }
@@ -1144,7 +1146,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.75</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.76</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -3220,7 +3222,7 @@ ol.ci-steps li::marker { content: none; }
                 if (!$('post-game').classList.contains('hidden')) render();
             }
             const refresh = () => { if (!$('post-game').classList.contains('hidden')) render(); };
-            return { addReport, refresh, reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS, aiPicks, autoAdvance,
+            return { canImprove, addReport, refresh, reset: () => { reports = []; tab = 0; adv = null; finished = false; pend = {}; }, settleEM, norm, normTeam, eff, value, tv, ctv, level, describe, matchSquad, journeymenNeeded, staffValue, canAdvance, SPP, SPP_NAME, open, simApply, pickPrimary, primaryList, advText, injTags, JOURNEY, skillChoices, AI_PICKS, aiPicks, autoAdvance,
                 started: t => (t.played || 0) > 0, statLine };
         })();
 
@@ -3407,17 +3409,36 @@ ol.ci-steps li::marker { content: none; }
                 budget: [1250, 1270, 1290, 1310, 1330, 1360], prim: [3, 3, 4, 4, 5, 5], sec: [0, 0, 1, 1, 2, 2], stars: [1, 1, 1, 1, 2, 2], mega: 1, elite: 0,
                 ind: ['kegs', 'chef', 'mascot', 'prayers', 'bribes', 'wizard', 'apo', 'rookies'],
                 notes: 'Getting Wasted (21 November 2026). Resurrection format: no lasting injuries, deaths or SPP. The pack lists Nurgle in both Tier 2 and Tier 3: this uses Tier 3. Mortuary Assistants and Plague Doctors are allowed but not in BludBowl yet, and the Chaos Wastes weather table is not in the game.' };
-            const BUILT = [GW, GOTG];
+            // UKTC XI (the UK Team Challenge, Manchester, 9-10 January 2027): from its Rules Pack, Tables 1.1 and 1.2. Team gold set per team, skill gold by tier
+            const UK = [['amazon', 1, 1090], ['human', 1, 1090], ['orc', 1, 1090], ['oldworld', 1, 1090], ['snotling', 5, 1090], ['gnome', 5, 1090],
+                ['darkelf', 1, 1110], ['highelf', 1, 1110], ['underworld', 1, 1110], ['nurgle', 2, 1110], ['undead', 2, 1110], ['halfling', 5, 1110],
+                ['woodelf', 1, 1130], ['lizardmen', 2, 1130], ['skaven', 2, 1130], ['bretonnian', 4, 1130], ['chaoschosen', 4, 1130], ['goblin', 5, 1130],
+                ['necromantic', 2, 1150], ['norse', 2, 1150], ['renegades', 4, 1150], ['tombkings', 4, 1150],
+                ['elvenunion', 3, 1170], ['imperial', 3, 1170], ['vampire', 3, 1170], ['blackorc', 4, 1170], ['chaosdwarf', 4, 1170],
+                ['dwarf', 3, 1200], ['khorne', 4, 1200], ['ogre', 5, 1200]];
+            const UKTC = { id: 'uktc11', name: 'UKTC XI', builtin: true, skill: 'gold', tiers: 5,
+                tier: Object.fromEntries(UK.map(x => [x[0], x[1]])), raceBudget: Object.fromEntries(UK.map(x => [x[0], x[2]])),
+                budget: [1150, 1150, 1150, 1150, 1150], gold: [120, 140, 160, 180, 200], stacks: [0, 0, 1, 2, 2], statups: [0, 0, 0, 0, 1],
+                cost: { P: 20, S: 30, stack: 10, av: 10, ma: 20, pa: 20, ag: 40, st: 50 },
+                prim: [16, 16, 16, 16, 16], sec: [16, 16, 16, 16, 16], stars: [0, 0, 0, 0, 0], mega: 0, elite: 0,
+                ind: ['ref', 'kegs', 'bribes', 'chef', 'mascot', 'rookies', 'apo'],
+                notes: 'UK Team Challenge XI, Manchester, 9-10 January 2027. Each team has its own budget (Team Gold); extra skills come out of a separate Skill Gold pot set by tier. Tier 3 and up can stack a second primary on a player whose extra is a primary; Tier 5 can give one player a stat increase instead of a skill. No Star Players. The pack allows 2 Kegs (its web page says 1). Its Slann, Mortuary Assistant, Plague Doctor and Bretonnian Pastry are not in BludBowl.' };
+            const BUILT = [GW, GOTG, UKTC];
             let mine = [];
             const races = () => Object.values(RACES).filter(r => r.positions).map(r => r.key);
             const int = (v, lo, hi, d) => { const n = parseInt(v, 10); return isNaN(n) ? d : Math.max(lo, Math.min(hi, n)); };
+            const at = (r, field, tier) => { const a = r[field] || []; return a[Math.max(0, Math.min(a.length - 1, tier - 1))] || 0; };
             function norm(r) {   // a coach's ruleset, filled in and kept in range
                 const n = int(r.tiers, 1, MAXT, 4), arr = (a, lo, hi, d) => Array.from({ length: n }, (_, i) => int((a || [])[i], lo, hi, Array.isArray(a) && a.length ? int(a[a.length - 1], lo, hi, d) : d));
                 const out = { id: String(r.id || ('r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6))).slice(0, 40), name: String(r.name || 'My tournament').trim().slice(0, 50) || 'My tournament',
                     tiers: n, tier: {}, budget: arr(r.budget, 100, 3000, 1150), prim: arr(r.prim, 0, 16, 3), sec: arr(r.sec, 0, 16, 0), stars: arr(r.stars, 0, 4, 1),
                     mega: int(r.mega, 0, 2, 1), elite: int(r.elite, 0, 16, 0), ind: (Array.isArray(r.ind) ? r.ind : []).filter((x, i, a) => typeof x === 'string' && a.indexOf(x) === i).slice(0, 30),
-                    notes: String(r.notes || '').slice(0, 800) };
+                    notes: String(r.notes || '').slice(0, 800), skill: r.skill === 'gold' ? 'gold' : 'count',
+                    gold: arr(r.gold, 0, 2000, 150), stacks: arr(r.stacks, 0, 16, 0), statups: arr(r.statups, 0, 16, 0), cost: {} };
+                const C0 = { P: 20, S: 30, stack: 10, av: 10, ma: 20, pa: 20, ag: 40, st: 50 };
+                Object.keys(C0).forEach(c => { out.cost[c] = int((r.cost || {})[c], 0, 500, C0[c]); });
                 races().forEach(k => { out.tier[k] = int((r.tier || {})[k], 1, n, Math.min(2, n)); });
+                if (r.raceBudget && typeof r.raceBudget === 'object') { out.raceBudget = {}; races().forEach(k => { out.raceBudget[k] = int(r.raceBudget[k], 100, 3000, at(out, 'budget', out.tier[k])); }); }
                 return out;
             }
             function load() { try { const d = JSON.parse(localStorage.getItem(KEY) || '[]'); mine = (Array.isArray(d) ? d : []).filter(r => r && typeof r === 'object' && r.id && !BUILT.some(b => b.id === r.id)).map(norm); } catch (e) { mine = []; } }
@@ -3426,7 +3447,8 @@ ol.ci-steps li::marker { content: none; }
             const list = () => BUILT.concat(mine);
             const get = id => list().find(r => r.id === id) || null;
             const tierOf = (r, race) => r.gw ? MP.tier(race) : (r.tier[race] || Math.min(2, r.tiers));
-            const at = (r, field, tier) => { const a = r[field] || []; return a[Math.max(0, Math.min(a.length - 1, tier - 1))] || 0; };
+            const budgetFor = (r, race) => r.raceBudget ? (r.raceBudget[race] || at(r, 'budget', tierOf(r, race))) : at(r, 'budget', tierOf(r, race));
+            const STATS = ['av', 'ma', 'pa', 'ag', 'st'];
             const last = () => { try { const id = localStorage.getItem(LAST); return get(id) ? id : 'gw'; } catch (e) { return 'gw'; } };
             const remember = id => { try { localStorage.setItem(LAST, id); } catch (e) {} };
             // rulesets a set of teams uses, to travel with an exported file; and taking in the ones a file brings
@@ -3445,14 +3467,19 @@ ol.ci-steps li::marker { content: none; }
             let draft = null, onDone = null, delArmed = '', showId = '';
             const $r = id => document.getElementById(id);
             function summary(r) {
-                const byTier = t => races().filter(k => tierOf(r, k) === t).map(raceName).sort().join(', ') || '<span class="pg-dim">none</span>';
+                const byTier = t => races().filter(k => tierOf(r, k) === t).map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n))
+                    .map(x => esc(x.n) + (r.raceBudget ? ` <span class="pg-dim">${k(r.raceBudget[x.k2])}</span>` : '')).join(', ') || '<span class="pg-dim">none</span>';
                 if (r.gw) return `<div class="tr-scroll"><table class="lg-tbl tr-tbl"><thead><tr><th class="l">Tier</th><th class="l">Teams</th><th>Skill points</th><th>Secondary</th><th>Stars</th></tr></thead><tbody>${[1, 2, 3, 4].map(t =>
                     `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td><td>${MP.SP[t]}</td><td>up to ${t}</td><td>${t === 1 ? 1 : 2}</td></tr>`).join('')}</tbody></table></div>
                     <div class="pg-dim">Budget: you choose, 1,000k to 1,500k (1,150k is usual). Every inducement may be bought.</div>`;
-                return `<div class="tr-scroll"><table class="lg-tbl tr-tbl"><thead><tr><th class="l">Tier</th><th class="l">Teams</th><th>Budget</th><th>Primary</th><th>Secondary</th><th>Stars</th></tr></thead><tbody>${Array.from({ length: r.tiers }, (_, i) => i + 1).map(t =>
-                    `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td><td>${k(at(r, 'budget', t))}</td><td>${at(r, 'prim', t)}</td><td>${at(r, 'sec', t)}</td><td>${at(r, 'stars', t)}</td></tr>`).join('')}</tbody></table></div>
-                    <div class="pg-dim">One extra skill per player; skills are free (outside the budget). ${r.mega ? `At most ${plural(r.mega, 'Mega-star')}.` : 'No Mega-stars.'} ${r.elite ? `Each Elite Skill (Block, Dodge, Guard, Mighty Blow) on ${r.elite} players at most.` : 'No limit on Elite Skills.'}</div>
-                    <div class="pg-dim"><b>Inducements allowed:</b> ${r.ind.length ? r.ind.map(indName).map(esc).join(', ') : 'none'}${r.ind.length ? '' : ''} (Star Players: per tier, above).</div>`;
+                const T = Array.from({ length: r.tiers }, (_, i) => i + 1), gold = r.skill === 'gold', C = r.cost;
+                const head = (r.raceBudget ? '' : '<th>Budget</th>') + (gold ? '<th>Skill gold</th><th>Stacks</th><th>Stat-ups</th>' : '<th>Primary</th><th>Secondary</th>') + '<th>Stars</th>';
+                const row = t => (r.raceBudget ? '' : `<td>${k(at(r, 'budget', t))}</td>`) + (gold ? `<td>${k(at(r, 'gold', t))}</td><td>${at(r, 'stacks', t)}</td><td>${at(r, 'statups', t)}</td>` : `<td>${at(r, 'prim', t)}</td><td>${at(r, 'sec', t)}</td>`) + `<td>${at(r, 'stars', t)}</td>`;
+                return `<div class="tr-scroll"><table class="lg-tbl tr-tbl"><thead><tr><th class="l">Tier</th><th class="l">Teams${r.raceBudget ? ' and their budgets' : ''}</th>${head}</tr></thead><tbody>${T.map(t =>
+                    `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td>${row(t)}</tr>`).join('')}</tbody></table></div>
+                    <div class="pg-dim">${gold ? `Extra skills are bought from the skill gold, not the budget: primary ${k(C.P)}, secondary ${k(C.S)}; a stack (a second primary on a player whose extra is a primary) ${k(C.P)} + ${k(C.stack)}; a stat increase instead of a skill: AV ${k(C.av)}, MA ${k(C.ma)}, PA ${k(C.pa)}, AG ${k(C.ag)}, ST ${k(C.st)}.`
+                        : 'One extra skill per player; skills are free (outside the budget).'} ${r.mega ? `At most ${plural(r.mega, 'Mega-star')}.` : 'No Mega-stars.'} ${r.elite ? `Each Elite Skill (Block, Dodge, Guard, Mighty Blow) on ${r.elite} players at most.` : 'No limit on Elite Skills.'}</div>
+                    <div class="pg-dim"><b>Inducements allowed:</b> ${r.ind.length ? r.ind.map(indName).map(esc).join(', ') : 'none'} (Star Players: per tier, above).</div>`;
             }
             function listView() {
                 return `<section class="pg-card"><div class="pg-dim tr-intro">A ruleset is how a tournament pack says teams are built: the budget, extra skills and Star Players for each tier, and which inducements may be bought.
@@ -3467,19 +3494,26 @@ ol.ci-steps li::marker { content: none; }
                     }).join('');
             }
             function editView() {
-                const r = draft, T = Array.from({ length: r.tiers }, (_, i) => i + 1);
+                const r = draft, T = Array.from({ length: r.tiers }, (_, i) => i + 1), gold = r.skill === 'gold';
                 const num = (f, t, lo, hi, step) => `<input type="number" class="lg-in tr-num" data-trf="${f}" data-trt="${t}" min="${lo}" max="${hi}" step="${step || 1}" value="${at(r, f, t)}" aria-label="Tier ${t} ${f}">`;
+                const cost = (c, lab) => `<label class="lg-field"><span>${lab}</span><input type="number" class="lg-in tr-num" data-trc="${c}" min="0" max="500" step="5" value="${r.cost[c]}"></label>`;
                 const inds = (typeof LEAGUE === 'undefined' ? [] : LEAGUE.indList('std'));
+                const cols = (r.raceBudget ? [] : [['budget', 'Budget (k)', 100, 3000, 5]]).concat(gold ? [['gold', 'Skill gold (k)', 0, 2000, 5], ['stacks', 'Stacks', 0, 16], ['statups', 'Stat-ups', 0, 16]] : [['prim', 'Primary', 0, 16], ['sec', 'Secondary', 0, 16]], [['stars', 'Stars', 0, 4]]);
                 return `<section class="pg-card"><h3>${get(r.id) ? 'Edit ruleset' : 'New ruleset'}</h3>
                     <label class="lg-field"><span>Name</span><input id="tr-name" class="lg-in" maxlength="50" value="${esc(r.name)}"></label>
-                    <label class="lg-field"><span>Number of tiers</span><select id="tr-tiers" class="lg-sel">${Array.from({ length: MAXT }, (_, i) => `<option value="${i + 1}"${i + 1 === r.tiers ? ' selected' : ''}>${i + 1}</option>`).join('')}</select></label>
-                    <div class="tr-scroll"><table class="lg-tbl tr-tbl tr-edit"><thead><tr><th class="l">Tier</th><th>Budget (k)</th><th>Primary</th><th>Secondary</th><th>Stars</th></tr></thead><tbody>
-                    ${T.map(t => `<tr><td class="l"><b>${t}</b></td><td>${num('budget', t, 100, 3000, 5)}</td><td>${num('prim', t, 0, 16)}</td><td>${num('sec', t, 0, 16)}</td><td>${num('stars', t, 0, 4)}</td></tr>`).join('')}</tbody></table></div>
-                    <div class="pg-dim">The budget pays for players, re-rolls, sideline staff, dedicated fans, Star Players and inducements. Extra skills are free, one per player.</div>
+                    <div class="tr-row2"><label class="lg-field"><span>Number of tiers</span><select id="tr-tiers" class="lg-sel">${Array.from({ length: MAXT }, (_, i) => `<option value="${i + 1}"${i + 1 === r.tiers ? ' selected' : ''}>${i + 1}</option>`).join('')}</select></label>
+                    <label class="lg-field"><span>Extra skills</span><select id="tr-skill" class="lg-sel"><option value="count"${gold ? '' : ' selected'}>Counted: so many primary and secondary per tier</option><option value="gold"${gold ? ' selected' : ''}>Bought with skill gold (with stacks and stat-ups)</option></select></label></div>
+                    <label class="tr-ind"><input type="checkbox" id="tr-rbud"${r.raceBudget ? ' checked' : ''}> <span>Each team has its own budget (set under Team tiers) instead of one per tier</span></label>
+                    <div class="tr-scroll"><table class="lg-tbl tr-tbl tr-edit"><thead><tr><th class="l">Tier</th>${cols.map(c => `<th>${c[1]}</th>`).join('')}</tr></thead><tbody>
+                    ${T.map(t => `<tr><td class="l"><b>${t}</b></td>${cols.map(c => `<td>${num(c[0], t, c[2], c[3], c[4])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+                    ${gold ? `<div class="tr-costs"><b>Costs from the skill gold (k)</b><div class="tr-row2">${cost('P', 'Primary')}${cost('S', 'Secondary')}${cost('stack', 'Stack (on top of the primary)')}${cost('av', 'AV+')}${cost('ma', 'MA+')}${cost('pa', 'PA+')}${cost('ag', 'AG+')}${cost('st', 'ST+')}</div></div>
+                        <div class="pg-dim">A stack is a second primary on a player whose extra is a primary. A stat increase replaces a skill on that player. Secondaries and stat increases can't be stacked.</div>`
+                        : '<div class="pg-dim">Extra skills are free, one per player.</div>'}
+                    <div class="pg-dim">The budget pays for players, re-rolls, sideline staff, dedicated fans, Star Players and inducements.</div>
                     <div class="tr-row2"><label class="lg-field"><span>Mega-stars, at most</span><input id="tr-mega" type="number" class="lg-in tr-num" min="0" max="2" value="${r.mega}"></label>
                     <label class="lg-field"><span>Players with each Elite Skill, at most (0: no limit)</span><input id="tr-elite" type="number" class="lg-in tr-num" min="0" max="16" value="${r.elite}"></label></div></section>
-                    <section class="pg-card"><h3>Team tiers</h3><div class="tr-races">${races().map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n)).map(({ k2, n }) =>
-                        `<label class="tr-race"><span>${esc(n)}</span><select class="lg-sel" data-trrace="${k2}">${T.map(t => `<option value="${t}"${tierOf(r, k2) === t ? ' selected' : ''}>Tier ${t}</option>`).join('')}</select></label>`).join('')}</div></section>
+                    <section class="pg-card"><h3>Team tiers${r.raceBudget ? ' and budgets' : ''}</h3><div class="tr-races${r.raceBudget ? ' tr-wide' : ''}">${races().map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n)).map(({ k2, n }) =>
+                        `<label class="tr-race"><span>${esc(n)}</span><span class="tr-rctl">${r.raceBudget ? `<input type="number" class="lg-in tr-num" data-trrb="${k2}" min="100" max="3000" step="5" value="${r.raceBudget[k2]}" aria-label="${esc(n)} budget">` : ''}<select class="lg-sel" data-trrace="${k2}">${T.map(t => `<option value="${t}"${tierOf(r, k2) === t ? ' selected' : ''}>Tier ${t}</option>`).join('')}</select></span></label>`).join('')}</div></section>
                     <section class="pg-card"><h3>Inducements allowed</h3><div class="tr-inds">${inds.map(it => `<label class="tr-ind"><input type="checkbox" data-trind="${it.key}"${r.ind.includes(it.key) ? ' checked' : ''}> <span>${esc(it.name)} <span class="pg-dim">${k(it.cost)}</span></span></label>`).join('')}</div>
                         <div class="pg-dim">Star Players are set per tier above.</div></section>
                     <section class="pg-card"><h3>Notes</h3><textarea id="tr-notes" class="lg-in tr-notes-in" rows="3" maxlength="800" placeholder="Anything else from the pack (shown in the Team Builder)">${esc(r.notes)}</textarea></section>
@@ -3526,15 +3560,22 @@ ol.ci-steps li::marker { content: none; }
                     else if (el.id === 'tr-notes') draft.notes = el.value;
                     else if (el.id === 'tr-mega') draft.mega = int(el.value, 0, 2, draft.mega);
                     else if (el.id === 'tr-elite') draft.elite = int(el.value, 0, 16, draft.elite);
-                    else if (d.trf) { const t = +d.trt, lim = { budget: [100, 3000], prim: [0, 16], sec: [0, 16], stars: [0, 4] }[d.trf]; draft[d.trf][t - 1] = int(el.value, lim[0], lim[1], draft[d.trf][t - 1]); }
+                    else if (d.trf) { const t = +d.trt, lim = { budget: [100, 3000], prim: [0, 16], sec: [0, 16], stars: [0, 4], gold: [0, 2000], stacks: [0, 16], statups: [0, 16] }[d.trf]; draft[d.trf][t - 1] = int(el.value, lim[0], lim[1], draft[d.trf][t - 1]); }
+                    else if (d.trc) draft.cost[d.trc] = int(el.value, 0, 500, draft.cost[d.trc]);
+                    else if (d.trrb) draft.raceBudget[d.trrb] = int(el.value, 100, 3000, draft.raceBudget[d.trrb]);
                     else if (d.trrace) draft.tier[d.trrace] = +el.value;
+                    else if (el.id === 'tr-skill' && e.type === 'change') { draft.skill = el.value; render(); }
+                    else if (el.id === 'tr-rbud' && e.type === 'change') {
+                        if (el.checked) { draft.raceBudget = {}; races().forEach(k2 => { draft.raceBudget[k2] = at(draft, 'budget', tierOf(draft, k2)); }); } else delete draft.raceBudget;
+                        render();
+                    }
                     else if (d.trind) draft.ind = el.checked ? draft.ind.concat([d.trind]).filter((x, i, a) => a.indexOf(x) === i) : draft.ind.filter(x => x !== d.trind);
                     else if (el.id === 'tr-tiers' && e.type === 'change') { draft.tiers = +el.value; draft = Object.assign(norm(draft), { id: draft.id }); render(); }
                 };
                 root.addEventListener('input', edit); root.addEventListener('change', edit);
             }
             const openW = (done, id) => { wire(); open(done, id); };
-            return { GW, list, get, tierOf, at, last, remember, defsFor, addMissing, indName, open: openW };
+            return { GW, STATS, list, get, tierOf, at, budgetFor, last, remember, defsFor, addMissing, indName, open: openW };
         })();
         const TB = (function () {
             const KEY = 'bb-custom-teams', VER = 1, BUDGET = 1000, MAXP = 16, MINP = 11;
@@ -3646,7 +3687,7 @@ ol.ci-steps li::marker { content: none; }
                 if (!/^#[0-9a-f]{6}$/i.test(c.secondary)) c.secondary = '#fde68a';
                 if (c.sprites && !(SPRITE_SETS[c.race] || []).some(x => x.id === c.sprites)) delete c.sprites;
                 if (c.league && !(RACE_LEAGUES[c.race] || []).includes(c.league)) delete c.league;
-                if (c.format !== 'matched' && c.format !== 'sevens-mp') { delete c.budget; delete c.stars; delete c.mind; delete c.rules; c.players.forEach(p => { delete p.mp; }); if (c.format === 'sevens') c.bribes = 0; }
+                if (c.format !== 'matched' && c.format !== 'sevens-mp') { delete c.budget; delete c.stars; delete c.mind; delete c.rules; c.players.forEach(p => { delete p.mp; delete p.mp2; }); if (c.format === 'sevens') c.bribes = 0; }
                 else {   // a Matched Play team: its budget, Star Players, inducements and one extra skill per player
                     const sv = c.format === 'sevens-mp', bl = sv ? SEV.MP_BUDGETS : MP.BUDGETS, rs = !sv && typeof c.rules === 'string' && TRULES.get(c.rules);
                     if (rs && !rs.gw) { c.rules = rs.id; c.budget = TRULES.at(rs, 'budget', TRULES.tierOf(rs, c.race)); }   // a tournament's rules: the budget comes with the tier
@@ -3656,7 +3697,11 @@ ol.ci-steps li::marker { content: none; }
                     Object.keys(m).forEach(key => { const n = Math.max(0, Math.min(8, parseInt(m[key], 10) || 0)); if (n) c.mind[key] = n; });
                     const f0 = parseInt(t.fans, 10); c.fans = Math.max(0, Math.min(sv ? 5 : 3, isNaN(f0) ? 0 : f0));
                     c.bribes = 0;
-                    c.players.forEach(p => { if (!(p.mp && typeof p.mp.skill === 'string' && (p.mp.kind === 'P' || p.mp.kind === 'S'))) delete p.mp; });
+                    const gd = !!(rs && rs.skill === 'gold'), skl = x => x && typeof x.skill === 'string' && (x.kind === 'P' || x.kind === 'S');
+                    c.players.forEach(p => {
+                        if (!(skl(p.mp) || (gd && p.mp && p.mp.kind === 'C' && TRULES.STATS.includes(p.mp.stat)))) delete p.mp;
+                        if (!(gd && p.mp && p.mp.kind === 'P' && skl(p.mp2) && p.mp2.kind === 'P' && p.mp2.skill !== p.mp.skill)) delete p.mp2;
+                    });
                 }
                 // the Sevens Veteran: exactly one, and a Lineman
                 if (isSevT(c)) {
@@ -3699,8 +3744,18 @@ ol.ci-steps li::marker { content: none; }
             const rulesOf = t => (!isSev(t) && t && t.rules && TRULES.get(t.rules)) || TRULES.GW;
             const gwRules = t => isSev(t) || rulesOf(t).gw;
             const tierOf = t => isSev(t) ? (SEV.TIER[t.race] || 2) : TRULES.tierOf(rulesOf(t), t.race);
-            const mpBudget = t => gwRules(t) ? t.budget : TRULES.at(rulesOf(t), 'budget', tierOf(t));
+            const mpBudget = t => gwRules(t) ? t.budget : TRULES.budgetFor(rulesOf(t), t.race);
             const mpN = (t, kind, not) => t.players.filter(q => q !== not && q.mp && q.mp.kind === kind).length;
+            // rules that sell extra skills for skill gold: a stacked second primary (p.mp2) or a stat increase instead of a skill (p.mp.kind 'C')
+            const isGold = t => !gwRules(t) && rulesOf(t).skill === 'gold';
+            const mpSkills = p => [p.mp && p.mp.skill, p.mp2 && p.mp2.skill].filter(Boolean);
+            const mpStat = p => p.mp && p.mp.kind === 'C' ? p.mp.stat : null;
+            const mpAdvs = p => !p.mp ? [] : mpSkills(p).map((skill, i) => ({ skill, kind: i ? 'P' : p.mp.kind })).concat(mpStat(p) ? [{ stat: mpStat(p) }] : []);
+            const mpText = p => mpSkills(p).map(sk => '+' + sk).concat(mpStat(p) ? ['+1 ' + mpStat(p).toUpperCase()] : []).join(' ');
+            const mpView = (t, p) => isMP(t) && p.mp ? Object.assign({}, p, { advs: (p.advs || []).concat(mpAdvs(p)) }) : p;   // the player as they take the field
+            const goldCost = (t, p) => { if (!p.mp) return 0; const C = rulesOf(t).cost; return (p.mp.kind === 'C' ? C[p.mp.stat] : C[p.mp.kind]) + (p.mp2 ? C.P + C.stack : 0); };
+            const goldUsed = (t, not) => t.players.reduce((a, p) => a + (p === not ? 0 : goldCost(t, p)), 0);
+            const statOk = (t, p, st) => CAREER.canImprove(t.race, CAREER.norm(Object.assign({}, p, { advs: [] })), st);   // within the characteristic's limit
             const starMax = t => isSev(t) ? 0 : gwRules(t) ? MP.maxStars(t.race) : TRULES.at(rulesOf(t), 'stars', tierOf(t));
             const megaMax = t => gwRules(t) ? 1 : rulesOf(t).mega;
             const eliteCap = t => isSev(t) ? 2 : gwRules(t) ? 4 : rulesOf(t).elite;   // Sevens: two in the whole team; otherwise players per Elite Skill (0: no limit)
@@ -3716,9 +3771,17 @@ ol.ci-steps li::marker { content: none; }
                 if (c.spent > B) out.push(`${k(c.spent - B)} over the ${k(B)} budget`);
                 if (!gwRules(t)) {   // a tournament's own rules: so many primary and secondary skills, Star Players and the inducements it allows
                     const r = rulesOf(t), P = TRULES.at(r, 'prim', tier), S = TRULES.at(r, 'sec', tier), pN = mpN(t, 'P'), sN = mpN(t, 'S'), stN = (t.stars || []).length, mx = starMax(t);
-                    if (pN > P) out.push(`${pN} primary skills (Tier ${tier}: up to ${P})`);
-                    if (sN > S) out.push(S ? `${sN} secondary skills (Tier ${tier}: up to ${S})` : `${sN} secondary skill${sN === 1 ? '' : 's'} (Tier ${tier} teams can't take secondary skills)`);
-                    if (r.elite) MP.ELITE.forEach(sk => { const m = t.players.filter(p => p.mp && p.mp.skill === sk).length; if (m > r.elite) out.push(`${sk} given to ${m} players (an Elite Skill: ${r.elite} at most)`); });
+                    if (isGold(t)) {
+                        const G = TRULES.at(r, 'gold', tier), used = goldUsed(t), stk = t.players.filter(p => p.mp2).length, sts = t.players.filter(mpStat).length, SK = TRULES.at(r, 'stacks', tier), SU = TRULES.at(r, 'statups', tier);
+                        if (used > G) out.push(`${k(used - G)} over the ${k(G)} of skill gold a Tier ${tier} team has`);
+                        if (stk > SK) out.push(`${stk} stacked skill${stk === 1 ? '' : 's'} (Tier ${tier}: ${SK || 'none'})`);
+                        if (sts > SU) out.push(`${sts} stat increase${sts === 1 ? '' : 's'} (Tier ${tier}: ${SU || 'none'})`);
+                        t.players.filter(p => mpStat(p) && !statOk(t, p, mpStat(p))).forEach(p => out.push(`${p.name}: +1 ${mpStat(p).toUpperCase()} is past the characteristic's limit`));
+                    } else {
+                        if (pN > P) out.push(`${pN} primary skills (Tier ${tier}: up to ${P})`);
+                        if (sN > S) out.push(S ? `${sN} secondary skills (Tier ${tier}: up to ${S})` : `${sN} secondary skill${sN === 1 ? '' : 's'} (Tier ${tier} teams can't take secondary skills)`);
+                    }
+                    if (r.elite) MP.ELITE.forEach(sk => { const m = t.players.filter(p => mpSkills(p).includes(sk)).length; if (m > r.elite) out.push(`${sk} given to ${m} players (an Elite Skill: ${r.elite} at most)`); });
                     if (stN > mx) out.push(mx ? `Tier ${tier} teams may have only ${mx} Star Player${mx === 1 ? '' : 's'}` : `Tier ${tier} teams may not hire Star Players`);
                     const mg = (t.stars || []).filter(sk => STARS[sk].mega).length;
                     if (mg > r.mega) out.push(r.mega ? `Only ${r.mega} Mega-star${r.mega === 1 ? '' : 's'}` : 'No Mega-stars under these rules');
@@ -3782,7 +3845,12 @@ ol.ci-steps li::marker { content: none; }
                 let SQ = CAREER.matchSquad(CAREER.normTeam(JSON.parse(JSON.stringify(t))));
                 if (mp) {   // Matched Play: each player's extra skill; no Journeymen (Star Players count towards the eleven)
                     SQ = SQ.filter(x => !x.ovr.journeyman);
-                    SQ.forEach(x => { const q = t.players.find(p => p.id === x.ovr.careerId); if (q && q.mp && !x.ovr.skills.includes(q.mp.skill)) { x.ovr.skills.push(q.mp.skill); x.ovr.mpSkill = q.mp.skill; } });
+                    SQ.forEach(x => {
+                        const q = t.players.find(p => p.id === x.ovr.careerId); if (!q || !q.mp) return;
+                        mpSkills(q).forEach((sk, i) => { if (!x.ovr.skills.includes(sk)) x.ovr.skills.push(sk); if (!i) x.ovr.mpSkill = sk; });
+                        const st = mpStat(q), o = x.ovr;   // a stat increase: AG and PA count down, the others up (within their limits)
+                        if (st && o[st] != null) { o[st] = st === 'ag' || st === 'pa' ? Math.max(1, o[st] - 1) : Math.min({ ma: 9, st: 8, av: 11 }[st], o[st] + 1); o.mpStat = st; }
+                    });
                 }
                 const P = SQ.map(p => ({ ...p, t: { ...R.types[p.pos], ...p.ovr } })), sev = isSev(t), XI = minP(t);
                 // the first eleven (Sevens: seven) take the field: strongest three on the line, quickest at the back (same as the computer's setup)
@@ -3821,12 +3889,14 @@ ol.ci-steps li::marker { content: none; }
             // a tournament team takes on a ruleset: the budget follows the tier, and inducements the rules don't allow are dropped
             function setRules(t, id) {
                 const r = TRULES.get(id) || TRULES.GW;
+                if (r.skill !== 'gold') t.players.forEach(p => { delete p.mp2; if (mpStat(p)) delete p.mp; });   // stacks and stat increases are skill-gold rules only
                 if (r.gw) { delete t.rules; if (!MP.BUDGETS.includes(t.budget)) t.budget = 1150; return; }
                 t.rules = r.id; t.budget = mpBudget(t);
                 Object.keys(t.mind || {}).forEach(key => { if (!r.ind.includes(key)) delete t.mind[key]; });
             }
             // Matched Play: the extra skill a player may take (primary 1 skill point, secondary 2)
             function mpSelect(t, p, i) {
+                if (isGold(t)) return goldSelect(t, p, i);
                 const tier = tierOf(t), own = p.mp ? (p.mp.kind === 'S' ? 2 : 1) : 0, room = spOf(t) - (spUsed(t) - own), sv = isSev(t);
                 const secs = t.players.filter(q => q !== p && q.mp && q.mp.kind === 'S').length;
                 const elite = sk => t.players.filter(q => q !== p && q.mp && q.mp.skill === sk).length;
@@ -3843,6 +3913,33 @@ ol.ci-steps li::marker { content: none; }
                 const P = CAREER.skillChoices(t.race, p, 'P'), S = CAREER.skillChoices(t.race, p, 'S'), showS = gw || SN > 0 || (p.mp && p.mp.kind === 'S');
                 return `<select class="tb-in tb-mpsel" data-mpsk="${i}" aria-label="Extra skill for ${esc(p.name)}"><option value="">No extra skill</option>
                     <optgroup label="${gw ? 'Primary · 1 skill point' : 'Primary skills'}">${P.map(x => opt(x.skill, 'P')).join('')}</optgroup>${showS ? `<optgroup label="${gw ? 'Secondary · 2 skill points' : 'Secondary skills'}">${S.map(x => opt(x.skill, 'S')).join('')}</optgroup>` : ''}</select>`;
+            }
+            // skill gold: a skill, or a stat increase instead (where the tier allows); then, where the tier allows stacks, a second primary on top of a primary
+            function goldSelect(t, p, i) {
+                const r = rulesOf(t), tier = tierOf(t), C = r.cost, G = TRULES.at(r, 'gold', tier), base = goldUsed(t, p), cap = r.elite;
+                const SK = TRULES.at(r, 'stacks', tier), SU = TRULES.at(r, 'statups', tier), stack = p.mp2 ? C.P + C.stack : 0;
+                const stacks = t.players.filter(q => q !== p && q.mp2).length, stats = t.players.filter(q => q !== p && mpStat(q)).length;
+                const elite = sk => t.players.filter(q => q !== p && mpSkills(q).includes(sk)).length;
+                const opt = (val, label, on, why) => `<option value="${val}"${on ? ' selected' : ''}${why && !on ? ' disabled' : ''}>${label}${why && !on ? ' – ' + why : ''}</option>`;
+                const gold = n => n > G ? 'not enough skill gold' : '';
+                const eliteWhy = sk => cap && MP.ELITE.includes(sk) && elite(sk) >= cap ? `Elite Skill: ${cap} players already` : '';
+                const sk = (x, kind) => opt(`${kind}|${esc(x)}`, esc(x) + (cap && MP.ELITE.includes(x) ? ' (Elite)' : ''), !!p.mp && p.mp.skill === x && p.mp.kind === kind,
+                    gold(base + C[kind] + (kind === 'P' && !(p.mp2 && p.mp2.skill === x) ? stack : 0)) || eliteWhy(x));
+                const e = CAREER.eff(t.race, CAREER.norm(Object.assign({}, p, { advs: [] })));
+                const now = st => st === 'ag' || st === 'pa' ? `${e[st]}+ → ${e[st] - 1}+` : st === 'av' ? `${e[st]}+ → ${e[st] + 1}+` : `${e[st]} → ${e[st] + 1}`;
+                const stl = SU || mpStat(p) ? TRULES.STATS.filter(st => statOk(t, p, st)).map(st => opt(`C|${st}`, `+1 ${st.toUpperCase()} (${now(st)}) · ${k(C[st])}`, mpStat(p) === st,
+                    gold(base + C[st]) || (stats >= SU ? (SU ? `Tier ${tier}: ${SU} per team` : `none at Tier ${tier}`) : ''))).join('') : '';
+                const P = CAREER.skillChoices(t.race, p, 'P'), S = CAREER.skillChoices(t.race, p, 'S');
+                let html = `<select class="tb-in tb-mpsel" data-mpsk="${i}" aria-label="Extra skill${stl ? ' or stat increase' : ''} for ${esc(p.name)}"><option value="">No extra skill</option>
+                    <optgroup label="Primary · ${k(C.P)}">${P.map(x => sk(x.skill, 'P')).join('')}</optgroup><optgroup label="Secondary · ${k(C.S)}">${S.map(x => sk(x.skill, 'S')).join('')}</optgroup>`
+                    + (stl ? `<optgroup label="Stat increase · instead of a skill">${stl}</optgroup>` : '') + '</select>';
+                if ((SK || p.mp2) && p.mp && p.mp.kind === 'P') {
+                    const P2 = CAREER.skillChoices(t.race, CAREER.norm(Object.assign({}, p, { advs: [{ skill: p.mp.skill, kind: 'P' }] })), 'P');
+                    html += `<select class="tb-in tb-mpsel" data-mpsk2="${i}" aria-label="Stacked primary skill for ${esc(p.name)}"><option value="">No stacked skill</option>
+                        <optgroup label="Stacked primary · ${k(C.P + C.stack)} (${k(C.P)} + ${k(C.stack)} for the stack)">${P2.map(x => opt(`P|${esc(x.skill)}`, esc(x.skill), !!p.mp2 && p.mp2.skill === x.skill,
+                            gold(base + C.P + C.P + C.stack) || (stacks >= SK ? (SK ? `Tier ${tier}: ${SK} stack${SK === 1 ? '' : 's'} per team` : `no stacks at Tier ${tier}`) : '') || eliteWhy(x.skill))).join('')}</optgroup></select>`;
+                }
+                return html;
             }
             function mpStarWhy(t, sk, c) {
                 const S = STARS[sk], mine = t.stars || [], tier = tierOf(t), mx = starMax(t), mg = megaMax(t);
@@ -3863,7 +3960,10 @@ ol.ci-steps li::marker { content: none; }
                 $('tb-rules').innerHTML = TRULES.list().map(x => `<option value="${esc(x.id)}"${x.id === r.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('');
                 $('tb-budwrap').style.display = gw ? '' : 'none';
                 $('tb-budget').innerHTML = (sv ? SEV.MP_BUDGETS : MP.BUDGETS).map(b => `<option value="${b}" ${b === t.budget ? 'selected' : ''}>${k(b)}${sv ? (b === 600 ? ' (usual)' : '') : [1100, 1150, 1200].includes(b) ? ' (common)' : ''}</option>`).join('');
-                $('tb-mpnote').innerHTML = !gw ? `<b>Tier ${tier}</b> team: budget <b>${k(t.budget)}</b> · <span class="tb-sp">primary skills ${pN} / ${PN}</span> · <span class="tb-sp">secondary ${sN} / ${SN}</span> · ${mx ? `up to ${mx} Star Player${mx === 1 ? '' : 's'}` : 'no Star Players'}.
+                const gd = isGold(t), G = gd ? TRULES.at(r, 'gold', tier) : 0, gU = gd ? goldUsed(t) : 0, SK = gd ? TRULES.at(r, 'stacks', tier) : 0, SU = gd ? TRULES.at(r, 'statups', tier) : 0, C = r.cost || {};
+                $('tb-mpnote').innerHTML = gd ? `<b>Tier ${tier}</b> team: budget <b>${k(t.budget)}</b> · <span class="tb-sp">skill gold ${k(gU)} / ${k(G)}</span> · ${SK ? `${SK} stacked skill${SK === 1 ? '' : 's'}` : 'no stacking'} · ${SU ? `${SU} stat increase${SU === 1 ? '' : 's'}` : 'no stat increases'} · ${mx ? `up to ${mx} Star Player${mx === 1 ? '' : 's'}` : 'no Star Players'}.
+                    Skills come out of the skill gold, not the budget: primary ${k(C.P)}, secondary ${k(C.S)}.${SK ? ` A player whose extra is a primary may stack a second primary for ${k(C.P + C.stack)}.` : ''}${SU ? ` A stat increase instead of a skill: AV ${k(C.av)}, MA ${k(C.ma)}, PA ${k(C.pa)}, AG ${k(C.ag)}, ST ${k(C.st)}.` : ''}${r.notes ? `<div class="tb-rnote">${esc(r.notes)}</div>` : ''}`
+                    : !gw ? `<b>Tier ${tier}</b> team: budget <b>${k(t.budget)}</b> · <span class="tb-sp">primary skills ${pN} / ${PN}</span> · <span class="tb-sp">secondary ${sN} / ${SN}</span> · ${mx ? `up to ${mx} Star Player${mx === 1 ? '' : 's'}` : 'no Star Players'}.
                     One extra skill per player; skills are free and don't add to team value.${r.notes ? `<div class="tb-rnote">${esc(r.notes)}</div>` : ''}`
                     : sv ? `<b>Sevens Tier ${tier}</b> team: <span class="tb-sp">${used} / ${allow} skill points</span> · one secondary skill in the whole team · two Elite Skills at most · no Star Players.
                     One extra skill per player (primary 1 point, secondary 2). At most 4 players without the Lineman keyword, and one Lineman is your Veteran.`
@@ -3875,7 +3975,7 @@ ol.ci-steps li::marker { content: none; }
                 $('tb-bar').parentNode.style.display = '';
                 $('tb-bar').style.width = Math.min(100, c.spent / t.budget * 100) + '%'; $('tb-bar').className = left < 0 ? 'tb-bad-bg' : '';
                 const probs = mpProblems(t, c);
-                $('tb-left').innerHTML = (left < 0 ? `${k(-left)} over the ${gw ? 'Matched Play' : 'tournament'} budget` : left ? `${k(left)} left · gold not spent is lost` : 'Every last coin spent') + (gw ? ` · skill points ${used}/${allow}` : ` · primary ${pN}/${PN} · secondary ${sN}/${SN}`)
+                $('tb-left').innerHTML = (left < 0 ? `${k(-left)} over the ${gw ? 'Matched Play' : 'tournament'} budget` : left ? `${k(left)} left · gold not spent is lost` : 'Every last coin spent') + (gw ? ` · skill points ${used}/${allow}` : gd ? ` · skill gold ${k(gU)}/${k(G)}` : ` · primary ${pN}/${PN} · secondary ${sN}/${SN}`)
                     + (probs.length ? `<div class="tb-mpwarn">${probs.map(x => `<div>${esc(x)}</div>`).join('')}</div>` : '');
                 const n = t.players.length + starN(t);
                 $('tb-count').textContent = `${n} / ${MAXP}`; $('tb-count').className = 'tb-big ' + (n < MINP || n > MAXP ? 'tb-bad' : 'tb-good');
@@ -3884,7 +3984,7 @@ ol.ci-steps li::marker { content: none; }
                     .map(([a, b]) => `<tr><td>${a}</td><td>${k(b)}</td></tr>`).join('') + `<tr class="tb-total"><td>Total spent</td><td>${k(c.spent)}</td></tr>`;
                 // Star Players (none in Sevens)
                 $('tb-mpstars').parentNode.style.display = sv ? 'none' : '';
-                const ks = sv ? [] : starsFor(t.race, t.league, t.favoured);
+                const ks = sv || (!mx && !(t.stars || []).length) ? [] : starsFor(t.race, t.league, t.favoured);
                 $('tb-mpstars').innerHTML = (gw ? `<p class="tb-dim tb-hint">Their price in gold plus <span class="tb-sp">2 skill points</span> (a Mega-star <span class="tb-sp">4</span>). A pair counts as one Star but takes two places. Star Players get no extra skills.</p>`
                     : `<p class="tb-dim tb-hint">Paid from the budget. Tier ${tier}: ${mx ? `up to <span class="tb-sp">${mx}</span> Star Player${mx === 1 ? '' : 's'}` : 'no Star Players'}${r.mega ? r.mega === 1 ? ', one Mega-star at most' : `, ${r.mega} Mega-stars at most` : ', no Mega-stars'}. A pair counts as one Star but takes two places. Star Players get no extra skills.</p>`) +
                     (ks.length ? ks.map(sk => {
@@ -3893,7 +3993,7 @@ ol.ci-steps li::marker { content: none; }
                             ${starMembers(sk).map(m => `<div class="tb-stats">${S.members ? `<b>${esc(m.name)}</b> ` : ''}MA ${m.ma} · ST ${m.st} · AG ${m.ag}+ · PA ${m.pa ? m.pa + '+' : '-'} · AV ${m.av}+</div><div class="tb-skills">${esc(m.skills.join(', '))}</div>`).join('')}
                             <div class="tb-skills"><b>${esc(S.rule)}:</b> ${esc(S.text)}</div>${why ? `<div class="tb-skills tb-bad">${esc(why)}</div>` : ''}</div>
                             <button type="button" class="tb-hire" data-mpstar="${sk}" ${why ? 'disabled' : ''}>${on ? 'Remove' : '+ Hire'}</button></div>`;
-                    }).join('') : '<div class="tb-empty">No Star Players will play for this team.</div>');
+                    }).join('') : `<div class="tb-empty">${mx ? 'No Star Players will play for this team.' : `No Star Players at Tier ${tier} under ${esc(r.name)}.`}</div>`);
                 // inducements
                 const barred = gw ? [] : LEAGUE.indList('std').filter(it => LEAGUE.offered(it, t.race) && !indOk(t, it.key)).map(it => it.name);
                 $('tb-mpind').innerHTML = LEAGUE.indList(sv ? 'sevens' : 'std').filter(it => LEAGUE.offered(it, t.race) && (indOk(t, it.key) || (t.mind || {})[it.key])).map(it => {
@@ -3980,7 +4080,7 @@ ol.ci-steps li::marker { content: none; }
                         : `<div class="tb-vetrow"><button type="button" class="tb-vet ${p.vet ? 'on' : ''}" data-vet="${i}" aria-pressed="${!!p.vet}">${p.vet ? '★ Veteran' : 'Make Veteran'}</button></div>`) : '';
                     const noFire = sev && car;   // Sevens leagues: no firing players
                     return `<div class="tb-pl"><span class="tb-ord"><button type="button" class="tb-mv" data-up="${i}" ${i ? '' : 'disabled'} aria-label="Move ${esc(p.name)} up">▲</button><span class="tb-no">${i + 1}</span><button type="button" class="tb-mv" data-dn="${i}" ${i < n - 1 ? '' : 'disabled'} aria-label="Move ${esc(p.name)} down">▼</button></span><span class="tb-tok" style="background:${t.primary};color:${t.secondary}">${sev && p.vet ? 'V' : ty.label}</span>
-                        <div class="tb-pnwrap"><input id="tb-pn-${i}" class="tb-in tb-pname" data-pn="${i}" value="${esc(p.name)}" maxlength="24" aria-label="Name of player ${i + 1}">${statSkillHtml(t.race, p, isMP(t) && p.mp ? p.mp.skill : null)}${vet}${extra}</div>
+                        <div class="tb-pnwrap"><input id="tb-pn-${i}" class="tb-in tb-pname" data-pn="${i}" value="${esc(p.name)}" maxlength="24" aria-label="Name of player ${i + 1}">${statSkillHtml(t.race, mpView(t, p))}${vet}${extra}</div>
                         <span class="tb-dim tb-pt">${esc(ty.type)}${i >= MINP ? ' · reserve' : ''}</span>
                         <span class="tb-dim">${k(CAREER.value(t.race, p))}</span>
                         ${noFire ? '<span></span>' : `<button type="button" class="tb-x" data-fire="${i}" aria-label="Release ${esc(p.name)}">✕</button>`}</div>`;
@@ -4168,7 +4268,7 @@ ol.ci-steps li::marker { content: none; }
                 root.addEventListener('input', e => {
                     const el = e.target;
                     if (el.dataset.pn != null) { cur.players[+el.dataset.pn].name = el.value; dirty = true; $('tb-save').textContent = 'Save team'; }
-                    else if (el.dataset.mpsk != null) return;
+                    else if (el.dataset.mpsk != null || el.dataset.mpsk2 != null) return;
                     else if (el.id === 'tb-name') { cur.name = el.value; dirty = true; $('tb-save').textContent = 'Save team'; $('tb-endzone').textContent = (el.value || 'Team').toUpperCase() + ' END ZONE'; }
                 });
                 root.addEventListener('change', e => {
@@ -4188,12 +4288,20 @@ ol.ci-steps li::marker { content: none; }
                         });
                         msg(had ? 'Roster cleared for the new race.' : '');
                     } else if (el.dataset.mpsk != null) {
-                        change(() => { const p = cur.players[+el.dataset.mpsk], v = el.value; if (!v) delete p.mp; else { const i2 = v.indexOf('|'); p.mp = { kind: v.slice(0, i2), skill: v.slice(i2 + 1) }; } });
+                        change(() => {
+                            const p = cur.players[+el.dataset.mpsk], v = el.value;
+                            if (!v) delete p.mp;
+                            else { const i2 = v.indexOf('|'), kind = v.slice(0, i2), x = v.slice(i2 + 1); p.mp = kind === 'C' ? { kind, stat: x } : { kind, skill: x }; }
+                            // a stacked skill stays only on top of a primary it still goes with
+                            if (p.mp2 && !(p.mp && p.mp.kind === 'P' && CAREER.skillChoices(cur.race, CAREER.norm(Object.assign({}, p, { advs: [{ skill: p.mp.skill, kind: 'P' }] })), 'P').some(q => q.skill === p.mp2.skill))) delete p.mp2;
+                        });
+                    } else if (el.dataset.mpsk2 != null) {
+                        change(() => { const p = cur.players[+el.dataset.mpsk2], v = el.value; if (!v) delete p.mp2; else p.mp2 = { kind: 'P', skill: v.slice(v.indexOf('|') + 1) }; });
                     } else if (el.id === 'tb-format') {
                         const to = el.value, from = cur.format || '';
                         change(() => {
                             const wasMP = from === 'matched' || from === 'sevens-mp', bribes = wasMP ? (cur.mind || {}).bribes || 0 : cur.bribes || 0;
-                            delete cur.budget; delete cur.stars; delete cur.mind; delete cur.rules; cur.players.forEach(p => { delete p.mp; delete p.vet; });
+                            delete cur.budget; delete cur.stars; delete cur.mind; delete cur.rules; cur.players.forEach(p => { delete p.mp; delete p.mp2; delete p.vet; });
                             if (to) cur.format = to; else delete cur.format;
                             if (to === 'matched' || to === 'sevens-mp') { cur.budget = to === 'matched' ? 1150 : 600; cur.stars = []; cur.mind = to === 'matched' && bribes ? { bribes } : {}; cur.bribes = 0; cur.fans = 0; if (to === 'matched') setRules(cur, TRULES.last()); }
                             else { cur.bribes = to === 'sevens' ? 0 : Math.min(maxOf('bribes', cur.race, cur), bribes); cur.fans = 1; }
@@ -4246,7 +4354,7 @@ ol.ci-steps li::marker { content: none; }
             const putRaw = t => { load(); const c = clean(JSON.parse(JSON.stringify(t))), i = teams.findIndex(x => x.id === c.id); if (i >= 0) teams[i] = c; else teams.push(c); return persist(); };
             const watchers = new Set();
             const temp = (t, cb) => { temps.set(t.id, clean(JSON.parse(JSON.stringify(t)))); onTemp = cb; load(); };
-            return { temp, putRaw, watch: f => watchers.add(f), open, list: () => { load(); return teams.filter(t => !temps.has(t.id) && !t.ext); }, toRace, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf, mpBudget, rulesOf };
+            return { temp, putRaw, watch: f => watchers.add(f), open, list: () => { load(); return teams.filter(t => !temps.has(t.id) && !t.ext); }, toRace, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf, mpBudget, rulesOf, mpAdvs, mpText, mpView };
         })();
         // ---------- Trophies: gold, silver and bronze for the top three of a league season, cup or Swiss event ----------
         const TROPHY = {
@@ -4399,7 +4507,7 @@ ol.ci-steps li::marker { content: none; }
                         <td><b>${esc(p.name)}</b><div class="pg-dim">${esc(ty.type)} · ${CAREER.level(p)}</div></td>
                         <td class="th-num">${p.spp}</td><td class="th-num">${s.gp}</td><td class="th-num">${s.td}</td><td class="th-num">${s.cas}</td><td class="th-num">${s.cp}</td><td class="th-num">${s.int}</td><td class="th-num">${s.mvp}</td>
                         <td class="th-num">${k(CAREER.value(t.race, p))}</td></tr>
-                        <tr class="th-sub ${p.mng ? 'th-out' : ''}"><td></td><td colspan="9">${statSkillHtml(t.race, p, TB.isMP(t) && p.mp ? p.mp.skill : null)}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td></tr>`;
+                        <tr class="th-sub ${p.mng ? 'th-out' : ''}"><td></td><td colspan="9">${statSkillHtml(t.race, TB.mpView(t, p))}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td></tr>`;
                 }).join('');
                 const hist = (t.history || []).slice(0, 10).map(h => `<div class="th-res"><span class="th-badge th-${h.res}">${h.res}</span> ${h.f}–${h.a} v ${esc(h.opp)} <span class="pg-dim">${esc(h.date)}</span></div>`).join('');
                 const fallen = (t.fallen || []).map(f => `<div class="th-res">✝ <b>${esc(f.name)}</b> <span class="pg-dim">${esc((R.types[f.pos] || {}).type || f.pos)} · ${f.gp} games · ${f.td} TD · ${f.cas} CAS · ${f.spp} SPP · ${esc(f.date)}</span></div>`).join('');
@@ -4471,8 +4579,8 @@ ol.ci-steps li::marker { content: none; }
                         TB.put(c); sel = c.id; msg(`Made an exact copy: ${c.name}.`);
                     } else if (d.act === 'dupfresh') {
                         const c = { id: uid(), name: (t.name + ' (new)').slice(0, 30), race: t.race, primary: t.primary, secondary: t.secondary, rerolls: t.rerolls, apothecary: t.apothecary,
-                            coaches: t.coaches, cheerleaders: t.cheerleaders, fans: Math.min(3, t.fans), bribes: 0, players: t.players.map(p => Object.assign({ pos: p.pos, name: p.name }, TB.isMP(t) && p.mp ? { mp: p.mp } : {}, p.vet ? { vet: true } : {})) };
-                        if (TB.isMP(t)) Object.assign(c, { format: t.format, budget: t.budget, stars: (t.stars || []).slice(), mind: Object.assign({}, t.mind) });
+                            coaches: t.coaches, cheerleaders: t.cheerleaders, fans: Math.min(3, t.fans), bribes: 0, players: t.players.map(p => Object.assign({ pos: p.pos, name: p.name }, TB.isMP(t) && p.mp ? { mp: p.mp } : {}, TB.isMP(t) && p.mp2 ? { mp2: p.mp2 } : {}, p.vet ? { vet: true } : {})) };
+                        if (TB.isMP(t)) Object.assign(c, { format: t.format, budget: t.budget, stars: (t.stars || []).slice(), mind: Object.assign({}, t.mind) }, t.rules ? { rules: t.rules } : {});
                         else if (TB.isSev(t)) c.format = 'sevens';
                         TB.put(c); sel = c.id; msg(TB.isMP(t) ? `Made a copy of the Matched Play team: ${c.name}.` : `Made a fresh copy with no career: ${c.name}. It starts on the usual ${TB.isSev(t) ? '600k Sevens' : '1,000k'} budget.`);
                     } else if (d.act === 'reset') {
@@ -6436,7 +6544,7 @@ ol.ci-steps li::marker { content: none; }
                 if (!th || !ta) { f.r = { s: th ? [2, 0] : [0, 2], sim: true, forfeit: true }; advance(cp); return; }
                 const tm = [th, ta].map(t => {
                     const c = JSON.parse(JSON.stringify(t)), d = c.mind || {};
-                    c.players.forEach(p => { p.advs = p.mp ? [{ skill: p.mp.skill, kind: p.mp.kind }] : []; });
+                    c.players.forEach(p => { p.advs = TB.isMP(t) ? TB.mpAdvs(p) : []; });
                     c.rerolls = (c.rerolls || 0) + (d.ett || 0) + (d.mascot ? 1 : 0) + (d.chef ? 1 : 0) + (d.wizard ? 1 : 0);
                     if (d.apo && !noApo(c.race)) c.apothecary = true;
                     c.simStars = (c.stars || []).slice();
@@ -6531,8 +6639,8 @@ ol.ci-steps li::marker { content: none; }
             }
             function teamLine(t) {
                 const R = RACES[t.race], st = (t.stars || []).map(sk => STARS[sk].name);
-                const sk = t.players.filter(p => p.mp).map(p => p.mp.skill), c = TB.costs(t);
-                return `${esc(R.name)} · Tier ${MP.tier(t.race)} · TV ${k(c.tv)} · ${t.rerolls} re-roll${t.rerolls === 1 ? '' : 's'}${st.length ? ' · ★ ' + esc(st.join(', ')) : ''}${sk.length ? ' · skills: ' + esc(sk.join(', ')) : ''}`;
+                const sk = t.players.flatMap(p => TB.mpAdvs(p).map(a => a.skill || '+1 ' + a.stat.toUpperCase())), c = TB.costs(t);
+                return `${esc(R.name)} · Tier ${TB.tierOf(t)} · TV ${k(c.tv)} · ${t.rerolls} re-roll${t.rerolls === 1 ? '' : 's'}${st.length ? ' · ★ ' + esc(st.join(', ')) : ''}${sk.length ? ' · skills: ' + esc(sk.join(', ')) : ''}`;
             }
             // the top three, with their medals
             function podium(cp) {
@@ -6570,7 +6678,7 @@ ol.ci-steps li::marker { content: none; }
                     <section class="pg-card"><h3>Teams</h3>${cp.teams.map(id => { const t = teamOf(id); if (!t) return '<div class="pg-dim">(deleted team)</div>';
                         return `<div class="lg-team"><div class="lg-team-row">${tok(id)}<div class="lg-team-main"><div class="lg-tn">${esc(t.name)} ${coachTag(cp, id)}</div><div class="pg-dim">${teamLine(t)}</div></div>
                             <div class="lg-team-acts"><button type="button" class="pg-btn" data-cros="${id}">${show === id ? 'Hide roster' : 'Roster'}</button></div></div>
-                            ${show === id ? `<div class="pg-dim" style="margin:4px 0 0 34px">${t.players.map(p => `${esc(p.name)} <span class="pg-amber">${esc((RACES[t.race].types[p.pos] || {}).type || p.pos)}</span>${p.mp ? ' +' + esc(p.mp.skill) : ''}`).join(' · ')}${Object.keys(t.mind || {}).length ? `<div>Inducements: ${esc(LEAGUE.IND.filter(it => t.mind[it.key]).map(it => it.name + (t.mind[it.key] > 1 ? ' ×' + t.mind[it.key] : '')).join(', '))}</div>` : ''}</div>` : ''}</div>`; }).join('')}</section>`;
+                            ${show === id ? `<div class="pg-dim" style="margin:4px 0 0 34px">${t.players.map(p => `${esc(p.name)} <span class="pg-amber">${esc((RACES[t.race].types[p.pos] || {}).type || p.pos)}</span>${p.mp ? ' ' + esc(TB.mpText(p)) : ''}`).join(' · ')}${Object.keys(t.mind || {}).length ? `<div>Inducements: ${esc(LEAGUE.IND.filter(it => t.mind[it.key]).map(it => it.name + (t.mind[it.key] > 1 ? ' ×' + t.mind[it.key] : '')).join(', '))}</div>` : ''}</div>` : ''}</div>`; }).join('')}</section>`;
             }
             function listHtml() {
                 const cards = cups.filter(cp => !cp.online).map(cp => {
