@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.96 (14 Nov 2026)
+- New match option: the **Chaos Wastes weather table** (from Glory on the Gridiron 2 - Getting Wasted), on the exhibition screen and in
+  the two-device lobby. Warpfire, mutations, gravity flux, the Gaze of the Gods, the Slavering Maw and more.
+- New pitch: **Chaos Wastes**, scorched and warped ground with glowing fissures and the star of Chaos.
+
 ## v4.95 (14 Nov 2026)
 - FUMBBL replays: a thrown team-mate carrying the ball now has it in the close-up and flies with it on the pitch; any thrown
   team-mate flies in an arc instead of sliding.

@@ -2,6 +2,35 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.96 (14 Nov 2026)
+- **New: the Chaos Wastes weather table, as a match option.** Next to the Pitch on the exhibition screen there is now a Weather
+  choice: Standard (BB2025, the default) or Chaos Wastes, the table from the "Glory on the Gridiron 2 - Getting Wasted" pack. The
+  two-device lobby has it too (the host picks it, the other player sees it). League and tournament matches keep the standard table.
+  The Chaos Wastes table is used for the pre-match roll, Changing Weather and a Weather Mage, and has its own weather window,
+  Training note (the whole table) and log lines. Most results strike at the start of every drive while they last (after both teams
+  have set up, before the kick), and anything they give lasts until the end of that drive; when Changing Weather brings one in, it
+  strikes straight away.
+  - 2 Chaos Warpfire: a random player on each team, 4+ and Breathe Fire is resolved against them (Placed Prone, or Knocked Down on a 6).
+  - 3 Winds of Change: a D6 each; the higher roller (both on a tie) picks a player to gain a random Mutation.
+  - 4 Blood Rain: Rushes fail on a 1 or 2, -1 to Passing Ability tests.
+  - 5 Gravity Flux: a random player on each team gets MA -1 (not below 3) or +1 (not above 9).
+  - 6 Freezing Gale: a ball carrier knocked down has the ball blown D3 squares instead of one bounce.
+  - 7 Unholy Overcast: Perfect Conditions (Changing Weather to it scatters the kick, as Perfect does).
+  - 8 Choking Spores: a D6 each; a random player of the lower roller (both on a tie) loses their Tackle Zone until the end of their next activation.
+  - 9 Warp Lightning: after a touchdown, a random player on the scoring team is knocked Prone and an Armour roll made.
+  - 10 Soporific Musk: the lower roller (both on a tie) picks one of their players to become Really Stupid.
+  - 11 Gaze of the Gods: each coach nominates a player, a D6 each: 1 KO, 4-5 a random characteristic +1, 6 Mighty Blow, Dauntless and Frenzy.
+  - 12 Slavering Maw: the kicking coach rolls a D6: a random receiving player goes Prone on a failed Agility test (3-4), takes an Armour
+    roll with Claws or Mighty Blow (5), or is swallowed into the KO box (6), where Blitzer's Best Kegs don't help them come back.
+  Picks are made on the pitch with the usual pick banner; the computer picks its best player for a gift and its least useful one for
+  Soporific Musk. Each weather has its own look on the pitch (red rain, a gale, a pulsing violet gloom with drifting warp motes).
+- **New pitch: Chaos Wastes.** Scorched, cracked ground that is itself rippled and twisted round warp vortices, stained violet and
+  sickly green, split by glowing fissures and veins of corruption, with swirls of warp energy, scorch marks, skulls, iron spikes along
+  the sidelines and the eight-pointed star of Chaos branded in the middle (the fissures and swirls pulse). The block close-up shows a
+  warp vortex over twisted spires and a crag with the star of Chaos. It plays the brimstone music. Picking the Chaos Wastes weather
+  offers this pitch (it doesn't force it).
+- New browser check: `node tools/ui-tests/chaos-wastes.js` (the options, every result forced, Changing Weather, a person's pick, screenshots).
+
 ## v4.95 (14 Nov 2026)
 - **Fixed (FUMBBL replays): the ball with a thrown team-mate.** FUMBBL marks a team-mate being thrown as "picked up" (state 16)
   and then "in the air" (21), moves them to where they land, and only then moves the ball to them. The replay viewer only counted
