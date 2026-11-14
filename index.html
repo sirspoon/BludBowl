@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.83</title>
+    <title>BludBowl 4.84</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1182,7 +1182,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.83</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.84</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1446,6 +1446,7 @@ ol.ci-steps li::marker { content: none; }
             <button id="tb-import" type="button" class="tb-ghost">Import file</button>
             <button id="tb-export-all" type="button" class="tb-ghost">Export all</button>
             <button id="tb-export" type="button" class="tb-ghost">Export team</button>
+            <button id="tb-pdf" type="button" class="tb-ghost">Roster PDF</button>
             <button id="tb-save" type="button" class="tb-primary">Save team</button>
             <input id="tb-file" type="file" accept=".json,application/json" hidden>
           </div>
@@ -4430,6 +4431,7 @@ ol.ci-steps li::marker { content: none; }
                     else if (b.id === 'tb-close') close();
                     else if (b.id === 'tb-save') save();
                     else if (b.id === 'tb-names') change(() => { const used = new Set(); cur.players.forEach(p => { p.name = randomName(cur.race, used); used.add(p.name); }); });
+                    else if (b.id === 'tb-pdf') ROSTER_PDF.save(cur, (m, bad) => msg(m, bad));
                     else if (b.id === 'tb-export') { download(((cur.name || 'team').replace(/[^\w\- ]+/g, '').trim() || 'team') + '.bbteam.json', Object.assign({ version: VER, teams: [cur] }, TRULES.defsFor([cur]).length ? { rules: TRULES.defsFor([cur]) } : {})); msg('Team exported as a file.'); }
                     else if (b.id === 'tb-export-all') { if (!teams.length) { msg('No saved teams yet.', true); return; } download('bludbowl-teams.json', Object.assign({ version: VER, teams }, TRULES.defsFor(teams).length ? { rules: TRULES.defsFor(teams) } : {})); msg(`Exported ${teams.length} team(s).`); }
                     else if (b.id === 'tb-import') $('tb-file').click();
@@ -4717,7 +4719,7 @@ ol.ci-steps li::marker { content: none; }
                             <button type="button" class="pg-primary" data-act="edit">Edit in Team Builder</button>
                             <button type="button" class="pg-btn" data-act="dupfresh" title="Same players and staff, no career: SPP, injuries and record start again">Fresh copy</button>
                             <button type="button" class="pg-btn" data-act="dupall" title="An exact copy, career and all">Exact copy</button>
-                            <button type="button" class="pg-btn" data-act="export">Export</button>
+                            <button type="button" class="pg-btn" data-act="export">Export</button><button type="button" class="pg-btn" data-act="pdf">Export PDF</button>
                             <button type="button" class="pg-btn th-danger" data-act="reset" ${car ? '' : 'disabled'}>${armed.reset > Date.now() ? 'Tap again to reset' : 'Reset career'}</button>
                             <button type="button" class="pg-btn th-danger" data-act="del">${armed.del > Date.now() ? 'Tap again to delete' : 'Delete'}</button>
                         </div></section>
@@ -4797,6 +4799,7 @@ ol.ci-steps li::marker { content: none; }
                     if (d.fallen != null) { HONOURS.show(t, 'fallen', +d.fallen); return; }
                     if (d.trophy != null) { HONOURS.show(t, 'trophy', +d.trophy); return; }
                     if (d.act === 'edit') { root.classList.add('hidden'); TB.open(() => { root.classList.remove('hidden'); render(); }, t.id); return; }
+                    if (d.act === 'pdf') { ROSTER_PDF.save(t, (m, bad) => msg(m, bad)); return; }
                     if (d.act === 'export') { TB.download(((t.name || 'team').replace(/[^\w\- ]+/g, '').trim() || 'team') + '.bbteam.json', { version: 1, teams: [t] }); msg(`${t.name} exported as a file.`); return; }
                     if (d.act === 'dupall') {
                         const c = JSON.parse(JSON.stringify(t)); c.id = uid(); c.name = (t.name + ' (copy)').slice(0, 30);
@@ -11893,6 +11896,177 @@ ol.ci-steps li::marker { content: none; }
             return `<div class="ind-tabs" role="tablist">${sides.map((sd, j) => `<button type="button" role="tab" aria-selected="${sd.i === on}" class="ind-tab ${sd.i === on ? 'on' : ''}" data-${attr}="${sd.i}">
                 <span class="ind-tab-n">${esc(sd.name)}</span><span class="ind-tab-s">${sd.cpu ? '<span class="ind-cpu">CPU</span> ' : ''}${sd.sub}</span></button>`).join('')}</div>`;
         }
+        // ---------- Roster PDF: a printable team sheet (A4 landscape) with the team's details, every player and what their skills do ----------
+        // Made with jsPDF, loaded from a CDN the first time it's needed (so it needs the internet once).
+        const ROSTER_PDF = (function () {
+            const SRC = ['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js'];
+            let loading = null;
+            function lib() {
+                if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf);
+                if (loading) return loading;
+                loading = new Promise((ok, bad) => {
+                    let i = 0;
+                    const next = () => {
+                        if (i >= SRC.length) { loading = null; bad(new Error('offline')); return; }
+                        const s = document.createElement('script'); s.src = SRC[i++]; s.async = true;
+                        s.onload = () => (window.jspdf && window.jspdf.jsPDF ? ok(window.jspdf) : next()); s.onerror = () => { s.remove(); next(); };
+                        document.head.appendChild(s);
+                    };
+                    next();
+                });
+                return loading;
+            }
+            const k = n => Math.round(n).toLocaleString('en-GB') + 'k';
+            // the PDF's built-in fonts only have Western European letters: swap anything else for a near match
+            const tx = v => String(v == null ? '' : v).replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—−]/g, '-').replace(/…/g, '...').replace(/×/g, 'x').replace(/→/g, '->').replace(/★/g, '*').replace(/[^\x20-\x7e\xa0-\xff]/g, '');
+            const ELITE = ['Block', 'Dodge', 'Guard', 'Mighty Blow'];
+            const advVal = a => a.skill ? (a.kind === 'S' ? 40 : 20) + (ELITE.includes(a.skill) ? 10 : 0) : (CAREER.STAT_VALUE[a.stat] || 0);
+            // everything the sheet shows, worked out from the team
+            function sheet(t0) {
+                const t = CAREER.normTeam(JSON.parse(JSON.stringify(t0))), R = RACES[t.race], mp = TB.isMP(t), sev = TB.isSev(t), car = CAREER.started(t), c = TB.costs(t);
+                let skillsCost = 0, baseCost = 0, prim = 0, sec = 0; const used = new Set();
+                const players = t.players.map((p, i) => {
+                    const ty = R.types[p.pos] || { type: p.pos, skills: [] }, view = TB.mpView(t, p), e = CAREER.eff(t.race, CAREER.norm(Object.assign({}, view)));
+                    const base = ty.skills || [], extra = new Set(e.skills.filter(s => !base.includes(s)));
+                    const adds = mp ? TB.mpAdvs(p) : (p.advs || []);
+                    adds.forEach(a => { skillsCost += mp ? advVal(a) : 0; if (a.skill) { if (a.kind === 'S') sec++; else prim++; } });
+                    const cost = CAREER.value(t.race, CAREER.norm(Object.assign({}, p))), basePrice = (R.positions[p.pos] || { cost: 0 }).cost;
+                    if (!mp) skillsCost += cost - basePrice;
+                    baseCost += basePrice;
+                    e.skills.forEach(s => used.add(s));
+                    return { n: i + 1, pos: ty.type, name: p.name, ma: e.ma, st: e.st, ag: e.ag, pa: e.pa, av: e.av, skills: e.skills.map(s => ({ s, extra: extra.has(s) })), cost, spp: p.spp || 0, mng: !!p.mng,
+                        up: { ma: e.ma > ty.ma, st: e.st > ty.st, ag: e.ag < ty.ag, pa: e.pa != null && ty.pa != null && e.pa < ty.pa, av: e.av > ty.av },
+                        dn: { ma: e.ma < ty.ma, st: e.st < ty.st, ag: e.ag > ty.ag, pa: e.pa != null && ty.pa != null && e.pa > ty.pa, av: e.av < ty.av } };
+                });
+                const stars = [];
+                (mp ? t.stars || [] : []).forEach(sk => starMembers(sk).forEach((m, j) => { (m.skills || []).forEach(s => used.add(s)); stars.push({ n: '*', pos: 'Star Player', name: m.name || STARS[sk].name, ma: m.ma, st: m.st, ag: m.ag, pa: m.pa || null, av: m.av, skills: (m.skills || []).map(s => ({ s, extra: false })), cost: j ? null : STARS[sk].cost, star: true, up: {}, dn: {} }); }));
+                const indList = typeof LEAGUE === 'undefined' ? [] : LEAGUE.indList(sev ? 'sevens' : 'std');
+                const ind = mp ? Object.keys(t.mind || {}).filter(key => t.mind[key]).map(key => { const it = indList.find(x => x.key === key); return it ? [`${t.mind[key]} x ${it.name}`, k(t.mind[key] * LEAGUE.indCost(it, t.race))] : null; }).filter(Boolean) : [];
+                (mp ? t.stars || [] : []).forEach(sk => ind.push([`Star Player: ${STARS[sk].name}`, k(STARS[sk].cost)]));
+                const lgKey = starLeagueOf(t.race, t.league), rules = mp && !sev ? TB.rulesOf(t) : null;
+                const special = [].concat(lgKey && LEAGUE_NAMES[lgKey] ? [LEAGUE_NAMES[lgKey]] : [], t.favoured ? ['Favoured of ' + t.favoured] : [], (R.specialRules || []).filter((s, i, a) => a.indexOf(s) === i));
+                const fmt = sev ? (mp ? 'Sevens tournament' : 'Sevens') : mp ? 'Tournament' : 'League';
+                const sideline = [['Apothecary', t.apothecary ? 'Yes' : 'No'], ['Assistant coaches', t.coaches], ['Cheerleaders', t.cheerleaders], ['Dedicated fans', t.fans], ['Re-rolls', t.rerolls]].concat(!mp && t.bribes ? [['Bribes', t.bribes]] : []);
+                const summary = [['Players cost', k(baseCost)], [mp ? 'Skills (value)' : 'Skills and advances', k(skillsCost)]].concat(mp ? [['Star Players', k(c.stars || 0)], ['Inducements', k(c.induce || 0)]] : (c.induce ? [['Bribes', k(c.induce)]] : []),
+                    [['Sideline cost', k(c.staff + c.fans)], ['Primary skills', prim], ['Secondary skills', sec]],
+                    mp ? [['Total spent', `${k(c.spent)} / ${k(TB.mpBudget(t))}`], ['Tier', TB.tierOf(t)]] : [['Team value', k(CAREER.tv(t))]].concat(car ? [['Treasury', k(t.treasury || 0)]] : []));
+                return { t, R, mp, sev, car, players, stars, ind, special, fmt, rules, sideline, summary, used: [...used].sort((a, b) => a.localeCompare(b)) };
+            }
+            function draw(J, S) {
+                const doc = new J.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }), W = 297, H = 210, M = 10;
+                const font = (st, size) => { doc.setFont('helvetica', st || 'normal'); doc.setFontSize(size || 8); };
+                const ink = (r, g, b) => doc.setTextColor(r, g, b);
+                const line = (x1, y1, x2, y2, w) => { doc.setLineWidth(w || 0.2); doc.line(x1, y1, x2, y2); };
+                doc.setDrawColor(30, 30, 30);
+                // ---- header: race, coach and team on the left; four boxes across
+                font('bold', 18); ink(0, 0, 0);
+                doc.text(tx(S.R.name), M + 25, M + 7, { align: 'center' });
+                const labelBox = (lab, val, y, h) => { font('bold', 6.5); doc.text(lab, M + 25, y, { align: 'center' }); doc.rect(M, y + 1.2, 50, h); font('normal', 8);
+                    doc.splitTextToSize(tx(val), 47).slice(0, Math.floor(h / 3.4)).forEach((l, i) => doc.text(l, M + 25, y + 4.6 + i * 3.4, { align: 'center' })); return y + 1.2 + h; };
+                let ly = labelBox('COACH NAME', DEV.name() || '', M + 12, 5.5);
+                // the team's name, then what kind of team it is (and its tournament rules), all inside the box
+                font('normal', 7); const sub = doc.splitTextToSize(tx(S.fmt + (S.rules ? ': ' + S.rules.name : '')), 47);
+                font('bold', 6.5); doc.text('TEAM NAME', M + 25, ly + 4, { align: 'center' });
+                font('bold', 8.5); const nm = doc.splitTextToSize(tx(S.t.name), 47).slice(0, 2), bh = 2.2 + nm.length * 3.6 + sub.length * 3 + 1.2;
+                doc.rect(M, ly + 5.2, 50, bh); nm.forEach((l, i) => doc.text(l, M + 25, ly + 8.6 + i * 3.6, { align: 'center' }));
+                font('normal', 7); ink(70, 70, 70); sub.forEach((l, i) => doc.text(l, M + 25, ly + 8.4 + nm.length * 3.6 + i * 3, { align: 'center' })); ink(0, 0, 0);
+                ly = ly + 5.2 + bh;
+                // team colours swatch
+                doc.setFillColor(S.t.primary || '#888888'); doc.rect(M, M + 1, 3, 8, 'F'); doc.setFillColor(S.t.secondary || '#dddddd'); doc.rect(M + 3, M + 1, 2, 8, 'F');
+                const bx0 = M + 56, bw = (W - M - bx0 - 3 * 4) / 4;
+                const box = (i, title, rows, bullets, empty) => {
+                    const x = bx0 + i * (bw + 4), y = M; let yy = y + 4;
+                    font('bold', 7.5); doc.text(title, x + bw / 2, yy, { align: 'center' }); yy += 1.5; line(x, yy, x + bw, yy, 0.2); yy += 3.4;
+                    font('normal', 7.2);
+                    if (!rows.length) { font('italic', 7.2); doc.text(empty, x + bw / 2, yy, { align: 'center' }); yy += 3.4; }
+                    rows.forEach(r => {
+                        if (bullets) { doc.splitTextToSize(tx('- ' + r), bw - 3).forEach((l, j) => { doc.text(j ? '  ' + l : l, x + 1.5, yy); yy += 3.2; }); return; }
+                        const v = tx(r[1]); doc.text(v, x + bw - 1.5, yy, { align: 'right' });
+                        doc.splitTextToSize(tx(r[0]), bw - 3 - doc.getTextWidth(v) - 2).slice(0, 2).forEach((l, j) => { doc.text(l, x + 1.5, yy + j * 3.2); if (j) yy += 3.2; }); yy += 3.4;
+                    });
+                    doc.setLineWidth(0.3); doc.rect(x, y, bw, yy - y - 1.4);
+                    return yy;
+                };
+                const hb = Math.max(ly, box(0, 'SIDELINE', S.sideline), box(1, S.mp ? 'INDUCEMENTS & STARS' : 'INDUCEMENTS', S.ind, false, 'No inducements'), box(2, 'LEAGUES & SPECIAL RULES', S.special, true, 'None'), box(3, 'SUMMARY', S.summary));
+                // ---- the players
+                const cols = [['#', 7, 'c'], ['POSITION', 36], ['NAME', 40], ['MA', 8, 'c'], ['ST', 8, 'c'], ['AG', 8, 'c'], ['PA', 8, 'c'], ['AV', 8, 'c'], ['SKILLS', 0]].concat(S.car ? [['SPP', 11, 'c']] : [], [['COST', 15, 'r']]);
+                const fixed = cols.reduce((a, c) => a + c[1], 0); cols.find(c => c[0] === 'SKILLS')[1] = W - 2 * M - fixed;
+                const xs = []; cols.reduce((x, c) => { xs.push(x); return x + c[1]; }, M);
+                const ci = name => cols.findIndex(c => c[0] === name);
+                let y = hb + 5;
+                const headRow = () => { font('bold', 8.2); ink(0, 0, 0); cols.forEach((c, i) => { const x = xs[i]; doc.text(c[0], c[2] === 'c' ? x + c[1] / 2 : c[2] === 'r' ? x + c[1] - 1.5 : x + 1.5, y + 4.2, { align: c[2] === 'c' ? 'center' : c[2] === 'r' ? 'right' : 'left' }); });
+                    doc.setLineWidth(0.4); doc.rect(M, y, W - 2 * M, 6); y += 6; };
+                // skills in a cell: the position's own in plain type, extra ones (picks and advancements) in blue italics, wrapped to fit
+                const skillLines = (skills, w) => {
+                    const lines = [[]]; let x = 0;
+                    skills.forEach((sk, i) => {
+                        const word = tx(sk.s) + (i < skills.length - 1 ? ',' : ''); font(sk.extra ? 'italic' : 'normal', 8); const ww = doc.getTextWidth(word), sp = 1.2;   // a clear gap after each comma
+                        if (x && x + ww > w) { lines.push([]); x = 0; }
+                        lines[lines.length - 1].push({ word, extra: sk.extra, x }); x += ww + sp;
+                    });
+                    return lines;
+                };
+                headRow();
+                const startY = y;
+                S.players.concat(S.stars).forEach((p, idx) => {
+                    const lines = skillLines(p.skills, cols[ci('SKILLS')][1] - 3), h = Math.max(5.6, 2.2 + lines.length * 3.5);
+                    if (y + h > H - 12) { doc.setLineWidth(0.3); doc.rect(M, startY - 6, W - 2 * M, y - startY + 6); doc.addPage(); y = M; headRow(); }
+                    const grey = p.mng, cell = (name, v, opts) => { const i = ci(name), c = cols[i], x = xs[i]; doc.text(tx(v), c[2] === 'c' ? x + c[1] / 2 : c[2] === 'r' ? x + c[1] - 1.5 : x + 1.5, y + 3.9, Object.assign({ align: c[2] === 'c' ? 'center' : c[2] === 'r' ? 'right' : 'left' }, opts || {})); };
+                    font('normal', 8); ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0);
+                    cell('#', p.n); font(p.star ? 'bold' : 'normal', 8); cell('POSITION', p.pos, { maxWidth: cols[1][1] - 2 }); font('normal', 8);
+                    cell('NAME', p.name + (p.mng ? ' (MNG)' : ''), { maxWidth: cols[2][1] - 2 });
+                    [['MA', 'ma', ''], ['ST', 'st', ''], ['AG', 'ag', '+'], ['PA', 'pa', '+'], ['AV', 'av', '+']].forEach(([n, key, pl]) => {
+                        const v = p[key]; if (p.up[key]) ink(22, 130, 60); else if (p.dn[key]) ink(200, 40, 40); else ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0);
+                        font(p.up[key] || p.dn[key] ? 'bold' : 'normal', 8); cell(n, v == null ? '-' : v + pl);
+                    });
+                    const sx = xs[ci('SKILLS')] + 1.5;
+                    lines.forEach((ln, li) => ln.forEach(wd => { font(wd.extra ? 'italic' : 'normal', 8); if (wd.extra) ink(21, 101, 192); else ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0); doc.text(wd.word, sx + wd.x, y + 3.9 + li * 3.5); }));
+                    font('normal', 8); ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0);
+                    if (S.car) cell('SPP', p.star ? '' : p.spp);
+                    cell('COST', p.cost == null ? '' : k(p.cost));
+                    y += h; doc.setLineWidth(0.15); doc.setDrawColor(150, 150, 150); if (idx < S.players.length + S.stars.length - 1) line(M, y, W - M, y, 0.15); doc.setDrawColor(30, 30, 30);
+                });
+                doc.setLineWidth(0.3); doc.rect(M, startY - 6, W - 2 * M, y - startY + 6);
+                font('normal', 7); ink(80, 80, 80);
+                doc.text(tx(`Skills in blue italics are ${S.mp ? 'the extra skills picked for this tournament team' : 'skills the player has gained'}. Characteristics in green have been improved; in red, lowered by an injury.${S.players.some(p => p.mng) ? ' MNG: misses the next game.' : ''}`), M, y + 4);
+                // ---- what each skill does (BludBowl's own short descriptions)
+                if (S.used.length) {
+                    doc.addPage(); y = M + 4; font('bold', 12); ink(0, 0, 0); doc.text(tx(`${S.t.name}: skills`), M, y); y += 6;
+                    const colW = (W - 2 * M - 8) / 2; let col = 0, top = y;
+                    S.used.forEach(sk => {
+                        const info = skillInfoFor(sk) || 'No description in BludBowl yet.', head = tx(sk + (ELITE.includes(sk) ? ' (Elite)' : '') + ': ');
+                        font('bold', 7.8); const hw = doc.getTextWidth(head);
+                        font('normal', 7.8); const first = doc.splitTextToSize(tx(info), colW - hw), rest = first.length > 1 ? doc.splitTextToSize(tx(doc.splitTextToSize(tx(info), colW - hw).slice(1).join(' ')), colW) : [];
+                        const h = 3.4 * (1 + rest.length) + 1.2;
+                        if (y + h > H - 12) { if (col === 0) { col = 1; y = top; } else { doc.addPage(); col = 0; top = y = M + 4; } }
+                        const x = M + col * (colW + 8);
+                        font('bold', 7.8); ink(0, 0, 0); doc.text(head, x, y); font('normal', 7.8); ink(30, 30, 30); doc.text(first[0] || '', x + hw, y);
+                        rest.forEach((l, i) => doc.text(l, x, y + 3.4 * (i + 1)));
+                        y += h;
+                    });
+                }
+                // ---- footers
+                const n = doc.getNumberOfPages(), date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), ver = ((document.getElementById('app-version') || {}).textContent || '').trim();
+                for (let i = 1; i <= n; i++) { doc.setPage(i); font('normal', 6.5); ink(130, 130, 130); doc.text(tx(`${S.t.name} · ${S.R.name} · BludBowl ${ver} · ${date}`), M, H - 5); doc.text(`Page ${i} of ${n}`, W - M, H - 5, { align: 'right' }); }
+                doc.setProperties({ title: tx(S.t.name + ' roster'), creator: 'BludBowl' });
+                return doc;
+            }
+            // make the sheet and download it; tells the caller how it went
+            async function save(team, say) {
+                try {
+                    say && say('Making the PDF…');
+                    const J = await lib(), doc = draw(J, sheet(team));
+                    const file = ((team.name || 'team').replace(/[^\w\- ]+/g, '').trim() || 'team') + ' roster.pdf';
+                    doc.save(file);
+                    say && say(`Saved ${file}.`);
+                    return true;
+                } catch (e) {
+                    say && say(e && e.message === 'offline' ? 'Couldn\'t load the PDF maker: it needs the internet the first time.' : 'Couldn\'t make the PDF: ' + (e && e.message || e), true);
+                    return false;
+                }
+            }
+            return { save, sheet, _draw: (J, t) => draw(J, sheet(t)), _lib: lib };
+        })();
         function statSkillHtml(race, p, extra) {
             const R = RACES[race], ty = R && R.types[p.pos]; if (!ty) return '';
             const e = CAREER.eff(race, CAREER.norm(Object.assign({}, p))), sk = e.skills.concat(extra && !e.skills.includes(extra) ? [extra] : []);

@@ -2,6 +2,22 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.84 (14 Nov 2026)
+- **New: roster PDF.** "Export PDF" on the Teams screen and "Roster PDF" in the Team Builder save the team as a printable A4
+  landscape sheet, laid out like a tournament roster:
+  - The race, coach name (your online name, from Settings) and team name, with what kind of team it is (and its tournament rules)
+    and a swatch of its colours.
+  - Boxes for the sideline (apothecary, assistant coaches, cheerleaders, dedicated fans, re-rolls, bribes), inducements and Star
+    Players, the league it plays in and its special rules, and a summary: players cost, the value of extra skills (or skills and
+    advances), Star Players, inducements, sideline cost, primary and secondary skills, then the total against the budget and the
+    tier for a tournament team, or the team value and treasury for a league team.
+  - Every player: number, position, name, MA ST AG PA AV (improved in green, injured in red), skills (the position's own in plain
+    type, extra skills or advancements in blue italics), SPP for a team with a career, and cost. Star Players are listed after
+    the players; a player missing the next game is greyed out and marked MNG.
+  - A page with what every skill on the roster does, in BludBowl's own words, Elite Skills marked.
+  - Page numbers, the team, the game version and the date at the foot of each page.
+  The PDF is made in the browser with jsPDF, loaded from a CDN the first time (so the first one needs the internet).
+
 ## v4.83 (14 Nov 2026)
 - **New (Teams screen): Filter teams.** A button above the team list opens filters, all off to start with (every team shown):
   - **Type:** All, League, Tournament, Sevens and Sevens tournament, each with how many teams it has (types you have none of

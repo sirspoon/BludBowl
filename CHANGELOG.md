@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.84 (14 Nov 2026)
+- Roster PDF: Export PDF on the Teams screen (or Roster PDF in the Team Builder) saves a printable team sheet: team details,
+  every player's characteristics, skills and cost, and a page saying what each skill does.
+
 ## v4.83 (14 Nov 2026)
 - Teams screen: a Filter teams button above the list: by type (League, Tournament, Sevens, Sevens tournament), race, tournament
   rules and whether a team has played. Off until you use it.
