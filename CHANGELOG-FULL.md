@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.82 (14 Nov 2026)
+- **Improved (Teams screen, Stats & skills only):** each player now takes two lines: their position in bold with MA, ST, AG, PA
+  and AV in columns (headed once at the top, lined up down the roster so players are easy to compare; improved characteristics
+  green, injured ones red), then their name and their skills (learned ones gold), and any injury.
+
 ## v4.81 (14 Nov 2026)
 - **New (Teams screen):** the Roster card has a Full / Stats & skills only switch. Stats & skills only shows each player's name,
   position, characteristics and skills (and any injury), without the SPP, games, touchdowns, casualties, completions,

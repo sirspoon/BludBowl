@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.82 (14 Nov 2026)
+- Teams screen, Stats & skills only: each player's position (bold) and characteristics in lined-up columns, then their name and skills.
+
 ## v4.81 (14 Nov 2026)
 - Teams screen: a "Stats & skills only" switch on the roster hides the career numbers for a tighter list.
 

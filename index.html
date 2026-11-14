@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.81</title>
+    <title>BludBowl 4.82</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,6 +100,13 @@
         #teams-hub .th-tbl tr.th-sub td { padding-top: 0; padding-bottom: 8px; }
         #teams-hub .th-tbl tr.th-sub .pl-stats { margin-top: 0; }
         #teams-hub .th-rhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; } #teams-hub .th-rhead h3 { margin: 0; }
+        #teams-hub .th-ctbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        #teams-hub .th-ctbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: center; padding: 2px 4px 4px; border-bottom: 1px solid var(--pg-edge); } #teams-hub .th-ctbl th.l { text-align: left; }
+        #teams-hub .th-ctbl td { padding: 0 4px; vertical-align: top; } #teams-hub .th-ctbl .th-c1 td { padding-top: 7px; } #teams-hub .th-ctbl .th-c2 td { padding-bottom: 7px; border-bottom: 1px solid #1c263a; }
+        #teams-hub .th-ctbl tbody tr.th-c2:last-child td { border-bottom: 0; }
+        #teams-hub .th-ctbl .th-cs { text-align: center; font-weight: 700; width: 2.6em; } #teams-hub .th-ctbl .th-cs.th-up { color: #4ade80; } #teams-hub .th-ctbl .th-cs.th-dn { color: #f87171; }
+        #teams-hub .th-ctbl .th-cn { width: 1.4em; text-align: right; padding-left: 0; } #teams-hub .th-ctbl .th-cpos b { color: #e2e8f0; }
+        #teams-hub .th-ctbl .th-c2 td { line-height: 1.9; } #teams-hub .th-ctbl .th-cname { color: #cbd5e1; margin-right: 4px; } #teams-hub .th-ctbl .th-out td { opacity: .55; }
         #teams-hub .th-clist { display: flex; flex-direction: column; } #teams-hub .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
         #teams-hub .th-crow { display: flex; gap: 8px; padding: 6px 2px; border-bottom: 1px solid #1c263a; } #teams-hub .th-crow:last-child { border-bottom: 0; }
         #teams-hub .th-cn { width: 18px; flex: 0 0 auto; text-align: right; padding-top: 1px; } #teams-hub .th-cmain { min-width: 0; flex: 1; }
@@ -1170,7 +1177,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.81</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.82</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -4664,12 +4671,16 @@ ol.ci-steps li::marker { content: none; }
             // the roster can show just each player's characteristics and skills (no SPP, games or value), remembered on this device
             let compact = false; try { compact = localStorage.getItem('bb-roster-compact') === '1'; } catch (e) {}
             function compactRoster(t) {
+                // two lines a player: the position (bold) and the characteristics in columns, then the name and the skills
                 const R = RACES[t.race];
-                return `<div class="th-clist">${t.players.map((p, i) => {
-                    const ty = R.types[p.pos] || { type: p.pos }, inj = CAREER.injTags(p);
-                    return `<div class="th-crow ${p.mng ? 'th-out' : ''}"><span class="pg-dim th-cn">${i + 1}</span><div class="th-cmain"><div class="th-chead"><b>${esc(p.name)}</b> <span class="pg-dim">${esc(ty.type)}</span></div>
-                        ${statSkillHtml(t.race, TB.mpView(t, p))}${inj ? `<div class="th-inj">${inj}</div>` : ''}</div></div>`;
-                }).join('')}</div>`;
+                const cell = (v, b, plus, low) => { const cls = v == null || b == null || v === b ? '' : (low ? v < b : v > b) ? 'th-up' : 'th-dn';
+                    return `<td class="th-cs ${cls}"${cls ? ` title="${cls === 'th-up' ? 'Improved' : 'Lowered by an injury'} (normally ${b}${plus ? '+' : ''})"` : ''}>${v == null ? '–' : v + (plus ? '+' : '')}</td>`; };
+                return `<div class="th-scroll"><table class="th-ctbl"><thead><tr><th></th><th class="l">Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th></tr></thead><tbody>${t.players.map((p, i) => {
+                    const ty = R.types[p.pos] || { type: p.pos }, inj = CAREER.injTags(p), e = CAREER.eff(t.race, CAREER.norm(Object.assign({}, TB.mpView(t, p))));
+                    const sk = skillTags(e.skills, '', ty.skills);
+                    return `<tr class="th-c1 ${p.mng ? 'th-out' : ''}"><td class="pg-dim th-cn">${i + 1}</td><td class="th-cpos"><b>${esc(ty.type)}</b></td>${cell(e.ma, ty.ma)}${cell(e.st, ty.st)}${cell(e.ag, ty.ag, true, true)}${cell(e.pa, ty.pa, true, true)}${cell(e.av, ty.av, true)}</tr>
+                        <tr class="th-c2 ${p.mng ? 'th-out' : ''}"><td></td><td colspan="6"><span class="th-cname">${esc(p.name)}</span>${sk ? ' ' + sk : ''}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td></tr>`;
+                }).join('')}</tbody></table></div>`;
             }
             function detail(t) {
                 const R = RACES[t.race], car = CAREER.started(t), rc = t.record;
