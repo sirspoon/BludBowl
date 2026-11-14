@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.87 (14 Nov 2026)
+- Team Builder: its sections are on tabs (Team, Staff & costs, Hire players, Roster, Stars & inducements, Honours) instead of
+  one long page.
+
 ## v4.86 (14 Nov 2026)
 - Every drop-down menu now uses the game's own styled menu, including the Team Builder's extra-skill picker, with group headings
   and the reason a choice isn't available.

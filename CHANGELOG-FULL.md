@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.87 (14 Nov 2026)
+- **Changed: the Team Builder is on tabs.** Under the summary bar (which still stays at the top), tabs show one section at a time:
+  **Team** (name, race, format, tournament rules and budget, colours, sprites, league), **Staff & costs** (re-rolls, staff,
+  fans and the cost breakdown), **Hire players**, **Roster** (with the player count on the tab, red when the team is short or
+  over), **Stars & inducements** (tournament teams only) and **Honours** (only when the team has trophies or fallen players).
+  An existing team opens on its Roster, a new one on Team. Switching tabs further down the page scrolls back to the tabs. On a
+  wide screen the hiring list is laid out in columns, and the Team and Staff sections are kept to a readable width.
+
 ## v4.86 (14 Nov 2026)
 - **Improved: all drop-down menus look the same.** The game's own menu (dark, gold edge) was only given to menus that existed
   when the page loaded; menus drawn later still opened the phone's system list. Now every menu gets it as soon as it appears:
