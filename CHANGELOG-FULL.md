@@ -2,6 +2,17 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.95 (14 Nov 2026)
+- **Fixed (FUMBBL replays): the ball with a thrown team-mate.** FUMBBL marks a team-mate being thrown as "picked up" (state 16)
+  and then "in the air" (21), moves them to where they land, and only then moves the ball to them. The replay viewer only counted
+  standing, moving or blocked players as holding the ball, so it decided nobody had it: the close-up showed the thrown player
+  without the ball, and on the pitch the player jumped across while the ball flew after them on its own.
+  - Players picked up or in the air now count as holding the ball, so the close-up shows it in their hands.
+  - When a thrown ball carrier is moved, the ball goes with them, and they fly to where they land in an arc carrying it.
+  - A thrown team-mate without the ball also flies in an arc now, instead of sliding across the pitch.
+  Checked against four recent FUMBBL matches with thrown ball carriers (accurate, inaccurate and fumbled throws) and other
+  throws without the ball.
+
 ## v4.94 (14 Nov 2026)
 - **Fixed (match replays): a thrown team-mate with the ball.** While a thrown player is in the air the game parks them off the
   board (so their old square is free to bounce into), and the match recorder saved that as them leaving the pitch, with the ball

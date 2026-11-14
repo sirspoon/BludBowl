@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.94</title>
+    <title>BludBowl 4.95</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.94</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.95</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -23389,7 +23389,7 @@ ol.ci-steps li::marker { content: none; }
                 let ball = null, inPlay = false, score = [0, 0], half = 1, turn = [0, 0], homePlaying = true, act = -1, rr = [T[0].reRolls || 0, T[1].reRolls || 0], weather = 'perfect';
                 const W = { NICE: 'perfect', NICE_WEATHER: 'perfect', VERY_SUNNY: 'sunny', POURING_RAIN: 'rain', BLIZZARD: 'blizzard', SWELTERING_HEAT: 'heat' };
                 const frames = [], turns = [], seenTurns = new Set(); let lines = [], fx = [], bombAt = null, blasted = false, prevCarrier = -1, prevBall = null, bombLive = false, thrownNow = -1, curAct = null, tgt = -1;
-                const UP = [1, 2, 12];   // standing (or moving, or being blocked): can hold the ball
+                const UP = [1, 2, 12, 16, 21];   // standing (or moving, or being blocked), or picked up and in the air to be thrown: can hold the ball
                 // ---- the commentary: FUMBBL's reports as lines for the match log, [side, html, style] (names are escaped: they're
                 // whatever FUMBBL's coaches typed) ----
                 const P = id => roster[ix.get(String(id))];
@@ -23611,7 +23611,7 @@ ol.ci-steps li::marker { content: none; }
                 const snapPlayers = () => roster.map((f, j) => ({ id: j + 1, x: posStart[j * 2], y: posStart[j * 2 + 1], down: stStart[j] === 3 || stStart[j] === 4 }))
                     .filter(q => q.x >= 0 && q.x < 26 && q.y >= 0 && q.y < 15 && ![5, 6, 7, 8, 9, 10, 13].includes(stStart[q.id - 1]));
                 const RES3 = { ACCURATE: 'acc', INACCURATE: 'inacc', WILDLY_INACCURATE: 'inacc', FUMBLE: 'fumble' };
-                const carrierNow = () => { if (!ball || !inPlay) return -1; for (let j = 0; j < n; j++) if (pos[j * 2] === ball[0] && pos[j * 2 + 1] === ball[1] && [1, 2, 12].includes(st[j])) return j; return -1; };
+                const carrierNow = () => { if (!ball || !inPlay) return -1; for (let j = 0; j < n; j++) if (pos[j * 2] === ball[0] && pos[j * 2 + 1] === ball[1] && UP.includes(st[j])) return j; return -1; };   // (FUMBBL: a team-mate being thrown is 'picked up', 16, then 'in the air', 21)
                 const endEp = () => {
                     if (!ep) return; const e = ep; ep = null;
                     try {
@@ -23647,6 +23647,8 @@ ol.ci-steps li::marker { content: none; }
                             case 'fieldModelSetPlayerCoordinate': { const i = ix.get(String(key)); if (i == null || !v) break; if (pos[i * 2] !== v[0] || pos[i * 2 + 1] !== v[1]) {
                                 // a thrown (or kicked) team-mate lands a moment after the throw is rolled: they fly there
                                 if (i === thrownNow && pos[i * 2] >= 0 && Math.max(Math.abs(pos[i * 2] - v[0]), Math.abs(pos[i * 2 + 1] - v[1])) > 1) { fx.push({ t: 'fly', p: i }); thrownNow = -1; }
+                                // FUMBBL moves a thrown ball carrier first and the ball only once they land: the ball goes with them
+                                if (ball && inPlay && ball[0] === pos[i * 2] && ball[1] === pos[i * 2 + 1] && (st[i] === 16 || st[i] === 21)) ball = [v[0], v[1]];
                                 moved.push(i); pos[i * 2] = v[0]; pos[i * 2 + 1] = v[1]; seen = true;
                                 pend.slice().forEach(e => { if (e.kind === 'follow' && e.a === i && (!e.sq || (e.sq[0] === v[0] && e.sq[1] === v[1]))) settle(e, 0); });   // (the blocker stepped into the square)
                                 if (ep && ep.kind === 'ttm' && ep.thrown === i + 1) { if (v[0] >= 0 && v[0] < 26 && v[1] >= 0 && v[1] < 15) ep.land = { x: v[0], y: v[1] }; else if (![5, 6, 7, 8].includes(st[i])) ep.out = true; }   // (knocked out or hurt: carried off, not thrown into the crowd)
@@ -24026,7 +24028,7 @@ ol.ci-steps li::marker { content: none; }
                     // the ball and the player who has it go the same way, two squares or more: a thrown team-mate (or a leap), ball in hand
                     const pb = i > 0 && D.frames[i - 1].ball, hadBall = pb && pb[0] === ox && pb[1] === oy;
                     const carried = animate && onP && wasOn && far >= 2 && hadBall && F.ball && F.ball[0] === x && F.ball[1] === y && !(F.fly && F.fly.kick);
-                    if (carried) { p.walkAnim = null; F._carry = { p, ox, oy, x, y, far }; }
+                    if (carried || (animate && flown && onP && wasOn && far > 1)) { p.walkAnim = null; F._carry = { p, ox, oy, x, y, far }; }
                     else if (animate && F.walk && j === F.mover && onP && wasOn && far === 1) {   // a step of a walk: linear in the middle, easing in and out at the ends
                         const d = walkMs(F);
                         p.walkAnim = { fx: ox, fy: oy, t0: performance.now(), dur: d, keep: true,

@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.95 (14 Nov 2026)
+- FUMBBL replays: a thrown team-mate carrying the ball now has it in the close-up and flies with it on the pitch; any thrown
+  team-mate flies in an arc instead of sliding.
+
 ## v4.94 (14 Nov 2026)
 - Match replays: a thrown team-mate carrying the ball now flies across the pitch with the ball in hand, instead of vanishing while
   the ball travelled on its own.
