@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.70 (14 Nov 2026)
+- **New (training and help):** the first time one of your blocks pushes a player back and you get the choice to follow up, a
+  "Following up" window: what it is (free, no movement and no Dodge), that it's your choice (tap FOLLOW UP or Stay put), when each is
+  worth it, and the skills that change it: Frenzy (must follow up and block again), Fend (stops it, except Juggernaut on a Blitz),
+  Taunt (must follow up), Stand Firm (no push, so nothing to follow into), and Grab and Sidestep (who picks the push square). It
+  doesn't appear when there's no choice (Frenzy, Taunt, Fend). Help has the same as a new "Following up" topic.
+
 ## v4.69 (14 Nov 2026)
 - **New (training):** at the start of your first turn, "The screen": the top bar, one of your players on the pitch, the unit panel and
   the match log are outlined and numbered, with a card explaining each (the turn counter and re-rolls, the buttons and End Turn;

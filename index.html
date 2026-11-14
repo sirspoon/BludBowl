@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.69</title>
+    <title>BludBowl 4.70</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1094,7 +1094,7 @@
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.69</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.70</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8650,7 +8650,21 @@
                     <li>If the block goes well and your player is still standing, they can <b>carry on moving</b> with the movement they have left, for
                     example to follow the ball or get clear.</li>
                     <li>If your player is knocked down, it's a turnover, just as in any block.</li></ul>`;
-            HELP.splice(HELP.findIndex(h => h[0] === 'pass'), 0, ['blitz', 'Blitzing', BLITZ]);
+            const FOLLOW = () => `<p>Your block pushed the defender back a square, so the square they were standing in is now empty. Your player can step
+                    into it: that's a <b>follow-up</b>. It's free: it uses no movement and needs no Dodge roll, even with opponents next to the square.</p>
+                    <p>It's <b>your choice</b>. Tap the square marked <b>FOLLOW UP</b> to step in, or <b>Stay put</b> (in the unit panel, or tap anywhere
+                    else) to stay where you are.</p>
+                    <ul class="ci-list"><li><b>Follow up</b> to stay on top of the defender (they'll have to Dodge to get away from you), to gain ground
+                    towards the end zone, or to chase a ball that came loose.</li>
+                    <li><b>Stay put</b> to keep your player where they are: guarding your ball carrier, holding the line, or out of reach of more
+                    opponents.</li></ul>
+                    <h3>Skills that change it</h3>
+                    <ul class="ci-list"><li><b>Frenzy</b> (yours): you must follow up, and block the same player again if they're still standing.</li>
+                    <li><b>Fend</b> (theirs): stops you following up, unless you have <b>Juggernaut</b> on a Blitz.</li>
+                    <li><b>Taunt</b> (theirs): you must follow up.</li>
+                    <li><b>Stand Firm</b> (theirs): they may refuse to be pushed, so there's no empty square to follow into.</li>
+                    <li><b>Grab</b> (yours) and <b>Sidestep</b> (theirs): choose which square the defender is pushed into.</li></ul>`;
+            HELP.splice(HELP.findIndex(h => h[0] === 'pass'), 0, ['blitz', 'Blitzing', BLITZ], ['follow', 'Following up', FOLLOW]);
             const helpOf = key => (HELP.find(h => h[0] === key) || HELP[0]);
             function helpModal() {
                 let m = $('coach-intro');
@@ -8742,6 +8756,12 @@
                 }
                 ov.querySelector('.ci-go').onclick = () => { ov.hidden = true; };
             }
+            // the first time the person can follow up after a block
+            function followWin(a) {
+                if (!on() || !a || AI.isAI(a.team) || (state.coachSeen || []).includes('followwin')) return;
+                (state.coachSeen = state.coachSeen || []).push('followwin');
+                showWin(`${badge}<h2>Following up</h2>${FOLLOW()}`, 'Got it →');
+            }
             // Help: every topic, picked from a row of tabs
             function help(key) {
                 const m = helpModal(), c = ctxNow();
@@ -8760,7 +8780,7 @@
                 m.hidden = false;
                 m.onclick = e => { if (e.target === m) m.hidden = true; };
             }
-            return { on, reset, intro, blockWin, passWin, ttmWin, blitzWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
+            return { on, reset, intro, blockWin, passWin, ttmWin, blitzWin, followWin, help, note, lesson, roll, rollNote, block, blockDice, cause: setCause, bounce, throwIn, kick, touchback, pass, armour, injury, turnover, turn, td, setup, paint };
         })();
 
         function triggerTurnover(reason, delay = 0) {
@@ -20641,7 +20661,7 @@
                             if (checkTouchdown()) return;
                             finalizeBlock(); return;
                         }
-                        state.mode = MODES.FOLLOWUP_CHOICE; updateUI(state.combat.atk); render();
+                        state.mode = MODES.FOLLOWUP_CHOICE; updateUI(state.combat.atk); render(); COACH.followWin(a);
                     };
                     if (defHasTaunt && state.combat.vacatedSquare) {
                         state.mode = MODES.LOCKED;

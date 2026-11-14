@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.70 (14 Nov 2026)
+- Training: the first time you can follow up after a block, a window explains following up (it's your choice) and the skills that
+  change it. It's in Help too.
+
 ## v4.69 (14 Nov 2026)
 - Training: your first turn opens a tour of the screen (top bar, pitch, unit panel and its actions, match log), and your first
   Blitz explains the rules for Blitzing. Help has a new Blitzing topic.
