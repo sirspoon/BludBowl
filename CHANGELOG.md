@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.90 (14 Nov 2026)
+- Team Builder on a phone held sideways: the summary box at the top packs into one slim row, leaving more room below.
+
 ## v4.89 (14 Nov 2026)
 - Team Builder: the tabs live in the summary box, so they're always on screen; Star Players are hired on the Hire players tab,
   and Inducements have a tab of their own.

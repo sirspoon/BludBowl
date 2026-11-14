@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.90 (14 Nov 2026)
+- **Improved (Team Builder, phone in landscape):** on a short, wide screen the summary box that stays at the top used the
+  stacked phone layout and took about half the screen. It now packs into one slim row: team value, money spent with its bar,
+  and players side by side, smaller figures, the team value caption dropped, warnings on the same line as the gold left, and
+  slimmer tabs that scroll sideways. On a Pixel 7 held sideways it went from about half the screen to under a third (102 of
+  360 pixels). Portrait phones and desktops are unchanged.
+
 ## v4.89 (14 Nov 2026)
 - **Changed (Team Builder):**
   - The tabs are now part of the summary box at the top, which stays on screen, so they're always there however far down the
