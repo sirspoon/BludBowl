@@ -2,6 +2,21 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v4.75 (14 Nov 2026)
+- **New: tournament rules.** A Tournament Rules screen (from the main menu, the Teams screen, or "Edit rules…" in the Team Builder)
+  lists rulesets: how a tournament pack says teams are built. Each one gives every tier a budget, a number of extra primary and
+  secondary skills (one per player, free) and Star Players, sets which team is in which tier, how many Mega-stars are allowed, an
+  optional limit on Elite Skills, and which inducements may be bought, plus notes. Two are built in: GW Matched Play (BB2025),
+  which works exactly as the old Tournament team format did (choose a budget, spend skill points), and Glory on the Gridiron 2
+  (Getting Wasted, 21 Nov 2026: 1,250k to 1,360k by tier, 3 to 5 primary and 0 to 2 secondary skills, 1 or 2 Star Players, and
+  only Kegs, Master Chef, Mascot, Prayers, Bribes, Sports-Wizard, Wandering Apothecaries and Riotous Rookies). The pack lists
+  Nurgle in Tier 2 and Tier 3; it uses Tier 3. Mortuary Assistants, Plague Doctors and the Chaos Wastes weather aren't in the game.
+  Coaches can copy a ruleset and edit it, or start a new one; their own are saved in the browser and can be deleted.
+- **Team Builder:** a tournament team now has a "Tournament rules" choice. Under a pack's rules the budget is set by the team's
+  tier, the skill lists show how many primary and secondary skills are left, Star Players and Mega-stars follow the tier's limits,
+  inducements the pack doesn't allow can't be bought, and the team won't save until it fits. The last rules used are picked for the
+  next new tournament team. Exported team files carry the rules they were built under, and importing one adds them.
+
 ## v4.74 (14 Nov 2026)
 - **Improved (training):** the start-of-match messages (the coach cards, the Weather and Kick-off Event table windows and the screen
   tour) open with the whole sequence as a row of numbered steps (Weather, Coin toss, Kickers set up, Receivers set up, Aim the kick,

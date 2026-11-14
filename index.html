@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BludBowl 4.74</title>
+    <title>BludBowl 4.75</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,167 +259,185 @@
         #team-builder .tb-vet.on { border-color: #fbbf24; color: #fbbf24; background: rgba(251,191,36,.12); }
         #ex-ind .ex-gold { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
         #ex-ind .ex-gold select { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 4px 6px; font-weight: 700; }
-        #teams-hub, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) { --pg-card: #121a2b; --pg-edge: #263247; --pg-dim: #94a3b8; --pg-amber: #fbbf24; --pg-good: #4ade80; --pg-bad: #f87171;
+        #teams-hub, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) { --pg-card: #121a2b; --pg-edge: #263247; --pg-dim: #94a3b8; --pg-amber: #fbbf24; --pg-good: #4ade80; --pg-bad: #f87171;
             position: fixed; inset: 0; z-index: 140; background: radial-gradient(ellipse at top, #16213a 0%, #0b0f1a 60%); color: #e2e8f0; overflow-y: auto; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; }
-        #teams-hub.hidden, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub).hidden { display: none; }
+        #teams-hub.hidden, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules).hidden { display: none; }
         #otour-hub { z-index: 150; }
+        #trules { z-index: 160; }
+        #trules .tr-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; } #trules .tr-h h3 { margin: 0; }
+        #trules .tr-badge { font-size: 9.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: #1e293b; color: var(--pg-amber); }
+        #trules .tr-notes { color: #cbd5e1; margin: 6px 0; line-height: 1.45; max-width: 75ch; }
+        #trules .tr-intro { font-size: 13px; line-height: 1.5; max-width: 75ch; }
+        #trules .tr-scroll { overflow-x: auto; margin: 6px 0; } #trules .tr-tbl td.tr-teams { font-size: 12px; color: #cbd5e1; min-width: 180px; }
+        #trules .tr-card > .pg-dim { margin-top: 4px; line-height: 1.45; }
+        #trules .lg-in.tr-num { width: 80px; text-align: right; } #trules .tr-edit td { vertical-align: middle; }
+        #trules .tr-row2 { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+        #trules .tr-races { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px 14px; }
+        #trules .tr-race { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px solid #1c263a; }
+        #trules .tr-inds { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 14px; margin-bottom: 6px; }
+        #trules .tr-ind { display: flex; align-items: center; gap: 8px; cursor: pointer; } #trules .tr-ind input { accent-color: #f59e0b; width: 16px; height: 16px; }
+        #trules .lg-in.tr-notes-in { width: 100%; resize: vertical; }
+        #trules .tr-del { color: var(--pg-bad); } #trules .tr-warn { color: var(--pg-bad); }
+        #trules .lg-field { margin-bottom: 8px; }
+        #team-builder .tb-rulesrow { display: flex; gap: 6px; align-items: center; } #team-builder .tb-rulesrow select { flex: 1; min-width: 0; }
+        #team-builder .tb-rnote { margin-top: 4px; font-style: italic; }
         #otour-hub .ot-code { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
         #otour-hub .ot-code b { font-family: 'Teko', 'Impact', sans-serif; font-size: 34px; letter-spacing: .08em; color: var(--pg-amber); line-height: 1; }
         #otour-hub .ot-state { margin-top: 4px; color: #fde68a; } #otour-hub .ot-state.ok { color: #86efac; }
         #otour-hub .ot-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #475569; margin-right: 5px; vertical-align: 1px; } #otour-hub .ot-dot.on { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
         #otour-hub .ot-clog { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 14px; margin-bottom: 6px; } #otour-hub .ot-clog b { color: #7dd3fc; } #otour-hub .ot-clog div { overflow-wrap: anywhere; }
-        #teams-hub .pg-wrap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-wrap { max-width: 1000px; margin: 0 auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 12px; }
-        #teams-hub .pg-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        #teams-hub h2, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) h2 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 34px; line-height: 1; color: var(--pg-amber); margin: 0; flex: 1; letter-spacing: .03em; }
-        #teams-hub h3, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) h3 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 19px; letter-spacing: .05em; color: #cbd5e1; margin: 8px 0 4px; }
-        #teams-hub h3:first-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) h3:first-child { margin-top: 0; }
-        #teams-hub button, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) button { font: inherit; cursor: pointer; } #teams-hub button:disabled, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) button:disabled { opacity: .4; cursor: default; }
-        #teams-hub button:focus-visible, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) button:focus-visible { outline: 2px solid var(--pg-amber); outline-offset: 1px; }
-        #teams-hub .pg-tabs, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-        #teams-hub .pg-tab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tab { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
-        #teams-hub .pg-tab.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tab.on { border-color: var(--pg-amber); color: var(--pg-amber); }
-        #teams-hub .pg-card, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-card { background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 10px 12px; min-width: 0; }
-        #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
-        #teams-hub .pg-result, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-result { text-align: center; border-top: 3px solid var(--pg-amber); }
-        #teams-hub .pg-result.pg-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-result.pg-W { border-top-color: var(--pg-good); } #teams-hub .pg-result.pg-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-result.pg-L { border-top-color: var(--pg-bad); }
-        #teams-hub .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-word { font-family: 'Teko', 'Impact', sans-serif; font-size: 44px; line-height: 1; text-transform: uppercase; letter-spacing: .06em; }
-        #teams-hub .pg-W .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-W .pg-word { color: var(--pg-good); } #teams-hub .pg-L .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-L .pg-word { color: var(--pg-bad); } #teams-hub .pg-D .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-D .pg-word { color: var(--pg-amber); }
-        #teams-hub .pg-score, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-score { font-size: 16px; } #teams-hub .pg-score b, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-score b { font-size: 20px; margin: 0 6px; font-variant-numeric: tabular-nums; }
-        #teams-hub .pg-dim, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-dim { color: var(--pg-dim); font-size: 11.5px; } #teams-hub .pg-amber, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-amber { color: var(--pg-amber); } #teams-hub .pg-good, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-good { color: var(--pg-good); font-size: 11.5px; }
-        #teams-hub .pg-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-        #teams-hub .pg-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tbl td { padding: 3px 0; border-bottom: 1px solid #1c263a; } #teams-hub .pg-tbl td:last-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tbl td:last-child { text-align: right; }
-        #teams-hub .pg-total td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-total td { font-weight: 800; color: var(--pg-amber); }
-        #teams-hub .pg-row, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 110px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid #1c263a; }
-        #teams-hub .pg-row.pg-dead, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-row.pg-dead { opacity: .65; }
-        #teams-hub .pg-name, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-name { font-weight: 800; } #teams-hub .pg-inj, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-inj { color: var(--pg-bad); font-size: 11.5px; font-weight: 700; }
-        #teams-hub .pg-tag, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tag { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); vertical-align: 1px; }
-        #teams-hub .pg-tag-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-tag-bad { background: #450a0a; color: #fca5a5; }
-        #teams-hub .pg-spp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-spp { text-align: right; font-variant-numeric: tabular-nums; } #teams-hub .pg-act, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-act { text-align: right; }
-        #teams-hub .pg-btn, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-btn { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
-        #teams-hub .pg-btn:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-btn:hover:not(:disabled) { border-color: var(--pg-amber); }
-        #teams-hub .pg-btn-go, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-btn-go { background: #1e293b; color: var(--pg-amber); border-color: #a16207; }
-        #teams-hub .pg-primary, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-primary { background: #059669; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
-        #teams-hub .pg-chips, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
-        #teams-hub .pg-chip, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chip { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 999px; padding: 5px 11px; font-weight: 700; font-size: 12px; }
-        #teams-hub .pg-chip:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chip:hover:not(:disabled), #teams-hub .pg-chip.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-chip.on { border-color: var(--pg-amber); color: var(--pg-amber); }
-        #teams-hub .pg-mvp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-mvp { font-size: 15px; margin: 4px 0; }
-        #teams-hub .pg-adv, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-adv { background: var(--pg-card); border: 1px solid var(--pg-edge); border-top: 3px solid var(--pg-amber); border-radius: 10px; padding: 12px; }
-        #teams-hub .pg-adv-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-adv-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
-        #teams-hub .pg-sppbig, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-sppbig { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: .9; color: var(--pg-amber); text-align: right; }
-        #teams-hub .pg-sppbig span, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-sppbig span { display: block; font-size: 13px; color: var(--pg-dim); font-family: 'Inter', sans-serif; font-weight: 700; }
-        #teams-hub .pg-opts, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-        #teams-hub .pg-opt, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opt { border: 1px solid var(--pg-edge); border-radius: 8px; padding: 8px 10px; background: #0d1424; }
-        #teams-hub .pg-opt.pg-off, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opt.pg-off { opacity: .55; }
-        #teams-hub .pg-opt-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-opt-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
-        #teams-hub .pg-foot, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        #teams-hub .pg-footbar, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-footbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-        #teams-hub .pg-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-actions { display: flex; gap: 8px; align-items: center; }
-        #teams-hub .th-top, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-top { display: flex; gap: 8px; flex-wrap: wrap; }
-        #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 12px; align-items: start; }
-        #teams-hub .th-list, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-list { display: flex; flex-direction: column; gap: 6px; }
-        #teams-hub .th-detail, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-detail { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-        #teams-hub .th-team, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-team { display: flex; align-items: center; gap: 10px; text-align: left; background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 8px 10px; color: #e2e8f0; }
-        #teams-hub .th-team.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-team.on { border-color: var(--pg-amber); box-shadow: inset 3px 0 0 var(--pg-amber); }
-        #teams-hub .th-tmain, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tmain { display: flex; flex-direction: column; min-width: 0; } #teams-hub .th-tname, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tname { font-weight: 800; }
-        #teams-hub .th-tok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tok { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 800; border: 2px solid rgba(0,0,0,.5); }
-        #teams-hub .th-tok-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tok-big { width: 52px; height: 52px; flex-basis: 52px; font-size: 13px; }
-        #teams-hub .th-headcard, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-headcard { border-top: 3px solid var(--pg-amber); }
-        #teams-hub .th-title, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-title { display: flex; align-items: center; gap: 12px; }
-        #teams-hub .th-h, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-h { font-size: 28px; margin: 0; color: #f8fafc; }
-        #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
-        #teams-hub .th-cap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-cap { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
-        #teams-hub .th-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-big { font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
-        #teams-hub .th-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-        #teams-hub .th-danger, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-danger { color: var(--pg-bad); }
-        #teams-hub .th-scroll, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-scroll { overflow-x: auto; }
-        #teams-hub .th-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-        #teams-hub .th-tbl th, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--pg-edge); }
-        #teams-hub .th-tbl th:nth-child(2), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl th:nth-child(2) { text-align: left; }
-        #teams-hub .th-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-tbl td { padding: 6px; border-bottom: 1px solid #1c263a; vertical-align: top; }
-        #teams-hub .th-num, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-num { text-align: right; } #teams-hub .th-info, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-info { font-size: 11px; color: #fcd34d; }
-        #teams-hub .th-out td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-out td { opacity: .7; } #teams-hub .th-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-bad { color: var(--pg-bad); font-size: 11px; font-weight: 700; } #teams-hub .th-ok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-ok { color: var(--pg-good); }
-        #teams-hub .th-res, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-res { padding: 4px 0; border-bottom: 1px solid #1c263a; }
-        #teams-hub .th-badge, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-badge { display: inline-block; width: 20px; text-align: center; border-radius: 4px; font-weight: 800; font-size: 11px; margin-right: 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-stage { font-family: 'Teko', 'Impact', sans-serif; font-size: 24px; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-form { display: grid; gap: 14px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-field { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-in, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sel { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 8px; font: inherit; max-width: 100%; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-in { width: 280px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-step { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-num { font-family: 'Teko', 'Impact', sans-serif; font-size: 30px; line-height: 1; min-width: 2ch; text-align: center; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pick { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #1c263a; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pick.off { opacity: .55; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cpus { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cpu { display: flex; align-items: center; gap: 6px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cpu select { flex: 1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-fx { display: grid; grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) 196px; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-lab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sub { grid-column: 1 / -1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-lab { font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sub { text-align: center; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side { display: flex; align-items: center; gap: 7px; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side.away { flex-direction: row-reverse; text-align: right; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side.won .lg-tn { color: var(--pg-good); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tn { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-sc { display: flex; align-items: center; justify-content: center; gap: 3px; text-align: center; font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-acts { display: flex; gap: 6px; justify-content: flex-end; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-coach { flex: 0 0 auto; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-bye .lg-sc { font: 700 12px 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .08em; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl th { white-space: nowrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-prizes { display: flex; justify-content: center; gap: 6px 18px; flex-wrap: wrap; margin: 10px 0 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-holder { background: #422006; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pmvs { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); align-items: center; gap: 10px; margin: 12px 0 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pmside { display: flex; align-items: center; gap: 10px; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-pmside.away { flex-direction: row-reverse; text-align: right; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-budget { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 2px 0 8px; font-variant-numeric: tabular-nums; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind.on .lg-ind-main b { color: var(--pg-amber); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind-main { min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind .lg-num { font-size: 24px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-funds { max-width: 420px; margin-top: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-merc .lg-ind-main { flex: 1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-merc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star { align-items: flex-start; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-top: 6px; border: 1px solid #263247; border-radius: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-row.on { border-color: var(--pg-amber); background: rgba(251,191,36,.07); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-info { flex: 1; min-width: 0; font-size: 12.5px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-rule { font-size: 11.5px; color: #e2e8f0; margin-top: 2px; } :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-rule b { color: var(--pg-amber); margin-right: 4px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-star-why { font-size: 11px; color: var(--pg-bad); margin-top: 2px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-mega { font-size: 9px; font-weight: 800; letter-spacing: .08em; padding: 1px 5px; border-radius: 4px; background: #713f12; color: #fde68a; vertical-align: 1px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-merc-row .pg-btn { padding: 3px 9px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-ind .lg-step { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-grid { align-items: start; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-coach.you { background: #064e3b; color: #6ee7b7; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tok { width: 26px; height: 26px; flex: 0 0 26px; font-size: 8px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 5px; border-bottom: 1px solid var(--pg-edge); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl td { padding: 5px; text-align: right; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl .l { text-align: left; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl tr.cut td { border-bottom: 2px solid var(--pg-amber); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tbl tr.me td { background: rgba(5, 150, 105, .09); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-tcell { display: flex; align-items: center; gap: 7px; min-width: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team { padding: 8px 0; border-bottom: 1px solid #1c263a; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team-main { flex: 1; min-width: 160px; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-team-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-who { margin-top: 0; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-champ { text-align: center; border-top: 3px solid var(--pg-amber); }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-cup { font-size: 46px; line-height: 1.1; }
-        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-champ-name { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: 1; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
+        #teams-hub .pg-wrap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-wrap { max-width: 1000px; margin: 0 auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+        #teams-hub .pg-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        #teams-hub h2, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) h2 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 34px; line-height: 1; color: var(--pg-amber); margin: 0; flex: 1; letter-spacing: .03em; }
+        #teams-hub h3, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) h3 { font-family: 'Teko', 'Impact', sans-serif; text-transform: uppercase; font-size: 19px; letter-spacing: .05em; color: #cbd5e1; margin: 8px 0 4px; }
+        #teams-hub h3:first-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) h3:first-child { margin-top: 0; }
+        #teams-hub button, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) button { font: inherit; cursor: pointer; } #teams-hub button:disabled, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) button:disabled { opacity: .4; cursor: default; }
+        #teams-hub button:focus-visible, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) button:focus-visible { outline: 2px solid var(--pg-amber); outline-offset: 1px; }
+        #teams-hub .pg-tabs, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        #teams-hub .pg-tab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tab { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
+        #teams-hub .pg-tab.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tab.on { border-color: var(--pg-amber); color: var(--pg-amber); }
+        #teams-hub .pg-card, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-card { background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+        #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+        #teams-hub .pg-result, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-result { text-align: center; border-top: 3px solid var(--pg-amber); }
+        #teams-hub .pg-result.pg-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-result.pg-W { border-top-color: var(--pg-good); } #teams-hub .pg-result.pg-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-result.pg-L { border-top-color: var(--pg-bad); }
+        #teams-hub .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-word { font-family: 'Teko', 'Impact', sans-serif; font-size: 44px; line-height: 1; text-transform: uppercase; letter-spacing: .06em; }
+        #teams-hub .pg-W .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-W .pg-word { color: var(--pg-good); } #teams-hub .pg-L .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-L .pg-word { color: var(--pg-bad); } #teams-hub .pg-D .pg-word, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-D .pg-word { color: var(--pg-amber); }
+        #teams-hub .pg-score, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-score { font-size: 16px; } #teams-hub .pg-score b, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-score b { font-size: 20px; margin: 0 6px; font-variant-numeric: tabular-nums; }
+        #teams-hub .pg-dim, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-dim { color: var(--pg-dim); font-size: 11.5px; } #teams-hub .pg-amber, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-amber { color: var(--pg-amber); } #teams-hub .pg-good, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-good { color: var(--pg-good); font-size: 11.5px; }
+        #teams-hub .pg-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        #teams-hub .pg-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tbl td { padding: 3px 0; border-bottom: 1px solid #1c263a; } #teams-hub .pg-tbl td:last-child, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tbl td:last-child { text-align: right; }
+        #teams-hub .pg-total td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-total td { font-weight: 800; color: var(--pg-amber); }
+        #teams-hub .pg-row, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 110px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid #1c263a; }
+        #teams-hub .pg-row.pg-dead, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-row.pg-dead { opacity: .65; }
+        #teams-hub .pg-name, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-name { font-weight: 800; } #teams-hub .pg-inj, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-inj { color: var(--pg-bad); font-size: 11.5px; font-weight: 700; }
+        #teams-hub .pg-tag, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tag { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); vertical-align: 1px; }
+        #teams-hub .pg-tag-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-tag-bad { background: #450a0a; color: #fca5a5; }
+        #teams-hub .pg-spp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-spp { text-align: right; font-variant-numeric: tabular-nums; } #teams-hub .pg-act, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-act { text-align: right; }
+        #teams-hub .pg-btn, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-btn { background: transparent; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 12px; font-weight: 700; }
+        #teams-hub .pg-btn:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-btn:hover:not(:disabled) { border-color: var(--pg-amber); }
+        #teams-hub .pg-btn-go, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-btn-go { background: #1e293b; color: var(--pg-amber); border-color: #a16207; }
+        #teams-hub .pg-primary, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-primary { background: #059669; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+        #teams-hub .pg-chips, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+        #teams-hub .pg-chip, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-chip { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 999px; padding: 5px 11px; font-weight: 700; font-size: 12px; }
+        #teams-hub .pg-chip:hover:not(:disabled), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-chip:hover:not(:disabled), #teams-hub .pg-chip.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-chip.on { border-color: var(--pg-amber); color: var(--pg-amber); }
+        #teams-hub .pg-mvp, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-mvp { font-size: 15px; margin: 4px 0; }
+        #teams-hub .pg-adv, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-adv { background: var(--pg-card); border: 1px solid var(--pg-edge); border-top: 3px solid var(--pg-amber); border-radius: 10px; padding: 12px; }
+        #teams-hub .pg-adv-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-adv-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+        #teams-hub .pg-sppbig, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-sppbig { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: .9; color: var(--pg-amber); text-align: right; }
+        #teams-hub .pg-sppbig span, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-sppbig span { display: block; font-size: 13px; color: var(--pg-dim); font-family: 'Inter', sans-serif; font-weight: 700; }
+        #teams-hub .pg-opts, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-opts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+        #teams-hub .pg-opt, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-opt { border: 1px solid var(--pg-edge); border-radius: 8px; padding: 8px 10px; background: #0d1424; }
+        #teams-hub .pg-opt.pg-off, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-opt.pg-off { opacity: .55; }
+        #teams-hub .pg-opt-head, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-opt-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+        #teams-hub .pg-foot, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        #teams-hub .pg-footbar, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-footbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+        #teams-hub .pg-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-actions { display: flex; gap: 8px; align-items: center; }
+        #teams-hub .th-top, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-top { display: flex; gap: 8px; flex-wrap: wrap; }
+        #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 12px; align-items: start; }
+        #teams-hub .th-list, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-list { display: flex; flex-direction: column; gap: 6px; }
+        #teams-hub .th-detail, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-detail { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+        #teams-hub .th-team, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-team { display: flex; align-items: center; gap: 10px; text-align: left; background: var(--pg-card); border: 1px solid var(--pg-edge); border-radius: 10px; padding: 8px 10px; color: #e2e8f0; }
+        #teams-hub .th-team.on, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-team.on { border-color: var(--pg-amber); box-shadow: inset 3px 0 0 var(--pg-amber); }
+        #teams-hub .th-tmain, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tmain { display: flex; flex-direction: column; min-width: 0; } #teams-hub .th-tname, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tname { font-weight: 800; }
+        #teams-hub .th-tok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tok { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 800; border: 2px solid rgba(0,0,0,.5); }
+        #teams-hub .th-tok-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tok-big { width: 52px; height: 52px; flex-basis: 52px; font-size: 13px; }
+        #teams-hub .th-headcard, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-headcard { border-top: 3px solid var(--pg-amber); }
+        #teams-hub .th-title, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-title { display: flex; align-items: center; gap: 12px; }
+        #teams-hub .th-h, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-h { font-size: 28px; margin: 0; color: #f8fafc; }
+        #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+        #teams-hub .th-cap, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-cap { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
+        #teams-hub .th-big, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-big { font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+        #teams-hub .th-actions, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        #teams-hub .th-danger, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-danger { color: var(--pg-bad); }
+        #teams-hub .th-scroll, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-scroll { overflow-x: auto; }
+        #teams-hub .th-tbl, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        #teams-hub .th-tbl th, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--pg-edge); }
+        #teams-hub .th-tbl th:nth-child(2), :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tbl th:nth-child(2) { text-align: left; }
+        #teams-hub .th-tbl td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-tbl td { padding: 6px; border-bottom: 1px solid #1c263a; vertical-align: top; }
+        #teams-hub .th-num, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-num { text-align: right; } #teams-hub .th-info, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-info { font-size: 11px; color: #fcd34d; }
+        #teams-hub .th-out td, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-out td { opacity: .7; } #teams-hub .th-bad, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-bad { color: var(--pg-bad); font-size: 11px; font-weight: 700; } #teams-hub .th-ok, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-ok { color: var(--pg-good); }
+        #teams-hub .th-res, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-res { padding: 4px 0; border-bottom: 1px solid #1c263a; }
+        #teams-hub .th-badge, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-badge { display: inline-block; width: 20px; text-align: center; border-radius: 4px; font-weight: 800; font-size: 11px; margin-right: 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-stage { font-family: 'Teko', 'Impact', sans-serif; font-size: 24px; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-form { display: grid; gap: 14px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-field { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--pg-dim); font-weight: 700; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-in, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-sel { background: #0a1020; color: #e2e8f0; border: 1px solid var(--pg-edge); border-radius: 6px; padding: 6px 8px; font: inherit; max-width: 100%; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-in { width: 280px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-step { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-num { font-family: 'Teko', 'Impact', sans-serif; font-size: 30px; line-height: 1; min-width: 2ch; text-align: center; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-pick { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #1c263a; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-pick.off { opacity: .55; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-cpus { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-cpu { display: flex; align-items: center; gap: 6px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-cpu select { flex: 1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-cta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-fx { display: grid; grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) 196px; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-lab, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-sub { grid-column: 1 / -1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-lab { font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-sub { text-align: center; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-side { display: flex; align-items: center; gap: 7px; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-side.away { flex-direction: row-reverse; text-align: right; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-side.won .lg-tn { color: var(--pg-good); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tn { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-sc { display: flex; align-items: center; justify-content: center; gap: 3px; text-align: center; font-family: 'Teko', 'Impact', sans-serif; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-acts { display: flex; gap: 6px; justify-content: flex-end; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-coach { flex: 0 0 auto; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: #1e293b; color: var(--pg-dim); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-bye .lg-sc { font: 700 12px 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tbl th { white-space: nowrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-prizes { display: flex; justify-content: center; gap: 6px 18px; flex-wrap: wrap; margin: 10px 0 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-holder { background: #422006; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-pmvs { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr); align-items: center; gap: 10px; margin: 12px 0 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-pmside { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-pmside.away { flex-direction: row-reverse; text-align: right; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-budget { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 2px 0 8px; font-variant-numeric: tabular-nums; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-ind { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-ind.on .lg-ind-main b { color: var(--pg-amber); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-ind-main { min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-ind .lg-num { font-size: 24px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-funds { max-width: 420px; margin-top: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-merc .lg-ind-main { flex: 1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-merc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-star { align-items: flex-start; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-star-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-top: 6px; border: 1px solid #263247; border-radius: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-star-row.on { border-color: var(--pg-amber); background: rgba(251,191,36,.07); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-star-info { flex: 1; min-width: 0; font-size: 12.5px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-star-rule { font-size: 11.5px; color: #e2e8f0; margin-top: 2px; } :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-star-rule b { color: var(--pg-amber); margin-right: 4px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-star-why { font-size: 11px; color: var(--pg-bad); margin-top: 2px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-mega { font-size: 9px; font-weight: 800; letter-spacing: .08em; padding: 1px 5px; border-radius: 4px; background: #713f12; color: #fde68a; vertical-align: 1px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-merc-row .pg-btn { padding: 3px 9px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-ind .lg-step { flex: 0 0 auto; flex-wrap: nowrap; gap: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-grid { align-items: start; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-coach.you { background: #064e3b; color: #6ee7b7; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tok { width: 26px; height: 26px; flex: 0 0 26px; font-size: 8px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--pg-dim); text-align: right; padding: 4px 5px; border-bottom: 1px solid var(--pg-edge); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tbl td { padding: 5px; text-align: right; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tbl .l { text-align: left; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tbl tr.cut td { border-bottom: 2px solid var(--pg-amber); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tbl tr.me td { background: rgba(5, 150, 105, .09); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-tcell { display: flex; align-items: center; gap: 7px; min-width: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-team { padding: 8px 0; border-bottom: 1px solid #1c263a; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-team-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-team-main { flex: 1; min-width: 160px; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-team-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-who { margin-top: 0; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-champ { text-align: center; border-top: 3px solid var(--pg-amber); }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-cup { font-size: 46px; line-height: 1.1; }
+        :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-champ-name { font-family: 'Teko', 'Impact', sans-serif; font-size: 40px; line-height: 1; color: var(--pg-amber); text-transform: uppercase; letter-spacing: .04em; }
         @media (max-width: 640px) {
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-fx { grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-acts { grid-column: 1 / -1; justify-content: center; }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-hide-sm { display: none; }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-coach { display: none; }
-            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .lg-side .lg-tn { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-fx { grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-acts { grid-column: 1 / -1; justify-content: center; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-hide-sm { display: none; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-coach { display: none; }
+            :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .lg-side .lg-tn { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; }
         }
-        #teams-hub .th-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-W { background: #14532d; color: #86efac; } #teams-hub .th-D, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-D { background: #422006; color: #fcd34d; } #teams-hub .th-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-L { background: #450a0a; color: #fca5a5; }
+        #teams-hub .th-W, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-W { background: #14532d; color: #86efac; } #teams-hub .th-D, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-D { background: #422006; color: #fcd34d; } #teams-hub .th-L, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-L { background: #450a0a; color: #fca5a5; }
         @media (max-width: 820px) {
-            #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-layout, #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .pg-grid { grid-template-columns: minmax(0, 1fr); }
-            #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub) .th-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #teams-hub .th-layout, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-layout, #teams-hub .pg-grid, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .pg-grid { grid-template-columns: minmax(0, 1fr); }
+            #teams-hub .th-stats, :is(#league-hub,#cup-hub,#ex-ind,#online-hub,#otour-hub,#trules) .th-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (max-width: 720px) {
             #post-game .pg-grid, #post-game .pg-opts { grid-template-columns: minmax(0, 1fr); }
@@ -1126,7 +1144,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.74</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v4.75</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1142,6 +1160,7 @@ ol.ci-steps li::marker { content: none; }
             <button type="button" class="mm-btn" data-go="league"><span class="mm-t">League</span><span class="mm-s">On this device: seasons, fixtures, a league table and play-offs</span></button>
             <button type="button" class="mm-btn" data-go="tournament"><span class="mm-t">Tournaments</span><span class="mm-s">On this device: knockout cups and Swiss events for tournament teams</span></button>
             <button type="button" class="mm-btn" data-go="teams"><span class="mm-t">Teams</span><span class="mm-s">Build, manage and back up your teams and their careers</span></button>
+            <button type="button" class="mm-btn" id="mm-trules"><span class="mm-t">Tournament Rules</span><span class="mm-s">Set up a tournament pack's team rules (budgets, skills, Star Players, inducements), then build teams that fit</span></button>
             <button type="button" class="mm-btn" id="mm-fumbbl"><span class="mm-t">I Like to Watch</span><span class="mm-s">Replay your saved matches, or any match from fumbbl.com</span></button>
             <button type="button" class="mm-btn" id="mm-help"><span class="mm-t">Help</span><span class="mm-s">How to play: the aim, turns, blocking, passing, the ball, injuries and more</span></button>
             <button type="button" class="mm-btn" data-go="settings"><span class="mm-t">Settings</span><span class="mm-s">Sound, music, text size, pitch and animations</span></button>
@@ -1242,7 +1261,7 @@ ol.ci-steps li::marker { content: none; }
         <label id="career-opt" class="mb-3 -mt-2 flex items-center gap-2 text-[11px] font-bold text-slate-300 pointer-events-auto cursor-pointer" style="display:none">
             <input id="chk-career" type="checkbox" class="accent-amber-500"> <span>Count for saved teams' careers (SPP, winnings, injuries)</span>
         </label>
-        <button id="btn-builder" type="button" class="mb-5 text-[12px] font-bold uppercase tracking-wider text-amber-300 hover:text-amber-200 border border-amber-700/70 hover:border-amber-500 bg-slate-900/70 rounded-lg px-4 py-1.5">Team Builder: create &amp; edit your teams</button>
+        <div class="mb-5 flex flex-wrap justify-center gap-2"><button id="btn-builder" type="button" class="text-[12px] font-bold uppercase tracking-wider text-amber-300 hover:text-amber-200 border border-amber-700/70 hover:border-amber-500 bg-slate-900/70 rounded-lg px-4 py-1.5">Team Builder: create &amp; edit your teams</button><button id="btn-trules" type="button" class="text-[12px] font-bold uppercase tracking-wider text-amber-300 hover:text-amber-200 border border-amber-700/70 hover:border-amber-500 bg-slate-900/70 rounded-lg px-4 py-1.5">Tournament rules</button></div>
         <button id="btn-start-match" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Start Match
         </button>
@@ -1255,10 +1274,16 @@ ol.ci-steps li::marker { content: none; }
         <div id="ex-body" class="th-detail"></div>
       </div>
     </div>
+    <div id="trules" class="hidden" role="dialog" aria-modal="true" aria-labelledby="tr-title">
+      <div class="pg-wrap">
+        <header class="pg-head"><button id="tr-back" type="button" class="pg-btn">← Back</button><h2 id="tr-title">Tournament rules</h2><button type="button" class="fsc-btn" data-fs title="Full screen" aria-label="Full screen">⛶</button></header>
+        <div id="tr-body" class="tr-body"></div>
+      </div>
+    </div>
     <div id="teams-hub" class="hidden" role="dialog" aria-modal="true" aria-labelledby="th-title">
       <div class="pg-wrap">
         <header class="pg-head"><button id="th-close" type="button" class="pg-btn">← Back</button><h2 id="th-title">Teams</h2><button type="button" class="fsc-btn" data-fs title="Full screen" aria-label="Full screen">⛶</button>
-          <div class="th-top"><button id="th-new" type="button" class="pg-primary">+ New team</button><button id="th-import" type="button" class="pg-btn">Import file</button><button id="th-export-all" type="button" class="pg-btn">Export all</button><button id="th-board" type="button" class="pg-btn">🏆 Honours board</button><input id="th-file" type="file" accept=".json,application/json" hidden></div></header>
+          <div class="th-top"><button id="th-new" type="button" class="pg-primary">+ New team</button><button id="th-import" type="button" class="pg-btn">Import file</button><button id="th-export-all" type="button" class="pg-btn">Export all</button><button id="th-board" type="button" class="pg-btn">🏆 Honours board</button><button id="th-rules" type="button" class="pg-btn">Tournament rules</button><input id="th-file" type="file" accept=".json,application/json" hidden></div></header>
         <div id="th-msg" class="pg-dim" aria-live="polite"></div>
         <div class="th-layout"><nav id="th-list" class="th-list" aria-label="Saved teams"></nav><div id="th-detail" class="th-detail"></div></div>
       </div>
@@ -1342,7 +1367,8 @@ ol.ci-steps li::marker { content: none; }
             <label class="tb-field"><span>Name</span><input id="tb-name" class="tb-in" maxlength="30"></label>
             <label class="tb-field"><span>Race</span><select id="tb-race" class="tb-in"></select></label>
             <label class="tb-field"><span>Format</span><select id="tb-format" class="tb-in"><option value="">League team (1,000k, plays a career)</option><option value="matched">Tournament team (Matched Play: a set budget and skill points)</option><option value="sevens">Sevens team (600k, 7 a side, plays a career)</option><option value="sevens-mp">Sevens tournament team (Matched Play)</option></select></label>
-            <div id="tb-mpwrap" class="tb-field"><label for="tb-budget">Tournament budget (the most this team can spend)</label><select id="tb-budget" class="tb-in"></select><div id="tb-mpnote" class="tb-dim"></div></div>
+            <div id="tb-mpwrap" class="tb-field"><div id="tb-ruleswrap" class="tb-field"><label for="tb-rules">Tournament rules</label><div class="tb-rulesrow"><select id="tb-rules" class="tb-in"></select><button id="tb-rulesbtn" type="button" class="tb-ghost tb-small">Edit rules…</button></div></div>
+              <div id="tb-budwrap" class="tb-field"><label for="tb-budget">Tournament budget (the most this team can spend)</label><select id="tb-budget" class="tb-in"></select></div><div id="tb-mpnote" class="tb-dim"></div></div>
             <div class="tb-cols">
               <div class="tb-field"><span>Main colour</span><button id="tb-col1" type="button" class="tb-swatch" data-colour="primary" aria-label="Main colour"></button></div>
               <div class="tb-field"><span>Lettering</span><button id="tb-col2" type="button" class="tb-swatch" data-colour="secondary" aria-label="Lettering colour"></button></div>
@@ -3365,6 +3391,151 @@ ol.ci-steps li::marker { content: none; }
             starSP: sk => STARS[sk] && STARS[sk].mega ? 4 : 2,
             maxStars: race => MP.tier(race) === 1 ? 1 : 2
         };
+        // ---------- Tournament rules: how a tournament pack builds teams, as data. 'gw' is GW's Matched Play (skill points: the MP object above).
+        // Every other ruleset gives each tier a budget, a number of primary and secondary skills and Star Players, and lists the inducements
+        // a team may buy. Two come with the game; coaches can copy, edit and add their own (saved in this browser). ----------
+        const TRULES = (function () {
+            const KEY = 'bb-tourn-rules', LAST = 'bb-tourn-last', MAXT = 8;
+            const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const k = n => Math.round(n).toLocaleString('en-GB') + 'k';
+            const GW = { id: 'gw', name: 'GW Matched Play (BB2025)', builtin: true, gw: true,
+                notes: "Games Workshop's Matched Play: choose a budget, then spend your tier's skill points (primary 1, secondary 2, a Star Player 2, a Mega-star 4). Each Elite Skill on four players at most." };
+            const GOTG = { id: 'gotg2', name: 'Glory on the Gridiron 2', builtin: true, tiers: 6,
+                tier: { amazon: 1, chaosdwarf: 1, lizardmen: 1, norse: 1, oldworld: 1, woodelf: 1,
+                    darkelf: 2, highelf: 2, dwarf: 2, elvenunion: 2, human: 2, necromantic: 2, orc: 2, undead: 2, skaven: 2, tombkings: 2, underworld: 2, vampire: 2,
+                    blackorc: 3, bretonnian: 3, renegades: 3, imperial: 3, nurgle: 3, chaoschosen: 4, khorne: 4, gnome: 5, ogre: 5, snotling: 5, goblin: 6, halfling: 6 },
+                budget: [1250, 1270, 1290, 1310, 1330, 1360], prim: [3, 3, 4, 4, 5, 5], sec: [0, 0, 1, 1, 2, 2], stars: [1, 1, 1, 1, 2, 2], mega: 1, elite: 0,
+                ind: ['kegs', 'chef', 'mascot', 'prayers', 'bribes', 'wizard', 'apo', 'rookies'],
+                notes: 'Getting Wasted (21 November 2026). Resurrection format: no lasting injuries, deaths or SPP. The pack lists Nurgle in both Tier 2 and Tier 3: this uses Tier 3. Mortuary Assistants and Plague Doctors are allowed but not in BludBowl yet, and the Chaos Wastes weather table is not in the game.' };
+            const BUILT = [GW, GOTG];
+            let mine = [];
+            const races = () => Object.values(RACES).filter(r => r.positions).map(r => r.key);
+            const int = (v, lo, hi, d) => { const n = parseInt(v, 10); return isNaN(n) ? d : Math.max(lo, Math.min(hi, n)); };
+            function norm(r) {   // a coach's ruleset, filled in and kept in range
+                const n = int(r.tiers, 1, MAXT, 4), arr = (a, lo, hi, d) => Array.from({ length: n }, (_, i) => int((a || [])[i], lo, hi, Array.isArray(a) && a.length ? int(a[a.length - 1], lo, hi, d) : d));
+                const out = { id: String(r.id || ('r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6))).slice(0, 40), name: String(r.name || 'My tournament').trim().slice(0, 50) || 'My tournament',
+                    tiers: n, tier: {}, budget: arr(r.budget, 100, 3000, 1150), prim: arr(r.prim, 0, 16, 3), sec: arr(r.sec, 0, 16, 0), stars: arr(r.stars, 0, 4, 1),
+                    mega: int(r.mega, 0, 2, 1), elite: int(r.elite, 0, 16, 0), ind: (Array.isArray(r.ind) ? r.ind : []).filter((x, i, a) => typeof x === 'string' && a.indexOf(x) === i).slice(0, 30),
+                    notes: String(r.notes || '').slice(0, 800) };
+                races().forEach(k => { out.tier[k] = int((r.tier || {})[k], 1, n, Math.min(2, n)); });
+                return out;
+            }
+            function load() { try { const d = JSON.parse(localStorage.getItem(KEY) || '[]'); mine = (Array.isArray(d) ? d : []).filter(r => r && typeof r === 'object' && r.id && !BUILT.some(b => b.id === r.id)).map(norm); } catch (e) { mine = []; } }
+            function persist() { try { localStorage.setItem(KEY, JSON.stringify(mine)); return true; } catch (e) { return false; } }
+            load();
+            const list = () => BUILT.concat(mine);
+            const get = id => list().find(r => r.id === id) || null;
+            const tierOf = (r, race) => r.gw ? MP.tier(race) : (r.tier[race] || Math.min(2, r.tiers));
+            const at = (r, field, tier) => { const a = r[field] || []; return a[Math.max(0, Math.min(a.length - 1, tier - 1))] || 0; };
+            const last = () => { try { const id = localStorage.getItem(LAST); return get(id) ? id : 'gw'; } catch (e) { return 'gw'; } };
+            const remember = id => { try { localStorage.setItem(LAST, id); } catch (e) {} };
+            // rulesets a set of teams uses, to travel with an exported file; and taking in the ones a file brings
+            const defsFor = ts => mine.filter(r => ts.some(t => t && t.rules === r.id)).map(r => JSON.parse(JSON.stringify(r)));
+            function addMissing(defs) {
+                let n = 0;
+                (Array.isArray(defs) ? defs : []).forEach(d => { if (d && d.id && !get(d.id)) { mine.push(norm(d)); n++; } });
+                if (n) persist();
+                return n;
+            }
+            const indName = key => { try { const it = LEAGUE.indList('std').find(x => x.key === key); return it ? it.name : key; } catch (e) { return key; } };
+            const raceName = key => (RACES[key] && RACES[key].name) || key;
+            const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+
+            // ---- the Tournament rules screen: every ruleset, and an editor for the coach's own
+            let draft = null, onDone = null, delArmed = '', showId = '';
+            const $r = id => document.getElementById(id);
+            function summary(r) {
+                const byTier = t => races().filter(k => tierOf(r, k) === t).map(raceName).sort().join(', ') || '<span class="pg-dim">none</span>';
+                if (r.gw) return `<div class="tr-scroll"><table class="lg-tbl tr-tbl"><thead><tr><th class="l">Tier</th><th class="l">Teams</th><th>Skill points</th><th>Secondary</th><th>Stars</th></tr></thead><tbody>${[1, 2, 3, 4].map(t =>
+                    `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td><td>${MP.SP[t]}</td><td>up to ${t}</td><td>${t === 1 ? 1 : 2}</td></tr>`).join('')}</tbody></table></div>
+                    <div class="pg-dim">Budget: you choose, 1,000k to 1,500k (1,150k is usual). Every inducement may be bought.</div>`;
+                return `<div class="tr-scroll"><table class="lg-tbl tr-tbl"><thead><tr><th class="l">Tier</th><th class="l">Teams</th><th>Budget</th><th>Primary</th><th>Secondary</th><th>Stars</th></tr></thead><tbody>${Array.from({ length: r.tiers }, (_, i) => i + 1).map(t =>
+                    `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td><td>${k(at(r, 'budget', t))}</td><td>${at(r, 'prim', t)}</td><td>${at(r, 'sec', t)}</td><td>${at(r, 'stars', t)}</td></tr>`).join('')}</tbody></table></div>
+                    <div class="pg-dim">One extra skill per player; skills are free (outside the budget). ${r.mega ? `At most ${plural(r.mega, 'Mega-star')}.` : 'No Mega-stars.'} ${r.elite ? `Each Elite Skill (Block, Dodge, Guard, Mighty Blow) on ${r.elite} players at most.` : 'No limit on Elite Skills.'}</div>
+                    <div class="pg-dim"><b>Inducements allowed:</b> ${r.ind.length ? r.ind.map(indName).map(esc).join(', ') : 'none'}${r.ind.length ? '' : ''} (Star Players: per tier, above).</div>`;
+            }
+            function listView() {
+                return `<section class="pg-card"><div class="pg-dim tr-intro">A ruleset is how a tournament pack says teams are built: the budget, extra skills and Star Players for each tier, and which inducements may be bought.
+                    Choose one for a team in the Team Builder (Format: Tournament team) and the builder checks the team against it: it won't save until the team fits.</div>
+                    <div class="pg-chips"><button type="button" class="pg-primary" data-trnew="1">+ New ruleset</button></div></section>` +
+                    list().map(r => {
+                        const used = TB.list().filter(t => t.rules === r.id || (r.gw && t.format === 'matched' && !t.rules)).length;
+                        return `<section class="pg-card tr-card" id="tr-${esc(r.id)}"><div class="tr-h"><h3>${esc(r.name)}</h3>${r.builtin ? '<span class="tr-badge">Built in</span>' : ''}<span class="pg-dim">${used ? plural(used, 'saved team') + ' use' + (used === 1 ? 's' : '') + ' it' : ''}</span></div>
+                            ${r.notes ? `<div class="tr-notes">${esc(r.notes)}</div>` : ''}${summary(r)}
+                            <div class="pg-chips">${r.gw ? '' : `<button type="button" class="pg-btn" data-trcopy="${esc(r.id)}">Copy &amp; edit</button>`}${r.builtin ? '' : `<button type="button" class="pg-btn pg-btn-go" data-tredit="${esc(r.id)}">Edit</button>
+                            <button type="button" class="pg-btn tr-del" data-trdel="${esc(r.id)}">${delArmed === r.id ? (used ? `Delete? ${plural(used, 'team')} go${used === 1 ? 'es' : ''} back to GW rules` : 'Click again to delete') : 'Delete'}</button>`}</div></section>`;
+                    }).join('');
+            }
+            function editView() {
+                const r = draft, T = Array.from({ length: r.tiers }, (_, i) => i + 1);
+                const num = (f, t, lo, hi, step) => `<input type="number" class="lg-in tr-num" data-trf="${f}" data-trt="${t}" min="${lo}" max="${hi}" step="${step || 1}" value="${at(r, f, t)}" aria-label="Tier ${t} ${f}">`;
+                const inds = (typeof LEAGUE === 'undefined' ? [] : LEAGUE.indList('std'));
+                return `<section class="pg-card"><h3>${get(r.id) ? 'Edit ruleset' : 'New ruleset'}</h3>
+                    <label class="lg-field"><span>Name</span><input id="tr-name" class="lg-in" maxlength="50" value="${esc(r.name)}"></label>
+                    <label class="lg-field"><span>Number of tiers</span><select id="tr-tiers" class="lg-sel">${Array.from({ length: MAXT }, (_, i) => `<option value="${i + 1}"${i + 1 === r.tiers ? ' selected' : ''}>${i + 1}</option>`).join('')}</select></label>
+                    <div class="tr-scroll"><table class="lg-tbl tr-tbl tr-edit"><thead><tr><th class="l">Tier</th><th>Budget (k)</th><th>Primary</th><th>Secondary</th><th>Stars</th></tr></thead><tbody>
+                    ${T.map(t => `<tr><td class="l"><b>${t}</b></td><td>${num('budget', t, 100, 3000, 5)}</td><td>${num('prim', t, 0, 16)}</td><td>${num('sec', t, 0, 16)}</td><td>${num('stars', t, 0, 4)}</td></tr>`).join('')}</tbody></table></div>
+                    <div class="pg-dim">The budget pays for players, re-rolls, sideline staff, dedicated fans, Star Players and inducements. Extra skills are free, one per player.</div>
+                    <div class="tr-row2"><label class="lg-field"><span>Mega-stars, at most</span><input id="tr-mega" type="number" class="lg-in tr-num" min="0" max="2" value="${r.mega}"></label>
+                    <label class="lg-field"><span>Players with each Elite Skill, at most (0: no limit)</span><input id="tr-elite" type="number" class="lg-in tr-num" min="0" max="16" value="${r.elite}"></label></div></section>
+                    <section class="pg-card"><h3>Team tiers</h3><div class="tr-races">${races().map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n)).map(({ k2, n }) =>
+                        `<label class="tr-race"><span>${esc(n)}</span><select class="lg-sel" data-trrace="${k2}">${T.map(t => `<option value="${t}"${tierOf(r, k2) === t ? ' selected' : ''}>Tier ${t}</option>`).join('')}</select></label>`).join('')}</div></section>
+                    <section class="pg-card"><h3>Inducements allowed</h3><div class="tr-inds">${inds.map(it => `<label class="tr-ind"><input type="checkbox" data-trind="${it.key}"${r.ind.includes(it.key) ? ' checked' : ''}> <span>${esc(it.name)} <span class="pg-dim">${k(it.cost)}</span></span></label>`).join('')}</div>
+                        <div class="pg-dim">Star Players are set per tier above.</div></section>
+                    <section class="pg-card"><h3>Notes</h3><textarea id="tr-notes" class="lg-in tr-notes-in" rows="3" maxlength="800" placeholder="Anything else from the pack (shown in the Team Builder)">${esc(r.notes)}</textarea></section>
+                    <div class="pg-chips"><button type="button" class="pg-primary" data-trsave="1">Save ruleset</button><button type="button" class="pg-btn" data-trcancel="1">Cancel</button><span id="tr-msg" class="pg-dim" aria-live="polite"></span></div>`;
+            }
+            function render() {
+                $r('tr-title').textContent = draft ? (get(draft.id) ? 'Edit rules' : 'New rules') : 'Tournament rules';
+                $r('tr-body').innerHTML = draft ? editView() : listView();
+            }
+            function open(done, id) {
+                onDone = done; draft = null; delArmed = ''; showId = id || '';
+                $r('trules').classList.remove('hidden'); $r('trules').scrollTop = 0; render();
+                if (showId) setTimeout(() => { const el = $r('tr-' + showId); if (el) el.scrollIntoView({ block: 'start' }); }, 0);
+            }
+            function close() { $r('trules').classList.add('hidden'); if (onDone) onDone(); }
+            function wire() {
+                const root = $r('trules'); if (!root || root.dataset.wired) return; root.dataset.wired = '1';
+                root.addEventListener('click', e => {
+                    const b = e.target.closest('button'); if (!b) return;
+                    const d = b.dataset;
+                    if (b.id === 'tr-back') { if (draft) { draft = null; render(); } else close(); return; }
+                    if (d.trnew) { const g = norm(Object.assign({}, GOTG, { id: '', name: 'My tournament', notes: '' })); draft = g; render(); root.scrollTop = 0; return; }
+                    if (d.trcopy) { const s = get(d.trcopy); draft = norm(Object.assign(JSON.parse(JSON.stringify(s)), { id: '', name: ('Copy of ' + s.name).slice(0, 50) })); render(); root.scrollTop = 0; return; }
+                    if (d.tredit) { draft = JSON.parse(JSON.stringify(get(d.tredit))); render(); root.scrollTop = 0; return; }
+                    if (d.trdel) {
+                        if (delArmed !== d.trdel) { delArmed = d.trdel; render(); return; }
+                        mine = mine.filter(r => r.id !== d.trdel); persist(); delArmed = ''; render(); return;
+                    }
+                    if (d.trcancel) { draft = null; render(); return; }
+                    if (d.trsave) {
+                        const r = norm(draft), i = mine.findIndex(x => x.id === r.id);
+                        if (list().some(x => x.id !== r.id && x.name.toLowerCase() === r.name.toLowerCase())) { $r('tr-msg').textContent = 'Another ruleset already has that name.'; return; }
+                        if (i >= 0) mine[i] = r; else mine.push(r);
+                        const ok = persist(); draft = null; render();
+                        setTimeout(() => { const el = $r('tr-' + r.id); if (el) el.scrollIntoView({ block: 'start' }); }, 0);
+                        if (!ok) $r('tr-body').insertAdjacentHTML('afterbegin', '<div class="pg-card tr-warn">This browser would not let the game save the ruleset.</div>');
+                        return;
+                    }
+                });
+                const edit = e => {
+                    if (!draft) return;
+                    const el = e.target, d = el.dataset;
+                    if (el.id === 'tr-name') draft.name = el.value;
+                    else if (el.id === 'tr-notes') draft.notes = el.value;
+                    else if (el.id === 'tr-mega') draft.mega = int(el.value, 0, 2, draft.mega);
+                    else if (el.id === 'tr-elite') draft.elite = int(el.value, 0, 16, draft.elite);
+                    else if (d.trf) { const t = +d.trt, lim = { budget: [100, 3000], prim: [0, 16], sec: [0, 16], stars: [0, 4] }[d.trf]; draft[d.trf][t - 1] = int(el.value, lim[0], lim[1], draft[d.trf][t - 1]); }
+                    else if (d.trrace) draft.tier[d.trrace] = +el.value;
+                    else if (d.trind) draft.ind = el.checked ? draft.ind.concat([d.trind]).filter((x, i, a) => a.indexOf(x) === i) : draft.ind.filter(x => x !== d.trind);
+                    else if (el.id === 'tr-tiers' && e.type === 'change') { draft.tiers = +el.value; draft = Object.assign(norm(draft), { id: draft.id }); render(); }
+                };
+                root.addEventListener('input', edit); root.addEventListener('change', edit);
+            }
+            const openW = (done, id) => { wire(); open(done, id); };
+            return { GW, list, get, tierOf, at, last, remember, defsFor, addMissing, indName, open: openW };
+        })();
         const TB = (function () {
             const KEY = 'bb-custom-teams', VER = 1, BUDGET = 1000, MAXP = 16, MINP = 11;
             const STAFF = {
@@ -3475,11 +3646,12 @@ ol.ci-steps li::marker { content: none; }
                 if (!/^#[0-9a-f]{6}$/i.test(c.secondary)) c.secondary = '#fde68a';
                 if (c.sprites && !(SPRITE_SETS[c.race] || []).some(x => x.id === c.sprites)) delete c.sprites;
                 if (c.league && !(RACE_LEAGUES[c.race] || []).includes(c.league)) delete c.league;
-                if (c.format !== 'matched' && c.format !== 'sevens-mp') { delete c.budget; delete c.stars; delete c.mind; c.players.forEach(p => { delete p.mp; }); if (c.format === 'sevens') c.bribes = 0; }
+                if (c.format !== 'matched' && c.format !== 'sevens-mp') { delete c.budget; delete c.stars; delete c.mind; delete c.rules; c.players.forEach(p => { delete p.mp; }); if (c.format === 'sevens') c.bribes = 0; }
                 else {   // a Matched Play team: its budget, Star Players, inducements and one extra skill per player
-                    const sv = c.format === 'sevens-mp', bl = sv ? SEV.MP_BUDGETS : MP.BUDGETS;
-                    c.budget = bl.includes(+c.budget) ? +c.budget : sv ? 600 : 1150;
-                    c.stars = sv ? [] : (Array.isArray(c.stars) ? c.stars : []).filter((sk, i, a) => STARS[sk] && a.indexOf(sk) === i).slice(0, 2);
+                    const sv = c.format === 'sevens-mp', bl = sv ? SEV.MP_BUDGETS : MP.BUDGETS, rs = !sv && typeof c.rules === 'string' && TRULES.get(c.rules);
+                    if (rs && !rs.gw) { c.rules = rs.id; c.budget = TRULES.at(rs, 'budget', TRULES.tierOf(rs, c.race)); }   // a tournament's rules: the budget comes with the tier
+                    else { delete c.rules; c.budget = bl.includes(+c.budget) ? +c.budget : sv ? 600 : 1150; }
+                    c.stars = sv ? [] : (Array.isArray(c.stars) ? c.stars : []).filter((sk, i, a) => STARS[sk] && a.indexOf(sk) === i).slice(0, 4);
                     const m = c.mind && typeof c.mind === 'object' ? c.mind : {}; c.mind = {};
                     Object.keys(m).forEach(key => { const n = Math.max(0, Math.min(8, parseInt(m[key], 10) || 0)); if (n) c.mind[key] = n; });
                     const f0 = parseInt(t.fans, 10); c.fans = Math.max(0, Math.min(sv ? 5 : 3, isNaN(f0) ? 0 : f0));
@@ -3523,7 +3695,16 @@ ol.ci-steps li::marker { content: none; }
             const isMP = t => !!t && (t.format === 'matched' || t.format === 'sevens-mp');
             const isSev = isSevT;
             // Matched Play allowances: standard (BB2025 tiers) or Sevens (skill points = tier; one secondary; two Elite skills in all; no Star Players)
-            const tierOf = t => isSev(t) ? (SEV.TIER[t.race] || 2) : MP.tier(t.race);
+            // a standard tournament team follows a ruleset (TRULES): GW's Matched Play unless the team names another
+            const rulesOf = t => (!isSev(t) && t && t.rules && TRULES.get(t.rules)) || TRULES.GW;
+            const gwRules = t => isSev(t) || rulesOf(t).gw;
+            const tierOf = t => isSev(t) ? (SEV.TIER[t.race] || 2) : TRULES.tierOf(rulesOf(t), t.race);
+            const mpBudget = t => gwRules(t) ? t.budget : TRULES.at(rulesOf(t), 'budget', tierOf(t));
+            const mpN = (t, kind, not) => t.players.filter(q => q !== not && q.mp && q.mp.kind === kind).length;
+            const starMax = t => isSev(t) ? 0 : gwRules(t) ? MP.maxStars(t.race) : TRULES.at(rulesOf(t), 'stars', tierOf(t));
+            const megaMax = t => gwRules(t) ? 1 : rulesOf(t).mega;
+            const eliteCap = t => isSev(t) ? 2 : gwRules(t) ? 4 : rulesOf(t).elite;   // Sevens: two in the whole team; otherwise players per Elite Skill (0: no limit)
+            const indOk = (t, key) => gwRules(t) || rulesOf(t).ind.includes(key);
             const spOf = t => isSev(t) ? tierOf(t) : MP.SP[tierOf(t)];
             const secMax = t => isSev(t) ? 1 : tierOf(t);
             const starN = t => isMP(t) ? (t.stars || []).reduce((a, sk) => a + starMembers(sk).length, 0) : 0;   // roster places the Stars take
@@ -3531,8 +3712,21 @@ ol.ci-steps li::marker { content: none; }
             function mpIndCost(t) { return typeof LEAGUE === 'undefined' ? 0 : LEAGUE.indList(isSev(t) ? 'sevens' : 'std').reduce((a, it) => a + (t.mind[it.key] || 0) * LEAGUE.indCost(it, t.race), 0); }
             // what is wrong with a Matched Play draft (nothing: it can be saved)
             function mpProblems(t, c) {
-                const out = [], tier = tierOf(t), sp = spOf(t), n = t.players.length + starN(t), MAXP = maxP(t), MINP = minP(t);
-                if (c.spent > t.budget) out.push(`${k(c.spent - t.budget)} over the ${k(t.budget)} budget`);
+                const out = [], tier = tierOf(t), sp = spOf(t), n = t.players.length + starN(t), MAXP = maxP(t), MINP = minP(t), B = mpBudget(t);
+                if (c.spent > B) out.push(`${k(c.spent - B)} over the ${k(B)} budget`);
+                if (!gwRules(t)) {   // a tournament's own rules: so many primary and secondary skills, Star Players and the inducements it allows
+                    const r = rulesOf(t), P = TRULES.at(r, 'prim', tier), S = TRULES.at(r, 'sec', tier), pN = mpN(t, 'P'), sN = mpN(t, 'S'), stN = (t.stars || []).length, mx = starMax(t);
+                    if (pN > P) out.push(`${pN} primary skills (Tier ${tier}: up to ${P})`);
+                    if (sN > S) out.push(S ? `${sN} secondary skills (Tier ${tier}: up to ${S})` : `${sN} secondary skill${sN === 1 ? '' : 's'} (Tier ${tier} teams can't take secondary skills)`);
+                    if (r.elite) MP.ELITE.forEach(sk => { const m = t.players.filter(p => p.mp && p.mp.skill === sk).length; if (m > r.elite) out.push(`${sk} given to ${m} players (an Elite Skill: ${r.elite} at most)`); });
+                    if (stN > mx) out.push(mx ? `Tier ${tier} teams may have only ${mx} Star Player${mx === 1 ? '' : 's'}` : `Tier ${tier} teams may not hire Star Players`);
+                    const mg = (t.stars || []).filter(sk => STARS[sk].mega).length;
+                    if (mg > r.mega) out.push(r.mega ? `Only ${r.mega} Mega-star${r.mega === 1 ? '' : 's'}` : 'No Mega-stars under these rules');
+                    Object.keys(t.mind || {}).forEach(key => { if (t.mind[key] && !r.ind.includes(key)) out.push(`${TRULES.indName(key)} isn't allowed by ${r.name}`); });
+                    if (n > MAXP) out.push(`${n} players: the roster holds ${MAXP}`);
+                    if (n < MINP) out.push(`${n} players: a team needs ${MINP}, counting Star Players`);
+                    return out;
+                }
                 if (spUsed(t) > sp) out.push(`${spUsed(t) - sp} skill point${spUsed(t) - sp === 1 ? '' : 's'} over the ${sp} a Tier ${tier} team has`);
                 const sec = t.players.filter(p => p.mp && p.mp.kind === 'S').length;
                 if (sec > secMax(t)) out.push(isSev(t) ? `${sec} secondary skills (Sevens: one at most)` : `${sec} secondary skills (Tier ${tier}: up to ${tier})`);
@@ -3624,36 +3818,54 @@ ol.ci-steps li::marker { content: none; }
                     <span class="tb-num">${value}</span>
                     <button type="button" class="tb-btn" data-inc="${key}" aria-label="More ${s.label}" ${value >= s.max ? 'disabled' : ''}>+</button></div></div>`;
             }
+            // a tournament team takes on a ruleset: the budget follows the tier, and inducements the rules don't allow are dropped
+            function setRules(t, id) {
+                const r = TRULES.get(id) || TRULES.GW;
+                if (r.gw) { delete t.rules; if (!MP.BUDGETS.includes(t.budget)) t.budget = 1150; return; }
+                t.rules = r.id; t.budget = mpBudget(t);
+                Object.keys(t.mind || {}).forEach(key => { if (!r.ind.includes(key)) delete t.mind[key]; });
+            }
             // Matched Play: the extra skill a player may take (primary 1 skill point, secondary 2)
             function mpSelect(t, p, i) {
                 const tier = tierOf(t), own = p.mp ? (p.mp.kind === 'S' ? 2 : 1) : 0, room = spOf(t) - (spUsed(t) - own), sv = isSev(t);
                 const secs = t.players.filter(q => q !== p && q.mp && q.mp.kind === 'S').length;
                 const elite = sk => t.players.filter(q => q !== p && q.mp && q.mp.skill === sk).length;
                 const eliteAll = t.players.filter(q => q !== p && q.mp && MP.ELITE.includes(q.mp.skill)).length;
+                const gw = gwRules(t), r = rulesOf(t), cap = eliteCap(t), PN = gw ? 0 : TRULES.at(r, 'prim', tier), SN = gw ? 0 : TRULES.at(r, 'sec', tier);
                 const opt = (sk, kind) => {
                     const on = !!p.mp && p.mp.skill === sk && p.mp.kind === kind;
-                    const why = (kind === 'S' ? 2 : 1) > room ? 'not enough skill points' : kind === 'S' && secs >= secMax(t) ? (sv ? 'one secondary per team' : `Tier ${tier}: ${tier} secondary`)
+                    const why = !gw ? (kind === 'P' ? (mpN(t, 'P', p) >= PN ? `Tier ${tier}: ${PN} primary` : '') : mpN(t, 'S', p) >= SN ? (SN ? `Tier ${tier}: ${SN} secondary` : `no secondary skills at Tier ${tier}`) : '')
+                            || (cap && MP.ELITE.includes(sk) && elite(sk) >= cap ? `Elite Skill: ${cap} players already` : '')
+                        : (kind === 'S' ? 2 : 1) > room ? 'not enough skill points' : kind === 'S' && secs >= secMax(t) ? (sv ? 'one secondary per team' : `Tier ${tier}: ${tier} secondary`)
                         : MP.ELITE.includes(sk) && (sv ? eliteAll >= 2 : elite(sk) >= 4) ? (sv ? 'two Elite Skills already' : 'Elite Skill: 4 players already') : '';
-                    return `<option value="${kind}|${esc(sk)}"${on ? ' selected' : ''}${why && !on ? ' disabled' : ''}>${esc(sk)}${MP.ELITE.includes(sk) ? ' (Elite)' : ''}${why && !on ? ' – ' + why : ''}</option>`;
+                    return `<option value="${kind}|${esc(sk)}"${on ? ' selected' : ''}${why && !on ? ' disabled' : ''}>${esc(sk)}${MP.ELITE.includes(sk) && cap ? ' (Elite)' : ''}${why && !on ? ' – ' + why : ''}</option>`;
                 };
-                const P = CAREER.skillChoices(t.race, p, 'P'), S = CAREER.skillChoices(t.race, p, 'S');
+                const P = CAREER.skillChoices(t.race, p, 'P'), S = CAREER.skillChoices(t.race, p, 'S'), showS = gw || SN > 0 || (p.mp && p.mp.kind === 'S');
                 return `<select class="tb-in tb-mpsel" data-mpsk="${i}" aria-label="Extra skill for ${esc(p.name)}"><option value="">No extra skill</option>
-                    <optgroup label="Primary · 1 skill point">${P.map(x => opt(x.skill, 'P')).join('')}</optgroup><optgroup label="Secondary · 2 skill points">${S.map(x => opt(x.skill, 'S')).join('')}</optgroup></select>`;
+                    <optgroup label="${gw ? 'Primary · 1 skill point' : 'Primary skills'}">${P.map(x => opt(x.skill, 'P')).join('')}</optgroup>${showS ? `<optgroup label="${gw ? 'Secondary · 2 skill points' : 'Secondary skills'}">${S.map(x => opt(x.skill, 'S')).join('')}</optgroup>` : ''}</select>`;
             }
             function mpStarWhy(t, sk, c) {
-                const S = STARS[sk], mine = t.stars || [], tier = MP.tier(t.race);
+                const S = STARS[sk], mine = t.stars || [], tier = tierOf(t), mx = starMax(t), mg = megaMax(t);
                 if (mine.includes(sk)) return '';
-                if (mine.length >= MP.maxStars(t.race)) return `Tier ${tier}: ${MP.maxStars(t.race) === 1 ? 'only one Star Player' : 'two Star Players at most'}`;
-                if (S.mega && mine.some(x => STARS[x].mega)) return 'Only one Mega-star';
-                if (spUsed(t) + MP.starSP(sk) > MP.SP[tier]) return `Needs ${MP.starSP(sk)} skill points`;
+                if (mine.length >= mx) return !mx ? `Tier ${tier}: no Star Players` : `Tier ${tier}: ${mx === 1 ? 'only one Star Player' : mx + ' Star Players at most'}`;
+                if (S.mega && mine.filter(x => STARS[x].mega).length >= mg) return mg ? `Only ${mg === 1 ? 'one Mega-star' : mg + ' Mega-stars'}` : 'No Mega-stars under these rules';
+                if (gwRules(t) && spUsed(t) + MP.starSP(sk) > MP.SP[tier]) return `Needs ${MP.starSP(sk)} skill points`;
                 if (t.players.length + starN(t) + starMembers(sk).length > MAXP) return `No room on the ${MAXP}-player roster`;
-                if (c.spent + S.cost > t.budget) return 'Not enough gold left';
+                if (c.spent + S.cost > mpBudget(t)) return 'Not enough gold left';
                 return '';
             }
             function mpRender(t, c) {
+                const gw = gwRules(t), r = rulesOf(t);
+                if (!gw) t.budget = mpBudget(t);   // a tournament's rules set the budget by tier
                 const tier = tierOf(t), used = spUsed(t), allow = spOf(t), left = t.budget - c.spent, sv = isSev(t), MAXP = maxP(t), MINP = minP(t);
+                const PN = gw ? 0 : TRULES.at(r, 'prim', tier), SN = gw ? 0 : TRULES.at(r, 'sec', tier), pN = mpN(t, 'P'), sN = mpN(t, 'S'), mx = starMax(t);
+                $('tb-ruleswrap').style.display = sv ? 'none' : '';
+                $('tb-rules').innerHTML = TRULES.list().map(x => `<option value="${esc(x.id)}"${x.id === r.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('');
+                $('tb-budwrap').style.display = gw ? '' : 'none';
                 $('tb-budget').innerHTML = (sv ? SEV.MP_BUDGETS : MP.BUDGETS).map(b => `<option value="${b}" ${b === t.budget ? 'selected' : ''}>${k(b)}${sv ? (b === 600 ? ' (usual)' : '') : [1100, 1150, 1200].includes(b) ? ' (common)' : ''}</option>`).join('');
-                $('tb-mpnote').innerHTML = sv ? `<b>Sevens Tier ${tier}</b> team: <span class="tb-sp">${used} / ${allow} skill points</span> · one secondary skill in the whole team · two Elite Skills at most · no Star Players.
+                $('tb-mpnote').innerHTML = !gw ? `<b>Tier ${tier}</b> team: budget <b>${k(t.budget)}</b> · <span class="tb-sp">primary skills ${pN} / ${PN}</span> · <span class="tb-sp">secondary ${sN} / ${SN}</span> · ${mx ? `up to ${mx} Star Player${mx === 1 ? '' : 's'}` : 'no Star Players'}.
+                    One extra skill per player; skills are free and don't add to team value.${r.notes ? `<div class="tb-rnote">${esc(r.notes)}</div>` : ''}`
+                    : sv ? `<b>Sevens Tier ${tier}</b> team: <span class="tb-sp">${used} / ${allow} skill points</span> · one secondary skill in the whole team · two Elite Skills at most · no Star Players.
                     One extra skill per player (primary 1 point, secondary 2). At most 4 players without the Lineman keyword, and one Lineman is your Veteran.`
                     : `<b>Tier ${tier}</b> team: <span class="tb-sp">${used} / ${allow} skill points</span> · up to ${tier} secondary skill${tier === 1 ? '' : 's'} · ${MP.maxStars(t.race) === 1 ? '1 Star Player' : '2 Star Players'}.
                     One extra skill per player (primary 1 point, secondary 2). Skills don't add to team value. No SPP or lasting injuries: every game starts fresh.`;
@@ -3663,7 +3875,7 @@ ol.ci-steps li::marker { content: none; }
                 $('tb-bar').parentNode.style.display = '';
                 $('tb-bar').style.width = Math.min(100, c.spent / t.budget * 100) + '%'; $('tb-bar').className = left < 0 ? 'tb-bad-bg' : '';
                 const probs = mpProblems(t, c);
-                $('tb-left').innerHTML = (left < 0 ? `${k(-left)} over the Matched Play budget` : left ? `${k(left)} left · gold not spent is lost` : 'Every last coin spent') + ` · skill points ${used}/${allow}`
+                $('tb-left').innerHTML = (left < 0 ? `${k(-left)} over the ${gw ? 'Matched Play' : 'tournament'} budget` : left ? `${k(left)} left · gold not spent is lost` : 'Every last coin spent') + (gw ? ` · skill points ${used}/${allow}` : ` · primary ${pN}/${PN} · secondary ${sN}/${SN}`)
                     + (probs.length ? `<div class="tb-mpwarn">${probs.map(x => `<div>${esc(x)}</div>`).join('')}</div>` : '');
                 const n = t.players.length + starN(t);
                 $('tb-count').textContent = `${n} / ${MAXP}`; $('tb-count').className = 'tb-big ' + (n < MINP || n > MAXP ? 'tb-bad' : 'tb-good');
@@ -3673,21 +3885,23 @@ ol.ci-steps li::marker { content: none; }
                 // Star Players (none in Sevens)
                 $('tb-mpstars').parentNode.style.display = sv ? 'none' : '';
                 const ks = sv ? [] : starsFor(t.race, t.league, t.favoured);
-                $('tb-mpstars').innerHTML = `<p class="tb-dim tb-hint">Their price in gold plus <span class="tb-sp">2 skill points</span> (a Mega-star <span class="tb-sp">4</span>). A pair counts as one Star but takes two places. Star Players get no extra skills.</p>` +
+                $('tb-mpstars').innerHTML = (gw ? `<p class="tb-dim tb-hint">Their price in gold plus <span class="tb-sp">2 skill points</span> (a Mega-star <span class="tb-sp">4</span>). A pair counts as one Star but takes two places. Star Players get no extra skills.</p>`
+                    : `<p class="tb-dim tb-hint">Paid from the budget. Tier ${tier}: ${mx ? `up to <span class="tb-sp">${mx}</span> Star Player${mx === 1 ? '' : 's'}` : 'no Star Players'}${r.mega ? r.mega === 1 ? ', one Mega-star at most' : `, ${r.mega} Mega-stars at most` : ', no Mega-stars'}. A pair counts as one Star but takes two places. Star Players get no extra skills.</p>`) +
                     (ks.length ? ks.map(sk => {
                         const S = STARS[sk], on = (t.stars || []).includes(sk), why = mpStarWhy(t, sk, c);
-                        return `<div class="tb-pos tb-mpstar ${on ? 'on' : ''}"><div class="tb-pos-main"><div class="tb-pos-name">${esc(S.name)}${S.mega ? ' <span class="tb-mega">MEGA-STAR</span>' : ''} <span class="tb-dim">${k(S.cost)} ·</span> <span class="tb-sp">${MP.starSP(sk)} SP</span></div>
+                        return `<div class="tb-pos tb-mpstar ${on ? 'on' : ''}"><div class="tb-pos-main"><div class="tb-pos-name">${esc(S.name)}${S.mega ? ' <span class="tb-mega">MEGA-STAR</span>' : ''} <span class="tb-dim">${k(S.cost)}${gw ? ' ·' : ''}</span>${gw ? ` <span class="tb-sp">${MP.starSP(sk)} SP</span>` : ''}</div>
                             ${starMembers(sk).map(m => `<div class="tb-stats">${S.members ? `<b>${esc(m.name)}</b> ` : ''}MA ${m.ma} · ST ${m.st} · AG ${m.ag}+ · PA ${m.pa ? m.pa + '+' : '-'} · AV ${m.av}+</div><div class="tb-skills">${esc(m.skills.join(', '))}</div>`).join('')}
                             <div class="tb-skills"><b>${esc(S.rule)}:</b> ${esc(S.text)}</div>${why ? `<div class="tb-skills tb-bad">${esc(why)}</div>` : ''}</div>
                             <button type="button" class="tb-hire" data-mpstar="${sk}" ${why ? 'disabled' : ''}>${on ? 'Remove' : '+ Hire'}</button></div>`;
                     }).join('') : '<div class="tb-empty">No Star Players will play for this team.</div>');
                 // inducements
-                $('tb-mpind').innerHTML = LEAGUE.indList(sv ? 'sevens' : 'std').filter(it => LEAGUE.offered(it, t.race)).map(it => {
+                const barred = gw ? [] : LEAGUE.indList('std').filter(it => LEAGUE.offered(it, t.race) && !indOk(t, it.key)).map(it => it.name);
+                $('tb-mpind').innerHTML = LEAGUE.indList(sv ? 'sevens' : 'std').filter(it => LEAGUE.offered(it, t.race) && (indOk(t, it.key) || (t.mind || {})[it.key])).map(it => {
                     const n2 = t.mind[it.key] || 0, cst = LEAGUE.indCost(it, t.race), mx = LEAGUE.indMax(it, t.race);
                     return `<div class="tb-row"><div class="tb-row-main"><span class="tb-lbl">${esc(it.name)}</span><span class="tb-note">${k(cst)} each · up to ${mx} · ${esc(it.note)}</span></div>
                         <div class="tb-step"><button type="button" class="tb-btn" data-mpind="${it.key}|-1" aria-label="One fewer ${esc(it.name)}" ${n2 ? '' : 'disabled'}>−</button><span class="tb-num">${n2}</span>
-                        <button type="button" class="tb-btn" data-mpind="${it.key}|1" aria-label="One more ${esc(it.name)}" ${n2 >= mx || cst > left ? 'disabled' : ''}>+</button></div></div>`;
-                }).join('');
+                        <button type="button" class="tb-btn" data-mpind="${it.key}|1" aria-label="One more ${esc(it.name)}" ${n2 >= mx || cst > left || !indOk(t, it.key) ? 'disabled' : ''}>+</button></div></div>`;
+                }).join('') + (barred.length ? `<p class="tb-dim tb-hint">Not allowed by ${esc(r.name)}: ${esc(barred.join(', '))}.</p>` : '');
             }
             function render() {
                 const t = cur, R = RACES[t.race], c = costs(t), n = t.players.length + starN(t), sev = isSev(t);
@@ -3819,8 +4033,8 @@ ol.ci-steps li::marker { content: none; }
                 else if (!CAREER.started(cur)) cur.treasury = Math.max(0, budgetOf(cur) - costs(cur).spent);   // what is left of the budget starts the treasury
                 const i = teams.findIndex(x => x.id === cur.id), copy = JSON.parse(JSON.stringify(cur)); copy.rev = (cur.rev || 0) + 1; cur.rev = copy.rev;
                 if (i >= 0) teams[i] = copy; else teams.push(copy);
-                const unspent = isMP(cur) ? cur.budget - costs(cur).spent : 0;
-                if (persist()) { dirty = false; msg(`Saved ${cur.name}. Pick it on the Choose Teams screen.${unspent > 0 ? ` (${k(unspent)} of the budget is unspent: in Matched Play it is lost.)` : ''}`); }
+                const unspent = isMP(cur) ? mpBudget(cur) - costs(cur).spent : 0;
+                if (persist()) { dirty = false; msg(`Saved ${cur.name}. Pick it on the Choose Teams screen.${unspent > 0 ? ` (${k(unspent)} of the budget is unspent: in a tournament it is lost.)` : ''}`); }
                 else msg('This browser would not let the game save. Use Export to keep a copy as a file.', true);
                 render();
             }
@@ -3833,6 +4047,7 @@ ol.ci-steps li::marker { content: none; }
             }
             function importText(text) {
                 let d; try { d = JSON.parse(text); } catch (e) { msg('That file is not a BludBowl team file.', true); return; }
+                if (d && Array.isArray(d.rules)) TRULES.addMissing(d.rules);   // tournament rules the teams were built under travel with them
                 const list = (Array.isArray(d.teams) ? d.teams : [d]).filter(valid).map(clean);
                 if (!list.length) { msg('No teams found in that file.', true); return; }
                 list.forEach(t => { if (teams.some(x => x.id === t.id)) t.id = uid(); teams.push(t); });
@@ -3935,11 +4150,12 @@ ol.ci-steps li::marker { content: none; }
                         change(() => { cur[d.dec] = Math.max(mn, cur[d.dec] - 1); });
                     }
                     else if (d.apo) { if (noApo(cur.race)) return; if (sev && car && cur.apothecary) { msg('Sevens leagues: sideline staff can\'t be fired.', true); return; } if (!cur.apothecary && !pay(priceOf('apo', cur), 'an apothecary')) return; change(() => { cur.apothecary = !cur.apothecary; }); }
+                    else if (b.id === 'tb-rulesbtn') TRULES.open(() => { if (cur.rules && !TRULES.get(cur.rules)) setRules(cur, 'gw'); render(); }, rulesOf(cur).id);
                     else if (b.id === 'tb-close') close();
                     else if (b.id === 'tb-save') save();
                     else if (b.id === 'tb-names') change(() => { const used = new Set(); cur.players.forEach(p => { p.name = randomName(cur.race, used); used.add(p.name); }); });
-                    else if (b.id === 'tb-export') { download(((cur.name || 'team').replace(/[^\w\- ]+/g, '').trim() || 'team') + '.bbteam.json', { version: VER, teams: [cur] }); msg('Team exported as a file.'); }
-                    else if (b.id === 'tb-export-all') { if (!teams.length) { msg('No saved teams yet.', true); return; } download('bludbowl-teams.json', { version: VER, teams }); msg(`Exported ${teams.length} team(s).`); }
+                    else if (b.id === 'tb-export') { download(((cur.name || 'team').replace(/[^\w\- ]+/g, '').trim() || 'team') + '.bbteam.json', Object.assign({ version: VER, teams: [cur] }, TRULES.defsFor([cur]).length ? { rules: TRULES.defsFor([cur]) } : {})); msg('Team exported as a file.'); }
+                    else if (b.id === 'tb-export-all') { if (!teams.length) { msg('No saved teams yet.', true); return; } download('bludbowl-teams.json', Object.assign({ version: VER, teams }, TRULES.defsFor(teams).length ? { rules: TRULES.defsFor(teams) } : {})); msg(`Exported ${teams.length} team(s).`); }
                     else if (b.id === 'tb-import') $('tb-file').click();
                     else if (b.id === 'tb-delete') {
                         if (delArmed > Date.now()) {
@@ -3977,19 +4193,22 @@ ol.ci-steps li::marker { content: none; }
                         const to = el.value, from = cur.format || '';
                         change(() => {
                             const wasMP = from === 'matched' || from === 'sevens-mp', bribes = wasMP ? (cur.mind || {}).bribes || 0 : cur.bribes || 0;
-                            delete cur.budget; delete cur.stars; delete cur.mind; cur.players.forEach(p => { delete p.mp; delete p.vet; });
+                            delete cur.budget; delete cur.stars; delete cur.mind; delete cur.rules; cur.players.forEach(p => { delete p.mp; delete p.vet; });
                             if (to) cur.format = to; else delete cur.format;
-                            if (to === 'matched' || to === 'sevens-mp') { cur.budget = to === 'matched' ? 1150 : 600; cur.stars = []; cur.mind = to === 'matched' && bribes ? { bribes } : {}; cur.bribes = 0; cur.fans = 0; }
+                            if (to === 'matched' || to === 'sevens-mp') { cur.budget = to === 'matched' ? 1150 : 600; cur.stars = []; cur.mind = to === 'matched' && bribes ? { bribes } : {}; cur.bribes = 0; cur.fans = 0; if (to === 'matched') setRules(cur, TRULES.last()); }
                             else { cur.bribes = to === 'sevens' ? 0 : Math.min(maxOf('bribes', cur.race, cur), bribes); cur.fans = 1; }
                             if (isSev(cur)) {
                                 cur.coaches = Math.min(3, cur.coaches); cur.cheerleaders = Math.min(3, cur.cheerleaders); cur.rerolls = Math.min(cur.rerolls, 1); cur.apothecary = false;   // a usual Sevens start: one re-roll
                                 const q = cur.players.find(p => sevLineman(cur.race, p.pos)); if (q) q.vet = true;
                             }
                         });
-                        msg({ matched: 'Matched Play: spend the budget, then use your skill points on extra skills and Star Players.',
+                        msg({ matched: gwRules(cur) ? 'Matched Play: spend the budget, then use your skill points on extra skills and Star Players.' : `Tournament team under ${rulesOf(cur).name}: spend the budget, then add the extra skills your tier allows.`,
                             sevens: 'Sevens: 600k for 7 to 11 players, at most 4 of them without the Lineman keyword. Pick a Veteran from your Linemen.',
                             'sevens-mp': 'Sevens Matched Play: draft to the budget, then spend your tier\'s skill points. No Star Players in Sevens.' }[to]
                             || 'Back to a League team: extra skills, Star Players and inducements removed.');
+                    } else if (el.id === 'tb-rules') {
+                        change(() => { setRules(cur, el.value); TRULES.remember(el.value); });
+                        msg(gwRules(cur) ? 'GW Matched Play: choose a budget, then spend your skill points.' : `${rulesOf(cur).name}: Tier ${tierOf(cur)}, budget ${k(mpBudget(cur))}. The team is checked against these rules when you save.`);
                     } else if (el.id === 'tb-budget') {
                         change(() => { cur.budget = +el.value; });
                     } else if (el.id === 'tb-league') {
@@ -4027,7 +4246,7 @@ ol.ci-steps li::marker { content: none; }
             const putRaw = t => { load(); const c = clean(JSON.parse(JSON.stringify(t))), i = teams.findIndex(x => x.id === c.id); if (i >= 0) teams[i] = c; else teams.push(c); return persist(); };
             const watchers = new Set();
             const temp = (t, cb) => { temps.set(t.id, clean(JSON.parse(JSON.stringify(t)))); onTemp = cb; load(); };
-            return { temp, putRaw, watch: f => watchers.add(f), open, list: () => { load(); return teams.filter(t => !temps.has(t.id) && !t.ext); }, toRace, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf };
+            return { temp, putRaw, watch: f => watchers.add(f), open, list: () => { load(); return teams.filter(t => !temps.has(t.id) && !t.ext); }, toRace, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf, mpBudget, rulesOf };
         })();
         // ---------- Trophies: gold, silver and bronze for the top three of a league season, cup or Swiss event ----------
         const TROPHY = {
@@ -4186,7 +4405,7 @@ ol.ci-steps li::marker { content: none; }
                 const fallen = (t.fallen || []).map(f => `<div class="th-res">✝ <b>${esc(f.name)}</b> <span class="pg-dim">${esc((R.types[f.pos] || {}).type || f.pos)} · ${f.gp} games · ${f.td} TD · ${f.cas} CAS · ${f.spp} SPP · ${esc(f.date)}</span></div>`).join('');
                 return `<section class="pg-card th-headcard" style="border-top-color:${t.primary}">
                         <div class="th-title"><span class="th-tok th-tok-big" style="background:${t.primary};color:${t.secondary}">${esc(R.short || '')}</span>
-                        <div><h3 class="th-h">${esc(t.name)}</h3><div class="pg-dim">${esc(R.name)} · ${TB.isSev(t) ? 'Sevens · ' : ''}${TB.isMP(t) ? `Matched Play team · ${k(t.budget)} budget · Tier ${TB.tierOf(t)}${(t.stars || []).length ? ' · ★ ' + esc(t.stars.map(sk => STARS[sk].name).join(', ')) : ''}` : car ? 'Career team' : 'Draft: not played a career match yet'}</div></div></div>
+                        <div><h3 class="th-h">${esc(t.name)}</h3><div class="pg-dim">${esc(R.name)} · ${TB.isSev(t) ? 'Sevens · ' : ''}${TB.isMP(t) ? `${TB.isSev(t) || TB.rulesOf(t).gw ? 'Matched Play team' : esc(TB.rulesOf(t).name)} · ${k(TB.mpBudget(t))} budget · Tier ${TB.tierOf(t)}${(t.stars || []).length ? ' · ★ ' + esc(t.stars.map(sk => STARS[sk].name).join(', ')) : ''}` : car ? 'Career team' : 'Draft: not played a career match yet'}</div></div></div>
                         <div class="th-stats">
                             <div><div class="th-cap">Record</div><div class="th-big">${rc.w}-${rc.d}-${rc.l}</div><div class="pg-dim">${t.played} played</div></div>
                             <div><div class="th-cap">Touchdowns</div><div class="th-big">${rc.tdf}:${rc.tda}</div><div class="pg-dim">for : against</div></div>
@@ -4239,6 +4458,7 @@ ol.ci-steps li::marker { content: none; }
                     if (b.id === 'th-new') { root.classList.add('hidden'); TB.open(() => { root.classList.remove('hidden'); const l = TB.list(); if (l.length) sel = l[l.length - 1].id; render(); }, null, true); return; }
                     if (b.id === 'th-import') { $('th-file').click(); return; }
                     if (b.id === 'th-board') { sel = '__board'; msg(''); render(); $('teams-hub').scrollTop = 0; return; }
+                    if (b.id === 'th-rules') { TRULES.open(() => render()); return; }
                     if (b.id === 'th-export-all') { const l = TB.list(); if (!l.length) { msg('No saved teams yet.', true); return; } TB.download('bludbowl-teams.json', { version: 1, teams: l }); msg(`Exported ${l.length} team${l.length === 1 ? '' : 's'}.`); return; }
                     if (d.sel) { sel = d.sel; armed = { del: 0, reset: 0 }; msg(''); render(); return; }
                     if (!t) return;
@@ -28695,6 +28915,7 @@ ol.ci-steps li::marker { content: none; }
             squads[0].onchange = () => { refreshPick(); homePitchCheck(); if (squads[0].value) teamPickSound(squads[0].value); };
             squads[1].onchange = () => { refreshPick(); if (squads[1].value) teamPickSound(squads[1].value); };
             refreshPick(); homePitchCheck();
+            document.getElementById('btn-trules').addEventListener('click', () => TRULES.open(() => {}));
             document.getElementById('btn-builder').addEventListener('click', () => {
                 const pick = [teamKey(0), teamKey(1)].find(v => v.startsWith('custom:'));
                 TB.open(() => { fillPickers(); refreshPick(); }, pick ? pick.slice(7) : null);
@@ -28974,6 +29195,7 @@ ol.ci-steps li::marker { content: none; }
                 });
             }
             document.getElementById('mm-help').addEventListener('click', () => COACH.help());
+            document.getElementById('mm-trules').addEventListener('click', () => TRULES.open(() => {}));
             document.getElementById('btn-help').addEventListener('click', e => { e.stopPropagation(); COACH.help(); });
             document.getElementById('btn-start-match').addEventListener('click', () => {
                 EXIND.start(teamKey(0), teamKey(1), document.getElementById('chk-career').checked, sevensOn() ? 'sevens' : 'std');

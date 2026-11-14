@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v4.75 (14 Nov 2026)
+- Tournament rules: set up a tournament pack's team rules (budget, extra skills and Star Players per tier, allowed inducements) on
+  a new Tournament Rules screen, then pick them for a tournament team in the Team Builder, which checks the team fits before it saves.
+  Comes with GW Matched Play and Glory on the Gridiron 2.
+
 ## v4.74 (14 Nov 2026)
 - Training: each start-of-match message shows the whole sequence of steps in order at the top, with the current step highlighted.
 
