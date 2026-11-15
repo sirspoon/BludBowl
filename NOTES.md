@@ -11,11 +11,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Bone Head-type failures never re-rolled (coaches 19%), and one-die blocks re-rolled too freely. `rr3` fixes both (Bone Head
   etc. 17%, one-die 'down' blocks 79% -> 45%, coaches 52%); match test against v5.01 running, then release as v5.02 if not
   worse. The "fewer re-rolls on other rolls" gap is the AI rolling fewer risky dice (dodges, Rushes), not refusing re-rolls.
-- **Race strength: FUMBBL v BludBowl's AI** (control room, 15 Nov): `ai-training/race-strength/`. FUMBBL Competitive results
-  (31,541 matches, May-Nov 2026) are in; a full AI round robin (all 435 pairings, home and away, v5.01) is running. Findings
-  go into `ai-training/race-strength/README.md` and get passed to BludBowl local.
-
 ## Recently done (newest first)
+- Race strength, FUMBBL v BludBowl's AI (control room, 15 Nov; `ai-training/race-strength/README.md`): the AI plays
+  Snotlings (22% v FUMBBL 51%), Vampires (25% v 47%; 7 turnovers a match) and Ogres (28% v 40%) much worse than coaches, and
+  hardly ever completes a pass; well-armoured teams (Dwarfs, Old World Alliance, Bretonnians, Undead) do far better against it.
 - v5.01: Squigmobile sprite right edge fixed. v5.00: Star Player Da Red Gobbo's Squigmobile (Exhibition Play only; extra
   Bribe each half; Hail Mary bombs added to the engine); "What's new" rolled up for the major version.
 - v4.96-v4.99: Chaos Wastes weather table and Chaos Wastes pitch (with its own music and crowd taunt). The weather choice is
@@ -30,7 +29,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 ## Ideas and open threads
 - AI: at the end of its turn the AI leaves about one defender a free path to its ball carrier (strong coaches about 0.3), and
   loses the ball more often for it. Two screen attempts made little difference (see `ai-training/README.md`).
-- AI: use the race-strength results to find races the AI plays notably worse than FUMBBL coaches do.
+- AI, from the race-strength results: Vampires' Bloodlust handling (7 turnovers a match); Snotling and Ogre negative traits
+  (re-rolls, the `rr3` work) and Snotling swarm tricks; passing (almost no completions); breaking down armoured teams.
 - Inducements the Glory on the Gridiron pack allows but the game lacks: Mortuary Assistants, Plague Doctors.
 - Editable league and Sevens rulesets (only GW's are shown now); worth doing once there's a real league pack to copy.
 - Teams screen filters: by league or tournament entered, team value, a name search.
