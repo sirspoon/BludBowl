@@ -27,6 +27,8 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
   the shell can: fetch the page and strip the HTML to read it.
 
 ## Working style
+- **Read `NOTES.md` first** (what's in progress, recently done, open ideas, decisions to keep), and update it before you
+  finish a job. Several sessions work on BludBowl; that file is how they keep each other informed.
 - The owner often keeps one long "control room" chat for planning and discussing bigger issues, and can have it start separate
   cloud sessions for individual jobs. A session started for one job should stick to it, push to `main` as usual (pull and
   rebase first: another session may have pushed meanwhile), and finish with a short report of what changed and the version.
