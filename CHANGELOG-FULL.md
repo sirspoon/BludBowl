@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.04 (16 Nov 2026)
+- **Improved (AI):** re-rolls in planning (`rrp1`). Every route now also carries its odds if one team re-roll goes on its
+  riskiest step (`probRR`), and the planner uses those odds for Blitz routes (general, lane and on their carrier), pick-ups and
+  scoring moves and passes when a team re-roll is free this turn and the computer's re-roll rules (`rrWorth`) would spend it on
+  that roll. Failed dodges with a re-roll available 31 -> 51, pick-ups 44 -> 66 over 48 matches. Against v5.03: 288 matches,
+  touchdowns 237-221, won 98, drew 97, lost 93; against BotBowl's bot (Humans, 96) won 56, drew 30, lost 10.
+
 ## v5.03 (16 Nov 2026)
 - **Improved (AI):** last-turn passes (`pas8`). When the computer plays the last turn of a half (the other side has had its turn
   8), a dropped pass costs nothing (the ball is set up again at half time, or the match is over), so its ball carrier is held back

@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.03</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.04</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -15810,7 +15810,7 @@ ol.ci-steps li::marker { content: none; }
             let initialCanDodge = o.canDodge != null ? o.canDodge : (!player.usedSkills.includes('Dodge') && player.skills.includes('Dodge'));
             // (skills2) the odds count an opponent's Diving Tackle (-2 after the dodge roll) and this player's Sure Feet (a Rush re-roll)
             const sk2 = AIX.on(player.team, 'skills2'), sureFeet = o.canSF != null ? o.canSF : sk2 && player.skills.includes('Sure Feet') && !player.usedSkills.includes('Sure Feet');
-            let q = [{ x: ox, y: oy, dist: 0, path: [], prob: 1.0, canDodge: initialCanDodge, canSF: sureFeet }];
+            let q = [{ x: ox, y: oy, dist: 0, path: [], prob: 1.0, canDodge: initialCanDodge, canSF: sureFeet, ms: 1 }];
             visited.set(`${ox},${oy}`, 0);
             
             const valid = [];
@@ -15841,7 +15841,8 @@ ol.ci-steps li::marker { content: none; }
                     let requiresDodge = false;
                     for(let step of curr.path) { if(step.jump || tzG[step.prevY * W + step.prevX] > 0) requiresDodge = true; }
                     let isRush = curr.dist + dist0 > player.remainingMA;
-                    valid.push({ x: curr.x, y: curr.y, path: curr.path, requiresDodge, isRush, prob: Math.round(curr.prob * 100), cost: curr.dist, raw: curr.prob, endCanDodge: curr.canDodge, endCanSF: curr.canSF });
+                    // probRR: the odds if one team re-roll goes on the riskiest step (rrp1: the computer plans with it)
+                    valid.push({ x: curr.x, y: curr.y, path: curr.path, requiresDodge, isRush, prob: Math.round(curr.prob * 100), probRR: Math.min(100, Math.round(curr.prob * (2 - (curr.ms != null ? curr.ms : 1)) * 100)), cost: curr.dist, raw: curr.prob, endCanDodge: curr.canDodge, endCanSF: curr.canSF });
                 }
                 
                 if(curr.dist >= legMax) continue;
@@ -15885,7 +15886,7 @@ ol.ci-steps li::marker { content: none; }
                             if (bp === undefined || np > bp + 1e-9 || nd < bd) {
                                 if (bp === undefined || np > bp) bestP.set(key, np);
                                 if (bd === undefined || nd < bd) visited.set(key, nd);
-                                q.push({ x: nx, y: ny, dist: nd, path: [...curr.path, {x:nx, y:ny, prevX: curr.x, prevY: curr.y}], prob: np, canDodge: newCanDodge, canSF: newCanSF });
+                                q.push({ x: nx, y: ny, dist: nd, path: [...curr.path, {x:nx, y:ny, prevX: curr.x, prevY: curr.y}], prob: np, canDodge: newCanDodge, canSF: newCanSF, ms: Math.min(curr.ms != null ? curr.ms : 1, stepProb) });
                             }
                         }
                     }
@@ -15905,7 +15906,7 @@ ol.ci-steps li::marker { content: none; }
                             if (player.skills.includes('Sure Hands') && !player.usedSkills.includes('Sure Hands') && player.actionTaken !== 'secure_ball') bp = 1 - Math.pow(1 - bp, 2);
                             stepProb *= bp;
                         }
-                        q.push({ x: nx, y: ny, dist: curr.dist + 2, path: [...curr.path, { x: nx, y: ny, prevX: curr.x, prevY: curr.y, jump: true }], prob: curr.prob * stepProb, canDodge: curr.canDodge });
+                        q.push({ x: nx, y: ny, dist: curr.dist + 2, path: [...curr.path, { x: nx, y: ny, prevX: curr.x, prevY: curr.y, jump: true }], prob: curr.prob * stepProb, canDodge: curr.canDodge, ms: Math.min(curr.ms != null ? curr.ms : 1, stepProb) });
                     }
                 }
             }
@@ -27544,7 +27545,7 @@ ol.ci-steps li::marker { content: none; }
                 receivers.forEach(r => {
                     const ri = runIn.get(r.id); if (ri <= 0) return;
                     spots.forEach(s => {
-                        const sp = s.prob / 100;   // a dodge or Rush on the way there
+                        const sp = pPlan(c, s, true) / 100;   // a dodge or Rush on the way there (rrp1: with a team re-roll counted)
                         if (!state.handoffUsed && Math.max(Math.abs(s.x - r.x), Math.abs(s.y - r.y)) === 1) {
                             const v = catchProb(r) * ri * sp;
                             if (!best || v > best.v) best = { v, kind: 'handoff', r, s };
@@ -27856,6 +27857,16 @@ ol.ci-steps li::marker { content: none; }
             }
 
             // ---- general blitz: knock someone over where it helps most ----
+            // (rrp1) a strong coach plans a risky play knowing a team re-roll can rescue it; the computer only re-rolled after the
+            // event and judged every route by its odds without one. pPlan: a route's odds (0-100) with the team re-roll counted, when
+            // one is free this turn and rrWorth would spend it on this kind of roll (critical: the ball at stake)
+            function pPlan(p, m, critical) {
+                if (!m || m.probRR == null || m.probRR <= m.prob || !AIX.on(p.team, 'rrp1')) return m ? m.prob : 0;
+                const me = p.team;
+                if (me !== state.activeTeam || !(state.rr[me] > 0) || state.teamRRUsedThisTurn) return m.prob;
+                const type = m.isRush && !m.requiresDodge ? 'RUSH' : 'DODGE';
+                return rrWorth({ type, player: p }, critical, undefined, undefined) ? m.probRR : m.prob;
+            }
             function blitzPlan(me, act) {
                 if (state.blitzUsed) return null;
                 let best = null;
@@ -27876,13 +27887,14 @@ ol.ci-steps li::marker { content: none; }
                     const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                     if (c && c.id === p.id) return;
                     movesFor(p).forEach(m => {
-                        if (m.prob < AIX.p(me, 'bzProb', 75)) return;   // (AIP bzProb: how safe the route must be, %; v4.31: 75, was 90)
+                        const mp = pPlan(p, m, false);   // (rrp1: with a team re-roll counted when one would be spent)
+                        if (mp < AIX.p(me, 'bzProb', 75)) return;   // (AIP bzProb: how safe the route must be, %; v4.31: 75, was 90)
                         const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
                         state.players.forEach(d => {
                             if (d.team === me || !onPitch(d) || d.isDown || Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) !== 1) return;
                             blitzCtx = true; const e = blockEval(p, d, m.x, m.y); blitzCtx = false;
                             if (e.pTurn > AIX.p(me, 'bzTurn', 0.12)) return;
-                            const pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
+                            const pr = mp / 100 * (left >= 1 ? 1 : 5 / 6);
                             const s = pr * (e.ev + e.pDown * extra(p, d)) - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0);
                             if (!best || s > best.s) best = { p, d, s };
                         });
@@ -28180,9 +28192,10 @@ ol.ci-steps li::marker { content: none; }
                         const cand = cheb(p, d) === 1 && !p.isDown ? [{ x: p.x, y: p.y, prob: 100, path: [] }] : [];
                         ms.forEach(m => { if (Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) === 1 && !(m.x === ourC.x && m.y === ourC.y)) cand.push(m); });
                         cand.forEach(m => {
-                            if (m.prob < 80) return;
+                            const mp = pPlan(p, m, false);   // (rrp1)
+                            if (mp < 80) return;
                             const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
-                            const pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
+                            const pr = mp / 100 * (left >= 1 ? 1 : 5 / 6);
                             blitzCtx = true; const e = blockEval(p, d, m.x, m.y); blitzCtx = false;
                             if (e.pTurn > 0.2) return;
                             const sc = pr * (e.ev + laneValue(e, g)) - (1 - pr) * 8 - e.pTurn * 6;
@@ -28295,7 +28308,7 @@ ol.ci-steps li::marker { content: none; }
                     movesFor(p).forEach(m => {
                         if (Math.max(Math.abs(m.x - carrier.x), Math.abs(m.y - carrier.y)) !== 1) return;
                         const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
-                        const pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
+                        const pr = pPlan(p, m, true) / 100 * (left >= 1 ? 1 : 5 / 6);   // (rrp1)
                         blitzCtx = true; const e = blockEval(p, carrier, m.x, m.y); blitzCtx = false;
                         const s = pr * (e.ev + bonus) - (1 - pr) * miss - e.pTurn * riskW;
                         if (!best || s > best.s) best = { p, s };
@@ -28418,9 +28431,9 @@ ol.ci-steps li::marker { content: none; }
 
                 // 1. score a touchdown if we can
                 if (carrier && carrier.team === me && act.includes(carrier)) {
-                    const td = movesFor(carrier).filter(m => m.x === endX(me)).sort((a, b) => b.prob - a.prob)[0];
+                    const td = movesFor(carrier).filter(m => m.x === endX(me)).sort((a, b) => pPlan(carrier, b, true) - pPlan(carrier, a, true))[0];
                     const via = throwToScore(carrier, me, lastTurn);
-                    const direct = td ? td.prob / 100 : 0;
+                    const direct = td ? pPlan(carrier, td, true) / 100 : 0;   // (rrp1: a run in with a team re-roll to rescue it)
                     // clock management: with the carrier safe and the score in reach, take the touchdown as late as we can,
                     // so they get as few turns as possible to reply - but only when nothing much can get at the carrier
                     if (td && direct >= 0.9 && !lastTurn && stallOK(carrier, me)) {
@@ -28600,7 +28613,7 @@ ol.ci-steps li::marker { content: none; }
                         if (hasSk(p, 'No Hands') || hasSk(p, 'No Ball')) return;
                         const m = movesFor(p).find(m => m.x === bx && m.y === by);
                         if (!m) return;
-                        let pr = m.prob, kind = 'pickup';
+                        let pr = pPlan(p, m, true), kind = 'pickup';   // (rrp1)
                         if (quiet && !state.secureUsed && !hasSk(p, 'Unsteady') && !isBigGuy(p)) {
                             const pathOnly = m.prob / (100 * withSkillRR((7 - clampT(getPickupTarget(p, bx, by) + weatherTargetMod('PICKUP'))) / 6, p, 'Sure Hands'));
                             const sec = Math.min(100, pathOnly * 100) * (5 / 6);

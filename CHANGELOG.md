@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.04 (16 Nov 2026)
+- The computer plans risky plays (a Blitz needing a Rush or dodge, a hard pick-up, a run in to score) counting on a team
+  re-roll when it has one to spare, instead of only re-rolling after a failure.
+
 ## v5.03 (16 Nov 2026)
 - The computer throws a pass on the last turn of a half when you don't get another turn (it costs nothing then, and a completion
   earns its passer Star Player Points), as strong human coaches often do.
