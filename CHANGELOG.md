@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.01 (15 Nov 2026)
+- Da Red Gobbo's Squigmobile no longer looks cut off on its right-hand side: the elf's sock, the bomb's fuse and the
+  candy-cane runner now stop short of the edge with an outline.
+
 ## v5.00 (14 Nov 2026)
 - **New Star Player: Da Red Gobbo's Squigmobile** (200k, Exhibition Play only, any team but Dwarfs): a Goblin war machine
   with Bombardier, Hail Mary Pass (bombs thrown anywhere on the pitch), Juggernaut, Stand Firm, Mighty Blow and Secret Weapon,

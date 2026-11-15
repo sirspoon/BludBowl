@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.01 (15 Nov 2026)
+- Da Red Gobbo's Squigmobile sprite: the right-hand column no longer runs to the edge of the 32×32 grid unoutlined, which
+  made it look clipped. The elf's sock is a pixel narrower with an outline, the bomb's fuse and spark moved in a column (the bomb
+  top gets its outline), and the candy-cane runner ends with an outline.
+
 ## v5.00 (14 Nov 2026)
 - **New Star Player: Da Red Gobbo's Squigmobile.** 200k; MA 5, ST 6, AG 5+, PA –, AV 10+ (Big Guy, Goblin, Special); Bombardier,
   Break Tackle, Dirty Player, Hail Mary Pass, Hatred (Dwarf), Juggernaut, Loner (4+), Mighty Blow, No Ball, Secret Weapon, Stand Firm.
