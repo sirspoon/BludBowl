@@ -30,7 +30,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - AI: at the end of its turn the AI leaves about one defender a free path to its ball carrier (strong coaches about 0.3), and
   loses the ball more often for it. Two screen attempts made little difference (see `ai-training/README.md`).
 - AI, from the race-strength results: Vampires' Bloodlust handling (7 turnovers a match); Snotling and Ogre negative traits
-  (re-rolls, the `rr3` work) and Snotling swarm tricks; passing (almost no completions); breaking down armoured teams.
+  (re-rolls, the `rr3` work) and Snotling swarm tricks; breaking down armoured teams.
+- **AI passing (the owner is worried about this one):** the AI essentially never throws a pass. Measured 15 Nov: 0 pass
+  attempts in 8 matches with pass-friendly teams (Humans, High/Wood/Dark Elves, Skaven, Elven Union) on v5.01 and on v4.31,
+  1 in 8 on v4.11; 19 completions in the whole 870-match round robin (0.01 per team per match). It hands off about as often
+  as coaches (0.6-0.75 v 0.46 a team a match). Strong FUMBBL coaches pass in about half their matches (at least 0.59
+  passers per team per match). Long-standing, not a recent regression; the October attempts (`passing-experiments.patch`:
+  `passv`, `recvfirst`) raised hand-offs and passes a little but didn't win more. See "Passing" in `ai-training/README.md`.
 - Inducements the Glory on the Gridiron pack allows but the game lacks: Mortuary Assistants, Plague Doctors.
 - Editable league and Sevens rulesets (only GW's are shown now); worth doing once there's a real league pack to copy.
 - Teams screen filters: by league or tournament entered, team value, a name search.
