@@ -31,7 +31,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   loses the ball more often for it. Two screen attempts made little difference (see `ai-training/README.md`).
 - AI, from the race-strength results: Vampires' Bloodlust handling (7 turnovers a match); Snotling and Ogre negative traits
   (re-rolls, the `rr3` work) and Snotling swarm tricks; breaking down armoured teams.
-- **AI passing (the owner is worried about this one):** the AI essentially never throws a pass. Measured 15 Nov: 0 pass
+- **AI passing: next job for BludBowl local, after v5.02 (the owner's choice, 15 Nov).** The owner is worried about it: the AI essentially never throws a pass. Measured 15 Nov: 0 pass
   attempts in 8 matches with pass-friendly teams (Humans, High/Wood/Dark Elves, Skaven, Elven Union) on v5.01 and on v4.31,
   1 in 8 on v4.11; 19 completions in the whole 870-match round robin (0.01 per team per match). It hands off about as often
   as coaches (0.6-0.75 v 0.46 a team a match). Strong FUMBBL coaches pass in about half their matches (at least 0.59
