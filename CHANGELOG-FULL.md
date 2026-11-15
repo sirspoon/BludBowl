@@ -2,6 +2,19 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.03 (16 Nov 2026)
+- **Improved (AI):** last-turn passes (`pas8`). When the computer plays the last turn of a half (the other side has had its turn
+  8), a dropped pass costs nothing (the ball is set up again at half time, or the match is over), so its ball carrier is held back
+  (moving him can't score) and throws once everyone else has acted, to the team-mate with the best odds (at least 30%). Half of
+  strong FUMBBL coaches' passes come on that turn: short throws that rarely score, the completion worth Star Player Points in
+  league play. Before, the computer threw almost no passes (2 in 12 matches between passing teams). Against v5.02: 288 matches on
+  12 teams, touchdowns 226-241, won 95, drew 93, lost 100, completed passes 19-11; against BotBowl's bot (Humans, 96) won 56, drew
+  27, lost 13, completed passes 8-0.
+- Tried and left out (`ai-training/passing-2026-11.patch`): short passes to an open team-mate in turns 1-7 (`pas1`, a softer
+  penalty for a drop when no opponent is within 3 squares of the receiver) and catchers moving into open squares ahead before the
+  carrier acts (`rcv1`, October's `recvfirst`): together they only took completions from about 0.06 to 0.1 a team a match
+  between passing teams, results level. Open receivers in safe passing range are rare.
+
 ## v5.02 (15 Nov 2026)
 - **Improved (AI):** team re-rolls on Bone Head, Really Stupid, Animal Savagery, Unchannelled Fury, Take Root, Bloodlust and the
   like (`rr3`): the computer was never asked whether to re-roll these. Now it does when the player is about to Blitz, hand off

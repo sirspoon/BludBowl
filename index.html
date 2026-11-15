@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.02</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.03</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -28340,9 +28340,39 @@ ol.ci-steps li::marker { content: none; }
                 let after = before; try { after = carrierReach(c); } finally { p.x = ox; p.y = oy; p.isDown = down; }
                 return after > before;
             }
+            // (pas8) we play the last turn of the half (the other side has had its turn 8): a dropped pass costs nothing then (the
+            // ball is set up again at half time, or the match is over). Half of strong coaches' passes come on that turn: short ones
+            // that rarely score, the completion worth Star Player Points in league play. The carrier is held back (moving him can't
+            // score) and throws once everyone else has acted.
+            let pas8Key = null;
+            const lastWord = me => state.half <= 2 && state.turn[me] >= TURNS && state.turn[other(me)] >= TURNS;
+            function pas8Plan(me) {
+                const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                if (!c || c.team !== me || !onPitch(c) || c.isDown || c.hasActed || c.pa == null || state.passUsed || hasSk(c, 'My Ball')) return null;
+                let best = null;
+                state.players.forEach(r => {
+                    if (r.team !== me || r.id === c.id || !onPitch(r) || r.isDown || r.isStunned || r.isDistracted || hasSk(r, 'No Hands') || hasSk(r, 'No Ball')) return;
+                    const v = passOdds(c, c.x, c.y, r) + (toGo(r.x, me) < toGo(c.x, me) ? 0.02 : 0);
+                    if (!best || v > best.v) best = { r, v };
+                });
+                if (!best || best.v < AIX.p(me, 'pas8Min', 0.3)) return null;
+                return { pid: c.id, kind: 'pass', receiver: best.r.id, stay: true, pick: () => null };
+            }
             function choose() {
-                let first = choose0();
                 const me = state.activeTeam;
+                if (AIX.on(me, 'pas8') && lastWord(me)) {
+                    const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null, k = state.half + ':' + me;
+                    // hold the carrier back (unless he can score: choose0 takes the touchdown first)
+                    if (c && c.team === me && onPitch(c) && !c.hasActed && pas8Key !== k && !movesFor(c).some(m => m.x === endX(me) && m.prob >= 30)) { pas8Key = k; tried.add(c.id); }
+                    if (pas8Key === k) {
+                        const f0 = choose0();
+                        if (f0 && f0.pid != null) return f0;
+                        if (c) tried.delete(c.id);
+                        pas8Key = 'done:' + k;
+                        return pas8Plan(me) || f0;
+                    }
+                }
+                let first = choose0();
                 // (lane1) a team-mate moving in round our carrier before he has moved can cut off his way forward (the owner has seen
                 // it: a route to the end zone shut by the support stepping in first): that move waits until after him
                 if (AIX.on(me, 'lane1') && cutsLane(me, first)) {

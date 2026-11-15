@@ -1,0 +1,135 @@
+diff --git a/index.html b/index.html
+index 7a0c3d9..530e491 100644
+--- a/index.html
++++ b/index.html
+@@ -27514,10 +27514,16 @@ ol.ci-steps li::marker { content: none; }
+                 const receivers = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Hands') && !hasSk(r, 'No Ball'));
+                 const spots = [{ x: c.x, y: c.y }, ...movesFor(c).filter(m => m.prob >= 100)];
+                 let best = null;
++                // (pas1) strong FUMBBL coaches throw short, safe passes to an open team-mate (58% of their passes go to one 4+ squares
++                // from any opponent, gaining 1-3 squares): with hardly anyone able to get at the receiver, a pass needn't be a big gain,
++                // and a drop is judged less harshly (the AI threw 2 passes in 12 matches with passing teams: ai-training/README.md, "Passing")
++                const p1 = AIX.on(me, 'pas1') && state.turn[me] < TURNS;
+                 receivers.forEach(r => {
+                     const pt = AIX.on(me, 'pass') && passingTeam(me);
+                     const rv = bestSpotFor(r) + ((pt || AIX.p(me, 'nextAll', 0)) && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
+-                    if (rv < stay + (pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
++                    // (open: no opponent on his feet within pas1Gap (3) squares, as for most of the coaches' passes)
++                    const open = p1 && !state.players.some(q => q.team !== me && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, r) <= AIX.p(me, 'pas1Gap', 3));
++                    if (rv < stay + (open ? AIX.p(me, 'pas1Gain', 0) : pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
+                     spots.forEach(s => {
+                         const opts = [];
+                         if (!state.handoffUsed && Math.max(Math.abs(s.x - r.x), Math.abs(s.y - r.y)) === 1) opts.push(['handoff', catchProb(r)]);
+@@ -27526,8 +27532,9 @@ ol.ci-steps li::marker { content: none; }
+                             const pe = rr ? 1 - Math.pow(1 - p, 2) * 0.9 : p;          // a team re-roll softens a miss
+                             const passer = agileTeam(me) || hasSk(c, 'Pass') || (c.pa != null && c.pa <= 3);   // a team that can throw
+                             if (pe < (kind === 'handoff' ? 0.7 : passer ? (agileTeam(me) ? 0.55 : 0.62) - (pt ? 0.06 : 0) - AIX.p(me, 'passEase', 0) : 0.8)) return;
+-                            const ev = pe * rv + (1 - pe) * (stay - 12);               // a dropped ball is a turnover
+-                            if (ev > stay + 1.2 && (!best || ev > best.ev)) best = { ev, kind, r, s };
++                            const soft = open && kind === 'pass' && pe >= AIX.p(me, 'pas1Odds', 0.7);
++                            const ev = pe * rv + (1 - pe) * (stay - (soft ? AIX.p(me, 'pas1Drop', 6) : 12));   // a dropped ball is a turnover
++                            if (ev > stay + (soft ? AIX.p(me, 'pas1Ev', 0.5) : 1.2) && (!best || ev > best.ev)) best = { ev, kind, r, s };
+                         });
+                     });
+                 });
+@@ -27648,6 +27655,48 @@ ol.ci-steps li::marker { content: none; }
+                 });
+                 return out.sort((a, b) => b.s - a.s).slice(0, k);
+             }
++            // (rcv1, from October's recvfirst) open squares ahead of the ball, in passing range of square a: out of every tackle zone,
++            // at most recvSafe of their players able to reach them, the best about recvAhead squares on, apart from each other
++            function recvSquares(me, a, k) {
++                if (k <= 0) return [];
++                const fwd = me === TEAMS.HUMAN ? 1 : -1, ahead = AIX.p(me, 'recvAhead', 6), range = AIX.p(me, 'recvRange', 6.4), safe = AIX.p(me, 'recvSafe', 1);
++                const cand = [];
++                for (let dx = AIX.p(me, 'recvMin', 3); dx <= 11; dx++) for (let dy = -6; dy <= 6; dy++) {
++                    const x = a.x + dx * fwd, y = a.y + dy;
++                    if (!inPitch(x, y) || y < 1 || y > CFG.rows - 2 || Math.hypot(dx, dy) > range) continue;
++                    const q = getPlayer(x, y); if (q && q.team !== me) continue;
++                    if (tzFor(x, y, me) > 0) continue;
++                    const rch = reachers(x, y, me); if (rch > safe) continue;
++                    cand.push({ x, y, s: -Math.abs(dx - ahead) * 0.5 - rch * 1.5 - edgeRisk(x, y, me) * 2 + (toGo(x, me) <= 8 ? 1.5 : 0) });
++                }
++                cand.sort((u, v) => v.s - u.s);
++                const out = [];
++                for (const c of cand) { if (out.length >= k) break; if (out.every(o => Math.max(Math.abs(o.x - c.x), Math.abs(o.y - c.y)) >= 3)) out.push(c); }
++                return out;
++            }
++            // (rcv1) our carrier still to act: the best catchers go into those open squares first, so a pass can follow this turn
++            // (the AI threw 2 passes in 12 matches with passing teams: it rarely had anyone open to throw to)
++            function recvPlan(me, act, c) {
++                const n = AIX.p(me, 'recvN', passingTeam(me) ? 2 : 1);
++                const sq = recvSquares(me, c, n + 1);
++                if (!sq.length) return null;
++                const okR = q => !hasSk(q, 'No Hands') && !hasSk(q, 'No Ball') && !isBigGuy(q);
++                const ready = state.players.filter(q => q.team === me && q.id !== c.id && onPitch(q) && !q.isDown && okR(q) && tzFor(q.x, q.y, me) === 0 && sq.some(s => cheb(q, s) <= 1)).length;
++                if (ready >= n) return null;
++                let best = null;
++                act.forEach(p => {
++                    if (p.id === c.id || p.isDown || !okR(p) || !canReposition(p, me)) return;
++                    const q = (hasSk(p, 'Catch') ? 4 : 0) + (3 - p.ag) * 1.5 + (p.ma - 6) * 0.5;
++                    movesFor(p).forEach(m => {
++                        if (m.prob < 100) return;
++                        const s = sq.find(t => t.x === m.x && t.y === m.y);
++                        if (s && (!best || q + s.s > best.v)) best = { p, m, v: q + s.s };
++                    });
++                });
++                if (!best) return null;
++                const tx = best.m.x, ty = best.m.y;
++                return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
++            }
+             function formationTargets(me, cageOnly) {
+                 const T = [], c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                 const add = (x, y, role) => {
+@@ -28340,9 +28389,39 @@ ol.ci-steps li::marker { content: none; }
+                 let after = before; try { after = carrierReach(c); } finally { p.x = ox; p.y = oy; p.isDown = down; }
+                 return after > before;
+             }
++            // (pas8) we play the last turn of the half (the other side has had its turn 8): a dropped pass costs nothing then (the
++            // ball is set up again at half time, or the match is over). Half of strong coaches' passes come on that turn: short ones
++            // that rarely score, the completion worth Star Player Points in league play. The carrier is held back (moving him can't
++            // score) and throws once everyone else has acted.
++            let pas8Key = null;
++            const lastWord = me => state.half <= 2 && state.turn[me] >= TURNS && state.turn[other(me)] >= TURNS;
++            function pas8Plan(me) {
++                const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
++                if (!c || c.team !== me || !onPitch(c) || c.isDown || c.hasActed || c.pa == null || state.passUsed || hasSk(c, 'My Ball')) return null;
++                let best = null;
++                state.players.forEach(r => {
++                    if (r.team !== me || r.id === c.id || !onPitch(r) || r.isDown || r.isStunned || r.isDistracted || hasSk(r, 'No Hands') || hasSk(r, 'No Ball')) return;
++                    const v = passOdds(c, c.x, c.y, r) + (toGo(r.x, me) < toGo(c.x, me) ? 0.02 : 0);
++                    if (!best || v > best.v) best = { r, v };
++                });
++                if (!best || best.v < AIX.p(me, 'pas8Min', 0.3)) return null;
++                return { pid: c.id, kind: 'pass', receiver: best.r.id, stay: true, pick: () => null };
++            }
+             function choose() {
+-                let first = choose0();
+                 const me = state.activeTeam;
++                if (AIX.on(me, 'pas8') && lastWord(me)) {
++                    const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null, k = state.half + ':' + me;
++                    // hold the carrier back (unless he can score: choose0 takes the touchdown first)
++                    if (c && c.team === me && onPitch(c) && !c.hasActed && pas8Key !== k && !movesFor(c).some(m => m.x === endX(me) && m.prob >= 30)) { pas8Key = k; tried.add(c.id); }
++                    if (pas8Key === k) {
++                        const f0 = choose0();
++                        if (f0 && f0.pid != null) return f0;
++                        if (c) tried.delete(c.id);
++                        pas8Key = 'done:' + k;
++                        return pas8Plan(me) || f0;
++                    }
++                }
++                let first = choose0();
+                 // (lane1) a team-mate moving in round our carrier before he has moved can cut off his way forward (the owner has seen
+                 // it: a route to the end zone shut by the support stepping in first): that move waits until after him
+                 if (AIX.on(me, 'lane1') && cutsLane(me, first)) {
+@@ -28687,6 +28766,10 @@ ol.ci-steps li::marker { content: none; }
+                 const bz = blitzPlan(me, act);
+                 if (bz) return bz;
+ 
++                if (AIX.on(me, 'rcv1') && carrier && carrier.team === me && act.includes(carrier) && !state.charge && !state.aiStalling && !state.passUsed && carrier.pa != null && !lastTurn) {
++                    const rp = recvPlan(me, act, carrier);
++                    if (rp) return rp;
++                }
+                 // 7. switch the play to a team-mate in space if they can take it further, otherwise run it
+                 if (carrier && carrier.team === me && act.includes(carrier) && !state.charge && !state.aiStalling) {
+                     const sw = switchPlay(carrier, me);

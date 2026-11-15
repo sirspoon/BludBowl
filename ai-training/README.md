@@ -1089,3 +1089,18 @@ rows the carrier could reach this turn (0.39, 9%). Released in v4.33 (CHANGELOG-
   (16% of the re-rolls). 288 matches against v5.01: touchdowns 237-220, won 102, drew 91, lost 95; BotBowl's bot 133-35-24 (192).
 - `rr3one` (off): one-die blocks re-rolled only with the ball at stake. Alone 227-229, 98-92-98; with the Bone Head part
   442-459, 191-178-207 over 576. Left off.
+
+## Passing again (Nov 2026, v5.03)
+Measured inside the game (12 matches between passing teams, v5.02): `switchPlay` was asked 184 times; 925 of 1,344 receivers
+weren't "clearly better placed", and of 19,298 pass options 16,844 failed on the odds and 2,275 on the value test (a drop counts
+the ball's value less 12). 2 passes chosen (hand-offs 41). `nn/passes.py` on the replays' decisions: strong coaches pass 0.31 times
+a team a match (FUMBBL's own stats give about 0.4 completions, so the decisions miss some, likely pick-up-and-pass), 52% on turn 8
+of a half; the ball gains 1-3 squares 47%, goes backwards or sideways 34%, 7+ squares 6%; the receiver is 4+ squares from any
+opponent 58%; the team scores by its next turn 16% (turn-8 passes 27%, others 10%); in the same positions the AI picked the ball
+up 44% (it picks up and runs where coaches pick up and pass).
+- `pas8` (released in v5.03): the last turn of a half when the other side doesn't play again: the carrier is held back and throws
+  at the end. 288 matches against v5.02: touchdowns 226-241, won 95, drew 93, lost 100, completions 19-11; BotBowl's bot 56-27-13.
+- `pas1` (short passes to a team-mate with nobody within 3 squares; a drop costs 6, then 3, then 1.5 instead of 12) and `rcv1`
+  (October's `recvfirst`: catchers into open squares ahead before the carrier acts): completions between passing teams about
+  0.06 -> 0.1 a team a match, results level either way (46-37, 40-50 over 48). Left out: `ai-training/passing-2026-11.patch`.
+- Next idea: pick-up-and-pass as one action, as coaches do.

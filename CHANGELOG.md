@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.03 (16 Nov 2026)
+- The computer throws a pass on the last turn of a half when you don't get another turn (it costs nothing then, and a completion
+  earns its passer Star Player Points), as strong human coaches often do.
+
 ## v5.02 (15 Nov 2026)
 - The computer now uses a team re-roll on a failed Bone Head, Really Stupid or Animal Savagery roll when that player's action
   matters (a Blitz, a hand-off or pass, or carrying the ball) and it can spare one.
