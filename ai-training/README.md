@@ -1070,3 +1070,22 @@ rows the carrier could reach this turn (0.39, 9%). Released in v4.33 (CHANGELOG-
   position (chasing back once he's past 1.74 -> 1.63 a turn); 288 matches against v4.33: touchdowns 252-235, won 97, drew 97, lost
   94; BotBowl's bot 62-22-12. In BotBowl itself (224 games, all teams, against the scripted bot): v4.33 won 134, drew 56, lost 34,
   touchdowns 218-72.
+
+## Team re-rolls again (Nov 2026, v5.02)
+`ai-training/bb-rerolls-jsdom.js` (the computer, 48 mirror matches on 12 teams) against `fumbbl-rerolls.py` (288 replays):
+
+| | coaches | AI v5.01 | AI v5.02 |
+|---|---|---|---|
+| team re-rolls used a team a match: on rolls / block dice | 2.10 / 2.34 | 1.05 / 2.69 | 1.33 / 2.66 |
+| left unused at the end of a half | 0.24 | 0.26 | 0.16 |
+| failed rolls re-rolled, turns 1-2 / 7-8 | 48 / 82% | 56 / 87% | (much the same) |
+| Bone Head, Really Stupid, Animal Savagery... re-rolled | 19% (7% of their re-rolls) | never | 17% (6%) |
+| blocks with the attacker down, re-rolled: 1 / 2 / 3 dice | 52 / 67 / 55% | 79 / 73 / 86% | 45 / 75 / 86% with `rr3one`; as v5.01 without |
+
+- The timing problem of October (re-rolls spent early) is gone. Coaches use twice as many re-rolls on rolls mainly because they
+  fail far more risky rolls (dodges, Rushes), not because the computer refuses them.
+- `rr3` (released, v5.02): the computer decides on Bone Head-type re-rolls (it was never asked): when the player is about to Blitz,
+  hand off or pass, or has the ball, and `rrWorth` says one can be spared. Counting a plain block as a reason too re-rolled 53%
+  (16% of the re-rolls). 288 matches against v5.01: touchdowns 237-220, won 102, drew 91, lost 95; BotBowl's bot 133-35-24 (192).
+- `rr3one` (off): one-die blocks re-rolled only with the ball at stake. Alone 227-229, 98-92-98; with the Bone Head part
+  442-459, 191-178-207 over 576. Left off.

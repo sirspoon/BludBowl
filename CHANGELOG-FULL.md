@@ -2,6 +2,19 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.02 (15 Nov 2026)
+- **Improved (AI):** team re-rolls on Bone Head, Really Stupid, Animal Savagery, Unchannelled Fury, Take Root, Bloodlust and the
+  like (`rr3`): the computer was never asked whether to re-roll these. Now it does when the player is about to Blitz, hand off
+  or pass, or has the ball, and a re-roll can be spared (the same judgement as its other re-rolls), or when it has plenty.
+  Strong FUMBBL coaches re-roll 19% of these failures (7% of their re-rolls); the computer now 17% (6%). Against v5.01: 288
+  matches, touchdowns 237-220, won 102, drew 91, lost 95; against BotBowl's bot (Humans, 192 matches) won 133, drew 35, lost 24.
+  A second part, re-rolling one-die blocks only with the ball at stake (coaches re-roll 52% of one-die blocks where the attacker
+  goes down, the computer 79%), is in the code but off (AIP `rr3one`): level alone (98-98 over 288) and, with the first part,
+  191-207 over 576.
+- **Testing:** `tools/ai-match.js` (Playwright) runs on the installed Chrome when Playwright's own Chromium isn't downloaded, about
+  three times as fast as `ai-match-jsdom.js` (288 matches in under 6 minutes with `--par 12`), and takes `--oldp` like the jsdom
+  runner. `ai-training/bb-rerolls-jsdom.js`: the computer's re-roll use without a browser (for `fumbbl-rerolls.py --bb`).
+
 ## v5.01 (15 Nov 2026)
 - Da Red Gobbo's Squigmobile sprite: the right-hand column no longer runs to the edge of the 32×32 grid unoutlined, which
   made it look clipped. The elf's sock is a pixel narrower with an outline, the bomb's fuse and spark moved in a column (the bomb

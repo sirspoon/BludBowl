@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.02 (15 Nov 2026)
+- The computer now uses a team re-roll on a failed Bone Head, Really Stupid or Animal Savagery roll when that player's action
+  matters (a Blitz, a hand-off or pass, or carrying the ball) and it can spare one.
+
 ## v5.01 (15 Nov 2026)
 - Da Red Gobbo's Squigmobile no longer looks cut off on its right-hand side: the elf's sock, the bomb's fuse and the
   candy-cane runner now stop short of the edge with an outline.

@@ -9,17 +9,18 @@
 //        Sure Hands/Accurate, linemen in turn Block/Guard/Wrestle/Tackle plus Dodge on agile teams) - roughly mid-season teams.
 // --devnew / --devold '{"lineman":["Guard"],"catcher":["Dodge"],...}'  instead of --dev: the skills each side's players get by
 //        position (big, strong, blitzer, catcher, thrower, lineman; a missing position gets nothing) - to compare skills.
-// --newp '{"key":value}'  tuning values for the new side (the AIX.p settings in index.html), to try different tolerances.
+// --newp '{"key":value}'  tuning values for the new side (the AIX.p settings in index.html), to try different tolerances;
+// --oldp the same for the old side (e.g. --oldp '{"brain":"botbowl"}' for BotBowl's scripted bot).
 // --new / --old  which AI improvements (the AIX switches in index.html) each side has: 'all' (as in play), 'none',
 //                or a comma list. With the same setting on both sides it just plays matches (e.g. to read the stats).
 // The new AI takes the home side in even-numbered matches and the away side in odd ones, so kick-off order evens out.
-// Needs Playwright (with Chromium). Serves index.html itself, so no web server is needed.
+// Needs Playwright (with its Chromium, or the installed Chrome). Serves index.html itself, so no web server is needed.
 const http = require('http'), fs = require('fs'), path = require('path');
 let chromium;
 try { ({ chromium } = require('playwright')); } catch (e) { ({ chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright')); }
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const DEV = process.argv.includes('--dev'), DEVNEW = JSON.parse(arg('devnew', 'null')), DEVOLD = JSON.parse(arg('devold', 'null')), NEWP = JSON.parse(arg('newp', '{}')), N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
+const DEV = process.argv.includes('--dev'), DEVNEW = JSON.parse(arg('devnew', 'null')), DEVOLD = JSON.parse(arg('devold', 'null')), NEWP = JSON.parse(arg('newp', '{}')), OLDP = JSON.parse(arg('oldp', '{}')), N = +arg('n', 4), PAR = +arg('par', 4), NEW = arg('new', 'all'), OLD = arg('old', 'all'), OUT = arg('out', null), LIMIT = +arg('limit', 240) * 1000;
 const jobs = [];
 (arg('races', '') ? arg('races').split(',') : []).forEach(r => { for (let i = 0; i < N; i++) jobs.push({ a: r, b: r, i }); });
 (arg('pairs', '') ? arg('pairs').split(',') : []).forEach(pr => { const [a, b] = pr.split(':'); for (let i = 0; i < N; i++) jobs.push({ a, b, i }); });
@@ -47,7 +48,7 @@ async function play(browser, port, job) {
   await p.route(/cdn\.tailwindcss\.com/, r => r.fulfill({ body: '' }));   // styling only; keeps the run offline
   await p.goto(`http://localhost:${port}/index.html?simtest`);
   const t0 = Date.now();
-  await p.evaluate(([a, b, f0, f1, p0, p1]) => { window.AIP = [p0, p1]; AIX.flags[0] = f0; AIX.flags[1] = f1; AI.set(0, true); AI.set(1, true); window.launchMatch(a, b, { replaceOk: true }); }, [job.a, job.b, flags(f0), flags(f1), newHome ? NEWP : {}, newHome ? {} : NEWP]);
+  await p.evaluate(([a, b, f0, f1, p0, p1]) => { window.AIP = [p0, p1]; AIX.flags[0] = f0; AIX.flags[1] = f1; AI.set(0, true); AI.set(1, true); window.launchMatch(a, b, { replaceOk: true }); }, [job.a, job.b, flags(f0), flags(f1), newHome ? NEWP : OLDP, newHome ? OLDP : NEWP]);
   let res = null, clicked = false;
   while (Date.now() - t0 < LIMIT) {
     await p.waitForTimeout(250);
@@ -97,7 +98,8 @@ server.listen(0, async () => {
   const port = server.address().port, results = [], t0 = Date.now(), queue = jobs.slice();
   const out = OUT ? fs.createWriteStream(OUT) : null;
   const worker = async () => {
-    const browser = await chromium.launch();
+    // Playwright's own Chromium if it was downloaded (npx playwright install chromium), otherwise the installed Chrome
+    const browser = await chromium.launch().catch(() => chromium.launch({ channel: 'chrome' }));
     for (let job; (job = queue.shift());) {
       let r; try { r = await play(browser, port, job); } catch (e) { r = { ...job, over: false, errs: [String(e)] }; }
       results.push(r); if (out) out.write(JSON.stringify(r) + '\n');

@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.01</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.02</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -15199,7 +15199,14 @@ ol.ci-steps li::marker { content: none; }
         // pass(r) says whether a roll succeeds; done(r) gets the roll that stands. The computer doesn't stop to ask.
         function teamRerollable(p, label, pass, done, first) {
             const r = first != null ? first : d6();
-            if (pass(r) || p.team !== state.activeTeam || !(state.rr[p.team] > 0) || AI.isAI(p.team)) { done(r); return; }
+            if (pass(r) || p.team !== state.activeTeam || !(state.rr[p.team] > 0)) { done(r); return; }
+            if (AI.isAI(p.team)) {   // (rr3) the computer's own call (it used to be never)
+                if (!AI.activationRR(p, label)) { done(r); return; }
+                spendTeamReroll(p.team); updateTopBar();
+                log(`  TEAM RE-ROLL used on the ${label} roll!`, 'text-amber-400 font-bold');
+                if (lonerBlocks(p)) { done(r); return; }
+                done(d6()); return;
+            }
             const was = state.mode; state.mode = MODES.LOCKED;
             const sheet = on => document.getElementById('modal-choice').classList.toggle('roll-sheet', on);
             sheet(true); camFocus(p, 'modal-choice');
@@ -29620,6 +29627,17 @@ ol.ci-steps li::marker { content: none; }
                 if (rr <= 1) return !!critical && left <= 2;                  // the last one: only to save the ball late on
                 return !!critical;                                            // otherwise only when the ball is at stake
             }
+            // (rr3) a failed Bone Head, Really Stupid, Animal Savagery... (or a Dauntless, Foul Appearance, Projectile Vomit roll):
+            // strong coaches re-roll 19% of these (the computer never did); here when the player's action this turn matters - a
+            // Blitz, hand-off or pass, or he has the ball - and a re-roll can be spared (rrWorth), or plenty are left
+            function activationRR(p, label) {
+                if (!AIX.on(p.team, 'rr3') || !AIX.p(p.team, 'rr3bh', 1) || p.team !== state.activeTeam) return false;   // (AIP rr3bh 0: this part off)
+                const pl = plan && plan.pid === p.id ? plan : null;
+                // (a plain block isn't enough: most of these players are big guys whose action is nearly always one, and re-rolling
+                // all of those spent 16% of the re-rolls on them, against the coaches' 7%)
+                const matters = (pl && ['blitz', 'handoff', 'pass', 'ttm'].includes(pl.kind)) || state.ball.carrierId === p.id;
+                return rrWorth(null, matters, false, false);
+            }
             function diceChoice() {
                 const c = state.combat;
                 if (!c || !c.dice || c.aiPicking) return;
@@ -29639,7 +29657,11 @@ ol.ci-steps li::marker { content: none; }
                 const kdFace = f => f === FACES.POW || (f === FACES.STUMBLE && (!hasSk(c.def, 'Dodge') || hasSk(c.atk, 'Tackle'))) || (f === FACES.BOTH_DOWN && hasSk(c.atk, 'Block') && !hasSk(c.def, 'Block'));
                 const noKd = !friendly && (c.chooser === c.atk.team ? !c.dice.some(kdFace) : !c.dice.every(kdFace));
                 const onCarrier = AIX.on(state.activeTeam, 'rr2') && noKd && chosen >= 0 && state.ball.carrierId === c.def.id && c.def.team !== state.activeTeam && (state.rr[state.activeTeam] || 0) > 0;
-                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && !c.aiRerolled && ((chosen < 0 && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) || onCarrier)) {
+                // (rr3, AIP rr3one 1 - off: level alone, and with the Bone Head re-rolls it leaned negative) a one-die block is a gamble
+                // taken knowing the risk (mostly at the end of the turn, where going down costs little): coaches re-roll the attacker
+                // going down on one die 52% of the time, a push 6% (the computer 79% and 34%) - only with the ball at stake
+                const oneDie = AIX.on(state.activeTeam, 'rr3') && AIX.p(state.activeTeam, 'rr3one', 0) && c.dice.length === 1 && c.chooser === c.atk.team && !blockCritical && !blockDecisive;
+                if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && !c.aiRerolled && ((chosen < 0 && !oneDie && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) || onCarrier)) {
                     after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); });
                     return;
                 }
@@ -30194,6 +30216,7 @@ ol.ci-steps li::marker { content: none; }
 
             return {
                 debugAdapt: t => adaptOffence(t, (GEO.sev ? SETUPS7 : SETUPS).offence),
+                activationRR: (p, label) => activationRR(p, label),   // (rr3)
                 bridge,   // (tools/bridge-server.js)
                 isAI, act, ownerTeam, decider, coachFace: (f, a, d) => faceScore(f, a, d), isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),
                 set(t, v) { on[t] = !!v; save(); },

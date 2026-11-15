@@ -6,12 +6,12 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- **AI re-rolls** (BludBowl local, 15 Nov): compared with 288 strong-coach FUMBBL replays (`ai-training/fumbbl-rerolls.py`;
-  the AI side now measured without a browser by `ai-training/bb-rerolls-jsdom.js`). Re-roll timing is fine now; the gaps:
-  Bone Head-type failures never re-rolled (coaches 19%), and one-die blocks re-rolled too freely. `rr3` fixes both (Bone Head
-  etc. 17%, one-die 'down' blocks 79% -> 45%, coaches 52%); match test against v5.01 running, then release as v5.02 if not
-  worse. The "fewer re-rolls on other rolls" gap is the AI rolling fewer risky dice (dodges, Rushes), not refusing re-rolls.
+- (nothing right now)
+
 ## Recently done (newest first)
+- v5.02 (BludBowl local): the AI re-rolls Bone Head / Really Stupid / Animal Savagery failures when the player's action
+  matters (it never did; coaches 19%, now 17%). The choosier one-die block re-rolls are in the code but off (level alone, a
+  little negative together). `tools/ai-match.js` now runs on the PC's installed Chrome, ~3x the jsdom runner, and takes `--oldp`.
 - Race strength, FUMBBL v BludBowl's AI (control room, 15 Nov; `ai-training/race-strength/README.md`): the AI plays
   Snotlings (22% v FUMBBL 51%), Vampires (25% v 47%; 7 turnovers a match) and Ogres (28% v 40%) much worse than coaches, and
   hardly ever completes a pass; well-armoured teams (Dwarfs, Old World Alliance, Bretonnians, Undead) do far better against it.
@@ -27,6 +27,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
+- AI: it rolls far fewer risky dice than strong coaches (failed dodges and Rushes with a re-roll available: about 0.6 a team a
+  match against 3.2), so it spends half as many re-rolls on rolls. That's the general caution, a bigger topic.
 - AI: at the end of its turn the AI leaves about one defender a free path to its ball carrier (strong coaches about 0.3), and
   loses the ball more often for it. Two screen attempts made little difference (see `ai-training/README.md`).
 - AI, from the race-strength results: Vampires' Bloodlust handling (7 turnovers a match); Snotling and Ogre negative traits
