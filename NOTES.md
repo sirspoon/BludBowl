@@ -6,9 +6,11 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- **AI re-rolls** (BludBowl local, 15 Nov): comparing the AI's re-roll use with 288 strong-coach FUMBBL replays. First gap
-  found: the AI never re-rolls Bone Head-type failures (Bone Head, Really Stupid...). Trying an `rr3` switch for that. Will
-  likely release as the next version (v5.02).
+- **AI re-rolls** (BludBowl local, 15 Nov): compared with 288 strong-coach FUMBBL replays (`ai-training/fumbbl-rerolls.py`;
+  the AI side now measured without a browser by `ai-training/bb-rerolls-jsdom.js`). Re-roll timing is fine now; the gaps:
+  Bone Head-type failures never re-rolled (coaches 19%), and one-die blocks re-rolled too freely. `rr3` fixes both (Bone Head
+  etc. 17%, one-die 'down' blocks 79% -> 45%, coaches 52%); match test against v5.01 running, then release as v5.02 if not
+  worse. The "fewer re-rolls on other rolls" gap is the AI rolling fewer risky dice (dodges, Rushes), not refusing re-rolls.
 - **Race strength: FUMBBL v BludBowl's AI** (control room, 15 Nov): `ai-training/race-strength/`. FUMBBL Competitive results
   (31,541 matches, May-Nov 2026) are in; a full AI round robin (all 435 pairings, home and away, v5.01) is running. Findings
   go into `ai-training/race-strength/README.md` and get passed to BludBowl local.
