@@ -1150,7 +1150,8 @@ the rest, and a marked player couldn't reposition at all unless agile (`canRepos
 `nn/tdturn.js` (on the PC): every turn of the 288 replays where the recorded coach scored (365), and 300 where he started with the
 carrier in range but didn't, loaded into the game at the start of the turn (`AI.bridge.load`, once an AI-v-AI match with the same
 teams is under way) and played by BludBowl's AI with real dice, 6-8 times each. `nn/tdclass.js`: the carrier's best route in at
-the start (no team re-roll). Coach scoring turns by kind, and the AI (v5.06) from the same positions:
+the start (no team re-roll). Coach scoring turns by kind, and the AI (v5.06) from the same positions (**the AI figures here are
+too low**: see the correction below - only each position's first play-out was sound):
 
 | | turns | AI scored | coaches used a re-roll (when they had one) |
 |---|---|---|---|
@@ -1167,3 +1168,26 @@ Turns where the coach was in range and didn't score (often stalling): walk-ins 1
 - `tdf1` (released in v5.09): stall only on a run that's safe without a re-roll; before a risky run in, only dice-free moves.
   Risky runs scored 43% -> 46%; misses with the carrier never moving 123 -> 76. Still missing: the carrier moving elsewhere or
   blocking (a 55% bar for going in, where the coaches went from routes under 40% too), and the pick-up / hand-off / pass scores.
+
+**Correction, and the 55% bar (16 Nov 2026).** The play-outs after the first in one page were spoiled by what the first left
+running: the first play-out of each position scored 66-69%, every later one ~35%, whatever the first had done. `tdturn.js` now
+plays each in a fresh page (slower: ~30 min for the 108 risky runs x 5 at `PAR` 12; about 1 in 8 still time out, left out). Redone,
+the risky runs the coaches scored (`TD_AIP` sets tuning values, `TD_OFF` turns switches off):
+
+| | AI scored | route under 45% / 45-75% / 75%+ | carrier fell over (of the misses) |
+|---|---|---|---|
+| v5.09 without `tdf1` | 66% | 30 / 70 / 90% | 34 of 159 |
+| v5.09 (bar 55%) | 69% | 39 / 71 / 92% | 46 of 145 |
+| bar 40% | 69% | 35 / 70 / 93% | 57 of 146 |
+| bar 25% | 72% | 42 / 76 / 93% | 67 of 128 |
+
+So the AI was nowhere near as bad here as the 44% said, `tdf1` still helps (~3 points), and the bar isn't what holds it back: 40%
+changes nothing, 25% scores a little more but drops the ball more, and in matches the 25% bar did worse (288 matches v v5.09, 12
+races: touchdowns 236-263, won 81, drew 96, lost 111, luck 4%). The bar stays at 55% (the one-line dial, `AIX.p(me, 'tdBar', 0.55)`
+in place of `0.55` in `choose0` step 1, was not kept). The no-ball and out-of-reach figures above are likely too low as well
+(not redone).
+- Picking only the turns a coach scored flatters them. A fair set is every turn that started with a risky route in, scored or not
+  (246 in `tdturn_run.jsonl`; non-scoring turns were only kept with the carrier within MA+2): on turn 8 of a half coaches scored
+  ~95% of them, on turns 1-7 only 20-46% - mostly by choice, holding the ball to score later. A fair test would compare scoring
+  rates on turn 8 only, and on turns 1-7 the outcome predictor's verdict on the end-of-turn position (the coach's actual one v the
+  AI's play-outs). Not built yet.
