@@ -1191,3 +1191,20 @@ in place of `0.55` in `choose0` step 1, was not kept). The no-ball and out-of-re
   ~95% of them, on turns 1-7 only 20-46% - mostly by choice, holding the ball to score later. A fair test would compare scoring
   rates on turn 8 only, and on turns 1-7 the outcome predictor's verdict on the end-of-turn position (the coach's actual one v the
   AI's play-outs). Not built yet.
+- The harder scoring turns redone with the fresh-page tester (90 turns, 6 tries each, about 1 in 5 timed out and left out; the
+  coach's own actions from the replay, `how` in `tdturn.js extract`): the AI scored 25% (not 12-15%).
+
+  | how the coach scored | turns | AI scored |
+  |---|---|---|
+  | picked up a loose ball, ran in | 35 | 42% |
+  | picked up a loose ball, then a hand-off | 18 | 14% |
+  | picked up a loose ball, then a pass | 9 | 0% |
+  | knocked the ball off their carrier, then scored | 7 | 0% |
+  | carrier out of reach: pass or hand-off | 11 | 23-28% |
+  | carrier out of reach: a run after clearing the way, or a Leap | 10 | 0-13% |
+
+  In the AI's loose-ball misses it often picked the ball up and stopped short: after a pick-up `carrierPick` wants 75%+ for any
+  move and no end-zone square next to an opponent unless sure. `pts1` (the new carrier goes in on the same terms as at the start
+  of an action: 55% with a re-roll counted, any chance on the last turn) took the loose-ball turns only from 29% to 31%, and in
+  288 matches v v5.09 did worse (touchdowns 226-276, luck 3%; won 93, drew 74, lost 121): not kept. Most remaining misses there
+  are failed pick-ups, dodges and Rushes - the coaches' turns are the ones where the dice went their way.
