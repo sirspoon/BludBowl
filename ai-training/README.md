@@ -1104,3 +1104,22 @@ up 44% (it picks up and runs where coaches pick up and pass).
   (October's `recvfirst`: catchers into open squares ahead before the carrier acts): completions between passing teams about
   0.06 -> 0.1 a team a match, results level either way (46-37, 40-50 over 48). Left out: `ai-training/passing-2026-11.patch`.
 - Next idea: pick-up-and-pass as one action, as coaches do.
+
+## Re-rolls in planning (Nov 2026, v5.04)
+The owner's point: re-rolls shouldn't only be a reaction, they belong in planning a risky play. The route search's odds counted
+skill re-rolls (Dodge, Sure Feet, Sure Hands) but never a team re-roll, and every planning threshold used those odds (a run in to
+score only at 55%+, a Blitz route at 75%+...). `rrp1`: every route also carries the odds with one team re-roll on its riskiest step
+(`probRR` = odds x (2 - riskiest step)), and `pPlan` uses them for the general, lane and carrier Blitzes, pick-ups, and scoring runs
+and passes, when a team re-roll is free this turn and `rrWorth` would spend it on that roll. Measured first: a run in at 1-54% odds
+came up only 0.1 times a team a match, so scoring gambles weren't the big gap; risky movement is (coaches fail ~6x the dodges and
+~4x the Rushes with a re-roll available). With `rrp1`, 48 matches: failed dodges with a re-roll available 31 -> 51, pick-ups 44 -> 66.
+288 matches against v5.03: touchdowns 237-221, won 98, drew 97, lost 93; BotBowl's bot 56-30-10. Released. Still untouched: the
+caution in ordinary moves (formation and support squares only at 80-100% odds, `okProb`).
+
+## Pick up and pass (Nov 2026, v5.06)
+`pup1`: where the computer would pick up a loose ball, a thrower (passing 3+ or Pass) may declare a Pass, pick up and throw to an
+open, better-placed team-mate (no opponent within 3 squares; odds 50%+ raw, 65%+ with a re-roll; a drop costs 4 against the
+ball's value at the pick-up square). Between passing teams completed passes 16 -> 34 over 48 matches. Any passer allowed: 12 teams
+230-243, won 96, lost 110, turnovers +9% (poor throwers dropping); passing teams 115-80, won 47, lost 27; bot 59-26-11. Real throwers
+only: 12 teams 230-241, won 105, lost 108; passing teams 82-104, won 27, lost 36 (the two passing-team runs are near enough the
+same change: 197-184, 74-63 together). Level, more like the coaches: released in v5.06.

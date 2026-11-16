@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.06 (16 Nov 2026)
+- The computer's throwers can pick up a loose ball and pass it on in one go to an open team-mate, as human coaches often do.
+
 ## v5.05 (16 Nov 2026)
 - A test of sharper graphics: High Elves drawn with twice the pixel detail. Add `?hd` to the address, or turn on
   Settings > HD sprites (test), to see them; nothing changes otherwise.

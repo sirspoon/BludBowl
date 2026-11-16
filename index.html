@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.05</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.06</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -28666,6 +28666,25 @@ ol.ci-steps li::marker { content: none; }
                             });
                             if (bz) return blitzOn(bz.p, bz.t.id);
                         }
+                    }
+                    // (pup1) pick up and pass in one action, as strong coaches often do (in 44% of the positions where they passed, the AI
+                    // picked the ball up instead and ran with it): the picker declares a Pass, picks up and throws to a team-mate with
+                    // nobody of theirs within pupGap (3) squares who is better placed, when that beats picking up and running
+                    // (only a real thrower - passing 3+ or the Pass skill - and a throw at least pupRaw (50%) before any re-roll: with every
+                    // team throwing, the poor passers dropped enough to lose ground, while passing teams gained a lot)
+                    if (AIX.on(me, 'pup1') && best && best.kind === 'pickup' && (best.pr >= 30 || lastTurn) && !state.passUsed && best.p.pa != null && (best.p.pa <= 3 || hasSk(best.p, 'Pass')) && !hasSk(best.p, 'My Ball') && !lastTurn) {
+                        const pk = best.p, here = ballSpotValue(me, bx, by), gap = AIX.p(me, 'pupGap', 3), drop = AIX.p(me, 'pupDrop', 4);
+                        const rrOk = state.rr[me] > 0 && !state.teamRRUsedThisTurn;
+                        let thr = null;
+                        state.players.forEach(r => {
+                            if (r.team !== me || r.id === pk.id || !onPitch(r) || r.isDown || r.isStunned || r.isDistracted || hasSk(r, 'No Hands') || hasSk(r, 'No Ball')) return;
+                            if (state.players.some(q => q.team !== me && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, r) <= gap)) return;
+                            const q0 = passOdds(pk, bx, by, r), q = rrOk && AIX.on(me, 'rrp1') ? 1 - Math.pow(1 - q0, 2) * 0.9 : q0;
+                            if (q < AIX.p(me, 'pupOdds', 0.65) || q0 < AIX.p(me, 'pupRaw', 0.5)) return;
+                            const rv = bestSpotFor(r), ev = q * rv + (1 - q) * (here - drop);
+                            if (ev > here + AIX.p(me, 'pupGain', 1) && (!thr || ev > thr.ev)) thr = { r, ev };
+                        });
+                        if (thr) return { pid: pk.id, kind: 'pass', receiver: thr.r.id, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
                     }
                     if (best && (best.pr >= 30 || lastTurn)) return { pid: best.p.id, kind: best.kind, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
                 }

@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.06 (16 Nov 2026)
+- **Improved (AI):** pick up and pass in one action (`pup1`). Where the computer would pick up a loose ball, a real thrower
+  (passing 3+ or the Pass skill) can instead declare a Pass, pick up and throw to a team-mate with no opponent within 3 squares
+  who is better placed, when that's worth more than picking up and running (odds at least 50% before a re-roll, 65% with one;
+  a drop costs 4). In 44% of the positions where strong FUMBBL coaches passed, the computer picked the ball up and ran.
+  Completed passes against v5.04: 56-17 over 288 matches on 12 teams (between passing teams 0.35 a team a match, coaches pass
+  about 0.31). Results level: 12 teams 460-484 touchdowns, won 201, lost 218 over 576; passing teams 197-184, won 74, lost 63 over
+  192; against BotBowl's bot (Humans, 96) won 59, drew 26, lost 11, completed passes 35-0. Every team throwing (any passer) cost
+  turnovers on teams that can't pass, hence the thrower limit.
+
 ## v5.05 (16 Nov 2026)
 - **Test:** HD sprites. The four High Elf positions (Lineman, White Lion, Dragon Prince, Phoenix Warrior) redrawn on a 64x64
   grid, drawn at the same size, so each pixel is a quarter the area: shaded steel, faces with eyes and brows, pointed ears, the
