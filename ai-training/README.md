@@ -1135,3 +1135,13 @@ the rest, and a marked player couldn't reposition at all unless agile (`canRepos
   Worse: the players who dodged away had been tying opponents up (fewer blocks and casualties). Not kept.
 - So the coaches' extra dodges and Rushes aren't for getting out of contact to reposition: more likely for getting into position -
   to reach a block or an assist, the ball, a screen square this turn - which the AI's positioning doesn't value enough to risk.
+- What the coaches dodge and Rush for (`nn/risky.py`, `nn/data/risky.md`: activations whose route odds are under 99.5%, by what the
+  square reached is for; the AI from its older recorded games, bb_003): an assist on an opponent a team-mate is on 2.19 a team a
+  match (AI 0.91), a Blitz 2.08 at median odds 0.67 (AI 0.60), next to an opponent 1.42 (0.76), next to their carrier 0.75 (0.33),
+  to the ball 1.06 (AI 3.57), the carrier's runs 0.47 (1.16). Two-thirds of the coaches' start next to an opponent: from one contact
+  to a better one, not away from contact.
+- `eng1`: risk allowed only to get into useful contact - assist moves at 75%+ (a re-roll counted when one would be spent, the risk
+  charged) instead of dice-free only, and moves next to their carrier or a loose runner at 75%+, players already in contact allowed
+  to dodge across to their carrier. Dodges 6.7 -> 7.5, Rushes unchanged (the situations are rare in its play). 288 matches against
+  v5.06: touchdowns 250-267, won 103, drew 79, lost 106, casualties caused 446-511; BotBowl's bot 58-26-12. With the Blitz route bar
+  at 65% (was 75%): 215-254, won 93, lost 113. Neither kept: level at best, and fewer casualties again.
