@@ -6,7 +6,10 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- (nothing right now)
+- (BludBowl local, from 16 Nov evening) Tuning the AI's numeric settings all together by self-play (SPSA, `nn/tune/spsa.js` on
+  the PC): 37 dials (the `AIX.p` values plus five fixed numbers made into dials in a snapshot: the 55% scoring bar, the move
+  caution `okProb` 80/100, `carrierPick`'s 75/80). 600 rounds of 48 matches overnight, a check against the defaults every 50.
+  Plays a snapshot of index.html, so game edits meanwhile don't disturb it. Nothing released until a 288-match check.
 
 ## Recently done (newest first)
 - (16 Nov, no version) The 55% bar for a risky run in: not changed. The scoring-turn tester (`nn/tdturn.js`) had a fault - the
