@@ -1123,3 +1123,15 @@ ball's value at the pick-up square). Between passing teams completed passes 16 -
 230-243, won 96, lost 110, turnovers +9% (poor throwers dropping); passing teams 115-80, won 47, lost 27; bot 59-26-11. Real throwers
 only: 12 teams 230-241, won 105, lost 108; passing teams 82-104, won 27, lost 36 (the two passing-team runs are near enough the
 same change: 197-184, 74-63 together). Level, more like the coaches: released in v5.06.
+
+## Caution in ordinary moves (Nov 2026, not kept)
+Dodges and Rushes per team per match: FUMBBL top coaches (their match stats, 600 team-matches) 13.7 dodges (2+ 5.5, 3+ 6.8, 4+ 1.1)
+and 9.0 Rushes; the AI v5.06 (48 mirror matches) 6.7 dodges (2+ 2.4, 3+ 3.9, 4+ 0.3) and 3.5 Rushes - of those Rushes 1.3 by the
+carrier, 1.6 on Blitzes and only 0.7 in ordinary moves. Positioning moves (`okProb`) needed 80% odds for agile players and 100% for
+the rest, and a marked player couldn't reposition at all unless agile (`canReposition`).
+- `dod1`: positioning moves at 70% / 80% (a team re-roll counted when one would be spent), and marked players allowed to dodge away
+  to a formation square. Dodges 6.7 -> 7.6, Rushes unchanged (formation squares are mostly in reach without one). Against v5.06,
+  288 matches: touchdowns 228-262, won 85, drew 93, lost 110, casualties caused 449-533, Turnovers 1291-1472; BotBowl's bot 47-30-19.
+  Worse: the players who dodged away had been tying opponents up (fewer blocks and casualties). Not kept.
+- So the coaches' extra dodges and Rushes aren't for getting out of contact to reposition: more likely for getting into position -
+  to reach a block or an assist, the ball, a screen square this turn - which the AI's positioning doesn't value enough to risk.
