@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.09 (16 Nov 2026)
+- **Improved (AI):** scoring turns (`tdf1`). Found by replaying FUMBBL coaches' scoring turns: the computer, put in the same
+  positions, scored only 44% of the turns where the coach scored with a run needing a dodge or Rush (route odds median 68%), and in
+  over half of its misses its carrier never moved. Two reasons: since v5.04 a run in counting a team re-roll could look "sure"
+  (90%+) and the AI held the ball back to score later (stalling now only on a run that's safe without a re-roll), and the turn
+  planner put the risky run after the blocks, so a skull or both down ended the turn first (now only dice-free moves come before
+  it). In those positions: scored 43% -> 46%, misses with the carrier never moving 123 -> 76 of about 210. Against v5.06's AI:
+  288 matches, touchdowns 227-245, won 94, drew 96, lost 98; against BotBowl's bot (Humans, 96) won 65, drew 25, lost 6.
+
 ## v5.08 (16 Nov 2026)
 - **Test (HD sprites, `?hd`):** White Lion redrawn after the owner's feedback, closer to GW's miniature: an open-faced silver
   helm with a raised ridge, cheek guards and the red gem (the lion no longer sits on top of the head); the lion's head worn on his

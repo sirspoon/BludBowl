@@ -1145,3 +1145,25 @@ the rest, and a marked player couldn't reposition at all unless agile (`canRepos
   to dodge across to their carrier. Dodges 6.7 -> 7.5, Rushes unchanged (the situations are rare in its play). 288 matches against
   v5.06: touchdowns 250-267, won 103, drew 79, lost 106, casualties caused 446-511; BotBowl's bot 58-26-12. With the Blitz route bar
   at 65% (was 75%): 215-254, won 93, lost 113. Neither kept: level at best, and fewer casualties again.
+
+## Scoring turns: the AI in the coaches' positions (Nov 2026, v5.09)
+`nn/tdturn.js` (on the PC): every turn of the 288 replays where the recorded coach scored (365), and 300 where he started with the
+carrier in range but didn't, loaded into the game at the start of the turn (`AI.bridge.load`, once an AI-v-AI match with the same
+teams is under way) and played by BludBowl's AI with real dice, 6-8 times each. `nn/tdclass.js`: the carrier's best route in at
+the start (no team re-roll). Coach scoring turns by kind, and the AI (v5.06) from the same positions:
+
+| | turns | AI scored | coaches used a re-roll (when they had one) |
+|---|---|---|---|
+| free walk-in | 167 | 99% | 8% (other risky actions first, then the score) |
+| risky run (median odds 68%) | 108 | 44% | 33% |
+| no ball at the start (pick up or win it, then score) | 69 | 12-15% | 40% |
+| out of reach (hand-off or pass needed) | 21 | 9-13% | 53% |
+
+Turns where the coach was in range and didn't score (often stalling): walk-ins 100%, risky runs 45%.
+- The AI's misses mostly had no failed roll (79% of risky-run misses): it didn't try. Its carrier never moved in over half of them:
+  a stalling check that, with the re-roll counted (`rrp1`), took a 68% dodge in for "sure", and the turn planner (`tplan`) leaving
+  the risky run till after the blocks, which could end the turn first. Re-roll use was about the coaches' (scoring attempts used
+  one 15-27%; a failure with a re-roll unused in about a quarter of failed risky runs).
+- `tdf1` (released in v5.09): stall only on a run that's safe without a re-roll; before a risky run in, only dice-free moves.
+  Risky runs scored 43% -> 46%; misses with the carrier never moving 123 -> 76. Still missing: the carrier moving elsewhere or
+  blocking (a 55% bar for going in, where the coaches went from routes under 40% too), and the pick-up / hand-off / pass scores.

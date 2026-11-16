@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.09 (16 Nov 2026)
+- The computer goes for a risky touchdown run before its blocks (a failed block could end the turn first), and no longer holds
+  the ball back from a run in that needs a dodge.
+
 ## v5.08 (16 Nov 2026)
 - HD sprite test (`?hd`): the White Lion redrawn closer to the miniature, with an open silver helm, the lion's head worn on
   his shoulder, and bigger, clearer claws.
