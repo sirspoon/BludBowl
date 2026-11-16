@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.05 (16 Nov 2026)
+- **Test:** HD sprites. The four High Elf positions (Lineman, White Lion, Dragon Prince, Phoenix Warrior) redrawn on a 64x64
+  grid, drawn at the same size, so each pixel is a quarter the area: shaded steel, faces with eyes and brows, pointed ears, the
+  lion pelt's muzzle and fangs, the Dragon Prince's scale pattern, flames on the Phoenix helm. Off unless the address has `?hd`
+  or Settings > HD sprites (test) is on; every other team is unchanged. Used everywhere sprites are (pitch, dugouts, Team
+  Builder, memorials, block close-ups, replays). The idle crouch scales with the grid. Drawings, screenshots and the
+  feasibility notes are in `tools/hd-test/`; browser check `tools/ui-tests/hd-sprites.js`.
+
 ## v5.04 (16 Nov 2026)
 - **Improved (AI):** re-rolls in planning (`rrp1`). Every route now also carries its odds if one team re-roll goes on its
   riskiest step (`probRR`), and the planner uses those odds for Blitz routes (general, lane and on their carrier), pick-ups and

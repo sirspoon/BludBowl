@@ -9,6 +9,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - (nothing right now)
 
 ## Recently done (newest first)
+- v5.05: HD sprite test, High Elves only, behind `?hd` / Settings > HD sprites (test). See `tools/hd-test/README.md`.
 - v5.04 (BludBowl local): the AI plans risky plays counting on a team re-roll when it would spend one (`rrp1`, the owner's
   idea): route odds with a re-roll for Blitzes, pick-ups and scoring. More risky plays attempted, results level-to-positive.
   Still open: the general caution (formation moves only at 80-100% odds, `okProb`) is untouched.
@@ -37,6 +38,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
+- **HD sprites (v5.05 test, waiting on the owner's verdict).** The High Elves on a 64x64 grid (`SPRITES_HD`, `?hd`). The code
+  already scaled sprites from their grid, so it took only a switch, a cache key, crouch scaling and 16 palette letters. Close up
+  and on a phone (where a 64 grid is about one pixel per screen pixel) the extra detail shows; at 1x desktop it's slightly
+  softer. Cost: +18.9 KB raw / +3.5 KB gzipped per 4 sprites; all ~214 sprites about +0.9 MB raw, +140 KB over the wire.
+  Painting is ~4x slower but cached. A full redraw is roughly 40-50 hours of sessions with the drawing kit in `tools/hd-test/`
+  (sprites as shaded shapes in code). If it goes ahead: load HD from a separate file only when on, or keep the art as code and
+  draw at start-up; indexed PNG sheets are the other option. Details: `tools/hd-test/README.md`.
 - AI: it rolls far fewer risky dice than strong coaches (failed dodges and Rushes with a re-roll available: about 0.6 a team a
   match against 3.2), so it spends half as many re-rolls on rolls. That's the general caution, a bigger topic.
 - AI: at the end of its turn the AI leaves about one defender a free path to its ball carrier (strong coaches about 0.3), and

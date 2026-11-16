@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.05 (16 Nov 2026)
+- A test of sharper graphics: High Elves drawn with twice the pixel detail. Add `?hd` to the address, or turn on
+  Settings > HD sprites (test), to see them; nothing changes otherwise.
+
 ## v5.04 (16 Nov 2026)
 - The computer plans risky plays (a Blitz needing a Rush or dodge, a hard pick-up, a run in to score) counting on a team
   re-roll when it has one to spare, instead of only re-rolling after a failure.

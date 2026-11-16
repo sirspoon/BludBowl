@@ -13,7 +13,7 @@ const done = async browser => { if (browser) await browser.close(); console.log(
 
 // a page with the game loaded and the splash out of the way. opts: { device: 'Pixel 7' | ..., viewport, query: '?simtest' }
 async function openGame(browser, opts = {}) {
-  const ctx = await browser.newContext(opts.device ? { ...devices[opts.device] } : { viewport: opts.viewport || { width: 1280, height: 900 } });
+  const ctx = await browser.newContext(opts.device ? { ...devices[opts.device] } : { viewport: opts.viewport || { width: 1280, height: 900 }, deviceScaleFactor: opts.dsf || 1 });
   const page = await ctx.newPage(), errors = [];
   page.on('pageerror', e => errors.push(String(e.stack || e).slice(0, 300)));
   await page.goto('file://' + path.join(ROOT, 'index.html') + (opts.query || ''));
