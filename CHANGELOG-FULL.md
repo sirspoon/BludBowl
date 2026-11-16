@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.07 (16 Nov 2026)
+- **Test (HD sprites, `?hd`):** the four High Elf sprites redrawn from GW's 2026 High Elf team (the Caledor Dragons) so they
+  tell apart without zooming: the first pass gave every position the same long fair hair, silver and kit, and only the Dragon
+  Prince stood out. Now each has its own silhouette and colour mass, as on the miniatures: **Lineman** a tall narrow silver
+  cone helm with the team-colour horsehair crest streaming back, a white sash across the breastplate, scale tassets, white socks
+  and laced boots; **White Lion** a tawny lion's head (shaggy mane, fangs over the brow) on the helm and its pelt over one
+  shoulder, a wide crouch in steel greaves, one clawed arm flung up; **Phoenix Warrior** a gold helm with two feathered
+  wing-fans, a gold scale mantle and coat, the ball raised to throw; **Dragon Prince** as before plus a gold crest. Every helm
+  has the miniatures' red brow gem, and faces are helmeted (no long hair). Four more palette letters (`< > ? {`, lion tawny).
+
 ## v5.06 (16 Nov 2026)
 - **Improved (AI):** pick up and pass in one action (`pup1`). Where the computer would pick up a loose ball, a real thrower
   (passing 3+ or the Pass skill) can instead declare a Pass, pick up and throw to a team-mate with no opponent within 3 squares

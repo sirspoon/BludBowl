@@ -9,6 +9,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - (nothing right now)
 
 ## Recently done (newest first)
+- v5.07: HD High Elves redrawn after GW's 2026 miniatures so the positions tell apart at normal zoom (owner's feedback).
 - v5.06 (BludBowl local): pick up and pass in one action (`pup1`), real throwers only: completions about 3x (56-17 over 288),
   results level. Passing now: last-turn passes (v5.03) and pick-up-and-pass (v5.06); open-play passes from a carrier still rare.
 - v5.05: HD sprite test, High Elves only, behind `?hd` / Settings > HD sprites (test). See `tools/hd-test/README.md`.
@@ -40,7 +41,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
-- **HD sprites (v5.05 test, waiting on the owner's verdict).** The High Elves on a 64x64 grid (`SPRITES_HD`, `?hd`). The code
+- **HD sprites (v5.05 and v5.07 test, waiting on the owner's verdict).** Lesson from v5.07: draw from the real miniatures (GW's
+  Warhammer Community article has clean photos) and give each position its own silhouette and colour mass; fine detail alone
+  doesn't tell players apart at normal zoom. The High Elves on a 64x64 grid (`SPRITES_HD`, `?hd`). The code
   already scaled sprites from their grid, so it took only a switch, a cache key, crouch scaling and 16 palette letters. Close up
   and on a phone (where a 64 grid is about one pixel per screen pixel) the extra detail shows; at 1x desktop it's slightly
   softer. Cost: +18.9 KB raw / +3.5 KB gzipped per 4 sprites; all ~214 sprites about +0.9 MB raw, +140 KB over the wire.

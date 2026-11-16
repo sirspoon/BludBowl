@@ -81,5 +81,9 @@ const M = {
   pelt: ['w', 'f', 'a', 'F', 'A', '&'],
   leather: ['b', 'B', 'c', 'X'],
   fire: ['Y', 'y', 'r', 'R'],
+  lion: ['^', '<', '>', '?', '{'],
+  phx: ['w', 'Y', 'g', 'G', '$'],
+  dark: ['|', 'M', 'i', 'I', 'e'],
+  gem: ['j', 'r', 'R'],
 };
 module.exports = { canvas, M, N };

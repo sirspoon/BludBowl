@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.07 (16 Nov 2026)
+- HD sprite test (`?hd`): the High Elves redrawn after Games Workshop's new High Elf team, so each position stands out at a
+  glance: silver Linemen with a team-colour crest, White Lions under a tawny lion pelt with a clawed arm raised, Phoenix
+  Warriors in a tall gold winged helm and gold scale coat, Dragon Princes in blue.
+
 ## v5.06 (16 Nov 2026)
 - The computer's throwers can pick up a loose ball and pass it on in one go to an open team-mate, as human coaches often do.
 

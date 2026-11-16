@@ -1,4 +1,4 @@
-# HD sprite test (v5.05)
+# HD sprite test (v5.05, redrawn in v5.07)
 
 A first look at doubling the sprites' pixel density: the four High Elf positions redrawn on a 64x64 grid, drawn at the same
 size on screen. Off by default; add `?hd` to the address (https://sirspoon.github.io/BludBowl/?hd) or turn on
@@ -10,13 +10,20 @@ size on screen. Off by default; add `?hd` to the address (https://sirspoon.githu
   first) and lit from the upper left, so curved parts get real shading; then a dark outline round the figure.
 - `lib.js`: reads the palette and sprites out of index.html, paints grids, writes PNGs (no dependencies).
 - `shots/`: before/after screenshots from `node tools/ui-tests/hd-sprites.js tools/hd-test/shots` (desktop at 2x, a Pixel 7
-  in portrait and its pitch, a close-up at the game's top zoom) plus a 1x desktop crop (`*-desktop-1x-crop.png`).
+  in portrait and its pitch, a close-up at the game's top zoom) plus `after-phone-pitch-crop.png` (the High Elf half at phone zoom).
+
+## Reference
+v5.07 redraws the four positions from Games Workshop's 2026 High Elf team (the Caledor Dragons; photos in the Warhammer
+Community article "What exactly do the High Elves do in Blood Bowl?", 10 Mar 2026; `shots/reference-gw-2026.png`). What tells
+them apart there, and so on the pitch: Linemen silver with a team-colour crest; White Lions a tawny lion pelt, a wide crouch and
+a clawed arm flung out; Phoenix Warriors gold (tall winged helm, scale coat); Dragon Princes blue dragon wings. All have a red
+brow gem and helmeted faces. The first pass (v5.05) gave everyone long fair hair, which made three of them look alike.
 
 ## How it fits in the game
 Sprites were already painted onto a canvas the size of their grid and then scaled to the token size, so a 64x64 grid needed
 almost nothing: `SPRITES_HD` + `HD` (the switch), `spriteSetFor` picking the HD set when on (so the pitch, dugouts, Team
 Builder preview, memorial ghosts, block close-ups, replays and pass close-ups all follow), the idle crouch moving 2 HD pixels
-per 32x32 one, an `|hd` sprite-cache key, and 16 extra palette letters (`$ ~ : ^ ; _ = / & @ ! |` fixed, `( ) [ ]` from the kit).
+per 32x32 one, an `|hd` sprite-cache key, and 20 extra palette letters (`$ ~ : ^ ; _ = / & @ ! | < > ? {` fixed, `( ) [ ]` from the kit).
 
 ## Findings
 - **Looks:** the difference is plain close up and when zoomed in (faces with blue eyes and brows, pointed ears, shaded steel,
