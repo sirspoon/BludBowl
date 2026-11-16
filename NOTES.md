@@ -9,6 +9,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - (nothing right now)
 
 ## Recently done (newest first)
+- v5.08: HD White Lion redrawn (helm, lion head on the shoulder, clearer claws), owner's feedback.
 - v5.07: HD High Elves redrawn after GW's 2026 miniatures so the positions tell apart at normal zoom (owner's feedback).
 - v5.06 (BludBowl local): pick up and pass in one action (`pup1`), real throwers only: completions about 3x (56-17 over 288),
   results level. Passing now: last-turn passes (v5.03) and pick-up-and-pass (v5.06); open-play passes from a carrier still rare.
@@ -41,7 +42,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
-- **HD sprites (v5.05 and v5.07 test, waiting on the owner's verdict).** Lesson from v5.07: draw from the real miniatures (GW's
+- **HD sprites (v5.05, v5.07, v5.08 test, waiting on the owner's verdict).** Lesson from v5.07: draw from the real miniatures (GW's
   Warhammer Community article has clean photos) and give each position its own silhouette and colour mass; fine detail alone
   doesn't tell players apart at normal zoom. The High Elves on a 64x64 grid (`SPRITES_HD`, `?hd`). The code
   already scaled sprites from their grid, so it took only a switch, a cache key, crouch scaling and 16 palette letters. Close up

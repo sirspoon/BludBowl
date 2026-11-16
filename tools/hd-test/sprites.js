@@ -75,42 +75,54 @@ function lineman() {   // tall silver cone helm, team-colour horsehair crest swe
   return finish(c);
 }
 
-function whiteLion() {   // tawny lion pelt over helm and shoulder, wide crouch, one clawed arm flung out and up
+function whiteLion() {   // open silver helm, the lion's head worn on his shoulder with its mane down his back, wide crouch, claws out
   const c = canvas(), L = M.lion;
+  // claws: long curved hooks in pale bone, each kept apart so the outline shows every one
+  const claw = (x, y, dx, dy, hx, hy) => { c.line(x, y, x + dx, y + dy, 'w'); c.line(x + dx, y + dy, x + dx + hx, y + dy + hy, 'W'); };
   // legs in a wide crouch: kit shorts, big steel greaves
   c.poly([[24, 47], [31, 47], [22, 56], [15, 54]], M.kit, { flat: 2 }); c.poly([[33, 47], [40, 47], [49, 54], [42, 56]], M.kit, { flat: 3 });
   c.poly([[15, 53], [22, 55], [21, 62], [12, 62]], M.steel, { k: 0.9, global: true }); c.line(15, 53, 22, 55, 'E');
   c.poly([[42, 55], [49, 53], [52, 62], [43, 62]], M.steel, { k: 0.9, global: true }); c.line(42, 55, 49, 53, 'E');
   c.rect(11, 62, 11, 1, ['i']); c.rect(43, 62, 10, 1, ['i']);
   tassets(c, 44, 50, 21, 43);
-  // the flung arm: pelt-clad forearm (the lion's foreleg) with black claws, up and out to the left
-  c.poly([[21, 36], [25, 39], [16, 30], [13, 32]], M.kit, { flat: 1 });
-  c.poly([[16, 29], [13, 33], [7, 25], [10, 22]], L, { global: true, k: 0.95 }); c.line(14, 30, 8, 23, '?');
-  [[6, 23, 1, 19], [7, 21, 3, 15], [9, 20, 8, 14], [10, 21, 13, 16]].forEach(([a, b, x, y]) => c.line(a, b, x, y, 'e'));
-  // the other arm low and out, claws on the hand
+  // the flung arm: kit sleeve, then the lion's foreleg worn as a gauntlet, a big paw and four claws reaching up and out
+  c.poly([[20, 35], [25, 38], [17, 28], [13, 30]], M.kit, { flat: 1 });
+  c.poly([[17, 27], [12, 31], [8, 22], [12, 19]], L, { global: true, k: 0.95 }); c.line(15, 28, 10, 21, '?'); c.line(11, 31, 8, 25, '{');
+  c.ell(9, 18, 4.5, 4, L, { k: 0.85 });   // the paw
+  claw(5, 16, -2, -3, -1, 1); claw(7, 14, -1, -4, -1, 1); claw(10, 14, 0, -4, 0, 1); claw(13, 15, 1, -3, 1, 1);
+  // the other arm low and out, steel bracer, a clawed hand
   c.poly([[42, 38], [46, 38], [50, 45], [46, 46]], M.kit, { flat: 3 }); c.poly([[46, 44], [50, 43], [53, 49], [49, 50]], M.steel, { flat: 3 });
-  c.ell(52, 51, 2.6, 2.4, M.skin, { k: 0.8 }); [-1.5, 0, 1.5].forEach(d => c.line(52 + d, 53, 52 + d * 1.6, 56, 'e'));
-  // body: silver plates, belt
+  c.ell(52, 51, 2.8, 2.6, M.skin, { k: 0.8 });
+  claw(49, 53, -2, 3, -1, 2); claw(52, 54, 0, 4, 0, 1); claw(55, 53, 2, 3, 1, 2);
+  // body: silver plates, white belt with the red gem
   c.poly([[24, 33], [41, 33], [41, 44], [23, 44]], M.steel, { k: 0.95 });
+  c.ell(32, 37, 8, 4, M.steel, { k: 0.8, clip: (x, y) => y < 40 });
   c.rect(23, 42, 18, 3, M.trim, { k: 0.85, global: true }); gem(c, 32, 43.5, 1.4);
-  // the pelt: mane draped over the right shoulder and down the side
-  c.poly([[33, 26], [44, 28], [48, 36], [46, 44], [42, 46], [40, 38], [34, 34]], L, { global: true, k: 0.95 });
-  [[40, 31, 45, 42], [37, 30, 41, 40], [43, 30, 47, 38]].forEach(([a, b, x, y]) => c.line(a, b, x, y, '?'));
-  c.poly([[22, 32], [27, 30], [27, 35], [21, 37]], L, { flat: 1 });   // a fold over the left shoulder
-  // helm with face mask under the lion's jaw
-  c.poly([[25, 18], [39, 18], [39, 28], [36, 33], [28, 33], [25, 28]], M.steel, { global: true });
-  face(c, 23); gem(c, 32, 21, 1.5);
-  // the lion's head on top: a shaggy darker mane with spiky tufts, a paler face, fierce brows, nose, fangs over the brow
-  c.ell(32, 11, 13, 10, ['>', '>', '?', '?', '{'], { k: 0.9 });
-  [[19, 4, 22, 0, 25, 3], [25, 2, 29, -1, 31, 2], [33, 2, 36, -1, 39, 2], [39, 3, 43, 0, 45, 4], [17, 9, 15, 6, 19, 6], [47, 9, 49, 6, 45, 6],
-   [18, 14, 14, 15, 18, 18], [46, 14, 50, 15, 46, 18]].forEach(([a, b, x, y, e, f]) => c.poly([[a, b], [x, y], [e, f]], ['>', '?'], { flat: x < 32 ? 0 : 1 }));
-  [[21, 8, 19, 14], [24, 4, 22, 9], [43, 8, 45, 14], [40, 4, 42, 9]].forEach(([a, b, x, y]) => c.line(a, b, x, y, '{'));
-  c.ell(32, 11, 8, 7.5, L, { k: 0.85 });   // the face
-  c.ell(32, 14, 5.5, 3.6, ['^', '^', '<', '>'], { k: 0.8 });   // muzzle
-  [[26, 9, 1], [36, 9, -1]].forEach(([x, y, f]) => { c.rect(x, y, 3, 1, ['y'], { flat: 0 }); c.set(x + (f > 0 ? 2 : 0), y, 'e'); c.line(x - (f > 0 ? 1 : -3), y - 2 + (f > 0 ? 0 : 0), x + (f > 0 ? 3 : -1), y - 1, '{'); });
-  c.line(25, 7, 29, 8, '{'); c.line(39, 7, 35, 8, '{');   // brows down
-  c.poly([[30, 12], [34, 12], [33, 14], [31, 14]], ['e'], { flat: 0 }); c.line(32, 14, 32, 15, '?'); c.line(29, 16, 31, 15, '?'); c.line(33, 15, 35, 16, '?');
-  c.line(26, 18, 38, 18, '{'); [27, 30, 34, 37].forEach(x => { c.set(x, 19, 'w'); c.set(x, 20, 'W'); });   // jaw, fangs
+  pauldron(c, -1);
+  // the pelt: mane falling from the lion's head down his right side and over the back
+  c.poly([[34, 30], [46, 26], [52, 34], [49, 42], [44, 44], [42, 38], [36, 35]], L, { global: true, k: 0.95 });
+  [[44, 32, 47, 42], [41, 33, 44, 42], [48, 31, 50, 39], [38, 33, 41, 38]].forEach(([a, b, x, y]) => c.line(a, b, x, y, '?'));
+  // helm: open-faced silver helm, a raised ridge down the middle, cheek guards, the red gem on the brow
+  c.ell(30, 18, 8.5, 8, M.steel, { k: 0.85 });
+  c.poly([[21.5, 18], [38.5, 18], [38, 29], [35, 33], [25, 33], [22, 29]], M.steel, { global: true });
+  c.poly([[29, 7], [31, 7], [32, 20], [28, 20]], ['E', 'm', '|'], { global: true });   // the ridge
+  c.line(22, 23, 38, 23, 'G');
+  c.poly([[24, 24], [36, 24], [36, 29], [33, 33], [27, 33], [24, 29]], M.skin, { k: 0.95, global: true });   // face
+  c.line(25, 25, 28, 26, 'e'); c.line(35, 25, 32, 26, 'e'); c.set(26, 27, 'E'); c.set(27, 27, '@'); c.set(33, 27, '@'); c.set(34, 27, 'E');
+  c.line(30, 27, 30, 30, 'S'); c.line(28, 31, 32, 31, 'D');
+  c.rect(23, 24, 2, 7, ['M'], { flat: 0 }); c.rect(36, 24, 2, 7, ['i'], { flat: 0 });   // cheek guards
+  gem(c, 30, 20.5, 1.5);
+  // the lion's head, on his left shoulder: shaggy mane, tawny face looking out, fierce brows, nose, open jaw with fangs
+  c.ell(46, 22, 10, 9, ['>', '>', '?', '?', '{'], { k: 0.9 });
+  [[38, 15, 39, 10, 43, 13], [43, 13, 46, 8, 49, 13], [49, 13, 54, 10, 54, 16], [54, 18, 59, 18, 55, 23], [55, 25, 58, 29, 52, 29], [37, 21, 34, 19, 37, 25]]
+    .forEach(([a, b, x, y, e, f]) => c.poly([[a, b], [x, y], [e, f]], ['>', '?'], { flat: x < 46 ? 0 : 1 }));
+  [[40, 16, 38, 22], [52, 16, 54, 22], [42, 13, 41, 17], [50, 13, 51, 17]].forEach(([a, b, x, y]) => c.line(a, b, x, y, '{'));
+  c.ell(46, 22, 6.2, 6, L, { k: 0.85 });   // face
+  c.ell(46, 25, 4.2, 2.8, ['^', '^', '<', '>'], { k: 0.8 });   // muzzle
+  c.line(41, 19, 44, 20, '{'); c.line(51, 19, 48, 20, '{');   // brows down
+  c.rect(42, 21, 2, 1, ['y'], { flat: 0 }); c.set(43, 21, 'e'); c.rect(48, 21, 2, 1, ['y'], { flat: 0 }); c.set(48, 21, 'e');
+  c.poly([[45, 23], [48, 23], [47, 25], [46, 25]], ['e'], { flat: 0 });
+  c.line(43, 27, 49, 27, '{'); c.set(44, 28, 'w'); c.set(48, 28, 'w'); c.line(44, 28, 48, 28, 'R'); c.set(44, 28, 'w'); c.set(48, 28, 'w');   // jaw open, fangs
   return finish(c);
 }
 

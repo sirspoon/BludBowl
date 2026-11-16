@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.08 (16 Nov 2026)
+- HD sprite test (`?hd`): the White Lion redrawn closer to the miniature, with an open silver helm, the lion's head worn on
+  his shoulder, and bigger, clearer claws.
+
 ## v5.07 (16 Nov 2026)
 - HD sprite test (`?hd`): the High Elves redrawn after Games Workshop's new High Elf team, so each position stands out at a
   glance: silver Linemen with a team-colour crest, White Lions under a tawny lion pelt with a clawed arm raised, Phoenix

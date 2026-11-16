@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.08 (16 Nov 2026)
+- **Test (HD sprites, `?hd`):** White Lion redrawn after the owner's feedback, closer to GW's miniature: an open-faced silver
+  helm with a raised ridge, cheek guards and the red gem (the lion no longer sits on top of the head); the lion's head worn on his
+  left shoulder, facing out (shaggy mane, fierce brows, open jaw with fangs), its mane falling down his side; the raised arm is
+  the lion's foreleg with a big paw and four long pale claws, and the low hand has three, each kept apart so the outline shows
+  every claw.
+
 ## v5.07 (16 Nov 2026)
 - **Test (HD sprites, `?hd`):** the four High Elf sprites redrawn from GW's 2026 High Elf team (the Caledor Dragons) so they
   tell apart without zooming: the first pass gave every position the same long fair hair, silver and kit, and only the Dragon
