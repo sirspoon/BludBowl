@@ -1243,8 +1243,15 @@ predictor trained on BludBowl's own matches, play-outs inside the page, an opt-i
 - 378 turn starts, 9,072 play-outs (2.3 s each in a fresh page). Predicted result at the end of the turn against the usual AI:
   bash -0.1, safe -0.4, score -0.4 points (each +-0.4): none better on average. Picking the best per position, chosen on half the
   play-outs and scored on the other half (so luck can't fake it): +0.56 +- 0.36 points a turn (first half +0.54, second +0.60).
-- Next: real matches with the choice made live (step 3; about 20 play-outs a turn, 288 matches about 6 hours), then bolder styles
-  and more play-outs.
+- Caveat found on 17 Nov: the collecting matches clicked "Confirm Lineups" whenever the button's `offsetParent` was set, and with
+  the Tailwind stylesheet blanked for speed the `hidden` modal still has one, so every click started the match again. 375 of the
+  378 positions are at 0-0 and almost all are the first turn or two after a fresh kick-off (turn counters even reach 9-12). The
+  play-outs themselves were sound (pages started from a save: the button does nothing there; 6,897 of 9,072 made 6+ decisions and
+  ended at the other side's turn). So step 2 says "picking a style helps in drive-opening positions", not in general. Fixed in
+  `look.js` and `lookmatch.js` (`!b.closest('.hidden')`, as `tdturn.js` and `tools/ai-whatif.js` already did).
+- Step 3, real matches with the choice made live (`nn/look/lookmatch.js`, the predictor served by `nn/look/value_server.py`):
+  3 styles x 6 play-outs at each of the look side's turn starts. Its first 24 matches had the same fault (22 draws, touchdowns
+  0-2; set aside as `spoiled_match.jsonl`); restarted after the fix. About 16 minutes a match, 4 at once: 288 take about 20 hours.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
