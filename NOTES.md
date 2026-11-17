@@ -6,7 +6,9 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- (nothing right now)
+- (BludBowl local, 17 Nov afternoon) Look-ahead step 3: 288 real matches (`nn/look/lookmatch.js` on the PC), one side
+  choosing a style (base / bash / safe) at each turn start by 6 play-outs each judged by the outcome predictor
+  (`nn/look/value_server.py` on the GPU), the other the usual v5.12 AI. About 6 hours; plays its own snapshot of index.html.
 
 ## Recently done (newest first)
 - v5.12 (BludBowl local): pick up and score on the last turn takes chances down to 2% (was 8%); level in 288 matches. Blocking
