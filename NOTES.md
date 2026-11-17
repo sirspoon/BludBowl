@@ -6,19 +6,14 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- (BludBowl local, 17 Nov night) An evaluator trained on BludBowl's own matches (the owner's choice, after the predictor check).
-  `nn/look/evalcollect.js`: 6,000 AI-v-AI matches in the game itself (all 30 races, each side base / bash / safe at random),
-  turn starts and 15% of the other decisions, with targets (result; scored this turn; conceded in the reply; Turnover; scored /
-  conceded later in the half; knock-downs and casualties caused). `nn/look/evaltrain.py`: the decision network's board and
-  trunk (from bb_v3b, which never saw these matches) with new heads; the matches with "play" facts are the test set, checked
-  with `predcheck.py --values` against bb_v3c. Collection due about 23:35, then training (starts by itself, log
-  `nn/look/evaltrain_ev1.log`). (GPU: keep batch shapes fixed - MIOpen spends ~1 minute tuning for each new shape.)
-  The dashboard (`python nn/dashboard.py`, http://localhost:8765, or the app's `nn-dashboard` preview) now shows the
-  evaluator's position collection and training (result loss on held-out v training matches); `node nn/dashboard_snapshot.js`
-  saves a picture of it (`nn/dashboard-snapshot.jpg`) to send when the owner is away. It shares port 8765 with
-  `look/value_server.py`: run one at a time.
+- Nothing running.
 
 ## Recently done (newest first)
+- (17 Nov, no version) An evaluator trained on BludBowl's own matches (ev1; `nn/look/evalcollect.js`, `evaltrain.py`,
+  `evalcheck.py`): 6,000 AI-v-AI matches, 370,460 positions. Better than bb_v3c (squared error on results 0.086 v 0.100, well
+  calibrated, much less noise), but alone no better than a simple-facts model trained on the same matches (0.085), and only a
+  little real positional knowledge on top (blend 0.080 v 0.083). Memorises matches after 1 epoch: the result is too noisy a
+  target for 6,000 matches. The dashboard now shows evaluator collections and training. Details: `ai-training/README.md`.
 - (17 Nov, no version) What the outcome predictor goes by (the owner's question; `nn/look/predfacts.js`, `predcheck.py`,
   `predprobe.py`; 12,670 turn starts from 400 AI-v-AI matches): simple facts (score, turn, the ball and how far up, players
   standing, re-rolls, races) explain 80% of its verdict, the "play" facts (can our carrier score this turn, its free run, who can

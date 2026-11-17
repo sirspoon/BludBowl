@@ -1303,6 +1303,25 @@ one thing in the input. (A carried ball's square isn't kept in `state.ball`: dis
   Turnovers, knock-downs) as well as the result; or judge play-outs by a model built on simple + play facts; or play each
   option out past the opponent's reply so differences become concrete events.
 
+## An evaluator trained on BludBowl's own matches (17 Nov 2026, ev1)
+After the predictor check (above), the owner's choice. `nn/look/evalcollect.js`: 6,000 AI-v-AI matches in the game itself
+(all 30 races, random pairs, each side base / bash / safe at random): 370,460 positions (every turn start and 15% of the other
+decisions, ~2 hours), each with what happened next (result; scored this turn; conceded in the reply; Turnover; scored /
+conceded later in the half; knock-downs, casualties caused). `nn/look/evaltrain.py`: bb_v3b's board and trunk with new heads
+(result + those short-term ones), the 589 matches with "play" facts held out as the test set, 10% more to stop on. GPU note:
+MIOpen tunes ~1 minute for every new tensor shape, so every batch is the same size (512).
+- Training: best after 1 epoch (result loss 0.694 held-out, 0.649 training); from epoch 2 it memorises matches (0.72, 0.78 v
+  0.60, 0.55). Test: result correct 66%, log loss 0.72, squared error 0.088 (all positions).
+- Fair check (`nn/look/evalcheck.py`, test turn starts): a simple-facts model (gradient boosting, the same training matches)
+  0.0847 squared error; ev1 0.0855 alone; blended with the simple facts 0.0801 v 0.0826 for simple alone; bb_v3c 0.1003 alone,
+  0.0810 blended. Simple facts explain 91% of ev1's verdict (bb_v3c 80%). What they miss of its verdict tracks what they miss
+  of the real result at +0.153 (spread 0.097) v bb_v3c +0.120 (spread 0.164); the play facts' model +0.149.
+- So: better than bb_v3c (sharper, much less noise beyond the simple facts, well calibrated: says 0.9-1.0, real 0.95), but on
+  its own no better than simple facts done well, and only a little real positional knowledge on top. The match result is too
+  noisy a target for 6,000 matches (memorised after 1 epoch). Next options: far more matches; judge play-outs by the
+  short-term heads (scored now, conceded next, Turnover, knock-downs: less noisy, and what a turn's choice changes); or
+  simple facts done well plus ev1's small extra.
+
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
 `pup1`, throws to an open team-mate for safety, never on the last turn). `pickToScore`: every available player who can reach the
