@@ -94,9 +94,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
-- **For later (the owner, 17 Nov): drefsante's Bot Bowl 2023 replays.** 20 BotBowl replays (`.rep`, 13-28 MB each, ~380 MB) in
-  the owner's Google Drive folder "Dres-script-ai-replays": drefsante v Overparameterized40kBot, motbot2, treeman and random,
-  5 each (games 0, 2, 4, 6, 8). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at
+- **For later (the owner, 17 Nov): drefsante's Bot Bowl 2023 replays.** All 40 of its Bot Bowl V matches as BotBowl replays
+  (`.rep`, 13-28 MB each, ~780 MB) in the owner's Google Drive folder "Dres-script-ai-replays": v Overparameterized40kBot,
+  motbot2, treeman and random, 10 each, 5 at home (`drefsante_VS_x_0/2/4/6/8`) and 5 away (`x_VS_drefsante_1/3/5/7/9`). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at
   drefsante's decisions, to see where a strong scripted bot and ours differ. BotBowl is Humans only. Not downloaded yet.
   Drefsante (Frederic Bair, scripted) won Bot Bowl V (2023): won 37, drew 0, lost 3, touchdowns 139-6 (MotBot2, NN + evolution +
   scripted, 33-0-7, 99-10; Treeman, MCTS, 19-1-20; an RL bot and random never scored). Round robin, 10 matches a pairing, BB2016
