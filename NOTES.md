@@ -111,8 +111,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   two settings reads now point at its own folder; originals kept as `.orig`); pyjnius 1.9.0 in the AI environment; the portable
   64-bit JDK 21 in `...\BloodbowlAI_312\java\jdk-21.0.13+9` (not on the system PATH). `nn/evaluate.py --opponent drefsante
   --rules botbowl --teams human` (Bot Bowl V's settings: BB2016, route-finding on; the bridge loads the jar in each worker).
-  First 2 games: drefsante won 4-0 and 3-0 (our AI blocked more, 55 v 43 a match, but never scored), ~2.7 min a game. Under
-  BB2025 (`--rules season3`) it isn't reliable (one game stopped on an assertion in its bridge): use `--rules botbowl`. Our AI's
+  First 2 games: drefsante won 4-0 and 3-0 (our AI blocked more, 55 v 43 a match, but never scored). Its decisions are all
+  in the jar (`be/drefsante/bloodbowl/ai`, compiled Java, no source or licence in the zip); the Python file only translates.
+  Under BB2025 (`--rules season3 --pathfinding`) every game stopped at its first Blitz: BB2025 names a Blitz's target when
+  it's declared, its bridge didn't, so BotBowl's default named the first player offered and the planned block was refused.
+  Fixed in its `drefsante_bot.py` (`blitz_target`: name the player its planned block is aimed at): 4 of 4 games finish
+  (drefsante won 3, touchdowns 8-3); left: small mismatches it recovers from (e.g. "forgo activation"). Its brain still plays
+  LRB6, so BB2025 results favour us and BB2016 ones it. Slow: ~160 s a game v ~9 s for our AI v BotBowl's scripted bot - its
+  bridge rewrites both teams to files and the Java side reloads them at every decision (its own comment calls that the
+  bottleneck), with route-finding on. Our AI's
   "secure the ball" doesn't exist in BB2016 (the bridge swaps it), so it's a little handicapped there; drefsante's author says
   it's "slightly less good" in BotBowl too. A full run waits for the GPU training (CPU).
 - **Reading (the owner, 17 Nov):** BotBowl's papers list (github.com/njustesen/botbowl, docs/papers.md): the Blood Bowl AI
