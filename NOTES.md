@@ -111,7 +111,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   2022/07 "v.0.4 is released"): the jar + `drefsante_bot.py` + `drefsante_bot.cfg` (set `temporaryFolder`, `jarPathName`), JDK
   on PATH (`jdk/bin` and `jdk/bin/server`: probably Java loaded inside Python, e.g. JPype); import `drefsante_bot` and use
   the bot by name. The author says it's "slightly less good" in BotBowl, with some skills untested there. The PC has botbowl
-  1.1.0 (as Bot Bowl V) but only a 32-bit Java 1.8 and no JPype: needs a 64-bit JDK 21. Then: our AI (BotBowl bridge,
+  1.1.0 (as Bot Bowl V) and now a portable 64-bit JDK 21 (Temurin 21.0.13, checksum-verified) in
+  `E:\python\projects\BloodbowlAI_312\java\jdk-21.0.13+9` (not on the system PATH; the old 32-bit Java 1.8 stays the default).
+  Still needed: drefsante's zip (the owner is getting it); JPype if its Python file uses it. Then: our AI (BotBowl bridge,
   `nn/evaluate.py --model bludbowl`) v drefsante, Humans, LRB6 rules. Whether the v0.8 zip includes the Python files is unknown.
 - **Reading (the owner, 17 Nov):** BotBowl's papers list (github.com/njustesen/botbowl, docs/papers.md): the Blood Bowl AI
   challenge papers (2018, 2019), MimicBot (imitation + reinforcement learning, Bot Bowl III winner, 2021), and "Planning in the
