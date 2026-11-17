@@ -6,10 +6,7 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- **Open, for the game itself:** `AI.reset()` doesn't forget the AI's plans kept by half and turn (`cageDest`, `claims`, `ttmHold`,
-  `pas8Key`), so a second match in one browser session (or a resumed one) can start with the last match's turn plans (e.g. turn
-  1's formation claims). Small; fixed only in look/site's copy so far.
-
+- Nothing running.
 ## Recently done (newest first)
 - (17 Nov, no version) What the outcome predictor goes by (the owner's question; `nn/look/predfacts.js`, `predcheck.py`,
   `predprobe.py`; 12,670 turn starts from 400 AI-v-AI matches): simple facts (score, turn, the ball and how far up, players
@@ -90,6 +87,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
+- AI, small bug: `AI.reset()` doesn't forget the AI's plans kept by half and turn (`cageDest`, `claims`, `ttmHold`,
+  `pas8Key`), so a second match in one browser session (or a resumed one) can start with the last match's turn plans (e.g. turn
+  1's formation claims). Small; fixed only in look/site's copy so far.
 - **HD sprites (v5.05-v5.10 test, waiting on the owner's verdict).** v5.10: the owner felt the 2x redraws lost the
   originals' character, so `?hd` is now the originals at 1.5x (48x48), upscaled by `tools/hd-test/x15.js` with light shading
   (+~10 KB raw per 4 sprites, any team in seconds); the 2x redraw stays at `?hd=64`. Lesson from v5.07: draw from the real miniatures (GW's
