@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.11 (17 Nov 2026)
+- **Improved (AI):** pick up and score (`pus1`). With the ball loose, the computer looks for a player who can pick it up and hand it
+  off or pass it (moving on after the pick-up if need be) to a team-mate who can then run in, and takes it when that beats the
+  picker running in himself: on the last turn of a half at almost any odds, before that at 70%+. Found by replaying FUMBBL
+  coaches' scoring turns that started with a loose ball (62): the AI only ever picked up and ran, and scored 11% of the turns
+  the coach won with a hand-off. With `pus1`: 21%, and all those turns 29% -> 34%. In 288 matches against the AI without it:
+  touchdowns 272-253, won 112, drew 66, lost 110; passes completed 80-58, hand-offs 154-135 (at the usual 45% hand-off / 40% pass
+  bars it leaned behind: won 94, lost 111; last turn only: won 105, lost 99).
+
 ## v5.10 (17 Nov 2026)
 - **Test (HD sprites):** a 1.5x version (48x48) of the High Elves' original sprites, after the owner found the redrawn 2x
   ones lose some of their character. Made from the 32x32 grids, not redrawn: Scale3x (keeps edges sharp, smooths diagonals)

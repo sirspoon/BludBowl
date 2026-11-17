@@ -1226,3 +1226,38 @@ difference). Every 50 rounds the current set played the defaults over 96 matches
   `bzTurn` moves blocks a lot (about +2.6 a team a match per 0.03) without changing results.
 - So around the current values the dials hardly matter: the AI's results are set by what it does, not by these thresholds.
   Untried: the on/off switches in combination (a genetic search), and settings per team type.
+
+## Look-ahead (Nov 2026, phase 1)
+The idea: at the start of a turn the AI tries a few ways of playing it, plays each out with real dice, asks the outcome predictor
+(`bb_v3c`) how good the end of the turn looks, and plays the best. Choices are whole-turn "styles" (the usual AI with other dials),
+so the AI still plays every action by its rules. Phase 1 proves it offline before any of it goes into the game; phase 2 would
+search single activations (the turn's first action, Blitzes, scoring, loose balls); phase 3 puts it in the browser (a small
+predictor trained on BludBowl's own matches, play-outs inside the page, an opt-in "thinks longer" AI level).
+- `nn/look/look.js collect`: AI-v-AI matches (12 races) save the match (`SAVE.snapshot`) at turn starts; `play`: each position x
+  style x 6, each in a fresh page (repeated play-outs in one page spoiled each other in the scoring-turn tests), the deciding side
+  playing that turn with the style's dials, stopped at the next decision of the other side and saved as the network sees it from
+  the side about to act; `look_value.py` scores them. Uses the tuning snapshot (`nn/tune/site`: v5.09 with five fixed numbers as dials).
+- Styles: bash (block and Blitz risk limits up, `blkTurn` 0.3, `bzTurn` 0.25, ...), safe (risk limits down, the scoring bar 80%,
+  carrier and nimble movers 90-95%), score (scoring bar 30%, carrier 55-60%, ordinary moves 90%). They change few decisions:
+  safe 2.3 of 8 a turn, bash 0.2, score 0.1.
+- 378 turn starts, 9,072 play-outs (2.3 s each in a fresh page). Predicted result at the end of the turn against the usual AI:
+  bash -0.1, safe -0.4, score -0.4 points (each +-0.4): none better on average. Picking the best per position, chosen on half the
+  play-outs and scored on the other half (so luck can't fake it): +0.56 +- 0.36 points a turn (first half +0.54, second +0.60).
+- Next: real matches with the choice made live (step 3; about 20 play-outs a turn, 288 matches about 6 hours), then bolder styles
+  and more play-outs.
+
+## Pick up and score (Nov 2026, `pus1`, v5.11)
+From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
+`pup1`, throws to an open team-mate for safety, never on the last turn). `pickToScore`: every available player who can reach the
+ball (route and pick-up odds, a team re-roll counted), every square he can still reach after it (`getValidMoves` with a leg from
+the ball's square), every team-mate who could then run in (`runInProb`): hand-off (catch x run in) or pass (`passOdds` x run in);
+the best, if it beats any picker running in himself, at 70%+ (`pusBar`) or anything on the last turn. Step 1b of `choose0`,
+before the blocks (the receivers stay free), and not reordered by the turn planner; the plan walks to the ball, then the second leg
+(`leg2`), then throws.
+- Coaches' 62 loose-ball scoring turns, 6 play-outs each: scored 29% -> 34% (the first version, without the "picker runs in
+  himself" check, 31%): turns the coach won with a hand-off 11% -> 21%, with a run 40% -> 44%, with a pass 0% -> 0%.
+- 288 matches each against the AI without it: the usual 45 / 40% bars, touchdowns 233-266, won 94, drew 83, lost 111 (leaning
+  behind); last turn only 248-231, won 105, drew 84, lost 99; 70% before the last turn 272-253, won 112, drew 66, lost 110, passes
+  completed 80-58, hand-offs 154-135 (released).
+- The coaches' pick-up-and-pass scores (9) still 0%: mostly last turns where they blocked 1-3 times first to free the receiver,
+  then threw to a player who dodged or Rushed in; two are Throw Team-mate teams.

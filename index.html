@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.10</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.11</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27584,6 +27584,39 @@ ol.ci-steps li::marker { content: none; }
                 if (!best) return null;
                 return best.v >= (lastTurn ? 0.08 : bar != null ? bar : best.kind === 'handoff' ? 0.45 : 0.4) ? best : null;
             }
+            // (pus1) a loose ball: pick it up and hand off or pass to a team-mate who can then run it in, all in one action (the picker
+            // declares the Hand-off or Pass, walks to the ball, picks up, carries on to where it throws from). In FUMBBL coaches'
+            // scoring turns that started with a loose ball, 27 of 62 went this way; the AI, in the same positions, scored 14% of the
+            // hand-off ones and none of the passes (it only ever picked up and ran). Before the last turn only at 70%+ (pusBar): at
+            // the usual hand-off / pass bars (45 / 40%) it scored more in those positions but leaned behind in matches (won 94, lost 111)
+            function pickToScore(me, act, lastTurn) {
+                if (state.ball.carrierId || state.ball.x < 0 || state.isResolvingKickoff) return null;
+                const bx = state.ball.x, by = state.ball.y;
+                const receivers = state.players.filter(r => r.team === me && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Ball') && !hasSk(r, 'No Hands'));
+                const runIn = new Map(receivers.map(r => [r.id, runInProb(r)]));
+                if (![...runIn.values()].some(v => v > 0)) return null;
+                let best = null, self = 0;
+                act.forEach(p => {
+                    if (p.isDown || hasSk(p, 'No Hands') || hasSk(p, 'No Ball') || hasSk(p, 'My Ball')) return;
+                    const m = movesFor(p).find(q => q.x === bx && q.y === by); if (!m) return;
+                    const pu = pPlan(p, m, true) / 100; if (pu <= 0) return;   // getting there and picking up (rrp1: a team re-roll counted)
+                    let legs;
+                    try { legs = [{ x: bx, y: by, prob: 100 }, ...getValidMoves(p, { from: { x: bx, y: by }, dist0: m.path.length })]; } catch (e) { return; }
+                    // the picker running it in himself: when that's as good, the usual pick-up and run is left to do it
+                    legs.forEach(s => { if (s.x === endX(me)) { const v = pu * s.prob / 100; if (!self || v > self) self = v; } });
+                    receivers.forEach(r => {
+                        const ri = runIn.get(r.id); if (r.id === p.id || !(ri > 0)) return;
+                        legs.forEach(s => {
+                            if (s.x === r.x && s.y === r.y) return;
+                            const sp = pu * s.prob / 100;
+                            if (!state.handoffUsed && cheb(s, r) === 1) { const v = sp * catchProb(r) * ri; if (!best || v > best.v) best = { v, kind: 'handoff', p, r, s }; }
+                            if (!state.passUsed && p.pa != null) { const v = sp * passOdds(p, s.x, s.y, r) * ri * 0.97; if (!best || v > best.v) best = { v, kind: 'pass', p, r, s }; }
+                        });
+                    });
+                });
+                if (!best || self >= best.v) return null;
+                return best.v >= (lastTurn ? 0.08 : AIX.p(me, 'pusBar', 0.7)) ? best : null;
+            }
             // how many of our players should be busy with their ball carrier (more as they near our end zone)
             function huntNeed(c) { return toGo(c.x, c.team) <= 4 ? 5 : 4; }
             function huntersNear(c, me, skipId) {
@@ -28418,7 +28451,7 @@ ol.ci-steps li::marker { content: none; }
                     try { for (let i = 0; i < 4 && first && cutsLane(me, first); i++) { tried.add(first.pid); added.push(first.pid); moveMemo = new Map(); first = choose0(); } }
                     finally { added.forEach(id => tried.delete(id)); moveMemo = new Map(); }
                 }
-                if (!first || first.pid == null || !AIX.on(me, 'tplan') || state.turn[me] >= TURNS || planRisk(first) !== 'risky') return first;
+                if (!first || first.pid == null || !AIX.on(me, 'tplan') || state.turn[me] >= TURNS || planRisk(first) !== 'risky' || first.pus) return first;
                 const stall = state.aiStalling, carrier = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                 const ourC = carrier && carrier.team === me && onPitch(carrier) ? carrier : null;
                 // a risky move by our carrier (or a hand-off, a pass): the cage round where it stands now would be wasted - those wait
@@ -28497,6 +28530,15 @@ ol.ci-steps li::marker { content: none; }
                     if (via && via.v > direct && !state.aiStalling) {
                         const rid = via.r.id, sx = via.s.x, sy = via.s.y;
                         return { pid: carrier.id, kind: via.kind, receiver: rid, pick: ms => (sx === carrier.x && sy === carrier.y) ? null : (ms.find(m => m.x === sx && m.y === sy) || null), stay: sx === carrier.x && sy === carrier.y };
+                    }
+                }
+                // 1b. (pus1) a loose ball: pick it up and hand off or pass to a team-mate who then runs it in
+                if (AIX.on(me, 'pus1') && !carrier) {
+                    const ps = pickToScore(me, act, lastTurn);
+                    if (ps) {
+                        const bx = state.ball.x, by = state.ball.y, sx = ps.s.x, sy = ps.s.y;
+                        return { pid: ps.p.id, kind: ps.kind, receiver: ps.r.id, pus: true, pick: ms => ms.find(m => m.x === bx && m.y === by) || null,
+                            leg2: sx !== bx || sy !== by ? { x: sx, y: sy } : null };
                     }
                 }
                 // last turn: a goblin with the ball can still be thrown in
@@ -29359,7 +29401,15 @@ ol.ci-steps li::marker { content: none; }
                     const t = plan.target != null ? getPlayerById(plan.target) : null;
                     if (plan.kind === 'blitz' && t && onPitch(t) && !t.isDown && cheb(p, t) === 1 && !p.hasBlocked) { doBlock(p); return; }
                     if (plan.kind === 'foul' && t && onPitch(t) && cheb(p, t) === 1) { doFoul(p); return; }
-                    if (plan.kind === 'pass' || plan.kind === 'handoff') { doThrow(p); return; }
+                    if (plan.kind === 'pass' || plan.kind === 'handoff') {
+                        // (pus1) picked the ball up on the way: carry on to where the hand-off or throw is made from
+                        if (plan.leg2 && !plan.leg2done && state.ball.carrierId === p.id && (p.x !== plan.leg2.x || p.y !== plan.leg2.y)) {
+                            plan.leg2done = true;
+                            const m2 = (state.moves || []).filter(m => m.x === plan.leg2.x && m.y === plan.leg2.y).sort((a, b) => b.prob - a.prob)[0];
+                            if (m2) { act(() => startPath(p, m2.path)); return; }
+                        }
+                        doThrow(p); return;
+                    }
                     if (state.ball.carrierId === p.id && !plan.advanced && p.remainingMA > 0) {
                         plan.advanced = true;
                         const m2 = feedPick(state.moves, p, plan.after ? plan.after(state.moves, p) : carrierPick(state.moves, p));

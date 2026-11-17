@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.11 (17 Nov 2026)
+- The computer can now pick up a loose ball and hand it off or throw it to a team-mate who can run in to score, all in one
+  action (always on the last turn of a half, earlier when it's a good bet).
+
 ## v5.10 (17 Nov 2026)
 - HD sprite test: `?hd` now shows the High Elves' original sprites with 1.5x the pixels, smoothed and lightly shaded so they
   keep their character. The redrawn 2x versions are still there with `?hd=64`; Settings > HD sprites switches Off / 1.5x / 2x.
