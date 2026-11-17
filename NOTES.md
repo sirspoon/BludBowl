@@ -88,6 +88,20 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
+- **For later (the owner, 17 Nov): drefsante's Bot Bowl 2023 replays.** 20 BotBowl replays (`.rep`, 13-28 MB each, ~380 MB) in
+  the owner's Google Drive folder "Dres-script-ai-replays": drefsante v Overparameterized40kBot, motbot2, treeman and random,
+  5 each (games 0, 2, 4, 6, 8). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at
+  drefsante's decisions, to see where a strong scripted bot and ours differ. BotBowl is Humans only. Not downloaded yet.
+- **Reading (the owner, 17 Nov):** BotBowl's papers list (github.com/njustesen/botbowl, docs/papers.md): the Blood Bowl AI
+  challenge papers (2018, 2019), MimicBot (imitation + reinforcement learning, Bot Bowl III winner, 2021), and "Planning in the
+  midst of chaos" (Humeau et al., IEEE CoG 2021: Blood Bowl as a Markov decision process; a framework, no bot or results). Its
+  useful parts for us: planning levels (1 one player - where GrodBot-style bots and mostly ours sit; 2 a few players together;
+  3 the whole turn; 4 the turn plus the opponent's reply - "expert coaches"; 5 several turns); a plan's odds as the product of
+  its rolls, with the safe actions first and a look at the position if it fails; dice-free search for a touchdown in one turn
+  with up to 3 players; and pointers to whole-turn search for many-action games (Online Evolution, Justesen et al. 2016;
+  Evolutionary MCTS, Baier and Cowling 2018) and to predicting Blood Bowl 2 winners by classification (Gustafsson 2019).
+- The AI Python environment (anaconda `bloodbowl_312`) now has scikit-learn (1.9.1). Its NumPy's BLAS is broken: `np.corrcoef`
+  and matrix products crash the process without a message (exit 127); element-wise maths and torch work.
 - AI, small bug: `AI.reset()` doesn't forget the AI's plans kept by half and turn (`cageDest`, `claims`, `ttmHold`,
   `pas8Key`), so a second match in one browser session (or a resumed one) can start with the last match's turn plans (e.g. turn
   1's formation claims). Small; fixed only in look/site's copy so far.
