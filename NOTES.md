@@ -9,7 +9,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - (BludBowl local, 17 Nov afternoon) Look-ahead step 3: 288 real matches (`nn/look/lookmatch.js` on the PC), one side
   choosing a style (base / bash / safe) at each turn start by 6 play-outs each judged by the outcome predictor
   (`nn/look/value_server.py` on the GPU), the other the usual v5.12 AI. Plays its own snapshot of index.html. Restarted about
-  15:40 after a runner fault (it kept clicking the hidden "Confirm Lineups" button, which restarts the match: 0-0 draws); about
+  15:05 after a runner fault (it kept clicking the hidden "Confirm Lineups" button, which restarts the match: 0-0 draws); about
   20 hours. The same fault skewed step 2's positions (almost all drive openers at 0-0): see `ai-training/README.md`, "Look-ahead".
 
 ## Recently done (newest first)
