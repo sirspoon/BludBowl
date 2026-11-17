@@ -1267,6 +1267,15 @@ predictor trained on BludBowl's own matches, play-outs inside the page, an opt-i
   on as fast as it can even while the AI is paused - and each waiting page (the 4 match pages during their look-ahead, play-out
   pages between jobs) used a whole CPU thread. look/site's copy has `CLOCK.hold(v)`; the runner holds the clock in waiting pages
   (an idle page 100% busy -> 8%). Seeded play-outs still match fresh pages exactly; matches 3.9 -> 3.3 minutes.
+- **Step 3 result (288 matches, 17 Nov):** the look-ahead side won 92, drew 100, lost 96, touchdowns 258-262 - no gain. It played
+  more carefully than the usual AI (Turnovers 1386 v 1515, casualties caused 429 v 505). By race nothing clear except Dwarfs
+  (1-12-11, touchdowns 8-20; with 12 races one such result by luck isn't unlikely). Styles picked: base 37%, bash 31%, safe 32%.
+  Why it doesn't help, most likely: (1) the styles barely differ - bash changes about 0.2 of a turn's ~8 decisions, safe about
+  2 - so choosing between near-copies of the same turn can't gain much, and bash being picked a third of the time suggests the
+  pick is mostly the play-outs' luck; (2) 6 play-outs a style are noisy next to the differences; (3) the predictor's verdicts
+  may not be sharp enough for small differences (step 2's encouraging +0.56 came from skewed positions). Next: check what the
+  predictor goes by (the owner's question: the ball, turn and score, or the plays that are possible), then search real choices
+  (phase 2) rather than styles.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,

@@ -6,24 +6,24 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- (BludBowl local, 17 Nov afternoon) Look-ahead step 3: 288 real matches (`nn/look/lookmatch.js` on the PC), one side
-  choosing a style (base / bash / safe) at each turn start by 6 play-outs each judged by the outcome predictor
-  (`nn/look/value_server.py` on the GPU), the other the usual v5.12 AI. Plays its own snapshot of index.html. Restarted about
-  15:05 after a runner fault (it kept clicking the hidden "Confirm Lineups" button, which restarts the match: 0-0 draws). The same
-  fault skewed step 2's positions (almost all drive openers at 0-0): see `ai-training/README.md`, "Look-ahead". Paused at 20
-  matches (16 min each) to speed up the play-outs (below), resumed 17:09 at about 3.9 min a match, 3.3 from 17:27 (the test
-  clock held in waiting pages): due about 21:00.
-- Faster play-outs (17 Nov, the owner's idea): play-out pages are now reused (`--reuse 40` in `lookmatch.js`), about 4x faster.
-  Checked with the dice seeded (`nn/look/reuse_test.js`): 767 of 768 play-outs in reused pages ended exactly as in fresh pages
-  (the other one is load timing, not a leak: replaying its page's sequence matched). Two fixes in look/site's copy made that
-  possible: `AI.reset()` now also forgets the plans kept by half and turn (`cageDest`, `claims`, `ttmHold`, `pas8Key`, caches),
-  which leaked into the next play-out of the same turn; and sound and drawing use their own random numbers (`Math.cosRandom`),
-  so seeded play-outs repeat. Sound and drawing themselves cost little (layout and style ~2% of a page's time); the waste was
-  the test clock: in `?simtest` a page never idles (the AI's tick keeps the timer queue busy), so every waiting page used a whole
-  CPU thread. look/site's copy has `CLOCK.hold(v)`; the runner holds it in waiting pages (busy 100% -> 8%). **Open, for the game itself:** the same `AI.reset()` gap means a second match in one browser session
-  (or a resumed one) can start with the last match's turn plans (e.g. turn 1's formation claims). Small; not fixed in the game yet.
+- (BludBowl local, 17 Nov evening) What does the outcome predictor go by? The owner's question: does its verdict mostly follow who
+  has the ball, the turn, the score and how far up the pitch, or does it see what plays are possible (who can score)? Collecting
+  turn starts from 400 AI-v-AI matches (`nn/look/predfacts.js`: simple facts, "play" facts from the AI's own code via
+  `AI.debugFacts` in look/site's copy, and what happened next), then `nn/look/predcheck.py`.
+- **Open, for the game itself:** `AI.reset()` doesn't forget the AI's plans kept by half and turn (`cageDest`, `claims`, `ttmHold`,
+  `pas8Key`), so a second match in one browser session (or a resumed one) can start with the last match's turn plans (e.g. turn
+  1's formation claims). Small; fixed only in look/site's copy so far.
 
 ## Recently done (newest first)
+- (17 Nov, no version) Look-ahead step 3, real matches (`nn/look/lookmatch.js`): one side chose a style (base / bash / safe) at
+  each turn start by 6 play-outs each judged by the outcome predictor; the other the usual v5.12 AI. 288 matches: won 92, drew
+  100, lost 96, touchdowns 258-262: no gain. It played more carefully (Turnovers 1386 v 1515, casualties caused 429 v 505);
+  Dwarfs went 1-12-11. Styles picked base 37%, bash 31%, safe 32%: the styles barely differ (bash changes ~0.2 decisions a
+  turn), so the pick is largely the play-outs' luck. On the way: the runner's first 24 matches were spoiled (it kept clicking
+  the hidden "Confirm Lineups" button, restarting the match), which had also skewed step 2's positions to drive openers; play-out
+  pages are now reused (`AI.reset()` leak and shared random numbers found and fixed in look/site's copy, checked exact with
+  seeded dice) and the test clock is held in waiting pages: a look-ahead match 16 -> 3.3 minutes. Details:
+  `ai-training/README.md`, "Look-ahead".
 - v5.12 (BludBowl local): pick up and score on the last turn takes chances down to 2% (was 8%); level in 288 matches. Blocking
   first to clear the way for the pick-up / throw / receiver (`clearForScore`, the owner's idea) tried and left off (`pusClear` 0):
   fewer scores in the coaches' loose-ball turns (29% v 33%) and level in matches with more Turnovers. Most of the coaches'
