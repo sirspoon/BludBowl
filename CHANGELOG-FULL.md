@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.10 (17 Nov 2026)
+- **Test (HD sprites):** a 1.5x version (48x48) of the High Elves' original sprites, after the owner found the redrawn 2x
+  ones lose some of their character. Made from the 32x32 grids, not redrawn: Scale3x (keeps edges sharp, smooths diagonals)
+  to 96x96, then each 2x2 block takes its most common colour, any small detail that lost the vote (eyes, fangs, gems) put back,
+  a clean 1-pixel outline, a lit edge on the left and a shaded edge on the right of each colour, and blue eyes with brows
+  (`tools/hd-test/x15.js`). `?hd` (or `?hd=48`) shows these; `?hd=64` the 2x redraw; Settings > HD sprites (test) cycles
+  Off / 1.5x / 2x. The idle crouch scales with any grid size.
+
 ## v5.09 (16 Nov 2026)
 - **Improved (AI):** scoring turns (`tdf1`). Found by replaying FUMBBL coaches' scoring turns: the computer, put in the same
   positions, scored only 44% of the turns where the coach scored with a run needing a dodge or Rush (route odds median 68%), and in

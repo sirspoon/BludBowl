@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.10 (17 Nov 2026)
+- HD sprite test: `?hd` now shows the High Elves' original sprites with 1.5x the pixels, smoothed and lightly shaded so they
+  keep their character. The redrawn 2x versions are still there with `?hd=64`; Settings > HD sprites switches Off / 1.5x / 2x.
+
 ## v5.09 (16 Nov 2026)
 - The computer goes for a risky touchdown run before its blocks (a failed block could end the turn first), and no longer holds
   the ball back from a run in that needs a dodge.

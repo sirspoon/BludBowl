@@ -1,4 +1,11 @@
-# HD sprite test (v5.05, redrawn in v5.07)
+# HD sprite test (v5.05; redrawn v5.07-v5.08; 1.5x version v5.10)
+
+**v5.10: `?hd` is now 1.5x (48x48).** The owner found the 2x redraws lose some of the originals' character, so `x15.js` makes a
+48x48 version of each original instead of redrawing: Scale3x to 96x96, a 2x2 majority vote down to 48, small details that lost
+the vote put back, a clean outline, a light left / dark right edge on each colour, blue eyes and brows. It writes
+`x15-highelf.json` (pasted into `SPRITES_HD48`). Being automatic, it would do every team in seconds; the 2x redraw is still
+there with `?hd=64`, and Settings > HD sprites (test) cycles Off / 1.5x / 2x.
+
 
 A first look at doubling the sprites' pixel density: the four High Elf positions redrawn on a 64x64 grid, drawn at the same
 size on screen. Off by default; add `?hd` to the address (https://sirspoon.github.io/BludBowl/?hd) or turn on

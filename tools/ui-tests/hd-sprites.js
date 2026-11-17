@@ -32,7 +32,7 @@ async function shots(browser, tag, query) {
     const he = state.players.find(p => p.team === 0), hu = state.players.find(p => p.team === 1);
     return { he: spriteCanvas(he, false).width, hu: spriteCanvas(hu, false).width, hd: HD.on };
   });
-  check(info.he === (query ? 64 : 32) && info.hu === 32, `${tag}: High Elf sprite ${info.he}px wide, Humans ${info.hu}px`, info);
+  check(info.he === (query === '?hd=64' ? 64 : query ? 48 : 32) && info.hu === 32, `${tag}: High Elf sprite ${info.he}px wide, Humans ${info.hu}px`, info);
   check(!errors.length, `${tag}: no page errors (desktop)`, errors.slice(0, 2));
   await ctx.close();
   // phone, portrait
@@ -50,34 +50,34 @@ async function shots(browser, tag, query) {
   const { page, errors, ctx } = await openGame(browser);
   const g = await page.evaluate(() => {
     const bad = [];
-    Object.entries(SPRITES_HD).forEach(([race, set]) => Object.entries(set).forEach(([n, grid]) => {
-      if (grid.length !== 64 || grid.some(r => r.length !== 64)) bad.push(n + ': not 64x64');
+    [[SPRITES_HD48, 48], [SPRITES_HD, 64]].forEach(([SETS, N]) => Object.entries(SETS).forEach(([race, set]) => Object.entries(set).forEach(([n, grid]) => {
+      if (grid.length !== N || grid.some(r => r.length !== N)) bad.push(n + ': not ' + N + 'x' + N);
       const pal = Object.assign({}, SPRITE_FIXED, { k: 1, K: 1, d: 1, t: 1, T: 1, l: 1, '(': 1, ')': 1, '[': 1, ']': 1, '.': 1 });
       const miss = [...new Set(grid.join(''))].filter(c => !pal[c]); if (miss.length) bad.push(n + ': unknown letters ' + miss.join(''));
       if (!SPRITES[race][n]) bad.push(n + ': no 32x32 original');
-    }));
-    const missing = Object.keys(SPRITES.highelf).filter(n => !SPRITES_HD.highelf[n]);
+    })));
+    const missing = Object.keys(SPRITES.highelf).filter(n => !SPRITES_HD.highelf[n] || !SPRITES_HD48.highelf[n]);
     return { bad, missing, off: HD.on };
   });
-  check(!g.bad.length, 'HD grids are 64x64 and use known palette letters', g.bad);
-  check(!g.missing.length, 'every High Elf position has an HD sprite', g.missing);
+  check(!g.bad.length, 'HD grids are 48x48 / 64x64 and use known palette letters', g.bad);
+  check(!g.missing.length, 'every High Elf position has both HD sprites', g.missing);
   check(!g.off, 'HD is off by default');
   // Settings switch
-  await page.evaluate(() => { document.getElementById('st-hd').click(); });
-  check(await page.evaluate(() => HD.on && localStorage.getItem('bb-hd-sprites') === '1' && document.getElementById('st-hd').textContent === 'On'), 'Settings switch turns it on and remembers it');
-  await page.evaluate(() => { document.getElementById('st-hd').click(); });
-  check(await page.evaluate(() => !HD.on && localStorage.getItem('bb-hd-sprites') === '0'), 'and off again');
+  const steps = [];
+  for (let i = 0; i < 3; i++) steps.push(await page.evaluate(() => { document.getElementById('st-hd').click(); return [HD.size, localStorage.getItem('bb-hd-sprites'), document.getElementById('st-hd').textContent].join(' '); }));
+  check(steps.join(', ') === '48 48 1.5x, 64 64 2x, 0 0 Off', 'Settings switch: Off -> 1.5x -> 2x -> Off, remembered', steps);
   // Team Builder preview row uses the HD set when on
-  const tb = await page.evaluate(() => { HD.set(true); const set = spriteSetFor('highelf'); const c = paintSprite(set.Lineman, '#1e3a8a', '#fff'); HD.set(false); return c.width; });
-  check(tb === 64, 'Team Builder / memorial previews paint the 64x64 grid', tb);
+  const tb = await page.evaluate(() => { const w = []; [48, 64].forEach(n => { HD.set(n); w.push(paintSprite(spriteSetFor('highelf').Lineman, '#1e3a8a', '#fff').width); }); HD.set(0); return w.join(','); });
+  check(tb === '48,64', 'Team Builder / memorial previews paint the HD grid', tb);
   // crouch (idle breathing) keeps working on a 64 grid
-  check(await page.evaluate(() => { const gr = crouchGrid(SPRITES_HD.highelf.Lineman, 1); return gr !== SPRITES_HD.highelf.Lineman && gr.length === 64; }), 'idle crouch frame works on 64x64');
+  check(await page.evaluate(() => [SPRITES_HD48, SPRITES_HD].every(S => { const g0 = S.highelf.Lineman, gr = crouchGrid(g0, 1); return gr !== g0 && gr.length === g0.length; })), 'idle crouch frame works on 48x48 and 64x64');
   // paint cost: 64x64 v 32x32
   const perf = await page.evaluate(() => { const t = f => { const a = performance.now(); for (let i = 0; i < 200; i++) f(); return (performance.now() - a) / 200; };
-    return { hd: t(() => paintSprite(SPRITES_HD.highelf.Lineman, '#1e3a8a', '#ffffff')).toFixed(3), sd: t(() => paintSprite(SPRITES.highelf.Lineman, '#1e3a8a', '#ffffff')).toFixed(3) }; });
+    return { hd48: t(() => paintSprite(SPRITES_HD48.highelf.Lineman, '#1e3a8a', '#ffffff')).toFixed(3), hd64: t(() => paintSprite(SPRITES_HD.highelf.Lineman, '#1e3a8a', '#ffffff')).toFixed(3), sd: t(() => paintSprite(SPRITES.highelf.Lineman, '#1e3a8a', '#ffffff')).toFixed(3) }; });
   console.log('      paint one sprite (ms, cached afterwards):', JSON.stringify(perf));
   await ctx.close();
   await shots(browser, 'before', '');
   await shots(browser, 'after', '?hd');
+  if (process.argv.includes('--64')) await shots(browser, 'after64', '?hd=64');
   await done(browser);
 })();
