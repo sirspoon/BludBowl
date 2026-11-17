@@ -1262,6 +1262,11 @@ predictor trained on BludBowl's own matches, play-outs inside the page, an opt-i
   x 4 seeds, fresh page twice and reused pages (16 play-outs a page): fresh v fresh 768 of 768 identical, fresh v reused 767 (the
   other one didn't repeat when its page's sequence was replayed: load timing, not a leak). Without the `AI.reset()` fix, 3 of 384
   differed. Play-outs 1.9 s each reused v 5.1 s fresh (under full load); look-ahead matches 16 -> 3.9 minutes.
+- Sound and graphics cost little once pages are reused (Chrome's counters: layout and style about 2% of a page's time). The real
+  waste was the test clock: with `?simtest` a page never goes idle - the AI's tick keeps the timer queue busy, so the clock steps
+  on as fast as it can even while the AI is paused - and each waiting page (the 4 match pages during their look-ahead, play-out
+  pages between jobs) used a whole CPU thread. look/site's copy has `CLOCK.hold(v)`; the runner holds the clock in waiting pages
+  (an idle page 100% busy -> 8%). Seeded play-outs still match fresh pages exactly; matches 3.9 -> 3.3 minutes.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,

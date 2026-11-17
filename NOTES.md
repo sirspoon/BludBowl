@@ -11,13 +11,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   (`nn/look/value_server.py` on the GPU), the other the usual v5.12 AI. Plays its own snapshot of index.html. Restarted about
   15:05 after a runner fault (it kept clicking the hidden "Confirm Lineups" button, which restarts the match: 0-0 draws). The same
   fault skewed step 2's positions (almost all drive openers at 0-0): see `ai-training/README.md`, "Look-ahead". Paused at 20
-  matches (16 min each) to speed up the play-outs (below), resumed 17:09 at about 3.9 min a match: due about 21:30.
+  matches (16 min each) to speed up the play-outs (below), resumed 17:09 at about 3.9 min a match, 3.3 from 17:27 (the test
+  clock held in waiting pages): due about 21:00.
 - Faster play-outs (17 Nov, the owner's idea): play-out pages are now reused (`--reuse 40` in `lookmatch.js`), about 4x faster.
   Checked with the dice seeded (`nn/look/reuse_test.js`): 767 of 768 play-outs in reused pages ended exactly as in fresh pages
   (the other one is load timing, not a leak: replaying its page's sequence matched). Two fixes in look/site's copy made that
   possible: `AI.reset()` now also forgets the plans kept by half and turn (`cageDest`, `claims`, `ttmHold`, `pas8Key`, caches),
   which leaked into the next play-out of the same turn; and sound and drawing use their own random numbers (`Math.cosRandom`),
-  so seeded play-outs repeat. **Open, for the game itself:** the same `AI.reset()` gap means a second match in one browser session
+  so seeded play-outs repeat. Sound and drawing themselves cost little (layout and style ~2% of a page's time); the waste was
+  the test clock: in `?simtest` a page never idles (the AI's tick keeps the timer queue busy), so every waiting page used a whole
+  CPU thread. look/site's copy has `CLOCK.hold(v)`; the runner holds it in waiting pages (busy 100% -> 8%). **Open, for the game itself:** the same `AI.reset()` gap means a second match in one browser session
   (or a resumed one) can start with the last match's turn plans (e.g. turn 1's formation claims). Small; not fixed in the game yet.
 
 ## Recently done (newest first)
