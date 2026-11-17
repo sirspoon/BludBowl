@@ -106,15 +106,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted, 33-0-7, 99-10; Treeman, MCTS, 19-1-20; an RL bot and random never scored). Round robin, 10 matches a pairing, BB2016
   rules, one fixed Human team, 2 minutes a turn (njustesen.github.io/botbowl/bot-bowl-v). No code or write-up for it is public that
   we found, so the replays are the way to learn from it (BB2016 rules: some decisions won't carry over to BB2025).
-- **drefsante as an opponent (the owner's idea, 17 Nov): looks doable.** It's a Java program (blog drefsante.blogspot.com;
-  v0.8, Apr 2025: `Drefsante_AI-0.8.zip` / `bloodbowl-0.8.jar`, LRB6 rules, needs Java 20+). Its BotBowl link (blog post
-  2022/07 "v.0.4 is released"): the jar + `drefsante_bot.py` + `drefsante_bot.cfg` (set `temporaryFolder`, `jarPathName`), JDK
-  on PATH (`jdk/bin` and `jdk/bin/server`: probably Java loaded inside Python, e.g. JPype); import `drefsante_bot` and use
-  the bot by name. The author says it's "slightly less good" in BotBowl, with some skills untested there. The PC has botbowl
-  1.1.0 (as Bot Bowl V) and now a portable 64-bit JDK 21 (Temurin 21.0.13, checksum-verified) in
-  `E:\python\projects\BloodbowlAI_312\java\jdk-21.0.13+9` (not on the system PATH; the old 32-bit Java 1.8 stays the default).
-  Still needed: drefsante's zip (the owner is getting it); JPype if its Python file uses it. Then: our AI (BotBowl bridge,
-  `nn/evaluate.py --model bludbowl`) v drefsante, Humans, LRB6 rules. Whether the v0.8 zip includes the Python files is unknown.
+- **drefsante as an opponent (the owner's idea, 17 Nov): working.** v0.8 (blog drefsante.blogspot.com, `Drefsante_AI-0.8.zip`:
+  the jar, `drefsante_bot.py` / `.cfg`, LRB6 rules) unpacked in `E:\python\projects\BloodbowlAI_312\drefsante` (the bridge's
+  two settings reads now point at its own folder; originals kept as `.orig`); pyjnius 1.9.0 in the AI environment; the portable
+  64-bit JDK 21 in `...\BloodbowlAI_312\java\jdk-21.0.13+9` (not on the system PATH). `nn/evaluate.py --opponent drefsante
+  --rules botbowl --teams human` (Bot Bowl V's settings: BB2016, route-finding on; the bridge loads the jar in each worker).
+  First 2 games: drefsante won 4-0 and 3-0 (our AI blocked more, 55 v 43 a match, but never scored), ~2.7 min a game. Under
+  BB2025 (`--rules season3`) it isn't reliable (one game stopped on an assertion in its bridge): use `--rules botbowl`. Our AI's
+  "secure the ball" doesn't exist in BB2016 (the bridge swaps it), so it's a little handicapped there; drefsante's author says
+  it's "slightly less good" in BotBowl too. A full run waits for the GPU training (CPU).
 - **Reading (the owner, 17 Nov):** BotBowl's papers list (github.com/njustesen/botbowl, docs/papers.md): the Blood Bowl AI
   challenge papers (2018, 2019), MimicBot (imitation + reinforcement learning, Bot Bowl III winner, 2021), and "Planning in the
   midst of chaos" (Humeau et al., IEEE CoG 2021: Blood Bowl as a Markov decision process; a framework, no bot or results). Its
