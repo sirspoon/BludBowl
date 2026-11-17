@@ -117,9 +117,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   it's declared, its bridge didn't, so BotBowl's default named the first player offered and the planned block was refused.
   Fixed in its `drefsante_bot.py` (`blitz_target`: name the player its planned block is aimed at): 4 of 4 games finish
   (drefsante won 3, touchdowns 8-3); left: small mismatches it recovers from (e.g. "forgo activation"). Its brain still plays
-  LRB6, so BB2025 results favour us and BB2016 ones it. Slow: ~160 s a game v ~9 s for our AI v BotBowl's scripted bot - its
-  bridge rewrites both teams to files and the Java side reloads them at every decision (its own comment calls that the
-  bottleneck), with route-finding on. Our AI's
+  LRB6, so BB2025 results favour us and BB2016 ones it. Slow: ~160 s a game v ~9 s for our AI v BotBowl's scripted bot.
+  Timed (`nn/look/dbg/dref_prof.py`, one game, PC busy): our AI's decisions 40%, drefsante's Java rebuilding its model from
+  the team files 21% (~0.1 s each, inside the jar; writing the files is ~1%), BotBowl's engine 25%, drefsante thinking 12%.
+  Route-finding off (now the default for `evaluate.py`, both rule sets; `--pathfinding` turns it on): ~20% faster (141 -> 113 s),
+  our AI's decisions 79 -> 45 ms; no refused actions. It can't change either side's play (drefsante's Java never sees
+  BotBowl's routes; both move square by square). Skipping repeated model updates (21% of them, mostly push after block dice)
+  would save only ~5% and assumes the Java side doesn't change its model between them: not done. Our AI's
   "secure the ball" doesn't exist in BB2016 (the bridge swaps it), so it's a little handicapped there; drefsante's author says
   it's "slightly less good" in BotBowl too. A full run waits for the GPU training (CPU).
 - **Reading (the owner, 17 Nov):** BotBowl's papers list (github.com/njustesen/botbowl, docs/papers.md): the Blood Bowl AI
