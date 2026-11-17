@@ -1252,6 +1252,16 @@ predictor trained on BludBowl's own matches, play-outs inside the page, an opt-i
 - Step 3, real matches with the choice made live (`nn/look/lookmatch.js`, the predictor served by `nn/look/value_server.py`):
   3 styles x 6 play-outs at each of the look side's turn starts. Its first 24 matches had the same fault (22 draws, touchdowns
   0-2; set aside as `spoiled_match.jsonl`); restarted after the fix. About 16 minutes a match, 4 at once: 288 take about 20 hours.
+- Faster play-outs: a fresh page costs about 4 s to load and start the game, more than playing the turn (about 1 s). Reusing
+  pages failed before (`tdturn.js`: the first play-out of a position scored 66-69%, later ones ~35%). Causes found: `AI.reset()`
+  (called by `SAVE.resume`) didn't clear the AI's plans kept by half and turn - `cageDest` (where the carrier stops), `claims`
+  (formation spots), `ttmHold`, `pas8Key` - so a second play-out of the same turn inherited the first one's. And sound and drawing
+  (the sound engine's noise buffers, about 650,000 random numbers when it starts; particles, the block clash, blood) share
+  `Math.random` with the dice at real-time moments, so no two play-outs could be compared exactly. In look/site's copy: `AI.reset()`
+  clears those too, and sound and drawing use `Math.cosRandom`. Test (`nn/look/reuse_test.js`, dice seeded): 96 positions x 2 styles
+  x 4 seeds, fresh page twice and reused pages (16 play-outs a page): fresh v fresh 768 of 768 identical, fresh v reused 767 (the
+  other one didn't repeat when its page's sequence was replayed: load timing, not a leak). Without the `AI.reset()` fix, 3 of 384
+  differed. Play-outs 1.9 s each reused v 5.1 s fresh (under full load); look-ahead matches 16 -> 3.9 minutes.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
