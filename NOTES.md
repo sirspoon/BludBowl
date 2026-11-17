@@ -11,6 +11,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   (`nn/look/value_server.py` on the GPU), the other the usual v5.12 AI. Plays its own snapshot of index.html. Restarted about
   15:05 after a runner fault (it kept clicking the hidden "Confirm Lineups" button, which restarts the match: 0-0 draws); about
   20 hours. The same fault skewed step 2's positions (almost all drive openers at 0-0): see `ai-training/README.md`, "Look-ahead".
+- **Next, once step 3 is written up (the owner's choice):** faster play-outs by reusing pages. Now each play-out loads the whole
+  game in a fresh page (a few seconds, far more than playing the turn), so a look-ahead match costs about 16 minutes. Repeated
+  play-outs in one page spoiled each other in the scoring-turn tests (`nn/tdturn.js`): find out why (state the save doesn't
+  restore? timers or memo caches left over, e.g. `moveMemo`, the AI's `plan`/`tried`/`turnKey`?), fix it, and check that
+  play-outs in a reused page match fresh-page ones before using them.
 
 ## Recently done (newest first)
 - v5.12 (BludBowl local): pick up and score on the last turn takes chances down to 2% (was 8%); level in 288 matches. Blocking
