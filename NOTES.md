@@ -7,6 +7,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 
 ## In progress
 - Nothing running.
+
 ## Recently done (newest first)
 - (17 Nov, no version) What the outcome predictor goes by (the owner's question; `nn/look/predfacts.js`, `predcheck.py`,
   `predprobe.py`; 12,670 turn starts from 400 AI-v-AI matches): simple facts (score, turn, the ball and how far up, players
