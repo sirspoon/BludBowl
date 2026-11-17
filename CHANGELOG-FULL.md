@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.12 (17 Nov 2026)
+- **Improved (AI):** pick up and score (`pus1`) on the last turn of a half now goes for chances down to 2% (was 8%), as strong
+  coaches do: in their last-turn pick-up-and-pass scores the receiver usually had to dodge or Rush in after the catch, a 2-20%
+  shot, and the AI simply secured the ball. In 288 matches against v5.11: won 100, drew 88, lost 100 (level).
+- Tried and left off (`pusClear`): blocking first to clear the way for the pick-up, the throw or the receiver's run (the owner's
+  idea, as coaches often do). In the coaches' loose-ball scoring turns it scored less (29% v 33%; failed blocks ended turns that a
+  plain pick-up and run would have scored), and in 288 matches it was level (won 98, drew 92, lost 98) with more Turnovers.
+
 ## v5.11 (17 Nov 2026)
 - **Improved (AI):** pick up and score (`pus1`). With the ball loose, the computer looks for a player who can pick it up and hand it
   off or pass it (moving on after the pick-up if need be) to a team-mate who can then run in, and takes it when that beats the

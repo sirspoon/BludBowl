@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.11</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.12</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27589,10 +27589,12 @@ ol.ci-steps li::marker { content: none; }
             // scoring turns that started with a loose ball, 27 of 62 went this way; the AI, in the same positions, scored 14% of the
             // hand-off ones and none of the passes (it only ever picked up and ran). Before the last turn only at 70%+ (pusBar): at
             // the usual hand-off / pass bars (45 / 40%) it scored more in those positions but leaned behind in matches (won 94, lost 111)
-            function pickToScore(me, act, lastTurn) {
+            // opt.raw: the best chain whatever its odds (null if a picker running in himself is as good); opt.skip: ids that can't take part
+            function pickToScore(me, act, lastTurn, opt = {}) {
                 if (state.ball.carrierId || state.ball.x < 0 || state.isResolvingKickoff) return null;
-                const bx = state.ball.x, by = state.ball.y;
-                const receivers = state.players.filter(r => r.team === me && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Ball') && !hasSk(r, 'No Hands'));
+                const bx = state.ball.x, by = state.ball.y, skip = opt.skip;
+                if (skip) act = act.filter(p => !skip.has(p.id));
+                const receivers = state.players.filter(r => r.team === me && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Ball') && !hasSk(r, 'No Hands') && !(skip && skip.has(r.id)));
                 const runIn = new Map(receivers.map(r => [r.id, runInProb(r)]));
                 if (![...runIn.values()].some(v => v > 0)) return null;
                 let best = null, self = 0;
@@ -27615,7 +27617,40 @@ ol.ci-steps li::marker { content: none; }
                     });
                 });
                 if (!best || self >= best.v) return null;
-                return best.v >= (lastTurn ? 0.08 : AIX.p(me, 'pusBar', 0.7)) ? best : null;
+                if (opt.raw) return best;
+                return best.v >= (lastTurn ? AIX.p(me, 'pusLast', 0.02) : AIX.p(me, 'pusBar', 0.7)) ? best : null;
+            }
+            // (pus2) clear the way for it first: a block on an opponent whose tackle zone makes the pick-up, the picker's route (a better
+            // thrower who would have to dodge), the throw or the receiver's run in harder, when knocking him over raises the chance of
+            // scoring by more than the block risks (a failed block ends the turn). Coaches' pick-up-and-pass scores mostly began
+            // with 1-3 such blocks. Off (pusClear 0): in those turns it scored less (29% v 33%, fewer of the runs in), and in 288
+            // matches it was level (won 98, drew 92, lost 98) with more Turnovers
+            function clearForScore(me, act, lastTurn) {
+                const bar = lastTurn ? AIX.p(me, 'pusLast', 0.02) : AIX.p(me, 'pusBar', 0.7), val = b => b && b.v >= bar ? b.v : 0;
+                const chain = skip => { moveMemo = new Map(); return pickToScore(me, act, lastTurn, { raw: true, skip }); };
+                const b0 = chain(null), v0 = val(b0);
+                if (v0 >= 0.95) return null;
+                const without = (b, best, v) => best && (best.p.id === b.id || best.r.id === b.id) ? val(chain(new Set([b.id]))) : v;   // the blocker is used up
+                const near = [{ x: state.ball.x, y: state.ball.y }, ...state.players.filter(r => r.team === me && onPitch(r) && !r.isDown && !r.isStunned && !r.hasActed)];
+                let bestB = null;
+                try {
+                    state.players.forEach(q => {
+                        if (q.team === me || !onPitch(q) || q.isDown || q.isStunned || q.isDistracted || !near.some(k => cheb(q, k) <= 2)) return;
+                        const blockers = act.filter(b => !b.isDown && cheb(b, q) === 1);
+                        if (!blockers.length) return;
+                        const was = q.isDown; let v1 = new Map();
+                        q.isDown = true;
+                        try { const b1 = chain(null), v = val(b1); blockers.forEach(b => v1.set(b.id, without(b, b1, v))); }
+                        finally { q.isDown = was; }
+                        blockers.forEach(b => {
+                            const up = v1.get(b.id); if (up <= v0 + 0.03) return;
+                            const e = blockEval(b, q), keep = without(b, b0, v0);
+                            const ev = (1 - e.pTurn) * (e.pDown * up + (1 - e.pDown) * keep);
+                            if (ev > v0 + AIX.p(me, 'pusClr', 0.04) && (!bestB || ev > bestB.ev)) bestB = { b, q, ev };
+                        });
+                    });
+                } finally { moveMemo = new Map(); }
+                return bestB ? { pid: bestB.b.id, kind: 'block', target: bestB.q.id } : null;
             }
             // how many of our players should be busy with their ball carrier (more as they near our end zone)
             function huntNeed(c) { return toGo(c.x, c.team) <= 4 ? 5 : 4; }
@@ -28533,7 +28568,8 @@ ol.ci-steps li::marker { content: none; }
                     }
                 }
                 // 1b. (pus1) a loose ball: pick it up and hand off or pass to a team-mate who then runs it in
-                if (AIX.on(me, 'pus1') && !carrier) {
+                if (AIX.on(me, 'pus1') && !carrier && state.ball.x >= 0 && !state.isResolvingKickoff) {
+                    if (AIX.on(me, 'pus2') && AIX.p(me, 'pusClear', 0)) { const cl = clearForScore(me, act, lastTurn); if (cl) return cl; }
                     const ps = pickToScore(me, act, lastTurn);
                     if (ps) {
                         const bx = state.ball.x, by = state.ball.y, sx = ps.s.x, sy = ps.s.y;
@@ -30359,6 +30395,13 @@ ol.ci-steps li::marker { content: none; }
 
             return {
                 debugAdapt: t => adaptOffence(t, (GEO.sev ? SETUPS7 : SETUPS).offence),
+                // (pus1) what the pick-up-and-score check sees: each team-mate's run-in odds, each picker's odds, the best chain
+                debugPus: () => { const me = state.activeTeam, act = avail(me); moveMemo = new Map();
+                    const nm = q => q.type + '@' + q.x + ',' + q.y;
+                    const rec = state.players.filter(r => r.team === me && onPitch(r)).map(r => nm(r) + ' runIn ' + runInProb(r).toFixed(2) + (r.hasActed ? ' acted' : '') + (r.isDown ? ' down' : ''));
+                    const pk = act.map(p => { const m = movesFor(p).find(q => q.x === state.ball.x && q.y === state.ball.y); return nm(p) + (m ? ' pick ' + pPlan(p, m, true).toFixed(0) : ' cannot reach') + ' pa ' + p.pa; });
+                    const b = pickToScore(me, act, state.turn[me] >= TURNS, { raw: true });
+                    return { ball: [state.ball.x, state.ball.y], turn: state.turn[me], rec, pk, best: b ? { v: b.v, kind: b.kind, p: nm(b.p), r: nm(b.r), s: [b.s.x, b.s.y] } : null }; },
                 activationRR: (p, label) => activationRR(p, label),   // (rr3)
                 bridge,   // (tools/bridge-server.js)
                 isAI, act, ownerTeam, decider, coachFace: (f, a, d) => faceScore(f, a, d), isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),

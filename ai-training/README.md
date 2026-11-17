@@ -1261,3 +1261,11 @@ before the blocks (the receivers stay free), and not reordered by the turn plann
   completed 80-58, hand-offs 154-135 (released).
 - The coaches' pick-up-and-pass scores (9) still 0%: mostly last turns where they blocked 1-3 times first to free the receiver,
   then threw to a player who dodged or Rushed in; two are Throw Team-mate teams.
+- v5.12: the last-turn bar 8% -> 2% (`pusLast`): `AI.debugPus()` in the coaches' last-turn pick-up-and-pass positions showed the
+  receivers mostly far from the end zone, the best chain a 2% shot (the coach's receiver dodged twice and Rushed in), and the AI
+  securing the ball instead. Loose-ball turns 33% (pass ones 0% -> 2%); 288 matches v v5.11: won 100, drew 88, lost 100.
+- Clearing the way first (`clearForScore`, off: `pusClear` 0): for every opponent within 2 squares of the ball or one of our
+  unused players, the chain's odds with him knocked over (the blocker used up) against the block's odds; blocks when that beats
+  the chain as it stands by 4+ points. Loose-ball turns 29% (two runs: 28.5%, 29.8%) v 33-34% without, the runs in down from about
+  40% to 35% and more carriers falling (failed blocks ended turns a plain pick-up and run would have scored); 288 matches v v5.11
+  level (won 98, drew 92, lost 98, touchdowns 239-238), Turnovers 1477-1426.

@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.12 (17 Nov 2026)
+- On the last turn of a half, the computer now takes even a long shot at picking up a loose ball and passing or handing it to a
+  team-mate who might score, instead of just holding on to it.
+
 ## v5.11 (17 Nov 2026)
 - The computer can now pick up a loose ball and hand it off or throw it to a team-mate who can run in to score, all in one
   action (always on the last turn of a half, earlier when it's a good bet).
