@@ -11,8 +11,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   turn starts and 15% of the other decisions, with targets (result; scored this turn; conceded in the reply; Turnover; scored /
   conceded later in the half; knock-downs and casualties caused). `nn/look/evaltrain.py`: the decision network's board and
   trunk (from bb_v3b, which never saw these matches) with new heads; the matches with "play" facts are the test set, checked
-  with `predcheck.py --values` against bb_v3c. Collection due about 23:35, then training. (GPU: keep batch shapes fixed -
-  MIOpen spends ~1 minute tuning for each new shape.)
+  with `predcheck.py --values` against bb_v3c. Collection due about 23:35, then training (starts by itself, log
+  `nn/look/evaltrain_ev1.log`). (GPU: keep batch shapes fixed - MIOpen spends ~1 minute tuning for each new shape.)
+  The dashboard (`python nn/dashboard.py`, http://localhost:8765, or the app's `nn-dashboard` preview) now shows the
+  evaluator's position collection and training (result loss on held-out v training matches); `node nn/dashboard_snapshot.js`
+  saves a picture of it (`nn/dashboard-snapshot.jpg`) to send when the owner is away. It shares port 8765 with
+  `look/value_server.py`: run one at a time.
 
 ## Recently done (newest first)
 - (17 Nov, no version) What the outcome predictor goes by (the owner's question; `nn/look/predfacts.js`, `predcheck.py`,
