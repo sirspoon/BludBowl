@@ -6,15 +6,18 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- (BludBowl local, 17 Nov evening) What does the outcome predictor go by? The owner's question: does its verdict mostly follow who
-  has the ball, the turn, the score and how far up the pitch, or does it see what plays are possible (who can score)? Collecting
-  turn starts from 400 AI-v-AI matches (`nn/look/predfacts.js`: simple facts, "play" facts from the AI's own code via
-  `AI.debugFacts` in look/site's copy, and what happened next), then `nn/look/predcheck.py`.
 - **Open, for the game itself:** `AI.reset()` doesn't forget the AI's plans kept by half and turn (`cageDest`, `claims`, `ttmHold`,
   `pas8Key`), so a second match in one browser session (or a resumed one) can start with the last match's turn plans (e.g. turn
   1's formation claims). Small; fixed only in look/site's copy so far.
 
 ## Recently done (newest first)
+- (17 Nov, no version) What the outcome predictor goes by (the owner's question; `nn/look/predfacts.js`, `predcheck.py`,
+  `predprobe.py`; 12,670 turn starts from 400 AI-v-AI matches): simple facts (score, turn, the ball and how far up, players
+  standing, re-rolls, races) explain 80% of its verdict, the "play" facts (can our carrier score this turn, its free run, who can
+  reach it, loose-ball chains) under 1% more. It sees the biggest play (a carrier able to score now: +0.075 v +0.098 really) but
+  beyond that its view is mostly noise for AI-v-AI games, and for real results it adds nothing over a simple-facts model. That's
+  what the look-ahead leaned on. Next options: an evaluator trained on BludBowl's own matches with short-horizon targets; a model
+  on simple + play facts; play-outs past the opponent's reply. Details: `ai-training/README.md`, "What the outcome predictor goes by".
 - (17 Nov, no version) Look-ahead step 3, real matches (`nn/look/lookmatch.js`): one side chose a style (base / bash / safe) at
   each turn start by 6 play-outs each judged by the outcome predictor; the other the usual v5.12 AI. 288 matches: won 92, drew
   100, lost 96, touchdowns 258-262: no gain. It played more carefully (Turnovers 1386 v 1515, casualties caused 429 v 505);

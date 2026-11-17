@@ -1277,6 +1277,32 @@ predictor trained on BludBowl's own matches, play-outs inside the page, an opt-i
   predictor goes by (the owner's question: the ball, turn and score, or the plays that are possible), then search real choices
   (phase 2) rather than styles.
 
+## What the outcome predictor goes by (17 Nov 2026)
+The owner's question after the look-ahead came out level: does `bb_v3c`'s verdict mostly follow who has the ball, the turn, the
+score and how far up the pitch, or does it see what plays are possible? 12,670 turn starts from 400 AI-v-AI matches (random pairs
+of 12 races, `nn/look/predfacts.js`), each with the predictor's input, simple facts (score, half and turn, the ball and how far
+it is from each end zone, players standing / down / KO / casualties, re-rolls, who received, the races), "play" facts from the
+AI's own code (`AI.debugFacts` in look/site's copy: our carrier's chance of scoring this turn, its free run and area, how many of
+theirs can reach it; theirs the same for next turn; a loose ball's pick-up and pick-up-and-score odds) and what happened next.
+`nn/look/predcheck.py` fits small networks (cross-validated by match, early stopping) and compares; `nn/look/predprobe.py` changes
+one thing in the input. (A carried ball's square isn't kept in `state.ball`: distances come from the carrier.)
+- **Simple facts explain 80% of the verdict** (R squared 0.80); the play facts add under 1%.
+- **For real results it adds nothing beyond them.** Squared error on the match result (always 0.5: 0.180): the predictor 0.111,
+  a simple-facts model fitted on these matches 0.099, simple facts + the predictor 0.100, simple + play facts 0.098. Its verdicts
+  are reasonably calibrated here (0.9 -> 0.93, 0.5 -> 0.50, 0.1 -> 0.06): the gap is sharpness, not bias.
+- **It does see the biggest play.** With our carrier able to score this turn (90%+), the verdict is +0.075 above the simple
+  facts, the real result +0.098; their carrier able to score next turn: -0.022 v -0.027. Probe: marking such a carrier as already
+  used (the score off, nothing else changed) drops the verdict 0.843 -> 0.752 (-0.091) against -0.032 for carriers that couldn't
+  score anyway.
+- **Beyond that its view is mostly noise for these games.** What the simple facts don't explain (spread 0.13) correlates +0.06
+  with what they don't explain of the real result; the play facts' extra (spread 0.08) correlates +0.15. That's the part the
+  look-ahead leans on - end-of-turn positions with the same score, turn and ball, differing in who stands where - which is why
+  choosing between near-identical turns by it didn't help.
+- What it means: for search, the predictor needs to be good at exactly what it's weakest at. Options: train an evaluator on
+  BludBowl's own matches (positions are cheap now: 12,670 in 8 minutes), with short-horizon targets (scored this turn / drive,
+  Turnovers, knock-downs) as well as the result; or judge play-outs by a model built on simple + play facts; or play each
+  option out past the opponent's reply so differences become concrete events.
+
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
 `pup1`, throws to an open team-mate for safety, never on the last turn). `pickToScore`: every available player who can reach the
