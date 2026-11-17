@@ -114,6 +114,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   its rolls, with the safe actions first and a look at the position if it fails; dice-free search for a touchdown in one turn
   with up to 3 players; and pointers to whole-turn search for many-action games (Online Evolution, Justesen et al. 2016;
   Evolutionary MCTS, Baier and Cowling 2018) and to predicting Blood Bowl 2 winners by classification (Gustafsson 2019).
+- **Reading (the owner, 17 Nov):** Maastricht University student project, 2022, on BotBowl (Python;
+  gitlab.maastrichtuniversity.nl/um-research-project-2022-01-group-15/ai-for-bloodbowl, branch `macro-actions`; no macro-action
+  code despite the name, no write-up or results). A priority-list scripted bot (`mimicbot/scripted_bot.py`: score at 70%+ path
+  odds, hand off to a scorer at 70%+ or on turn 8, blocks keeping the blocker up 94%+, blitz with Block players, cage at 94%+,
+  ...), simpler than ours; a MimicBot re-implementation (imitation then A2C, value head; trained weights not loaded); and MCTS
+  code (`mcts/`, tested only v random). Worth a look only for its MCTS if we search single actions.
 - The AI Python environment (anaconda `bloodbowl_312`) now has scikit-learn (1.9.1). Its NumPy's BLAS is broken: `np.corrcoef`
   and matrix products crash the process without a message (exit 127); element-wise maths, torch and scikit-learn's gradient
   boosting work (its linear models will likely not).
