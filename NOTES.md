@@ -106,6 +106,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted, 33-0-7, 99-10; Treeman, MCTS, 19-1-20; an RL bot and random never scored). Round robin, 10 matches a pairing, BB2016
   rules, one fixed Human team, 2 minutes a turn (njustesen.github.io/botbowl/bot-bowl-v). No code or write-up for it is public that
   we found, so the replays are the way to learn from it (BB2016 rules: some decisions won't carry over to BB2025).
+- **drefsante as an opponent (the owner's idea, 17 Nov): looks doable.** It's a Java program (blog drefsante.blogspot.com;
+  v0.8, Apr 2025: `Drefsante_AI-0.8.zip` / `bloodbowl-0.8.jar`, LRB6 rules, needs Java 20+). Its BotBowl link (blog post
+  2022/07 "v.0.4 is released"): the jar + `drefsante_bot.py` + `drefsante_bot.cfg` (set `temporaryFolder`, `jarPathName`), JDK
+  on PATH (`jdk/bin` and `jdk/bin/server`: probably Java loaded inside Python, e.g. JPype); import `drefsante_bot` and use
+  the bot by name. The author says it's "slightly less good" in BotBowl, with some skills untested there. The PC has botbowl
+  1.1.0 (as Bot Bowl V) but only a 32-bit Java 1.8 and no JPype: needs a 64-bit JDK 21. Then: our AI (BotBowl bridge,
+  `nn/evaluate.py --model bludbowl`) v drefsante, Humans, LRB6 rules. Whether the v0.8 zip includes the Python files is unknown.
 - **Reading (the owner, 17 Nov):** BotBowl's papers list (github.com/njustesen/botbowl, docs/papers.md): the Blood Bowl AI
   challenge papers (2018, 2019), MimicBot (imitation + reinforcement learning, Bot Bowl III winner, 2021), and "Planning in the
   midst of chaos" (Humeau et al., IEEE CoG 2021: Blood Bowl as a Markov decision process; a framework, no bot or results). Its
