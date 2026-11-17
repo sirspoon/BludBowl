@@ -101,7 +101,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   with up to 3 players; and pointers to whole-turn search for many-action games (Online Evolution, Justesen et al. 2016;
   Evolutionary MCTS, Baier and Cowling 2018) and to predicting Blood Bowl 2 winners by classification (Gustafsson 2019).
 - The AI Python environment (anaconda `bloodbowl_312`) now has scikit-learn (1.9.1). Its NumPy's BLAS is broken: `np.corrcoef`
-  and matrix products crash the process without a message (exit 127); element-wise maths and torch work.
+  and matrix products crash the process without a message (exit 127); element-wise maths, torch and scikit-learn's gradient
+  boosting work (its linear models will likely not).
 - AI, small bug: `AI.reset()` doesn't forget the AI's plans kept by half and turn (`cageDest`, `claims`, `ttmHold`,
   `pas8Key`), so a second match in one browser session (or a resumed one) can start with the last match's turn plans (e.g. turn
   1's formation claims). Small; fixed only in look/site's copy so far.
