@@ -6,7 +6,13 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- Nothing running.
+- (BludBowl local, 17 Nov night) An evaluator trained on BludBowl's own matches (the owner's choice, after the predictor check).
+  `nn/look/evalcollect.js`: 6,000 AI-v-AI matches in the game itself (all 30 races, each side base / bash / safe at random),
+  turn starts and 15% of the other decisions, with targets (result; scored this turn; conceded in the reply; Turnover; scored /
+  conceded later in the half; knock-downs and casualties caused). `nn/look/evaltrain.py`: the decision network's board and
+  trunk (from bb_v3b, which never saw these matches) with new heads; the matches with "play" facts are the test set, checked
+  with `predcheck.py --values` against bb_v3c. Collection due about 23:35, then training. (GPU: keep batch shapes fixed -
+  MIOpen spends ~1 minute tuning for each new shape.)
 
 ## Recently done (newest first)
 - (17 Nov, no version) What the outcome predictor goes by (the owner's question; `nn/look/predfacts.js`, `predcheck.py`,
