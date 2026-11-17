@@ -1208,3 +1208,21 @@ in place of `0.55` in `choose0` step 1, was not kept). The no-ball and out-of-re
   of an action: 55% with a re-roll counted, any chance on the last turn) took the loose-ball turns only from 29% to 31%, and in
   288 matches v v5.09 did worse (touchdowns 226-276, luck 3%; won 93, drew 74, lost 121): not kept. Most remaining misses there
   are failed pick-ups, dodges and Rushes - the coaches' turns are the ones where the dice went their way.
+
+## Tuning the dials together (Nov 2026, not released)
+`nn/tune/spsa.js` (on the PC): SPSA self-play over 37 numeric settings - the `AIX.p` dials (except on/off ones, bombs and
+Throw Team-mate) plus five fixed numbers made into dials in its snapshot of index.html: the 55% bar for a run in (`tdBar`),
+`okProb`'s 80 / 100 (`okNimble`, `okPlain`) and `carrierPick`'s 75 / 80 (`cpMin`, `cpMobile`). Each round every dial is nudged
+up or down at random by about one step (e.g. 0.08 on the scoring bar, 7 on a % bar), the "+" set plays the "-" set in 48 mirror
+matches (12 races), and every dial moves towards the side that did better (win 1, loss -1, plus a quarter of the touchdown
+difference). Every 50 rounds the current set played the defaults over 96 matches. 600 rounds, 16-17 Nov, about 11 hours.
+- The checks: won 361, drew 322, lost 373, touchdowns 924-921 over 1,056 matches; single checks swung from 98-79 to 76-99.
+- The final set (block order `seqW` 0.76, assists `astWorth` 1.24, Blitz risk `bzTurn` 0.09, last-turn passes `pas8Min` 0.22,
+  late knock-down `lateDown` 0.33, `cpMin` 69, `okPlain` 97, ...) against the defaults, 288 matches: won 92, drew 93, lost 103,
+  touchdowns 240-240, blocks 38.8 v 44.8 a team a match, casualties caused 423-501. Not released (no better, less bashy).
+- Every match is logged with both sides' settings (`nn/tune/rounds.jsonl`, 24,336 matches). With the nudges random and
+  independent, each dial's effect on results can be read off on its own: none reaches 2 standard errors (with 37 dials about
+  two would by chance). Largest: block risk `blkTurn` and Blitz risk `bzTurn` (higher slightly worse, z -1.8 / -1.7);
+  `bzTurn` moves blocks a lot (about +2.6 a team a match per 0.03) without changing results.
+- So around the current values the dials hardly matter: the AI's results are set by what it does, not by these thresholds.
+  Untried: the on/off switches in combination (a genetic search), and settings per team type.
