@@ -92,6 +92,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   the owner's Google Drive folder "Dres-script-ai-replays": drefsante v Overparameterized40kBot, motbot2, treeman and random,
   5 each (games 0, 2, 4, 6, 8). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at
   drefsante's decisions, to see where a strong scripted bot and ours differ. BotBowl is Humans only. Not downloaded yet.
+  Drefsante (Frederic Bair, scripted) won Bot Bowl V (2023): won 37, drew 0, lost 3, touchdowns 139-6 (MotBot2, NN + evolution +
+  scripted, 33-0-7, 99-10; Treeman, MCTS, 19-1-20; an RL bot and random never scored). Round robin, 10 matches a pairing, BB2016
+  rules, one fixed Human team, 2 minutes a turn (njustesen.github.io/botbowl/bot-bowl-v). No code or write-up for it is public that
+  we found, so the replays are the way to learn from it (BB2016 rules: some decisions won't carry over to BB2025).
 - **Reading (the owner, 17 Nov):** BotBowl's papers list (github.com/njustesen/botbowl, docs/papers.md): the Blood Bowl AI
   challenge papers (2018, 2019), MimicBot (imitation + reinforcement learning, Bot Bowl III winner, 2021), and "Planning in the
   midst of chaos" (Humeau et al., IEEE CoG 2021: Blood Bowl as a Markov decision process; a framework, no bot or results). Its
