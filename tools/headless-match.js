@@ -9,7 +9,9 @@ try { ({ JSDOM, VirtualConsole } = require('jsdom')); } catch (e) { console.erro
 
 // a BludBowl page in jsdom, ready to use (resolves with its window once the game has loaded)
 function openGame({ simtest = true } = {}) {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8').replace(/<script[^>]*src=["'][^"']*tailwind[^"']*["'][^>]*><\/script>/g, '');
+  // BLUDBOWL_HTML=path: another copy of the game instead of this one, e.g. a frozen baseline for comparisons (the bridge, and so
+  // nn/evaluate.py, open the game through here): git show 9e05816:index.html > ../baseline-v5.17.html
+  const html = fs.readFileSync(process.env.BLUDBOWL_HTML || path.join(__dirname, '..', 'index.html'), 'utf8').replace(/<script[^>]*src=["'][^"']*tailwind[^"']*["'][^>]*><\/script>/g, '');
   const errors = [], vc = new VirtualConsole();
   vc.on('jsdomError', e => errors.push(String(e && e.message || e).slice(0, 200)));
   vc.on('error', e => errors.push(String(e).slice(0, 200)));

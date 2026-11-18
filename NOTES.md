@@ -6,7 +6,14 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- Nothing running.
+- **Brain x (v5.18, the owner's plan, 18 Nov): make the AI a real challenge for drefsante, Humans v Humans.** Work goes into the
+  experimental brain (`'{"brain":"x"}'`; code behind `AIX.x(team)`, its own tuning values in `AIX.X`), not the game's AI, so it may
+  test worse for a while. Measure each step v drefsante (`nn/evaluate.py --model bludbowl --opponent drefsante --rules season3
+  --teams human --aip '{"brain":"x"}'`, seeds 900000 x100 + 901000 x200; ~1,000 games for small effects) against the game's AI or
+  the frozen v5.17 (`--html ../baseline-v5.17.html`, made with `git show 9e05816:index.html`). Make x the default when it clearly
+  beats the current AI v drefsante and isn't clearly worse in the all-races mirror guard (`tools/ai-match.js --newp '{"brain":"x"}'`).
+  Leave helpers the game's AI uses unchanged (fork them for x) so the default doesn't drift. Not doing for now: the special-action
+  skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
 - (18 Nov, no version) **Does our AI use special-action skills?** In BludBowl (`node tools/ai-special-actions.js <races> --n 3`, AI v AI

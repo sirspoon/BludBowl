@@ -2,6 +2,17 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.18 (18 Nov 2026)
+- No change to play. An experimental computer coach, "brain x", for the work on beating drefsante (Bot Bowl V's winner) with
+  Humans v Humans in BotBowl. It plays only when a test run asks for it (`'{"brain":"x"}'`: `nn/evaluate.py --aip`,
+  `tools/ai-match.js --newp`), so it can be worse than the game's AI while it's being built; its changes go behind `AIX.x(team)`
+  and its own tuning values (`AIX.X`). It starts as a copy of today's AI. It becomes the default only when it clearly beats the
+  current AI against drefsante (~1,000 games) and isn't clearly worse in the all-races mirror matches.
+- For comparisons with a fixed opponent, the test tools can play the AI from another copy of the game: `BLUDBOWL_HTML=path`
+  (`tools/headless-match.js`, so also the BotBowl bridge; `nn/evaluate.py --html`), e.g. v5.17 frozen with
+  `git show 9e05816:index.html > ../baseline-v5.17.html`.
+- A garbled score in a code comment (v5.17's `def2` test) tidied.
+
 ## v5.17 (18 Nov 2026)
 - No change to play. Tried and left off (`def2`, setting `defN` 1 or 2): covering the opponent's receivers ready to score next
   turn (standing, unmarked, within their move and two Rushes of our end zone, within a hand-off or pass of their carrier) -

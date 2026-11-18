@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.17</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.18</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -26999,7 +26999,13 @@ ol.ci-steps li::marker { content: none; }
         // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
-            p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : d; } };
+            p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : (P && P.brain === 'x' && this.X[k] != null ? this.X[k] : d); },
+            // (brain: x) the experimental AI, worked on to beat drefsante (Humans v Humans in BotBowl) and played only when a test run asks
+            // for it ('{"brain":"x"}': nn/evaluate.py --aip, tools/ai-match.js --newp). Its changes are code behind AIX.x(team) and its own
+            // tuning values here in X (used when a run doesn't set them); the game's AI stays as it is until brain x clearly beats it v
+            // drefsante (~1,000 games) and isn't clearly worse in the all-races mirror guard, then x becomes the default.
+            X: {},
+            x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); } };
         const AI = (function () {
             const on = { 0: false, 1: false };
             try { const s = JSON.parse(localStorage.getItem('bb-ai') || '{}'); on[0] = !!s[0]; on[1] = !!s[1]; } catch (e) {}
@@ -28853,7 +28859,7 @@ ol.ci-steps li::marker { content: none; }
                     // with a sure move, on his side towards our end zone if it can. In the formation (cover squares) it hardly happened -
                     // 0.9 a match, the movers mostly tied up. drefsante had 0.76-0.86 such receivers at its turn starts against our AI.
                     // OFF by default (defN 0; 1 or 2 to try): v drefsante (same 100 games) its ready receivers 0.86 -> 0.54-0.57 and its scores
-                    // from 11+ 12% -> 10%, but our results worse: won 11-12 lost 65-67, touchdowns 51-54 v 134... -147-151 (off: 17-26-57, 60-134)
+                    // from 11+ 12% -> 10%, but our results worse: won 11-12 lost 65-67, touchdowns 51-54 to 147-151 (off: won 17 drew 26 lost 57, 60-134)
                     if (AIX.on(me, 'def2') && AIX.p(me, 'defN', 0) > 0) {
                         const c = carrier, inReach = q => cheb(q, c) <= (c.ma || 6) + 3 || (c.pa != null && Math.hypot(q.x - c.x, q.y - c.y) <= 10);
                         const threats = state.players.filter(q => q.team === them && q.id !== c.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted
