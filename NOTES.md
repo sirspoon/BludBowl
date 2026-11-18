@@ -9,6 +9,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- (18 Nov, no version) **How drefsante beats our AI** (200 games, BB2025, `nn/look/drefstudy.py` / `_report.py`): the gap is
+  scoring from 11+ squares out (it scores in 15% of such turns, we 0.3%; a third of its touchdowns). It sends fast players deep
+  and unmarked ahead of the ball ("ready receivers": 0.76 a turn v our 0.02), then hands off or throws to one who runs in; our
+  AI gathers everyone round the ball, so its pass/hand-off-to-score check rarely gets a chance. Close in we score as well or
+  better; Turnovers, blocks, casualties about level. Details: `ai-training/README.md`, "How drefsante beats our AI".
 - (18 Nov, no version) **v5.12's AI v drefsante** (Bot Bowl V's winner) in BotBowl, Humans: BB2016 (its rules) 97 games: won 7,
   drew 15, lost 75, touchdowns 43-183 (one game hung in a set-up loop; the run was stopped there); BB2025 (ours) 100 games: won
   14, drew 22, lost 64, touchdowns 52-145, no errors. Blocks level (~45 a match each), casualties level: it simply scores far
@@ -99,6 +104,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
+- **AI: deep receivers (from the drefsante study, 18 Nov).** When holding the ball far from the end zone, end the turn with
+  one or two fast players unmarked within striking range (move + 2 Rushes of the end zone, in hand-off / pass reach), so the
+  existing `throwToScore` can fire next turn. Test v base AI and v drefsante (`nn/evaluate.py --opponent drefsante --rules season3`).
 - **For later (the owner, 17 Nov): drefsante's Bot Bowl 2023 replays.** All 40 of its Bot Bowl V matches as BotBowl replays
   (`.rep`, 13-28 MB each, ~780 MB) in the owner's Google Drive folder "Dres-script-ai-replays": v Overparameterized40kBot,
   motbot2, treeman and random, 10 each, 5 at home (`drefsante_VS_x_0/2/4/6/8`) and 5 away (`x_VS_drefsante_1/3/5/7/9`). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at

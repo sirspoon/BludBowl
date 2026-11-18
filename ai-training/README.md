@@ -1322,6 +1322,27 @@ MIOpen tunes ~1 minute for every new tensor shape, so every batch is the same si
   short-term heads (scored now, conceded next, Turnover, knock-downs: less noisy, and what a turn's choice changes); or
   simple facts done well plus ev1's small extra.
 
+## How drefsante beats our AI (18 Nov 2026, BB2025)
+drefsante (Bot Bowl V's winner, a scripted Java bot; see NOTES) v v5.12's AI in BotBowl Season 3, Humans, BB2025 rules:
+`nn/look/drefstudy.py` records a snapshot at every team-turn start and every game event; `nn/look/drefstudy_report.py` reads
+them. 200 games: drefsante won 121, drew 48, lost 31, touchdowns 292-126.
+- **The gap is scoring from far out.** Turns starting with the ball, scored that turn: 0-3 squares to go drefsante 82% / ours
+  86%; 4-6: 55 / 71%; 7-10: 45 / 56%; **11+: 15% (93 of 640) / 0.3% (2 of 785)**. Close in we're as good or better; a third
+  of its touchdowns come from 11+ squares, where we never score. Its touchdowns: run 32%, pass 28%, hand-off 21%, pick-up and
+  run 17%, after 1.2 of its turns with the ball on average; ours: run 90%, after 2.1.
+- From 11+ squares both try a pass or hand-off in ~28% of those turns; drefsante scores in 52% of its tries, we in 1%: ours
+  move the ball up, its are strikes to a team-mate who runs in.
+- **Why: its receivers are already there.** A "ready receiver" = a team-mate standing, unmarked, within its move + 2 Rushes of
+  the end zone, in hand-off or pass (10 squares) reach of the carrier. With the ball 11+ out: drefsante 0.76 a turn (one in
+  reach in 39% of turns; it scores 26% then, 6% otherwise), ours 0.02 (2% of turns). At the end of its own turn (the set-up for
+  the next): 0.99 v 0.08. It keeps the ball back and sends fast players deep; our AI gathers everyone round the ball, so our
+  hand-off / pass-to-score check (`throwToScore`, 45 / 40% bars) almost never has a chance to fire.
+- Otherwise close: Turnovers 5.1 v 5.3 a game, blocks 30 v 31, Blitzes 13 v 10, casualties level; it keeps the ball turn to
+  turn less often (39% v 47%) - it takes more risks with it; we foul more (1.1 v 0.3 a game) and recover our loose balls more.
+- Next: give our AI deep receivers (when holding the ball far out, move one or two fast players unmarked into striking range
+  at the end of the turn), then test v base and v drefsante. Earlier passing work (`rcv1`, receivers first) was about open
+  team-mates for safe passes, not scoring threats: different.
+
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
 `pup1`, throws to an open team-mate for safety, never on the last turn). `pickToScore`: every available player who can reach the
