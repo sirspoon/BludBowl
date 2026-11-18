@@ -9,6 +9,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- v5.16 (BludBowl local, no change to play): three-player scoring chains (hand-off + pass or pass + hand-off, any players; the
+  owner's agile-team tactic) tried and left off (`chainBar` 9; 0.45 / 0.6 to try): rare (Humans ~1 in 12 matches, Wood Elves
+  ~0.4 a match), convert about as promised when played (4 of 10), no gain in 288 all-race or 192 agile matches. Because Humans
+  hardly ever chain, the drefsante target can't see it: for rare features the guard (and agile runs) are the only test.
 - v5.15 (BludBowl local, no change to play): `ho2` (hand-off to a thrower, pass, run in - drefsante's fourth scoring plan) and
   `rcv2` (keep Catchers free as receivers: drefsante's Catchers score 81 of its 136 touchdowns, ours carried the ball in 219 turn
   starts and scored 26) tried and left off - v drefsante 300 games 52-64-184 v v5.14's 52-79-169. Lessons: changes this size move

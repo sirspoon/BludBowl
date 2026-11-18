@@ -1373,6 +1373,14 @@ them. 200 games: drefsante won 121, drew 48, lost 31, touchdowns 292-126.
   54, carries 219 -> 160; same 100 games v drefsante 23-24-53 v 20-24-56, but over 300 games (with `ho2`) 52-64-184 v v5.14's
   52-79-169. Also refusing hand-offs to Catchers who can't run in next turn (`rcvSwitch`): 10-22-68 in 100 games - that is how
   our AI moves the ball up. Effects this size need ~1,000 games a version v drefsante to call.
+- **Three-player chains (v5.16, off; the owner's idea from playing agile teams against the AI).** `throwToScore2`, generalised:
+  hand-off to B, B moves and passes to C, C runs in; or pass to B, B moves next to C and hands off, C runs in - any players, the
+  carrier's dodges and Rushes counted. Two fixes made it work: B's moves planned as `throwToScore` will allow them once B has the
+  ball (else the promised second throw isn't played), and a chain goes at once (`choose()`'s turn planner reordered it behind
+  blocks, which used up B or C). Wood Elves then chained 10 times in 24 matches, 4 scored (the chains averaged 51%); Humans 2 in
+  24, High Elves 3. Results: all races 288 at bar 0.45 won 92 drew 92 lost 104 (246-246), at 0.6 84-99-105 (233-274); agile
+  teams (Wood, High, Dark Elves, Skaven) 192 at 0.45 65-50-77 (217-226), at 0.6 76-45-71 (216-211). No gain: a failed chain
+  is a Turnover deep in our half. The flip side - covering against such chains when the opponent is agile - is untried.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,

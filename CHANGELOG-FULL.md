@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.16 (18 Nov 2026)
+- No change to play. Tried and left off (`chainBar`, 0.45 or 0.6 to try it): three-player scoring chains, the owner's idea from
+  playing agile teams against the AI (and drefsante's fourth and fifth plans) - the carrier hands off to a team-mate who moves
+  and passes to one who runs in, or passes to a team-mate who moves and hands off to one who runs in, any players, dodges and
+  Rushes counted. Played at once when found (the turn planner used to put blocks first and use up the other two players), and
+  the middle player's moves planned as its throw will allow. When played it converts about as promised (Wood Elves: 10 chains in
+  24 matches, 4 scored), but it's rare (Humans: about one every 12 matches) and no gain showed in 288 matches over 12 races
+  (bar 0.45: won 92, drew 92, lost 104, touchdowns 246-246; 0.6: 84-99-105, 233-274) or 192 agile-team matches (0.45: 65-50-77;
+  0.6: 76-45-71).
+
 ## v5.15 (18 Nov 2026)
 - No change to play. Tried and left off, both from studying drefsante (Bot Bowl V's winner):
   - `ho2` (setting `ho2Bar`, 0.4 to try it): drefsante's blog says it weighs five scoring plans before each move - a run, a

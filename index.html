@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.15</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.16</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27562,41 +27562,66 @@ ol.ci-steps li::marker { content: none; }
                 });
                 return best;
             }
-            // (ho2) drefsante, Bot Bowl V's winner, works out before each move the chance of scoring by a run, a hand-off then a run, a
-            // pass then a run, a hand-off then a pass then a run, and a pass then a hand-off then a run, and plays the best (its blog).
-            // throwToScore covers the first three; this is the fourth: the carrier (with sure moves) hands off to a team-mate who can
-            // really throw (PA 3+ or better), who moves, passes to one who runs in - all this turn. Only the hand-off is planned here:
-            // with the ball, the thrower's pass is then throwToScore's. The chain's value: the carrier's way there x the catch x the
-            // thrower's way to its throwing square x the pass x the run in. OFF by default (ho2Bar 9; 0.4, the pass bar, turns it on): it
-            // fired 0.08 times a match (Humans) - the thrower, a receiver in its range and the run in rarely line up.
+            // (ho2) three players, one ball: drefsante, Bot Bowl V's winner, weighs before each move a run, a hand-off then a run, a pass
+            // then a run, a hand-off then a pass then a run, and a pass then a hand-off then a run (its blog). throwToScore has the first
+            // three; this has the last two, with any team-mates: the carrier moves (dodges and Rushes counted, a team re-roll too) and
+            // hands off to B, who moves and passes to C, who runs in - or the carrier passes to B, who moves next to C and hands off, and
+            // C runs in. Three players' moves can carry the ball 20+ squares in a turn: how agile teams score from far out (the owner's
+            // experience; a third of drefsante's touchdowns came from 11+ squares). Only the first throw is planned here: B, with the
+            // ball, then finds the second in throwToScore. Value: each link's odds multiplied (passOdds counts the catch and any
+            // interceptions); played at chainBar (0.45, the hand-off bar, so B's second throw clears throwToScore's own bar), anything
+            // on the last turn. chainBar 9 turns it off; chainMove: the least likely move (%) a link may use. OFF by default (v5.16):
+            // when played it converts about as promised (Wood Elves: 10 chains in 24 matches, 4 scored), but it's rare (Humans 0.08 a
+            // match) and no gain showed: all races 288 matches at 0.45 won 92 drew 92 lost 104 (touchdowns 246-246), at 0.6 84-99-105
+            // (233-274); agile teams 192 at 0.45 65-50-77, at 0.6 76-45-71. Two fixes on the way: the middle player's moves as
+            // throwToScore allows them, and a chain is played at once (the turn planner put blocks first, using up its players).
             function throwToScore2(c, me, lastTurn) {
                 if (state.handoffUsed || state.passUsed || hasSk(c, 'My Ball')) return null;
                 const mates = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !r.hasActed
                     && !hasSk(r, 'No Ball') && !hasSk(r, 'No Hands'));
-                const throwers = mates.filter(t => t.pa != null && t.pa <= AIX.p(me, 'ho2Pa', 3));
-                if (!throwers.length) return null;
+                if (mates.length < 2) return null;
                 const runIn = new Map(mates.map(r => [r.id, runInProb(r)]));
-                if (!mates.some(r => runIn.get(r.id) > 0 && !throwers.every(t => t.id === r.id))) return null;
-                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= 100)];
+                const scorers = mates.filter(r => runIn.get(r.id) > 0);
+                if (!scorers.length) return null;
+                const minMove = AIX.p(me, 'chainMove', 50);
+                const bMove = AIX.p(me, 'passMove', lastTurn && AIX.on(me, 'endgame') ? 40 : 100);
+                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= minMove)];
+                const sp = new Map(spots.map((s, i) => [s.x + ',' + s.y, i === 0 ? 1 : pPlan(c, s, true) / 100]));
                 let best = null;
-                throwers.forEach(t => {
-                    const adj = spots.filter(s => Math.max(Math.abs(s.x - t.x), Math.abs(s.y - t.y)) === 1);
-                    if (!adj.length) return;
-                    adj.sort((a, b) => pPlan(c, b, true) - pPlan(c, a, true));
-                    const s1 = adj[0], p1 = pPlan(c, s1, true) / 100 * catchProb(t);
-                    if (p1 < 0.2) return;
-                    const tspots = [{ x: t.x, y: t.y, prob: 100, path: [] }, ...movesFor(t).filter(m => m.prob >= 90)];
-                    let p2 = 0;
-                    mates.forEach(r => {
-                        if (r.id === t.id) return;
-                        const ri = runIn.get(r.id); if (!ri) return;
-                        tspots.forEach(ts => { const v = pPlan(t, ts, true) / 100 * passOdds(t, ts.x, ts.y, r) * ri * 0.97; if (v > p2) p2 = v; });
-                    });
-                    const v = p1 * p2;
-                    if (!best || v > best.v) best = { v, kind: 'handoff', r: t, s: s1, chain: true };
+                const take = (v, kind, B, s) => { if (!best || v > best.v) best = { v, kind, r: B, s, chain: true }; };
+                mates.forEach(B => {
+                    // B's moves as throwToScore will allow them once B has the ball (sure ones, except on the last turn), or the second
+                    // throw it promises doesn't get played: a Wood Elf chain handed off to a Lineman whose throw needed a dodge, and stopped
+                    const bspots = [{ x: B.x, y: B.y, prob: 100, path: [] }, ...movesFor(B).filter(m => m.prob >= bMove)];
+                    const bp = s => (s.x === B.x && s.y === B.y ? 1 : pPlan(B, s, true) / 100);
+                    // hand-off to B, B passes to C
+                    if (B.pa != null) {
+                        let s1 = null, p1 = 0;
+                        spots.forEach(s => { if (Math.max(Math.abs(s.x - B.x), Math.abs(s.y - B.y)) === 1) { const v = sp.get(s.x + ',' + s.y); if (v > p1) { p1 = v; s1 = s; } } });
+                        if (s1) {
+                            p1 *= catchProb(B);
+                            if (p1 >= 0.2) {
+                                let p2 = 0;
+                                scorers.forEach(C => { if (C.id === B.id) return; const ri = runIn.get(C.id);
+                                    bspots.forEach(ts => { const v = bp(ts) * passOdds(B, ts.x, ts.y, C) * ri; if (v > p2) p2 = v; }); });
+                                take(p1 * p2, 'handoff', B, s1);
+                            }
+                        }
+                    }
+                    // pass to B, B hands off to C
+                    if (c.pa != null) {
+                        let s1 = null, p1 = 0;
+                        spots.forEach(s => { const v = sp.get(s.x + ',' + s.y) * passOdds(c, s.x, s.y, B); if (v > p1) { p1 = v; s1 = s; } });
+                        if (s1 && p1 >= 0.2) {
+                            let p2 = 0;
+                            scorers.forEach(C => { if (C.id === B.id) return; const ri = runIn.get(C.id);
+                                bspots.forEach(ts => { if (Math.max(Math.abs(ts.x - C.x), Math.abs(ts.y - C.y)) === 1) { const v = bp(ts) * catchProb(C) * ri; if (v > p2) p2 = v; } }); });
+                            take(p1 * p2, 'pass', B, s1);
+                        }
+                    }
                 });
                 if (!best) return null;
-                return best.v >= (lastTurn ? 0.08 : AIX.p(me, 'ho2Bar', 9)) ? best : null;
+                return best.v >= (lastTurn ? 0.05 : AIX.p(me, 'chainBar', 9)) ? best : null;
             }
             function throwToScore(c, me, lastTurn) {
                 if (hasSk(c, 'My Ball')) return null;
@@ -28557,7 +28582,7 @@ ol.ci-steps li::marker { content: none; }
                     try { for (let i = 0; i < 4 && first && cutsLane(me, first); i++) { tried.add(first.pid); added.push(first.pid); moveMemo = new Map(); first = choose0(); } }
                     finally { added.forEach(id => tried.delete(id)); moveMemo = new Map(); }
                 }
-                if (!first || first.pid == null || !AIX.on(me, 'tplan') || state.turn[me] >= TURNS || planRisk(first) !== 'risky' || first.pus) return first;
+                if (!first || first.pid == null || !AIX.on(me, 'tplan') || state.turn[me] >= TURNS || planRisk(first) !== 'risky' || first.pus || first.chain) return first;   // (ho2: a chain goes now - it needs its other two players unused)
                 const stall = state.aiStalling, carrier = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                 const ourC = carrier && carrier.team === me && onPitch(carrier) ? carrier : null;
                 // a risky move by our carrier (or a hand-off, a pass): the cage round where it stands now would be wasted - those wait
@@ -28632,13 +28657,13 @@ ol.ci-steps li::marker { content: none; }
                         if (bestB) return { pid: bestB.b.id, kind: 'block', target: bestB.q.id };
                     }
                     else if (td && (direct >= 0.55 || (lastTurn && (!via || direct >= via.v)))) return { pid: carrier.id, kind: 'move', pick: ms => ms.filter(m => m.x === endX(me)).sort((a, b) => b.prob - a.prob)[0] || null };
-                    // 2b. (ho2) or hand off to a thrower who passes to a team-mate who runs it in, all this turn
+                    // 2b. (ho2) or a three-player chain: hand-off then pass, or pass then hand-off, and a run in - all this turn
                     if (AIX.on(me, 'ho2') && !state.aiStalling) {
                         const via2 = throwToScore2(carrier, me, lastTurn);
                         if (via2 && via2.v > Math.max(direct, via ? via.v : 0) + 0.02) {
                             const rid = via2.r.id, sx = via2.s.x, sy = via2.s.y;
-                            if (window.AI_HO2) window.AI_HO2.push({ v: via2.v, c: carrier.type, t: via2.r.type, togo: toGo(carrier.x, me), turn: state.turn[me] });
-                            return { pid: carrier.id, kind: 'handoff', receiver: rid, pick: ms => (sx === carrier.x && sy === carrier.y) ? null : (ms.find(m => m.x === sx && m.y === sy) || null), stay: sx === carrier.x && sy === carrier.y };
+                            if (window.AI_HO2) window.AI_HO2.push({ v: via2.v, kind: via2.kind, c: carrier.type, t: via2.r.type, togo: toGo(carrier.x, me), turn: state.turn[me] });
+                            return { pid: carrier.id, kind: via2.kind, receiver: rid, chain: true, pick: ms => (sx === carrier.x && sy === carrier.y) ? null : (ms.find(m => m.x === sx && m.y === sy) || null), stay: sx === carrier.x && sy === carrier.y };
                         }
                     }
                     // 2. or hand off / pass to a team-mate who can run it in

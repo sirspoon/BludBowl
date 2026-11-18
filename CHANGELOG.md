@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.16 (18 Nov 2026)
+- Behind the scenes: three-player scoring moves (a hand-off and a pass in one turn) for the computer were tested and left off
+  for now.
+
 ## v5.15 (18 Nov 2026)
 - Behind the scenes: two more computer tactics copied from Bot Bowl's champion bot were tested and left switched off for now.
 
