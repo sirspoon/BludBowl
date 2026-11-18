@@ -44,6 +44,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   was hardly reached (`formationPlan` stops at the first target with no mover), so it goes before it. 1,000 games: 165-242-593,
   touchdowns 603-1361 v 185-247-568, 655-1393 (`nn/look/dbg/k_ds2.txt`): 32 fewer conceded, 52 fewer scored. As with `cd1` and
   `def2`, players sent back cost more in attack than they save.
+  Openings study (owner's question: can the AI plan a turn around key moves? `nn/look/dbg/openings.py`, `openings2.py`, on
+  `study_pos.jsonl`, 300 games): "open" = at the start of a turn with the ball, a score is on for 0-1 dice rolls (dodges + Rushes,
+  +1 for a hand-off or pass to a team-mate who runs it in; generous: any player may throw, catches not counted). Open by the carrier
+  running: drefsante 9%, ours 9%. Open only through a team-mate: drefsante 29%, ours 1% - that is the gap. Carrier 11-15 squares
+  out: open 44% v 1%, scored 17% v 1%. One knock-down that opens a score that same turn is rare (ours 3.7% of turns, its 2.7%), so
+  a game is opened the turn before: a receiver in place, surviving their turn. Part of the gap is each side's defence (ours leaves
+  receivers free, its covers them). drefsante is rule-based too, no search, but its rules are built round the ball and its
+  receivers. Proposed for brain x: one all-routes "rolls to score next turn" measure, used to choose a two-turn plan and to name
+  the defenders worth hitting (those covering or able to reach the carrier/receiver).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
