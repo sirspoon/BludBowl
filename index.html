@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.21</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.22</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27005,7 +27005,8 @@ ol.ci-steps li::marker { content: none; }
             // tuning values here in X (used when a run doesn't set them); the game's AI stays as it is until brain x clearly beats it v
             // drefsante (~1,000 games) and isn't clearly worse in the all-races mirror guard, then x becomes the default.
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
-            // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN))
+            // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
+            // v5.22 ds1, a deep safety on defence (dsN))
             X: {},
             x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
@@ -27903,6 +27904,19 @@ ol.ci-steps li::marker { content: none; }
                             .forEach(q => { const sq = [[back, 0], [back, 1], [back, -1], [0, 1], [0, -1]].map(([dx, dy]) => ({ x: q.x + dx, y: q.y + dy }))
                                 .find(t => inPitch(t.x, t.y) && !getPlayer(t.x, t.y)); if (sq) add(sq.x, sq.y, 'cover'); });
                     }
+                    // (ds1, brain x) a deep safety before the screen (after it, it was hardly ever reached: the formation stops at the
+                    // first square nobody can get to): dsN players 5 squares (dsAt) out from our end zone, each in line
+                    // with one of their deepest standing players (else their carrier) - drefsante, defending, had 1.28 players 8+ squares
+                    // goal-side of the carrier at our turn starts, we 0.78; its deep moves end 5 out, next to a receiver (nn/look/dref_shadow.py).
+                    // OFF (dsN 0) in brain x too: v drefsante over 1,000 games (seeds 910000+) dsN 1 won 165 drew 242 lost 593, touchdowns 603-1361,
+                    // v today's AI 185-247-568, 655-1393 - it conceded 32 fewer but scored 52 fewer
+                    if (AIX.x(me) && AIX.p(me, 'dsN', 0) > 0 && dz >= AIX.p(me, 'dsFrom', 11)) {
+                        const ownZ = endX(other(me)), sx = ownZ - AIX.p(me, 'dsAt', 5) * back, rows = [];
+                        state.players.filter(q => q.team === c.team && q.id !== c.id && onPitch(q) && !q.isDown && !q.isStunned && toGo(q.x, c.team) < dz)
+                            .sort((a, b) => toGo(a.x, c.team) - toGo(b.x, c.team)).forEach(q => { if (rows.every(y => Math.abs(y - q.y) >= 3)) rows.push(q.y); });
+                        if (!rows.length) rows.push(c.y);
+                        rows.slice(0, AIX.p(me, 'dsN', 0)).forEach(y => { AIX.count(me, 'ds1'); add(sx, Math.max(1, Math.min(CFG.rows - 2, y)), 'ds'); });
+                    }
                     // a column defence: two lines across the pitch between the carrier and our end zone, players three rows apart
                     // (two empty squares between them, so slipping through means a hard dodge), the second line staggered two
                     // squares further back. The lines lean towards the middle, squeezing the attack out towards the sideline.
@@ -27942,7 +27956,7 @@ ol.ci-steps li::marker { content: none; }
             }
             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
-            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, safety: 2, ballguard: 3, outlet: 2, strike: 2, cover: 2 };
+            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, safety: 2, ballguard: 3, outlet: 2, strike: 2, cover: 2, ds: 2 };
             // formation squares already given to someone this turn: a player sent towards a square they can't reach yet
             // (it's still empty when the next player is chosen) mustn't have everyone else sent after them
             let claims = { key: '', m: new Map() };
@@ -27968,7 +27982,7 @@ ol.ci-steps li::marker { content: none; }
                 for (const t of T) {
                     let occ = getPlayer(t.x, t.y);
                     // a screen square is near enough covered by one of ours standing right next to it
-                    if (!(occ && occ.team === me) && ['screen', 'screen2', 'mark', 'deep', 'safety'].includes(t.role))
+                    if (!(occ && occ.team === me) && ['screen', 'screen2', 'mark', 'deep', 'safety', 'ds'].includes(t.role))
                         occ = state.players.find(q => q.team === me && onPitch(q) && !q.isDown && !q.isStunned && !taken.has(q.id) && (!c || q.id !== c.id) && cheb(q, t) === 1) || null;
                     if (occ && occ.team === me) { used.set(t.role, (used.get(t.role) || 0) + 1); taken.add(occ.id); continue; }
                     const ck = t.x + ',' + t.y + ':' + t.role, cl = claims.m.get(ck), cp = cl != null ? getPlayerById(cl) : null;

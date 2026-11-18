@@ -38,6 +38,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   drefsante's level), but over 1,000 games (seeds 910000+, `nn/look/dbg/k_lb1.txt`) we did worse: 159-219-622 v 185-247-568,
   touchdowns 613-1449 v 655-1393. Kept at 0.2 / 0.4 - our players lying down at the end of the turn seem to cost more than the
   knock-downs gain.
+  v5.22 `ds1` (deep safety, `dsN`, `dsAt` 5, `dsFrom` 11): off. drefsante's "deep" defenders turned out to be mostly marking its
+  receivers 5 squares out (98% next to one), and whole-team setups are closer than the per-move figures suggest: at the attacker's
+  turn start it has 1.28 players 8+ goal-side of the carrier v our 0.78, and marks the carrier 66% v 47%. After the screen `ds1`
+  was hardly reached (`formationPlan` stops at the first target with no mover), so it goes before it. 1,000 games: 165-242-593,
+  touchdowns 603-1361 v 185-247-568, 655-1393 (`nn/look/dbg/k_ds2.txt`): 32 fewer conceded, 52 fewer scored. As with `cd1` and
+  `def2`, players sent back cost more in attack than they save.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

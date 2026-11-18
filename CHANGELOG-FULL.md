@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.22 (18 Nov 2026)
+- No change to play. Brain x's `ds1` (`dsN`) tried and left off: a deep safety on defence. A new study (`nn/look/dref_shadow.py`)
+  asked drefsante's brain what it would do at each of our AI's 39,000 player choices; defending, it has 1.28 players 8+ squares
+  goal-side of the ball carrier at our turn starts, ours 0.78. With `ds1` one player goes 5 squares out from our end zone, in line
+  with their deepest player, ahead of the screen. Turns with a deep move doubled (213 to 427 in 300 games), but over 1,000 games
+  against drefsante (BotBowl, Humans) we won 165, drew 242, lost 593, touchdowns 603-1361, against 185-247-568 and 655-1393
+  without it: 32 fewer conceded, 52 fewer scored. Also tried, with no code change: looser limits for end-of-turn 1-die blocks
+  (`lateTurn` 0.4, `lateDown` 0.3), which doubled them to drefsante's level and did worse (159-219-622, touchdowns 613-1449).
+
 ## v5.21 (18 Nov 2026)
 - No change to play. Brain x's first attacking experiment, `qb1` (`qbN`), tried and left off: the Thrower as quarterback. From
   11+ squares out drefsante scored 298 touchdowns in 600 games against our AI (ours: 12), 171 of them its Thrower passing to a

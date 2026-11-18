@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.22 (18 Nov 2026)
+- Behind the scenes: a deep safety for the experimental computer coach's defence was tested against Bot Bowl's champion bot and
+  left off: it conceded a little less but scored less.
+
 ## v5.21 (18 Nov 2026)
 - Behind the scenes: an attacking idea for the experimental computer coach (the Thrower as quarterback) was tested against Bot
   Bowl's champion bot and left off: it scored less.
