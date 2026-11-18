@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.23</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.24</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27007,7 +27007,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0 },   // (v5.23: the turn plan, tp1 - see turnPlan)
+            X: { tpN: 1, tpRoute: 0, dpN: 3 },   // (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat)
             x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -27183,6 +27183,7 @@ ol.ci-steps li::marker { content: none; }
 
             // ---- planning a turn ----
             const tpHold = new Set(), tpHits = new Set();   // (brain x: tp1, see turnPlan) receivers staying where they are; opponents worth hitting
+            const dpHits = new Map();   // (brain x: dp1, see dpThreat) their finishers: how much knocking each down cuts their chance of scoring
             function avail(team) {
                 return state.players.filter(p => p.team === team && onPitch(p) && !p.hasActed && !p.isStunned && !p.isDistracted && !tried.has(p.id) && !hasSk(p, 'Ball & Chain') && !(tpHold.has(p.id) && state.ball.carrierId !== p.id));
             }
@@ -28218,6 +28219,109 @@ ol.ci-steps li::marker { content: none; }
                 const tx = first.m.x, ty = first.m.y;
                 return { pid: first.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
             }
+            // ---- (brain x: dp1) the plan in defence: how could they score next turn, by any route, and what cuts that most ----
+            // drefsante starts 37% of its turns with the ball with a score on for 0-1 dice rolls. Earlier defences each shut one route (def2,
+            // cd1: free receivers) and it scored another way, so this one measure counts them all: their carrier running in, or getting
+            // the ball by hand-off or pass to a team-mate who runs in, with every dodge and Rush as a roll (dpRoll each). Our sure moves that
+            // cut it most go first (up to dpN a turn), and their finishers become worth more to knock down, by how much that cuts it (dpW).
+            // v drefsante on top of tp1 (BotBowl, Humans, 300 games, seeds 750000+): its turns with a score on through a team-mate 30% -> 10%, from
+            // 11-15 squares out (any route) 48% -> 8%. Over 1,000 games (seeds 910000+): dpN 3 won 188 drew 241 lost 571, touchdowns 646-1382; dpN 1
+            // 183-239-578, 618-1358; tp1 alone 173-221-606, 665-1454; today's AI 185-247-568, 655-1393. ON in brain x (AIX.X, dpN 3).
+            function dpMap(x, y, ma, W, N, tz, occ) {   // fewest rolls (dodges + Rushes) to each square within ma + 2 steps; 99: out of reach
+                const R = new Int8Array(N).fill(99), cur = new Int8Array(N).fill(99), s0 = y * W + x, H = N / W;
+                cur[s0] = 0; R[s0] = 0;
+                let front = [s0];
+                for (let st = 1; st <= ma + 2 && front.length; st++) {
+                    const vals = front.map(q => cur[q] + tz[q]), next = [], rush = Math.max(0, st - ma);
+                    front.forEach((sq, i) => {
+                        const c = vals[i], sx = sq % W, sy = (sq - sx) / W;
+                        for (const [dx, dy] of DIRS8) {
+                            const nx = sx + dx, ny = sy + dy;
+                            if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+                            const n = ny * W + nx;
+                            if (occ[n] || c >= cur[n]) continue;
+                            cur[n] = c; next.push(n);
+                            if (c + rush < R[n]) R[n] = c + rush;
+                        }
+                    });
+                    front = next;
+                }
+                return R;
+            }
+            function dpThreat(me, c, wantHot) {
+                const them = other(me), W = CFG.cols, H = CFG.rows, N = W * H, ez = endX(them), q0 = AIX.p(me, 'dpRoll', 0.78);
+                const tz = new Uint8Array(N), occ = new Uint8Array(N), hot = wantHot ? new Uint8Array(N) : null;
+                state.players.forEach(q => {
+                    if (!onPitch(q)) return;
+                    occ[q.y * W + q.x] = 1;
+                    if (q.team === me && !q.isDown && !q.isStunned && !q.isDistracted) for (const [dx, dy] of DIRS8) if (inPitch(q.x + dx, q.y + dy)) tz[(q.y + dy) * W + q.x + dx] = 1;
+                });
+                const inEZ = R => { let b = 99; for (let y = 0; y < H; y++) b = Math.min(b, R[y * W + ez]); return b; };
+                const mark = (R, sx, sy, ma) => { if (hot) for (let i = 0; i < N; i++) { if (R[i] >= 9) continue; const x = i % W, y = (i - x) / W; if (Math.max(Math.abs(x - sx), Math.abs(y - sy)) + Math.abs(x - ez) <= ma + 3) hot[i] = 1; } };
+                const cma = c.ma || 6, Rc = dpMap(c.x, c.y, cma, W, N, tz, occ), parts = [];
+                let miss = 1;
+                const add = (id, v) => { v = Math.min(0.97, v); parts.push({ id, v }); miss *= 1 - v; };
+                const run = inEZ(Rc);
+                if (run < 9) { add(c.id, Math.pow(q0, run)); mark(Rc, c.x, c.y, cma); }
+                const throwV = isThrower(c) ? 0.6 : c.pa != null ? 0.3 : 0;
+                state.players.forEach(q => {
+                    if (q.team !== them || q.id === c.id || !onPitch(q) || q.isStunned || q.isDistracted || hasSk(q, 'No Hands') || hasSk(q, 'No Ball')) return;
+                    const ma = (q.ma || 6) - (q.isDown ? 3 : 0);
+                    if (ma < 0 || Math.abs(q.x - ez) > ma + 2) return;
+                    const Rq = dpMap(q.x, q.y, ma, W, N, tz, occ), k = inEZ(Rq);
+                    if (k >= 9) return;
+                    let h = 99;
+                    for (const [dx, dy] of DIRS8) if (inPitch(q.x + dx, q.y + dy)) h = Math.min(h, Rc[(q.y + dy) * W + q.x + dx]);
+                    const d = Math.hypot(q.x - c.x, q.y - c.y), hand = h < 9 ? Math.pow(q0, h) * 0.8 : 0, pass = d <= 13 ? throwV * (d <= 7 ? 1 : 0.75) : 0;
+                    const link = Math.max(hand, pass) * (tz[q.y * W + q.x] ? 0.8 : 1);
+                    if (link <= 0) return;
+                    add(q.id, link * Math.pow(q0, k)); mark(Rq, q.x, q.y, ma);
+                });
+                return { T: 1 - miss, parts, hot, W };
+            }
+            function dpFindHits(me, c) {
+                const now = dpThreat(me, c);
+                now.parts.forEach(o => {
+                    if (o.id === c.id) return;
+                    const q = getPlayerById(o.id), was = q.isDown;
+                    if (was) return;
+                    q.isDown = true;
+                    let t = now.T; try { t = dpThreat(me, c).T; } finally { q.isDown = was; }
+                    if (now.T - t > 0.01) dpHits.set(q.id, now.T - t);
+                });
+            }
+            function dpMovePlan(me, act, c) {
+                const ck = state.half + ':' + me + ':' + state.turn[me];
+                if (dpDone.key !== ck) dpDone = { key: ck, n: 0 };
+                if (dpDone.n >= AIX.p(me, 'dpN', 0)) return null;
+                const now = dpThreat(me, c, true);
+                if (now.T < AIX.p(me, 'dpMin', 0.1)) return null;
+                const W = now.W, hot = now.hot, cands = [];
+                act.forEach(p => {
+                    if (p.id === c.id || p.isStunned || cheb(p, c) === 1 || !canReposition(p, me)) return;
+                    movesFor(p).forEach(m => {
+                        if (m.prob < 100 || m.isRush || (m.x === p.x && m.y === p.y)) return;
+                        let n = hot[m.y * W + m.x];
+                        for (const [dx, dy] of DIRS8) if (inPitch(m.x + dx, m.y + dy)) n += hot[(m.y + dy) * W + m.x + dx];
+                        if (n) cands.push({ p, m, n });
+                    });
+                });
+                cands.sort((a, b) => b.n - a.n);
+                let best = null;
+                cands.slice(0, AIX.p(me, 'dpLook', 30)).forEach(({ p, m }) => {
+                    const ox = p.x, oy = p.y, od = p.isDown;
+                    p.x = m.x; p.y = m.y; p.isDown = false;
+                    let t = now.T; try { t = dpThreat(me, c).T; } finally { p.x = ox; p.y = oy; p.isDown = od; }
+                    // (the gain, less a little for going back: a player sent back isn't there for the counter-attack)
+                    const back = Math.max(0, toGo(m.x, me) - toGo(ox, me)), g = now.T - t - back * AIX.p(me, 'dpBack', 0.004) - edgeRisk(m.x, m.y, me, p.id) * 0.02;
+                    if (!best || g > best.g) best = { p, m, g };
+                });
+                if (!best || best.g < AIX.p(me, 'dpGain', 0.04)) return null;
+                dpDone.n++; AIX.count(me, 'dp1');
+                const tx = best.m.x, ty = best.m.y;
+                return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
+            }
+            let dpDone = { key: '', n: 0 };
             function blitzPlan(me, act) {
                 if (state.blitzUsed) return null;
                 let best = null;
@@ -28233,6 +28337,7 @@ ol.ci-steps li::marker { content: none; }
                     let v = frees && frees.has(d.id) ? frW : 0;
                     if (tgW > 0 && deepThreat(d)) v += tgW;
                     if (tpHits.has(d.id)) v += AIX.p(me, 'tpW', 1.5);   // (brain x: tp1)
+                    if (dpHits.has(d.id)) v += dpHits.get(d.id) * AIX.p(me, 'dpW', 6);   // (brain x: dp1)
                     if (!z5) return v;
                     if (ourB && d.id !== ourB.id) { const ah = toGo(ourB.x, me) - toGo(d.x, me); if (ah >= 1 && ah <= 4 && Math.abs(d.y - ourB.y) <= 2) v += AIX.p(me, 'bzPath', 1.5); }
                     if (state.players.some(q => q.team === me && q.id !== p.id && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, d) === 1)) v += AIX.p(me, 'bzEng', 1);
@@ -28783,7 +28888,7 @@ ol.ci-steps li::marker { content: none; }
             function choose0() {
                 moveMemo = new Map();
                 state.aiStalling = false;
-                tpHold.clear(); tpHits.clear();
+                tpHold.clear(); tpHits.clear(); dpHits.clear();
                 const me = state.activeTeam, them = other(me);
                 let act = avail(me);
                 if (!act.length) return fanaticPlan(me);
@@ -28894,6 +28999,9 @@ ol.ci-steps li::marker { content: none; }
                     tpMove = turnPlan(me, carrier, act);
                     act = act.filter(p => !tpHold.has(p.id)); standing = act.filter(p => !p.isDown);
                 }
+                // (brain x: dp1) they have the ball: which of their finishers is most worth knocking down (see dpThreat)
+                const dpOn = AIX.x(me) && AIX.p(me, 'dpN', 0) > 0 && carrier && carrier.team === them && onPitch(carrier) && !carrier.isDown && !state.charge;
+                if (dpOn) dpFindHits(me, carrier);
                 // our carrier, still to move this turn: blocks that open a lane for it are worth more
                 const ourC = carrier && carrier.team === me && act.includes(carrier) && onPitch(carrier) && !state.charge ? carrier : null;
                 laneCache = null;
@@ -28910,7 +29018,8 @@ ol.ci-steps li::marker { content: none; }
                     const agileLim = AIX.on(me, 'line1') && tzFor(p.x, p.y, me) > 0 ? 0.12 : AIX.p(me, 'blkAgile', 0.12);
                     const limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? agileLim : AIX.p(me, 'blkTurn', 0.17)) + (gain >= 3 || freesC ? 0.08 : 0);
                     const v = e.ev + laneValue(e, gain + freesC) + (AIX.p(me, 'tgW', 0) > 0 && deepThreat(d) ? AIX.p(me, 'tgW', 0) * e.pDown : 0)   // (brain x: tg1)
-                        + (tpHits.has(d.id) ? AIX.p(me, 'tpW', 1.5) * e.pDown : 0);   // (brain x: tp1)
+                        + (tpHits.has(d.id) ? AIX.p(me, 'tpW', 1.5) * e.pDown : 0)   // (brain x: tp1)
+                        + (dpHits.get(d.id) || 0) * AIX.p(me, 'dpW', 6) * e.pDown;   // (brain x: dp1)
                     return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : AIX.p(me, 'blkMin', 1.5)), v, gain };
                 };
                 // block candidates
@@ -29067,6 +29176,7 @@ ol.ci-steps li::marker { content: none; }
                             if (bestD) { cdDone.n++; AIX.count(me, 'cd1'); const tx = bestD.m.x, ty = bestD.m.y; return { pid: bestD.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
                         }
                     }
+                    if (dpOn) { const dm = dpMovePlan(me, free, carrier); if (dm) return dm; }   // (brain x: dp1) the moves that most cut their chance of scoring
                     const pl = plugPlan(me, free, carrier);
                     if (pl) return pl;
                     const df = formationPlan(me, free, false, true, true) || formationPlan(me, free, false, true);

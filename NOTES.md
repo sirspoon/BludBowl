@@ -59,6 +59,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   -> 53, but from 0-6 out 100-105 -> 73: the total didn't rise. 1,000 games (`k_tp3.txt`): 173-221-606, 665-1454 v 185-247-568, 655-1393.
   Two finishers, or ones sent forward early, did clearly worse (31-63-206, 42-56-202: stranded upfield when the ball changes hands;
   variants via `nn/look/dbg/tp_runs.sh`). So scoring sooner isn't scoring more, and the cost is on defence.
+  v5.24 `dp1` (`dpThreat`), the plan in defence, ON in brain x (`dpN` 3): their chance of scoring next turn over all routes; sure moves
+  that cut it most, and their finishers worth more to hit. Its turns with a score on through a team-mate 30% -> 10%, from 11-15 out 48% ->
+  8% (300 games, `study_dp3.jsonl`). 1,000 games (`k_dp3.txt`): 188-241-571, 646-1382 - level with today's AI (185-247-568, 655-1393), up from
+  `tp1` alone (173-221-606, 665-1454). `dpN` 1: 183-239-578, 618-1358. It still scores from closer in: it advances instead.
+  **Next for the plan (owner, 18 Nov): protecting the ball** - we lose it before the score comes (about 43% of the time between our turns).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
