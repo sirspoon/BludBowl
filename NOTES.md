@@ -9,6 +9,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- (18 Nov, no version) **Does our AI use special-action skills?** In BludBowl (`node tools/ai-special-actions.js <races> --n 3`, AI v AI
+  mirrors, counts the action buttons it presses; 3 matches a race): yes for bombs, Chainsaw, Projectile Vomit, Ball & Chain (goblins),
+  Throw Team-Mate (goblin, snotling, ogre, halfling), Kick Team-Mate (once); hardly ever Stab (1 in 9 Dark Elf / Skaven / Chaos Dwarf
+  matches: it comes after every good block and needs a 25% armour break, so v AV10 never) or Hypnotic Gaze (0 in 3 Vampire matches:
+  only used to free our marked carrier); never Breathe Fire (no AI code for it) or the Black Orcs' Troll's Vomit. In BotBowl
+  (`nn/look/dbg/dref_skilluse.py --us`) even less: the bridge (`tools/botbowl/bludbowl_bot.py`) can't send Kick Team-Mate, Ball &
+  Chain or Breathe Fire, and in 24 games it used Gaze once, bombs 7 times, Throw Team-Mate 5, no Stab / Vomit / Chainsaw (goblins
+  Vomit / Chainsaw in BludBowl but not BotBowl: not looked into). Passive skills work in both (the rules apply them). Not checked:
+  reactive choices (Dump-off, Diving Tackle, Shadowing, Pro...). (One Black Orc batch of 3 jsdom matches ran out of time; a rerun
+  finished fine.)
 - (18 Nov, no version) **v5.17's AI v drefsante, all races** (BotBowl, BB2025, random races each side, 300 games: seeds 900000 x100 +
   901000 x200; `nn/look/dbg/dref_allraces_bench.txt`, by race: `nn/look/dbg/dref_byrace.py`): won 108, drew 65, lost 127, touchdowns
   236-291 - much closer than Humans v Humans (52-79-169). No errors. Random pairs are noisy: a stunty team (goblin, gnome,
