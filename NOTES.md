@@ -63,7 +63,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   that cut it most, and their finishers worth more to hit. Its turns with a score on through a team-mate 30% -> 10%, from 11-15 out 48% ->
   8% (300 games, `study_dp3.jsonl`). 1,000 games (`k_dp3.txt`): 188-241-571, 646-1382 - level with today's AI (185-247-568, 655-1393), up from
   `tp1` alone (173-221-606, 665-1454). `dpN` 1: 183-239-578, 618-1358. It still scores from closer in: it advances instead.
-  **Next for the plan (owner, 18 Nov): protecting the ball** - we lose it before the score comes (about 43% of the time between our turns).
+  v5.25 `bp1` (`bpEnd`), protecting the ball, ON in brain x (`bpN` 4). Lost in the opponent's turn 41% of the time, by how many can reach the
+  carrier with no dodge: 0 -> 10%, 1 -> 21%, 2+ -> 54-67% (`nn/look/dbg/ball_loss.py`). Carrier's stopping square chosen for that, up to 4 sure
+  moves before any dice to shut the ways to him, whoever could reach him worth more to hit. Reach 2.30 -> 1.40, lost in our turn 9% -> 6%, in
+  theirs 41% -> 35%. 1,000 games (`k_bp4.txt`): 207-245-548, 697-1337 v today's AI 185-247-568, 655-1393 - the first brain x ahead, by about
+  1.2 standard errors (promising, not proven; not yet tried in the all-races guard). The plan does nothing yet when the ball is loose.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

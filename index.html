@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.24</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.25</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27007,7 +27007,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3 },   // (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4 },   // (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -28169,8 +28169,79 @@ ol.ci-steps li::marker { content: none; }
                 }
                 return Infinity;
             }
+            // ---- (brain x: bp1) the plan protects the ball ----
+            // The ball goes mostly in their turn (we still hold it at the end of ours 78% of the time, then lose it in 41% of their turns), and
+            // one number says when: how many of them can get at the carrier without a dodge. None: lost 10%; one: 21%; two or more: 54-67%. We
+            // leave 2.3 on average (nn/look/dbg/ball_loss.py). So the carrier stops where few can reach him (giving up a few squares if it's
+            // worth it), up to bpN sure moves before any dice shut the ways to him, and whoever could reach him is worth more to knock down.
+            // v drefsante on top of tp1 + dp1 (BotBowl, Humans, 300 games, seeds 750000+): opponents able to reach him 2.30 -> 1.40, ball lost in our turn
+            // 9% -> 6%, in theirs 41% -> 35%. Over 1,000 games (seeds 910000+): won 207 drew 245 lost 548, touchdowns 697-1337, v tp1 + dp1 188-241-571,
+            // 646-1382 and today's AI 185-247-568, 655-1393. ON in brain x (AIX.X, bpN 4).
+            let bpMemo = null, bpDone = { key: '', n: 0 };
+            const BP_LOSS = [0.10, 0.21, 0.54, 0.56, 0.58, 0.67];
+            const bpLoss = n => n >= 5 ? 0.67 + (n - 5) * 0.01 : BP_LOSS[Math.floor(n)] + (n - Math.floor(n)) * (BP_LOSS[Math.floor(n) + 1] - BP_LOSS[Math.floor(n)]);
+            function bpCount(me, c, x, y) {   // how many could get at the carrier if he stood at (x, y): free ways to him, and any next to him
+                const ox = c.x, oy = c.y;
+                c.x = x; c.y = y;
+                try {
+                    let n = carrierThreat(me, c);
+                    state.players.forEach(q => { if (q.team !== me && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && cheb(q, c) === 1) n += 1; });
+                    return n;
+                } finally { c.x = ox; c.y = oy; }
+            }
+            function bpEnd(me, c, act) {   // where the carrier will finish this turn
+                if (!act.includes(c)) return { x: c.x, y: c.y, m: null };
+                const tk = state.half + ':' + me + ':' + state.turn[me] + ':' + c.id;
+                if (cageDest && cageDest.key === tk) { const keep = movesFor(c).find(q => q.x === cageDest.x && q.y === cageDest.y); if (keep) return { x: keep.x, y: keep.y, m: keep }; }
+                if (bpMemo) return bpMemo;
+                const ms = movesFor(c), m0 = carrierPick(ms, c), stay = { x: c.x, y: c.y, prob: 100, stay: true }, base = m0 || stay, go0 = toGo(base.x, me);
+                if (base.x === endX(me)) return (bpMemo = { x: base.x, y: base.y, m: m0 });
+                const prog = AIX.p(me, 'bpProg', 0.025), val = o => -bpLoss(bpCount(me, c, o.x, o.y)) + (go0 - toGo(o.x, me)) * prog - (1 - o.prob / 100) * 0.5;
+                let best = base, bv = val(base) + AIX.p(me, 'bpMargin', 0.05);
+                [stay, ...ms.filter(o => o.prob >= 100 && !o.isRush && o.x !== endX(me) && toGo(o.x, me) <= go0 + AIX.p(me, 'bpGive', 4))]
+                    .sort((a, b) => toGo(a.x, me) - toGo(b.x, me)).slice(0, AIX.p(me, 'bpLook', 30)).forEach(o => { if (o === base) return; const v = val(o); if (v > bv) { bv = v; best = o; } });
+                return (bpMemo = { x: best.x, y: best.y, m: best.stay ? null : best });
+            }
+            function bpFindHits(me, c, act) {
+                const E = bpEnd(me, c, act), L0 = bpLoss(bpCount(me, c, E.x, E.y));
+                state.players.forEach(q => {
+                    if (q.team === me || !onPitch(q) || q.isDown || q.isStunned || cheb(q, E) - 1 > (q.ma || 6) + 2) return;
+                    q.isDown = true;
+                    let L = L0; try { L = bpLoss(bpCount(me, c, E.x, E.y)); } finally { q.isDown = false; }
+                    if (L0 - L > 0.01) dpHits.set(q.id, L0 - L);
+                });
+            }
+            function bpMovePlan(me, act, c) {
+                const ck = state.half + ':' + me + ':' + state.turn[me];
+                if (bpDone.key !== ck) bpDone = { key: ck, n: 0 };
+                if (bpDone.n >= AIX.p(me, 'bpN', 0)) return null;
+                const E = bpEnd(me, c, act), n0 = bpCount(me, c, E.x, E.y);
+                if (n0 <= AIX.p(me, 'bpOk', 0.4)) return null;
+                const L0 = bpLoss(n0), route = E.m && E.m.path ? E.m.path : [], cands = [];
+                act.forEach(p => {
+                    if (p.id === c.id || p.isStunned || !canReposition(p, me)) return;
+                    movesFor(p).forEach(m => {
+                        if (m.prob < 100 || m.isRush || (m.x === p.x && m.y === p.y) || (m.x === E.x && m.y === E.y) || cheb(m, E) > AIX.p(me, 'bpR', 6)) return;
+                        if (route.some(st => st.x === m.x && st.y === m.y)) return;   // (not across the carrier's way)
+                        cands.push({ p, m });
+                    });
+                });
+                cands.sort((a, b) => cheb(a.m, E) - cheb(b.m, E));
+                let best = null;
+                cands.slice(0, AIX.p(me, 'bpLook', 30) + 6).forEach(({ p, m }) => {
+                    const ox = p.x, oy = p.y, od = p.isDown;
+                    p.x = m.x; p.y = m.y; p.isDown = false;
+                    let n = n0; try { n = bpCount(me, c, E.x, E.y); } finally { p.x = ox; p.y = oy; p.isDown = od; }
+                    const g = L0 - bpLoss(n) - m.path.length * 0.002 - edgeRisk(m.x, m.y, me, p.id) * 0.02;
+                    if (!best || g > best.g) best = { p, m, g };
+                });
+                if (!best || best.g < AIX.p(me, 'bpGain', 0.03)) return null;
+                bpDone.n++; AIX.count(me, 'bp1');
+                const tx = best.m.x, ty = best.m.y;
+                return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
+            }
             function turnPlan(me, c, act) {
-                const want = AIX.p(me, 'tpN', 0), cm = act.includes(c) ? carrierPick(movesFor(c), c) : null;
+                const want = AIX.p(me, 'tpN', 0), cm = AIX.p(me, 'bpN', 0) > 0 ? bpEnd(me, c, act).m : act.includes(c) ? carrierPick(movesFor(c), c) : null;
                 const cx = cm ? cm.x : c.x, cy = cm ? cm.y : c.y, cma = c.ma || 6, passer = isThrower(c);
                 const inReach = (x, y) => Math.max(Math.abs(x - cx), Math.abs(y - cy)) <= cma + 1 || (passer && Math.hypot(x - cx, y - cy) <= 10);
                 const canTake = q => !hasSk(q, 'No Hands') && !hasSk(q, 'No Ball') && !isBigGuy(q);
@@ -28888,7 +28959,7 @@ ol.ci-steps li::marker { content: none; }
             function choose0() {
                 moveMemo = new Map();
                 state.aiStalling = false;
-                tpHold.clear(); tpHits.clear(); dpHits.clear();
+                tpHold.clear(); tpHits.clear(); dpHits.clear(); bpMemo = null;
                 const me = state.activeTeam, them = other(me);
                 let act = avail(me);
                 if (!act.length) return fanaticPlan(me);
@@ -28999,6 +29070,9 @@ ol.ci-steps li::marker { content: none; }
                     tpMove = turnPlan(me, carrier, act);
                     act = act.filter(p => !tpHold.has(p.id)); standing = act.filter(p => !p.isDown);
                 }
+                // (brain x: bp1) we have the ball: who could get at the carrier is worth knocking down (see bpEnd)
+                const bpOn = AIX.x(me) && AIX.p(me, 'bpN', 0) > 0 && carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && !state.charge && !lastTurn;
+                if (bpOn) bpFindHits(me, carrier, act);
                 // (brain x: dp1) they have the ball: which of their finishers is most worth knocking down (see dpThreat)
                 const dpOn = AIX.x(me) && AIX.p(me, 'dpN', 0) > 0 && carrier && carrier.team === them && onPitch(carrier) && !carrier.isDown && !state.charge;
                 if (dpOn) dpFindHits(me, carrier);
@@ -29075,6 +29149,7 @@ ol.ci-steps li::marker { content: none; }
                     if (up) return { pid: up.p.id, kind: 'move', pick: () => null };
                 }
                 if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
+                if (bpOn) { const bm = bpMovePlan(me, act, carrier); if (bm) return bm; }   // (brain x: bp1) then the ways to the carrier are shut
                 // (deep1) before the blocks: holding the ball well short of their end zone, with fewer than two team-mates ready to take
                 // a scoring hand-off or pass next turn, a quick free player (no opponent next to it) steps, with no dice, to a square
                 // where it is ready: within its move and two Rushes of the end zone, out of every tackle zone, within a hand-off (the
@@ -29392,7 +29467,7 @@ ol.ci-steps li::marker { content: none; }
                 }
                 // move our ball carrier forward, then build the cage round him
                 if (carrier && carrier.team === me && act.includes(carrier)) {
-                    let m = carrierPick(movesFor(carrier), carrier);
+                    let m = bpOn ? bpEnd(me, carrier, act).m : carrierPick(movesFor(carrier), carrier);
                     // (cagefirst; turn planner stage 2) the cage goes to where the carrier will stop before the carrier moves, as strong
                     // coaches do: the stopping square is worked out once and kept for the turn, free team-mates step (without dice) into
                     // the diagonal squares round it, and the carrier comes in last

@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.25 (18 Nov 2026)
+- Behind the scenes: the experimental computer coach's plan now protects the ball carrier, and for the first time it did better than
+  the normal coach against Bot Bowl's champion bot. The normal computer coach is unchanged.
+
 ## v5.24 (18 Nov 2026)
 - Behind the scenes: the experimental computer coach's plan now covers defence too, shutting down the opponent's best ways to score
   next turn. It now matches the normal coach against Bot Bowl's champion bot; the normal computer coach is unchanged.

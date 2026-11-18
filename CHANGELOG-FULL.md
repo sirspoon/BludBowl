@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.25 (18 Nov 2026)
+- No change to the game's AI. Brain x's plan now protects the ball, `bp1` (`bpEnd`; `bpN`, `bpProg`, `bpGive`, `bpMargin`, `bpOk`, `bpGain`, `bpR`, `bpLook`).
+  We lose the ball mostly in the opponent's turn, and how often depends on how many opponents can get at the carrier without a dodge:
+  none 10%, one 21%, two or more 54-67%. The carrier now stops where few can reach him (giving up a few squares if that's worth it), up
+  to 4 sure moves before any dice shut the ways to him, and whoever could reach him is worth more to knock down. Against drefsante
+  (BotBowl, Humans) opponents able to reach him fell from 2.30 to 1.40 a turn, and the ball was lost less in our turn (9% to 6%) and in
+  theirs (41% to 35%). Over 1,000 games: won 207, drew 245, lost 548, touchdowns 697-1337, against 188-241-571 and 646-1382 before it and
+  185-247-568 and 655-1393 for the game's AI. On in brain x (`AIX.X`).
+
 ## v5.24 (18 Nov 2026)
 - No change to the game's AI. Brain x's plan now defends, `dp1` (`dpThreat`; `dpN`, `dpW`, `dpRoll`, `dpGain`, `dpMin`, `dpBack`, `dpLook`): with
   the opponent holding the ball it estimates their chance of scoring next turn over every route (the carrier running in, or a hand-off
