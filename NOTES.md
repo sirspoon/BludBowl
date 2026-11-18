@@ -33,6 +33,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   and 88% of its moves end marking someone (ours 72%); (3) its Blitz goes at the carrier more (36% of its block targets v 26%);
   (4) in attack it moves before it blocks (we start 44% of turns with a Blitzer block/Blitz, it 7%), gets more players ahead of
   the carrier (77% v 56%) and cages less; (5) with the ball loose it sends receivers upfield first, then picks up.
+  Tried (1), no code change: `blk1`'s end-of-turn block limits loosened (`lateTurn` 0.4, `lateDown` 0.3, so any player, not
+  just Blitzers with Block). Unthrown blocks fell (defence 399 -> 41 turns) and our 1-die blocks doubled (3.7 -> 7.6 a game,
+  drefsante's level), but over 1,000 games (seeds 910000+, `nn/look/dbg/k_lb1.txt`) we did worse: 159-219-622 v 185-247-568,
+  touchdowns 613-1449 v 655-1393. Kept at 0.2 / 0.4 - our players lying down at the end of the turn seem to cost more than the
+  knock-downs gain.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
