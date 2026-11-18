@@ -9,6 +9,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- (18 Nov, no version) **v5.17's AI v drefsante, all races** (BotBowl, BB2025, random races each side, 300 games: seeds 900000 x100 +
+  901000 x200; `nn/look/dbg/dref_allraces_bench.txt`, by race: `nn/look/dbg/dref_byrace.py`): won 108, drew 65, lost 127, touchdowns
+  236-291 - much closer than Humans v Humans (52-79-169). No errors. Random pairs are noisy: a stunty team (goblin, gnome,
+  halfling, ogre, snotling, underworld) v a non-stunty one loses whoever plays it (we won 4 of 53 as stunty, 33 of 42 v drefsante's
+  stunty), so mirror races would be a fairer all-races test. Neither side stunty: 66-48-77, touchdowns 141-168. drefsante's
+  Humans were its best team v us (we went 2-1-10 against them; ~10 games a race, so per-race splits are mostly luck).
 - (18 Nov, no version) **drefsante plays every race in BotBowl now, not just Humans.** Humans-only was Bot Bowl V's format (and
   BotBowl Season 3's one team), not a drefsante limit: its own app plays 24 LRB6 teams. Its BotBowl bridge
   (`drefsante/drefsante_bot.py` on the owner's PC, originals kept as `.orig`) crashed on other races; fixed there: skills sent to
