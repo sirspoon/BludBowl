@@ -9,6 +9,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- (18 Nov, no version) **v5.12's AI v drefsante** (Bot Bowl V's winner) in BotBowl, Humans: BB2016 (its rules) 97 games: won 7,
+  drew 15, lost 75, touchdowns 43-183 (one game hung in a set-up loop; the run was stopped there); BB2025 (ours) 100 games: won
+  14, drew 22, lost 64, touchdowns 52-145, no errors. Blocks level (~45 a match each), casualties level: it simply scores far
+  more (1.5-1.9 a game v our 0.4-0.5). For scale, v BotBowl's scripted bot we win ~60%. `nn/evaluate.py` now has a per-game
+  time limit (`--game-limit`, 300 s) so a hung game can't block a worker, and drefsante's console is silenced in the workers.
+  The dashboard shows these runs (restart dashboard.py after editing it: the page is served from memory).
 - (17 Nov, no version) An evaluator trained on BludBowl's own matches (ev1; `nn/look/evalcollect.js`, `evaltrain.py`,
   `evalcheck.py`): 6,000 AI-v-AI matches, 370,460 positions. Better than bb_v3c (squared error on results 0.086 v 0.100, well
   calibrated, much less noise), but alone no better than a simple-facts model trained on the same matches (0.085), and only a
