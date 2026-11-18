@@ -24,7 +24,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   201-216 touchdowns in 300). The far-out gap is mostly its defence covering deep and ours not: both lose the ball about as often
   (ours 9% in our turn + 33% in theirs, its 14% + 32%). Scripts: `nn/look/drives_report.py`, `nn/look/dbg/far_scores.py`.
   Noise check (same AI, same 300 seeds 750000+, `nn/look/drefstudy.py --positions`): drefsante won 167 v 177, touchdowns 425-201 v
-  447-216 - differences of ~10 wins in 300 are luck. Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
+  447-216 - differences of ~10 wins in 300 are luck.
+  Shadow study (18 Nov, `nn/look/dref_shadow.py` + `dref_shadow_report.py`, 300 games, report `nn/look/dref/rep_shadow.txt`): at
+  each of our AI's 39,000 player choices a second copy of drefsante's brain said what it would do. It picks the same player only
+  22-43% of the time (order differs a lot). Clearest differences: (1) we end the turn with players unused where it would still
+  throw a block - 35% of our defence turns, 28% loose-ball, 22% attack - nearly all 1-die blocks (it throws 1-die blocks 3x as
+  often on defence); (2) on defence it sends a deep safety: 23% of its moves end 8+ squares goal-side of their carrier, ours 5%,
+  and 88% of its moves end marking someone (ours 72%); (3) its Blitz goes at the carrier more (36% of its block targets v 26%);
+  (4) in attack it moves before it blocks (we start 44% of turns with a Blitzer block/Blitz, it 7%), gets more players ahead of
+  the carrier (77% v 56%) and cages less; (5) with the ball loose it sends receivers upfield first, then picks up.
+  Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
