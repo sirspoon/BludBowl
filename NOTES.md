@@ -9,6 +9,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- (18 Nov, no version) drefsante's scoring turns position by position (300 games, `nn/look/drefstudy.py --positions`,
+  `drefpos_report.py`, `drefpos_boards.py` draws them): 58% of its touchdowns start with a free receiver (a team-mate in hand-off /
+  pass reach who can walk in without a dodge), 59% of those deeper than all our standing players, ~3 squares from our nearest.
+  Marking them fails (Dodge); knocking them down is the likely answer - our Blitz goes to the carrier first.
 - v5.17 (BludBowl local, no change to play): defence against deep receivers (`def2`, `defN` 1-2) tried and left off: marking the
   opponent's ready receivers cut drefsante's (0.86 -> 0.55 a turn) and its far-out scores (12% -> 10%), but v drefsante (same 100
   games) we did worse (won 11-12, lost 65-67, touchdowns conceded 147-151 v 17-26-57, 134 without): markers taken off the screen.
@@ -133,6 +137,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
+- **AI, defence: knock down their free receivers (from the position study, 18 Nov).** When the opponent holds the ball and has a
+  team-mate deep with a free run in (in hand-off / pass reach of the carrier), Blitz or block that player down rather than the
+  far-off, caged carrier. Test v drefsante.
 - **For later (the owner, 17 Nov): drefsante's Bot Bowl 2023 replays.** All 40 of its Bot Bowl V matches as BotBowl replays
   (`.rep`, 13-28 MB each, ~780 MB) in the owner's Google Drive folder "Dres-script-ai-replays": v Overparameterized40kBot,
   motbot2, treeman and random, 10 each, 5 at home (`drefsante_VS_x_0/2/4/6/8`) and 5 away (`x_VS_drefsante_1/3/5/7/9`). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at

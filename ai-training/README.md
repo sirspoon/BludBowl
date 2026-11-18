@@ -1388,6 +1388,21 @@ them. 200 games: drefsante won 121, drew 48, lost 31, touchdowns 292-126.
   (seed 730000): off won 17 drew 26 lost 57, touchdowns 60-134, its ready receivers 0.86 a turn, scores from 11+ 12%; covering
   one: 11-22-67, 51-151, 0.57, 10%; covering two: 12-23-65, 54-147, 0.54, 10%. It does what it's meant to and loses more: the
   markers come off the screen and the carrier chase, and drefsante scores another way (its Catchers have Dodge, too).
+- **Its scoring turns, position by position** (`nn/look/drefstudy.py --positions`, `drefpos_report.py`, `drefpos_boards.py`; 300 games,
+  BB2025, drefsante won 167 drew 86 lost 47, touchdowns 425-201). For every turn starting with the ball: a "free run" = the carrier
+  can walk in without a dodge (empty squares outside the defence's tackle zones, within move + 2 Rushes); "free receivers" = team-
+  mates with such a run in, within hand-off or pass reach of the carrier.
+  - drefsante's 315 touchdowns: free run at the start 21%, **a free receiver in reach (no free run) 58%**, neither - made in the
+    turn (blocks 30%, Blitzes 35%, then hand-off / pass) 21%. Ours (195): free run 25%, free receiver 35%, made in the turn 40%.
+  - Free receivers in reach a turn: against our defence 0.60, against drefsante's 0.14 (but its attack sends receivers deep and
+    ours doesn't, so this isn't the defence alone). Carrier 0-3 squares out with a free run: v our defence 72%, v its 27%.
+  - In 59% of its free-receiver touchdowns the receiver was **deeper than every standing player of ours**; it waited ~6.3 squares
+    from our end zone, our nearest player ~3.2 squares away (within 3 in 61%). Our deepest defender was within 3 squares of our end
+    zone in 2% of turns (with the ball 11+ out); drefsante's in 0%.
+  - Why marking them (v5.17) didn't help: its Catchers have Dodge - a marked one dodges away ~97% of the time. What stops a
+    receiver is knocking it down (standing up costs 3 squares). Our AI spends its Blitz on the carrier first, even far out and
+    caged, while the danger waits deep and free.
+  - Our attack when free: scored 100% (its 74-91%); our carriers were Catchers in 775 of 1,504 turns with the ball.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
