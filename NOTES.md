@@ -9,6 +9,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- (18 Nov, no version) **drefsante plays every race in BotBowl now, not just Humans.** Humans-only was Bot Bowl V's format (and
+  BotBowl Season 3's one team), not a drefsante limit: its own app plays 24 LRB6 teams. Its BotBowl bridge
+  (`drefsante/drefsante_bot.py` on the owner's PC, originals kept as `.orig`) crashed on other races; fixed there: skills sent to
+  its Java only if it knows them (BotBowl's 1-79 minus Long Legs, Monstrous Mouth, Swoop, Swift Reaction, Timmm-ber - its map,
+  `FFAIProxy.skillsFFAIOrder`, lacks those; BB2025's 80+ are new), Wrestle and the apothecary decided in Python (BB2025's D16
+  casualty rolls aren't the numbers its Java expects), a missing `OutcomeType` import, and an empty or not-allowed plan ends the
+  player's action instead of returning nothing. Check (`nn/look/dbg/dref_allraces.sh`, 4 mirror games a race v our AI): all 30
+  races finish; one Nurgle game hit BotBowl's own "square taken" assertion (game.py:1352), not reproducible. So
+  `evaluate.py --model bludbowl --opponent drefsante --teams <races>` can test us v drefsante with any team. (Its play for those
+  races is LRB6-era and ignores BB2025-only skills.)
 - (18 Nov, no version) drefsante's scoring turns position by position (300 games, `nn/look/drefstudy.py --positions`,
   `drefpos_report.py`, `drefpos_boards.py` draws them): 58% of its touchdowns start with a free receiver (a team-mate in hand-off /
   pass reach who can walk in without a dodge), 59% of those deeper than all our standing players, ~3 squares from our nearest.
@@ -143,7 +153,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - **For later (the owner, 17 Nov): drefsante's Bot Bowl 2023 replays.** All 40 of its Bot Bowl V matches as BotBowl replays
   (`.rep`, 13-28 MB each, ~780 MB) in the owner's Google Drive folder "Dres-script-ai-replays": v Overparameterized40kBot,
   motbot2, treeman and random, 10 each, 5 at home (`drefsante_VS_x_0/2/4/6/8`) and 5 away (`x_VS_drefsante_1/3/5/7/9`). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at
-  drefsante's decisions, to see where a strong scripted bot and ours differ. BotBowl is Humans only. Not downloaded yet.
+  drefsante's decisions, to see where a strong scripted bot and ours differ. (Bot Bowl V was Humans only.) Not downloaded yet.
   Drefsante (Frederic Bair, scripted) won Bot Bowl V (2023): won 37, drew 0, lost 3, touchdowns 139-6 (MotBot2, NN + evolution +
   scripted, 33-0-7, 99-10; Treeman, MCTS, 19-1-20; an RL bot and random never scored). Round robin, 10 matches a pairing, BB2016
   rules, one fixed Human team, 2 minutes a turn (njustesen.github.io/botbowl/bot-bowl-v). No code or write-up for it is public that
