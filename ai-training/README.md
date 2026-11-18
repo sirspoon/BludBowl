@@ -1350,6 +1350,12 @@ them. 200 games: drefsante won 121, drew 48, lost 31, touchdowns 292-126.
   `AI.debugThrow()` in those positions: mostly passes from a Blitzer or Lineman (4-40% shots); hand-offs (46-61%) were taken.
   v drefsante 300 games: won 65, drew 65, lost 170 v 57-57-186 without; v the AI without it 288: won 96, drew 81, lost 111
   (and 96 Human matches 31-20-45): our defence marks receivers left deep and the quick players don't block. Off (`deepN` 0).
+- **v5.14, on in a quieter form** (`deepN` 1, `deepNoBlock` 1: never a player with Block, `deepSafe` 0: only with no opponent
+  free to get at the carrier, `deepForm` 0: no formation strike squares). v drefsante 300 games (same seeds as the baselines):
+  won 52, drew 79, lost 169, touchdowns 209-418 (score 30.5% v 28.5% without; v5.13's fuller form 32.5%); v the AI without it
+  288 mirror matches: won 109, drew 84, lost 95, touchdowns 269-239, Turnovers 1406 v 1511. Ready receivers 11+ out: 11% of turns
+  (end of our turn 15%). A lesson on the way: `deep1_measure.js` drew each side's race at random, and an A/A test (both sides
+  the same) came out 41-32-23 - results only from mirror matches (now fixed) or same-seed runs.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,

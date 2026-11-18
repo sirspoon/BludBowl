@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.13</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.14</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27786,8 +27786,8 @@ ol.ci-steps li::marker { content: none; }
                         a = { x: c.x + fwd * k, y: Math.max(2, Math.min(CFG.rows - 3, c.y)) };
                     }
                     // (deep1) quick players deep, ready for a scoring hand-off or pass next turn: straight after the escort, before the rest
-                    const strike = () => { if (AIX.on(me, 'deep1') && !cageOnly && toGo(c.x, me) >= AIX.p(me, 'deepFrom', 9) && state.turn[me] < TURNS)
-                        strikeSquares(me, c, AIX.p(me, 'deepN', 0)).forEach(o => add(o.x, o.y, 'strike')); };
+                    const strike = () => { if (AIX.on(me, 'deep1') && AIX.p(me, 'deepForm', 0) && !cageOnly && toGo(c.x, me) >= AIX.p(me, 'deepFrom', 9) && state.turn[me] < TURNS)
+                        strikeSquares(me, c, AIX.p(me, 'deepN', 1)).forEach(o => add(o.x, o.y, 'strike')); };
                     if (mobileTeam(me)) {
                         // a loose escort behind the carrier and runners in the open spaces ahead, ready for a pass or hand-off
                         [[-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
@@ -28720,23 +28720,27 @@ ol.ci-steps li::marker { content: none; }
                 // where it is ready: within its move and two Rushes of the end zone, out of every tackle zone, within a hand-off (the
                 // carrier's move + 3) or a 10-square pass of the carrier. In the formation step (after the blocks) the quick players
                 // were already used or tied up - 0.6 such moves a match. drefsante does this: 0.76 ready receivers a turn, ours 0.02.
-                // OFF by default (deepN 0; '{"deepN":2}' to try it): it got receivers ready (11+ out: 2% -> 21-30% of turns) but they
-                // rarely scored; v drefsante 300 games won 65 drew 65 lost 170 v 57-57-186 without; v the AI without it 288 matches
-                // won 96 drew 81 lost 111 (our defence marks receivers left deep). ai-training/README.md, "How drefsante beats our AI".
+                // v5.14: ON, in its quieter form - one receiver (deepN 1), never a Block player (deepNoBlock 1), only with no opponent
+                // free to get at the carrier (deepSafe 0), no formation "strike" squares (deepForm 0). v drefsante (BotBowl, BB2025) 300
+                // games won 52 drew 79 lost 169 v 57-57-186 without; v the AI without it 288 mirror matches won 109 drew 84 lost 95. (v5.13's
+                // fuller form, two receivers incl. Blitzers: v drefsante 65-65-170, v the AI without it 96-81-111.)
+                // (deepSafe: only with the carrier safe - at most that many of theirs with a free way to him; deepNoBlock: players with
+                // Block - the Blitzers - stay for the blocks and the Blitz)
                 if (AIX.on(me, 'deep1') && carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && !state.charge && !lastTurn
-                    && toGo(carrier.x, me) >= AIX.p(me, 'deepFrom', 9)) {
+                    && toGo(carrier.x, me) >= AIX.p(me, 'deepFrom', 9) && AIX.p(me, 'deepN', 1) > 0
+                    && (AIX.p(me, 'deepSafe', 0) >= 99 || carrierThreat(me, carrier) <= AIX.p(me, 'deepSafe', 0))) {
                     // in reach: a hand-off after a sure move (the carrier's move + 1), or a short pass (6 squares) if the carrier can really
                     // throw - from a Blitzer or a Lineman the passes it lined up were 4-40% shots (look/dbg/deep1_throw.js)
                     const passer = (carrier.pa != null && carrier.pa <= AIX.p(me, 'deepPa', 3)) || hasSk(carrier, 'Pass');
                     const inReach = (x, y) => Math.max(Math.abs(x - carrier.x), Math.abs(y - carrier.y)) <= (carrier.ma || 6) + 1 || (passer && Math.hypot(x - carrier.x, y - carrier.y) <= 6);
                     const readyAt = (q, x, y) => toGo(x, me) <= q.ma + 2 && tzFor(x, y, me) === 0 && inReach(x, y);
-                    const want = AIX.p(me, 'deepN', 0);
+                    const want = AIX.p(me, 'deepN', 1);
                     const readyNow = state.players.filter(q => q.team === me && q.id !== carrier.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && readyAt(q, q.x, q.y));
                     if (readyNow.length < want) {
                         let best = null;
                         act.forEach(p => {
                             if (p.id === carrier.id || p.isDown || readyNow.includes(p) || tzFor(p.x, p.y, me) > 0 || p.ma < AIX.p(me, 'deepMa', 7)
-                                || isBigGuy(p) || hasSk(p, 'No Hands') || hasSk(p, 'No Ball')) return;
+                                || isBigGuy(p) || hasSk(p, 'No Hands') || hasSk(p, 'No Ball') || (AIX.p(me, 'deepNoBlock', 1) && hasSk(p, 'Block'))) return;
                             movesFor(p).forEach(m => {
                                 if (m.prob < 100 || m.isRush || !readyAt(p, m.x, m.y) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
                                 if (readyNow.some(q => cheb(q, m) < 3)) return;   // not on top of one already there

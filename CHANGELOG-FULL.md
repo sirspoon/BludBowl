@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.14 (18 Nov 2026)
+- **Improved (AI):** deep receivers (`deep1`), in a quieter form, now on. With the ball 9+ squares from the end zone and no
+  opponent free to get at the carrier, the AI first sends one quick free player (not a Blitzer: players with Block stay for
+  the blocks) deep, with no dice, to a square from which it could take a hand-off or short pass and run in next turn - as
+  drefsante, Bot Bowl V's winner, does. Against drefsante (BotBowl, BB2025, 300 games): won 52, drew 79, lost 169 (touchdowns
+  209-418) v 57-57-186 (192-426) without; against the AI without it, 288 matches over 12 races: won 109, drew 84, lost 95
+  (touchdowns 269-239), fewer Turnovers. Both lean better; neither is beyond luck on its own. The settings `deepN`,
+  `deepNoBlock`, `deepSafe`, `deepForm` give v5.13's fuller form back for testing.
+
 ## v5.13 (18 Nov 2026)
 - Tried and left off (`deep1`, switched on with the tuning value `deepN` 2): deep receivers. A study of Bot Bowl V's winner,
   drefsante, playing the AI found it scores a third of its touchdowns from 11+ squares out, by keeping one or two quick players

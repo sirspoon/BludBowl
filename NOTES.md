@@ -9,6 +9,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- v5.14 (BludBowl local): deep receivers on, in a quieter form (one quick player, never a Block player, only with no opponent
+  free to get at the carrier, no formation strike squares). v drefsante 300 games: won 52, drew 79, lost 169 (touchdowns
+  209-418) v 57-57-186 without; v the AI without it 288 mirror matches: won 109, drew 84, lost 95. **New test policy (the
+  owner, 18 Nov): the target is beating drefsante** (`nn/evaluate.py --opponent drefsante --rules season3 --teams human`, 300
+  games on seeds 900000 x100 + 901000 x200 so variants pair up); our own AI (ai-match, 12 races x 24 mirror matches) is a guard
+  that mustn't be clearly worse. Never judge results from random race pairs: an A/A test with `nn/look/deep1_measure.js`'s old
+  random pairs came out 41-32-23 (it now plays mirror matches).
 - v5.13 (BludBowl local): deep receivers (`deep1`, from the drefsante study) tried and left off (`deepN` 0; `'{"deepN":2}'` turns it
   on). A quick free player goes deep before the blocks, to a square from which it could take a hand-off / short pass and run in
   next turn; plus "strike" squares in the formation. Ready receivers with the ball 11+ out: 2% -> 21-30% of turns, but scores

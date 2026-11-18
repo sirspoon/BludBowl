@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.14 (18 Nov 2026)
+- When the computer has the ball well up its own end and the carrier is safe, it now sends one fast player deep, ready for a
+  scoring hand-off or pass next turn.
+
 ## v5.13 (18 Nov 2026)
 - Behind the scenes: a new computer tactic (sending fast players deep for a scoring pass) was tested and left switched off for now.
 
