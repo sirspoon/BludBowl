@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.19 (18 Nov 2026)
+- Behind the scenes: the experimental computer coach's first idea (Blitzing the opponent's receivers waiting deep) was tested
+  against Bot Bowl's champion bot and left off: it didn't help.
+
 ## v5.18 (18 Nov 2026)
 - Behind the scenes: a separate, experimental computer coach to develop against Bot Bowl's champion bot. The game's own computer
   coach doesn't change until the new one clearly beats it.

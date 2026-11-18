@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.18</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.19</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27004,6 +27004,7 @@ ol.ci-steps li::marker { content: none; }
             // for it ('{"brain":"x"}': nn/evaluate.py --aip, tools/ai-match.js --newp). Its changes are code behind AIX.x(team) and its own
             // tuning values here in X (used when a run doesn't set them); the game's AI stays as it is until brain x clearly beats it v
             // drefsante (~1,000 games) and isn't clearly worse in the all-races mirror guard, then x becomes the default.
+            // (v5.19: fr1, Blitzing their free receivers, frW 3 and 1, tried and left at 0 - it didn't cut their free receivers)
             X: {},
             x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); } };
         const AI = (function () {
@@ -28074,17 +28075,52 @@ ol.ci-steps li::marker { content: none; }
                 const type = m.isRush && !m.requiresDodge ? 'RUSH' : 'DODGE';
                 return rrWorth({ type, player: p }, critical, undefined, undefined) ? m.probRR : m.prob;
             }
+            // (brain x: fr1) their free receivers: standing team-mates of their carrier, out of our tackle zones, who could walk into our
+            // end zone next turn without a dodge (their move + 2 Rushes over empty squares outside our tackle zones), within a hand-off
+            // (the carrier's move + 3) or a 10-square pass of him. 58% of drefsante's touchdowns against our AI started from one, most
+            // deeper than all our players (nn/look/drefpos_report.py). Marking them (v5.17's def2) cost too much; knocking one over
+            // (a Blitz - nobody of ours is next to them) leaves him standing up with 3 fewer squares to run.
+            // OFF (frW 0) in brain x too: v drefsante (BotBowl, Humans, the same 300 games, seeds 750000+) its free receivers stayed at
+            // 0.57-0.60 a turn (today's AI 0.55-0.60), and frW 3 did worse - drefsante won 193 lost 39, touchdowns 466-168 (two runs of
+            // today's AI: 167-47, 425-201 and 177-55, 447-216): the Blitzers left the screen (its carrier's free runs from 7-10 squares
+            // 12-15% -> 20%). frW 1: 181-55, 416-200, the same as without.
+            function freeReceivers(me) {
+                const them = other(me), c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null, out = new Set();
+                if (!c || c.team !== them || !onPitch(c)) return out;
+                const ez = endX(them);
+                state.players.forEach(q => {
+                    if (q.team !== them || q.id === c.id || !onPitch(q) || q.isDown || q.isStunned || q.isDistracted || tzFor(q.x, q.y, them) > 0) return;
+                    if (cheb(q, c) > (c.ma || 6) + 3 && !(c.pa != null && Math.hypot(q.x - c.x, q.y - c.y) <= 10)) return;
+                    const lim = (q.ma || 6) + 2;
+                    if (Math.abs(q.x - ez) > lim) return;
+                    const seen = new Map([[q.x + ',' + q.y, 0]]), Q = [[q.x, q.y]];
+                    for (let i = 0; i < Q.length && !out.has(q.id); i++) {
+                        const [x, y] = Q[i], s = seen.get(x + ',' + y);
+                        if (s >= lim) continue;
+                        for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+                            const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+                            if ((!dx && !dy) || nx < 0 || nx >= CFG.cols || ny < 0 || ny >= CFG.rows || seen.has(k) || getPlayer(nx, ny)) continue;
+                            seen.set(k, s + 1);
+                            if (nx === ez) { out.add(q.id); break; }
+                            if (tzFor(nx, ny, them) === 0) Q.push([nx, ny]);
+                        }
+                    }
+                });
+                return out;
+            }
             function blitzPlan(me, act) {
                 if (state.blitzUsed) return null;
                 let best = null;
+                // (brain x: fr1) knocking down one of their free receivers is worth frW more (by the chance of knocking him down)
+                const frW = AIX.p(me, 'frW', 0), frees = frW > 0 ? freeReceivers(me) : null;
                 // (bz5) whom to Blitz, as strong FUMBBL coaches choose (ai-training/README.md, "Whom the coaches Blitz"): a player
                 // in our carrier's path, one tying up a player of ours (knocking him over frees ours to move without a dodge), or
                 // one escorting their carrier is worth more, by the chance of knocking him down
                 const z5 = AIX.on(me, 'bz5'), bc = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                 const ourB = z5 && bc && bc.team === me && onPitch(bc) ? bc : null, theirB = z5 && bc && bc.team !== me && onPitch(bc) && !bc.isDown ? bc : null;
                 const extra = (p, d) => {
-                    if (!z5) return 0;
-                    let v = 0;
+                    let v = frees && frees.has(d.id) ? frW : 0;
+                    if (!z5) return v;
                     if (ourB && d.id !== ourB.id) { const ah = toGo(ourB.x, me) - toGo(d.x, me); if (ah >= 1 && ah <= 4 && Math.abs(d.y - ourB.y) <= 2) v += AIX.p(me, 'bzPath', 1.5); }
                     if (state.players.some(q => q.team === me && q.id !== p.id && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, d) === 1)) v += AIX.p(me, 'bzEng', 1);
                     if (theirB && d.id !== theirB.id && cheb(d, theirB) <= 3) v += AIX.p(me, 'bzEsc', 1);

@@ -12,7 +12,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   --teams human --aip '{"brain":"x"}'`, seeds 900000 x100 + 901000 x200; ~1,000 games for small effects) against the game's AI or
   the frozen v5.17 (`--html ../baseline-v5.17.html`, made with `git show 9e05816:index.html`). Make x the default when it clearly
   beats the current AI v drefsante and isn't clearly worse in the all-races mirror guard (`tools/ai-match.js --newp '{"brain":"x"}'`).
-  Leave helpers the game's AI uses unchanged (fork them for x) so the default doesn't drift. Not doing for now: the special-action
+  Leave helpers the game's AI uses unchanged (fork them for x) so the default doesn't drift.
+  Brain x so far: v5.19 `fr1` (Blitz their free receivers, `frW`) left at 0 - free receivers didn't fall, frW 3 did worse.
+  Noise check (same AI, same 300 seeds 750000+, `nn/look/drefstudy.py --positions`): drefsante won 167 v 177, touchdowns 425-201 v
+  447-216 - differences of ~10 wins in 300 are luck. Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)

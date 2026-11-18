@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.19 (18 Nov 2026)
+- No change to play. Brain x's first experiment (`fr1`, tuning value `frW`), tried and left off: Blitzing drefsante's free
+  receivers - team-mates of its carrier out of our tackle zones who could walk into our end zone next turn, where 58% of its
+  touchdowns against our AI start. A Blitz on one counted for more (`frW` times the chance of knocking him down). Against
+  drefsante (BotBowl, Humans, the same 300 games) its free receivers stayed at 0.57-0.60 a turn (0.55-0.60 without), and with
+  `frW` 3 the AI did worse: drefsante won 193, lost 39, touchdowns 466-168, against 167-47 (425-201) and 177-55 (447-216) in two
+  runs without - the Blitzers left the screen, so its carrier had a free run more often. `frW` 1 played the same as without
+  (181-55, 416-200). Knocked down, a deep receiver stands up still within reach of our end zone.
+
 ## v5.18 (18 Nov 2026)
 - No change to play. An experimental computer coach, "brain x", for the work on beating drefsante (Bot Bowl V's winner) with
   Humans v Humans in BotBowl. It plays only when a test run asks for it (`'{"brain":"x"}'`: `nn/evaluate.py --aip`,
