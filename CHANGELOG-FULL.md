@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.17 (18 Nov 2026)
+- No change to play. Tried and left off (`def2`, setting `defN` 1 or 2): covering the opponent's receivers ready to score next
+  turn (standing, unmarked, within their move and two Rushes of our end zone, within a hand-off or pass of their carrier) -
+  drefsante, Bot Bowl V's winner, scores a third of its touchdowns from 11+ squares out through such receivers. First as "cover"
+  squares in the defensive formation (hardly ever filled: the movers were tied up), then as a first step of the defence: a free
+  player steps next to such a receiver with a sure move. Against drefsante (the same 100 games) its ready receivers fell from
+  0.86 to 0.54-0.57 a turn and its scores from 11+ squares from 12% to 10%, but the AI did worse: won 11-12, lost 65-67,
+  touchdowns 51-54 to 147-151, against 17-26-57 and 60-134 without - the players marking receivers weren't screening.
+
 ## v5.16 (18 Nov 2026)
 - No change to play. Tried and left off (`chainBar`, 0.45 or 0.6 to try it): three-player scoring chains, the owner's idea from
   playing agile teams against the AI (and drefsante's fourth and fifth plans) - the carrier hands off to a team-mate who moves

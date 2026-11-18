@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.17 (18 Nov 2026)
+- Behind the scenes: a defensive tactic (marking the opponent's receivers waiting deep) was tested against Bot Bowl's champion
+  bot and left off: it did worse.
+
 ## v5.16 (18 Nov 2026)
 - Behind the scenes: three-player scoring moves (a hand-off and a pass in one turn) for the computer were tested and left off
   for now.

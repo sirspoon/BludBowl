@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.16</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.17</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27878,6 +27878,18 @@ ol.ci-steps li::marker { content: none; }
                     const dz = toGo(c.x, c.team);   // squares their carrier still needs to score
                     // a few mark the carrier, a few screen the way to our end zone (closer in when they are near it), one stays deep
                     [[back, 0], [0, 1], [0, -1], [back, 1], [back, -1], [-back, 0]].forEach(([dx, dy]) => { const x = c.x + dx, y = c.y + dy; if (!getPlayer(x, y) || getPlayer(x, y).team === me) add(x, y, 'hunt'); });
+                    // (def2) their receivers ready to score next turn - standing, out of our tackle zones, within a run (their move + 2 Rushes)
+                    // of our end zone, within a hand-off (the carrier's move + 3) or a pass (10 squares) of the carrier - get a marker each, on
+                    // the side towards our end zone, before the screen. drefsante, Bot Bowl V's winner, had 0.76 such receivers at its turn
+                    // starts against our AI and scored a third of its touchdowns from 11+ squares out through them (ai-training/README.md).
+                    if (AIX.on(me, 'def2') && AIX.p(me, 'defN', 0) > 0) {
+                        const inReach = q => cheb(q, c) <= (c.ma || 6) + 3 || (c.pa != null && Math.hypot(q.x - c.x, q.y - c.y) <= 10);
+                        state.players.filter(q => q.team === c.team && q.id !== c.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted
+                            && toGo(q.x, c.team) <= (q.ma || 6) + 2 && tzFor(q.x, q.y, c.team) === 0 && inReach(q))
+                            .sort((a, b) => toGo(a.x, c.team) - toGo(b.x, c.team)).slice(0, AIX.p(me, 'defN', 0))
+                            .forEach(q => { const sq = [[back, 0], [back, 1], [back, -1], [0, 1], [0, -1]].map(([dx, dy]) => ({ x: q.x + dx, y: q.y + dy }))
+                                .find(t => inPitch(t.x, t.y) && !getPlayer(t.x, t.y)); if (sq) add(sq.x, sq.y, 'cover'); });
+                    }
                     // a column defence: two lines across the pitch between the carrier and our end zone, players three rows apart
                     // (two empty squares between them, so slipping through means a hard dodge), the second line staggered two
                     // squares further back. The lines lean towards the middle, squeezing the attack out towards the sideline.
@@ -27917,7 +27929,7 @@ ol.ci-steps li::marker { content: none; }
             }
             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
-            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, safety: 2, ballguard: 3, outlet: 2, strike: 2 };
+            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, safety: 2, ballguard: 3, outlet: 2, strike: 2, cover: 2 };
             // formation squares already given to someone this turn: a player sent towards a square they can't reach yet
             // (it's still empty when the next player is chosen) mustn't have everyone else sent after them
             let claims = { key: '', m: new Map() };
@@ -27965,11 +27977,11 @@ ol.ci-steps li::marker { content: none; }
                     taken.add(best.id); used.set(t.role, (used.get(t.role) || 0) + 1); claims.m.set(ck, best.id);
                     const tx = t.x, ty = t.y, role = t.role;
                     const pick = (ms, p) => {
-                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) - 0.5;
+                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' || role === 'cover' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) - 0.5;
                         ms.forEach(m => {
                             if (m.prob < (safeOnly ? 100 : okProb(p)) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
-                            if (m.isRush && role !== 'hunt' && role !== 'mark' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
-                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) + (100 - m.prob) / 10
+                            if (m.isRush && role !== 'hunt' && role !== 'mark' && role !== 'cover' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
+                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' || role === 'cover' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) + (100 - m.prob) / 10
                                 + edgeRisk(m.x, m.y, p.team, p.id) * (role === 'hunt' ? 1.5 : 3)   // keep off the sidelines
                                 + (['runner', 'outlet', 'deep', 'flank', 'strike'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
                             if (s < bs) { bs = s; bm = m; }
@@ -28836,6 +28848,28 @@ ol.ci-steps li::marker { content: none; }
                     // (bz2) and the player who will Blitz (after the screen is in place), when it isn't their carrier
                     if (AIX.on(me, 'bz2') && !cb0 && !state.blitzUsed) { const bz0 = blitzPlan(me, act); if (bz0) hold.add(bz0.pid); }
                     const free = act.filter(p => !hold.has(p.id));
+                    // (def2) first, mark their receivers ready to score next turn (standing, unmarked, within their move + 2 Rushes of our
+                    // end zone, within a hand-off or pass of the carrier): a free player of ours (no opponent next to it) steps next to one
+                    // with a sure move, on his side towards our end zone if it can. In the formation (cover squares) it hardly happened -
+                    // 0.9 a match, the movers mostly tied up. drefsante had 0.76-0.86 such receivers at its turn starts against our AI.
+                    // OFF by default (defN 0; 1 or 2 to try): v drefsante (same 100 games) its ready receivers 0.86 -> 0.54-0.57 and its scores
+                    // from 11+ 12% -> 10%, but our results worse: won 11-12 lost 65-67, touchdowns 51-54 v 134... -147-151 (off: 17-26-57, 60-134)
+                    if (AIX.on(me, 'def2') && AIX.p(me, 'defN', 0) > 0) {
+                        const c = carrier, inReach = q => cheb(q, c) <= (c.ma || 6) + 3 || (c.pa != null && Math.hypot(q.x - c.x, q.y - c.y) <= 10);
+                        const threats = state.players.filter(q => q.team === them && q.id !== c.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted
+                            && toGo(q.x, them) <= (q.ma || 6) + 2 && tzFor(q.x, q.y, them) === 0 && inReach(q))
+                            .sort((a, b) => toGo(a.x, them) - toGo(b.x, them)).slice(0, AIX.p(me, 'defN', 0));
+                        let bestC = null;
+                        threats.forEach(q => free.forEach(p => {
+                            if (p.isDown || tzFor(p.x, p.y, me) > 0 || !canReposition(p, me)) return;
+                            movesFor(p).forEach(m => {
+                                if (m.prob < 100 || m.isRush || cheb(m, q) !== 1) return;
+                                const s = (toGo(m.x, them) < toGo(q.x, them) ? 1 : 0) - toGo(q.x, them) * 0.1 - m.path.length * 0.05 - edgeRisk(m.x, m.y, me, p.id) * 0.5;
+                                if (!bestC || s > bestC.s) bestC = { p, m, s };
+                            });
+                        }));
+                        if (bestC) { const tx = bestC.m.x, ty = bestC.m.y; return { pid: bestC.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
+                    }
                     const pl = plugPlan(me, free, carrier);
                     if (pl) return pl;
                     const df = formationPlan(me, free, false, true, true) || formationPlan(me, free, false, true);

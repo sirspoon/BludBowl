@@ -1381,6 +1381,13 @@ them. 200 games: drefsante won 121, drew 48, lost 31, touchdowns 292-126.
   24, High Elves 3. Results: all races 288 at bar 0.45 won 92 drew 92 lost 104 (246-246), at 0.6 84-99-105 (233-274); agile
   teams (Wood, High, Dark Elves, Skaven) 192 at 0.45 65-50-77 (217-226), at 0.6 76-45-71 (216-211). No gain: a failed chain
   is a Turnover deep in our half. The flip side - covering against such chains when the opponent is agile - is untried.
+- **Defence v deep receivers (v5.17, `def2`, off).** Their receivers ready to score next turn (standing, unmarked, within move +
+  2 Rushes of our end zone, within a hand-off or pass of their carrier) get a marker: first as "cover" squares in the defensive
+  formation (0.9 assignments a match, 15 of 22 assigned players already tied up, 3 arrived), then as the defence's first step (a
+  free player, a sure move, next to the receiver, on its side towards our end zone if it can). v drefsante, the same 100 games
+  (seed 730000): off won 17 drew 26 lost 57, touchdowns 60-134, its ready receivers 0.86 a turn, scores from 11+ 12%; covering
+  one: 11-22-67, 51-151, 0.57, 10%; covering two: 12-23-65, 54-147, 0.54, 10%. It does what it's meant to and loses more: the
+  markers come off the screen and the carrier chase, and drefsante scores another way (its Catchers have Dodge, too).
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
