@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.23 (18 Nov 2026)
+- No change to the game's AI. Brain x gets its first turn plan, `tp1` (`turnPlan`; `tpN`, `tpRoute`, `tpNoBlock`, `tpSafe`, `tpW`): with
+  the ball and no score on this turn, it works out where the carrier will finish, sends a finisher (sure moves, before any dice) to a
+  square from which he could take a hand-off or pass next turn and run in, keeps one already there in place, and makes the opponents
+  who could get at him worth more to knock down. Why: drefsante starts 29% of its turns with the ball with a score on through a
+  team-mate, we 1%. Against drefsante (BotBowl, Humans) a score on from 11-15 squares out went from 1% of turns to 7%, touchdowns from
+  11+ out from 2-10 to 39 in 300 games and those with a hand-off from 13-14 to 53, but fewer came from close in. Over 1,000 games: won
+  173, drew 221, lost 606, touchdowns 665-1454, against 185-247-568 and 655-1393. Left on in brain x (`AIX.X`) as the base for more
+  planning.
+
 ## v5.22 (18 Nov 2026)
 - No change to play. Brain x's `ds1` (`dsN`) tried and left off: a deep safety on defence. A new study (`nn/look/dref_shadow.py`)
   asked drefsante's brain what it would do at each of our AI's 39,000 player choices; defending, it has 1.28 players 8+ squares

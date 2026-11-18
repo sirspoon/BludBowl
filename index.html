@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.22</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.23</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27007,7 +27007,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: {},
+            X: { tpN: 1, tpRoute: 0 },   // (v5.23: the turn plan, tp1 - see turnPlan)
             x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -27182,8 +27182,9 @@ ol.ci-steps li::marker { content: none; }
             }
 
             // ---- planning a turn ----
+            const tpHold = new Set(), tpHits = new Set();   // (brain x: tp1, see turnPlan) receivers staying where they are; opponents worth hitting
             function avail(team) {
-                return state.players.filter(p => p.team === team && onPitch(p) && !p.hasActed && !p.isStunned && !p.isDistracted && !tried.has(p.id) && !hasSk(p, 'Ball & Chain'));
+                return state.players.filter(p => p.team === team && onPitch(p) && !p.hasActed && !p.isStunned && !p.isDistracted && !tried.has(p.id) && !hasSk(p, 'Ball & Chain') && !(tpHold.has(p.id) && state.ball.carrierId !== p.id));
             }
             // the same player's moves get asked for many times while one decision is made: work them out once
             // (the store is emptied at the start of every decision, as positions change between them)
@@ -28135,6 +28136,88 @@ ol.ci-steps li::marker { content: none; }
                 });
                 return out;
             }
+            // ---- (brain x: tp1) a plan for the turn: a score lined up for NEXT turn ----
+            // Why: at the start of its turns with the ball drefsante has a score on through a team-mate in 29% of them, we in 1% (running
+            // it in: 9% each). With the carrier 9-16 squares out it has someone standing within a run of the end zone in 78% of turns,
+            // we in 18%, with as many players ahead of the ball (nn/look/dbg/openings2.py, open_funnel.py). A touchdown from far out is
+            // set up the turn before. So with the ball and no score on now: work out where the carrier will finish, send up to tpN
+            // finishers (sure moves, before any dice) to squares from which they could take a hand-off or pass from there next turn and
+            // run in, as far from opponents' reach as possible, keep those already in place where they are, and make the opponents who
+            // could get at them the ones worth knocking down this turn (tpW). tpRoute 1: those who can't get there yet go as deep as they can.
+            // tpNoBlock: not the Blitzers; tpSafe: new finishers only with at most that many opponents free to reach the carrier.
+            // v drefsante (BotBowl, Humans, 300 games, seeds 750000+; today's AI 47-86-167 and 55-68-177, touchdowns 201-425 and 216-447): tpN 2
+            // with Blitzers 31-63-206, 167-552 (score on from 11-15 out 16% of turns, was 1%, but two players stranded upfield); tpN 1
+            // 42-56-202, 191-498; tpN 1 tpRoute 0 55-68-177, 212-450 (score on from 11-15 out 7%, touchdowns from 11+ out 39 v 2-10, with a
+            // hand-off 53 v 13-14, but fewer from close in: 73 v 100-105); tpSafe 1 51-58-191, 194-450. Over 1,000 games (seeds 910000+) tpN 1
+            // tpRoute 0 won 173 drew 221 lost 606, touchdowns 665-1454, v today's AI 185-247-568, 655-1393: we score as much, they score more.
+            // Left ON in brain x (AIX.X) as the base for further planning; the game's AI doesn't use it.
+            function tpRun(x, y, lim, me, selfId) {   // squares to their end zone from (x, y) with no dodge (Infinity: no way)
+                if (tzFor(x, y, me) > 0) return Infinity;
+                const ez = endX(me), seen = new Map([[x + ',' + y, 0]]), Q = [[x, y]];
+                for (let i = 0; i < Q.length; i++) {
+                    const [a, b] = Q[i], n = seen.get(a + ',' + b);
+                    if (n >= lim) continue;
+                    for (const [dx, dy] of DIRS8) {
+                        const nx = a + dx, ny = b + dy, k = nx + ',' + ny;
+                        if (!inPitch(nx, ny) || seen.has(k)) continue;
+                        const o = getPlayer(nx, ny); if (o && o.id !== selfId) continue;
+                        seen.set(k, n + 1);
+                        if (nx === ez) return n + 1;
+                        if (tzFor(nx, ny, me) === 0) Q.push([nx, ny]);
+                    }
+                }
+                return Infinity;
+            }
+            function turnPlan(me, c, act) {
+                const want = AIX.p(me, 'tpN', 0), cm = act.includes(c) ? carrierPick(movesFor(c), c) : null;
+                const cx = cm ? cm.x : c.x, cy = cm ? cm.y : c.y, cma = c.ma || 6, passer = isThrower(c);
+                const inReach = (x, y) => Math.max(Math.abs(x - cx), Math.abs(y - cy)) <= cma + 1 || (passer && Math.hypot(x - cx, y - cy) <= 10);
+                const canTake = q => !hasSk(q, 'No Hands') && !hasSk(q, 'No Ball') && !isBigGuy(q);
+                const ready = (q, x, y) => toGo(x, me) >= 1 && toGo(x, me) <= (q.ma || 6) + 2 && tzFor(x, y, me) === 0 && inReach(x, y);
+                const placed = state.players.filter(q => q.team === me && q.id !== c.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && canTake(q) && ready(q, q.x, q.y))
+                    .sort((a, b) => toGo(a.x, me) - toGo(b.x, me)).slice(0, want);
+                placed.forEach(q => tpHold.add(q.id));
+                const spots = placed.map(q => ({ x: q.x, y: q.y })), moves = [];
+                if (placed.length < want && carrierThreat(me, c) <= AIX.p(me, 'tpSafe', 99)) {
+                    const cands = [];
+                    act.forEach(p => {
+                        if (p.id === c.id || tpHold.has(p.id) || !canTake(p) || (AIX.p(me, 'tpNoBlock', 1) && hasSk(p, 'Block'))) return;
+                        const ma = p.ma || 6, was = toGo(p.x, me);
+                        movesFor(p).forEach(m => {
+                            if (m.prob < 100 || m.isRush || tzFor(m.x, m.y, me) > 0 || toGo(m.x, me) < 1) return;
+                            const go = toGo(m.x, me), isReady = ready(p, m.x, m.y);
+                            if (!isReady && (!AIX.p(me, 'tpRoute', 1) || go > was - 2)) return;   // (not ready yet: only a real step towards it)
+                            const s = (isReady ? 4 - Math.max(0, go - ma) * 0.6 : -Math.max(0, go - ma - 2) * 0.4) + (hasSk(p, 'Catch') ? 1 : 0) + (ma - 6) * 0.3
+                                - (hasSk(p, 'Block') ? 0.5 : 0) - (cheb(p, c) === 1 ? 0.5 : 0) - edgeRisk(m.x, m.y, me, p.id);
+                            cands.push({ p, m, isReady, s });
+                        });
+                    });
+                    cands.sort((a, b) => b.s - a.s);
+                    // the dearer questions for the best few: who could get at him there, and has he a way in from there
+                    const top = cands.slice(0, AIX.p(me, 'tpLook', 24));
+                    top.forEach(o => {
+                        o.s -= Math.min(4, realDanger(me, o.m.x, o.m.y, o.p.id)) * AIX.p(me, 'tpDanger', 0.7);
+                        if (o.isReady && tpRun(o.m.x, o.m.y, (o.p.ma || 6) + 2, me, o.p.id) === Infinity) o.s -= 1.5;
+                    });
+                    top.sort((a, b) => b.s - a.s);
+                    const used = new Set();
+                    for (const o of top) {
+                        if (placed.length + moves.length >= want) break;
+                        if (used.has(o.p.id) || spots.some(q => cheb(q, o.m) < 3)) continue;
+                        used.add(o.p.id); moves.push(o); spots.push({ x: o.m.x, y: o.m.y });
+                    }
+                }
+                // whoever could get next to those squares next turn is the one to knock over now
+                if (spots.length) for (const { q, mm } of oppReach(me)) {
+                    if (q.isDown) continue;
+                    if (spots.some(t => DIRS8.some(([dx, dy]) => (mm.get((t.x + dx) + ',' + (t.y + dy)) || 0) >= 0.5))) tpHits.add(q.id);
+                }
+                const first = moves[0];
+                if (!first) return null;
+                AIX.count(me, 'tp1');
+                const tx = first.m.x, ty = first.m.y;
+                return { pid: first.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
+            }
             function blitzPlan(me, act) {
                 if (state.blitzUsed) return null;
                 let best = null;
@@ -28149,6 +28232,7 @@ ol.ci-steps li::marker { content: none; }
                 const extra = (p, d) => {
                     let v = frees && frees.has(d.id) ? frW : 0;
                     if (tgW > 0 && deepThreat(d)) v += tgW;
+                    if (tpHits.has(d.id)) v += AIX.p(me, 'tpW', 1.5);   // (brain x: tp1)
                     if (!z5) return v;
                     if (ourB && d.id !== ourB.id) { const ah = toGo(ourB.x, me) - toGo(d.x, me); if (ah >= 1 && ah <= 4 && Math.abs(d.y - ourB.y) <= 2) v += AIX.p(me, 'bzPath', 1.5); }
                     if (state.players.some(q => q.team === me && q.id !== p.id && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, d) === 1)) v += AIX.p(me, 'bzEng', 1);
@@ -28699,6 +28783,7 @@ ol.ci-steps li::marker { content: none; }
             function choose0() {
                 moveMemo = new Map();
                 state.aiStalling = false;
+                tpHold.clear(); tpHits.clear();
                 const me = state.activeTeam, them = other(me);
                 let act = avail(me);
                 if (!act.length) return fanaticPlan(me);
@@ -28802,6 +28887,13 @@ ol.ci-steps li::marker { content: none; }
                     const bombers = act.filter(p => hasSk(p, 'Bombardier') && state.ball.carrierId !== p.id);
                     if (bombers.length && bombers.length < act.length) { act = act.filter(p => !bombers.includes(p)); standing = act.filter(p => !p.isDown); }
                 }
+                // (brain x: tp1) no score on this turn: line one up for the next (see turnPlan)
+                let tpMove = null;
+                if (AIX.x(me) && AIX.p(me, 'tpN', 0) > 0 && carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && !state.charge && !lastTurn
+                    && toGo(carrier.x, me) >= AIX.p(me, 'tpFrom', 7)) {
+                    tpMove = turnPlan(me, carrier, act);
+                    act = act.filter(p => !tpHold.has(p.id)); standing = act.filter(p => !p.isDown);
+                }
                 // our carrier, still to move this turn: blocks that open a lane for it are worth more
                 const ourC = carrier && carrier.team === me && act.includes(carrier) && onPitch(carrier) && !state.charge ? carrier : null;
                 laneCache = null;
@@ -28817,7 +28909,8 @@ ol.ci-steps li::marker { content: none; }
                     // level - won 105, drew 87, lost 96, touchdowns 209-213)
                     const agileLim = AIX.on(me, 'line1') && tzFor(p.x, p.y, me) > 0 ? 0.12 : AIX.p(me, 'blkAgile', 0.12);
                     const limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? agileLim : AIX.p(me, 'blkTurn', 0.17)) + (gain >= 3 || freesC ? 0.08 : 0);
-                    const v = e.ev + laneValue(e, gain + freesC) + (AIX.p(me, 'tgW', 0) > 0 && deepThreat(d) ? AIX.p(me, 'tgW', 0) * e.pDown : 0);   // (brain x: tg1)
+                    const v = e.ev + laneValue(e, gain + freesC) + (AIX.p(me, 'tgW', 0) > 0 && deepThreat(d) ? AIX.p(me, 'tgW', 0) * e.pDown : 0)   // (brain x: tg1)
+                        + (tpHits.has(d.id) ? AIX.p(me, 'tpW', 1.5) * e.pDown : 0);   // (brain x: tp1)
                     return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : AIX.p(me, 'blkMin', 1.5)), v, gain };
                 };
                 // block candidates
@@ -28872,6 +28965,7 @@ ol.ci-steps li::marker { content: none; }
                     });
                     if (up) return { pid: up.p.id, kind: 'move', pick: () => null };
                 }
+                if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
                 // (deep1) before the blocks: holding the ball well short of their end zone, with fewer than two team-mates ready to take
                 // a scoring hand-off or pass next turn, a quick free player (no opponent next to it) steps, with no dice, to a square
                 // where it is ready: within its move and two Rushes of the end zone, out of every tackle zone, within a hand-off (the

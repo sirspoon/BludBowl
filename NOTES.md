@@ -53,6 +53,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   receivers free, its covers them). drefsante is rule-based too, no search, but its rules are built round the ball and its
   receivers. Proposed for brain x: one all-routes "rolls to score next turn" measure, used to choose a two-turn plan and to name
   the defenders worth hitting (those covering or able to reach the carrier/receiver).
+  v5.23 `tp1` (`turnPlan`), the first such plan, is ON in brain x (`AIX.X`: `tpN` 1, `tpRoute` 0): one finisher placed for a score next
+  turn, before any dice. With the carrier 9-16 out drefsante had someone within a run of the end zone in 78% of turns, we 18%
+  (`nn/look/dbg/open_funnel.py`). Score on from 11-15 out 1% -> 7%; touchdowns from 11+ out 2-10 -> 39 (300 games), with a hand-off 13-14
+  -> 53, but from 0-6 out 100-105 -> 73: the total didn't rise. 1,000 games (`k_tp3.txt`): 173-221-606, 665-1454 v 185-247-568, 655-1393.
+  Two finishers, or ones sent forward early, did clearly worse (31-63-206, 42-56-202: stranded upfield when the ball changes hands;
+  variants via `nn/look/dbg/tp_runs.sh`). So scoring sooner isn't scoring more, and the cost is on defence.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
