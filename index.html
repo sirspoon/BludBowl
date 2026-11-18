@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.12</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.13</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27742,6 +27742,32 @@ ol.ci-steps li::marker { content: none; }
                 });
                 return out.sort((a, b) => b.s - a.s).slice(0, k);
             }
+            // (deep1) holding the ball well short of their end zone: squares for one or two quick players to wait in, deep and out of
+            // every tackle zone, within a run of the end zone (3-7 squares) and within reach of the carrier next turn (a hand-off:
+            // his move, two Rushes and one more; or a pass of up to 10 squares), so a hand-off or pass to them can score
+            // (throwToScore). drefsante, Bot Bowl V's winner, scores a third of its touchdowns that way from 11+ squares out; with
+            // the ball that far out our AI had such a receiver ready in 2% of turns, drefsante in 39% (ai-training/README.md)
+            function strikeSquares(me, c, k) {
+                if (k <= 0) return [];
+                const opps = state.players.filter(q => q.team !== me && onPitch(q) && !q.isDown && !q.isStunned);
+                const reachC = (c.ma || 6) + 3, maxGo = AIX.p(me, 'deepGo', 7);
+                const cands = [];
+                for (let x = 0; x < CFG.cols; x++) {
+                    const g = toGo(x, me); if (g < 3 || g > maxGo) continue;
+                    for (let y = 1; y < CFG.rows - 1; y++) {
+                        if (getPlayer(x, y) || tzFor(x, y, me) > 0) continue;
+                        const dc = Math.max(Math.abs(x - c.x), Math.abs(y - c.y)), de = Math.hypot(x - c.x, y - c.y);
+                        if (dc > reachC && de > 10) continue;   // out of reach of a hand-off and of a long pass
+                        const near = opps.length ? Math.min(...opps.map(q => Math.max(Math.abs(q.x - x), Math.abs(q.y - y)))) : 9;
+                        cands.push({ x, y, v: Math.min(near, 4) * 0.6 - Math.min(4, reachers(x, y, me)) * 0.4 + (dc <= reachC ? 1 : 0) + (de <= 6 ? 0.5 : 0)
+                            - (y <= 1 || y >= CFG.rows - 2 ? 0.5 : 0) });
+                    }
+                }
+                cands.sort((a, b) => b.v - a.v);
+                const out = [];
+                for (const o of cands) { if (out.every(q => Math.max(Math.abs(q.x - o.x), Math.abs(q.y - o.y)) >= 3)) out.push(o); if (out.length >= k) break; }
+                return out;
+            }
             function formationTargets(me, cageOnly) {
                 const T = [], c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                 const add = (x, y, role) => {
@@ -27759,9 +27785,13 @@ ol.ci-steps li::marker { content: none; }
                         const k = Math.max(0, Math.min(c.ma, toGo(c.x, me) - Math.floor(CFG.cols / 2)));
                         a = { x: c.x + fwd * k, y: Math.max(2, Math.min(CFG.rows - 3, c.y)) };
                     }
+                    // (deep1) quick players deep, ready for a scoring hand-off or pass next turn: straight after the escort, before the rest
+                    const strike = () => { if (AIX.on(me, 'deep1') && !cageOnly && toGo(c.x, me) >= AIX.p(me, 'deepFrom', 9) && state.turn[me] < TURNS)
+                        strikeSquares(me, c, AIX.p(me, 'deepN', 0)).forEach(o => add(o.x, o.y, 'strike')); };
                     if (mobileTeam(me)) {
                         // a loose escort behind the carrier and runners in the open spaces ahead, ready for a pass or hand-off
                         [[-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
+                        strike();
                         if (cageOnly) return T;
                         if (AIX.on(me, 'flank')) flankSquares(me, AIX.p(me, 'flankN', 2)).forEach(o => add(o.x, o.y, 'flank'));
                         outletSquares(me, 1, toGo(a.x, me) - 2).filter(o => cheb(o, a) <= 9).forEach(o => add(o.x, o.y, 'runner'));
@@ -27770,6 +27800,7 @@ ol.ci-steps li::marker { content: none; }
                     }
                     if (a !== c) [[1, 1], [1, -1]].forEach(([dx, dy]) => add(c.x + dx * fwd, c.y + dy, 'cage'));   // two stay with the carrier as an escort
                     [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([dx, dy]) => add(a.x + dx * fwd, a.y + dy, 'cage'));
+                    strike();
                     if (cageOnly) return T;
                     if (AIX.on(me, 'flank')) flankSquares(me, AIX.p(me, 'flankN', 2)).forEach(o => add(o.x, o.y, 'flank'));
                     [0, -3, 3].forEach(dy => add(a.x + 3 * fwd, a.y + dy, 'front'));
@@ -27822,7 +27853,7 @@ ol.ci-steps li::marker { content: none; }
             }
             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
-            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, safety: 2, ballguard: 3, outlet: 2 };
+            const CAPS = { flank: 2, cage: 4, front: 3, runner: 3, hunt: 3, screen: 5, mark: 2, screen2: 3, deep: 1, safety: 2, ballguard: 3, outlet: 2, strike: 2 };
             // formation squares already given to someone this turn: a player sent towards a square they can't reach yet
             // (it's still empty when the next player is chosen) mustn't have everyone else sent after them
             let claims = { key: '', m: new Map() };
@@ -27862,20 +27893,21 @@ ol.ci-steps li::marker { content: none; }
                         let got = cheb(p, t);
                         if (got > 0 && got <= 14) movesFor(p).forEach(m => { if (m.prob >= okProb(p)) got = Math.min(got, Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y))); });
                         const d = got * 3 + cheb(p, t) * 0.2 - (t.role === 'runner' ? (p.ma - 6) * 0.7 : 0)   // send the quick players into space
-                            - (t.role === 'flank' ? (p.ma - 6) * 1 + (hasSk(p, 'Catch') ? 1 : 0) - (isBigGuy(p) ? 6 : 0) : 0);   // quick ones down the wings
+                            - (t.role === 'flank' ? (p.ma - 6) * 1 + (hasSk(p, 'Catch') ? 1 : 0) - (isBigGuy(p) ? 6 : 0) : 0)   // quick ones down the wings
+                            - (t.role === 'strike' ? (p.ma - 6) * 1.5 + (hasSk(p, 'Catch') ? 1.5 : 0) - (isBigGuy(p) || hasSk(p, 'No Hands') || hasSk(p, 'No Ball') ? 12 : 0) : 0);   // (deep1) the quickest catchers
                         if (d < bd) { bd = d; best = p; } });
                     if (!best) break;
                     if (window.AI_DEBUG) window.AI_DEBUG.push(`${t.role}@${t.x},${t.y} <- ${best.type}@${best.x},${best.y} (${bd.toFixed(1)})`);
                     taken.add(best.id); used.set(t.role, (used.get(t.role) || 0) + 1); claims.m.set(ck, best.id);
                     const tx = t.x, ty = t.y, role = t.role;
                     const pick = (ms, p) => {
-                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'flank' ? 1.5 : 0.5)) - 0.5;
+                        let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) - 0.5;
                         ms.forEach(m => {
                             if (m.prob < (safeOnly ? 100 : okProb(p)) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
                             if (m.isRush && role !== 'hunt' && role !== 'mark' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
-                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' ? 1.5 : 0.5)) + (100 - m.prob) / 10
+                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) + (100 - m.prob) / 10
                                 + edgeRisk(m.x, m.y, p.team, p.id) * (role === 'hunt' ? 1.5 : 3)   // keep off the sidelines
-                                + (['runner', 'outlet', 'deep', 'flank'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
+                                + (['runner', 'outlet', 'deep', 'flank', 'strike'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
                             if (s < bs) { bs = s; bm = m; }
                         });
                         return bm;
@@ -28682,6 +28714,38 @@ ol.ci-steps li::marker { content: none; }
                         });
                     });
                     if (up) return { pid: up.p.id, kind: 'move', pick: () => null };
+                }
+                // (deep1) before the blocks: holding the ball well short of their end zone, with fewer than two team-mates ready to take
+                // a scoring hand-off or pass next turn, a quick free player (no opponent next to it) steps, with no dice, to a square
+                // where it is ready: within its move and two Rushes of the end zone, out of every tackle zone, within a hand-off (the
+                // carrier's move + 3) or a 10-square pass of the carrier. In the formation step (after the blocks) the quick players
+                // were already used or tied up - 0.6 such moves a match. drefsante does this: 0.76 ready receivers a turn, ours 0.02.
+                // OFF by default (deepN 0; '{"deepN":2}' to try it): it got receivers ready (11+ out: 2% -> 21-30% of turns) but they
+                // rarely scored; v drefsante 300 games won 65 drew 65 lost 170 v 57-57-186 without; v the AI without it 288 matches
+                // won 96 drew 81 lost 111 (our defence marks receivers left deep). ai-training/README.md, "How drefsante beats our AI".
+                if (AIX.on(me, 'deep1') && carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && !state.charge && !lastTurn
+                    && toGo(carrier.x, me) >= AIX.p(me, 'deepFrom', 9)) {
+                    // in reach: a hand-off after a sure move (the carrier's move + 1), or a short pass (6 squares) if the carrier can really
+                    // throw - from a Blitzer or a Lineman the passes it lined up were 4-40% shots (look/dbg/deep1_throw.js)
+                    const passer = (carrier.pa != null && carrier.pa <= AIX.p(me, 'deepPa', 3)) || hasSk(carrier, 'Pass');
+                    const inReach = (x, y) => Math.max(Math.abs(x - carrier.x), Math.abs(y - carrier.y)) <= (carrier.ma || 6) + 1 || (passer && Math.hypot(x - carrier.x, y - carrier.y) <= 6);
+                    const readyAt = (q, x, y) => toGo(x, me) <= q.ma + 2 && tzFor(x, y, me) === 0 && inReach(x, y);
+                    const want = AIX.p(me, 'deepN', 0);
+                    const readyNow = state.players.filter(q => q.team === me && q.id !== carrier.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && readyAt(q, q.x, q.y));
+                    if (readyNow.length < want) {
+                        let best = null;
+                        act.forEach(p => {
+                            if (p.id === carrier.id || p.isDown || readyNow.includes(p) || tzFor(p.x, p.y, me) > 0 || p.ma < AIX.p(me, 'deepMa', 7)
+                                || isBigGuy(p) || hasSk(p, 'No Hands') || hasSk(p, 'No Ball')) return;
+                            movesFor(p).forEach(m => {
+                                if (m.prob < 100 || m.isRush || !readyAt(p, m.x, m.y) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
+                                if (readyNow.some(q => cheb(q, m) < 3)) return;   // not on top of one already there
+                                const s = -Math.min(4, reachers(m.x, m.y, me)) * 0.6 - toGo(m.x, me) * 0.1 - edgeRisk(m.x, m.y, me, p.id) * 1.5 + (hasSk(p, 'Catch') ? 0.5 : 0) + (p.ma - 7) * 0.3;
+                                if (!best || s > best.s) best = { p, m, s };
+                            });
+                        });
+                        if (best) { const tx = best.m.x, ty = best.m.y; return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
+                    }
                 }
                 // 3. blocks with almost no risk come first
                 const safe = blocks.find(b => b.e.pTurn < 0.05);
@@ -30396,6 +30460,14 @@ ol.ci-steps li::marker { content: none; }
             return {
                 debugAdapt: t => adaptOffence(t, (GEO.sev ? SETUPS7 : SETUPS).offence),
                 // (pus1) what the pick-up-and-score check sees: each team-mate's run-in odds, each picker's odds, the best chain
+                // (deep1) the best hand-off / pass to a team-mate who then runs in, whatever its odds, with what it's made of
+                debugThrow: () => { const me = state.activeTeam, c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                    if (!c || c.team !== me || !onPitch(c)) return null;
+                    const P = window.AIP = window.AIP || [], p0 = P[me]; P[me] = Object.assign({}, p0 || {}, { scoreBar: 0 }); moveMemo = new Map();
+                    let b; try { b = throwToScore(c, me, state.turn[me] >= TURNS); } finally { P[me] = p0; moveMemo = new Map(); }
+                    if (!b) return { none: true, acted: !!c.hasActed };
+                    const sp = pPlan(c, b.s, true) / 100;
+                    return { v: b.v, kind: b.kind, runIn: runInProb(b.r), reach: sp, cat: b.kind === 'handoff' ? catchProb(b.r) : passOdds(c, b.s.x, b.s.y, b.r), r: b.r.type + '@' + b.r.x + ',' + b.r.y, c: c.type + '@' + c.x + ',' + c.y }; },
                 debugPus: () => { const me = state.activeTeam, act = avail(me); moveMemo = new Map();
                     const nm = q => q.type + '@' + q.x + ',' + q.y;
                     const rec = state.players.filter(r => r.team === me && onPitch(r)).map(r => nm(r) + ' runIn ' + runInProb(r).toFixed(2) + (r.hasActed ? ' acted' : '') + (r.isDown ? ' down' : ''));

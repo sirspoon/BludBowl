@@ -1342,6 +1342,14 @@ them. 200 games: drefsante won 121, drew 48, lost 31, touchdowns 292-126.
 - Next: give our AI deep receivers (when holding the ball far out, move one or two fast players unmarked into striking range
   at the end of the turn), then test v base and v drefsante. Earlier passing work (`rcv1`, receivers first) was about open
   team-mates for safe passes, not scoring threats: different.
+- **Tried (v5.13, `deep1`, left off):** before its blocks, a quick free player (move 7+, no opponent next to it) steps with no
+  dice to a square where it's ready (within move + 2 Rushes of the end zone, out of every tackle zone, within the carrier's
+  move + 1 for a hand-off, or 6 squares for a pass if the carrier can throw); "strike" squares in the formation too. (Only in
+  the formation step it hardly ever happened: 0.6 a match, the quick players already used or tied up.) Ready receivers with the
+  ball 11+ out at our turn start 2% -> 21-30%, at the end of our turn 7% -> 33-50%; but scores from 11+ only 0-1.2% -> 1.5-1.7%.
+  `AI.debugThrow()` in those positions: mostly passes from a Blitzer or Lineman (4-40% shots); hand-offs (46-61%) were taken.
+  v drefsante 300 games: won 65, drew 65, lost 170 v 57-57-186 without; v the AI without it 288: won 96, drew 81, lost 111
+  (and 96 Human matches 31-20-45): our defence marks receivers left deep and the quick players don't block. Off (`deepN` 0).
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,

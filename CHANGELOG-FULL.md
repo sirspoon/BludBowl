@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.13 (18 Nov 2026)
+- Tried and left off (`deep1`, switched on with the tuning value `deepN` 2): deep receivers. A study of Bot Bowl V's winner,
+  drefsante, playing the AI found it scores a third of its touchdowns from 11+ squares out, by keeping one or two quick players
+  deep and unmarked and then handing off or passing to one who runs in; the AI almost never had such a player ready (2% of turns
+  with the ball that far out, drefsante 39%). With `deep1` the AI sends a quick free player deep before its blocks (and adds
+  "strike" squares to its formation): receivers ready in 21-30% of those turns, but they rarely scored (passes from a carrier
+  who isn't a thrower are long shots). Against drefsante, 300 games: won 65, drew 65, lost 170 v 57-57-186 without; against
+  the AI without it, 288 matches: won 96, drew 81, lost 111 (its defence marks receivers left deep). Not clearly better: off.
+- No change to play. For testing: `AI.debugThrow()` shows the best hand-off / pass to a team-mate who runs in, whatever its odds.
+
 ## v5.12 (17 Nov 2026)
 - **Improved (AI):** pick up and score (`pus1`) on the last turn of a half now goes for chances down to 2% (was 8%), as strong
   coaches do: in their last-turn pick-up-and-pass scores the receiver usually had to dodge or Rush in after the catch, a 2-20%

@@ -12,6 +12,8 @@ const { openGame } = require('./headless-match');
   const { window: w } = await openGame({ simtest: false });   // (the normal clock: test mode's runs flat out even when idle)
   // a Human v Human match, with nobody playing it: only there to give the AI its teams and a game to put positions into
   w.eval(`AI.set(0, false); AI.set(1, false); window.launchMatch('human', 'human', { replaceOk: true });`);
+  // BRIDGE_AIP='{"deepN":0}': tuning values for the AI on both sides (window.AIP), e.g. to test a feature off (nn/evaluate.py --aip)
+  if (process.env.BRIDGE_AIP) { const aip = JSON.parse(process.env.BRIDGE_AIP); w.AIP = [aip, aip]; }
   await new Promise(r => setTimeout(r, 1500));
   const B = w.eval('AI.bridge');
   const out = o => process.stdout.write(JSON.stringify(o) + '\n');

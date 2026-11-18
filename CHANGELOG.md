@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.13 (18 Nov 2026)
+- Behind the scenes: a new computer tactic (sending fast players deep for a scoring pass) was tested and left switched off for now.
+
 ## v5.12 (17 Nov 2026)
 - On the last turn of a half, the computer now takes even a long shot at picking up a loose ball and passing or handing it to a
   team-mate who might score, instead of just holding on to it.

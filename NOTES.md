@@ -9,6 +9,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - Nothing running.
 
 ## Recently done (newest first)
+- v5.13 (BludBowl local): deep receivers (`deep1`, from the drefsante study) tried and left off (`deepN` 0; `'{"deepN":2}'` turns it
+  on). A quick free player goes deep before the blocks, to a square from which it could take a hand-off / short pass and run in
+  next turn; plus "strike" squares in the formation. Ready receivers with the ball 11+ out: 2% -> 21-30% of turns, but scores
+  from there only 0 -> 1.5% (from a carrier who isn't a thrower the passes were 4-40% shots; hand-offs need him within his move
+  + 1). v drefsante (BotBowl, BB2025) 300 games: won 65, drew 65, lost 170 v 57-57-186 without (a little better, within luck);
+  v the AI without it (ai-match, 12 races) 288: won 96, drew 81, lost 111 (leaning worse; our defence marks receivers left
+  deep). `AI.debugThrow()`; `nn/look/deep1_measure.js` (ready receivers, far-out scores, AI v AI); `nn/evaluate.py --aip` /
+  `tools/bridge-server.js` `BRIDGE_AIP` set tuning values for our AI in BotBowl. Ideas if it's taken up again: keep the Blitzer
+  back, one receiver only, send it only when the carrier is safe, or bring the ball to the Thrower first.
 - (18 Nov, no version) **How drefsante beats our AI** (200 games, BB2025, `nn/look/drefstudy.py` / `_report.py`): the gap is
   scoring from 11+ squares out (it scores in 15% of such turns, we 0.3%; a third of its touchdowns). It sends fast players deep
   and unmarked ahead of the ball ("ready receivers": 0.76 a turn v our 0.02), then hands off or throws to one who runs in; our
@@ -104,9 +113,6 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
-- **AI: deep receivers (from the drefsante study, 18 Nov).** When holding the ball far from the end zone, end the turn with
-  one or two fast players unmarked within striking range (move + 2 Rushes of the end zone, in hand-off / pass reach), so the
-  existing `throwToScore` can fire next turn. Test v base AI and v drefsante (`nn/evaluate.py --opponent drefsante --rules season3`).
 - **For later (the owner, 17 Nov): drefsante's Bot Bowl 2023 replays.** All 40 of its Bot Bowl V matches as BotBowl replays
   (`.rep`, 13-28 MB each, ~780 MB) in the owner's Google Drive folder "Dres-script-ai-replays": v Overparameterized40kBot,
   motbot2, treeman and random, 10 each, 5 at home (`drefsante_VS_x_0/2/4/6/8`) and 5 away (`x_VS_drefsante_1/3/5/7/9`). Idea: replay them and ask our AI (`AI.bridge`, as with the FUMBBL decisions) what it would do at
