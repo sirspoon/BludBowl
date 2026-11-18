@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.15 (18 Nov 2026)
+- No change to play. Tried and left off, both from studying drefsante (Bot Bowl V's winner):
+  - `ho2` (setting `ho2Bar`, 0.4 to try it): drefsante's blog says it weighs five scoring plans before each move - a run, a
+    hand-off then a run, a pass then a run, a hand-off then a pass then a run, a pass then a hand-off then a run. The AI had
+    the first three; this adds the fourth (the carrier hands off to a thrower, who passes to a team-mate who runs in). It
+    lined up only 0.08 times a match.
+  - `rcv2` (setting `rcvPick`, 12 to try it): drefsante's Catchers score (81 of its 136 touchdowns in 100 games against the
+    AI) while its Thrower and Linemen carry; the AI's Catchers picked up and carried the ball (219 of its turn starts with the
+    ball) and scored 26. With a handicap on pick-ups by players with Catch, Catcher pick-ups halved, but against drefsante over
+    300 games it won 52, drew 64, lost 184 v v5.14's 52-79-169. Also stopping hand-offs to Catchers who can't score next turn
+    (`rcvSwitch`) cut the AI's scoring badly.
+
 ## v5.14 (18 Nov 2026)
 - **Improved (AI):** deep receivers (`deep1`), in a quieter form, now on. With the ball 9+ squares from the end zone and no
   opponent free to get at the carrier, the AI first sends one quick free player (not a Blitzer: players with Block stay for

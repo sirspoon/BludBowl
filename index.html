@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.14</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.15</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27541,6 +27541,9 @@ ol.ci-steps li::marker { content: none; }
                 const spots = [{ x: c.x, y: c.y }, ...movesFor(c).filter(m => m.prob >= 100)];
                 let best = null;
                 receivers.forEach(r => {
+                    // (rcv2) a receiver (Catch, not Sure Hands) gets the ball only if it could run it in next turn: otherwise it becomes
+                    // the carrier and stops being the one to throw or hand off to. OFF (rcvSwitch 0): v drefsante it cut our scoring (100 games: won 10, lost 68 v 23-53 without) - a hand-off to a Catcher in space is how the ball moves up
+                    if (AIX.p(me, 'rcvSwitch', 0) && hasSk(r, 'Catch') && !hasSk(r, 'Sure Hands') && toGo(r.x, me) > (r.ma || 6) + 2) return;
                     const pt = AIX.on(me, 'pass') && passingTeam(me);
                     const rv = bestSpotFor(r) + ((pt || AIX.p(me, 'nextAll', 0)) && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
                     if (rv < stay + (pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
@@ -27558,6 +27561,42 @@ ol.ci-steps li::marker { content: none; }
                     });
                 });
                 return best;
+            }
+            // (ho2) drefsante, Bot Bowl V's winner, works out before each move the chance of scoring by a run, a hand-off then a run, a
+            // pass then a run, a hand-off then a pass then a run, and a pass then a hand-off then a run, and plays the best (its blog).
+            // throwToScore covers the first three; this is the fourth: the carrier (with sure moves) hands off to a team-mate who can
+            // really throw (PA 3+ or better), who moves, passes to one who runs in - all this turn. Only the hand-off is planned here:
+            // with the ball, the thrower's pass is then throwToScore's. The chain's value: the carrier's way there x the catch x the
+            // thrower's way to its throwing square x the pass x the run in. OFF by default (ho2Bar 9; 0.4, the pass bar, turns it on): it
+            // fired 0.08 times a match (Humans) - the thrower, a receiver in its range and the run in rarely line up.
+            function throwToScore2(c, me, lastTurn) {
+                if (state.handoffUsed || state.passUsed || hasSk(c, 'My Ball')) return null;
+                const mates = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !r.hasActed
+                    && !hasSk(r, 'No Ball') && !hasSk(r, 'No Hands'));
+                const throwers = mates.filter(t => t.pa != null && t.pa <= AIX.p(me, 'ho2Pa', 3));
+                if (!throwers.length) return null;
+                const runIn = new Map(mates.map(r => [r.id, runInProb(r)]));
+                if (!mates.some(r => runIn.get(r.id) > 0 && !throwers.every(t => t.id === r.id))) return null;
+                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= 100)];
+                let best = null;
+                throwers.forEach(t => {
+                    const adj = spots.filter(s => Math.max(Math.abs(s.x - t.x), Math.abs(s.y - t.y)) === 1);
+                    if (!adj.length) return;
+                    adj.sort((a, b) => pPlan(c, b, true) - pPlan(c, a, true));
+                    const s1 = adj[0], p1 = pPlan(c, s1, true) / 100 * catchProb(t);
+                    if (p1 < 0.2) return;
+                    const tspots = [{ x: t.x, y: t.y, prob: 100, path: [] }, ...movesFor(t).filter(m => m.prob >= 90)];
+                    let p2 = 0;
+                    mates.forEach(r => {
+                        if (r.id === t.id) return;
+                        const ri = runIn.get(r.id); if (!ri) return;
+                        tspots.forEach(ts => { const v = pPlan(t, ts, true) / 100 * passOdds(t, ts.x, ts.y, r) * ri * 0.97; if (v > p2) p2 = v; });
+                    });
+                    const v = p1 * p2;
+                    if (!best || v > best.v) best = { v, kind: 'handoff', r: t, s: s1, chain: true };
+                });
+                if (!best) return null;
+                return best.v >= (lastTurn ? 0.08 : AIX.p(me, 'ho2Bar', 9)) ? best : null;
             }
             function throwToScore(c, me, lastTurn) {
                 if (hasSk(c, 'My Ball')) return null;
@@ -28593,6 +28632,15 @@ ol.ci-steps li::marker { content: none; }
                         if (bestB) return { pid: bestB.b.id, kind: 'block', target: bestB.q.id };
                     }
                     else if (td && (direct >= 0.55 || (lastTurn && (!via || direct >= via.v)))) return { pid: carrier.id, kind: 'move', pick: ms => ms.filter(m => m.x === endX(me)).sort((a, b) => b.prob - a.prob)[0] || null };
+                    // 2b. (ho2) or hand off to a thrower who passes to a team-mate who runs it in, all this turn
+                    if (AIX.on(me, 'ho2') && !state.aiStalling) {
+                        const via2 = throwToScore2(carrier, me, lastTurn);
+                        if (via2 && via2.v > Math.max(direct, via ? via.v : 0) + 0.02) {
+                            const rid = via2.r.id, sx = via2.s.x, sy = via2.s.y;
+                            if (window.AI_HO2) window.AI_HO2.push({ v: via2.v, c: carrier.type, t: via2.r.type, togo: toGo(carrier.x, me), turn: state.turn[me] });
+                            return { pid: carrier.id, kind: 'handoff', receiver: rid, pick: ms => (sx === carrier.x && sy === carrier.y) ? null : (ms.find(m => m.x === sx && m.y === sy) || null), stay: sx === carrier.x && sy === carrier.y };
+                        }
+                    }
                     // 2. or hand off / pass to a team-mate who can run it in
                     if (via && via.v > direct && !state.aiStalling) {
                         const rid = via.r.id, sx = via.s.x, sy = via.s.y;
@@ -28796,7 +28844,14 @@ ol.ci-steps li::marker { content: none; }
                             const sec = Math.min(100, pathOnly * 100) * (5 / 6);
                             if (pathOnly >= 0.999 && sec > pr + 8) { pr = sec; kind = 'secure'; }
                         }
-                        if (!best || pr > best.pr || (pr === best.pr && m.path.length < best.m.path.length)) best = { p, m, pr, kind };
+                        // (rcv2) keep the receivers free: a player with Catch (and not Sure Hands) picks up only if nobody else nearly as
+                        // likely can - drefsante, Bot Bowl V's winner, carries with its Thrower and Linemen and its Catchers score (81 of
+                        // its 136 touchdowns in 100 games v our AI); ours picked up with the Catchers (120 times), carried with them (219
+                        // turn starts) and scored with them 26 times (ai-training/README.md, "How drefsante beats our AI")
+                        // OFF by default (rcvPick 0; 12 turns it on): Catcher pick-ups 120 -> 54 a 100 games, but v drefsante over 300 games
+                        // (with ho2) won 52 drew 64 lost 184 v v5.14's 52-79-169 - not better
+                        const pen = hasSk(p, 'Catch') && !hasSk(p, 'Sure Hands') ? AIX.p(me, 'rcvPick', 0) : 0;
+                        if (!best || pr - pen > best.pr - best.pen || (pr - pen === best.pr - best.pen && m.path.length < best.m.path.length)) best = { p, m, pr, kind, pen };
                     });
                     if (AIX.on(me, 'loose') && (!best || best.pr < 75)) {
                         // a hard pickup: first knock away the players marking the ball (each one makes the pickup harder),

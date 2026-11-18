@@ -1356,6 +1356,23 @@ them. 200 games: drefsante won 121, drew 48, lost 31, touchdowns 292-126.
   288 mirror matches: won 109, drew 84, lost 95, touchdowns 269-239, Turnovers 1406 v 1511. Ready receivers 11+ out: 11% of turns
   (end of our turn 15%). A lesson on the way: `deep1_measure.js` drew each side's race at random, and an A/A test (both sides
   the same) came out 41-32-23 - results only from mirror matches (now fixed) or same-seed runs.
+- **drefsante's blog** (drefsante.blogspot.com, 12 posts 2019-2025) on how it plays: probability-based - every action is chosen
+  knowing its chance of success and of a Turnover, safe actions first and risky ones last, ball actions before the rest; paths
+  are the least risky ones; before each move it works out the chance of scoring by five plans (a run; hand-off + run; pass + run;
+  hand-off + pass + run; pass + hand-off + run) and plays the best; always tries to score on the last turn; a carrier near the
+  end zone may wait when safe and not behind; it fixed a carrier falling back too far (that made scoring passes and hand-offs
+  harder) and hands off without moving first when that's best. The author rates its defence weaker than its attack. v0.3 beat
+  BotBowl's scripted bot 89-9-2 in 100 Human games (ours wins ~60% against it).
+- **Who carries and who scores** (100 games v drefsante, positions recorded): pick-ups - drefsante Thrower 136, Lineman 105,
+  Blitzer 47, Catcher 41; ours Thrower 141, Catcher 120, Lineman 67, Blitzer 47. Carrier at its own turn starts - drefsante
+  Thrower 141, Lineman 129, Catcher 107, Blitzer 68; ours Catcher 219, Thrower 99, Blitzer 89, Lineman 78. Touchdowns - drefsante
+  Catcher 81, Lineman 36, Blitzer 12, Thrower 7; ours Catcher 26, Lineman 14, Blitzer 10, Thrower 7. Its Catchers are receivers;
+  ours are carriers.
+- **Tried (v5.15, both off):** `ho2`, the fourth plan (carrier hands off to a thrower, who passes to a team-mate who runs in): 0.08
+  times a match (Humans). `rcv2`: a 12-point handicap on pick-ups by players with Catch (not Sure Hands) - Catcher pick-ups 120 ->
+  54, carries 219 -> 160; same 100 games v drefsante 23-24-53 v 20-24-56, but over 300 games (with `ho2`) 52-64-184 v v5.14's
+  52-79-169. Also refusing hand-offs to Catchers who can't run in next turn (`rcvSwitch`): 10-22-68 in 100 games - that is how
+  our AI moves the ball up. Effects this size need ~1,000 games a version v drefsante to call.
 
 ## Pick up and score (Nov 2026, `pus1`, v5.11)
 From the scoring-turn replays: in the coaches' loose-ball scoring turns the AI only ever picked up and ran (pick-up-and-pass,
