@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.21 (18 Nov 2026)
+- No change to play. Brain x's first attacking experiment, `qb1` (`qbN`), tried and left off: the Thrower as quarterback. From
+  11+ squares out drefsante scored 298 touchdowns in 600 games against our AI (ours: 12), 171 of them its Thrower passing to a
+  Catcher, and its Thrower carried the ball far more than ours (our Catchers carry). With `qb1` a carrier who can't throw,
+  well short of the end zone, hands the ball to a free Thrower when the catch is likely enough, and the Thrower keeps it until
+  a team-mate could run it in. Against drefsante (BotBowl, Humans, the same 300 games) our Thrower carried twice as often far
+  out, but a receiver was ready in pass range in only 2-5% of those turns - even with two deep receivers sent whatever the
+  danger, drefsante's defence left almost none free - and our touchdowns fell from 201-216 to 147-168 (lost 193-199 games, not
+  167-177): the slower Thrower carried where Catchers had run the ball in.
+
 ## v5.20 (18 Nov 2026)
 - No change to play. Two more brain x experiments against drefsante (BotBowl, Humans), tried and left off:
   - `cd1` (`cdN`): closing its free receivers down before our screen goes up - a free player of ours makes a sure move to a

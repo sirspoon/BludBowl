@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.20</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.21</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27005,7 +27005,7 @@ ol.ci-steps li::marker { content: none; }
             // tuning values here in X (used when a run doesn't set them); the game's AI stays as it is until brain x clearly beats it v
             // drefsante (~1,000 games) and isn't clearly worse in the all-races mirror guard, then x becomes the default.
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
-            // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW))
+            // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN))
             X: {},
             x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
@@ -27543,6 +27543,7 @@ ol.ci-steps li::marker { content: none; }
                 return best;
             }
             // switch the play: hand off or pass to a team-mate in space who can take the ball further than the carrier can
+            const isThrower = q => hasSk(q, 'Pass') || (q.pa != null && q.pa <= 3);   // (brain x: qb1) a player who can really throw
             function switchPlay(c, me) {
                 if (hasSk(c, 'My Ball') || (state.passUsed && state.handoffUsed)) return null;
                 const stay = bestSpotFor(c);
@@ -27554,6 +27555,8 @@ ol.ci-steps li::marker { content: none; }
                     // (rcv2) a receiver (Catch, not Sure Hands) gets the ball only if it could run it in next turn: otherwise it becomes
                     // the carrier and stops being the one to throw or hand off to. OFF (rcvSwitch 0): v drefsante it cut our scoring (100 games: won 10, lost 68 v 23-53 without) - a hand-off to a Catcher in space is how the ball moves up
                     if (AIX.p(me, 'rcvSwitch', 0) && hasSk(r, 'Catch') && !hasSk(r, 'Sure Hands') && toGo(r.x, me) > (r.ma || 6) + 2) return;
+                    // (brain x: qb1) the Thrower keeps the ball until a team-mate could run it in next turn (no handing it back and forth)
+                    if (AIX.p(me, 'qbN', 0) > 0 && isThrower(c) && !isThrower(r) && toGo(r.x, me) > (r.ma || 6) + 2) return;
                     const pt = AIX.on(me, 'pass') && passingTeam(me);
                     const rv = bestSpotFor(r) + ((pt || AIX.p(me, 'nextAll', 0)) && toGo(r.x, me) <= (r.ma || 6) + 2 && threatAt(r.x, r.y, me) <= 1 ? 2 : 0);   // they could run it in next turn
                     if (rv < stay + (pt ? 0.8 : agileTeam(me) ? 1 : 1.5)) return;   // not clearly better placed
@@ -29128,6 +29131,41 @@ ol.ci-steps li::marker { content: none; }
 
                 // 7. switch the play to a team-mate in space if they can take it further, otherwise run it
                 if (carrier && carrier.team === me && act.includes(carrier) && !state.charge && !state.aiStalling) {
+                    // (brain x: qb1) the Thrower as quarterback: from 11+ squares out drefsante scored 298 touchdowns in 600 games v our
+                    // AI (ours: 12), 171 of them its Thrower passing to a Catcher (then a hand-off, sometimes) - its Thrower carried at 867
+                    // such turn starts, our Catchers at 1,269. A carrier who can't throw, well short of their end zone, walks (sure moves
+                    // only) next to a free Thrower of ours and hands it over, when the catch is likely enough (qbOdds, a team re-roll
+                    // counted) and the Thrower isn't more exposed than he is. Then the cage forms round the Thrower, and the hand-off or
+                    // pass to a receiver ready to run in (throwToScore, deep1) can follow.
+                    // OFF (qbN 0) in brain x too: v drefsante (BotBowl, Humans, the same 300 games) our Thrower carried twice as often
+                    // 11+ out (397 turn starts v 197-205), but had a receiver ready in pass range in only 2-5% of them, even with two deep
+                    // receivers sent whatever the danger (deepN 2, deepSafe 99, deepNoBlock 0: ready 6% of turns 11+ out - drefsante's
+                    // defence leaves none free); scores from 11+ 2-10 -> 13-21, but all our touchdowns fell (201-216 -> 147-168) and we
+                    // lost more (167-177 -> 193-199): the slow Thrower carried where Catchers had run it in.
+                    if (AIX.p(me, 'qbN', 0) > 0 && !state.handoffUsed && toGo(carrier.x, me) >= AIX.p(me, 'qbFrom', 9)) {
+                        const thrower = isThrower;
+                        if (!thrower(carrier)) {
+                            const rr = state.rr[me] > 0 && !state.teamRRUsedThisTurn;
+                            const exposed = threatAt(carrier.x, carrier.y, me);
+                            let qb = null;
+                            state.players.forEach(t => {
+                                if (t.team !== me || t.id === carrier.id || !onPitch(t) || t.isDown || t.isStunned || t.isDistracted || !thrower(t)
+                                    || tzFor(t.x, t.y, me) > 0 || hasSk(t, 'No Hands') || threatAt(t.x, t.y, me) > exposed) return;
+                                const p = catchProb(t), pe = rr ? 1 - Math.pow(1 - p, 2) * 0.9 : p;
+                                if (pe < AIX.p(me, 'qbOdds', 0.75)) return;
+                                [{ x: carrier.x, y: carrier.y, prob: 100, path: [] }, ...movesFor(carrier)].forEach(s => {
+                                    if (s.prob < 100 || cheb(s, t) !== 1) return;
+                                    const v = pe - (s.path ? s.path.length : 0) * 0.01 - tzFor(s.x, s.y, me) * 0.05;
+                                    if (!qb || v > qb.v) qb = { v, t, s };
+                                });
+                            });
+                            if (qb) {
+                                AIX.count(me, 'qb1');
+                                const sx = qb.s.x, sy = qb.s.y, stay = sx === carrier.x && sy === carrier.y;
+                                return { pid: carrier.id, kind: 'handoff', receiver: qb.t.id, stay, pick: ms => stay ? null : (ms.find(m => m.x === sx && m.y === sy) || null) };
+                            }
+                        }
+                    }
                     const sw = switchPlay(carrier, me);
                     if (sw) {
                         const sx = sw.s.x, sy = sw.s.y, stay = sx === carrier.x && sy === carrier.y;

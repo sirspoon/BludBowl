@@ -19,6 +19,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   baseline for today's AI v drefsante (seeds 910000+): won 185 drew 247 lost 568, touchdowns 655-1393 (`nn/look/dbg/k_base.txt`).
   Lesson: its scoring adapts - cutting one route doesn't cut its touchdowns. The bigger gap is our attack: from 11+ squares out
   drefsante scores in 14% of its turns with the ball, we in 1%.
+  v5.21 `qb1` (Thrower as quarterback, `qbN`): off - our Thrower carried twice as often but had nobody ready to throw to (ready
+  receivers 11+ out 2-6% of turns even with deep1 forced: drefsante's defence keeps them covered) and we scored less (147-168 v
+  201-216 touchdowns in 300). The far-out gap is mostly its defence covering deep and ours not: both lose the ball about as often
+  (ours 9% in our turn + 33% in theirs, its 14% + 32%). Scripts: `nn/look/drives_report.py`, `nn/look/dbg/far_scores.py`.
   Noise check (same AI, same 300 seeds 750000+, `nn/look/drefstudy.py --positions`): drefsante won 167 v 177, touchdowns 425-201 v
   447-216 - differences of ~10 wins in 300 are luck. Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
