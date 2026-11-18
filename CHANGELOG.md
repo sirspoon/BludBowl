@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.20 (18 Nov 2026)
+- Behind the scenes: two more defensive ideas for the experimental computer coach (cutting off receivers waiting deep, and
+  aiming hits at Catchers) were tested against Bot Bowl's champion bot and left off: neither helped.
+
 ## v5.19 (18 Nov 2026)
 - Behind the scenes: the experimental computer coach's first idea (Blitzing the opponent's receivers waiting deep) was tested
   against Bot Bowl's champion bot and left off: it didn't help.

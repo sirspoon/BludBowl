@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.19</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.20</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27004,9 +27004,12 @@ ol.ci-steps li::marker { content: none; }
             // for it ('{"brain":"x"}': nn/evaluate.py --aip, tools/ai-match.js --newp). Its changes are code behind AIX.x(team) and its own
             // tuning values here in X (used when a run doesn't set them); the game's AI stays as it is until brain x clearly beats it v
             // drefsante (~1,000 games) and isn't clearly worse in the all-races mirror guard, then x becomes the default.
-            // (v5.19: fr1, Blitzing their free receivers, frW 3 and 1, tried and left at 0 - it didn't cut their free receivers)
+            // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
+            // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW))
             X: {},
-            x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); } };
+            x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
+            // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
+            st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
         const AI = (function () {
             const on = { 0: false, 1: false };
             try { const s = JSON.parse(localStorage.getItem('bb-ai') || '{}'); on[0] = !!s[0]; on[1] = !!s[1]; } catch (e) {}
@@ -28084,6 +28087,13 @@ ol.ci-steps li::marker { content: none; }
             // 0.57-0.60 a turn (today's AI 0.55-0.60), and frW 3 did worse - drefsante won 193 lost 39, touchdowns 466-168 (two runs of
             // today's AI: 167-47, 425-201 and 177-55, 447-216): the Blitzers left the screen (its carrier's free runs from 7-10 squares
             // 12-15% -> 20%). frW 1: 181-55, 416-200, the same as without.
+            // (brain x: tg1) the players likeliest to go deep and score: Catchers and anyone with MA 8+ (not a Big Guy) - drefsante's
+            // Catchers scored 81 of its 136 touchdowns against our AI. Knocking them over (and hurting them: Catchers have the least
+            // armour) is worth tgW more in a block or a Blitz, by the chance of knocking them down.
+            // OFF (tgW 0) in brain x too: with tgW 2 it hardly hit their Catchers more (knocked down 5.2 a game v 4.9-5.1, casualties
+            // 0.37 v 0.38-0.41: they keep out of reach) and over 1,000 games won 164 drew 251 lost 585, touchdowns 633-1385 (today's AI
+            // 185-247-568, 655-1393).
+            const deepThreat = d => !isBigGuy(d) && (hasSk(d, 'Catch') || (d.ma || 0) >= 8);
             function freeReceivers(me) {
                 const them = other(me), c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null, out = new Set();
                 if (!c || c.team !== them || !onPitch(c)) return out;
@@ -28113,6 +28123,7 @@ ol.ci-steps li::marker { content: none; }
                 let best = null;
                 // (brain x: fr1) knocking down one of their free receivers is worth frW more (by the chance of knocking him down)
                 const frW = AIX.p(me, 'frW', 0), frees = frW > 0 ? freeReceivers(me) : null;
+                const tgW = AIX.p(me, 'tgW', 0);   // (brain x: tg1)
                 // (bz5) whom to Blitz, as strong FUMBBL coaches choose (ai-training/README.md, "Whom the coaches Blitz"): a player
                 // in our carrier's path, one tying up a player of ours (knocking him over frees ours to move without a dodge), or
                 // one escorting their carrier is worth more, by the chance of knocking him down
@@ -28120,6 +28131,7 @@ ol.ci-steps li::marker { content: none; }
                 const ourB = z5 && bc && bc.team === me && onPitch(bc) ? bc : null, theirB = z5 && bc && bc.team !== me && onPitch(bc) && !bc.isDown ? bc : null;
                 const extra = (p, d) => {
                     let v = frees && frees.has(d.id) ? frW : 0;
+                    if (tgW > 0 && deepThreat(d)) v += tgW;
                     if (!z5) return v;
                     if (ourB && d.id !== ourB.id) { const ah = toGo(ourB.x, me) - toGo(d.x, me); if (ah >= 1 && ah <= 4 && Math.abs(d.y - ourB.y) <= 2) v += AIX.p(me, 'bzPath', 1.5); }
                     if (state.players.some(q => q.team === me && q.id !== p.id && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, d) === 1)) v += AIX.p(me, 'bzEng', 1);
@@ -28601,6 +28613,7 @@ ol.ci-steps li::marker { content: none; }
             // that rarely score, the completion worth Star Player Points in league play. The carrier is held back (moving him can't
             // score) and throws once everyone else has acted.
             let pas8Key = null;
+            let cdDone = { key: '', n: 0 };   // (brain x: cd1) closing-down moves made this turn
             const lastWord = me => state.half <= 2 && state.turn[me] >= TURNS && state.turn[other(me)] >= TURNS;
             function pas8Plan(me) {
                 const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
@@ -28787,7 +28800,7 @@ ol.ci-steps li::marker { content: none; }
                     // level - won 105, drew 87, lost 96, touchdowns 209-213)
                     const agileLim = AIX.on(me, 'line1') && tzFor(p.x, p.y, me) > 0 ? 0.12 : AIX.p(me, 'blkAgile', 0.12);
                     const limit = isCarrier ? 0.34 : (carrier && carrier.id === p.id ? 0.03 : agileTeam(me) ? agileLim : AIX.p(me, 'blkTurn', 0.17)) + (gain >= 3 || freesC ? 0.08 : 0);
-                    const v = e.ev + laneValue(e, gain + freesC);
+                    const v = e.ev + laneValue(e, gain + freesC) + (AIX.p(me, 'tgW', 0) > 0 && deepThreat(d) ? AIX.p(me, 'tgW', 0) * e.pDown : 0);   // (brain x: tg1)
                     return { ok: e.pTurn <= limit && v >= (isCarrier ? 1 : AIX.p(me, 'blkMin', 1.5)), v, gain };
                 };
                 // block candidates
@@ -28911,6 +28924,37 @@ ol.ci-steps li::marker { content: none; }
                             });
                         }));
                         if (bestC) { const tx = bestC.m.x, ty = bestC.m.y; return { pid: bestC.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
+                    }
+                    // (brain x: cd1) close their receivers down before the screen goes up: a free player of ours (no opponent next to it)
+                    // makes a sure move to a square whose tackle zone cuts off the free runs of their free receivers (see freeReceivers) -
+                    // not next to them, so one player can shut several lanes, goal-side of them if he can, and without taking a marker
+                    // off their carrier. cdN such moves a turn, only when one takes away at least one free receiver.
+                    // OFF (cdN 0) in brain x too: v drefsante (BotBowl, Humans) its free receivers halved (0.55-0.60 -> 0.26 a turn; their
+                    // share of its touchdowns 55-58% -> 22-29%), but it scored as often other ways, and ours fell: over 1,000 games (seeds
+                    // 910000+) cdN 2 won 159 drew 232 lost 609, touchdowns 582-1387, v today's AI 185-247-568, 655-1393 - the players
+                    // sent back weren't there for the counter-attack.
+                    if (AIX.p(me, 'cdN', 0) > 0) {
+                        const ck = state.half + ':' + me + ':' + state.turn[me];
+                        if (cdDone.key !== ck) cdDone = { key: ck, n: 0 };
+                        const now = cdDone.n < AIX.p(me, 'cdN', 0) ? freeReceivers(me) : null;
+                        if (now && now.size) {
+                            const recv = [...now].map(getPlayerById);
+                            let bestD = null;
+                            free.forEach(p => {
+                                if (p.isDown || tzFor(p.x, p.y, me) > 0 || !canReposition(p, me) || cheb(p, carrier) === 1) return;
+                                const ox = p.x, oy = p.y, ms = movesFor(p);
+                                ms.forEach(m => {
+                                    if (m.prob < 100 || m.isRush || (m.x === ox && m.y === oy)) return;
+                                    p.x = m.x; p.y = m.y;
+                                    let left; try { left = freeReceivers(me).size; } finally { p.x = ox; p.y = oy; }
+                                    if (left >= now.size) return;
+                                    const goal = recv.some(q => cheb(q, m) <= 3 && toGo(m.x, them) < toGo(q.x, them)) ? 0.5 : 0;
+                                    const s = (now.size - left) * 2 + goal - m.path.length * 0.05 - edgeRisk(m.x, m.y, me, p.id) * 0.5 - (cheb({ x: ox, y: oy }, carrier) <= 3 ? 1 : 0);
+                                    if (!bestD || s > bestD.s) bestD = { p, m, s };
+                                });
+                            });
+                            if (bestD) { cdDone.n++; AIX.count(me, 'cd1'); const tx = bestD.m.x, ty = bestD.m.y; return { pid: bestD.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
+                        }
                     }
                     const pl = plugPlan(me, free, carrier);
                     if (pl) return pl;

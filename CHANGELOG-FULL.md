@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.20 (18 Nov 2026)
+- No change to play. Two more brain x experiments against drefsante (BotBowl, Humans), tried and left off:
+  - `cd1` (`cdN`): closing its free receivers down before our screen goes up - a free player of ours makes a sure move to a
+    square whose tackle zone cuts off a receiver's free run to our end zone (not next to him). Its free receivers halved (0.55-0.60
+    a turn to 0.26; their share of its touchdowns from 55-58% to 22-29%), but it scored as often in other ways, and we scored
+    less: over 1,000 games (seeds 910000+), two such moves a turn won 159, drew 232, lost 609, touchdowns 582-1387, against
+    today's AI's 185-247-568 and 655-1393.
+  - `tg1` (`tgW`): its Catchers and other MA 8+ players worth more to knock down, in blocks and Blitzes (the owner's idea). It
+    hardly hit them more (5.2 knock-downs a game against 4.9-5.1; casualties 0.37 against 0.38-0.41) - they keep away from our
+    players - and over the same 1,000 games won 164, drew 251, lost 585, touchdowns 633-1385.
+- A counter of how often each experiment acts (`AIX.st`), for tests.
+
 ## v5.19 (18 Nov 2026)
 - No change to play. Brain x's first experiment (`fr1`, tuning value `frW`), tried and left off: Blitzing drefsante's free
   receivers - team-mates of its carrier out of our tackle zones who could walk into our end zone next turn, where 58% of its

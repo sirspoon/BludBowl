@@ -14,6 +14,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   beats the current AI v drefsante and isn't clearly worse in the all-races mirror guard (`tools/ai-match.js --newp '{"brain":"x"}'`).
   Leave helpers the game's AI uses unchanged (fork them for x) so the default doesn't drift.
   Brain x so far: v5.19 `fr1` (Blitz their free receivers, `frW`) left at 0 - free receivers didn't fall, frW 3 did worse.
+  v5.20 `cd1` (close free receivers down, `cdN`): free receivers halved but drefsante scored as much and we scored less (1,000
+  games: 159-232-609 v 185-247-568); `tg1` (Catchers worth more to hit, `tgW`): hardly more hits, 164-251-585. 1,000-game
+  baseline for today's AI v drefsante (seeds 910000+): won 185 drew 247 lost 568, touchdowns 655-1393 (`nn/look/dbg/k_base.txt`).
+  Lesson: its scoring adapts - cutting one route doesn't cut its touchdowns. The bigger gap is our attack: from 11+ squares out
+  drefsante scores in 14% of its turns with the ball, we in 1%.
   Noise check (same AI, same 300 seeds 750000+, `nn/look/drefstudy.py --positions`): drefsante won 167 v 177, touchdowns 425-201 v
   447-216 - differences of ~10 wins in 300 are luck. Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
