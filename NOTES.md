@@ -15,6 +15,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   halfling, ogre, snotling, underworld) v a non-stunty one loses whoever plays it (we won 4 of 53 as stunty, 33 of 42 v drefsante's
   stunty), so mirror races would be a fairer all-races test. Neither side stunty: 66-48-77, touchdowns 141-168. drefsante's
   Humans were its best team v us (we went 2-1-10 against them; ~10 games a race, so per-race splits are mostly luck).
+  **But drefsante plays other races handicapped in BotBowl** (`nn/look/dbg/dref_skilluse.py`, 24 games, 12 races): its BotBowl
+  interface (Java `FFAIProxy.playTurn`) can only send move / block / Blitz / pass / hand-off / Foul / stand up / Leap / Throw
+  Team-Mate, so it never Gazes, Stabs, throws bombs, Chainsaws, uses Ball & Chain, Projectile Vomit, Breathe Fire or Kick
+  Team-Mate (offered 1,600+ times, used 0), and it never threw a team-mate either (772 chances). Skills BotBowl applies by itself
+  (Dodge, Side Step, Horns, Frenzy, Blood Lust, Foul Appearance, Stand Firm, Grab...) do work, and its brain knows those it is told
+  about. It isn't told the BB2025-only skills, for its own players or ours. So all-races results flatter us; Humans stay the
+  clean benchmark.
 - (18 Nov, no version) **drefsante plays every race in BotBowl now, not just Humans.** Humans-only was Bot Bowl V's format (and
   BotBowl Season 3's one team), not a drefsante limit: its own app plays 24 LRB6 teams. Its BotBowl bridge
   (`drefsante/drefsante_bot.py` on the owner's PC, originals kept as `.orig`) crashed on other races; fixed there: skills sent to
