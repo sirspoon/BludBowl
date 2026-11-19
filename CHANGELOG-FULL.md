@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.38 (19 Nov 2026)
+- No change to the game's normal computer coach. Brain x's ball carrier now values ground gained more against safety (`bpProg` 0.1, was 0.025).
+  A 300-game study against drefsante found our carrier, 13-18 squares from scoring, gaining nothing in 51% of our turns (drefsante's carrier: 28%),
+  so he stayed in our half, where drefsante knocks him over. 1,000 games v drefsante, against v5.37: won 229, drew 261, lost 510, touchdowns 807-1348
+  (v5.37: 210-269-521, 790-1362); on fresh seeds 229-241-530, 798-1365 (v5.37: 204-249-547, 748-1425).
+- Tried and not kept: 0.06 and 0.15 instead of 0.1, and letting the carrier give up at most one square for safety instead of four. None did better.
+
 ## v5.37 (19 Nov 2026)
 - No change to the game's normal computer coach. How drefsante scores against brain x, studied (300 games, every touchdown traced back to the kick-off:
   `nn/look/dbg/score_paths.py`, `carrier_half.py`, `carrier_dice.py`, `carrier_hits.py`): 63% of its touchdowns come right after it takes the ball off us,

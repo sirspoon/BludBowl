@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.37</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.38</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27247,7 +27247,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3 },   // (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1 },   // (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -28429,6 +28429,11 @@ ol.ci-steps li::marker { content: none; }
                     return n;
                 } finally { c.x = ox; c.y = oy; }
             }
+            // bpProg: what each square of progress is worth against the carrier's safety. Brain x uses 0.1 (AIX.X, v5.38): the study v drefsante
+            // (study_v537.jsonl) found our carrier 13-18 squares out gaining nothing in 51% of own turns (drefsante's 28%), so it sat in our half
+            // where it gets knocked over. 1,000 games v drefsante, against 0.025: seeds 910000+ 229-261-510, 807-1348 v 210-269-521, 790-1362;
+            // fresh seeds 930000+ 229-241-530, 798-1365 v 204-249-547, 748-1425 (score share .355 v .337 over 2,000 games). 0.06 and 0.15 did
+            // no better (.330, .332), nor letting him give up only one square for safety (bpGive 1: .336).
             function bpEnd(me, c, act) {   // where the carrier will finish this turn
                 if (!act.includes(c)) return { x: c.x, y: c.y, m: null };
                 const tk = state.half + ':' + me + ':' + state.turn[me] + ':' + c.id;

@@ -107,6 +107,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   All-races mirror guard, v5.37 brain x v the game's AI (`tools/ai-match.js`, 31 races x 20, `nn/look/dbg/guard_v537.txt/.jsonl`): won 212 drew 192
   lost 216, touchdowns 562-568 (margin -0.01 a match, se 0.05): level; no race clearly off (worst khorne/orc/renegades -0.35, se 0.25). v drefsante it is
   ahead of the game's AI by 0.17 touchdowns a game of margin (.345 v .308 score share, ~2 se, same seeds). Making x the default is the owner's call.
+  v5.38: `bpProg` 0.1 in brain x (was 0.025; what a square of carrier progress is worth against safety in `bpEnd`). Why: in `study_v537.jsonl`
+  (300 games, seeds 760000) our carrier 13-18 out gains nothing in 51% of own turns (drefsante 28%), avg gain 2.5 v 2.9; our spells score 18.9% v its
+  35.3%, and 26.9% end at half time. 1,000 games v drefsante (`k_pg2.txt`, `k_b930.txt`, `k_pg2s.txt`): seeds 910000+ 229-261-510, 807-1348 v
+  210-269-521, 790-1362; seeds 930000+ 229-241-530, 798-1365 v 204-249-547, 748-1425 (score share .355 v .337 over 2,000, ~1.4 se). Not kept:
+  bpProg 0.06 (.330), 0.15 (.332), bpGive 1 (.336). Brain x's baseline is now 229-261-510, 807-1348 (seeds 910000+). Not in the all-races guard.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

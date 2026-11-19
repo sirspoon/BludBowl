@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.38 (19 Nov 2026)
+- Behind the scenes: the experimental computer coach's ball carrier now pushes forward more instead of hanging back for safety.
+
 ## v5.37 (19 Nov 2026)
 - Behind the scenes: the experimental computer coach now brings team-mates in to help before it hits the other side's ball carrier.
 
