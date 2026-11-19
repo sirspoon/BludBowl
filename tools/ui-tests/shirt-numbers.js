@@ -69,7 +69,7 @@ const { chromium, OUT, check, done, openGame, click, putTeam } = require('./lib'
     check(match.away === 1 && match.panel, 'match: player panel shows #23; away team numbered from 1', match);
     // roster PDF lists by number
     const pdf = await page.evaluate(() => { try { return ROSTER_PDF.sheet ? ROSTER_PDF.sheet(TB.get('sn-orcs')).players.map(p => p.n).join(',') : null; } catch (e) { return 'err ' + e.message; } });
-    if (pdf != null) check(pdf === '1,2,4,5,6,7,8,9,10,11,15,23', 'roster PDF sorted by shirt number', pdf);
+    if (pdf != null) check(pdf === '15,23,1,4,5,6,7,8,9,10,11,2', 'roster PDF in roster order, with the shirt numbers', pdf);
     // export / import keeps them
     const imp = await page.evaluate(() => { const t = TB.get('sn-orcs'); t.id = 'sn-copy'; const r = TB.importData(JSON.stringify({ teams: [t] })); return TB.get(r.first).players.map(p => p.nr).join(','); });
     check(imp === '15,23,1' + rest + ',2', 'export / import keeps the numbers', imp);

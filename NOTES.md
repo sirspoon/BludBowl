@@ -105,8 +105,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   CAREER) gives everyone's shown number (own, else lowest free in roster order), `freeNumbers`. Team Builder: the number under the
   arrows is a button (`data-nr`) opening `#tb-nrdlg` (set / swap on a duplicate / "Number all by order"); setting one fixes all the
   team's numbers (`CAREER.normTeam` then gives any newcomer the lowest free). Matches: `matchSquad` puts `nr` in `ovr`, `buildPlayers`
-  sets `p.nr` for everyone, and every shown number uses `pNo(p)` (never `p.id`, which stays the engine's id). Roster PDF sorted by
-  number. Check: `node tools/ui-tests/shirt-numbers.js`.
+  sets `p.nr` for everyone, and every shown number uses `pNo(p)` (never `p.id`, which stays the engine's id). Roster PDF in roster order
+  (v5.36, the owner's call), showing the numbers. Check: `node tools/ui-tests/shirt-numbers.js`.
 - v5.27 (job session, 19 Nov): **Night Goblins** team (BB2025, pre-release from Reddit photos of the book: `RACES.nightgoblin`,
   `preRelease` note in the Team Builder). New traits Squig Rage / Squig Restraint (`squigRage`, `squigRolls`, `SQUIG.stats` counts
   rolls/fails/blocks); the roll is made with the other activation rolls (on commit), and a 1-2 "undeclares" the action. AI: forced

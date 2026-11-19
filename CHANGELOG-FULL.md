@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.36 (19 Nov 2026)
+- The roster PDF lists players in roster order again (as arranged in the Team Builder), not by shirt number; each row still shows the
+  player's shirt number. (The owner's call.)
+
 ## v5.35 (19 Nov 2026)
 - **Shirt numbers.** In the Team Builder's roster, tap a player's number to choose his own, from 1 to 99 (for example to match the numbers
   on your miniatures). Gaps are fine. Two players can't share a number: the game says whose it is and offers to swap them. Once a team

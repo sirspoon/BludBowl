@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.35</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.36</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -12512,7 +12512,7 @@ ol.ci-steps li::marker { content: none; }
                     return { n: nums[i], pos: ty.type, name: p.name, ma: e.ma, st: e.st, ag: e.ag, pa: e.pa, av: e.av, skills: e.skills.map(s => ({ s, extra: extra.has(s), elite: capped.has(s) && extra.has(s) })), cost, spp: p.spp || 0, mng: !!p.mng, posKey: p.pos,
                         up: { ma: e.ma > ty.ma, st: e.st > ty.st, ag: e.ag < ty.ag, pa: e.pa != null && ty.pa != null && e.pa < ty.pa, av: e.av > ty.av },
                         dn: { ma: e.ma < ty.ma, st: e.st < ty.st, ag: e.ag > ty.ag, pa: e.pa != null && ty.pa != null && e.pa > ty.pa, av: e.av < ty.av } };
-                }).sort((a, b) => a.n - b.n);   // listed by shirt number (the same as roster order for a team that hasn't picked its own numbers)
+                });   // in roster order (as arranged in the Team Builder), each with his shirt number
                 const stars = [];
                 (mp ? t.stars || [] : []).forEach(sk => starMembers(sk).forEach((m, j) => { (m.skills || []).forEach(s => used.add(s)); stars.push({ n: '*', pos: 'Star Player', name: m.name || STARS[sk].name, ma: m.ma, st: m.st, ag: m.ag, pa: m.pa || null, av: m.av, skills: (m.skills || []).map(s => ({ s, extra: false })), cost: j ? null : STARS[sk].cost, star: true, up: {}, dn: {} }); }));
                 const indList = typeof LEAGUE === 'undefined' ? [] : LEAGUE.indList(sev ? 'sevens' : 'std');
