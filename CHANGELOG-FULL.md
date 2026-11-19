@@ -2,6 +2,22 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.35 (19 Nov 2026)
+- **Shirt numbers.** In the Team Builder's roster, tap a player's number to choose his own, from 1 to 99 (for example to match the numbers
+  on your miniatures). Gaps are fine. Two players can't share a number: the game says whose it is and offers to swap them. Once a team
+  uses its own numbers, everyone's number is fixed where it is (so setting one doesn't move the others), numbers stay with the player when
+  the roster is reordered, a new hire (or a Journeyman kept on) gets the lowest number free, and a released or dead player's number is
+  free again. "Number all by order" in the number box forgets them all. Teams that never set numbers look exactly as before (1, 2, 3...
+  by roster order).
+- The numbers go everywhere a number is shown: the match (player panel, roster, match log, notices), the team and league roster tables,
+  the roster PDF (now listed by shirt number, which is the same as roster order for a team that hasn't chosen numbers), the saved replay
+  file (FUMBBL's `playerNr`) and so the replay viewer. They're saved with the team and survive export / import, leagues, tournaments and
+  two-device play; older saved data without numbers still works (a repeated number in a file is fixed on loading).
+- In a match, a player's number was the game's internal id, so the away team was numbered from 12 (or 8 in Sevens) upwards. Now each
+  team is numbered from 1: its own numbers, else by roster order; Star Players, Mercenaries, Journeymen and players who join during the
+  match take the lowest numbers free.
+- New check: `node tools/ui-tests/shirt-numbers.js`.
+
 ## v5.34 (19 Nov 2026)
 - No change to play. Brain x's block targets and order, studied again against drefsante (300 games, the whole board at every block: `drefstudy.py --blocks`,
   `nn/look/dbg/block_order.py`, `block_sources.py`, `blitz_look.py`). Knocking one over to free an assist for a later block we already do as often as drefsante

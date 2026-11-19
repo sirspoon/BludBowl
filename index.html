@@ -583,6 +583,16 @@
         #team-builder .tb-pl > .tb-pnwrap > .fs-wrap, #team-builder .tb-pl > .tb-pnwrap > .tb-mpsel { max-width: 460px; } #team-builder .tb-plstar .tb-sname { padding: 0 0 2px; font-weight: 700; }
         #team-builder .tb-pl:nth-child(11) { border-bottom: 2px dashed #a16207; }
         #team-builder .tb-no { color: var(--tb-dim); font-size: 11px; text-align: center; font-variant-numeric: tabular-nums; }
+        #team-builder button.tb-no { min-width: 26px; min-height: 22px; padding: 0 2px; margin: 1px 0; border: 1px dashed #334155; border-radius: 4px; background: transparent; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+        #team-builder button.tb-no.own { color: var(--tb-amber); border-style: solid; border-color: #a16207; }
+        #team-builder button.tb-no:hover, #team-builder button.tb-no:focus-visible { color: #fbbf24; border-color: #f59e0b; outline: none; }
+        #tb-nrdlg { position: fixed; inset: 0; z-index: 5; background: rgba(2,6,15,.7); display: flex; align-items: center; justify-content: center; padding: 16px; }
+        #tb-nrdlg.hidden { display: none; }
+        #tb-nrdlg .tbp-card { width: min(340px, 100%); background: var(--tb-card); border: 1px solid var(--tb-edge); border-top: 3px solid var(--tb-amber); border-radius: 12px; padding: 12px 14px; }
+        #tb-nrdlg h3 { margin: 0 0 4px; } #tb-nrdlg .tbn-who { color: var(--tb-dim); font-size: 12px; margin-bottom: 10px; }
+        #tb-nrdlg .tbn-row { display: flex; align-items: center; gap: 8px; } #tb-nrdlg #tb-nrin { width: 84px; font-size: 20px; font-weight: 800; text-align: center; padding: 6px; }
+        #tb-nrdlg .tbn-note { min-height: 1.3em; margin: 8px 0 0; font-size: 12px; line-height: 1.35; color: var(--tb-dim); } #tb-nrdlg .tbn-note.bad { color: #fca5a5; }
+        #tb-nrdlg .tbp-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 10px; } #tb-nrdlg .tbn-clear { margin-right: auto; font-size: 11px; padding: 4px 8px; }
         #team-builder .tb-tok { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 800; border: 1.5px solid rgba(0,0,0,.5); }
         #team-builder .tb-pname { padding: 4px 6px; width: 100%; }
         #team-builder .tb-pnwrap { min-width: 0; } #team-builder .tb-pl { padding: 7px 0; } #team-builder .tb-plx { font-size: 10.5px; color: var(--tb-dim); margin-top: 2px; line-height: 1.3; }
@@ -1233,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.34</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.35</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1445,6 +1455,15 @@ ol.ci-steps li::marker { content: none; }
           <label class="tbp-slide"><span>Brightness</span><input id="tbp-l" type="range" min="0" max="100"></label>
           <label class="tbp-hex"><span>Hex</span><input id="tbp-hexin" class="tb-in" maxlength="7" spellcheck="false" autocomplete="off"></label>
           <div class="tbp-btns"><button type="button" class="tb-ghost" id="tbp-cancel">Cancel</button><button type="button" class="tb-primary" id="tbp-set">Set</button></div>
+        </div>
+      </div>
+      <div id="tb-nrdlg" class="hidden" role="dialog" aria-modal="true" aria-labelledby="tbn-title">
+        <div class="tbp-card">
+          <h3 id="tbn-title">Shirt number</h3>
+          <div id="tbn-who" class="tbn-who"></div>
+          <div class="tbn-row"><input id="tb-nrin" class="tb-in" type="number" inputmode="numeric" min="1" max="99" step="1" aria-label="Shirt number (1 to 99)"><span class="tb-dim">1 to 99. Gaps are fine.</span></div>
+          <p id="tbn-note" class="tbn-note">The number stays with the player if you reorder the roster.</p>
+          <div class="tbp-btns"><button type="button" class="tb-ghost tbn-clear" id="tbn-clear" title="Forget every chosen number: the team is numbered 1, 2, 3... by roster order again">Number all by order</button><button type="button" class="tb-ghost" id="tbn-cancel">Cancel</button><button type="button" class="tb-ghost hidden" id="tbn-swap">Swap</button><button type="button" class="tb-primary" id="tbn-set">Set</button></div>
         </div>
       </div>
       <div class="tb-wrap">
@@ -2624,6 +2643,20 @@ ol.ci-steps li::marker { content: none; }
             }).observe(document.documentElement, { childList: true, subtree: true });
             return { enhance, close };
         })();
+        // ---------- Shirt numbers ----------
+        // A saved player may have his own number (p.nr, 1-99, picked by the coach in the Team Builder: tap the number). Anyone without
+        // one takes the lowest number still free, in roster order, so a team with no numbers set is numbered 1, 2, 3... by its order.
+        // (In a match a player's number is p.nr: p.id is only the engine's id. See pNo.)
+        const okNr = n => Number.isInteger(n) && n >= 1 && n <= 99;
+        function shirtNumbers(list, nrOf = q => q && q.nr) {
+            const out = new Array(list.length), used = new Set();
+            list.forEach((q, i) => { const n = +nrOf(q); if (okNr(n) && !used.has(n)) { out[i] = n; used.add(n); } });   // (a repeated number: the first keeps it)
+            let next = 1;
+            list.forEach((q, i) => { if (out[i] == null) { while (used.has(next)) next++; out[i] = next; used.add(next); } });
+            return out;
+        }
+        // the next n numbers nobody in `used` has
+        function freeNumbers(used, n) { const u = new Set(used), out = []; for (let k = 1; out.length < n; k++) if (!u.has(k)) out.push(k); return out; }
         // ---------- Careers (BB2025 League Play): Star Player Points, advancement, injuries and the post-game sequence ----------
         // A saved team's players keep a record from match to match. Rules tables follow the BB2025 League Play section.
         const CAREER = (function () {
@@ -2747,6 +2780,7 @@ ol.ci-steps li::marker { content: none; }
                 p.inj = Object.assign({ ma: 0, st: 0, ag: 0, pa: 0, av: 0 }, p.inj || {});
                 p.nig = Math.max(0, parseInt(p.nig, 10) || 0);
                 p.mng = !!p.mng;
+                if (p.nr != null) { const n = parseInt(p.nr, 10); if (okNr(n)) p.nr = n; else delete p.nr; }   // the shirt number, if the coach picked one
                 p.stats = Object.assign({ gp: 0, td: 0, cas: 0, cp: 0, int: 0, ttm: 0, mvp: 0, sppTotal: 0 }, p.stats || {});
                 return p;
             }
@@ -2757,6 +2791,9 @@ ol.ci-steps li::marker { content: none; }
                 t.history = Array.isArray(t.history) ? t.history.slice(0, 40) : [];
                 t.fallen = Array.isArray(t.fallen) ? t.fallen.slice(0, 40) : [];
                 (t.players || []).forEach(norm);
+                // a team that uses its own shirt numbers: a repeated number is dropped, and anyone without one (a new hire, a Journeyman
+                // kept on) gets the lowest free, so numbers stay put; a team using none stays numbered by its order
+                if ((t.players || []).some(p => p.nr != null)) { const nums = shirtNumbers(t.players); t.players.forEach((p, i) => { p.nr = nums[i]; }); }
                 return t;
             }
             const types = race => RACES[race].types;
@@ -2824,10 +2861,13 @@ ol.ci-steps li::marker { content: none; }
                 const list = t.players.filter(p => !p.mng).map(p => ({ p, j: false }));
                 const sev = isSevT(t), need = squadOf(t) - list.length, jpos = JOURNEY[t.race] || Object.keys(RACES[t.race].positions)[0];
                 for (let i = 0; i < need; i++) list.push({ p: norm({ id: 'J' + uid(), pos: jpos, name: 'Journeyman ' + (i + 1) }), j: true });
+                // shirt numbers: the roster's own (injured players' numbers stay theirs); Journeymen take numbers nobody on the roster has
+                const nums = shirtNumbers(t.players), nrOf = new Map(t.players.map((p, i) => [p.id, nums[i]])), jNums = freeNumbers(nums, need);
+                let jn = 0;
                 return list.map(({ p, j }) => {
                     const e = eff(t.race, p);
                     if (j && !e.skills.some(s => s.startsWith('Loner'))) e.skills.push(sev ? 'Loner (5+)' : 'Loner (4+)');   // Sevens Journeymen: Loner (5+)
-                    const o = { careerId: p.id, journeyman: j, nig: p.nig, sppBank: p.spp, lvl: j ? 'Journeyman' : level(p), ma: e.ma, st: e.st, ag: e.ag, pa: e.pa, av: e.av, skills: e.skills };
+                    const o = { careerId: p.id, nr: j ? jNums[jn++] : nrOf.get(p.id), journeyman: j, nig: p.nig, sppBank: p.spp, lvl: j ? 'Journeyman' : level(p), ma: e.ma, st: e.st, ag: e.ag, pa: e.pa, av: e.av, skills: e.skills };
                     if (sev && p.vet && !j) Object.assign(o, { ma: Math.max(1, e.ma - 1), skills: e.skills.concat(['Veteran']), veteran: true, lvl: 'Veteran', label: 'V' });   // the Veteran: MA 1 lower, a once-a-game re-roll
                     return { pos: p.pos, name: p.name, ovr: o };
                 });
@@ -4278,8 +4318,9 @@ ol.ci-steps li::marker { content: none; }
             // coach picks who starts at set-up, so the roster order doesn't apply to them (no move arrows). Let go here or on Hire players.
             function starRows(t) {
                 if (!isMP(t)) return '';
-                let no = t.players.length;
-                return (t.stars || []).map(sk => { const S = STARS[sk]; return starMembers(sk).map((m, j) => `<div class="tb-pl tb-plstar"><span class="tb-ord"><span class="tb-no" title="Star Players join the squad at kick-off: you choose who starts">${++no}</span></span>
+                const free = freeNumbers(shirtNumbers(t.players), (t.stars || []).reduce((s, sk) => s + starMembers(sk).length, 0));   // Star Players wear the lowest numbers free
+                let no = 0;
+                return (t.stars || []).map(sk => { const S = STARS[sk]; return starMembers(sk).map((m, j) => `<div class="tb-pl tb-plstar"><span class="tb-ord"><span class="tb-no" title="Star Players join the squad at kick-off: you choose who starts">${free[no++]}</span></span>
                     <div class="tb-phead"><span class="tb-tok tb-startok" aria-hidden="true">★</span><b class="tb-ppos">Star Player</b>${S.mega ? ' <span class="tb-mega">MEGA-STAR</span>' : ''}</div>
                     <span class="tb-dim tb-pcost">${j ? '' : k(S.cost)}</span>
                     ${j ? '<span class="tb-x0"></span>' : `<button type="button" class="tb-x" data-mpstar="${sk}" aria-label="Remove ${esc(S.name)}">✕</button>`}
@@ -4421,6 +4462,7 @@ ol.ci-steps li::marker { content: none; }
                         <button type="button" class="tb-hire" data-hire="${key}" ${full ? 'disabled' : ''}>+ ${k(pos.cost)}</button></div>`;
                 }).join('');
                 // roster
+                const nums = shirtNumbers(t.players);
                 $('tb-roster').innerHTML = n ? t.players.map((p, i) => {
                     const ty = R.types[p.pos], info = CAREER.advText(p), inj = CAREER.injTags(p);
                     // learned skills already show as gold tags and improved stats in green, so "+Frenzy · +Dodge" isn't repeated here
@@ -4429,7 +4471,7 @@ ol.ci-steps li::marker { content: none; }
                     const vet = sev && sevLineman(t.race, p.pos) ? (car ? (p.vet ? '<div class="tb-vetrow"><span class="tb-vet on">★ Veteran</span></div>' : '')
                         : `<div class="tb-vetrow"><button type="button" class="tb-vet ${p.vet ? 'on' : ''}" data-vet="${i}" aria-pressed="${!!p.vet}">${p.vet ? '★ Veteran' : 'Make Veteran'}</button></div>`) : '';
                     const noFire = sev && car;   // Sevens leagues: no firing players
-                    return `<div class="tb-pl"><span class="tb-ord"><button type="button" class="tb-mv" data-up="${i}" ${i ? '' : 'disabled'} aria-label="Move ${esc(p.name)} up">▲</button><span class="tb-no">${i + 1}</span><button type="button" class="tb-mv" data-dn="${i}" ${i < t.players.length - 1 ? '' : 'disabled'} aria-label="Move ${esc(p.name)} down">▼</button></span>
+                    return `<div class="tb-pl"><span class="tb-ord"><button type="button" class="tb-mv" data-up="${i}" ${i ? '' : 'disabled'} aria-label="Move ${esc(p.name)} up">▲</button><button type="button" class="tb-no${p.nr != null ? ' own' : ''}" data-nr="${i}" title="Shirt number: tap to choose one" aria-label="Shirt number ${nums[i]} for ${esc(p.name)}: tap to change">${nums[i]}</button><button type="button" class="tb-mv" data-dn="${i}" ${i < t.players.length - 1 ? '' : 'disabled'} aria-label="Move ${esc(p.name)} down">▼</button></span>
                         <div class="tb-phead"><span class="tb-tok" style="background:${t.primary};color:${t.secondary}">${sev && p.vet ? 'V' : ty.label}</span><b class="tb-ppos" title="${esc(ty.type)}${i >= MINP ? ' (reserve)' : ''}">${esc(ty.type)}</b><input id="tb-pn-${i}" class="tb-in tb-pname" data-pn="${i}" value="${esc(p.name)}" maxlength="24" aria-label="Name of player ${i + 1}"></div>
                         <span class="tb-dim tb-pcost">${k(CAREER.value(t.race, p))}</span>
                         ${noFire ? '<span class="tb-x0"></span>' : `<button type="button" class="tb-x" data-fire="${i}" aria-label="Release ${esc(p.name)}">✕</button>`}
@@ -4568,13 +4610,65 @@ ol.ci-steps li::marker { content: none; }
                 ['tbp-h', 'tbp-s', 'tbp-l'].forEach(id => $(id).addEventListener('input', () => { pick.hex = hslToHex(+$('tbp-h').value, +$('tbp-s').value, +$('tbp-l').value); paintPicker(true); }));
                 $('tbp-hexin').addEventListener('input', e => { let v = e.target.value.trim(); if (v[0] !== '#') v = '#' + v; if (/^#[0-9a-f]{6}$/i.test(v)) { pick.hex = v.toLowerCase(); paintPicker(false); } });
             }
+            // ---- shirt numbers: tap a player's number to give him one of his own (1-99; gaps fine; two players can't share one) ----
+            let nrAt = -1;
+            function openNr(i) {
+                const p = cur.players[i]; if (!p) return;
+                nrAt = i;
+                const ty = (RACES[cur.race].types[p.pos] || { type: p.pos }).type;
+                $('tbn-who').textContent = `${p.name || 'Player'} (${ty})`;
+                $('tb-nrin').value = shirtNumbers(cur.players)[i];
+                nrNote('The number stays with the player if you reorder the roster.');
+                $('tbn-clear').classList.toggle('hidden', !cur.players.some(q => q.nr != null));
+                $('tb-nrdlg').classList.remove('hidden');
+                setTimeout(() => { const el = $('tb-nrin'); el.focus(); el.select(); }, 0);
+            }
+            function nrNote(text, bad, swap) { const n = $('tbn-note'); n.textContent = text; n.className = 'tbn-note' + (bad ? ' bad' : ''); $('tbn-swap').classList.toggle('hidden', !swap); }
+            const closeNr = () => { $('tb-nrdlg').classList.add('hidden'); nrAt = -1; };
+            // fix everyone's number where it is now (so setting one doesn't move the others), then give player i number n
+            // (swap: whoever has n takes player i's old number)
+            function setNr(n, swap) {
+                const i = nrAt, a = cur.players, nums = shirtNumbers(a), j = nums.indexOf(n);
+                if (!a[i]) return closeNr();
+                closeNr();
+                change(() => { a.forEach((q, k) => { q.nr = nums[k]; }); if (j >= 0 && j !== i) a[j].nr = nums[i]; a[i].nr = n; });
+                msg(j >= 0 && j !== i && swap ? `Swapped numbers: ${a[i].name} is now ${n}, ${a[j].name} ${nums[i]}.` : `${a[i].name} now wears number ${n}.`);
+            }
+            function tryNr(swap) {
+                const raw = String($('tb-nrin').value).trim(), n = Number(raw);
+                if (!/^\d+$/.test(raw) || !okNr(n)) { nrNote('Pick a whole number from 1 to 99.', true); return; }
+                const a = cur.players, nums = shirtNumbers(a), j = nums.indexOf(n);
+                if (j >= 0 && j !== nrAt && !swap) {
+                    const ty = (RACES[cur.race].types[a[j].pos] || { type: a[j].pos }).type;
+                    nrNote(`Number ${n} is already ${a[j].name}'s (${ty}): two players can't share a number. Swap them? ${a[j].name} would take ${nums[nrAt]}.`, true, true);
+                    return;
+                }
+                setNr(n, swap);
+            }
+            function wireNr() {
+                const dlg = $('tb-nrdlg');
+                dlg.addEventListener('click', e => {
+                    const b = e.target.closest('button');
+                    if (e.target === dlg || (b && b.id === 'tbn-cancel')) { closeNr(); return; }
+                    if (!b) return;
+                    if (b.id === 'tbn-set') tryNr(false);
+                    else if (b.id === 'tbn-swap') tryNr(true);
+                    else if (b.id === 'tbn-clear') { closeNr(); change(() => { cur.players.forEach(q => { delete q.nr; }); }); msg('Shirt numbers follow the roster order again.'); }
+                });
+                $('tb-nrin').addEventListener('input', () => nrNote('The number stays with the player if you reorder the roster.'));
+                dlg.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') { e.preventDefault(); tryNr(!$('tbn-swap').classList.contains('hidden')); }
+                    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeNr(); }
+                });
+            }
             function wire() {
-                wirePicker();
+                wirePicker(); wireNr();
                 const root = $('team-builder');
                 root.addEventListener('click', e => {
                     const b = e.target.closest('button'); if (!b) return;
                     const d = b.dataset;
-                    if (b.closest('#tb-picker')) return;   // the colour picker handles its own buttons
+                    if (b.closest('#tb-picker') || b.closest('#tb-nrdlg')) return;   // the colour picker and the number box handle their own buttons
+                    if (d.nr != null) { openNr(+d.nr); return; }
                     if (d.tbtab) {   // switch section; if the page has scrolled past the tabs, bring them back just under the summary bar
                         tab = d.tbtab; render();
                         const box = $('team-builder'), grid = document.querySelector('#team-builder .tb-grid'), sum = document.querySelector('#team-builder .tb-sum');
@@ -4874,12 +4968,12 @@ ol.ci-steps li::marker { content: none; }
                 const R = RACES[t.race];
                 const cell = (v, b, plus, low) => { const cls = v == null || b == null || v === b ? '' : (low ? v < b : v > b) ? 'th-up' : 'th-dn';
                     return `<td class="th-cs ${cls}"${cls ? ` title="${cls === 'th-up' ? 'Improved' : 'Lowered by an injury'} (normally ${b}${plus ? '+' : ''})"` : ''}>${v == null ? '–' : v + (plus ? '+' : '')}</td>`; };
-                return `<div class="th-scroll"><table class="th-ctbl"><thead><tr><th></th><th class="l">Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th></tr></thead><tbody>${t.players.map((p, i) => {
+                return `<div class="th-scroll"><table class="th-ctbl"><thead><tr><th></th><th class="l">Position</th><th>MA</th><th>ST</th><th>AG</th><th>PA</th><th>AV</th></tr></thead><tbody>${((nums) => t.players.map((p, i) => {
                     const ty = R.types[p.pos] || { type: p.pos }, inj = CAREER.injTags(p), e = CAREER.eff(t.race, CAREER.norm(Object.assign({}, TB.mpView(t, p))));
                     const sk = skillTags(e.skills, '', ty.skills);
-                    return `<tr class="th-c1 ${p.mng ? 'th-out' : ''}"><td class="pg-dim th-cn">${i + 1}</td><td class="th-cpos"><b>${esc(ty.type)}</b></td>${cell(e.ma, ty.ma)}${cell(e.st, ty.st)}${cell(e.ag, ty.ag, true, true)}${cell(e.pa, ty.pa, true, true)}${cell(e.av, ty.av, true)}</tr>
+                    return `<tr class="th-c1 ${p.mng ? 'th-out' : ''}"><td class="pg-dim th-cn">${nums[i]}</td><td class="th-cpos"><b>${esc(ty.type)}</b></td>${cell(e.ma, ty.ma)}${cell(e.st, ty.st)}${cell(e.ag, ty.ag, true, true)}${cell(e.pa, ty.pa, true, true)}${cell(e.av, ty.av, true)}</tr>
                         <tr class="th-c2 ${p.mng ? 'th-out' : ''}"><td></td><td colspan="6"><span class="th-cname">${esc(p.name)}</span>${sk ? ' ' + sk : ''}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td></tr>`;
-                }).join('')}${starsOf(t).map(({ m, S }) => `<tr class="th-c1"><td class="pg-dim th-cn">★</td><td class="th-cpos"><b>Star Player</b></td><td class="th-cs">${m.ma}</td><td class="th-cs">${m.st}</td><td class="th-cs">${m.ag}+</td><td class="th-cs">${m.pa ? m.pa + '+' : '–'}</td><td class="th-cs">${m.av}+</td></tr>
+                }).join(''))(shirtNumbers(t.players))}${starsOf(t).map(({ m, S }) => `<tr class="th-c1"><td class="pg-dim th-cn">★</td><td class="th-cpos"><b>Star Player</b></td><td class="th-cs">${m.ma}</td><td class="th-cs">${m.st}</td><td class="th-cs">${m.ag}+</td><td class="th-cs">${m.pa ? m.pa + '+' : '–'}</td><td class="th-cs">${m.av}+</td></tr>
                         <tr class="th-c2"><td></td><td colspan="6"><span class="th-cname">${esc(m.name || S.name)}</span> ${skillTags(m.skills || [], '')}</td></tr>`).join('')}</tbody></table></div>`;
             }
             // a tournament team's Star Players, for the foot of the roster
@@ -4887,11 +4981,12 @@ ol.ci-steps li::marker { content: none; }
             const starStats = m => `<div class="pl-stats"><span class="pst">MA <b>${m.ma}</b></span><span class="pst">ST <b>${m.st}</b></span><span class="pst">AG <b>${m.ag}+</b></span><span class="pst">PA <b>${m.pa ? m.pa + '+' : '–'}</b></span><span class="pst">AV <b>${m.av}+</b></span></div><div class="pl-skills">${skillTags(m.skills || [], '')}</div>`;
             function detail(t) {
                 const R = RACES[t.race], car = CAREER.started(t), rc = t.record;
+                const nums = shirtNumbers(t.players);
                 const rows = t.players.map((p, i) => {
                     const ty = R.types[p.pos], info = CAREER.advText(p), inj = CAREER.injTags(p), s = p.stats;
                     // two rows per player: name and numbers, then the stats and skills across the full width underneath
                     // (learned skills are the gold tags and improved stats are green, so the "+Frenzy · +Dodge" line isn't repeated)
-                    return `<tr class="th-main ${p.mng ? 'th-out' : ''}"><td class="pg-dim">${i + 1}</td>
+                    return `<tr class="th-main ${p.mng ? 'th-out' : ''}"><td class="pg-dim">${nums[i]}</td>
                         <td><b>${esc(p.name)}</b><div class="pg-dim">${esc(ty.type)} · ${CAREER.level(p)}</div></td>
                         <td class="th-num">${p.spp}</td><td class="th-num">${s.gp}</td><td class="th-num">${s.td}</td><td class="th-num">${s.cas}</td><td class="th-num">${s.cp}</td><td class="th-num">${s.int}</td><td class="th-num">${s.mvp}</td>
                         <td class="th-num">${k(CAREER.value(t.race, p))}</td></tr>
@@ -5710,11 +5805,11 @@ ol.ci-steps li::marker { content: none; }
             }
             function rosterHtml(t) {
                 const R = RACES[t.race];
-                return `<div class="th-scroll"><table class="th-tbl lg-ros"><thead><tr><th></th><th>Player</th><th>SPP</th><th>GP</th><th>TD</th><th>CAS</th><th>Value</th></tr></thead><tbody>${t.players.map((p, i) => {
+                return `<div class="th-scroll"><table class="th-tbl lg-ros"><thead><tr><th></th><th>Player</th><th>SPP</th><th>GP</th><th>TD</th><th>CAS</th><th>Value</th></tr></thead><tbody>${((nums) => t.players.map((p, i) => {
                     const ty = R.types[p.pos] || { type: p.pos }, info = CAREER.advText(p), inj = CAREER.injTags(p);
-                    return `<tr class="${p.mng ? 'th-out' : ''}"><td class="pg-dim">${i + 1}</td><td><b>${esc(p.name)}</b><div class="pg-dim">${esc(ty.type)} · ${CAREER.level(p)}</div>${info ? `<div class="th-info">${esc(info)}</div>` : ''}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td>
+                    return `<tr class="${p.mng ? 'th-out' : ''}"><td class="pg-dim">${nums[i]}</td><td><b>${esc(p.name)}</b><div class="pg-dim">${esc(ty.type)} · ${CAREER.level(p)}</div>${info ? `<div class="th-info">${esc(info)}</div>` : ''}${inj ? `<div class="th-inj">${inj}</div>` : ''}</td>
                         <td class="th-num">${p.spp}</td><td class="th-num">${p.stats.gp}</td><td class="th-num">${p.stats.td}</td><td class="th-num">${p.stats.cas}</td><td class="th-num">${k(CAREER.value(t.race, p))}</td></tr>`;
-                }).join('')}</tbody></table></div>`;
+                }).join(''))(shirtNumbers(t.players))}</tbody></table></div>`;
             }
             function teamsHtml(lg) {
                 const tb = table(lg);
@@ -7454,7 +7549,7 @@ ol.ci-steps li::marker { content: none; }
                 avail.filter(p => !p.inSquad).forEach(p => {
                     if (chosen.length < MAX_ON_PITCH) {
                         p.inSquad = true; p.sub = true; chosen.push(p);
-                        log(`  ${ROSTERS[team].name} bring ${p.type} #${p.id} on from the dugout.`, 'text-sky-300');
+                        log(`  ${ROSTERS[team].name} bring ${p.type} #${pNo(p)} on from the dugout.`, 'text-sky-300');
                     }
                 });
                 assignSpawns(team, chosen);
@@ -7597,7 +7692,19 @@ ol.ci-steps li::marker { content: none; }
                         [...mine].sort((a, b) => (ix(a) - ix(b)) || (a.id - b.id)).forEach((p, i) => { p.id = first + i; });
                     }
                 } catch (e) { console.error('numbering', e); }
+                // shirt numbers: a saved team's come with it (its own or by its order); everyone else (Stars, Mercenaries, a default team)
+                // takes the lowest number free, in roster order
+                try {
+                    const order = rosterOrdered(team), nums = shirtNumbers(order);
+                    order.forEach((p, i) => { p.nr = nums[i]; });
+                } catch (e) { console.error('shirt numbers', e); }
             });
+        }
+        // the number a player wears in the match (p.id is only the engine's id); one who joins during the match takes the lowest free
+        function pNo(p) {
+            if (!p) return '?';
+            if (p.nr == null) { const used = state.players.filter(q => q.team === p.team && q !== p && q.nr != null).map(q => q.nr); p.nr = freeNumbers(used, 1)[0]; }
+            return p.nr;
         }
 
         const WEATHER_TABLE = {
@@ -7802,7 +7909,7 @@ ol.ci-steps li::marker { content: none; }
                 const skillsText = skillTags(p.skills, undefined, p.baseSkills);
                 return `
                     <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="py-2 px-2.5 text-center font-mono font-bold text-slate-500">#${p.id}</td>
+                        <td class="py-2 px-2.5 text-center font-mono font-bold text-slate-500">#${pNo(p)}</td>
                         <td class="py-2 px-3 font-semibold ${team === TEAMS.HUMAN ? 'text-blue-400' : 'text-green-400'}">${p.name ? `${p.name}<div class="text-[10px] font-normal text-slate-400">${p.type}</div>` : p.type}</td>
                         <td class="py-2 px-3 text-center">
                             <span class="text-[9px] uppercase px-1.5 py-0.5 rounded border font-bold ${status.color}">${status.label}</span>
@@ -8035,8 +8142,8 @@ ol.ci-steps li::marker { content: none; }
             if (addBlood && player.x >= 0 && player.y >= 0 && player.x < CFG.cols && player.y < CFG.rows) {
                 addBloodSplatter(player.x, player.y);
             }
-            showRemovalNotice(reasonTitle, `${ROSTERS[player.team].name} ${player.type} #${player.id}: ${reasonDesc}`);
-            log(`  ${ROSTERS[player.team].name} ${player.type} #${player.id} leaves the pitch (${reasonDesc})!`, 'text-red-400 font-bold');
+            showRemovalNotice(reasonTitle, `${ROSTERS[player.team].name} ${player.type} #${pNo(player)}: ${reasonDesc}`);
+            log(`  ${ROSTERS[player.team].name} ${player.type} #${pNo(player)} leaves the pitch (${reasonDesc})!`, 'text-red-400 font-bold');
         }
 
         function getTackleZones(x, y, oppTeam) {
@@ -8832,7 +8939,7 @@ ol.ci-steps li::marker { content: none; }
             const reset = () => { S = blank(); };
             reset();
             const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-            const nm = p => p.name ? `${p.name} <span class="ms-dim">${esc(p.type)}</span>` : `${esc(p.type)} <span class="ms-dim">#${p.id}</span>`;
+            const nm = p => p.name ? `${p.name} <span class="ms-dim">${esc(p.type)}</span>` : `${esc(p.type)} <span class="ms-dim">#${pNo(p)}</span>`;
             const tn = t => esc(ROSTERS[t].name);
             const ok = t => t === 0 || t === 1;
             // event notes from the rules code
@@ -10279,10 +10386,10 @@ ol.ci-steps li::marker { content: none; }
                     if (kegs) log(`  ${indOf(p.team, 'kegs') ? "Blitzer's Best Kegs" : ''}${indOf(p.team, 'kegs') && indOf(p.team, 'bugman') ? ' and ' : ''}${indOf(p.team, 'bugman') ? "Bugman's XXXX" : ''}: +${kegs} for ${ROSTERS[p.team].name}.`, 'text-violet-300');
                     if (roll + kegs >= 4) {
                         p.isKO = false; p.isFading = false; p.mawKO = false;
-                        recoveredNames.push(`${ROSTERS[p.team].name.substring(0,3)} ${p.type} #${p.id}`);
-                        log(`  ${ROSTERS[p.team].name} ${p.type} #${p.id} rolled ${roll} -> RECOVERED!`, 'text-green-400');
+                        recoveredNames.push(`${ROSTERS[p.team].name.substring(0,3)} ${p.type} #${pNo(p)}`);
+                        log(`  ${ROSTERS[p.team].name} ${p.type} #${pNo(p)} rolled ${roll} -> RECOVERED!`, 'text-green-400');
                     } else {
-                        log(`  ${ROSTERS[p.team].name} ${p.type} #${p.id} rolled ${roll} -> Still KO'd.`, 'text-slate-400');
+                        log(`  ${ROSTERS[p.team].name} ${p.type} #${pNo(p)} rolled ${roll} -> Still KO'd.`, 'text-slate-400');
                     }
                 });
                 
@@ -10307,7 +10414,7 @@ ol.ci-steps li::marker { content: none; }
                 }
                 const p = list[i];
                 if (starIs(p, 'kreek') && starFree(p, 'back')) { starSpend(p, 'back', "I'll Be Back!"); log(`  I'LL BE BACK! Kreek talks his way out of it and stays in the game.`, 'text-yellow-300 font-bold'); next(i + 1); return; }
-                log(`  SECRET WEAPON! The ref has had enough of ${ROSTERS[p.team].name} ${p.type} #${p.id}...`, 'text-red-400 font-bold');
+                log(`  SECRET WEAPON! The ref has had enough of ${ROSTERS[p.team].name} ${p.type} #${pNo(p)}...`, 'text-red-400 font-bold');
                 skillPop('Secret Weapon', p.type);
                 resolveSendOff(p, res => {
                     if (res === 'sent') {
@@ -11223,8 +11330,8 @@ ol.ci-steps li::marker { content: none; }
                 if (bribesLeft(team) > 0) {
                     const nb = bribesLeft(team), gift = gobboBribe(team) ? ` (${nb > 1 ? 'one is ' : 'it is '}Da Red Gobbo's present, which goes at the end of the half)` : '';
                     askChoice('USE A BRIBE?',
-                        secret ? `${tname} ${player.type} #${player.id} is Sent-off for carrying a Secret Weapon! Use one of your ${nb} Bribe(s)${gift}? On a 2+ the ref looks away and they can play in the next Drive. On a 1 the Bribe is wasted.`
-                               : `${tname} ${player.type} #${player.id} has been Sent-off! Use one of your ${nb} Bribe(s)${gift}? On a 2+ the ref looks away: the player stays and no Turnover is caused. On a 1 the Bribe is wasted.`,
+                        secret ? `${tname} ${player.type} #${pNo(player)} is Sent-off for carrying a Secret Weapon! Use one of your ${nb} Bribe(s)${gift}? On a 2+ the ref looks away and they can play in the next Drive. On a 1 the Bribe is wasted.`
+                               : `${tname} ${player.type} #${pNo(player)} has been Sent-off! Use one of your ${nb} Bribe(s)${gift}? On a 2+ the ref looks away: the player stays and no Turnover is caused. On a 1 the Bribe is wasted.`,
                         'Use Bribe', 'Accept Send-off',
                         () => {
                             spendBribe(team);
@@ -11297,7 +11404,7 @@ ol.ci-steps li::marker { content: none; }
                     const onPitch = state.players.filter(p => p.team === t && !p.isCasualty && !p.isEjected && !p.isKO && !p.isReserve);
                     pickRandom(onPitch, n).forEach(p => {
                         p.heatBench = true;
-                        log(`    ${ROSTERS[t].name} ${p.type} #${p.id} is sent to the Reserves.`, 'text-orange-300');
+                        log(`    ${ROSTERS[t].name} ${p.type} #${pNo(p)} is sent to the Reserves.`, 'text-orange-300');
                     });
                 });
             }
@@ -11414,7 +11521,7 @@ ol.ci-steps li::marker { content: none; }
                     picked.x = x; picked.y = y;
                     ev.moved.add(picked.id);
                     ev.pickId = null;
-                    log(`  Quick Snap! ${picked.type} #${picked.id} steps to [${x}, ${y}].`, 'text-cyan-300');
+                    log(`  Quick Snap! ${picked.type} #${pNo(picked)} steps to [${x}, ${y}].`, 'text-cyan-300');
                     if (ev.moved.size >= ev.ids.size) finishQuickSnap();
                 } else if (clicked && ev.ids.has(clicked.id) && !ev.moved.has(clicked.id)) {
                     ev.pickId = (ev.pickId === clicked.id) ? null : clicked.id;
@@ -11535,7 +11642,7 @@ ol.ci-steps li::marker { content: none; }
                             if (ids.length) {
                                 const p = getPlayerById(ids[0]);
                                 p.x = L.x; p.y = L.y;
-                                log(`  High Kick! ${p.type} #${p.id} sprints under the ball at [${L.x}, ${L.y}].`, 'text-sky-300 font-bold');
+                                log(`  High Kick! ${p.type} #${pNo(p)} sprints under the ball at [${L.x}, ${L.y}].`, 'text-sky-300 font-bold');
                             }
                             finishKickoffEvent();
                         }
@@ -11638,14 +11745,14 @@ ol.ci-steps li::marker { content: none; }
                         const r = rollD6();
                         if (r === 1) {
                             p.isReserve = true;
-                            log(`  ${ROSTERS[t].name} ${p.type} #${p.id} is locked in the lavatory (rolled 1)! Reserves for this Drive.`, 'text-lime-300');
-                            txt += `${ROSTERS[t].name} ${p.type} #${p.id} is locked in the lavatory. `;
+                            log(`  ${ROSTERS[t].name} ${p.type} #${pNo(p)} is locked in the lavatory (rolled 1)! Reserves for this Drive.`, 'text-lime-300');
+                            txt += `${ROSTERS[t].name} ${p.type} #${pNo(p)} is locked in the lavatory. `;
                         } else {
                             const dma = p.ma > 1 ? 1 : 0, dav = p.av > 2 ? 1 : 0;
                             p.ma -= dma; p.av -= dav; p.remainingMA = p.ma;
                             p.snackDelta = { ma: dma, av: dav };
-                            log(`  ${ROSTERS[t].name} ${p.type} #${p.id} feels queasy: -1 MA and -1 AV for the Drive.`, 'text-lime-300');
-                            txt += `${ROSTERS[t].name} ${p.type} #${p.id} has -1 MA and -1 AV. `;
+                            log(`  ${ROSTERS[t].name} ${p.type} #${pNo(p)} feels queasy: -1 MA and -1 AV for the Drive.`, 'text-lime-300');
+                            txt += `${ROSTERS[t].name} ${p.type} #${pNo(p)} has -1 MA and -1 AV. `;
                         }
                     });
                     return { text: txt };
@@ -11905,7 +12012,7 @@ ol.ci-steps li::marker { content: none; }
                         } else {
                             p.isStunned = false; 
                             p.isDown = true; 
-                            log(`  ${ROSTERS[p.team].name} ${p.type} #${p.id} recovers from Stun (now Prone).`, 'text-blue-300 font-bold'); 
+                            log(`  ${ROSTERS[p.team].name} ${p.type} #${pNo(p)} recovers from Stun (now Prone).`, 'text-blue-300 font-bold'); 
                         }
                     }
                     if (p.isDown || p.isStunned) p.rooted = false;
@@ -12391,6 +12498,7 @@ ol.ci-steps li::marker { content: none; }
             function sheet(t0) {
                 const t = CAREER.normTeam(JSON.parse(JSON.stringify(t0))), R = RACES[t.race], mp = TB.isMP(t), sev = TB.isSev(t), car = CAREER.started(t), c = TB.costs(t), check = TB.rulesCheck(t);
                 let skillsCost = 0, baseCost = 0, prim = 0, sec = 0; const used = new Set();
+                const nums = shirtNumbers(t.players);
                 const players = t.players.map((p, i) => {
                     const ty = R.types[p.pos] || { type: p.pos, skills: [] }, view = TB.mpView(t, p), e = CAREER.eff(t.race, CAREER.norm(Object.assign({}, view)));
                     const base = ty.skills || [], extra = new Set(e.skills.filter(s => !base.includes(s)));
@@ -12401,10 +12509,10 @@ ol.ci-steps li::marker { content: none; }
                     if (!mp) skillsCost += cost - basePrice;
                     baseCost += basePrice;
                     e.skills.forEach(s => used.add(s));
-                    return { n: i + 1, pos: ty.type, name: p.name, ma: e.ma, st: e.st, ag: e.ag, pa: e.pa, av: e.av, skills: e.skills.map(s => ({ s, extra: extra.has(s), elite: capped.has(s) && extra.has(s) })), cost, spp: p.spp || 0, mng: !!p.mng, posKey: p.pos,
+                    return { n: nums[i], pos: ty.type, name: p.name, ma: e.ma, st: e.st, ag: e.ag, pa: e.pa, av: e.av, skills: e.skills.map(s => ({ s, extra: extra.has(s), elite: capped.has(s) && extra.has(s) })), cost, spp: p.spp || 0, mng: !!p.mng, posKey: p.pos,
                         up: { ma: e.ma > ty.ma, st: e.st > ty.st, ag: e.ag < ty.ag, pa: e.pa != null && ty.pa != null && e.pa < ty.pa, av: e.av > ty.av },
                         dn: { ma: e.ma < ty.ma, st: e.st < ty.st, ag: e.ag > ty.ag, pa: e.pa != null && ty.pa != null && e.pa > ty.pa, av: e.av < ty.av } };
-                });
+                }).sort((a, b) => a.n - b.n);   // listed by shirt number (the same as roster order for a team that hasn't picked its own numbers)
                 const stars = [];
                 (mp ? t.stars || [] : []).forEach(sk => starMembers(sk).forEach((m, j) => { (m.skills || []).forEach(s => used.add(s)); stars.push({ n: '*', pos: 'Star Player', name: m.name || STARS[sk].name, ma: m.ma, st: m.st, ag: m.ag, pa: m.pa || null, av: m.av, skills: (m.skills || []).map(s => ({ s, extra: false })), cost: j ? null : STARS[sk].cost, star: true, up: {}, dn: {} }); }));
                 const indList = typeof LEAGUE === 'undefined' ? [] : LEAGUE.indList(sev ? 'sevens' : 'std');
@@ -15354,7 +15462,7 @@ ol.ci-steps li::marker { content: none; }
                 log(`  ${nm} snaps at thin air and becomes DISTRACTED! The activation is lost.`, 'text-orange-400 font-bold');
                 p.isDistracted = true; p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null;
                 state.mode = MODES.IDLE;
-                showRemovalNotice('DISTRACTED', `${ROSTERS[p.team].name} ${p.type} #${p.id} rages at nothing. No Tackle Zone until their next turn.`);
+                showRemovalNotice('DISTRACTED', `${ROSTERS[p.team].name} ${p.type} #${pNo(p)} rages at nothing. No Tackle Zone until their next turn.`);
                 refreshSelection(p); done(false);
             };
             const flatten = v => {
@@ -15480,7 +15588,7 @@ ol.ci-steps li::marker { content: none; }
                 log(`  Animal Savagery roll: ${r}${mod ? ' +2' : ''} - nobody to lash out at, ${p.type} becomes DISTRACTED! The Action is lost.`, 'text-orange-400 font-bold');
                 p.isDistracted = true; p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null;
                 state.mode = MODES.IDLE;
-                showRemovalNotice('DISTRACTED', `${ROSTERS[p.team].name} ${p.type} #${p.id} snarls at nothing. No Tackle Zone until their next turn.`);
+                showRemovalNotice('DISTRACTED', `${ROSTERS[p.team].name} ${p.type} #${pNo(p)} snarls at nothing. No Tackle Zone until their next turn.`);
                 refreshSelection(p);
                 return false;
             }
@@ -15521,7 +15629,7 @@ ol.ci-steps li::marker { content: none; }
             p.isDistracted = true;
             p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null;
             state.mode = MODES.IDLE;
-            showRemovalNotice('DISTRACTED', `${ROSTERS[p.team].name} ${p.type} #${p.id} loses track of what they were doing. No Tackle Zone until their next turn.`);
+            showRemovalNotice('DISTRACTED', `${ROSTERS[p.team].name} ${p.type} #${pNo(p)} loses track of what they were doing. No Tackle Zone until their next turn.`);
             refreshSelection(p);
             return false;
         }
@@ -22484,7 +22592,7 @@ ol.ci-steps li::marker { content: none; }
                     animateBallFlight(fromX, fromY, clicked.x, clicked.y, 800, () => {
                         state.ball.carrierId = clicked.id;
                         state.ball.x = -1; state.ball.y = -1;
-                        log(`  Touchback awarded to ${clicked.type} #${clicked.id}!`, 'text-green-400 font-bold');
+                        log(`  Touchback awarded to ${clicked.type} #${pNo(clicked)}!`, 'text-green-400 font-bold');
                         beginDriveActivePhase();
                     }, true);
                 } else {
@@ -22714,7 +22822,7 @@ ol.ci-steps li::marker { content: none; }
                         ${p.isStunned ? '<span class="text-yellow-400 font-bold ml-1 text-[10px] animate-pulse">💫 [STUNNED]</span>' : ''}
                         ${p.isDistracted ? '<span class="text-orange-400 font-bold ml-1 text-[10px]">❓ [DISTRACTED]</span>' : ''}
                     </div>
-                    <span class="text-slate-400 font-normal">#${p.id}</span>
+                    <span class="text-slate-400 font-normal">#${pNo(p)}</span>
                 </div>
                 <div class="flex justify-between bg-slate-950 rounded px-1.5 py-0.5 mb-1 shadow-inner">
                     <div class="text-center"><div class="text-[8px] text-slate-500">MA</div><div class="font-bold text-[10px]">${p.remainingMA}/${p.ma}</div></div>

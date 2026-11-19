@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.35 (19 Nov 2026)
+- Shirt numbers: tap a player's number on the Team Builder roster to give him his own (1-99, gaps fine), e.g. to match your models.
+  The number stays with the player when you reorder, and shows in matches, replays and the roster PDF.
+
 ## v5.34 (19 Nov 2026)
 - Behind the scenes: an earlier Blitz was tested for the experimental computer coach and left off: it made no difference.
 
