@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.33 (19 Nov 2026)
+- Behind the scenes: more blocking on defence and more Blitzes were tested for the experimental computer coach and left off: neither
+  helped, and the extra Blitzes made it worse.
+
 ## v5.32 (19 Nov 2026)
 - The foam-hand Squig Herder's stick no longer disappears behind his teeth.
 

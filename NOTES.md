@@ -78,6 +78,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   ball: 0 -> it scores within 3 turns 43%, 3 -> 4% (`nn/look/dbg/loose_ours.py`). Sure moves to cut that, hits on those who could reach it: it got the ball 48% ->
   40%. 300 games looked great (73-71-156, 209-348) but 1,000 (`k_cb2.txt`): 202-245-553, 643-1268 v 207-245-548, 697-1337. `lb1` and `cb1` both took ~70 touchdowns
   off each side: more care around the ball slows our attack as much as theirs. Trust 1,000 games, not 300. `cbKeep` (hold players back for a Blitz) was no help.
+  v5.33 blocks: all OFF. `nn/look/dbg/block_gap.py` (per turn, drefsante | ours): on defence 3.15 | 2.29 block rolls, ball loose Blitzes .89 | .38; about 4.4 of the
+  ~10 blocks-a-game gap is 1-die blocks. 1,000 games v 207-245-548, 697-1337 (.330, margin -.640): `bk1` (`bkD` 1, 1-die blocks on defence at turn end, `lateWorth`)
+  205-247-548, 679-1350 (.329, -.671; 1-die 4.4 -> 5.7, knock-downs 25.7 -> 26.0); `bzMin` 1.5 + `bzDef` 1 181-234-585, 674-1415 (.298, -.741); both 175-256-569,
+  668-1383 (.303, -.715). `k_bk1-3.txt`. Throwing more blocks doesn't close the gap: the count is a symptom, not the cause. Don't lower the Blitz bar.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

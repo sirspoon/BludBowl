@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.33 (19 Nov 2026)
+- No change to play. Brain x's blocks, tried again against drefsante and left as they were. From similar positions drefsante throws 3.2 blocks a
+  turn when we have the ball; we throw 2.3 when it has the ball, and with the ball loose it Blitzes 0.89 times a turn to our 0.38. Over 1,000 games each,
+  against brain x as it stands (won 207, drew 245, lost 548, touchdowns 697-1337, score share .330):
+  - `bk1` (`bkD`, `bkTurn`, `bkDown`, `bkRisk`, in `lateWorth`): with the ball theirs, any player may throw a 1-die block at the end of the turn, unless his going down
+    would open a way for them to score. 205-247-548, 679-1350, share .329. 1.3 more 1-die blocks a game but only 0.3 more knock-downs.
+  - A lower bar for Blitzes (`bzMin` 1.5, `bzDef` 1): 181-234-585, 674-1415, share .298. Worse.
+  - Both: 175-256-569, 668-1383, share .303. Worse.
+
 ## v5.32 (19 Nov 2026)
 - Night Goblin sprite fix (the owner spotted it): the foam-hand Squig Herder's stick ran behind his face and was hidden by his
   teeth. The hand is now a little lower and the stick runs below his chin, across his chest, drawn in front of him.
