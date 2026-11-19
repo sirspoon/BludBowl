@@ -116,6 +116,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.39 (job session, 19 Nov): **roster PDF easier to read in print**. `ROSTER_PDF.draw` tries type sizes `SIZES` (11pt down to 7) with
+  `rosterPage(doc, S, z, last, extra)` and keeps the largest that fits one page (returns the spare room; a small team redraws with
+  taller rows). Column widths come from the contents; names, numbers, characteristics, headings and box values bold; changed
+  characteristics underlined too (shows in black and white). Paper: Letter for US/Canada/Mexico browser languages (`paper()`), else A4;
+  `_draw(J, t, fmt)` takes 'a4' / 'letter' and the doc carries `_fit` {size, onePage}. Typical sizes: 16 skilled league players 9.5pt,
+  worst-case 16 rows (3 Big Guys + Dribl & Drull, failing ruleset check) 8pt, small teams 11pt. Check: `tools/ui-tests/roster-pdf.js`;
+  before/after pictures in `tools/ui-tests/roster-pdf-images/`.
 - v5.35 (job session, 19 Nov): **shirt numbers** chosen by the coach. Saved players may have `p.nr` (1-99); `shirtNumbers(list)` (before
   CAREER) gives everyone's shown number (own, else lowest free in roster order), `freeNumbers`. Team Builder: the number under the
   arrows is a button (`data-nr`) opening `#tb-nrdlg` (set / swap on a duplicate / "Number all by order"); setting one fixes all the

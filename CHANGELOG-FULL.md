@@ -2,6 +2,24 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.39 (19 Nov 2026)
+- Roster PDF easier to read in print (the owner: "quite small yet there's quite a bit of space on the page"). The player rows now use the
+  largest type size that gets the roster page onto one page (11pt down to 7pt in half-points; it was always 8pt): a full 16-player league
+  team with gained skills gets 9.5pt, a new or small team 11pt, and a small team's rows are spread out to fill the page. The header boxes,
+  keywords, legend and ruleset check grow with it. Long skill lists wrap within their row; a long player name is set a little smaller
+  before it wraps.
+- Bold for scanning: shirt numbers, player names, all five characteristics, column headings, box titles and every value in the
+  Sideline and Summary boxes (team value, treasury, re-rolls...). Skills stay regular weight: starting skills plain, gained or picked
+  skills in blue italics (Elite Skills under a limit in orange bold italics). Changed characteristics are now underlined as well as
+  coloured (green improved, red injured), so they still show when printed in black and white.
+- Paper: Letter for coaches whose browser language is set for the US, Canada or Mexico, A4 for everyone else; the layout
+  fits either.
+- Fixed: the team colour swatch no longer overlaps a long race name (the name shrinks to fit), the team name box takes up to three
+  lines, box titles shrink to fit narrow boxes, and the skills page leaves a gap after each skill's name.
+- Check: `node tools/ui-tests/roster-pdf.js` now also builds a 16-player league team with long skill lists and a worst-case 16-row
+  tournament team (Big Guys, a two-player Star, a failing ruleset check) on A4 and Letter and checks each roster fits one page.
+  Before/after pictures: `tools/ui-tests/roster-pdf-images/`.
+
 ## v5.38 (19 Nov 2026)
 - No change to the game's normal computer coach. Brain x's ball carrier now values ground gained more against safety (`bpProg` 0.1, was 0.025).
   A 300-game study against drefsante found our carrier, 13-18 squares from scoring, gaining nothing in 51% of our turns (drefsante's carrier: 28%),

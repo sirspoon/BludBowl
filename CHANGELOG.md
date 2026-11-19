@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.39 (19 Nov 2026)
+- The roster PDF is easier to read when printed: bigger type (as large as fits on one page), player names, characteristics,
+  headings and totals in bold, and Letter paper for coaches in the US and Canada.
+
 ## v5.38 (19 Nov 2026)
 - Behind the scenes: the experimental computer coach's ball carrier now pushes forward more instead of hanging back for safety.
 

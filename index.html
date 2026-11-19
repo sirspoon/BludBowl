@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.38</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.39</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -12528,132 +12528,174 @@ ol.ci-steps li::marker { content: none; }
                 const kw = []; t.players.forEach(p => { const ty = R.types[p.pos] || { type: p.pos }; if (!kw.some(x => x[0] === ty.type)) { const w = keywordsOf(t.race, p.pos); if (w.length) kw.push([ty.type, w.join(', ')]); } });
                 return { t, R, mp, sev, car, players, stars, ind, special, fmt, rules, sideline, summary, check, kw, used: [...used].sort((a, b) => a.localeCompare(b)) };
             }
-            function draw(J, S) {
-                const doc = new J.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }), W = 297, H = 210, M = 10;
-                const font = (st, size) => { doc.setFont('helvetica', st || 'normal'); doc.setFontSize(size || 8); };
-                const ink = (r, g, b) => doc.setTextColor(r, g, b);
+            // coaches in the US, Canada and Mexico print on Letter paper, everyone else on A4
+            const paper = () => /^(en-US|en-CA|es-US|es-MX|fr-CA)\b/i.test(navigator.language || '') ? 'letter' : 'a4';
+            // the player rows' type size, in points: the sheet uses the largest that gets the roster onto one page
+            const SIZES = [11, 10.5, 10, 9.5, 9, 8.5, 8, 7.5, 7], PT = 0.3528;   // mm per point
+            function draw(J, S, fmt) {
+                fmt = fmt === 'letter' || fmt === 'a4' ? fmt : paper();
+                let doc, z, one = false;
+                for (let i = 0; i < SIZES.length && one === false; i++) { z = SIZES[i]; doc = new J.jsPDF({ orientation: 'landscape', unit: 'mm', format: fmt }); one = rosterPage(doc, S, z, i === SIZES.length - 1, 0); }
+                // room to spare (a small team at the largest size): spread the rows out
+                const rows = S.players.length + S.stars.length, spare = typeof one === 'number' ? one : 0;
+                if (spare > 4 && rows) { doc = new J.jsPDF({ orientation: 'landscape', unit: 'mm', format: fmt }); rosterPage(doc, S, z, true, Math.min(z * PT * 0.8, (spare - 2) / rows)); }
+                one = one !== false;
+                doc._fit = { size: z, onePage: one, rosterPages: doc.getNumberOfPages(), fmt };
+                skillsPages(doc, S);
+                // ---- footers
+                const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 10;
+                const n = doc.getNumberOfPages(), date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), ver = ((document.getElementById('app-version') || {}).textContent || '').trim();
+                for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 120, 120); doc.text(tx(`${S.t.name} · ${S.R.name} · BludBowl ${ver} · ${date}`), M, H - 4.5); doc.text(`Page ${i} of ${n}`, W - M, H - 4.5, { align: 'right' }); }
+                doc.setProperties({ title: tx(S.t.name + ' roster'), creator: 'BludBowl' });
+                return doc;
+            }
+            // the roster page at type size z, each player row taller by extra (mm); returns the room left at the bottom, or false if
+            // it doesn't fit on one page (unless last: then it carries on over more pages)
+            function rosterPage(doc, S, z, last, extra) {
+                const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 10, END = H - 8.5;
+                const font = (st, size) => { doc.setFont('helvetica', st || 'normal'); doc.setFontSize(size); };
+                const ink = (r, g, b) => doc.setTextColor(r, g == null ? r : g, b == null ? r : b);
                 const line = (x1, y1, x2, y2, w) => { doc.setLineWidth(w || 0.2); doc.line(x1, y1, x2, y2); };
+                const lh = s => s * PT * 1.2, asc = s => s * PT * 0.78;   // line height; baseline below the top of a line
+                const GREEN = [0, 115, 45], RED = [190, 25, 25], BLUE = [15, 75, 170], ORANGE = [190, 80, 0];
+                const hz = Math.max(7.2, Math.min(9.5, z * 0.88)), nz = Math.max(6.3, Math.min(7.8, z * 0.7));   // the header boxes; small notes
                 doc.setDrawColor(30, 30, 30);
                 // ---- header: race, coach and team on the left; four boxes across
-                font('bold', 18); ink(0, 0, 0);
-                doc.text(tx(S.R.name), M + 25, M + 7, { align: 'center' });
-                const labelBox = (lab, val, y, h) => { font('bold', 6.5); doc.text(lab, M + 25, y, { align: 'center' }); doc.rect(M, y + 1.2, 50, h); font('normal', 8);
-                    doc.splitTextToSize(tx(val), 47).slice(0, Math.floor(h / 3.4)).forEach((l, i) => doc.text(l, M + 25, y + 4.6 + i * 3.4, { align: 'center' })); return y + 1.2 + h; };
-                let ly = labelBox('COACH NAME', DEV.name() || '', M + 12, 5.5);
-                // the team's name, then what kind of team it is (and its tournament rules), all inside the box
-                font('normal', 7); const sub = doc.splitTextToSize(tx(S.fmt + (S.rules ? ': ' + S.rules.name : '')), 47);
-                font('bold', 6.5); doc.text('TEAM NAME', M + 25, ly + 4, { align: 'center' });
-                font('bold', 8.5); const nm = doc.splitTextToSize(tx(S.t.name), 47).slice(0, 2), bh = 2.2 + nm.length * 3.6 + sub.length * 3 + 1.2;
-                doc.rect(M, ly + 5.2, 50, bh); nm.forEach((l, i) => doc.text(l, M + 25, ly + 8.6 + i * 3.6, { align: 'center' }));
-                font('normal', 7); ink(70, 70, 70); sub.forEach((l, i) => doc.text(l, M + 25, ly + 8.4 + nm.length * 3.6 + i * 3, { align: 'center' })); ink(0, 0, 0);
-                ly = ly + 5.2 + bh;
-                // team colours swatch
-                doc.setFillColor(S.t.primary || '#888888'); doc.rect(M, M + 1, 3, 8, 'F'); doc.setFillColor(S.t.secondary || '#dddddd'); doc.rect(M + 3, M + 1, 2, 8, 'F');
-                const bx0 = M + 56, bw = (W - M - bx0 - 3 * 4) / 4;
+                const LW = 54, LX = M + LW / 2;
+                doc.setFillColor(S.t.primary || '#888888'); doc.rect(M, M + 0.5, 3, 8, 'F'); doc.setFillColor(S.t.secondary || '#dddddd'); doc.rect(M + 3, M + 0.5, 2, 8, 'F');
+                let rs = 20; font('bold', rs); while (rs > 11 && doc.getTextWidth(tx(S.R.name)) > LW - 8) font('bold', --rs);
+                ink(0); doc.text(tx(S.R.name), M + 6 + (LW - 6) / 2, M + 7, { align: 'center' });
+                let ly = M + 10;
+                const field = (lab, parts) => {   // parts: [[lines, style, size, grey?], ...]
+                    font('bold', hz * 0.82); ink(0); doc.text(lab, LX, ly + asc(hz * 0.82)); ly += lh(hz * 0.82) + 0.4;
+                    const top = ly; let yy = top + 0.9;
+                    parts.forEach(([lines, st, sz, grey]) => { font(st, sz); ink(grey ? 70 : 0); lines.forEach(l => { doc.text(l, LX, yy + asc(sz), { align: 'center' }); yy += lh(sz); }); });
+                    ink(0); doc.setLineWidth(0.25); doc.rect(M, top, LW, yy - top + 0.9); ly = yy + 0.9 + 1.6;
+                };
+                field('COACH NAME', [[[tx(DEV.name() || '') || ' '], 'normal', hz * 1.1]]);
+                let ns = hz * 1.25; font('bold', ns); let nm = doc.splitTextToSize(tx(S.t.name), LW - 3);
+                while (nm.length > 2 && ns > hz) { font('bold', ns -= 0.5); nm = doc.splitTextToSize(tx(S.t.name), LW - 3); }
+                font('normal', hz * 0.9); const sub = doc.splitTextToSize(tx(S.fmt + (S.rules ? ': ' + S.rules.name : '')), LW - 3);
+                field('TEAM NAME', [[nm.slice(0, 3), 'bold', ns], [sub, 'normal', hz * 0.9, true]]);
+                const bx0 = M + LW + 5, bw = (W - M - bx0 - 3 * 4) / 4;
                 const box = (i, title, rows, bullets, empty, note) => {
-                    const x = bx0 + i * (bw + 4), y = M; let yy = y + 4;
-                    font('bold', 7.5); doc.text(title, x + bw / 2, yy, { align: 'center' }); yy += 1.5; line(x, yy, x + bw, yy, 0.2); yy += 3.4;
-                    font('normal', 7.2);
-                    if (!rows.length) { font('italic', 7.2); doc.text(empty, x + bw / 2, yy, { align: 'center' }); yy += 3.4; }
+                    const x = bx0 + i * (bw + 4), y = M; let yy = y + 1.2;
+                    let ts = hz * 1.02; ink(0); font('bold', ts); while (ts > 6 && doc.getTextWidth(title) > bw - 2) font('bold', ts -= 0.25);
+                    doc.text(title, x + bw / 2, yy + asc(hz * 1.02), { align: 'center' }); yy += lh(hz * 1.02) + 0.6; line(x, yy, x + bw, yy, 0.25); yy += 0.9;
+                    if (!rows.length) { font('italic', hz); doc.text(empty, x + bw / 2, yy + asc(hz), { align: 'center' }); yy += lh(hz); }
                     rows.forEach(r => {
-                        if (bullets) { doc.splitTextToSize(tx('- ' + r), bw - 3).forEach((l, j) => { doc.text(j ? '  ' + l : l, x + 1.5, yy); yy += 3.2; }); return; }
-                        const v = tx(r[1]); doc.text(v, x + bw - 1.5, yy, { align: 'right' });
-                        doc.splitTextToSize(tx(r[0]), bw - 3 - doc.getTextWidth(v) - 2).slice(0, 2).forEach((l, j) => { doc.text(l, x + 1.5, yy + j * 3.2); if (j) yy += 3.2; }); yy += 3.4;
+                        if (bullets) { font('normal', hz); doc.splitTextToSize(tx('- ' + r), bw - 3).forEach((l, j) => { doc.text(j ? '  ' + l : l, x + 1.5, yy + asc(hz)); yy += lh(hz); }); return; }
+                        font('bold', hz); const v = tx(r[1]); doc.text(v, x + bw - 1.5, yy + asc(hz), { align: 'right' }); const vw = doc.getTextWidth(v);
+                        font('normal', hz); doc.splitTextToSize(tx(r[0]), bw - 5 - vw).slice(0, 2).forEach((l, j) => { doc.text(l, x + 1.5, yy + asc(hz)); yy += lh(hz); });
                     });
-                    if (note) { font('italic', 6.2); ink(90, 90, 90); doc.splitTextToSize(tx(note), bw - 3).forEach(l => { doc.text(l, x + 1.5, yy); yy += 2.7; }); yy += 0.6; ink(0, 0, 0); }
-                    doc.setLineWidth(0.3); doc.rect(x, y, bw, yy - y - 1.4);
+                    if (note) { yy += 0.4; font('italic', nz); ink(80); doc.splitTextToSize(tx(note), bw - 3).forEach(l => { doc.text(l, x + 1.5, yy + asc(nz)); yy += lh(nz); }); ink(0); }
+                    yy += 0.8; doc.setLineWidth(0.3); doc.rect(x, y, bw, yy - y);
                     return yy;
                 };
-                const hb = Math.max(ly, box(0, 'SIDELINE', S.sideline), box(1, S.mp ? 'INDUCEMENTS & STARS' : 'INDUCEMENTS', S.ind, false, 'No inducements'), box(2, 'LEAGUES & SPECIAL RULES', S.special, true, 'None'), box(3, 'SUMMARY', S.summary, false, '', '* ' + S.check.skillsNote));
-                // ---- the players
-                const cols = [['#', 7, 'c'], ['POSITION', 36], ['NAME', 40], ['MA', 8, 'c'], ['ST', 8, 'c'], ['AG', 8, 'c'], ['PA', 8, 'c'], ['AV', 8, 'c'], ['SKILLS', 0]].concat(S.car ? [['SPP', 11, 'c']] : [], [['COST', 15, 'r']]);
+                const hb = Math.max(ly - 1.6, box(0, 'SIDELINE', S.sideline), box(1, S.mp ? 'INDUCEMENTS & STARS' : 'INDUCEMENTS', S.ind, false, 'No inducements'), box(2, 'LEAGUES & SPECIAL RULES', S.special, true, 'None'), box(3, 'SUMMARY', S.summary, false, '', '* ' + S.check.skillsNote));
+                // ---- the players: column widths from what's in them
+                const all = S.players.concat(S.stars), pt = z * PT, rl = pt * 1.17, pad = pt * 0.42, hz2 = z * 0.86;
+                const widest = (st, sz, strs) => { font(st, sz); return Math.max(0, ...strs.map(s => doc.getTextWidth(tx(s)))); };
+                const nameOf = p => p.name + (p.mng ? ' (MNG)' : '');
+                const posW = Math.min(pt * 12, Math.max(widest('bold', hz2, ['POSITION']), widest('normal', z, all.filter(p => !p.star).map(p => p.pos)), widest('bold', z, all.filter(p => p.star).map(p => p.pos))) + 3);
+                const nameW = Math.min(pt * 14, Math.max(widest('bold', hz2, ['NAME']), widest('bold', z, all.map(nameOf))) + 3);
+                const sw = Math.max(pt * 2.9, widest('bold', z, ['10+']) + 2.4);
+                const cols = [['#', Math.max(pt * 2.6, widest('bold', z, ['99']) + 2.4), 'c'], ['POSITION', posW], ['NAME', nameW], ['MA', sw, 'c'], ['ST', sw, 'c'], ['AG', sw, 'c'], ['PA', sw, 'c'], ['AV', sw, 'c'], ['SKILLS', 0]]
+                    .concat(S.car ? [['SPP', Math.max(pt * 3.4, widest('bold', hz2, ['SPP']) + 3), 'c']] : [], [['COST', Math.max(widest('bold', hz2, ['COST']), widest('normal', z, all.map(p => p.cost == null ? '' : k(p.cost)))) + 3.5, 'r']]);
                 const fixed = cols.reduce((a, c) => a + c[1], 0); cols.find(c => c[0] === 'SKILLS')[1] = W - 2 * M - fixed;
                 const xs = []; cols.reduce((x, c) => { xs.push(x); return x + c[1]; }, M);
                 const ci = name => cols.findIndex(c => c[0] === name);
-                let y = hb + 5;
-                const headRow = () => { font('bold', 8.2); ink(0, 0, 0); cols.forEach((c, i) => { const x = xs[i]; doc.text(c[0], c[2] === 'c' ? x + c[1] / 2 : c[2] === 'r' ? x + c[1] - 1.5 : x + 1.5, y + 4.2, { align: c[2] === 'c' ? 'center' : c[2] === 'r' ? 'right' : 'left' }); });
-                    doc.setLineWidth(0.4); doc.rect(M, y, W - 2 * M, 6); y += 6; };
+                const ax = (i, c) => c[2] === 'c' ? xs[i] + c[1] / 2 : c[2] === 'r' ? xs[i] + c[1] - 1.5 : xs[i] + 1.5, al = c => c[2] === 'c' ? 'center' : c[2] === 'r' ? 'right' : 'left';
+                let y = hb + 3.5;
+                const headH = lh(hz2) + 2;
+                const headRow = () => { font('bold', hz2); ink(0); cols.forEach((c, i) => doc.text(c[0], ax(i, c), y + 1 + asc(hz2) + 0.1, { align: al(c) })); doc.setLineWidth(0.45); doc.rect(M, y, W - 2 * M, headH); y += headH; };
                 // skills in a cell: the position's own in plain type, extra ones (picks and advancements) in blue italics, wrapped to fit
                 const skillLines = (skills, w) => {
                     const lines = [[]]; let x = 0;
                     skills.forEach((sk, i) => {
-                        const word = tx(sk.s) + (i < skills.length - 1 ? ',' : ''); font(sk.extra ? 'italic' : 'normal', 8); const ww = doc.getTextWidth(word), sp = 1.2;   // a clear gap after each comma
+                        const word = tx(sk.s) + (i < skills.length - 1 ? ',' : ''); font(sk.elite ? 'bolditalic' : sk.extra ? 'italic' : 'normal', z); const ww = doc.getTextWidth(word), sp = pt * 0.5;   // a clear gap after each comma
                         if (x && x + ww > w) { lines.push([]); x = 0; }
                         lines[lines.length - 1].push({ word, extra: sk.extra, elite: sk.elite, x }); x += ww + sp;
                     });
                     return lines;
                 };
                 headRow();
-                const startY = y;
-                S.players.concat(S.stars).forEach((p, idx) => {
-                    const lines = skillLines(p.skills, cols[ci('SKILLS')][1] - 3), h = Math.max(5.6, 2.2 + lines.length * 3.5);
-                    if (y + h > H - 12) { doc.setLineWidth(0.3); doc.rect(M, startY - 6, W - 2 * M, y - startY + 6); doc.addPage(); y = M; headRow(); }
-                    const grey = p.mng, cell = (name, v, opts) => { const i = ci(name), c = cols[i], x = xs[i]; doc.text(tx(v), c[2] === 'c' ? x + c[1] / 2 : c[2] === 'r' ? x + c[1] - 1.5 : x + 1.5, y + 3.9, Object.assign({ align: c[2] === 'c' ? 'center' : c[2] === 'r' ? 'right' : 'left' }, opts || {})); };
-                    font('normal', 8); ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0);
-                    cell('#', p.n); font(p.star ? 'bold' : 'normal', 8); cell('POSITION', p.pos, { maxWidth: cols[1][1] - 2 }); font('normal', 8);
-                    cell('NAME', p.name + (p.mng ? ' (MNG)' : ''), { maxWidth: cols[2][1] - 2 });
-                    [['MA', 'ma', ''], ['ST', 'st', ''], ['AG', 'ag', '+'], ['PA', 'pa', '+'], ['AV', 'av', '+']].forEach(([n, key, pl]) => {
-                        const v = p[key]; if (p.up[key]) ink(22, 130, 60); else if (p.dn[key]) ink(200, 40, 40); else ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0);
-                        font(p.up[key] || p.dn[key] ? 'bold' : 'normal', 8); cell(n, v == null ? '-' : v + pl);
+                let startY = y;
+                const frame = () => { doc.setLineWidth(0.35); doc.rect(M, startY - headH, W - 2 * M, y - startY + headH); };
+                for (let idx = 0; idx < all.length; idx++) {
+                    const p = all[idx], grey = p.mng ? 135 : 0;
+                    font('normal', z); const posL = doc.splitTextToSize(tx(p.pos), posW - 2.5); let nmz = z; font('bold', z); while (nmz > z * 0.8 && doc.getTextWidth(tx(nameOf(p))) > nameW - 2.5) font('bold', nmz -= 0.25); const nameL = doc.splitTextToSize(tx(nameOf(p)), nameW - 2.5);   // a long name: a little smaller, then wrapped
+                    const lines = skillLines(p.skills, cols[ci('SKILLS')][1] - 3), n = Math.max(lines.length, posL.length, nameL.length), h = 2 * pad + pt + (n - 1) * rl + extra;
+                    if (y + h > END) { if (!last) return false; frame(); doc.addPage(); y = M; headRow(); startY = y; }
+                    const b0 = y + pad + extra / 2 + asc(z) + pt * 0.1;
+                    const cell = (name, v) => { const i = ci(name); doc.text(tx(v), ax(i, cols[i]), b0, { align: al(cols[i]) }); };
+                    ink(grey); font('bold', z); cell('#', p.n);
+                    font(p.star ? 'bold' : 'normal', z); posL.forEach((l, j) => doc.text(l, xs[1] + 1.5, b0 + j * rl));
+                    font('bold', nmz); nameL.forEach((l, j) => doc.text(l, xs[2] + 1.5, b0 + j * rl));
+                    [['MA', 'ma', ''], ['ST', 'st', ''], ['AG', 'ag', '+'], ['PA', 'pa', '+'], ['AV', 'av', '+']].forEach(([nm2, key, pl]) => {
+                        const v = p[key]; if (p.up[key]) ink(...GREEN); else if (p.dn[key]) ink(...RED); else ink(grey);
+                        font('bold', z); cell(nm2, v == null ? '-' : v + pl);
+                        if (p.up[key] || p.dn[key]) { const i = ci(nm2), w = doc.getTextWidth(tx(v == null ? '-' : v + pl)), cx = ax(i, cols[i]); doc.setDrawColor(...(p.up[key] ? GREEN : RED)); line(cx - w / 2, b0 + 0.7, cx + w / 2, b0 + 0.7, 0.3); doc.setDrawColor(30, 30, 30); }   // underlined, so it shows in black and white too
                     });
                     const sx = xs[ci('SKILLS')] + 1.5;
-                    lines.forEach((ln, li) => ln.forEach(wd => { font(wd.elite ? 'bolditalic' : wd.extra ? 'italic' : 'normal', 8); if (wd.elite) ink(205, 95, 0); else if (wd.extra) ink(21, 101, 192); else ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0); doc.text(wd.word, sx + wd.x, y + 3.9 + li * 3.5); }));
-                    font('normal', 8); ink(grey ? 140 : 0, grey ? 140 : 0, grey ? 140 : 0);
+                    lines.forEach((ln, li) => ln.forEach(wd => { font(wd.elite ? 'bolditalic' : wd.extra ? 'italic' : 'normal', z); if (wd.elite) ink(...ORANGE); else if (wd.extra) ink(...BLUE); else ink(grey); doc.text(wd.word, sx + wd.x, b0 + li * rl); }));
+                    font('normal', z); ink(grey);
                     if (S.car) cell('SPP', p.star ? '' : p.spp);
                     cell('COST', p.cost == null ? '' : k(p.cost));
-                    y += h; doc.setLineWidth(0.15); doc.setDrawColor(150, 150, 150); if (idx < S.players.length + S.stars.length - 1) line(M, y, W - M, y, 0.15); doc.setDrawColor(30, 30, 30);
-                });
-                doc.setLineWidth(0.3); doc.rect(M, startY - 6, W - 2 * M, y - startY + 6);
-                // keywords for each position on the roster, then what the colours mean
-                y += 4.2;
-                const flow = (parts, x0, w, lh) => { let x = x0; parts.forEach(([str, st, col]) => { font(st, 7.2); ink(...(col || [0, 0, 0])); tx(str).split(/(?<= )/).forEach(word => { const ww = doc.getTextWidth(word); if (x > x0 && x + ww > x0 + w) { x = x0; y += lh; } doc.text(word, x, y); x += ww; }); }); y += lh; };
-                if (S.kw.length) { const parts = [['Keywords: ', 'bold']]; S.kw.forEach(([pos, w], i) => { parts.push([pos + ': ', 'bold'], [w + (i < S.kw.length - 1 ? ' | ' : ''), 'normal']); }); flow(parts, M, W - 2 * M, 3.3); }
-                const ecap = S.check.eliteCap;
-                flow([[`Skills in blue italics are ${S.mp ? 'the extra skills picked for this tournament team' : 'skills the player has gained'}${ecap ? '; ' : '. '}`, 'normal', [80, 80, 80]]]
-                    .concat(ecap ? [[`Elite Skills in orange are limited by the rules (${S.check.eliteTotal ? `${ecap} in the whole team` : `at most ${ecap} players each`}). `, 'bold', [205, 95, 0]]] : [])
-                    .concat([[`Characteristics in green have been improved; in red, lowered by an injury.${S.players.some(p => p.mng) ? ' MNG: misses the next game.' : ''}`, 'normal', [80, 80, 80]]]), M, W - 2 * M, 3.3);
-                // ---- the ruleset check: every limit, what the team uses, and OK or OVER
-                const CK = S.check, cw = (W - 2 * M) / 3, rh = 4.6, nRows = Math.ceil(CK.rows.length / 3), boxH = 9 + nRows * rh + (CK.ok ? 0 : 4 + 3.2 * Math.min(4, CK.problems.length)) + 2;
-                if (y + 3 + boxH > H - 10) { doc.addPage(); y = M; }
-                y += 2.5; const by = y;
-                font('bold', 8.5); ink(0, 0, 0); doc.text(tx(`RULESET CHECK: ${CK.name}${CK.tier ? ` · Tier ${CK.tier}` : ''}`), M + 2, y + 4.6);
-                font('bold', 8.5); if (CK.ok) ink(22, 130, 60); else ink(200, 40, 40);
-                doc.text(CK.ok ? 'LEGAL: every limit below is met' : 'NOT LEGAL: see below', W - M - 2, y + 4.6, { align: 'right' });
-                y += 7; line(M, y, W - M, y, 0.2); y += 1;
-                CK.rows.forEach((r, i) => {
-                    const col = i % 3, row = Math.floor(i / 3), x = M + 2 + col * cw, yy = y + row * rh + 3.3;
-                    font('bold', 7); ink(0, 0, 0); doc.text(tx(r.label), x, yy);
-                    const lw = doc.getTextWidth(tx(r.label)) + 1.5;
-                    font('normal', 7); const val = tx(r.allowed ? `${r.used} / ${r.allowed}` : r.used); doc.text(val, x + lw, yy);
-                    const vw = doc.getTextWidth(val) + 1.5;
-                    font('bold', 7); if (r.ok) ink(22, 130, 60); else ink(200, 40, 40); doc.text(r.ok ? 'OK' : 'OVER', x + lw + vw, yy);
-                    const ow = doc.getTextWidth(r.ok ? 'OK' : 'OVER') + 1.5;
-                    if (r.note) { font('italic', 6.2); ink(110, 110, 110); const room = cw - lw - vw - ow - 3; if (room > 8) doc.text(doc.splitTextToSize(tx('(' + r.note + ')'), room)[0], x + lw + vw + ow, yy); }
-                });
-                y += nRows * rh + 1;
-                if (!CK.ok) { font('bold', 7); ink(200, 40, 40); CK.problems.slice(0, 4).forEach(pr => { y += 3.2; doc.text(tx('- ' + pr), M + 2, y); }); y += 2; }
-                doc.setDrawColor(CK.ok ? 22 : 200, CK.ok ? 130 : 40, CK.ok ? 60 : 40); doc.setLineWidth(0.5); doc.rect(M, by, W - 2 * M, y - by + 1); doc.setDrawColor(30, 30, 30); ink(0, 0, 0);
-                // ---- what each skill does (BludBowl's own short descriptions)
-                if (S.used.length) {
-                    doc.addPage(); y = M + 4; font('bold', 12); ink(0, 0, 0); doc.text(tx(`${S.t.name}: skills`), M, y); y += 6;
-                    const colW = (W - 2 * M - 8) / 2; let col = 0, top = y;
-                    S.used.forEach(sk => {
-                        const info = skillInfoFor(sk) || 'No description in BludBowl yet.', head = tx(sk + (ELITE.includes(sk) ? ' (Elite)' : '') + ': ');
-                        font('bold', 7.8); const hw = doc.getTextWidth(head);
-                        font('normal', 7.8); const first = doc.splitTextToSize(tx(info), colW - hw), rest = first.length > 1 ? doc.splitTextToSize(tx(doc.splitTextToSize(tx(info), colW - hw).slice(1).join(' ')), colW) : [];
-                        const h = 3.4 * (1 + rest.length) + 1.2;
-                        if (y + h > H - 12) { if (col === 0) { col = 1; y = top; } else { doc.addPage(); col = 0; top = y = M + 4; } }
-                        const x = M + col * (colW + 8);
-                        font('bold', 7.8); ink(0, 0, 0); doc.text(head, x, y); font('normal', 7.8); ink(30, 30, 30); doc.text(first[0] || '', x + hw, y);
-                        rest.forEach((l, i) => doc.text(l, x, y + 3.4 * (i + 1)));
-                        y += h;
-                    });
+                    y += h; doc.setDrawColor(160, 160, 160); if (idx < all.length - 1) line(M, y, W - M, y, 0.15); doc.setDrawColor(30, 30, 30);
                 }
-                // ---- footers
-                const n = doc.getNumberOfPages(), date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), ver = ((document.getElementById('app-version') || {}).textContent || '').trim();
-                for (let i = 1; i <= n; i++) { doc.setPage(i); font('normal', 6.5); ink(130, 130, 130); doc.text(tx(`${S.t.name} · ${S.R.name} · BludBowl ${ver} · ${date}`), M, H - 5); doc.text(`Page ${i} of ${n}`, W - M, H - 5, { align: 'right' }); }
-                doc.setProperties({ title: tx(S.t.name + ' roster'), creator: 'BludBowl' });
-                return doc;
+                frame();
+                // keywords for each position on the roster, then what the type styles mean
+                const kz = Math.max(6.5, Math.min(8.5, z * 0.8)), kl = lh(kz);
+                y += 1.4;
+                const flow = (parts, x0, w) => { let x = x0; y += kl; parts.forEach(([str, st, col]) => { font(st, kz); ink(...(col || [0, 0, 0])); tx(str).split(/(?<= )/).forEach(word => { const ww = doc.getTextWidth(word); if (x > x0 && x + ww > x0 + w) { x = x0; y += kl; } doc.text(word, x, y); x += ww; }); }); y += kl * 0.25; };
+                if (S.kw.length) { const parts = [['Keywords: ', 'bold']]; S.kw.forEach(([pos, w], i) => { parts.push([pos + ': ', 'bold'], [w + (i < S.kw.length - 1 ? ' | ' : ''), 'normal']); }); flow(parts, M, W - 2 * M); }
+                const ecap = S.check.eliteCap;
+                flow([[`Skills in blue italics are ${S.mp ? 'the extra skills picked for this tournament team' : 'skills the player has gained'}${ecap ? '; ' : '. '}`, 'normal', [70, 70, 70]]]
+                    .concat(ecap ? [[`Elite Skills in orange are limited by the rules (${S.check.eliteTotal ? `${ecap} in the whole team` : `at most ${ecap} players each`}). `, 'bold', ORANGE]] : [])
+                    .concat([[`Underlined characteristics have changed: green improved, red lowered by an injury.${S.players.some(p => p.mng) ? ' MNG: misses the next game.' : ''}`, 'normal', [70, 70, 70]]]), M, W - 2 * M);
+                // ---- the ruleset check: every limit, what the team uses, and OK or OVER
+                const CK = S.check, cz = Math.max(6.8, Math.min(9, z * 0.84)), cw = (W - 2 * M) / 3, rh = lh(cz) + 0.9, nRows = Math.ceil(CK.rows.length / 3), probs = CK.ok ? [] : CK.problems.slice(0, 4);
+                const titleH = lh(cz * 1.1) + 2.4, boxH = titleH + 1 + nRows * rh + (probs.length ? probs.length * lh(cz) + 1 : 0) + 1;
+                y += 1.6;
+                if (y + boxH > END) { if (!last) return false; doc.addPage(); y = M; }
+                const by = y;
+                font('bold', cz * 1.1); ink(0); doc.text(tx(`RULESET CHECK: ${CK.name}${CK.tier ? ` · Tier ${CK.tier}` : ''}`), M + 2, y + 1.2 + asc(cz * 1.1));
+                ink(...(CK.ok ? GREEN : RED)); doc.text(CK.ok ? 'LEGAL: every limit below is met' : 'NOT LEGAL: see below', W - M - 2, y + 1.2 + asc(cz * 1.1), { align: 'right' });
+                y += titleH; line(M, y, W - M, y, 0.25); y += 1;
+                CK.rows.forEach((r, i) => {
+                    const col = i % 3, row = Math.floor(i / 3), x = M + 2 + col * cw, yy = y + row * rh + 0.45 + asc(cz);
+                    font('bold', cz); ink(0); doc.text(tx(r.label), x, yy);
+                    const lw = doc.getTextWidth(tx(r.label)) + 1.5;
+                    font('normal', cz); const val = tx(r.allowed ? `${r.used} / ${r.allowed}` : r.used); doc.text(val, x + lw, yy);
+                    const vw = doc.getTextWidth(val) + 1.5;
+                    font('bold', cz); ink(...(r.ok ? GREEN : RED)); doc.text(r.ok ? 'OK' : 'OVER', x + lw + vw, yy);
+                    const ow = doc.getTextWidth(r.ok ? 'OK' : 'OVER') + 1.5;
+                    if (r.note) { font('italic', nz); ink(100); const room = cw - lw - vw - ow - 3; if (room > 8) doc.text(doc.splitTextToSize(tx('(' + r.note + ')'), room)[0], x + lw + vw + ow, yy); }
+                });
+                y += nRows * rh;
+                if (probs.length) { font('bold', cz); ink(...RED); probs.forEach(pr => { y += lh(cz); doc.text(tx('- ' + pr), M + 2, y); }); y += 1; }
+                doc.setDrawColor(...(CK.ok ? GREEN : RED)); doc.setLineWidth(0.5); doc.rect(M, by, W - 2 * M, y - by + 1); doc.setDrawColor(30, 30, 30); ink(0);
+                return doc.getNumberOfPages() > 1 ? 0 : Math.max(0, END - (y + 1));
+            }
+            // ---- what each skill does (BludBowl's own short descriptions), in two columns on the pages after the roster
+            function skillsPages(doc, S) {
+                if (!S.used.length) return;
+                const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 10, sz = 8.8, l = sz * PT * 1.22;
+                const font = (st, size) => { doc.setFont('helvetica', st); doc.setFontSize(size); };
+                doc.addPage(); let y = M + 5; font('bold', 13); doc.setTextColor(0, 0, 0); doc.text(tx(`${S.t.name}: skills`), M, y); y += 7;
+                const colW = (W - 2 * M - 8) / 2; let col = 0, top = y;
+                S.used.forEach(sk => {
+                    const info = skillInfoFor(sk) || 'No description in BludBowl yet.', head = tx(sk + (ELITE.includes(sk) ? ' (Elite)' : '') + ': ');
+                    font('bold', sz); const hw = doc.getTextWidth(head) + 0.8;
+                    font('normal', sz); const first = doc.splitTextToSize(tx(info), colW - hw), rest = first.length > 1 ? doc.splitTextToSize(tx(first.slice(1).join(' ')), colW) : [];
+                    const h = l * (1 + rest.length) + 1.4;
+                    if (y + h > H - 10) { if (col === 0) { col = 1; y = top; } else { doc.addPage(); col = 0; top = y = M + 5; } }
+                    const x = M + col * (colW + 8);
+                    font('bold', sz); doc.setTextColor(0, 0, 0); doc.text(head, x, y); font('normal', sz); doc.setTextColor(25, 25, 25); doc.text(first[0] || '', x + hw, y);
+                    rest.forEach((ln, i) => doc.text(ln, x, y + l * (i + 1)));
+                    y += h;
+                });
             }
             // make the sheet and download it; tells the caller how it went
             async function save(team, say) {
@@ -12669,7 +12711,7 @@ ol.ci-steps li::marker { content: none; }
                     return false;
                 }
             }
-            return { save, sheet, _draw: (J, t) => draw(J, sheet(t)), _lib: lib };
+            return { save, sheet, _draw: (J, t, fmt) => draw(J, sheet(t), fmt), _lib: lib };
         })();
         function statSkillHtml(race, p, extra) {
             const R = RACES[race], ty = R && R.types[p.pos]; if (!ty) return '';
