@@ -104,6 +104,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Tried after it, not kept: `kh1`, blocking the carrier's helpers away before the Blitz (one of ours already next to a helper, no move). In 5 mirror
   matches it never paid: usually none of ours stands next to a helper (only a Blitz could get there), and when one does the assist gained is worth
   less than the Turnover risk and that player's own hit. drefsante hardly does it either (0.19 blocks before its hit on our carrier; ours 0.57).
+  All-races mirror guard, v5.37 brain x v the game's AI (`tools/ai-match.js`, 31 races x 20, `nn/look/dbg/guard_v537.txt/.jsonl`): won 212 drew 192
+  lost 216, touchdowns 562-568 (margin -0.01 a match, se 0.05): level; no race clearly off (worst khorne/orc/renegades -0.35, se 0.25). v drefsante it is
+  ahead of the game's AI by 0.17 touchdowns a game of margin (.345 v .308 score share, ~2 se, same seeds). Making x the default is the owner's call.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
