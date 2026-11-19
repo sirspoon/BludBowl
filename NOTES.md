@@ -119,6 +119,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   we score 69%, from further 11%). 1,000 games v drefsante (seeds 910000+, v5.38 229-261-510, 807-1348): as built 215-262-523, 808-1382; sure moves
   only 211-245-544, 776-1365; a first version that also dropped bp1's step back on every turn 7: 211-220-569, 741-1386 (and 218-244-538 v 229-241-530
   on seeds 930000+), with their scoring chance x1.5 212-244-544. None better: code removed (the patch is described here if it's wanted again).
+  Losing the ball early (19+ out; study_v537, `score_paths.py`, `nn/look/dbg/marked_carrier.py`): we lose it there 0.67 a game v drefsante's 0.36,
+  but mostly because we start more drives deep (1.72 v 1.13 a game: we receive more kicks, it scores more); per drive starting 19+ out, 39% v 32%
+  lost before 19. Ours more often: pushed into the crowd 0.087 v 0.007, knocked over by a plain Block 0.083 v 0.003 (carrier left marked). Our carrier
+  marked at the start of our turn (13+ out) stayed and ended it still marked 127 times in 300 games (drefsante 24); ball gone by our next turn 75%
+  (moved clear: 37%); 65 of those after a Turnover ended our turn before he moved (31 from blocks away from him). Tried, not kept: `mk1`, with our
+  carrier marked and still to move only blocks on his markers or near-safe (pTurn < mkTurn 0.05) ones before him, the rest after. Stranded after
+  a Turnover 65 -> 56 (`study_mk1.jsonl`); 1,000 games v drefsante: seeds 910000+ 242-245-513, 833-1361 (v5.38 229-261-510, 807-1348), seeds
+  930000+ 214-221-565, 747-1415 (v5.38 229-241-530, 798-1365); mkTurn 0.1 228-226-546, 769-1375. Not better; too small a lever (~0.1 balls a game).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
