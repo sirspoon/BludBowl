@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.27 (19 Nov 2026)
+- New team: **Night Goblins** (Blood Bowl 2025, pre-release: from photos of the new book, so details may change). Hooded goblins
+  with Squig Hoppers, Squig Wranglers, Cave Squigs, Squig Herders and a Trained Troll. Squigs have Squig Rage: on a 1-2 they must
+  bite someone, unless a Squig Herder stands within 3 squares.
+
 ## v5.26 (19 Nov 2026)
 - Behind the scenes: a plan for loose balls was tested for the experimental computer coach and left off: it kept the ball more after
   kick-offs, but didn't win more.

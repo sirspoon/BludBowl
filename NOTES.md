@@ -78,6 +78,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.27 (job session, 19 Nov): **Night Goblins** team (BB2025, pre-release from Reddit photos of the book: `RACES.nightgoblin`,
+  `preRelease` note in the Team Builder). New traits Squig Rage / Squig Restraint (`squigRage`, `squigRolls`, `SQUIG.stats` counts
+  rolls/fails/blocks); the roll is made with the other activation rolls (on commit), and a 1-2 "undeclares" the action. AI: forced
+  Block target (runPlan), `squigVictimAI`, Herder positioning (`herdPick`, counted as `herd`). Rulesets can now ban teams (`r.ban`,
+  `TRULES.allows`, a "Not allowed" box in the tiers editor); GotG2/UKTC ban Night Goblins. Tier 4 (GW and Sevens) is a guess.
+  Check: `node tools/ui-tests/squig-rage.js`. Not done: the NN race list (`RACE_L` in `AI.bridge`'s nn view) doesn't include
+  `nightgoblin` (left alone so NN_VERSION and the owner's models don't change: the race one-hot is just empty for them); no HD sprites.
+  Open: once the book is out, check the roster and Squig Rage wording again (and GW's tier), and drop `preRelease`.
 - (18 Nov, no version) **Does our AI use special-action skills?** In BludBowl (`node tools/ai-special-actions.js <races> --n 3`, AI v AI
   mirrors, counts the action buttons it presses; 3 matches a race): yes for bombs, Chainsaw, Projectile Vomit, Ball & Chain (goblins),
   Throw Team-Mate (goblin, snotling, ogre, halfling), Kick Team-Mate (once); hardly ever Stab (1 in 9 Dark Elf / Skaven / Chaos Dwarf

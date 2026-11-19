@@ -297,6 +297,7 @@
         #trules .tr-row2 { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
         #trules .tr-boxes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 8px; }
         #trules .tr-box { border: 1px dashed var(--pg-edge); border-radius: 8px; padding: 8px; background: #0d1424; min-width: 0; transition: border-color .15s, background .15s; }
+        #trules .tr-box.tr-ban { background: #1a1016; } #trules .tr-box.tr-ban .tr-boxh b { color: #fca5a5; }
         #trules .tr-box.tr-target { border-color: #a16207; cursor: pointer; } #trules .tr-box.tr-over { border: 1px solid var(--pg-amber); background: #1a2236; }
         #trules .tr-boxh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; } #trules .tr-boxh b { color: var(--pg-amber); font-family: 'Teko', 'Impact', sans-serif; font-size: 18px; letter-spacing: .04em; text-transform: uppercase; }
         #trules .tr-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 34px; align-content: flex-start; }
@@ -545,6 +546,7 @@
         #team-builder .tb-endzone { border-radius: 6px; padding: 6px; text-align: center; font-family: 'Teko', 'Impact', sans-serif; letter-spacing: .1em; font-size: 16px; margin-bottom: 6px; overflow-wrap: anywhere; }
         #team-builder .tb-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1c263a; }
         #team-builder .tb-row-main { display: flex; flex-direction: column; min-width: 0; }
+        #team-builder .tb-pre { color: #fbbf24; margin: -4px 0 6px; }
         #team-builder .tb-lbl { font-weight: 700; } #team-builder .tb-note { font-size: 10.5px; color: var(--tb-dim); }
         #team-builder .tb-step { display: flex; align-items: center; gap: 6px; }
         #team-builder .tb-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--tb-edge); background: #0a1020; color: var(--tb-fg); font-weight: 800; }
@@ -1231,7 +1233,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.26</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.27</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1464,7 +1466,7 @@ ol.ci-steps li::marker { content: none; }
           <section class="tb-card" data-pane="team">
             <h3>Team</h3>
             <label class="tb-field"><span>Name</span><input id="tb-name" class="tb-in" maxlength="30"></label>
-            <label class="tb-field"><span>Race</span><select id="tb-race" class="tb-in"></select></label>
+            <label class="tb-field"><span>Race</span><select id="tb-race" class="tb-in"></select></label><div id="tb-pre" class="tb-note tb-pre" style="display:none"></div>
             <label class="tb-field"><span>Format</span><select id="tb-format" class="tb-in"><option value="">League team (1,000k, plays a career)</option><option value="matched">Tournament team (Matched Play: a set budget and skill points)</option><option value="sevens">Sevens team (600k, 7 a side, plays a career)</option><option value="sevens-mp">Sevens tournament team (Matched Play)</option></select></label>
             <div id="tb-mpwrap" class="tb-field"><div id="tb-ruleswrap" class="tb-field"><label for="tb-rules">Tournament rules</label><div class="tb-rulesrow"><select id="tb-rules" class="tb-in"></select><button id="tb-rulesbtn" type="button" class="tb-ghost tb-small">Edit rules…</button></div></div>
               <div id="tb-budwrap" class="tb-field"><label for="tb-budget">Tournament budget (the most this team can spend)</label><select id="tb-budget" class="tb-in"></select></div><div id="tb-mpnote" class="tb-dim"></div></div>
@@ -2457,16 +2459,33 @@ ol.ci-steps li::marker { content: none; }
                 Witch:    { type: 'Witch Elf', label: 'W', ma: 7, st: 3, ag: 2, pa: 4, av: 8, skills: ['Dodge', 'Frenzy', 'Jump Up'] }
             }
         };
+        // Night Goblins (BB2025, from a pre-release photo of the new book's roster page: may change): hooded goblins and their Squigs.
+        // Squig Rage (Hoppers, Wranglers, Cave Squigs): a D6 at activation, 1-2 and they must Block someone they mark (or flatten a
+        // team-mate, or become Distracted); a Standing Squig Herder within 3 squares (Squig Restraint) spares them the roll.
+        RACES.nightgoblin = { key: 'nightgoblin', short: 'NGB', lineup: ['Troll','Lineman','CaveSquig','Herder','Hopper','Lineman','CaveSquig','Hopper','Herder','Lineman','Wrangler'],
+            bench: ['Lineman','Lineman'], rerolls: 2, specialRules: ['Bribery and Corruption'],   // 850k players (13) + 2 re-rolls 140k = 990k
+            name: "Night Goblins", color: "#facc15", preRelease: 'Pre-release: from photos of the new book (via Reddit); may change when it is published.',
+            style: { fill: '#facc15', text: '#111111', endBg: '#ca8a04', endText: '#111111', shade: 'rgba(0,0,0,0.5)' },   // yellow hoods, black robes
+            fans: 1, assistantCoaches: 0, cheerleaders: 0, apothecary: 0, tv: "990k", treasury: "10,000 gp",
+            types: {
+                Lineman:   { type: 'Night Goblin Lineman', label: 'L', ma: 6, st: 2, ag: 3, pa: 4, av: 8, skills: ['Dodge', 'Right Stuff', 'Shadowing', 'Stunty', 'Taunt'] },
+                Herder:    { type: 'Squig Herder', label: 'SH', ma: 6, st: 2, ag: 3, pa: 5, av: 8, skills: ['Dodge', 'Disturbing Presence', 'Fend', 'Squig Restraint', 'Stunty'] },
+                Hopper:    { type: 'Squig Hopper', label: 'HO', ma: 7, st: 3, ag: 3, pa: 4, av: 8, skills: ['Dodge', 'Jump Up', 'Monstrous Mouth', 'Pogo', 'Squig Rage'] },
+                Wrangler:  { type: 'Squig Wrangler', label: 'SW', ma: 3, st: 7, ag: 3, pa: null, av: 8, skills: ['Ball & Chain', 'No Ball', 'Squig Rage', 'Stunty'] },
+                CaveSquig: { type: 'Cave Squig', label: 'CS', ma: 6, st: 4, ag: 3, pa: null, av: 9, skills: ['Frenzy', 'Jump Up', 'Monstrous Mouth', 'No Ball', 'Pogo', 'Squig Rage'] },
+                Troll:     { type: 'Trained Troll', label: 'TR', ma: 4, st: 5, ag: 5, pa: 5, av: 10, skills: ['Always Hungry', 'Mighty Blow', 'Projectile Vomit', 'Really Stupid', 'Regeneration', 'Throw Team Mate'] }
+            }
+        };
         // a race that may never hire an apothecary (nor a Wandering one)
         const noApo = race => !!((RACES[race] || {}).noApothecary);
         // ---------- Blood Bowl Sevens (Spike! Journal 22): drafting a Sevens team ----------
         const SEV = {
             BUDGET: 600, MAXP: 11, MINP: 7, RR: 100, STAFF: 20, APO: 80, FAN: 20, CAP: 750, MP_BUDGETS: [600, 650, 700],
             // Sevens Matched Play tiers: a team gets as many skill points as its tier number
-            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 1, gnome: 4, chaoschosen: 3, renegades: 3, khorne: 3, nurgle: 3, snotling: 4, tombkings: 2, necromantic: 2, vampire: 2, underworld: 1 },
+            TIER: { human: 1, highelf: 1, skaven: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, dwarf: 2, lizardmen: 2, orc: 2, undead: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 1, gnome: 4, chaoschosen: 3, renegades: 3, khorne: 3, nurgle: 3, snotling: 4, tombkings: 2, necromantic: 2, vampire: 2, underworld: 1, nightgoblin: 4 },
             // positions with the Lineman keyword (the Veteran is one of them; at most 4 players may be anything else)
             LINEMEN: { human: ['Lineman'], orc: ['Lineman'], highelf: ['Lineman'], lizardmen: ['Skink'], skaven: ['Clanrat'], ogre: ['Gnoblar'], goblin: ['Lineman'],
-                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'], halfling: ['Hopeful'], imperial: ['Retainer'], norse: ['Raider'], elvenunion: ['Lineman'], oldworld: ['Lineman', 'Halfling', 'DwarfLineman'], gnome: ['Lineman'], chaoschosen: ['Beastman'], renegades: ['Human', 'Goblin', 'Orc', 'Skaven', 'DarkElf'], khorne: ['Marauder'], nurgle: ['Rotter'], snotling: ['Lineman'], tombkings: ['Lineman'], necromantic: ['Zombie'], vampire: ['Thrall'], underworld: ['Goblin', 'Snotling', 'Clanrat'] },
+                blackorc: ['Bruiser'], woodelf: ['Lineman'], dwarf: ['Lineman'], undead: ['Skeleton', 'Zombie'], amazon: ['Eagle'], bretonnian: ['Squire'], chaosdwarf: ['Hobgoblin'], darkelf: ['Lineman'], halfling: ['Hopeful'], imperial: ['Retainer'], norse: ['Raider'], elvenunion: ['Lineman'], oldworld: ['Lineman', 'Halfling', 'DwarfLineman'], gnome: ['Lineman'], chaoschosen: ['Beastman'], renegades: ['Human', 'Goblin', 'Orc', 'Skaven', 'DarkElf'], khorne: ['Marauder'], nurgle: ['Rotter'], snotling: ['Lineman'], nightgoblin: ['Lineman'], tombkings: ['Lineman'], necromantic: ['Zombie'], vampire: ['Thrall'], underworld: ['Goblin', 'Snotling', 'Clanrat'] },
             NO_ADV: ['Leader', 'Pro']   // never gained by a Sevens player
         };
         const isSevT = t => !!t && (t.format === 'sevens' || t.format === 'sevens-mp');
@@ -2501,6 +2520,7 @@ ol.ci-steps li::marker { content: none; }
         Object.assign(RACES.khorne, { rerollCost: 60, positions: { Marauder: { max: 16, cost: 50 }, Khorngor: { max: 2, cost: 70 }, Bloodseeker: { max: 4, cost: 105 }, Bloodspawn: { max: 1, cost: 160 } } });
         Object.assign(RACES.nurgle, { rerollCost: 60, positions: { Rotter: { max: 16, cost: 40 }, Pestigor: { max: 2, cost: 70 }, Bloater: { max: 4, cost: 110 }, Rotspawn: { max: 1, cost: 140 } } });
         Object.assign(RACES.snotling, { rerollCost: 70, positions: { Lineman: { max: 16, cost: 15 }, FunHoppa: { max: 2, cost: 20 }, Stilty: { max: 2, cost: 20 }, Flinga: { max: 2, cost: 30 }, PumpWagon: { max: 2, cost: 100 }, Troll: { max: 2, cost: 115 } } });
+        Object.assign(RACES.nightgoblin, { rerollCost: 70, bribeCost: 50, bribeMax: 6, positions: { Lineman: { max: 16, cost: 45 }, Herder: { max: 2, cost: 55 }, Hopper: { max: 2, cost: 80 }, Wrangler: { max: 2, cost: 70 }, CaveSquig: { max: 2, cost: 85 }, Troll: { max: 1, cost: 115 } } });
         Object.assign(RACES.tombkings, { rerollCost: 60, positions: { Lineman: { max: 16, cost: 40 }, Thrower: { max: 2, cost: 65 }, Blitzer: { max: 2, cost: 85 }, Guardian: { max: 4, cost: 115 } } });
         Object.assign(RACES.necromantic, { rerollCost: 70, positions: { Zombie: { max: 16, cost: 40 }, Ghoul: { max: 2, cost: 75 }, Wraith: { max: 2, cost: 85 }, Golem: { max: 2, cost: 110 }, Werewolf: { max: 2, cost: 120 } } });
         Object.assign(RACES.vampire, { rerollCost: 60, positions: { Thrall: { max: 16, cost: 40 }, Runner: { max: 2, cost: 100 }, Thrower: { max: 2, cost: 110 }, Blitzer: { max: 2, cost: 110 }, Vargheist: { max: 1, cost: 150 } } });
@@ -2627,6 +2647,7 @@ ol.ci-steps li::marker { content: none; }
                 underworld: { Goblin: ['ADM', 'GPS'], Snotling: ['ADM', 'G'], Clanrat: ['DGM', 'AS'], Thrower: ['GMP', 'ADS'], Gutter: ['ADGM', 'S'], Blitzer: ['GMS', 'AP'], Troll: ['MS', 'AGP'], RatOgre: ['MS', 'AG'] },
                 necromantic: { Zombie: ['DG', 'AS'], Ghoul: ['AG', 'DPS'], Wraith: ['GS', 'AD'], Golem: ['GS', 'AD'], Werewolf: ['AG', 'DPS'] },
                 vampire: { Thrall: ['G', 'AS'], Runner: ['AG', 'PS'], Thrower: ['AGP', 'S'], Blitzer: ['AGS', ''], Vargheist: ['S', 'AG'] },
+                nightgoblin: { Lineman: ['AD', 'GPS'], Herder: ['AD', 'GPS'], Hopper: ['AD', 'GPS'], Wrangler: ['DS', 'AG'], CaveSquig: ['', 'ADGS'], Troll: ['S', 'AGP'] },
                 snotling: { Lineman: ['AD', 'G'], FunHoppa: ['AD', 'G'], Stilty: ['AD', 'G'], Flinga: ['ADP', 'G'], PumpWagon: ['DS', 'AG'], Troll: ['S', 'AGP'] },
                 tombkings: { Lineman: ['G', 'ADS'], Thrower: ['GP', 'ADS'], Blitzer: ['GS', 'AD'], Guardian: ['S', 'AG'] },
                 khorne: { Marauder: ['GM', 'ADS'], Khorngor: ['GMS', 'ADP'], Bloodseeker: ['GMS', 'AD'], Bloodspawn: ['MS', 'AG'] },
@@ -2641,7 +2662,7 @@ ol.ci-steps li::marker { content: none; }
                 chaosdwarf: { Hobgoblin: ['D', 'AGS'], Stabba: ['DG', 'AS'], Blocker: ['GS', 'ADM'], Flamesmith: ['GS', 'ADM'], Centaur: ['GS', 'ADM'], Minotaur: ['MS', 'AG'] },
                 darkelf: { Lineman: ['AG', 'DS'], Runner: ['AGP', 'DS'], Assassin: ['AD', 'GS'], Blitzer: ['AG', 'DPS'], Witch: ['AG', 'DS'] }
             };
-            const JOURNEY = { blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman', halfling: 'Hopeful', imperial: 'Retainer', norse: 'Raider', elvenunion: 'Lineman', oldworld: 'Lineman', gnome: 'Lineman', chaoschosen: 'Beastman', renegades: 'Human', khorne: 'Marauder', nurgle: 'Rotter', snotling: 'Lineman', tombkings: 'Lineman', necromantic: 'Zombie', vampire: 'Thrall', underworld: 'Goblin' };
+            const JOURNEY = { nightgoblin: 'Lineman', blackorc: 'Bruiser', human: 'Lineman', orc: 'Lineman', highelf: 'Lineman', skaven: 'Clanrat', ogre: 'Gnoblar', goblin: 'Lineman', woodelf: 'Lineman', lizardmen: 'Skink', dwarf: 'Lineman', undead: 'Skeleton', amazon: 'Eagle', bretonnian: 'Squire', chaosdwarf: 'Hobgoblin', darkelf: 'Lineman', halfling: 'Hopeful', imperial: 'Retainer', norse: 'Raider', elvenunion: 'Lineman', oldworld: 'Lineman', gnome: 'Lineman', chaoschosen: 'Beastman', renegades: 'Human', khorne: 'Marauder', nurgle: 'Rotter', snotling: 'Lineman', tombkings: 'Lineman', necromantic: 'Zombie', vampire: 'Thrall', underworld: 'Goblin' };
             const CATS = { A: 'Agility', D: 'Devious', G: 'General', M: 'Mutation', P: 'Passing', S: 'Strength' };
             const SKILLS = {
                 A: ['Catch', 'Diving Catch', 'Diving Tackle', 'Dodge', 'Defensive', 'Hit and Run', 'Jump Up', 'Leap', 'Safe Pair of Hands', 'Sidestep', 'Sprint', 'Sure Feet'],
@@ -3345,7 +3366,7 @@ ol.ci-steps li::marker { content: none; }
 
         // ---- Star Players (BB2025): famous free agents hired for a single game ----
         const LEAGUE_NAMES = { OWC: 'Old World Classic', BB: 'Badlands Brawl', UC: 'Underworld Challenge', WESL: "Worlds Edge Superleague", SS: 'Sylvanian Spotlight', LSL: 'Lustrian Superleague', ELK: 'Elven Kingdoms League', WL: 'Woodland League', HTC: 'Halfling Thimble Cup', CC: 'Chaos Clash' };
-        const RACE_LEAGUES = { halfling: ['HTC', 'WL'], imperial: ['OWC'], norse: ['OWC', 'CC'], elvenunion: ['ELK'], oldworld: ['OWC'], gnome: ['HTC', 'WL'], chaoschosen: ['CC'], renegades: ['CC'], khorne: ['CC'], nurgle: ['CC'], snotling: ['UC'], tombkings: ['SS'], necromantic: ['SS'], vampire: ['SS'], underworld: ['UC'], human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB', 'CC'], darkelf: ['ELK'] };
+        const RACE_LEAGUES = { halfling: ['HTC', 'WL'], imperial: ['OWC'], norse: ['OWC', 'CC'], elvenunion: ['ELK'], oldworld: ['OWC'], gnome: ['HTC', 'WL'], chaoschosen: ['CC'], renegades: ['CC'], khorne: ['CC'], nurgle: ['CC'], snotling: ['UC'], nightgoblin: ['UC'], tombkings: ['SS'], necromantic: ['SS'], vampire: ['SS'], underworld: ['UC'], human: ['OWC'], orc: ['BB'], blackorc: ['BB'], goblin: ['BB', 'UC'], skaven: ['UC'], ogre: ['BB', 'WESL'], lizardmen: ['LSL'], highelf: ['ELK'], woodelf: ['ELK', 'WL'], dwarf: ['WESL'], undead: ['SS'], amazon: ['LSL'], bretonnian: ['OWC'], chaosdwarf: ['BB', 'CC'], darkelf: ['ELK'] };
         const STARS = {
             griff:   { name: 'Griff Oberwald', label: 'GO', cost: 300, mega: true, ma: 7, st: 4, ag: 2, pa: 3, av: 9, skills: ['Block', 'Dodge', 'Fend', 'Loner (3+)', 'Sprint', 'Sure Feet'],
                        rule: 'Consummate Professional', text: 'Once per game, Griff may add +1 to an Agility Test he has made, after seeing the roll.', leagues: ['OWC'] },
@@ -3499,7 +3520,7 @@ ol.ci-steps li::marker { content: none; }
                 && (STARS[k].leagues === 'any' || STARS[k].leagues.includes(L)) && (!STARS[k].favoured || STARS[k].favoured === f)); };
         // ---------- Matched Play (BB2025): team tiers (May 2026 list), skill points and Star Player limits ----------
         const MP = {
-            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 2, gnome: 4, chaoschosen: 3, renegades: 3, khorne: 3, nurgle: 3, snotling: 4, tombkings: 2, necromantic: 2, vampire: 2, underworld: 1 },
+            TIER: { highelf: 1, lizardmen: 1, woodelf: 1, amazon: 1, chaosdwarf: 1, darkelf: 1, human: 2, orc: 2, skaven: 2, bretonnian: 2, blackorc: 3, goblin: 4, ogre: 4, dwarf: 2, undead: 2, imperial: 2, halfling: 4, norse: 1, elvenunion: 2, oldworld: 2, gnome: 4, chaoschosen: 3, renegades: 3, khorne: 3, nurgle: 3, snotling: 4, tombkings: 2, necromantic: 2, vampire: 2, underworld: 1, nightgoblin: 4 },
             SP: { 1: 6, 2: 8, 3: 9, 4: 10 },
             ELITE: ['Block', 'Dodge', 'Guard', 'Mighty Blow'],   // each can be given to at most four players
             BUDGETS: [1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500],
@@ -3520,6 +3541,7 @@ ol.ci-steps li::marker { content: none; }
                 tier: { amazon: 1, chaosdwarf: 1, lizardmen: 1, norse: 1, oldworld: 1, woodelf: 1,
                     darkelf: 2, highelf: 2, dwarf: 2, elvenunion: 2, human: 2, necromantic: 2, orc: 2, undead: 2, skaven: 2, tombkings: 2, underworld: 2, vampire: 2,
                     blackorc: 3, bretonnian: 3, renegades: 3, imperial: 3, nurgle: 3, chaoschosen: 4, khorne: 4, gnome: 5, ogre: 5, snotling: 5, goblin: 6, halfling: 6 },
+                ban: ['nightgoblin'],   // (the pack predates the Night Goblins' release: not allowed)
                 budget: [1250, 1270, 1290, 1310, 1330, 1360], prim: [3, 3, 4, 4, 5, 5], sec: [0, 0, 1, 1, 2, 2], stars: [1, 1, 1, 1, 2, 2], mega: 1, elite: 0,
                 ind: ['kegs', 'chef', 'mascot', 'prayers', 'bribes', 'wizard', 'apo', 'rookies'],
                 notes: 'Getting Wasted (21 November 2026). Resurrection format: no lasting injuries, deaths or SPP. The pack lists Nurgle in both Tier 2 and Tier 3: this uses Tier 3. Mortuary Assistants and Plague Doctors are allowed but not in BludBowl yet, and the Chaos Wastes weather table is not in the game.' };
@@ -3530,7 +3552,8 @@ ol.ci-steps li::marker { content: none; }
                 ['necromantic', 2, 1150], ['norse', 2, 1150], ['renegades', 4, 1150], ['tombkings', 4, 1150],
                 ['elvenunion', 3, 1170], ['imperial', 3, 1170], ['vampire', 3, 1170], ['blackorc', 4, 1170], ['chaosdwarf', 4, 1170],
                 ['dwarf', 3, 1200], ['khorne', 4, 1200], ['ogre', 5, 1200]];
-            const UKTC = { id: 'uktc11', name: 'Example: UKTC XI', builtin: true, example: true, skill: 'gold', tiers: 5, secmax: [16, 16, 16, 16, 16],
+            const UKTC = { id: 'uktc11', name: 'Example: UKTC XI', builtin: true, example: true, skill: 'gold', tiers: 5, ban: ['nightgoblin'],   // (not in the pack's tables)
+                secmax: [16, 16, 16, 16, 16],
                 tier: Object.fromEntries(UK.map(x => [x[0], x[1]])), raceBudget: Object.fromEntries(UK.map(x => [x[0], x[2]])),
                 budget: [1150, 1150, 1150, 1150, 1150], gold: [120, 140, 160, 180, 200], stacks: [0, 0, 1, 2, 2], statups: [0, 0, 0, 0, 1],
                 cost: { P: 20, S: 30, stack: 10, av: 10, ma: 20, pa: 20, ag: 40, st: 50, star: 0, mega: 0 },
@@ -3557,6 +3580,7 @@ ol.ci-steps li::marker { content: none; }
                 const C0 = Object.assign({}, r.skill === 'points' ? PTS : GOLD);
                 Object.keys(C0).forEach(c => { out.cost[c] = int((r.cost || {})[c], 0, 500, C0[c]); });
                 races().forEach(k => { out.tier[k] = int((r.tier || {})[k], 1, n, Math.min(2, n)); });
+                out.ban = (Array.isArray(r.ban) ? r.ban : []).filter((x, i, a) => races().includes(x) && a.indexOf(x) === i);
                 if (r.raceBudget && typeof r.raceBudget === 'object') { out.raceBudget = {}; races().forEach(k => { out.raceBudget[k] = int(r.raceBudget[k], 100, 3000, at(out, 'budget', out.tier[k])); }); }
                 return out;
             }
@@ -3575,6 +3599,9 @@ ol.ci-steps li::marker { content: none; }
                 notes: 'Copied from GW Matched Play. GW lets each event choose the budget: here it is 1,150k for every tier (change it above).' });
             const get = id => list().find(r => r.id === id) || null;
             const tierOf = (r, race) => r.gw ? MP.tier(race) : (r.tier[race] || Math.min(2, r.tiers));
+            // teams a pack doesn't allow at all (r.ban); in the tiers editor they sit in a 'Not allowed' box, slot 0
+            const allows = (r, race) => !r || !!r.gw || !(r.ban || []).includes(race);
+            const slotOf = (r, race) => allows(r, race) ? tierOf(r, race) : 0;
             const budgetFor = (r, race) => r.raceBudget ? (r.raceBudget[race] || at(r, 'budget', tierOf(r, race))) : at(r, 'budget', tierOf(r, race));
             const STATS = ['av', 'ma', 'pa', 'ag', 'st'];
             const last = () => { try { const id = localStorage.getItem(LAST); return get(id) ? id : 'gw'; } catch (e) { return 'gw'; } };
@@ -3633,7 +3660,7 @@ ol.ci-steps li::marker { content: none; }
             }
             const $r = id => document.getElementById(id);
             function summary(r) {
-                const byTier = t => races().filter(k => tierOf(r, k) === t).map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n))
+                const byTier = t => races().filter(k => allows(r, k) && tierOf(r, k) === t).map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n))
                     .map(x => esc(x.n) + (r.raceBudget ? ` <span class="pg-dim">${k(r.raceBudget[x.k2])}</span>` : '')).join(', ') || '<span class="pg-dim">none</span>';
                 if (r.gw) return `<div class="tr-scroll"><table class="lg-tbl tr-tbl"><thead><tr><th class="l">Tier</th><th class="l">Teams</th><th>Skill points</th><th>Secondary</th><th>Stars</th></tr></thead><tbody>${[1, 2, 3, 4].map(t =>
                     `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td><td>${MP.SP[t]}</td><td>up to ${t}</td><td>${t === 1 ? 1 : 2}</td></tr>`).join('')}</tbody></table></div>
@@ -3642,7 +3669,7 @@ ol.ci-steps li::marker { content: none; }
                 const head = (r.raceBudget ? '' : '<th>Budget</th>') + (gold ? `<th>${pts ? 'Skill points' : 'Skill gold'}</th>${secC ? '<th>Secondary</th>' : ''}${stkC ? '<th>Stacks</th>' : ''}${stuC ? '<th>Stat-ups</th>' : ''}` : '<th>Primary</th><th>Secondary</th>') + '<th>Stars</th>';
                 const row = t => (r.raceBudget ? '' : `<td>${k(at(r, 'budget', t))}</td>`) + (gold ? `<td>${pts ? at(r, 'gold', t) : k(at(r, 'gold', t))}</td>${secC ? `<td>up to ${secCap(r, t)}</td>` : ''}${stkC ? `<td>${at(r, 'stacks', t)}</td>` : ''}${stuC ? `<td>${at(r, 'statups', t)}</td>` : ''}` : `<td>${at(r, 'prim', t)}</td><td>${at(r, 'sec', t)}</td>`) + `<td>${at(r, 'stars', t)}</td>`;
                 return `<div class="tr-scroll"><table class="lg-tbl tr-tbl"><thead><tr><th class="l">Tier</th><th class="l">Teams${r.raceBudget ? ' and their budgets' : ''}</th>${head}</tr></thead><tbody>${T.map(t =>
-                    `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td>${row(t)}</tr>`).join('')}</tbody></table></div>
+                    `<tr><td class="l"><b>${t}</b></td><td class="l tr-teams">${byTier(t)}</td>${row(t)}</tr>`).join('')}${(r.ban || []).length ? `<tr><td class="l"><b>-</b></td><td class="l tr-teams">Not allowed: ${r.ban.map(raceName).map(esc).join(', ')}</td></tr>` : ''}</tbody></table></div>
                     <div class="pg-dim">${gold ? `Extra skills are bought from the ${pts ? 'skill points' : 'skill gold'}, not the budget: primary ${cst(r, C.P)}, secondary ${cst(r, C.S)}${C.star ? `; a Star Player ${cst(r, C.star)}, a Mega-star ${cst(r, C.mega)}` : ''}${T.some(t => at(r, 'stacks', t)) ? `; a stack (a second primary on a player whose extra is a primary) ${cst(r, C.P)} + ${cst(r, C.stack)}` : ''}${T.some(t => at(r, 'statups', t)) ? `; a stat increase instead of a skill: AV ${cst(r, C.av)}, MA ${cst(r, C.ma)}, PA ${cst(r, C.pa)}, AG ${cst(r, C.ag)}, ST ${cst(r, C.st)}` : ''}.`
                         : 'One extra skill per player; skills are free (outside the budget).'} ${r.mega ? `At most ${plural(r.mega, 'Mega-star')}.` : 'No Mega-stars.'} ${r.elite ? `Each Elite Skill (Block, Dodge, Guard, Mighty Blow) on ${r.elite} players at most.` : 'No limit on Elite Skills.'}</div>
                     <div class="pg-dim"><b>Inducements allowed:</b> ${r.ind.length ? r.ind.map(indName).map(esc).join(', ') : 'none'} (Star Players: per tier, above).</div>`;
@@ -3665,18 +3692,20 @@ ol.ci-steps li::marker { content: none; }
             // the Team tiers editor: a box per tier with its teams in, moved by dragging or by tapping a team then a tier
             let picked = '';
             function tiersHtml() {
-                const r = draft, T = Array.from({ length: r.tiers }, (_, i) => i + 1);
+                const r = draft, T = Array.from({ length: r.tiers }, (_, i) => i + 1).concat([0]);
                 const all = races().map(k2 => ({ k2, n: raceName(k2) })).sort((a, b) => a.n.localeCompare(b.n));
                 return T.map(t => {
-                    const mine2 = all.filter(x => tierOf(r, x.k2) === t);
-                    return `<div class="tr-box${picked && tierOf(r, picked) !== t ? ' tr-target' : ''}" data-trbox="${t}"><div class="tr-boxh"><b>Tier ${t}</b><span class="pg-dim">${plural(mine2.length, 'team')}${r.raceBudget ? '' : ' · ' + k(at(r, 'budget', t))}</span></div>
-                        <div class="tr-chips">${mine2.map(({ k2, n }) => `<div class="tr-chip${picked === k2 ? ' on' : ''}" data-trchip="${k2}" role="button" tabindex="0" aria-pressed="${picked === k2}" aria-label="${esc(n)}, Tier ${t}"><span class="tr-grip" aria-hidden="true">⠿</span><span class="tr-cn">${esc(n)}</span>${r.raceBudget
+                    const mine2 = all.filter(x => slotOf(r, x.k2) === t);
+                    return `<div class="tr-box${picked && slotOf(r, picked) !== t ? ' tr-target' : ''}${t ? '' : ' tr-ban'}" data-trbox="${t}"><div class="tr-boxh"><b>${t ? 'Tier ' + t : 'Not allowed'}</b><span class="pg-dim">${plural(mine2.length, 'team')}${r.raceBudget || !t ? '' : ' · ' + k(at(r, 'budget', t))}</span></div>
+                        <div class="tr-chips">${mine2.map(({ k2, n }) => `<div class="tr-chip${picked === k2 ? ' on' : ''}" data-trchip="${k2}" role="button" tabindex="0" aria-pressed="${picked === k2}" aria-label="${esc(n)}, ${t ? 'Tier ' + t : 'not allowed'}"><span class="tr-grip" aria-hidden="true">⠿</span><span class="tr-cn">${esc(n)}</span>${r.raceBudget
                             ? `<input type="number" class="lg-in tr-num tr-cb" data-trrb="${k2}" min="100" max="3000" step="5" value="${r.raceBudget[k2]}" aria-label="${esc(n)} budget">` : ''}</div>`).join('') || '<div class="pg-dim tr-none">No teams: drop one here</div>'}</div></div>`;
                 }).join('');
             }
             function moveTeam(race, t) {
-                if (!draft || !race || !(t >= 1 && t <= draft.tiers)) return;
-                draft.tier[race] = t; picked = '';
+                if (!draft || !race || !(t >= 0 && t <= draft.tiers)) return;
+                draft.ban = (draft.ban || []).filter(x => x !== race);
+                if (t) draft.tier[race] = t; else draft.ban.push(race);
+                picked = '';
                 const box = $r('tr-tierbox'); if (box) box.innerHTML = tiersHtml();
                 const el = document.querySelector(`#tr-tierbox [data-trchip="${race}"]`); if (el) { el.classList.add('tr-moved'); setTimeout(() => el.classList.remove('tr-moved'), 700); }
             }
@@ -3756,12 +3785,12 @@ ol.ci-steps li::marker { content: none; }
                 root.addEventListener('click', e => {
                     if (!draft || root.dataset.justDragged || e.target.closest('input')) return;
                     const chip = e.target.closest('[data-trchip]'), box = e.target.closest('#tr-tierbox [data-trbox]');
-                    if (chip && !(picked && picked !== chip.dataset.trchip && tierOf(draft, picked) !== tierOf(draft, chip.dataset.trchip))) { picked = picked === chip.dataset.trchip ? '' : chip.dataset.trchip; repaintTiers(); return; }
+                    if (chip && !(picked && picked !== chip.dataset.trchip && slotOf(draft, picked) !== slotOf(draft, chip.dataset.trchip))) { picked = picked === chip.dataset.trchip ? '' : chip.dataset.trchip; repaintTiers(); return; }
                     if (box && picked) moveTeam(picked, +box.dataset.trbox);   // tapping a team in another tier also drops the picked team there
                 });
                 root.addEventListener('keydown', e => {
                     const chip = e.target.closest && e.target.closest('[data-trchip]'); if (!chip || !draft) return;
-                    const t = tierOf(draft, chip.dataset.trchip);
+                    const t = slotOf(draft, chip.dataset.trchip);
                     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); chip.click(); }
                     else if (/^[1-8]$/.test(e.key)) { moveTeam(chip.dataset.trchip, +e.key); }
                     else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -3824,7 +3853,7 @@ ol.ci-steps li::marker { content: none; }
                 root.addEventListener('input', edit); root.addEventListener('change', edit);
             }
             const openW = (done, id, sec) => { wire(); open(done, id, sec); };
-            return { GW, STATS, pooled, unit, cst, secCap, list, get, tierOf, at, budgetFor, last, remember, defsFor, addMissing, indName, open: openW };
+            return { GW, STATS, pooled, unit, cst, secCap, list, get, tierOf, allows, at, budgetFor, last, remember, defsFor, addMissing, indName, open: openW };
         })();
         const TB = (function () {
             const KEY = 'bb-custom-teams', VER = 1, BUDGET = 1000, MAXP = 16, MINP = 11;
@@ -4021,6 +4050,7 @@ ol.ci-steps li::marker { content: none; }
                 if (c.spent > B) out.push(`${k(c.spent - B)} over the ${k(B)} budget`);
                 if (!gwRules(t)) {   // a tournament's own rules: so many primary and secondary skills, Star Players and the inducements it allows
                     const r = rulesOf(t), P = TRULES.at(r, 'prim', tier), S = TRULES.at(r, 'sec', tier), pN = mpN(t, 'P'), sN = mpN(t, 'S'), stN = (t.stars || []).length, mx = starMax(t);
+                    if (!TRULES.allows(r, t.race)) out.push(`${(RACES[t.race] || {}).name || 'This team'} aren't allowed under ${r.name}`);
                     if (isGold(t)) {
                         const G = TRULES.at(r, 'gold', tier), used = goldUsed(t), stk = t.players.filter(p => p.mp2).length, sts = t.players.filter(mpStat).length, SK = TRULES.at(r, 'stacks', tier), SU = TRULES.at(r, 'statups', tier);
                         if (used > G) out.push(`${TRULES.unit(r, used - G)} over the ${TRULES.unit(r, G)} a Tier ${tier} team has`);
@@ -4118,7 +4148,7 @@ ol.ci-steps li::marker { content: none; }
                 return { players, staff, fans, induce, tv: players + staff, spent: players + staff + fans + induce };
             }
             function randomName(race, used) {   // avoids a first name or surname someone in the team already has, where it can
-                const [a, b] = NAMES[race] || NAMES.human, firsts = new Set(), lasts = new Set();
+                const [a, b] = NAMES[race] || (race === 'nightgoblin' && NAMES.goblin) || NAMES.human, firsts = new Set(), lasts = new Set();
                 used.forEach(n => { const i = String(n).indexOf(' '); if (i > 0) { firsts.add(n.slice(0, i)); lasts.add(n.slice(i + 1)); } });
                 for (let i = 0; i < 120; i++) {
                     const f = a[Math.floor(Math.random() * a.length)], l = b[Math.floor(Math.random() * b.length)], n = f + ' ' + l;
@@ -4338,7 +4368,8 @@ ol.ci-steps li::marker { content: none; }
                     : isMP(t) && (t.stars || []).length ? 'Star Players (at the bottom) count towards the 11 and the 16. The first players make up the rest of the starting eleven; you can still change it before kick-off.'
                     : 'The first 11 start the match (players below the dashed line are reserves); you can still change the starting eleven before kick-off.';
                 $('tb-mpwrap').style.display = isMP(t) ? '' : 'none'; $('tb-mpcard').style.display = isMP(t) ? '' : 'none'; if (!isMP(t)) $('tb-hirestars').style.display = 'none';
-                $('tb-race').innerHTML = Object.values(RACES).filter(r => r.positions).map(r => `<option value="${r.key}" ${r.key === t.race ? 'selected' : ''}>${esc(r.name)}</option>`).join('');
+                $('tb-race').innerHTML = Object.values(RACES).filter(r => r.positions).map(r => `<option value="${r.key}" ${r.key === t.race ? 'selected' : ''}>${esc(r.name)}${r.preRelease ? ' (pre-release)' : ''}</option>`).join('');
+                $('tb-pre').textContent = R.preRelease || ''; $('tb-pre').style.display = R.preRelease ? '' : 'none';
                 $('tb-col1').style.background = t.primary; $('tb-col2').style.background = t.secondary;
                 const tok = $('tb-token'); tok.style.background = t.primary; tok.style.color = t.secondary; tok.textContent = R.types[Object.keys(R.positions)[0]].label;
                 const sets = SPRITE_SETS[t.race] || [];
@@ -5059,6 +5090,7 @@ ol.ci-steps li::marker { content: none; }
                 underworld: ['Skavenblight', 'the Underway', 'Karak Eight Peaks', 'the Warrens', 'Hell Pit', 'the Black Pit', 'Mount Gunbad', 'the Deep Tunnels'],
                 necromantic: ['Mortis Moor', 'the Haunted Fen', 'Grimhold', 'Hel Fenn', 'the Barrowdowns', 'Waldenhof', 'Nachthafen', 'the Crypts'],
                 vampire: ['Drakenhof', 'Sylvania', 'Castle Templehof', 'Fort Oberstyre', 'Vanhaldenschlosse', 'Mousillon', 'Schwartzhafen', 'Nachtdorf'],
+                nightgoblin: ['Red Eye Mountain', 'Karak Eight Peaks', 'the Badlands', 'Mount Gunbad', 'Black Crag', 'the Moonlit Caves', 'Mad Moon Hollow', 'Iron Rock'],
                 snotling: ['Crud Creek', 'the Fungus Caves', 'Squig Hollow', 'Mudpit', 'the Badlands', 'Black Crag', 'Toadstool Grotto', 'Bogrot'],
                 tombkings: ['Khemri', 'Numas', 'Zandri', 'Lybaras', 'Quatar', 'Mahrak', 'Rasetra', 'Lahmia'],
                 khorne: ['the Brass Citadel', 'Skull Throne', 'the Blood Pits', 'Goreheim', 'the Bloodfields', 'Brasshold', 'the Crimson Wastes', 'Kharnath'],
@@ -5091,6 +5123,7 @@ ol.ci-steps li::marker { content: none; }
                 underworld: ['Underlings', 'Tunnellers', 'Warpstompers', 'Diggers', 'Gutterlings', 'Glowers', 'Scurriers', 'Burrowers'],
                 necromantic: ['Horrors', 'Howlers', 'Wailers', 'Stitch-ups', 'Grave Robbers', 'Night Terrors', 'Moonhowlers', 'Ghasts'],
                 vampire: ['Counts', 'Nightlords', 'Bloodsuckers', 'Fangs', 'Gargoyles', 'Thirsters', 'Night Owls', 'Bats'],
+                nightgoblin: ['Moonhoods', 'Squig Hoppers', 'Loonz', 'Fungus Fiends', 'Bad Moons', 'Gnashers', 'Netters', 'Hoodies'],
                 snotling: ['Nosepickers', 'Squigs', 'Mushrooms', 'Mudlarks', 'Stilts', 'Gobbos', 'Sporeheads', 'Wobblers'],
                 tombkings: ['Nightmares', 'Mummies', 'Pharaohs', 'Scarabs', 'Sandstorms', 'Sphinxes', 'Dust Devils', 'Embalmers'],
                 khorne: ['Bloodletters', 'Skullcrushers', 'Gorehounds', 'Berserkers', 'Bloodreavers', 'Butchers', 'Wrathmongers', 'Juggernauts'],
@@ -7084,7 +7117,7 @@ ol.ci-steps li::marker { content: none; }
             function createOnline(spec, entries) {
                 const ids = [], coach = {}, cid = uid();
                 entries.forEach(e => { ids.push(e.id); coach[e.id] = e.coach; });
-                const usedNames = new Set(TB.list().map(t => t.name).concat(entries.map(e => (TB.get(e.id) || {}).name))), usedKits = new Set(TB.list().map(t => t.primary)), races = LEAGUE.raceKeys();
+                const usedNames = new Set(TB.list().map(t => t.name).concat(entries.map(e => (TB.get(e.id) || {}).name))), usedKits = new Set(TB.list().map(t => t.primary)), races = LEAGUE.raceKeys().filter(rc => spec.fmt === 'sevens' || TRULES.allows(TRULES.get(spec.rules), rc));
                 while (ids.length < spec.size) { const t = draftTeam(rnd(races), spec.budget, cid, usedNames, usedKits, spec.fmt, spec.rules); TB.put(t); ids.push(t.id); coach[t.id] = 'c'; }
                 const cp = { id: cid, online: spec.tid, rules: spec.fmt === 'sevens' ? undefined : (spec.rules || 'gw'), fmt: spec.fmt === 'sevens' ? 'sevens' : 'std', type: spec.type === 'swiss' ? 'swiss' : 'ko', name: spec.name, size: spec.size, budget: spec.budget, teams: ids, coach, rounds: [], at: 0, stage: 'play', champ: null, created: new Date().toISOString().slice(0, 10) };
                 cp.wx = spec.wx === 'chaos' ? 'chaos' : 'std';
@@ -7199,7 +7232,7 @@ ol.ci-steps li::marker { content: none; }
                         <div class="lg-team-main"><div class="lg-tn">${esc(t.name)}</div><div class="pg-dim">${teamLine(t)} · spends ${k(TB.costs(t).spent)}</div>${pr.length ? `<div class="pg-dim" style="color:#fda4af">Can't enter: ${esc(pr.join('; '))}.</div>` : ''}</div>
                         ${on ? `<div class="ai-toggle lg-who" role="group" aria-label="Who coaches ${esc(t.name)}"><button type="button" data-cmcoach="${t.id}|p" class="${on === 'p' ? 'on' : ''}">You</button><button type="button" data-cmcoach="${t.id}|c" class="${on === 'c' ? 'on' : ''}">Computer</button></div>` : ''}</div>`;
                 }).join('') : `<div class="pg-dim">You have no ${sevC ? 'Sevens ' : ''}Matched Play teams yet. In Teams, make a team and set its Format to ${sevC ? 'Sevens Matched Play' : 'Matched Play'}. (Or run a cup of computer teams to watch.)</div>`;
-                const cpuRows = d.cpu.slice(0, cpuN).map((v, i) => `<label class="lg-cpu"><span class="pg-dim">${i + 1}.</span><select class="lg-sel" data-ccpu="${i}"><option value="random"${v === 'random' ? ' selected' : ''}>Random race</option>${races.map(r => `<option value="${r}"${v === r ? ' selected' : ''}>${esc(RACES[r].name)} (Tier ${sevC ? SEV.TIER[r] || 2 : MP.tier(r)})</option>`).join('')}</select></label>`).join('');
+                const cpuRows = d.cpu.slice(0, cpuN).map((v, i) => `<label class="lg-cpu"><span class="pg-dim">${i + 1}.</span><select class="lg-sel" data-ccpu="${i}"><option value="random"${v === 'random' ? ' selected' : ''}>Random race</option>${races.map(r => { const no = !sevC && !TRULES.allows(TRULES.get(d.rules), r); return `<option value="${r}"${v === r ? ' selected' : ''}${no ? ' disabled' : ''}>${esc(RACES[r].name)} (Tier ${sevC ? SEV.TIER[r] || 2 : MP.tier(r)})${no ? ' – not allowed by this ruleset' : ''}</option>`; }).join('')}</select></label>`).join('');
                 const sw = d.type === 'swiss';
                 return `<section class="pg-card lg-form">
                     <div class="lg-field"><span class="lg-lbl">Game</span>${seg('fmt', [['std', 'Blood Bowl'], ['sevens', 'Blood Bowl Sevens']])}</div>
@@ -7236,9 +7269,9 @@ ol.ci-steps li::marker { content: none; }
             function create() {
                 const d = draft, ids = Object.keys(d.mine), coach = {};
                 ids.forEach(id => { coach[id] = d.mine[id]; });
-                const cid = uid(), usedNames = new Set(TB.list().map(t => t.name)), usedKits = new Set(TB.list().map(t => t.primary)), races = LEAGUE.raceKeys();
+                const cid = uid(), usedNames = new Set(TB.list().map(t => t.name)), usedKits = new Set(TB.list().map(t => t.primary)), races = LEAGUE.raceKeys().filter(rc => d.fmt === 'sevens' || TRULES.allows(TRULES.get(d.rules), rc));
                 for (let i = 0; ids.length < d.size; i++) {
-                    const race = d.cpu[i] && d.cpu[i] !== 'random' ? d.cpu[i] : rnd(races);
+                    const race = d.cpu[i] && d.cpu[i] !== 'random' && races.includes(d.cpu[i]) ? d.cpu[i] : rnd(races);
                     const t = draftTeam(race, d.budget, cid, usedNames, usedKits, d.fmt, d.rules);
                     TB.put(t); ids.push(t.id); coach[t.id] = 'c';
                 }
@@ -7356,6 +7389,7 @@ ol.ci-steps li::marker { content: none; }
             underworld: { lineup: ['Goblin', 'Goblin', 'Clanrat', 'Blitzer', 'Gutter', 'Clanrat', 'Thrower'], rerolls: 1 },
             necromantic: { lineup: ['Zombie', 'Werewolf', 'Zombie', 'Ghoul', 'Zombie', 'Wraith', 'Zombie'], rerolls: 1 },
             vampire: { lineup: ['Thrall', 'Blitzer', 'Thrall', 'Runner', 'Thrall', 'Thrall', 'Thrower'], rerolls: 1 },
+            nightgoblin: { lineup: ['CaveSquig', 'Lineman', 'Hopper', 'Herder', 'Lineman', 'Lineman', 'Lineman'], bench: ['Lineman'], rerolls: 1 },
             snotling: { lineup: ['Lineman', 'Troll', 'Lineman', 'PumpWagon', 'FunHoppa', 'Lineman', 'Stilty'], bench: ['Lineman'], rerolls: 1 },
             tombkings: { lineup: ['Lineman', 'Guardian', 'Lineman', 'Blitzer', 'Guardian', 'Thrower', 'Lineman'], rerolls: 1 },
             khorne: { lineup: ['Marauder', 'Bloodseeker', 'Marauder', 'Khorngor', 'Bloodseeker', 'Marauder', 'Marauder'], rerolls: 1 },
@@ -7468,6 +7502,7 @@ ol.ci-steps li::marker { content: none; }
             underworld: { fill: '#475569', text: '#ef4444', endBg: '#334155', endText: '#fecaca', shade: 'rgba(0,0,0,0.5)' },   // away: slate grey with red
             necromantic: { fill: '#65a30d', text: '#ea580c', endBg: '#4a7a09', endText: '#fed7aa', shade: 'rgba(30,50,10,0.45)' },   // away: lime with orange
             vampire: { fill: '#d6d3d1', text: '#9f1239', endBg: '#a8a29e', endText: '#6b0d27', shade: 'rgba(60,50,50,0.45)' },     // away: bone grey with crimson
+            nightgoblin: { fill: '#1e3a8a', text: '#facc15', endBg: '#172554', endText: '#fde047', shade: 'rgba(0,0,0,0.55)' },   // away: navy robes with yellow
             snotling: { fill: '#facc15', text: '#7c3a06', endBg: '#c9a00f', endText: '#4a2304', shade: 'rgba(90,70,20,0.45)' },   // away: yellow with mud orange
             tombkings: { fill: '#b4343a', text: '#0f9fb0', endBg: '#7f2428', endText: '#a5f3fc', shade: 'rgba(0,0,0,0.5)' },  // away: red with turquoise
             khorne: { fill: '#d4a017', text: '#7f1d1d', endBg: '#a87d0f', endText: '#450a0a', shade: 'rgba(90,70,20,0.45)' },   // away: brass with crimson
@@ -12203,6 +12238,8 @@ ol.ci-steps li::marker { content: none; }
             'Kick': 'When this player kicks off (not on the line of scrimmage or in a wide zone), the kick deviates only D3 squares.',
             'Always Hungry': 'When this player makes a Throw Team-mate action, roll a D6 first. On a 1 they try to eat the team-mate: roll another D6 - on a 1 the team-mate is eaten, otherwise they squirm free and the throw is fumbled.',
             'Block': 'On a Both Down block result this player is not Knocked Down and stays on their feet.',
+            'Squig Rage': 'Roll a D6 when this player is activated, before declaring an action (a team re-roll may be used). 3+: they act as normal. 1-2: they must Block an opponent they are Marking (with Jump Up if Prone; even with Ball & Chain). If they can\'t, they may Knock Down an adjacent team-mate (no Turnover unless that team-mate had the ball) and carry on, or else become Distracted. No roll within 3 squares of a Standing team-mate with Squig Restraint.',
+            'Squig Restraint': 'Team-mates within 3 squares of this player, while they are Standing, don\'t roll for Squig Rage when they are activated.',
             'Bone Head': 'Roll a D6 when this player is activated. On a 1 they become Distracted: the activation is lost and they have no Tackle Zone until the start of their next team turn.',
             'Break Tackle': 'Once per turn, when this player dodges, they may add +1 to the roll (+2 if their Strength is 4 or more). It can turn a failed dodge into a success.',
             'Catch': 'May re-roll a failed Catch test.',
@@ -12319,6 +12356,7 @@ ol.ci-steps li::marker { content: none; }
             orc: { Lineman: 'Lineman,Orc', Goblin: 'Lineman,Goblin', Thrower: 'Thrower,Orc', Blitzer: 'Blitzer,Orc', BigUn: 'Blocker,Orc', Troll: 'Big Guy,Troll' },
             undead: { Skeleton: 'Human,Lineman,Skeleton,Undead', Zombie: 'Human,Lineman,Undead,Zombie', Ghoul: 'Ghoul,Runner,Undead', Wight: 'Blitzer,Human,Skeleton,Undead', Mummy: 'Big Guy,Blocker,Human,Undead' },
             skaven: { Clanrat: 'Lineman,Skaven', Thrower: 'Thrower,Skaven', GutterRunner: 'Runner,Skaven', Blitzer: 'Blitzer,Skaven', RatOgre: 'Big Guy,Skaven' },
+            nightgoblin: { Lineman: 'Goblin,Lineman', Herder: 'Goblin,Special', Hopper: 'Goblin,Special,Squig', Wrangler: 'Goblin,Special,Squig', CaveSquig: 'Special,Squig', Troll: 'Big Guy,Troll' },
             snotling: { Lineman: 'Lineman,Snotling', FunHoppa: 'Snotling,Special', Stilty: 'Runner,Snotling', Flinga: 'Snotling,Special', PumpWagon: 'Big Guy,Snotling,Special', Troll: 'Big Guy,Troll' },
             tombkings: { Lineman: 'Human,Lineman,Skeleton,Undead', Thrower: 'Human,Skeleton,Thrower,Undead', Blitzer: 'Blitzer,Human,Skeleton,Undead', Guardian: 'Big Guy,Blocker,Human,Undead' },
             underworld: { Goblin: 'Goblin,Lineman', Snotling: 'Lineman,Snotling', Clanrat: 'Lineman,Skaven', Thrower: 'Skaven,Thrower', Gutter: 'Runner,Skaven', Blitzer: 'Blitzer,Skaven', Troll: 'Big Guy,Troll', RatOgre: 'Big Guy,Skaven' },
@@ -14357,6 +14395,7 @@ ol.ci-steps li::marker { content: none; }
             'Animal Savagery':{ fill: '#fb923c', edge: '#2a1000', shadow: '#7c2d12' },
             'Juggernaut':     { fill: '#ffb15c', edge: '#3a1600', shadow: '#0f8b80' },
             'Shadowing':      { fill: '#7af0e0', edge: '#032a26', shadow: '#0f8b80' },
+            'Squig Rage':     { fill: '#f87171', edge: '#450a0a', shadow: '#facc15' },
             'On the Ball':    { fill: '#ffd27a', edge: '#3a2400', shadow: '#0f8b80' },
             'Prehensile Tail':{ fill: '#c6ff7a', edge: '#1e3300', shadow: '#0f8b80' },
             'CHOMP!':         { fill: '#ff4a3a', edge: '#220000', shadow: '#7a0a0a' },
@@ -15225,6 +15264,7 @@ ol.ci-steps li::marker { content: none; }
         const actD6 = () => (actDice && actDice.length ? actDice.shift() : d6());
         function rollActivationDice(p, done) {
             const blk = p.actionTaken === 'block' || p.actionTaken === 'blitz', checks = [];
+            if (squigRolls(p)) checks.push({ label: 'Squig Rage', pass: r => r >= 3 });   // (first: it's rolled before the action is declared)
             const bl = bloodlustNeed(p);
             if (bl) checks.push({ label: 'Bloodlust', pass: r => r !== 1 && r + (blk ? 1 : 0) >= bl, goOn: true });
             if (p.skills.includes('Take Root') && !p.isDown && !p.rooted) checks.push({ label: 'Take Root', pass: r => r !== 1, goOn: true });
@@ -15252,13 +15292,92 @@ ol.ci-steps li::marker { content: none; }
             if (resolveStalls(p.id)) { if (cont) cont(false); return false; }   // the last player's activation is over: were they stalling?
             if (resolveHunger(p.id)) { if (cont) cont(false); return false; }   // ...or still thirsty?
             p.stallWatch = canScoreNoDice(p);
+            p.squigForced = false;
+            const sq = p.skills.includes('Squig Rage') ? squigRolls(p) : null;
+            if (sq === false) { log(`  Squig Restraint: a Squig Herder is close by, so ${p.name || p.type} needn't roll for Squig Rage.`, 'text-slate-400'); SQUIG.stat('skip'); }
             let result;
             rollActivationDice(p, dice => {
+                if (sq) {
+                    const r = dice.shift(); SQUIG.stat('n');
+                    if (r < 3) { SQUIG.stat('fail'); p.stallWatch = false; squigRage(p, r, ok => { result = ok; if (cont) cont(ok); }); return; }
+                    log(`  Squig Rage roll: ${r} (needs 3+) - ${p.name || p.type} behaves itself.`, 'text-green-400');
+                }
                 actDice = dice; const ok = activationTest0(p); actDice = null;
                 if (!ok) p.stallWatch = false;
                 result = ok; if (cont) cont(ok);
             });
             return result;
+        }
+        // ---- Squig Rage (Night Goblins' Squigs) and Squig Restraint (the Squig Herder) ----
+        const SQUIG = { stats: { n: 0, fail: 0, skip: 0, block: 0, flatten: 0, distracted: 0 }, stat(k) { this.stats[k] = (this.stats[k] || 0) + 1; } };
+        // a Standing team-mate with Squig Restraint within 3 squares
+        const squigCalmed = p => state.players.some(q => q.team === p.team && q.id !== p.id && q.skills && q.skills.includes('Squig Restraint') && standingOn(q) && cheb1(p, q) <= 3);
+        // does this player roll for Squig Rage now? (null: no Squig Rage; false: a Herder spares them the roll)
+        const squigRolls = p => !p.skills.includes('Squig Rage') ? null : !squigCalmed(p);
+        // the rule's roll comes before the action is declared, so on a 1-2 the action they did declare never happened
+        function undeclare(p) {
+            const a = p.actionTaken;
+            if (a === 'blitz') state.blitzUsed = false; else if (a === 'pass') state.passUsed = false; else if (a === 'handoff') state.handoffUsed = false;
+            else if (a === 'secure_ball') state.secureUsed = false; else if (a === 'ttm') state.ttmUsed = false; else if (a === 'ktm') state.ktmUsed = false;
+            else if (a === 'bomb') state.bombUsed = false; else if (a === 'punt') state.puntUsed = false;
+            else if (a === 'foul') { state.foulUsed = p.foulPrev ? p.foulPrev.used : false; if (state.foulers) state.foulers = state.foulers.filter(id => id !== p.id); }
+        }
+        // the computer's pick on a 1-2 with nobody to Block: flatten a team-mate and carry on only when this activation matters
+        // (the Squig has the ball, or a Blitz, pass or hand-off was declared), or the team-mate is a cheap one who has already acted
+        function squigVictimAI(p, mates) {
+            const ok = mates.filter(q => state.ball.carrierId !== q.id).sort((a, b) => ((b.hasActed ? 1 : 0) - (a.hasActed ? 1 : 0)) || (playerCost(a) - playerCost(b)) || (b.av - a.av));
+            const v = ok[0]; if (!v) return null;
+            const matters = state.ball.carrierId === p.id || ['blitz', 'pass', 'handoff', 'ttm', 'foul'].includes(p.actionTaken);
+            return matters || (v.hasActed && playerCost(v) <= 55) ? v : null;
+        }
+        function squigRage(p, r, done) {
+            const nm = p.name || p.type, savedMode = state.mode;
+            log(`  Squig Rage roll: ${r} (needs 3+) - ${nm} flies into a RAGE!`, 'text-red-400 font-bold');
+            skillPop('Squig Rage'); sfx('chomp');
+            const prone = p.isDown || p.jumpStoodAt === actStamp();
+            const foes = state.players.filter(q => q.team !== p.team && standingOn(q) && cheb1(p, q) === 1);
+            if (foes.length && !p.isStunned && (!prone || p.skills.includes('Jump Up'))) {
+                // a Block Action against someone they mark (a Ball & Chain player too)
+                undeclare(p); SQUIG.stat('block');
+                p.actionTaken = 'block'; p.squigForced = true; p.hasBlocked = false; p.jumpStoodAt = null;
+                log(`  ${nm} must Block an opponent it is marking!`, 'text-red-300');
+                const toBlock = () => { state.mode = MODES.ACTION_BLOCK; state.selectedId = p.id; refreshSelection(p); updateValidActions(p); done(false); };
+                if (!prone) { toBlock(); return; }
+                p.isDown = true; state.mode = MODES.LOCKED;
+                setupRoll('JUMP UP', p, Math.max(2, Math.min(6, p.ag - 1)), 'None',
+                    () => { p.isDown = false; p.jumpedUp = true; skillPop('Jump Up'); log(`  ${nm} springs up to bite!`, 'text-sky-300'); toBlock(); },
+                    () => { log(`  ${nm} can't get up: the activation ends.`, 'text-slate-400'); p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null; p.squigForced = false; state.mode = MODES.IDLE; refreshSelection(p); done(false); },
+                    { desc: 'Squig Rage, Jump Up: an Agility test with +1 to stand up and make the Block. Fail and the player stays Prone and their activation ends (no Turnover).', prevMode: MODES.LOCKED, skillAllowed: false,
+                      explainFail: () => ({ title: 'Stays Down', text: 'The player stays Prone and their activation ends. It is not a Turnover.' }) });
+                return;
+            }
+            const distracted = () => {
+                undeclare(p); SQUIG.stat('distracted');
+                log(`  ${nm} snaps at thin air and becomes DISTRACTED! The activation is lost.`, 'text-orange-400 font-bold');
+                p.isDistracted = true; p.hasActed = true; p.remainingMA = 0; p.rushes = 0; p.actionTaken = null;
+                state.mode = MODES.IDLE;
+                showRemovalNotice('DISTRACTED', `${ROSTERS[p.team].name} ${p.type} #${p.id} rages at nothing. No Tackle Zone until their next turn.`);
+                refreshSelection(p); done(false);
+            };
+            const flatten = v => {
+                SQUIG.stat('flatten');
+                const hadBall = state.ball.carrierId === v.id;
+                log(`  ${nm} takes it out on team-mate ${v.name || v.type}: they are Knocked Down!`, 'text-orange-400 font-bold');
+                v.isDown = true;
+                if (hadBall) dropBall(v);
+                harm({ kind: 'savagery', by: p }, () => checkArmor(v, p));
+                if (hadBall) { p.hasActed = true; p.actionTaken = null; triggerTurnover('A raging Squig flattened its own ball carrier!'); done(false); return; }
+                log(`  (Having vented its rage, ${nm} carries on with its activation.)`, 'text-slate-400');
+                state.mode = savedMode; refreshSelection(p);
+                const ok = activationTest0(p); if (ok) updateValidActions(p); done(ok);
+            };
+            const mates = state.players.filter(q => q.team === p.team && q.id !== p.id && standingOn(q) && cheb1(p, q) === 1);
+            if (!mates.length) { distracted(); return; }
+            if (AI.isAI(p.team)) { const v = squigVictimAI(p, mates); if (v) flatten(v); else distracted(); return; }
+            pitchPick({ title: 'SQUIG RAGE', team: p.team, hint: `${nm} is raging with nobody to bite. Tap an adjacent team-mate to Knock Down (then carry on), or Cancel to become Distracted.`,
+                cells: mates.map(q => ({ x: q.x, y: q.y, data: q, hint: state.ball.carrierId !== q.id })), cancelLabel: 'Nobody (Distracted)',
+                describe: c => `Knock Down ${c.data.name || c.data.type}${state.ball.carrierId === c.data.id ? ' - they have the ball: that would be a Turnover!' : ' (no Turnover)'}. Tap Confirm, or tap them again.`,
+                onPick: flatten, onCancel: distracted });
         }
         const bloodlustNeed = p => { const s = (p.skills || []).find(x => x.startsWith('Bloodlust')); const m = s && s.match(/\((\d)\+\)/); return m ? +m[1] : 0; };
         function bloodlustTest(p) {
@@ -19726,6 +19845,14 @@ ol.ci-steps li::marker { content: none; }
         // the Beastmaster brings an animal: a goose (wings up, honking) or a badger, picked at random for each player each match; the goose stands in elsewhere (the Team Builder)
         const SPRITE_VARIANTS = { gnome: { 'Gnome Beastmaster': [["................................", "................................", "................................", "................................", "................................", "....oooooooooooo................", "...ottttttttttttoo..............", "...ottttttttttttTTo..o..........", "...ottttttttttttTToooso.........", "..otttttttttttttTTosooso........", "..otoootttttttttTTTosso..ooo....", ".oToo.oTAAAAAAAAAATooooooIiIo...", "..oosooTTyyssssyyToIIiIiIIiIo...", "....ossTTsesCssesTooIiIIiIiIo...", ".....oSTTssSCDSssoiIoIiIiIiIoo..", "......oobssCCDssooIioIiIiIIoiio.", ".......oyyyyDyyyoiIIioIWWWoiiEeo", ".o....ooybyyyyyyoIiIioWWWWoWWWoy", "osooooqQyyyyybyyyoIiiioWWWWoWWoG", "osskkkkkyybyyyyyydooiioWWWoooooo", "ossdddddkyyyyybyddo.oiioWWoowWo.", "coooooookKbbbbbkddo..oiioooowWo.", "......okccccggccccdo.oooWWoowWo.", "..c....ooyyyooyyyoo.oWWWWWWWoo..", "cc.c...oobbboobbboo.oWWWWWWWWo..", "....c.omosMsoosMsomoowwwwwwwwo..", "......omMMMMooMMMMmo.owwwwwwo...", ".......ooooo..ooooo...ooooooo...", "......................oyyooyyo..", ".......................oo..oo...", "................................", "................................"], ["................................", "................................", "................................", "................................", "................................", ".......oooooooooooo.............", "......ottttttttttttoo...........", "......ottttttttttttTTo..o.......", "......ottttttttttttTToooso......", ".....otttttttttttttTTosooso.....", ".....otoootttttttttTTTosso......", "....oToo.oTAAAAAAAAAATosso......", ".....oosooTTyyssssyyTTokso......", ".......ossTTsesCssesTTssdo......", "........oSTTssSCDSssTTSkdo......", ".........oobssCCDssoyookdo......", "..........oyyyyDyyyoyookdo......", "....o....ooybyyyyyybqookdo......", "...osooooqQyyyyybyyydqdkdo......", "...osskkkkkyybyyyyyydoooo.......", "...ossdddddkyyyyybyddo..........", "...coooooookKbbbbbkddo..oooo....", "..c......okccccggcoooeooWWWWoo..", "..c..c....ooyyyooowwwooWWWWWWWo.", "...cc.c...oobbbooowwwwwoiiiiiiio", ".......c.omosMsoewoEeeeoiiiiiiio", ".........omMMMMoewowwwoIIIIIIIo.", "..........ooooo.ooooooooooooooo.", "....................oeooeooeoeo.", ".....................o..o..o.o..", "................................", "................................"]] } };
         SPRITES.gnome['Gnome Beastmaster'] = SPRITE_VARIANTS.gnome['Gnome Beastmaster'][0];
+        // Night Goblins (the 2025 miniatures): bright yellow pointed hoods with a floppy tip and a little moon, team-coloured robes (black by default)
+        // with rope belts, silver spiky pads and brown boots; a Squig Herder with a long prod ending in a pointing blue hand (a mushroom on it),
+        // a Squig Hopper bouncing on a big red Squig, a Squig Wrangler hauling a Squig on a rope, a Cave Squig in a checked helmet; the Troll is the Orcs'.
+        // Two Linemen: waving their claws with the tongue out, and running with the ball.
+        SPRITES.nightgoblin = { 'Night Goblin Lineman': ["................................", "..................oooo..........", ".................oKKKko.........", "................okkoookko.......", "................okdo..okdo......", "...............okkdo...oo.......", "...............okkdo............", "..............okKkdo............", ".............okKkkkdo...........", "..o.o.......okKkNkkkdo..........", ".ouoooo....okKkkNNkkkdo..oooo.o.", ".ouuuuo...okKkkkkkkkkkdo.ouuuuo.", "..ouuo...okkoooooooooookdo.ouuo.", "..oUuo.oookouuuuuuuuuuokdooouUo.", "..oUuoouuuoouoouuuuoouooouuuoUo.", "..oUuo.ooouuuurouuoruuuuoooouUo.", "...oUo...okouuuuUUuuuuokdo.oUo..", "...oUo...okouowwwwwwouokdo.oUo..", "...oUmo..okkuojjjjjjoukkdo.mUo..", "...omMmo.okkuowjjjjwoukdo.mMmo..", "...omMMmooddkuoojjoouddooomMMo..", "....ommmtnttoouuojjouoottntmmo..", ".....ootnttntttooojjoootntttoo..", ".......otntttnttnoojjonttntto...", ".......oaAaAaAaAaAaoooaAaAao....", ".......otntttnttnttnttnttnto....", "........otntmmtttttmmtntto......", "........ottmMMmo.ommMmtto.......", ".........obbbbo...obbbbo........", "........obbbBbo...obbBbbo.......", ".......omMbbbbo...obbbbMmo......", ".......oooooooo...oooooooo......"], 'Squig Herder': ["................................", "................................", "..............oooo..............", ".............oKKKko.............", "............okkoookko...........", "............okdo..okdo..........", "...........okkdo...oo...........", "...........okkdo................", "..........okKkdo...........o....", ".........okKkkkdo.........oro...", "........okKkNkkkdo.......orwro..", ".......okKkkNNkkkdo.......obo...", "......okKkkkkkkkkkkdo....oo+oo..", ".....okkoooooooooookkdo.o+000o..", "..oo.okouuuuuuuuuuuokdo.o00000oo", "..ouoookouoouuuuoouokdooo+00000o", "...ouuuoouurouuoruuokoouo+0000oo", "....ooookuuuuUUuuuuokdooo+000o..", ".........kuowwwwwwouko..oo00o...", "........okuooooooooukdo.obooo...", "......ommmkuowwwwwoukmmmobo.....", ".....omMmmouuoooooouommMbbo.....", ".....ommmotttttttttttomobbo.....", "......ooUotnttnttnttnooobbo.....", ".......oUutnttnttnttooubo.......", ".......oUuoaAaAaAaAaoouo........", ".......obbtnttnttnttnobo........", "......obbootnmmttnmmtobo........", ".....obbo..omMMmoommMbo.........", "....obbo..obbbbbo.obbbbo........", "...obbo..omMbbbbo.obbbMmo.......", "...ooo...ooooooooo.oooooo......."],
+            'Squig Hopper': ["................................", ".........oooo...................", "........oKKKko..................", ".......okkoookko................", ".......okdo..okko...............", "......okkdo...oo................", "......okKkdo....................", ".....okKkNkdo...................", "....okKkkNkkdo..................", "...okkooooookkdo....oo..........", "..okouuuuuuuokdo...ouo..........", ".oookuoouooukdo...ouuo..........", ".ouuouroouroukoooouuo...........", "..ooouuUUuuuokouuuuo............", "....ouowwwwouootnoo.............", "....omoooooomttntto.............", "...omMmuwwwumMtnto..............", "...ommmtttttmmmtoo..............", ".....ooRRRRRRRRRRRoooo..........", "...ooRrrrrrrrrrrrrRRRRo.........", "..oRr!rrrrrrrrrrrrrrrRRo........", "oRrrorzzzzzzzzzzzzzzrorRRo......", "oRrrozEEEoEEEoEEEoEEzorRRo......", "oRrrozoEoooEoooEoooEzorRRo......", "oRrrozoojjjjjjjjjjjozorRRo......", "oRrrozjoJEoooEoooEJozorRRo......", "oRrrozzoEEEoEEEoEEEozorRRo......", "oRrrorzzzzzzzzzzzzzzrorRRo......", ".oRRrrrrrrrrrrrrrrrRRo..........", "..ooRRRRRooooooRRRRoo...........", "....oRRo......oRRo..............", "...ofofo.....ofofo.............."], 'Squig Wrangler': ["..................oooo..........", ".................oKKKko.........", "................okkoookko.......", "................okdo..okdo......", "...............okkdo...oo.......", "...............okKkdo...........", "..............okKkNkdo..........", ".............okKkkNNkdo.........", "............okkooooookkdo.......", "...........okkouuuuuuuokdo..oo..", "...........okouoouuuoouokdooUo..", "......ooo..okouroouuorouokdoUo..", ".....oRRRo.okouuuUUuuuuokooUo...", "....oRrrrRo.kuowwwwwwouko.oo....", "...oRrrrrrRo.uoooooooou.........", "..oRrrrrrrrRooowwwwwooommo......", ".oRrrooooorRaoAuooooouommMo.....", ".oRrozEwEzoRaAuuuuuuuuuommo.....", "oRrrozjjjzoRAaoAtttttttooo......", "oRrrozEwEzoRaAaAunttnttnuo......", ".oRrrooooorRoaAuounttnttuuo.....", ".oRRrrrrrrRRo.oaAuottnttntuo....", "..oRRRRRRRRo...oAotntttnttnuo...", "...ooRRRRoo.....oaAaAaAaAaAo....", "....oRo.oRo.....otnttnttnttno...", "....ofo.ofo.....otnmmtttnmmto...", ".................ommMo.ommMo....", "................obbbbo.obbbbo...", "...............obbBbbo.obbBbbo..", "..............omMbbbbo.obbbbMmo.", "..............oooooooo.oooooooo.", "................................"],
+            'Cave Squig': ["................................", "................................", "................................", "................................", "..........oooooooooo............", "........ootkktkkttkkoo..........", ".......okttkkttkkttkkkdo........", "......okkkkttkkttkkKkkkdo.......", ".....ommmmmmmmmmmmmmmmmmmo......", ".....oRRrrrrrrrrrrrrrrRRRRo.....", "....oRrr!rroErrrrroErrrRRRo.....", "....oRrrrrrooRrrrRooRrrrRRRo....", "..oRrrorzzzzzzzzzzzzzzrorRRo....", "..oRrrozEEEoEEEoEEEoEEzorRRo..o.", "..oRrrozoEoooEoooEoooEzorRRo.oRo", "..oRrrozoojjjjjjjjjjjozorRRooRo.", "..oRrrozjoJEoooEoooEJozorRRooRRo", "..oRrrozzoEEEoEEEoEEEozorRRoRRo.", "..oRrrorzzzzzzzzzzzzzzrorRRoRo..", "...oRRrrrrrrrrrrrrrrrrrRRRo.....", "....oRRRrrrrrrrrrrrrrrRRRo......", ".....ooRRRRRRRRRRRRRRRRoo.......", "......oRRRo.......oRRRo.........", "......oRRo........oRRo..........", ".....oRRRo.......oRRRo..........", ".....ofofo.......ofofo..........", "................................", "................................", "................................", "................................", "................................", "................................"], 'Trained Troll': SPRITES.orc['Troll'] };
+        SPRITE_VARIANTS.nightgoblin = { 'Night Goblin Lineman': [SPRITES.nightgoblin['Night Goblin Lineman'], ["................................", "................................", ".......oooo.....................", "......okKKko....................", ".....okkooKko...................", "....okdo..okko..................", ".....oo...okkdo.................", "..........okKkdo................", ".........okKkkkdo...............", "........okKkNkkkdo..............", ".......okKkkNNkkkkdo............", "......okKkkkkkkkkkkkdo..........", ".....okkoooooooooookkdo.........", "..oo.okkouuuuuuuuuuokkdo...oo...", "..ouoookouoouuuuoouuokdooooUo...", "...ouuuuouurouuoruuuuoouuuUo....", "....oooookuuuuUUuuuuuokdooo.....", ".........kuowwwwwwwouukdo.......", "........okuoooooooooukkdo.......", "........okkuowwwwwwoukkdo.......", "......ommmkkuuooooouukkmmmo.....", ".....omMmmotttuuuuuttooooMmo....", ".....ommmotntttnttnoobbbbooo....", "......ooUotnttnttnobbwbwbbo.....", ".......oUutnttnttnobwwwwwbo.....", ".......oUuoaAaAaAaobbwbwbbo.....", ".......ouuotnttnttnoobbbBoo.....", "........ootnmmttnmmtouuoo.......", ".........omMMmooottmmo..........", "........obbbbbo.obbMMmo.........", ".......omMbbbbo..obbbbbo........", ".......oooooooo..ooooooo........"]] };
         // HD test (tools/hd-test/), High Elves only; everyone else keeps 32x32. Off unless the address has ?hd or Settings > HD sprites is on.
         // ?hd (or the setting's '1.5x'): the original sprites at 1.5x, 48x48, smoothed and lightly shaded but otherwise as they were.
         // ?hd=64 ('2x'): redrawn on 64x64 after GW's 2026 miniatures (silver Linemen, tawny-pelted White Lions, gold Phoenix Warriors).
@@ -19755,7 +19882,7 @@ ol.ci-steps li::marker { content: none; }
             '<': '#f2cf86', '>': '#d9a95a', '?': '#a8763a', '{': '#6e4a22' };   // (1-3: the Troll's light blue skin; 4-6: the Black Orc's dark green; 7-9: Skaven fur; 0 + %: Fancy Socks blue and yellow)
         const hexMix = (hex, f, toward) => '#' + [1, 3, 5].map(i => { const v = parseInt(hex.slice(i, i + 2), 16); return Math.round(toward == null ? v * f : v + (toward - v) * f).toString(16).padStart(2, '0'); }).join('');
         const hexLum = hex => { const n = parseInt(hex.slice(1, 7), 16); return 0.3 * (n >> 16) + 0.59 * (n >> 8 & 255) + 0.11 * (n & 255); };
-        const smallFig = p => !!(p.skills && (p.skills.includes('Right Stuff') || p.skills.includes('Stunty')) && p.type !== 'Fanatic');
+        const smallFig = p => !!(p.skills && (p.skills.includes('Right Stuff') || p.skills.includes('Stunty')) && p.type !== 'Fanatic' && p.type !== 'Squig Wrangler');
         // only the High Elves are drawn a touch squatter than square; everyone else at full height
         // Dwarfs are drawn a little smaller than everyone else (squat as well as short)
         const spriteScale = p => { const R = ROSTERS[p.team] || {}, r = R.race || R.key; return p.star ? 1 : (r === 'dwarf' || (r === 'oldworld' && /^Dwarf |Troll Slayer/.test(p.type)) || (r === 'chaosdwarf' && /Blocker|Flamesmith/.test(p.type))) ? 0.9 : r === 'skaven' && !/Ogre/.test(p.type) ? 0.86 : 1; };   // the Rat Ogre towers over the rest
@@ -19933,7 +20060,7 @@ ol.ci-steps li::marker { content: none; }
         function setWeatherPref(v) { weatherPref = v === 'chaos' ? 'chaos' : 'std'; try { localStorage.setItem('bb-weather', weatherPref); } catch (e) {} }
         try { const v = localStorage.getItem('bb-pitch'); if (v && (v === 'random' || v === 'home' || PITCH_STYLES.includes(v))) pitchPref = v; } catch (e) {}
         // Home Team: each race plays on its own kind of ground (the home team is Team 1)
-        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'ziggurat', human: 'altdorf', norse: 'fjord', halfling: 'moot', imperial: 'altdorf', oldworld: 'altdorf', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', nurgle: 'plague', bretonnian: 'bretonnia', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'khemri', snotling: 'flagstone', underworld: 'flagstone' };   // everyone else: muddy grass
+        const HOME_PITCH = { elvenunion: 'elven', highelf: 'elven', woodelf: 'woodland', gnome: 'woodland', skaven: 'warpstone', goblin: 'flagstone', lizardmen: 'jungle', dwarf: 'dwarfhold', ogre: 'wastes', undead: 'graveyard', amazon: 'jungle', chaosdwarf: 'ziggurat', human: 'altdorf', norse: 'fjord', halfling: 'moot', imperial: 'altdorf', oldworld: 'altdorf', darkelf: 'blackark', orc: 'shanty', blackorc: 'shanty', khorne: 'brimstone', nurgle: 'plague', bretonnian: 'bretonnia', renegades: 'brimstone', chaoschosen: 'brimstone', necromantic: 'graveyard', vampire: 'graveyard', tombkings: 'khemri', snotling: 'flagstone', underworld: 'flagstone', nightgoblin: 'flagstone' };   // everyone else: muddy grass
         let homeRace = () => 'human';
         const pitchFor = v => v === 'random' ? PITCH_STYLES[Math.floor(Math.random() * PITCH_STYLES.length)] : v === 'home' ? (HOME_PITCH[homeRace()] || 'worn') : v;
         const PITCH = { tex: null, style: pitchFor(pitchPref), seed: (Date.now() & 0xffff) + 1 };
@@ -22709,8 +22836,8 @@ ol.ci-steps li::marker { content: none; }
                     if(state.mode === MODES.ACTION_TTM && getAdjacentRightStuffTeammate(p)) document.getElementById('btn-execute-ttm').classList.remove('hidden');
                     
                     if ([MODES.ACTION_MOVE, MODES.ACTION_BLOCK, MODES.ACTION_CHOMP, MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_SECURE_BALL, MODES.ACTION_TTM, MODES.ACTION_VOMIT, MODES.ACTION_STAB, MODES.ACTION_CHAINSAW, MODES.TARGET_BOMB, MODES.TARGET_PASS, MODES.TARGET_HANDOFF, MODES.TARGET_TTM].includes(state.mode)) {
-                        if (p.remainingMA === p.ma && p.rushes >= 2 && !p.hasBlocked && !p.jumpedUp) document.getElementById('btn-cancel-action').classList.remove('hidden');
-                        document.getElementById('btn-end-action').classList.remove('hidden');
+                        if (p.remainingMA === p.ma && p.rushes >= 2 && !p.hasBlocked && !p.jumpedUp && !p.squigForced) document.getElementById('btn-cancel-action').classList.remove('hidden');
+                        if (!(p.squigForced && !p.hasBlocked && state.mode === MODES.ACTION_BLOCK && state.targets.length)) document.getElementById('btn-end-action').classList.remove('hidden');   // (Squig Rage: the Block must be made)
                     }
                 }
             } else { tb.classList.add('hidden'); }
@@ -22719,7 +22846,7 @@ ol.ci-steps li::marker { content: none; }
 
         function handleStandUp(p) {
             if (p.isDown) {
-                if (p.skills.includes('Jump Up')) { p.isDown = false; log(`  Jump Up! ${p.type} springs to their feet for free.`, 'text-sky-300'); skillPop('Jump Up'); return; }
+                if (p.skills.includes('Jump Up')) { p.isDown = false; p.jumpStoodAt = actStamp(); log(`  Jump Up! ${p.type} springs to their feet for free.`, 'text-sky-300'); skillPop('Jump Up'); return; }
                 p.isDown = false; p.remainingMA = Math.max(0, p.remainingMA - 3);
                 log(`  ${p.type} stands up (cost 3 MA).`);
             }
@@ -30009,6 +30136,23 @@ ol.ci-steps li::marker { content: none; }
                 act(() => startPath(p, m.path));
                 return true;
             }
+            // a Squig Herder on a plain move: if a square close to the chosen one (and no riskier) keeps more of the team's Squigs
+            // within 3 squares (Squig Restraint: no Squig Rage roll), take that one instead
+            function herdPick(ms, p, want) {
+                if (!want || plan.kind !== 'move' || !hasSk(p, 'Squig Restraint') || state.ball.carrierId === p.id) return want;
+                const sq = state.players.filter(q => q.team === p.team && q.id !== p.id && onPitch(q) && hasSk(q, 'Squig Rage') && !hasSk(q, 'Squig Restraint'));
+                if (!sq.length) return want;
+                const calm = m => sq.filter(q => Math.max(Math.abs(q.x - m.x), Math.abs(q.y - m.y)) <= 3).length;
+                const c0 = calm(want);
+                let best = null;
+                (ms || []).forEach(m => {
+                    if (m.prob < want.prob || m.prob < 100 || cheb(m, want) > 2) return;
+                    const c = calm(m); if (c <= c0) return;
+                    const sc = c * 10 - cheb(m, want) * 3; if (!best || sc > best.sc) best = { m, sc };
+                });
+                if (best) AIX.count(p.team, 'herd');
+                return best ? best.m : want;
+            }
             function doBlock(p) {
                 plan.step = 3;
                 act(() => initBlock(p.id, plan.target));
@@ -30047,6 +30191,13 @@ ol.ci-steps li::marker { content: none; }
                     return;
                 }
                 if (p.hasActed || state.mode === MODES.IDLE) { plan = null; return; }
+                if (p.squigForced && !p.hasBlocked && state.mode === MODES.ACTION_BLOCK && plan.step < 3) {   // Squig Rage made it Block: the best of those it marks
+                    const ts = getValidBlocks(p).map(getPlayerById).filter(Boolean);
+                    if (!ts.length) { endAction(p); return; }
+                    const val = t => { const e = blockEval(p, t, p.x, p.y); return e.ev + (state.ball.carrierId === t.id ? 2 : 0); };
+                    plan.kind = 'block'; plan.target = ts.sort((a, b) => val(b) - val(a))[0].id;
+                    doBlock(p); return;
+                }
                 if (plan.kind === 'bnc') { if (state.mode !== MODES.BALL_CHAIN && state.mode !== MODES.LOCKED) plan = null; return; }
                 if (plan.step === 1) {
                     if (plan.kind === 'block') { doBlock(p); return; }
@@ -30062,7 +30213,7 @@ ol.ci-steps li::marker { content: none; }
                     if (plan.kind === 'blitz' && t && cheb(p, t) === 1 && !t.isDown) { doBlock(p); return; }
                     if (plan.kind === 'foul' && t && cheb(p, t) === 1) { doFoul(p); return; }
                     if ((plan.kind === 'pass' || plan.kind === 'handoff') && plan.stay) { doThrow(p); return; }
-                    const m = feedPick(state.moves, p, plan.pick(state.moves, p));
+                    const m = feedPick(state.moves, p, herdPick(state.moves, p, plan.pick(state.moves, p)));
                     if (!m) { if (plan.kind === 'pass' || plan.kind === 'handoff') doThrow(p); else endAction(p); return; }
                     cameraFocus([p, m, plan.target != null ? getPlayerById(plan.target) : null, plan.receiver != null ? getPlayerById(plan.receiver) : null], 380);
                     plan.step = 2;

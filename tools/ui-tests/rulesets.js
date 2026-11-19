@@ -33,7 +33,7 @@ const { chromium, OUT, check, done, openGame, setSelect, click, putTeam } = requ
   check(chk.budget === 1270, 'Tier 2 budget 1,270k');
   check(!chk.check.ok && chk.check.problems.some(p => /Extra Team Training/.test(p)), 'a barred inducement makes the team not legal', chk.check.problems);
   // computer teams drafted to each ruleset are legal, for every race
-  const drafts = await page.evaluate(ids => ids.map(id => { let bad = 0, n = 0; for (const race of LEAGUE.raceKeys()) for (let i = 0; i < 2; i++) { const t = CUP.draftTeam(race, 1150, 'x', new Set(), new Set(), 'std', id); n++; if (TB.mpProblems(t, TB.costs(t)).length) bad++; } return [id, n, bad]; }), ['gw', 'gotg2', 'uktc11', gwCopy]);
+  const drafts = await page.evaluate(ids => ids.map(id => { let bad = 0, n = 0; for (const race of LEAGUE.raceKeys().filter(rc => TRULES.allows(TRULES.get(id), rc))) for (let i = 0; i < 2; i++) { const t = CUP.draftTeam(race, 1150, 'x', new Set(), new Set(), 'std', id); n++; if (TB.mpProblems(t, TB.costs(t)).length) bad++; } return [id, n, bad]; }), ['gw', 'gotg2', 'uktc11', gwCopy]);
   drafts.forEach(([id, n, bad]) => check(!bad, `${n} computer teams drafted legally under ${id}`, bad ? `${bad} illegal` : null));
   // the tournament form
   await page.evaluate(() => { CUP.open(); document.querySelector('[data-cact="new"]').click(); }); await page.waitForTimeout(200);

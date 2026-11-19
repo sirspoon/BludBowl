@@ -2,6 +2,26 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.27 (19 Nov 2026)
+- New team: **Night Goblins** (BB2025; from Reddit photos of the new book's roster page, so marked pre-release in the Team Builder).
+  Lineman 0-16 45k (Dodge, Right Stuff, Shadowing, Stunty, Taunt), Squig Herder 0-2 55k (Dodge, Disturbing Presence, Fend, Squig
+  Restraint, Stunty), Squig Hopper 0-2 80k (Dodge, Jump Up, Monstrous Mouth, Pogo, Squig Rage), Squig Wrangler 0-2 70k (MA 3 ST 7:
+  Ball & Chain, No Ball, Squig Rage, Stunty), Cave Squig 0-2 85k (Frenzy, Jump Up, Monstrous Mouth, No Ball, Pogo, Squig Rage),
+  Trained Troll 0-1 115k. Re-rolls 70k, apothecary allowed, Underworld Challenge, Bribery and Corruption. Starting team: 13 players
+  and 2 re-rolls (990k). Yellow and black kit (navy and yellow away); new sprites after the 2025 miniatures (two Linemen, Herder with
+  his pointing-hand prod, Hopper, Wrangler, Cave Squig in a checked helmet; the Troll is the Orcs').
+- **Squig Rage** (new trait): a D6 when the player is activated, before the action counts as declared (a team re-roll may be used,
+  as for Bone Head). 3+: as normal. 1-2: a Block on an opponent it marks (Jump Up's Agility test first if Prone; a Ball & Chain
+  Wrangler blocks too); any Blitz, pass or the like it had declared is given back. With nobody to Block, the coach may Knock Down an
+  adjacent team-mate (Armour roll; no Turnover unless that team-mate had the ball) and carry on, or the Squig becomes Distracted.
+  **Squig Restraint** (new trait, the Herder): no Squig Rage roll within 3 squares of a Standing Herder.
+- Computer coach: picks the best Block for a raging Squig; with nobody to Block it only flattens a team-mate when the activation
+  matters (the Squig has the ball, or a Blitz, pass or hand-off was declared) or the team-mate is cheap and has already acted;
+  Herders on a plain move step to a nearby square that is no riskier if it keeps more Squigs within 3 squares.
+- Rulesets: GW Matched Play and Sevens Tier 4 (a guess until GW's tier list includes them). Tournament rulesets can now list teams
+  that aren't allowed (a "Not allowed" box in the tiers editor); the GotG2 and UKTC XI examples don't list Night Goblins, so they
+  aren't allowed there (a team built for one is told so; computer teams for those cups skip them).
+
 ## v5.26 (19 Nov 2026)
 - No change to play. Brain x's loose-ball plan, `lb1` (`lbOn`, `lbMin`, `lbTurn`), tried and left off. When one of ours can get the ball, he
   becomes the carrier-to-be: the plan's sure moves go first, then only very safe blocks, then the pick-up. After drefsante's kick-offs we
