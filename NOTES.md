@@ -87,7 +87,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   `nightgoblin` (left alone so NN_VERSION and the owner's models don't change: the race one-hot is just empty for them); no HD sprites.
   Open: once the book is out, check the roster and Squig Rage wording again (and GW's tier), and drop `preRelease`.
   v5.28: allowed in the GotG2 / UKTC examples after all (the owner's call: both Tier 5, UKTC 1,130k); sprites reworked
-  (two Herders, foam hand and bugle, dealt one of each by `SPRITE_EACH`; round Squigs).
+  (two Herders, foam hand and bugle, dealt one of each by `SPRITE_EACH`). v5.29: Squigs redrawn side on after GW's photos (Hopper,
+  Cave Squig, Wrangler).
 - (18 Nov, no version) **Does our AI use special-action skills?** In BludBowl (`node tools/ai-special-actions.js <races> --n 3`, AI v AI
   mirrors, counts the action buttons it presses; 3 matches a race): yes for bombs, Chainsaw, Projectile Vomit, Ball & Chain (goblins),
   Throw Team-Mate (goblin, snotling, ogre, halfling), Kick Team-Mate (once); hardly ever Stab (1 in 9 Dark Elf / Skaven / Chaos Dwarf

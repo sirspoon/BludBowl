@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.29 (19 Nov 2026)
+- Night Goblin sprites, after GW's photos of the miniatures (the owner's): the Squigs are now seen side on, with a huge grin of big
+  triangular fangs, purple lips and bumpy gums. Squig Hopper: a hooded goblin with the ball under his arm riding the Squig, which
+  bounces on one leg off a pale mushroom, tail up behind and a clawed foot flung back. Cave Squig: the same grin, a tail, two clawed
+  legs, the yellow-and-black checked helmet. Squig Wrangler: the Squig out in front facing away from him, mouth gaping, a grey spiky
+  crest, a leather strap and a pointed tail, on the rope he hauls. Linemen and Herders unchanged.
+
 ## v5.28 (19 Nov 2026)
 - Night Goblins allowed in the example tournament rulesets: Glory on the Gridiron 2 Tier 5 (with Gnomes, Ogres and Snotlings; Goblins
   are Tier 6) and UKTC XI Tier 5 with a 1,130k budget (as the Goblins). Neither pack lists the team (both predate it), so these are
