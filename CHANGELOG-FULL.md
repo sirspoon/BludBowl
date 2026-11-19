@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.26 (19 Nov 2026)
+- No change to play. Brain x's loose-ball plan, `lb1` (`lbOn`, `lbMin`, `lbTurn`), tried and left off. When one of ours can get the ball, he
+  becomes the carrier-to-be: the plan's sure moves go first, then only very safe blocks, then the pick-up. After drefsante's kick-offs we
+  ended the turn with the ball 77% of the time (66% before) and still had it at our next turn 70% (60%), but the gain faded within two
+  turns. Over 1,000 games against drefsante: won 194, drew 261, lost 545, touchdowns 627-1268, against 207-245-548 and 697-1337 without
+  it: lower-scoring games with the same margin.
+
 ## v5.25 (18 Nov 2026)
 - No change to the game's AI. Brain x's plan now protects the ball, `bp1` (`bpEnd`; `bpN`, `bpProg`, `bpGive`, `bpMargin`, `bpOk`, `bpGain`, `bpR`, `bpLook`).
   We lose the ball mostly in the opponent's turn, and how often depends on how many opponents can get at the carrier without a dodge:

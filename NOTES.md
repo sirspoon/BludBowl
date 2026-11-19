@@ -67,7 +67,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   carrier with no dodge: 0 -> 10%, 1 -> 21%, 2+ -> 54-67% (`nn/look/dbg/ball_loss.py`). Carrier's stopping square chosen for that, up to 4 sure
   moves before any dice to shut the ways to him, whoever could reach him worth more to hit. Reach 2.30 -> 1.40, lost in our turn 9% -> 6%, in
   theirs 41% -> 35%. 1,000 games (`k_bp4.txt`): 207-245-548, 697-1337 v today's AI 185-247-568, 655-1393 - the first brain x ahead, by about
-  1.2 standard errors (promising, not proven; not yet tried in the all-races guard). The plan does nothing yet when the ball is loose.
+  1.2 standard errors (promising, not proven; not yet tried in the all-races guard).
+  v5.26 `lb1` (loose ball, `lbOn`): OFF. drefsante, receiving a kick-off, has the ball at turn end 86% with few Turnovers: it throws 2.3 very safe
+  blocks and picks up last (5% of those turns end in a Turnover before the pick-up, ours 17%; `nn/look/dbg/loose_ball.py`, `kick_follow.py`). `lb1`
+  (plan's sure moves, very safe blocks, pick-up): ball at turn end 66% -> 77%, at our next turn 60% -> 70%, gone within two turns. 1,000 games
+  (`k_lb2.txt`): 194-261-545, 627-1268 v 207-245-548, 697-1337 - same margin, lower scoring. Worth a look next: loose balls in our own half
+  mid-drive (we concede within 3 turns 27-31% of the time; drefsante gets 583 loose-ball turns near our end zone per 300 games and scores within 3
+  turns in 43%), and blocks (the plan's moves cut ours: 42 -> 40 a game, knock-downs 27 -> 26, while drefsante's rise to 49).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

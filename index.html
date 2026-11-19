@@ -1231,7 +1231,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.25</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.26</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -28211,11 +28211,11 @@ ol.ci-steps li::marker { content: none; }
                     if (L0 - L > 0.01) dpHits.set(q.id, L0 - L);
                 });
             }
-            function bpMovePlan(me, act, c) {
+            function bpMovePlan(me, act, c, end) {
                 const ck = state.half + ':' + me + ':' + state.turn[me];
                 if (bpDone.key !== ck) bpDone = { key: ck, n: 0 };
                 if (bpDone.n >= AIX.p(me, 'bpN', 0)) return null;
-                const E = bpEnd(me, c, act), n0 = bpCount(me, c, E.x, E.y);
+                const E = end || bpEnd(me, c, act), n0 = bpCount(me, c, E.x, E.y);
                 if (n0 <= AIX.p(me, 'bpOk', 0.4)) return null;
                 const L0 = bpLoss(n0), route = E.m && E.m.path ? E.m.path : [], cands = [];
                 act.forEach(p => {
@@ -28240,9 +28240,30 @@ ol.ci-steps li::marker { content: none; }
                 const tx = best.m.x, ty = best.m.y;
                 return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
             }
-            function turnPlan(me, c, act) {
-                const want = AIX.p(me, 'tpN', 0), cm = AIX.p(me, 'bpN', 0) > 0 ? bpEnd(me, c, act).m : act.includes(c) ? carrierPick(movesFor(c), c) : null;
-                const cx = cm ? cm.x : c.x, cy = cm ? cm.y : c.y, cma = c.ma || 6, passer = isThrower(c);
+            // ---- (brain x: lb1) the plan with the ball on the ground ----
+            // On the turn after their kick-off drefsante ends up with the ball 86% of the time, with a Turnover in 16% of those turns; we 66%, with
+            // a Turnover in 42%. It throws 2.3 blocks before the pick-up, hardly any after, and only 5% of those turns end in a Turnover before it; we
+            // throw 3.2, and 17% do (nn/look/dbg/loose_ball.py, kick_follow.py). So when one of
+            // ours can get the ball at lbMin% or better: he is the carrier-to-be and the ball's square is where he'll finish. First the sure
+            // moves of the plan (a finisher, the ways to that square shut), then only the very safe blocks (lbTurn), then the pick-up.
+            // OFF (lbOn 0) in brain x too: v drefsante on the turn after its kick-off we ended with the ball 77% of the time (66% without), and still
+            // held it at our next turn 70% (60%), but that faded within two turns. Over 1,000 games (seeds 910000+) won 194 drew 261 lost 545, touchdowns
+            // 627-1268, v 207-245-548, 697-1337 without it: lower-scoring games with the same margin, and fewer blocks (37.4 a game v 39.7).
+            function lbPicker(me, act) {
+                const bx = state.ball.x, by = state.ball.y;
+                let best = null;
+                act.forEach(p => {
+                    if (hasSk(p, 'No Hands') || hasSk(p, 'No Ball')) return;
+                    const m = movesFor(p).find(q => q.x === bx && q.y === by);
+                    if (!m) return;
+                    const pr = pPlan(p, m, true);
+                    if (!best || pr > best.pr || (pr === best.pr && m.path.length < best.m.path.length)) best = { p, m, pr };
+                });
+                return best && best.pr >= AIX.p(me, 'lbMin', 40) ? best : null;
+            }
+            function turnPlan(me, c, act, end) {
+                const want = AIX.p(me, 'tpN', 0), cm = end ? null : AIX.p(me, 'bpN', 0) > 0 ? bpEnd(me, c, act).m : act.includes(c) ? carrierPick(movesFor(c), c) : null;
+                const cx = end ? end.x : cm ? cm.x : c.x, cy = end ? end.y : cm ? cm.y : c.y, cma = c.ma || 6, passer = isThrower(c);
                 const inReach = (x, y) => Math.max(Math.abs(x - cx), Math.abs(y - cy)) <= cma + 1 || (passer && Math.hypot(x - cx, y - cy) <= 10);
                 const canTake = q => !hasSk(q, 'No Hands') && !hasSk(q, 'No Ball') && !isBigGuy(q);
                 const ready = (q, x, y) => toGo(x, me) >= 1 && toGo(x, me) <= (q.ma || 6) + 2 && tzFor(x, y, me) === 0 && inReach(x, y);
@@ -29070,6 +29091,21 @@ ol.ci-steps li::marker { content: none; }
                     tpMove = turnPlan(me, carrier, act);
                     act = act.filter(p => !tpHold.has(p.id)); standing = act.filter(p => !p.isDown);
                 }
+                // (brain x: lb1) the ball is on the ground and one of ours can get it: the plan's sure moves, the very safe blocks, then the pick-up
+                let lbMove = null, lbGo = false;
+                if (AIX.x(me) && AIX.p(me, 'lbOn', 0) && !carrier && state.ball.x >= 0 && !state.isResolvingKickoff && !state.charge && !lastTurn) {
+                    const pk = lbPicker(me, act);
+                    if (pk) {
+                        lbGo = true;
+                        const o = { x: state.ball.x, y: state.ball.y };
+                        let rest = act.filter(q => q.id !== pk.p.id);
+                        if (AIX.p(me, 'tpN', 0) > 0 && toGo(o.x, me) >= AIX.p(me, 'tpFrom', 7)) lbMove = turnPlan(me, pk.p, rest, o);
+                        rest = rest.filter(q => !tpHold.has(q.id));
+                        if (!lbMove && AIX.p(me, 'bpN', 0) > 0) lbMove = bpMovePlan(me, rest, pk.p, o);
+                        act = act.filter(q => !tpHold.has(q.id)); standing = act.filter(q => !q.isDown);
+                        AIX.count(me, 'lb1');
+                    }
+                }
                 // (brain x: bp1) we have the ball: who could get at the carrier is worth knocking down (see bpEnd)
                 const bpOn = AIX.x(me) && AIX.p(me, 'bpN', 0) > 0 && carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && !state.charge && !lastTurn;
                 if (bpOn) bpFindHits(me, carrier, act);
@@ -29149,6 +29185,8 @@ ol.ci-steps li::marker { content: none; }
                     if (up) return { pid: up.p.id, kind: 'move', pick: () => null };
                 }
                 if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
+                if (lbMove) return lbMove;   // (brain x: lb1)
+                if (lbGo) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].e.pTurn >= AIX.p(me, 'lbTurn', 0.05)) blocks.splice(i, 1);   // (brain x: lb1) no risky block before the pick-up
                 if (bpOn) { const bm = bpMovePlan(me, act, carrier); if (bm) return bm; }   // (brain x: bp1) then the ways to the carrier are shut
                 // (deep1) before the blocks: holding the ball well short of their end zone, with fewer than two team-mates ready to take
                 // a scoring hand-off or pass next turn, a quick free player (no opponent next to it) steps, with no dice, to a square
