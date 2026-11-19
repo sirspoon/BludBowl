@@ -2,6 +2,10 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.32 (19 Nov 2026)
+- Night Goblin sprite fix (the owner spotted it): the foam-hand Squig Herder's stick ran behind his face and was hidden by his
+  teeth. The hand is now a little lower and the stick runs below his chin, across his chest, drawn in front of him.
+
 ## v5.31 (19 Nov 2026)
 - No change to play. Brain x's plan for a loose ball in our own half, `cb1` (`cbFree`; `cbN`, `cbKeep`, `cbMin`, `cbGain`, `cbPick`, `cbFrom`), tried and left
   off. drefsante gets such a ball far less often when none of its players can reach it without a dodge (26% against 53-74%), and scores less the
