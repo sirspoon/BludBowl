@@ -127,6 +127,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   carrier marked and still to move only blocks on his markers or near-safe (pTurn < mkTurn 0.05) ones before him, the rest after. Stranded after
   a Turnover 65 -> 56 (`study_mk1.jsonl`); 1,000 games v drefsante: seeds 910000+ 242-245-513, 833-1361 (v5.38 229-261-510, 807-1348), seeds
   930000+ 214-221-565, 747-1415 (v5.38 229-241-530, 798-1365); mkTurn 0.1 228-226-546, 769-1375. Not better; too small a lever (~0.1 balls a game).
+  v5.40: `bpEdge` 0.15 in brain x (edgeRisk counts against the carrier's stopping square in `bpEnd`; bpCount alone favoured the sideline). Study
+  (study_v537): our carrier on the sideline at drefsante's turn start 0.96 a game v 0.37 (moved there 0.34 v 0.08), but not lost more there (26% v
+  33% in the middle; 48% when he stayed there). 1,000 games (`k_ed1.txt`, `k_ed1s.txt`): 226-277-497, 817-1357 and 216-256-528, 790-1388 v
+  229-261-510, 807-1348 and 229-241-530, 798-1365 - level (.354 v .355), kept as coach-like. Not in the all-races guard.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

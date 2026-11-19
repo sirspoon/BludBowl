@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.40 (19 Nov 2026)
+- No change to the game's normal computer coach. Brain x's ball carrier now keeps off the sideline (`bpEdge` 0.15): the rule that picks where he
+  stops for safety counted how many opponents could reach him and ignored the sideline, where fewer can, so it liked it - though there a push alone
+  puts the ball in the crowd. Our carrier started drefsante's turn on the sideline 0.96 times a game (drefsante's 0.37). 1,000 games v drefsante,
+  against v5.39: won 226, drew 277, lost 497, touchdowns 817-1357 (v5.39: 229-261-510, 807-1348); on fresh seeds 216-256-528, 790-1388 (229-241-530,
+  798-1365). Level, kept because it is how strong coaches play.
+
 ## v5.39 (19 Nov 2026)
 - Roster PDF easier to read in print (the owner: "quite small yet there's quite a bit of space on the page"). The player rows now use the
   largest type size that gets the roster page onto one page (11pt down to 7pt in half-points; it was always 8pt): a full 16-player league
