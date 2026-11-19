@@ -112,6 +112,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   35.3%, and 26.9% end at half time. 1,000 games v drefsante (`k_pg2.txt`, `k_b930.txt`, `k_pg2s.txt`): seeds 910000+ 229-261-510, 807-1348 v
   210-269-521, 790-1362; seeds 930000+ 229-241-530, 798-1365 v 204-249-547, 748-1425 (score share .355 v .337 over 2,000, ~1.4 se). Not kept:
   bpProg 0.06 (.330), 0.15 (.332), bpGive 1 (.336). Brain x's baseline is now 229-261-510, 807-1348 (seeds 910000+). Not in the all-races guard.
+  Tried after v5.38, not kept: `eh1`, the turn before the last with the ball: the carrier ends on the square worth most by (not stripped, bpLoss) x
+  (scores next turn: within MA 85%, +1 Rush 72%, +2 60%, else 10%) less their chance of scoring if they get the ball there (drefsante, by squares to go
+  and own turns left: 0-6 63%, 7-10 53/40%, 11-14 44/33%, 15-18 21/32%, 19+ 17%), dodges and Rushes down to 50%; bp1's step back skipped when it picked.
+  Why: `nn/look/dbg/late_half.py` (study_v537): our turn 7 with the ball 13-18 out, at turn 8 still ours 53% but within MA+2 only 16% (from there
+  we score 69%, from further 11%). 1,000 games v drefsante (seeds 910000+, v5.38 229-261-510, 807-1348): as built 215-262-523, 808-1382; sure moves
+  only 211-245-544, 776-1365; a first version that also dropped bp1's step back on every turn 7: 211-220-569, 741-1386 (and 218-244-538 v 229-241-530
+  on seeds 930000+), with their scoring chance x1.5 212-244-544. None better: code removed (the patch is described here if it's wanted again).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
