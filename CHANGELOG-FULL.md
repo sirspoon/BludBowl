@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.30 (19 Nov 2026)
+- Night Goblin sprites reworked with the owner, after GW's photos of the miniatures:
+  - Lineman: one sprite now (the one with the ball is gone), slimmer, arms down with the claws at his hips, long ears.
+  - Squig Herders (still one of each): the foam finger is back on a straight stick held on the slant, the hand tilted to match and
+    closed off at the tip, no mushroom; the bugle Herder has both ears.
+  - Squig Hopper: the rider has ears; the Squig's grin sits in the middle of its face with thick legs out of its sides (one planted,
+    one kicking), no mushroom or tail.
+  - Squig Wrangler: leans well back, feet planted towards his Squig.
+  - The Squigs are round again rather than side on, keeping the miniatures' features: big fangs, purple lips and gums, angry eyes.
+  - Cave Squig: a big checked dome helmet with an arched silver rim, small angry eyes under it.
+  - Shoulder pads in the team's secondary colour, with a lighter edge so black pads still show on black robes.
+
 ## v5.29 (19 Nov 2026)
 - Night Goblin sprites, after GW's photos of the miniatures (the owner's): the Squigs are now seen side on, with a huge grin of big
   triangular fangs, purple lips and bumpy gums. Squig Hopper: a hooded goblin with the ball under his arm riding the Squig, which

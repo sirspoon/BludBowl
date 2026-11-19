@@ -2,6 +2,11 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.30 (19 Nov 2026)
+- Night Goblin sprites finished: slimmer Linemen, a foam finger that follows its stick, a bugle Herder with both ears, the Hopper's
+  rider with ears and its Squig's legs out of its sides, Wranglers leaning back on the rope, a proper helmet on the Cave Squig, and
+  shoulder pads in the team's second colour.
+
 ## v5.29 (19 Nov 2026)
 - Night Goblin Squigs redrawn after the miniatures: the Squig Hopper rides with the ball on a grinning Squig bouncing off a mushroom,
   the Cave Squig is all fangs, and the Squig Wrangler's Squig flies out on its rope with a spiky crest.
