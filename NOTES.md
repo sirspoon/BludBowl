@@ -95,6 +95,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   the owner (approved in v5.30: one slim Lineman, foam finger on a slanting stick, bugle Herder, round Squigs with the miniatures'
   fangs and gums, Hopper legs out of its sides, Wrangler leaning back, Cave Squig dome helmet, shoulder pads in the secondary colour).
   The working scripts weren't kept in the repo; the sprites are plain grids in `SPRITES.nightgoblin` if they need touching up.
+  v5.32: the foam-hand Herder's stick now runs below his chin (it was hidden behind his teeth). Job finished; home pitch is Mossy
+  Flagstones, as the Goblins'.
 - (18 Nov, no version) **Does our AI use special-action skills?** In BludBowl (`node tools/ai-special-actions.js <races> --n 3`, AI v AI
   mirrors, counts the action buttons it presses; 3 matches a race): yes for bombs, Chainsaw, Projectile Vomit, Ball & Chain (goblins),
   Throw Team-Mate (goblin, snotling, ogre, halfling), Kick Team-Mate (once); hardly ever Stab (1 in 9 Dark Elf / Skaven / Chaos Dwarf
