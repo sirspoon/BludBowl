@@ -82,6 +82,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   ~10 blocks-a-game gap is 1-die blocks. 1,000 games v 207-245-548, 697-1337 (.330, margin -.640): `bk1` (`bkD` 1, 1-die blocks on defence at turn end, `lateWorth`)
   205-247-548, 679-1350 (.329, -.671; 1-die 4.4 -> 5.7, knock-downs 25.7 -> 26.0); `bzMin` 1.5 + `bzDef` 1 181-234-585, 674-1415 (.298, -.741); both 175-256-569,
   668-1383 (.303, -.715). `k_bk1-3.txt`. Throwing more blocks doesn't close the gap: the count is a symptom, not the cause. Don't lower the Blitz bar.
+  v5.34 block targets and order (`nn/look/dref/study_blk.jsonl`, made with `drefstudy.py --blocks`: the board at every block; `look/dbg/block_order.py`,
+  `block_sources.py`, `blitz_look.py`): freeing assists with an earlier block, level (8.0 v 7.8 blocks a game helped); other 2-dice blocks level; the gap is
+  the Blitz (drefsante 82% of turns, 92% on 2 dice, as its 2nd-5th action; ours 60%, 77%, 57% as the 6th+; 13.0 v 8.9 Blitz blocks a game). On defence we
+  make 4.3 moves before the first block, it 2.3. Targets: it hits whoever's there (Linemen); we pick Blitzers, pass up Catchers (8% of picks, 28% on offer).
+  `be1` (early Blitz, `beAt`): OFF - Blitzed early in 87% of turns, but 1,000 games 192-272-536 676-1294 / 189-256-555 646-1310 / 199-250-551 683-1319 v
+  207-245-548 697-1337; blocks fell to ~37.7, knock-downs 25.3. `k_be1-3.txt`. Counting and timing blocks like drefsante doesn't move the score.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

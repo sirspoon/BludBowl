@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.34 (19 Nov 2026)
+- No change to play. Brain x's block targets and order, studied again against drefsante (300 games, the whole board at every block: `drefstudy.py --blocks`,
+  `nn/look/dbg/block_order.py`, `block_sources.py`, `blitz_look.py`). Knocking one over to free an assist for a later block we already do as often as drefsante
+  (8.0 blocks a game on better dice thanks to an earlier block, to its 7.8), and our other blocks on 2 dice are level with its. The gap is the Blitz: drefsante
+  Blitzes in 82% of its turns, 92% of them on 2 dice, mostly as its 2nd-5th action; we in 60%, 77% on 2 dice, 57% as the 6th action or later (13.0 Blitz blocks
+  a game to 8.9). Its targets: whoever is on offer, mostly Linemen; ours lean to Blitzers and pass up Catchers (8% of picks, 28% of what's on offer).
+- `be1` (`bePlan`, `bzExtra`; `beAt`, `beProb`, `beMin`, `beW`, `beLook`): the Blitz picked early, on 2+ dice, counting what it does to the blocks still to come
+  (the helper who leaves, the block he gives up, the assists freed if the target goes down). Tried and left off: it Blitzed in 87% of turns, half of them as
+  the 1st or 2nd action, but over 1,000 games against brain x as it stands (won 207, drew 245, lost 548, touchdowns 697-1337): straight after the safe blocks
+  192-272-536, 676-1294; on defence after the plan's moves 189-256-555, 646-1310; that with 75%-safe routes 199-250-551, 683-1319. Blocks a game fell
+  (39.7 -> 37.5-37.9) and knock-downs stayed at 25.3: the early Blitz took the place of blocks later in the turn.
+
 ## v5.33 (19 Nov 2026)
 - No change to play. Brain x's blocks, tried again against drefsante and left as they were. From similar positions drefsante throws 3.2 blocks a
   turn when we have the ball; we throw 2.3 when it has the ball, and with the ball loose it Blitzes 0.89 times a turn to our 0.38. Over 1,000 games each,

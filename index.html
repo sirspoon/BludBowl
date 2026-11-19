@@ -1233,7 +1233,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.33</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.34</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -28630,9 +28630,16 @@ ol.ci-steps li::marker { content: none; }
                 return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
             }
             let dpDone = { key: '', n: 0 };
-            function blitzPlan(me, act) {
-                if (state.blitzUsed) return null;
-                let best = null;
+            // ---- (brain x: be1) the Blitz comes early, and opens up the other blocks ----
+            // The gap in blocks is the Blitz: drefsante Blitzes in 82% of its turns, 92% of them on 2 dice, mostly as its 2nd-5th action; we in 60%, 77% on 2 dice,
+            // 57% of them as the 6th action or later, when the helpers have gone (13.0 Blitz blocks a game to 8.9). The other blocks on 2 dice are level
+            // (nn/look/dbg/block_sources.py, blitz_look.py). Knocking one over to free an assist for the next block we already do as often as it does (8.0 blocks a game
+            // to 7.8). So: pick the Blitz early, on 2+ dice by a sure route, counting what it does to the blocks still to come - the helper who leaves, the
+            // block he gives up, and the assists freed if the target goes down.
+            // OFF (beAt 0). It did Blitz early (87% of turns, half of them as the 1st or 2nd action) but over 1,000 games v drefsante, against 207-245-548, touchdowns
+            // 697-1337: beAt 1 192-272-536, 676-1294; beAt 2 189-256-555, 646-1310; beAt 2 + beProb 75 199-250-551, 683-1319. Blocks a game fell (39.7 -> 37.5-37.9)
+            // and knock-downs stayed at 25.3: the early Blitz took the place of blocks thrown later in the turn.
+            function bzExtra(me) {   // what knocking this target down is worth on top of the block itself
                 // (brain x: fr1) knocking down one of their free receivers is worth frW more (by the chance of knocking him down)
                 const frW = AIX.p(me, 'frW', 0), frees = frW > 0 ? freeReceivers(me) : null;
                 const tgW = AIX.p(me, 'tgW', 0);   // (brain x: tg1)
@@ -28652,6 +28659,58 @@ ol.ci-steps li::marker { content: none; }
                     if (theirB && d.id !== theirB.id && cheb(d, theirB) <= 3) v += AIX.p(me, 'bzEsc', 1);
                     return v;
                 };
+                return extra;
+            }
+            function bePlan(me, act, c) {
+                if (state.blitzUsed || state.charge) return null;
+                if (c && c.team !== me && onPitch(c) && carrierBlitz(me, act, c)) return null;   // (the Blitz is for their carrier)
+                const ourC = c && c.team === me && onPitch(c) ? c : null, minP = AIX.p(me, 'beProb', 100), lim = AIX.p(me, 'bzTurn', 0.12), extra = bzExtra(me), cands = [];
+                let keep = null;
+                if (!c && state.ball.x >= 0) { const pk = lbPicker(me, act); if (pk && pk.pr >= 50) keep = pk.p.id; }
+                act.forEach(p => {
+                    if ((c && c.id === p.id) || p.id === keep || (ourC && cheb(p, ourC) === 1)) return;
+                    movesFor(p).forEach(m => {
+                        const mp = pPlan(p, m, false);
+                        if (mp < minP) return;
+                        const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
+                        state.players.forEach(d => {
+                            if (d.team === me || !onPitch(d) || d.isDown || Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) !== 1) return;
+                            blitzCtx = true; const e = blockEval(p, d, m.x, m.y); blitzCtx = false;
+                            if (e.chooser !== me || e.n < 2 || e.pTurn > lim) return;
+                            const pr = mp / 100 * (left >= 1 ? 1 : 5 / 6);
+                            cands.push({ p, d, m, e, pr, s: pr * (e.ev + e.pDown * extra(p, d)) - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0) });
+                        });
+                    });
+                });
+                if (!cands.length) return null;
+                cands.sort((a, b) => b.s - a.s);
+                const A0 = blocksAhead(me, new Set(), null), w = AIX.p(me, 'beW', 0.6), seen = new Set();
+                let best = null;
+                for (const o of cands) {
+                    const k = o.p.id + ':' + o.d.id;
+                    if (seen.has(k)) continue;
+                    seen.add(k);
+                    if (seen.size > AIX.p(me, 'beLook', 8)) break;
+                    const { p, d, m, e } = o, ox = p.x, oy = p.y, od = p.isDown, skip = new Set([p.id]);
+                    let up = A0, dn = A0;
+                    p.x = m.x; p.y = m.y; p.isDown = false;
+                    try {
+                        up = blocksAhead(me, skip, null);
+                        d.isDown = true;
+                        try { dn = blocksAhead(me, skip, d.id); } finally { d.isDown = false; }
+                    } finally { p.x = ox; p.y = oy; p.isDown = od; }
+                    const t = o.s + w * o.pr * (e.pDown * dn + (1 - e.pDown) * up - A0);
+                    if (!best || t > best.t) best = { p, d, m, t };
+                }
+                if (!best || best.t < AIX.p(me, 'beMin', 1.5)) return null;
+                AIX.count(me, 'be1');
+                const tx = best.m.x, ty = best.m.y, tid = best.d.id, back = blitzOn(best.p, tid).pick;
+                return { pid: best.p.id, kind: 'blitz', target: tid, pick: (ms, q) => ms.find(m => m.x === tx && m.y === ty) || back(ms, q) };
+            }
+            function blitzPlan(me, act) {
+                if (state.blitzUsed) return null;
+                let best = null;
+                const extra = bzExtra(me);
                 act.forEach(p => {
                     const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                     if (c && c.id === p.id) return;
@@ -29458,6 +29517,9 @@ ol.ci-steps li::marker { content: none; }
                 // 3. blocks with almost no risk come first
                 const safe = blocks.find(b => b.e.pTurn < 0.05);
                 if (safe) return blockPlan(safe);
+                // (brain x: be1) the Blitz, early (beAt 1: here; beAt 2: here, but on defence after the plan's sure moves)
+                const beAt = AIX.x(me) ? AIX.p(me, 'beAt', 0) : 0;
+                if (beAt === 1 || (beAt === 2 && !(carrier && carrier.team === them && onPitch(carrier) && !state.charge))) { const be = bePlan(me, act, carrier); if (be) return be; }
                 // defending: get the screen (and the markers) in place before anything that could cause a Turnover,
                 // keeping back the player who will blitz their carrier
                 if (carrier && carrier.team === them && onPitch(carrier) && !state.charge) {
@@ -29525,6 +29587,7 @@ ol.ci-steps li::marker { content: none; }
                         }
                     }
                     if (dpOn) { const dm = dpMovePlan(me, free, carrier); if (dm) return dm; }   // (brain x: dp1) the moves that most cut their chance of scoring
+                    if (beAt === 2) { const be = bePlan(me, act, carrier); if (be) return be; }   // (brain x: be1)
                     const pl = plugPlan(me, free, carrier);
                     if (pl) return pl;
                     const df = formationPlan(me, free, false, true, true) || formationPlan(me, free, false, true);
