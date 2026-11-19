@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.37 (19 Nov 2026)
+- Behind the scenes: the experimental computer coach now brings team-mates in to help before it hits the other side's ball carrier.
+
 ## v5.36 (19 Nov 2026)
 - The roster PDF lists players in roster order again (as arranged in the Team Builder), each with his shirt number.
 

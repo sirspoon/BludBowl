@@ -2,6 +2,19 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.37 (19 Nov 2026)
+- No change to the game's normal computer coach. How drefsante scores against brain x, studied (300 games, every touchdown traced back to the kick-off:
+  `nn/look/dbg/score_paths.py`, `carrier_half.py`, `carrier_dice.py`, `carrier_hits.py`): 63% of its touchdowns come right after it takes the ball off us,
+  and 80% of the touchdown gap is spells starting within 12 squares of scoring (it gets 1.52 a game, we 0.58), got by knocking our carrier over in our half.
+  Both sides leave their carrier about as exposed, but its hit on our carrier is better: it brings helpers in first and hits on 2 dice; we hit its carrier
+  less often, after five other moves.
+- `ca1` (`caPlan`; `caAt`, `caGain`, `caN`), ON in brain x: before the hit on their carrier, free players make sure moves into squares next to him where
+  they count as assists, each when it raises the chance he goes down by `caGain` or more (up to `caN` a turn), and then the Blitz on him comes at once.
+  1,000 games v drefsante, against brain x before (won 207, drew 245, lost 548, touchdowns 697-1337): won 210, drew 269, lost 521, touchdowns 790-1362
+  (with the Blitz kept after the screen, `caAt` 2: 203-267-530, 706-1332; with stricter assists: 207-251-542, 777-1377). With a 1-die hit open on their
+  carrier in their half we now hit him 55% of those turns (47% before), on 2+ dice 76% (55%), after 1.7 moves (5.3).
+- Tried and dropped: handing the ball from a Catcher to a stronger team-mate in our own half. Human Catchers are ST3 in the BB2025 rules, so it fixed nothing.
+
 ## v5.36 (19 Nov 2026)
 - The roster PDF lists players in roster order again (as arranged in the Team Builder), not by shirt number; each row still shows the
   player's shirt number. (The owner's call.)

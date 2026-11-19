@@ -97,6 +97,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   45-47%), but at each level we lose it more (72 v 51%, 41 v 30%). (Human Catchers are ST3 in season3: carrying with a Catcher costs nothing.) It's the
   hit on the carrier: once it can reach ours it hits him ~64% of turns, mostly on 2 dice; we hit its carrier in its half ~47%, after 5 moves first
   (it: 2), and when we don't, our Blitz went at someone else 55%. Next: hit their carrier first when he's reachable (assists stepped in first).
+  v5.37 `ca1` (`caPlan`: assists stepped in first, then the Blitz on their carrier at once; `caAt` 1, `caGain` 0.04, `caN` 3) ON in brain x. 1,000 games
+  (`k_ca1-3.txt`): 210-269-521, 790-1362 (.345) v 207-245-548, 697-1337 (.330); caAt 2 (Blitz after the screen) 203-267-530, 706-1332. 300 games
+  (`study_ca3.jsonl`, 282 done - the run stalled at the end): 1-die hit open on their carrier in its half, hit 47 -> 55%, on 2+ dice 55 -> 76%, after
+  5.3 -> 1.7 moves, ball lost 35 -> 44%. Brain x's 1,000-game baseline is now 210-269-521, 790-1362. Not yet in the all-races guard.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
