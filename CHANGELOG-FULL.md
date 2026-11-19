@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.28 (19 Nov 2026)
+- Night Goblins allowed in the example tournament rulesets: Glory on the Gridiron 2 Tier 5 (with Gnomes, Ogres and Snotlings; Goblins
+  are Tier 6) and UKTC XI Tier 5 with a 1,130k budget (as the Goblins). Neither pack lists the team (both predate it), so these are
+  BludBowl's placings, noted on each ruleset. The "Not allowed" list for rulesets stays, for packs that bar a team.
+- Night Goblin sprites reworked: the Squig Herder now comes as two (a big blue foam hand on a stick, and a bronze bugle held at his
+  belly, with a looped tube and a red squig-faced bulb, as the miniature), dealt one of each in order (`SPRITE_EACH`: the team's first
+  Herder has the hand, the second the bugle) rather than
+  at random. The Squigs (Hopper, Wrangler's Squig, Cave Squig) are now round, with big fangs, purple gums and a lolling tongue. The
+  two Lineman sprites (claws up; running with the ball) are unchanged.
+
 ## v5.27 (19 Nov 2026)
 - New team: **Night Goblins** (BB2025; from Reddit photos of the new book's roster page, so marked pre-release in the Team Builder).
   Lineman 0-16 45k (Dodge, Right Stuff, Shadowing, Stunty, Taunt), Squig Herder 0-2 55k (Dodge, Disturbing Presence, Fend, Squig

@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.28 (19 Nov 2026)
+- Night Goblins can now enter the example tournaments (GotG2 and UKTC XI, Tier 5). New sprites: two Squig Herders (a big foam hand
+  on a stick, and a bugle: a team's first Herder has the hand, the second the bugle) and rounder, toothier Squigs.
+
 ## v5.27 (19 Nov 2026)
 - New team: **Night Goblins** (Blood Bowl 2025, pre-release: from photos of the new book, so details may change). Hooded goblins
   with Squig Hoppers, Squig Wranglers, Cave Squigs, Squig Herders and a Trained Troll. Squigs have Squig Rage: on a 1-2 they must

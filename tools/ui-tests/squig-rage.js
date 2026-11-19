@@ -132,16 +132,24 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(rr.shown && /Squig Rage/.test(rr.txt) && rr.ok === true && rr.rr === 0 && rr.act === 'move', 'a failed Squig Rage roll can be team re-rolled (5: it acts as declared)', rr);
 
   check(await S(() => !!(SKILL_INFO['Squig Rage'] && SKILL_INFO['Squig Restraint'])), 'Squig Rage and Squig Restraint have skill tips');
-  // ---- rulesets: GW Matched Play Tier 4; the two example packs don't list the team, so it isn't allowed there
+  // ---- rulesets: GW Matched Play Tier 4; the two example packs (written before the team) put them in Tier 5
   const tr = await S(() => {
     TB.put({ id: 'ng-uktc', name: 'NG', race: 'nightgoblin', format: 'matched', rules: 'uktc11', rerolls: 1, players: Array.from({ length: 11 }, (_, i) => ({ pos: 'Lineman', name: 'P' + i })) });
-    const t = TB.get('ng-uktc');
-    return { gw: MP.tier('nightgoblin'), sev: SEV.TIER.nightgoblin, uk: TRULES.allows(TRULES.get('uktc11'), 'nightgoblin'), gotg: TRULES.allows(TRULES.get('gotg2'), 'nightgoblin'),
-      gwOk: TRULES.allows(TRULES.GW, 'nightgoblin'), probs: CUP.unfit(t, 1150, 'uktc11'), kw: KEYWORDS.nightgoblin.CaveSquig, lg: RACE_LEAGUES.nightgoblin };
+    const t = TB.get('ng-uktc'), uk = TRULES.get('uktc11'), gotg = TRULES.get('gotg2');
+    return { gw: MP.tier('nightgoblin'), sev: SEV.TIER.nightgoblin, uk: TRULES.allows(uk, 'nightgoblin') && TRULES.tierOf(uk, 'nightgoblin'), ukBudget: TRULES.budgetFor(uk, 'nightgoblin'),
+      gotg: TRULES.allows(gotg, 'nightgoblin') && TRULES.tierOf(gotg, 'nightgoblin'), probs: CUP.unfit(t, 1150, 'uktc11'), kw: KEYWORDS.nightgoblin.CaveSquig, lg: RACE_LEAGUES.nightgoblin };
   });
-  check(tr.gw === 4 && tr.sev === 4 && tr.gwOk, 'GW Matched Play and Sevens: Tier 4', tr);
-  check(!tr.uk && !tr.gotg && tr.probs.some(x => /aren't allowed/.test(x)), "the UKTC and GotG2 examples don't allow them (a team built for one is told so)", tr.probs);
+  check(tr.gw === 4 && tr.sev === 4, 'GW Matched Play and Sevens: Tier 4', tr);
+  check(tr.uk === 5 && tr.ukBudget === 1130 && tr.gotg === 5 && !tr.probs.some(x => /allowed/.test(x)), 'allowed in the UKTC XI (Tier 5, 1,130k) and GotG2 (Tier 5) examples', tr);
   check(tr.kw === 'Special,Squig' && tr.lg.join() === 'UC', 'keywords and league (Underworld Challenge)', tr);
+  // ---- sprites: the two Linemen vary; the two Herders are one of each (the foam hand, then the horn)
+  const sp = await S(() => {
+    const hs = __scene([[0, 'Squig Herder', 5, 5], [0, 'Squig Herder', 7, 5]]);
+    const g = hs.map(h => spriteFor(h));
+    return { two: hs.length === 2, differ: g[0] !== g[1], order: g[0] === SPRITES.nightgoblin['Squig Herder'] && g[1] === SPRITE_VARIANTS.nightgoblin['Squig Herder'][1],
+      all: ['Night Goblin Lineman', 'Squig Herder', 'Squig Hopper', 'Squig Wrangler', 'Cave Squig', 'Trained Troll'].every(k => SPRITES.nightgoblin[k] && SPRITES.nightgoblin[k].length === 32) };
+  });
+  check(sp.two && sp.differ && sp.order && sp.all, 'a sprite for every position; the first Herder has the foam hand, the second the horn', sp);
   console.log('page errors:', errors.length ? errors : 'none');
   check(!errors.length, 'no page errors', errors.slice(0, 3));
 
