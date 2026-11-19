@@ -74,6 +74,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   (`k_lb2.txt`): 194-261-545, 627-1268 v 207-245-548, 697-1337 - same margin, lower scoring. Worth a look next: loose balls in our own half
   mid-drive (we concede within 3 turns 27-31% of the time; drefsante gets 583 loose-ball turns near our end zone per 300 games and scores within 3
   turns in 43%), and blocks (the plan's moves cut ours: 42 -> 40 a game, knock-downs 27 -> 26, while drefsante's rise to 49).
+  v5.31 `cb1` (loose ball in our half, `cbN`): OFF. Its players who can reach the ball with no dodge: 0 -> it gets the ball 26%, 1+ -> 53-74%; ours next to the
+  ball: 0 -> it scores within 3 turns 43%, 3 -> 4% (`nn/look/dbg/loose_ours.py`). Sure moves to cut that, hits on those who could reach it: it got the ball 48% ->
+  40%. 300 games looked great (73-71-156, 209-348) but 1,000 (`k_cb2.txt`): 202-245-553, 643-1268 v 207-245-548, 697-1337. `lb1` and `cb1` both took ~70 touchdowns
+  off each side: more care around the ball slows our attack as much as theirs. Trust 1,000 games, not 300. `cbKeep` (hold players back for a Blitz) was no help.
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

@@ -1233,7 +1233,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.30</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.31</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -28381,6 +28381,90 @@ ol.ci-steps li::marker { content: none; }
             // OFF (lbOn 0) in brain x too: v drefsante on the turn after its kick-off we ended with the ball 77% of the time (66% without), and still
             // held it at our next turn 70% (60%), but that faded within two turns. Over 1,000 games (seeds 910000+) won 194 drew 261 lost 545, touchdowns
             // 627-1268, v 207-245-548, 697-1337 without it: lower-scoring games with the same margin, and fewer blocks (37.4 a game v 39.7).
+            // ---- (brain x: cb1) the plan with the ball loose in our half ----
+            // drefsante starts 2 turns a game with the ball loose in our half, gets it in 48% and scores within three of its turns in 34%. What
+            // decides it: how many of its players can reach the ball with no dodge (none: it gets the ball 26% of the time; one or more: 53-74%) and how
+            // many of ours stand next to the ball (none: it scores within three turns 43%; three: 4%) (nn/look/dbg/loose_ours.py). So before any
+            // dice our sure moves go where they most cut that (up to cbN a turn, the likely picker kept back), and whoever could get to the ball is
+            // worth more to knock down. And 223 of those 602 turns followed our own hit knocking their carrier over, with nobody left to act: when
+            // we mean to Blitz their carrier, cbKeep free players near him wait until after it.
+            // OFF (cbN 0, cbKeep 0) in brain x too: v drefsante it got the ball less (48% -> 40% of those turns; 300 games 73-71-156, touchdowns 209-348 v
+            // 64-76-160, 222-406; with cbKeep 2 60-84-156, 215-381), but over 1,000 games (seeds 910000+, cbN 4) won 202 drew 245 lost 553, touchdowns
+            // 643-1268, v 207-245-548, 697-1337 without it: 69 fewer conceded, 54 fewer scored.
+            let cbDone = { key: '', n: 0 };
+            function cbFree(me, bx, by) {   // how many of theirs could get to the ball with no dodge (those needing Rushes count 0.4)
+                const W = CFG.cols, key = (x, y) => y * W + x, occ = new Set(), tz = new Set(), tk = key(bx, by);
+                state.players.forEach(q => {
+                    if (!onPitch(q)) return;
+                    occ.add(key(q.x, q.y));
+                    if (q.team === me && !q.isDown && !q.isStunned && !q.isDistracted) for (const [dx, dy] of DIRS8) if (inPitch(q.x + dx, q.y + dy)) tz.add(key(q.x + dx, q.y + dy));
+                });
+                if (occ.has(tk)) return 0;
+                let t = 0;
+                state.players.forEach(q => {
+                    if (q.team === me || !onPitch(q) || q.isStunned || q.isDistracted || hasSk(q, 'No Hands') || hasSk(q, 'No Ball')) return;
+                    const ma = (q.ma || 0) - (q.isDown ? 3 : 0), s0 = key(q.x, q.y);
+                    if (ma < 0 || tz.has(s0) || cheb(q, { x: bx, y: by }) > ma + 2) return;
+                    const dist = new Map([[s0, 0]]), qu = [s0];
+                    let best = 99;
+                    for (let h = 0; h < qu.length && best === 99; h++) {
+                        const sq = qu[h], d = dist.get(sq), x = sq % W, y = (sq - x) / W;
+                        if (d >= ma + 2 || (sq !== s0 && tz.has(sq))) continue;
+                        for (const [dx, dy] of DIRS8) {
+                            const nx = x + dx, ny = y + dy; if (!inPitch(nx, ny)) continue;
+                            const k = key(nx, ny);
+                            if (k === tk) { best = d + 1; break; }
+                            if (occ.has(k) || dist.has(k)) continue;
+                            dist.set(k, d + 1); qu.push(k);
+                        }
+                    }
+                    if (best <= ma) t += 1; else if (best <= ma + 2) t += 0.4;
+                });
+                return t;
+            }
+            const CB_F = [0.26, 0.60, 0.63, 0.68, 0.74], CB_C = [1, 0.85, 0.78, 0.6];
+            function cbValue(me, bx, by) {   // the chance they get the ball, as far as the position shows
+                const f = cbFree(me, bx, by), i = Math.floor(f), base = f >= 4 ? 0.74 + (f - 4) * 0.01 : CB_F[i] + (f - i) * (CB_F[i + 1] - CB_F[i]);
+                const c = state.players.filter(q => q.team === me && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && Math.max(Math.abs(q.x - bx), Math.abs(q.y - by)) === 1).length;
+                return base * CB_C[Math.min(3, c)];
+            }
+            function cbFindHits(me) {
+                const bx = state.ball.x, by = state.ball.y, v0 = cbValue(me, bx, by);
+                state.players.forEach(q => {
+                    if (q.team === me || !onPitch(q) || q.isDown || q.isStunned || Math.max(Math.abs(q.x - bx), Math.abs(q.y - by)) > (q.ma || 6) + 2) return;
+                    q.isDown = true;
+                    let v = v0; try { v = cbValue(me, bx, by); } finally { q.isDown = false; }
+                    if (v0 - v > 0.01) dpHits.set(q.id, v0 - v);
+                });
+            }
+            function cbMovePlan(me, act) {
+                const ck = state.half + ':' + me + ':' + state.turn[me];
+                if (cbDone.key !== ck) cbDone = { key: ck, n: 0 };
+                if (cbDone.n >= AIX.p(me, 'cbN', 0)) return null;
+                const bx = state.ball.x, by = state.ball.y, o = { x: bx, y: by }, v0 = cbValue(me, bx, by);
+                if (v0 < AIX.p(me, 'cbMin', 0.15)) return null;
+                const pk = lbPicker(me, act), keep = pk && pk.pr >= AIX.p(me, 'cbPick', 50) ? pk.p.id : null, cands = [];
+                act.forEach(p => {
+                    if (p.id === keep || p.isStunned || !canReposition(p, me)) return;
+                    movesFor(p).forEach(m => {
+                        if (m.prob < 100 || m.isRush || (m.x === p.x && m.y === p.y) || (m.x === bx && m.y === by) || cheb(m, o) > AIX.p(me, 'cbR', 6)) return;
+                        cands.push({ p, m });
+                    });
+                });
+                cands.sort((a, b) => cheb(a.m, o) - cheb(b.m, o));
+                let best = null;
+                cands.slice(0, AIX.p(me, 'cbLook', 36)).forEach(({ p, m }) => {
+                    const ox = p.x, oy = p.y, od = p.isDown;
+                    p.x = m.x; p.y = m.y; p.isDown = false;
+                    let v = v0; try { v = cbValue(me, bx, by); } finally { p.x = ox; p.y = oy; p.isDown = od; }
+                    const g = v0 - v - m.path.length * 0.002 - edgeRisk(m.x, m.y, me, p.id) * 0.02;
+                    if (!best || g > best.g) best = { p, m, g };
+                });
+                if (!best || best.g < AIX.p(me, 'cbGain', 0.03)) return null;
+                cbDone.n++; AIX.count(me, 'cb1');
+                const tx = best.m.x, ty = best.m.y;
+                return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
+            }
             function lbPicker(me, act) {
                 const bx = state.ball.x, by = state.ball.y;
                 let best = null;
@@ -29238,6 +29322,11 @@ ol.ci-steps li::marker { content: none; }
                         AIX.count(me, 'lb1');
                     }
                 }
+                // (brain x: cb1) the ball loose in our half: cover it before any dice (see cbFree)
+                let cbMove = null;
+                if (AIX.x(me) && AIX.p(me, 'cbN', 0) > 0 && !carrier && state.ball.x >= 0 && !state.isResolvingKickoff && !state.charge && toGo(state.ball.x, me) >= AIX.p(me, 'cbFrom', 13)) {
+                    cbFindHits(me); cbMove = cbMovePlan(me, act);
+                }
                 // (brain x: bp1) we have the ball: who could get at the carrier is worth knocking down (see bpEnd)
                 const bpOn = AIX.x(me) && AIX.p(me, 'bpN', 0) > 0 && carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && !state.charge && !lastTurn;
                 if (bpOn) bpFindHits(me, carrier, act);
@@ -29318,6 +29407,7 @@ ol.ci-steps li::marker { content: none; }
                 }
                 if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
                 if (lbMove) return lbMove;   // (brain x: lb1)
+                if (cbMove) return cbMove;   // (brain x: cb1)
                 if (lbGo) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].e.pTurn >= AIX.p(me, 'lbTurn', 0.05)) blocks.splice(i, 1);   // (brain x: lb1) no risky block before the pick-up
                 if (bpOn) { const bm = bpMovePlan(me, act, carrier); if (bm) return bm; }   // (brain x: bp1) then the ways to the carrier are shut
                 // (deep1) before the blocks: holding the ball well short of their end zone, with fewer than two team-mates ready to take
@@ -29365,6 +29455,10 @@ ol.ci-steps li::marker { content: none; }
                     const cb0 = carrierBlitz(me, act, carrier);
                     const fl0 = foulPlan(me, act);
                     const hold = new Set([...(cb0 ? [cb0.p.id] : []), ...(fl0 ? [fl0.pid] : [])]);
+                    // (brain x: cb1) a Blitz on their carrier is coming: the nearest free players wait, to go for the ball if it comes loose
+                    if (cb0 && AIX.x(me) && AIX.p(me, 'cbKeep', 0) > 0 && toGo(carrier.x, me) >= AIX.p(me, 'cbFrom', 13))
+                        act.filter(p => !p.isDown && !hold.has(p.id) && tzFor(p.x, p.y, me) === 0 && !hasSk(p, 'No Hands') && !hasSk(p, 'No Ball') && cheb(p, carrier) <= (p.ma || 6) + 1)
+                            .sort((a, b) => cheb(a, carrier) - cheb(b, carrier)).slice(0, AIX.p(me, 'cbKeep', 0)).forEach(p => hold.add(p.id));
                     // (bz2) and the player who will Blitz (after the screen is in place), when it isn't their carrier
                     if (AIX.on(me, 'bz2') && !cb0 && !state.blitzUsed) { const bz0 = blitzPlan(me, act); if (bz0) hold.add(bz0.pid); }
                     const free = act.filter(p => !hold.has(p.id));

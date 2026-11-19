@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.31 (19 Nov 2026)
+- Behind the scenes: a plan for loose balls in the computer's own half was tested for the experimental computer coach and left off: it
+  conceded less but scored less too.
+
 ## v5.30 (19 Nov 2026)
 - Night Goblin sprites finished: slimmer Linemen, a foam finger that follows its stick, a bugle Herder with both ears, the Hopper's
   rider with ears and its Squig's legs out of its sides, Wranglers leaning back on the rope, a proper helmet on the Cave Squig, and

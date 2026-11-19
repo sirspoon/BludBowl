@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.31 (19 Nov 2026)
+- No change to play. Brain x's plan for a loose ball in our own half, `cb1` (`cbFree`; `cbN`, `cbKeep`, `cbMin`, `cbGain`, `cbPick`, `cbFrom`), tried and left
+  off. drefsante gets such a ball far less often when none of its players can reach it without a dodge (26% against 53-74%), and scores less the
+  more of ours stand next to it. With `cb1` sure moves go first to whatever cuts that most, and whoever could reach the ball is worth more to
+  knock down. drefsante got the ball in 40% of those turns (48% before). A 300-game run looked like a big gain (73-71-156, touchdowns 209-348,
+  against 64-76-160 and 222-406), but over 1,000 games: won 202, drew 245, lost 553, touchdowns 643-1268, against 207-245-548 and 697-1337
+  without it: 69 fewer conceded and 54 fewer scored.
+
 ## v5.30 (19 Nov 2026)
 - Night Goblin sprites reworked with the owner, after GW's photos of the miniatures:
   - Lineman: one sprite now (the one with the ball is gone), slimmer, arms down with the claws at his hips, long ears.
