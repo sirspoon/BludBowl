@@ -88,14 +88,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   make 4.3 moves before the first block, it 2.3. Targets: it hits whoever's there (Linemen); we pick Blitzers, pass up Catchers (8% of picks, 28% on offer).
   `be1` (early Blitz, `beAt`): OFF - Blitzed early in 87% of turns, but 1,000 games 192-272-536 676-1294 / 189-256-555 646-1310 / 199-250-551 683-1319 v
   207-245-548 697-1337; blocks fell to ~37.7, knock-downs 25.3. `k_be1-3.txt`. Counting and timing blocks like drefsante doesn't move the score.
-  How drefsante scores v brain x (19 Nov, `study_blk.jsonl`, 300 games; `nn/look/dbg/score_paths.py`, `carrier_half.py`, `carrier_hits.py`, outputs `.txt`):
+  How drefsante scores v brain x (19 Nov, `study_blk.jsonl`, 300 games; `nn/look/dbg/score_paths.py`, `carrier_half.py`, `carrier_hits.py`, `carrier_dice.py`, outputs `.txt`):
   63% of its touchdowns come right after taking the ball off us (0.85 a game; 35% of all after Blitzing our carrier), 75% of those within 2 of its turns;
   ours 44% (0.29 a game). Spells with the ball: 3.8 a game each; it scores in 36%, we 17%. 80% of the touchdown gap is spells starting within 12 squares
   of scoring: it gets 1.52 a game and scores 50%, we 0.58 and 34%; from further out 0.59 v 0.45 touchdowns a game. Why: our carrier spends 5.4 of its
-  turns a game in our half (its carrier 2.8 in its half) and is lost 36% v 25% a turn there. In our half our carrier is a Catcher (ST2) 47% of turns
-  (its: 8%, it carries with the Thrower 59%), so a 2-dice hit is open to them 23% of turns v 6%; and once they can reach him at all it hits him 67-73%,
-  on 2+ dice 70-89%. Our defence, with its carrier reachable in its half: hits him 47-59% (2+ dice 53-76%), after 5 moves first (it: 2); when we don't,
-  our Blitz went at someone else 56%. Ideas: a ST3 carrier and a square with no 2-dice hit in our half; hit their carrier first when he's reachable.
+  turns a game in our half (its carrier 2.8 in its half) and is lost 36% v 25% a turn there. Not the setup: by the best dice a hit could have once
+  their free players step in to assist (`carrier_dice.py`), both carriers in their own half are as exposed (2 dice 25-26% of turns, 1 die 22%, none
+  45-47%), but at each level we lose it more (72 v 51%, 41 v 30%). (Human Catchers are ST3 in season3: carrying with a Catcher costs nothing.) It's the
+  hit on the carrier: once it can reach ours it hits him ~64% of turns, mostly on 2 dice; we hit its carrier in its half ~47%, after 5 moves first
+  (it: 2), and when we don't, our Blitz went at someone else 55%. Next: hit their carrier first when he's reachable (assists stepped in first).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
