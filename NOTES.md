@@ -101,6 +101,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   (`k_ca1-3.txt`): 210-269-521, 790-1362 (.345) v 207-245-548, 697-1337 (.330); caAt 2 (Blitz after the screen) 203-267-530, 706-1332. 300 games
   (`study_ca3.jsonl`, 282 done - the run stalled at the end): 1-die hit open on their carrier in its half, hit 47 -> 55%, on 2+ dice 55 -> 76%, after
   5.3 -> 1.7 moves, ball lost 35 -> 44%. Brain x's 1,000-game baseline is now 210-269-521, 790-1362. Not yet in the all-races guard.
+  Tried after it, not kept: `kh1`, blocking the carrier's helpers away before the Blitz (one of ours already next to a helper, no move). In 5 mirror
+  matches it never paid: usually none of ours stands next to a helper (only a Blitz could get there), and when one does the assist gained is worth
+  less than the Turnover risk and that player's own hit. drefsante hardly does it either (0.19 blocks before its hit on our carrier; ours 0.57).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 
