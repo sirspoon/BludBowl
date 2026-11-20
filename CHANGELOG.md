@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.47 (20 Nov 2026)
+- The experimental computer coach's marked ball carrier may now block one of his markers himself when that is safer than dodging or staying.
+
 ## v5.46 (20 Nov 2026)
 - The experimental computer coach's ball carrier no longer just stands there when marked: it weighs dodging away against staying put.
 

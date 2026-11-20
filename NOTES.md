@@ -184,6 +184,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   kept 31%), drefsante 11%; a 4+ dodge to a free square was there 95%. With it: nothing 17%, hand-offs 19 -> 25%, kept ~50% either way;
   1,000 games 270-244-486, 930-1306 (.392) v v5.45 (`k_cbt`) .395. Still open: with 3+ markers we do nothing 25% (drefsante blocks a marker
   with the carrier 30%, dodges 29%); and we are marked 2.8 times a game v 1.7-2.2 (prevention: where the carrier ends).
+  v5.47: `bpBlk` 1 ON in brain x (bpEnd: a marked carrier weighs blocking a marker himself - fall -> bpFail, marker moved -> one fewer).
+  Study: kept/scored 49 -> 56%; 1,000 games (seeds 910000+) 258-250-492, 929-1321 (.383) v v5.46 .392. Drift check (seeds 930000+, `k_d542`,
+  `k_d546`, `look/dbg/k_chunks.sh` now takes SEED=): v5.42's settings (btOn/beAt/cbThreat/bpDodge 0) 263-284-453, 927-1288 (.405) v v5.46
+  275-274-451, 924-1260 (.412) - the slide on seeds 910000+ (.409 -> .392 over v5.42-v5.46) was luck; over both seed sets level.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,

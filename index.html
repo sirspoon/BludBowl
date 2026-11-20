@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.46</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.47</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27296,7 +27296,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1 },   // (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1 },   // (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -28519,7 +28519,23 @@ ol.ci-steps li::marker { content: none; }
                     });
                     if (!best.stay && best.prob < 100) AIX.count(me, 'bpDodge');
                 }
-                return (bpMemo = { x: best.x, y: best.y, m: best.stay ? null : best });
+                // (bpBlk, v5.47) or the carrier blocks one of his markers himself and stays: if he falls (attacker down, or both down without
+                // Block) the ball goes (bpFail); if the marker is knocked over or pushed off, one marker fewer. drefsante's marked carrier does
+                // this 13% of the time (30% with 3+ markers) and keeps the ball 75%; ours 8% (look/dbg/marked_opts.py)
+                // ON in brain x since v5.47 (bpBlk 1): marked carrier, ball still ours (or scored) by our next turn 49% -> 56% (study, 300 games);
+                // 1,000 games v drefsante 258-250-492, 929-1321 (.383) v v5.46's 270-244-486, 930-1306 (.392) - level.
+                if (AIX.p(me, 'bpBlk', 0) && tzFor(c.x, c.y, me) > 0 && !c.isDown) {
+                    const failL = AIX.p(me, 'bpFail', 0.85), here = bpLoss(bpCount(me, c, c.x, c.y));
+                    state.players.forEach(d => {
+                        if (d.team === me || !onPitch(d) || d.isDown || d.isStunned || cheb(d, c) !== 1) return;
+                        const e = blockEval(c, d);
+                        d.isDown = true;
+                        let gone = here; try { gone = bpLoss(bpCount(me, c, c.x, c.y)); } finally { d.isDown = false; }
+                        const v = -(e.pTurn * failL + (1 - e.pTurn) * (e.pMove * gone + (1 - e.pMove) * here));
+                        if (v > bv + AIX.p(me, 'bpBlkMargin', 0.02)) { bv = v; best = { x: c.x, y: c.y, stay: true, block: d.id }; }
+                    });
+                }
+                return (bpMemo = { x: best.x, y: best.y, m: best.stay ? null : best, block: best.block || null });
             }
             function bpFindHits(me, c, act) {
                 const E = bpEnd(me, c, act), L0 = bpLoss(bpCount(me, c, E.x, E.y));
@@ -30086,6 +30102,7 @@ ol.ci-steps li::marker { content: none; }
                 }
                 // move our ball carrier forward, then build the cage round him
                 if (carrier && carrier.team === me && act.includes(carrier)) {
+                    if (bpOn) { const E = bpEnd(me, carrier, act); if (E.block && getPlayerById(E.block)) { AIX.count(me, 'bpBlk'); return { pid: carrier.id, kind: 'block', target: E.block }; } }   // (brain x: bpBlk)
                     let m = bpOn ? bpEnd(me, carrier, act).m : carrierPick(movesFor(carrier), carrier);
                     // (cagefirst; turn planner stage 2) the cage goes to where the carrier will stop before the carrier moves, as strong
                     // coaches do: the stopping square is worked out once and kept for the turn, free team-mates step (without dice) into

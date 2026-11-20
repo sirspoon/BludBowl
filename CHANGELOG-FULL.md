@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.47 (20 Nov 2026)
+- Experimental computer coach (brain x): a ball carrier who starts the turn marked can now block one of his markers himself, when that is
+  safer than dodging away or staying put (if he falls the ball is gone; if the marker goes down or is pushed off, one marker fewer).
+  drefsante's carrier does this 13% of the time and keeps the ball 75%. In a 300-game study the marked carrier kept the ball (or scored) by
+  our next turn 56% of the time, up from 49%. 1,000 games v drefsante: won 258, drew 250, lost 492, touchdowns 929-1321, against v5.46's
+  270-244-486, 930-1306 - level. A check on fresh seeds found today's changes together level with v5.42's AI (v5.46 .412, v5.42 .405 over
+  1,000 games), not the slow slide the same-seed runs had suggested.
+
 ## v5.46 (20 Nov 2026)
 - Experimental computer coach (brain x): when its ball carrier starts the turn marked, it now weighs each dodge away (with a team re-roll
   counted) against the real risk of staying marked. Before, the rule that picks where the carrier finishes only looked at moves with no
