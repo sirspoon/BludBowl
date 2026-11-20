@@ -18,10 +18,16 @@ const { openGame } = require('./headless-match');
   const B = w.eval('AI.bridge');
   const out = o => process.stdout.write(JSON.stringify(o) + '\n');
   out({ ready: true });
-  const rl = readline.createInterface({ input: process.stdin });
+  const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });   // (CR LF is always one line end)
   rl.on('line', line => {
     if (!line.trim()) return;
-    let q; try { q = JSON.parse(line); } catch (e) { out({ ok: false, error: 'bad JSON' }); return; }
+    // a question may carry "id" (last, so it can usually be found even in a line that can't be read): its answer echoes it
+    let q; try { q = JSON.parse(line); } catch (e) {
+      const m = /"id": ?(\d+)\}\s*$/.exec(line), id = m ? +m[1] : undefined;
+      process.stderr.write(`bridge: could not read question ${id} (${line.length} chars, ${e.message}): ${JSON.stringify(line.slice(0, 120))} ... ${JSON.stringify(line.slice(-120))}\n`);
+      out({ ok: false, error: 'bad JSON', id }); return;
+    }
+    const say = o => out(q.id === undefined ? o : Object.assign(o, { id: q.id }));
     try {
       const t0 = TIMING ? performance.now() : 0;
       if (q.desc) B.load(q.desc);
@@ -31,15 +37,15 @@ const { openGame } = require('./headless-match');
       if (q.op && q.op !== 'load' && typeof fn !== 'function') throw new Error('unknown op ' + q.op);
       if (q.record && fn) {   // (ai-training/nn: the answer, plus each decision as the neural network sees it, labelled with the answer)
         const rec = B.nnRecord(q.op, q.arg);
-        out({ ok: true, result: rec.result == null ? null : JSON.parse(JSON.stringify(rec.result)), nn: rec.samples });
+        say({ ok: true, result: rec.result == null ? null : JSON.parse(JSON.stringify(rec.result)), nn: rec.samples });
         return;
       }
       const r = fn ? fn(q.arg) : null;
       if (TIMING) { const d = performance.now() - TIMES.t1; TIMES.op += d; const k = q.op || 'none'; TIMES.by[k] = TIMES.by[k] || [0, 0, 0]; TIMES.by[k][0]++; TIMES.by[k][1] += d; TIMES.by[k][2] += line.length; }
       const t2 = TIMING ? performance.now() : 0;
-      out({ ok: true, result: r == null ? null : JSON.parse(JSON.stringify(r)) });
+      say({ ok: true, result: r == null ? null : JSON.parse(JSON.stringify(r)) });
       if (TIMING) TIMES.out += performance.now() - t2;
-    } catch (e) { out({ ok: false, error: String(e && e.stack || e).slice(0, 600) }); }
+    } catch (e) { say({ ok: false, error: String(e && e.stack || e).slice(0, 600) }); }
   });
   const report = () => { if (!TIMING || !TIMES.n) return; process.stderr.write(`bridge timing: ${TIMES.n} questions; load ${(TIMES.load / TIMES.n).toFixed(1)} ms, answer ${(TIMES.op / TIMES.n).toFixed(1)} ms, send back ${(TIMES.out / TIMES.n).toFixed(1)} ms each; by kind: ` +
     Object.entries(TIMES.by).map(([k, v]) => `${k} ${v[0]} x ${(v[1] / v[0]).toFixed(1)} ms (${Math.round(v[2] / v[0] / 1024)} KB in)`).join(', ') + '\n'); };

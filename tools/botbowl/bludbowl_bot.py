@@ -13,7 +13,9 @@ import json
 import os
 import queue
 import subprocess
+import sys
 import threading
+import time
 
 import botbowl
 from botbowl import Action, ActionType, BBDieResult, Square, ProcBot
@@ -37,39 +39,68 @@ def skill_name(s):
     return SKILL_NAME.get(s.name, s.name.replace('_', ' ').title())
 
 
+class BridgeFailure(RuntimeError):
+    """No usable answer from the Node process (no reply in time, or it couldn't read the question): ask again on a fresh one."""
+
+
 class Bridge:
-    """The Node process running BludBowl's AI: one JSON line out, one back."""
+    """The Node process running BludBowl's AI: one JSON line out, one back.
+
+    The pipe is UTF-8 bytes with plain newline line ends (text mode on Windows sent CR LF and read the answers as cp1252), and each
+    question carries a number that its answer echoes, so a stray or late line is never taken as the answer to a later question. In
+    2,000+ games v drefsante one question went unanswered (the run hung for hours) and ~20 reached Node unreadable ("bad JSON");
+    either now gets one more try on a fresh Node (BludBowlBot.ask) before the game is given up as an error."""
 
     def __init__(self):
         env = dict(os.environ)
         here_modules = os.path.join(HERE, '..', '..', 'node_modules')
         env['NODE_PATH'] = os.pathsep.join(p for p in [env.get('NODE_PATH', ''), here_modules] if p)
-        self.proc = subprocess.Popen(['node', SERVER], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, env=env, bufsize=1)
-        # replies are read on a thread, so a reply that never comes (seen once in 2,000+ games: the bridge stayed idle) ends that one
-        # game as an error after TIMEOUT seconds - Node is restarted for the next - instead of hanging the whole run
+        self.proc = subprocess.Popen(['node', SERVER], stdin=subprocess.PIPE, stdout=subprocess.PIPE, env=env)
+        self.n = 0
+        # replies are read on a thread, so one that never comes gives up after TIMEOUT seconds instead of hanging the whole run
         self.lines = queue.Queue()
-        threading.Thread(target=lambda: [self.lines.put(l) for l in iter(self.proc.stdout.readline, '')], daemon=True).start()
-        first = json.loads(self.read())
+        threading.Thread(target=lambda: [self.lines.put(l.decode('utf-8', 'replace')) for l in iter(self.proc.stdout.readline, b'')],
+                         daemon=True).start()
+        first = self.reply(None)
         assert first.get('ready'), first
 
     def ask(self, op, desc=None, arg=None, record=False):
+        self.n += 1
         q = {'op': op, 'desc': desc, 'arg': arg}
         if record:
             q['record'] = True
-        self.proc.stdin.write(json.dumps(q) + '\n')
-        self.proc.stdin.flush()
-        r = json.loads(self.read())
+        q['id'] = self.n   # (last, so Node can still find it in a line it can't read)
+        try:
+            self.proc.stdin.write((json.dumps(q) + '\n').encode('utf-8'))
+            self.proc.stdin.flush()
+        except OSError as e:   # (Node has gone: BrokenPipeError, or EINVAL on Windows)
+            raise BridgeFailure(f'BludBowl AI: could not send ({e})')
+        r = self.reply(self.n)
+        if r.get('error') == 'bad JSON':
+            raise BridgeFailure('BludBowl AI: bad JSON')
         if not r.get('ok'):
             raise RuntimeError('BludBowl AI: ' + r.get('error', '?'))
         self.last_nn = r.get('nn')   # (with record: each decision as the neural network sees it, labelled with the AI's answer)
         return r.get('result')
 
-    def read(self):
-        try:
-            return self.lines.get(timeout=TIMEOUT)
-        except queue.Empty:
-            self.proc.kill()   # (bridge() starts a fresh one for the next question)
-            raise RuntimeError(f'BludBowl AI: no reply in {TIMEOUT}s')
+    def reply(self, n):
+        """The answer to question n (None: the ready line), skipping anything else Node prints."""
+        end = time.time() + TIMEOUT
+        while True:
+            try:
+                line = self.lines.get(timeout=max(0.01, end - time.time()))
+            except queue.Empty:
+                self.proc.kill()
+                raise BridgeFailure(f'BludBowl AI: no reply in {TIMEOUT:.0f}s')
+            try:
+                r = json.loads(line)
+            except ValueError:
+                r = None
+            if isinstance(r, dict) and (r.get('id') == n if n is not None else r.get('ready')):
+                return r
+            if isinstance(r, dict) and n is not None and r.get('id') is None and r.get('error') == 'bad JSON':
+                return r   # (Node couldn't read the question, nor find its number in it)
+            print(f'bludbowl_bot: skipped a line from the bridge (waiting for {n}): {line[:200]!r}', file=sys.stderr, flush=True)
 
     def close(self):
         try:
@@ -103,8 +134,17 @@ class BludBowlBot(ProcBot):
 
     def ask(self, op, desc=None, arg=None):
         """One question to BludBowl's AI (a subclass can answer differently: the neural network, ai-training/nn)."""
+        global _bridge
         b = bridge()
-        r = b.ask(op, desc, arg, record=self.recorder is not None)
+        try:
+            r = b.ask(op, desc, arg, record=self.recorder is not None)
+        except BridgeFailure as e:   # (every question carries the whole position, so a fresh Node can answer it)
+            self.fallbacks['bridge restarted: ' + str(e).split(': ', 1)[-1].split(' (')[0]] += 1
+            print(f'bludbowl_bot: {e} - asking {op!r} again on a fresh bridge', file=sys.stderr, flush=True)
+            b.proc.kill()
+            _bridge = None
+            b = bridge()
+            r = b.ask(op, desc, arg, record=self.recorder is not None)
         if self.recorder is not None and b.last_nn:
             self.recorder(b.last_nn)
         return r
