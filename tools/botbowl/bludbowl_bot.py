@@ -121,6 +121,7 @@ class BludBowlBot(ProcBot):
                                 'pa': p.get_pa(), 'av': p.get_armor_target() if hasattr(p, 'get_armor_target') else p.get_av(),
                                 'skills': [skill_name(k) for k in p.get_skills()], 'x': x, 'y': y, 'state': st, 'used': bool(p.state.used),
                                 'maLeft': max(0, ma - p.state.moves),
+                                'rushesLeft': max(0, (3 if 'Sprint' in [skill_name(k) for k in p.get_skills()] else 2) - max(0, p.state.moves - ma)),
                                 'rooted': bool(getattr(p.state, 'taken_root', False)),
                                 'distracted': bool(getattr(p.state, 'bone_headed', False) or getattr(p.state, 'really_stupid', False)
                                                    or getattr(p.state, 'hypnotized', False) or getattr(p.state, 'distracted', False))})
@@ -254,6 +255,7 @@ class BludBowlBot(ProcBot):
             if not plan or plan.get('kind') == 'end':
                 return Action(ActionType.END_TURN)
             acts = self.plan_actions(game, plan)
+            self.carry_pid = plan.get('player') if plan.get('kind') == 'pickup' else None   # (see player_action)
             if plan.get('player'):
                 self.tried.add(plan['player'])
             if acts and self.allowed(game, acts[0]):
@@ -313,12 +315,28 @@ class BludBowlBot(ProcBot):
         return acts
 
     def player_action(self, game):
-        while self.queue:
-            a = self.queue.pop(0)
-            if self.allowed(game, a):
-                return a
-            self.fallbacks['step not allowed: ' + a.action_type.name] += 1
-        return Action(ActionType.END_PLAYER_TURN)
+        while True:
+            while self.queue:
+                a = self.queue.pop(0)
+                if self.allowed(game, a):
+                    return a
+                self.fallbacks['step not allowed: ' + a.action_type.name] += 1
+            # picked the ball up on the move: carry it on, as the game does (BludBowl's runPlan; before 19 Nov the picker stopped there)
+            pid, self.carry_pid = getattr(self, 'carry_pid', None), None
+            p = game.get_player(pid) if pid else None
+            c = game.get_ball_carrier()
+            if p is None or c is None or c.player_id != pid or game.state.active_player is not p:
+                return Action(ActionType.END_PLAYER_TURN)
+            prev = p.position
+            for q in self.ask('carry', self.describe(game), {'player': pid}) or []:
+                s = self.sq(q)
+                self.queue.append(Action(ActionType.JUMP if game.is_season3 and prev.distance(s) == 2 else ActionType.MOVE, position=s))
+                prev = s
+            if os.environ.get('BB_CARRY_LOG'):   # (a file to note each carry-on in: how many squares)
+                with open(os.environ['BB_CARRY_LOG'], 'a') as fh:
+                    fh.write('%d ' % len(self.queue))
+            if not self.queue:
+                return Action(ActionType.END_PLAYER_TURN)
 
     def blitz_target(self, game):
         if self.queue and self.queue[0].action_type == ActionType.SELECT_PLAYER:

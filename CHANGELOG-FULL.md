@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.41 (20 Nov 2026)
+- No change to how the game plays. A fix to the bridge that plays the computer coach in BotBowl (`AI.bridge`, `tools/botbowl/bludbowl_bot.py`),
+  where every test against drefsante runs: a player who picked the ball up on the move stopped on the ball's square, where in the game he carries
+  on (`runPlan`). The bridge's new `carry()` gives the rest of his move (the game's `carryOn`, shared with `runPlan`), and a pick-up made on the
+  way to a hand-off or pass now carries on to where the throw is made from (`leg2`), as in the game. Brain x v drefsante, 1,000 games: won 269,
+  drew 250, lost 481, touchdowns 951-1363, where the old bridge gave 226-277-497, 817-1357 - the earlier drefsante results undersold the AI.
+
 ## v5.40 (19 Nov 2026)
 - No change to the game's normal computer coach. Brain x's ball carrier now keeps off the sideline (`bpEdge` 0.15): the rule that picks where he
   stops for safety counted how many opponents could reach him and ignored the sideline, where fewer can, so it liked it - though there a push alone

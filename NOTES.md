@@ -131,6 +131,20 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   (study_v537): our carrier on the sideline at drefsante's turn start 0.96 a game v 0.37 (moved there 0.34 v 0.08), but not lost more there (26% v
   33% in the middle; 48% when he stayed there). 1,000 games (`k_ed1.txt`, `k_ed1s.txt`): 226-277-497, 817-1357 and 216-256-528, 790-1388 v
   229-261-510, 807-1348 and 229-241-530, 798-1365 - level (.354 v .355), kept as coach-like. Not in the all-races guard.
+  v5.41 (20 Nov): BotBowl bridge fix. A player who picked the ball up on the move stopped on the ball's square in BotBowl (the bridge sent only
+  the route to the ball; in the game `runPlan` carries on with `carrierPick`); a pick-up on the way to a hand-off or pass threw from the ball's
+  square (`leg2` dropped). Now the bot asks the bridge's `carry()` after the pick-up (shared `carryOn`) and the route includes `leg2`. Every
+  drefsante result before v5.41 had this handicap (ideas that pay off after a pick-up - lb1, cb1, pus1 - may have been undersold; worth
+  re-trying). Brain x v drefsante, 1,000 games (seeds 910000+, `k_fb0.txt`): 269-250-481, 951-1363 (.394) - the new baseline - v 226-277-497,
+  817-1357 (.364) with the old bridge. Don't run two `evaluate.py` at once: drefsante's Java side throws errors (~5% of games, counted as 0-0
+  draws in its totals; `look/dbg/k_tally.py` leaves them out). `look/dbg/k_chunks.sh` alternates runs in 250-game blocks for early reads.
+  Tried on the fixed bridge, not kept (code removed): `ps1` (`psMin` 0.55), after a pick-up running in at the odds choose0's step 1 uses (55%
+  with a re-roll, not carrierPick's 75% and never into a tackle zone): 235-239-471, 883-1333 (.375) v 250-238-466, 915-1301 (.387) (both
+  side by side, errored games left out). Why it looked worth it (study_v540, `look/dbg/loose_score.py`): turns starting with the ball loose 0-7
+  out, we scored that turn 0-1% (0.45 a game), drefsante 13-28% (1.22) - largely the bridge bug. `e2` (`e2N` 2), on the turn before the last
+  up to 2 finishers (tp1's rules), the rest going as deep as they can, in reach of a move and a pass: 253-245-502, 958-1411 (.376) v the same
+  seeds' 269-250-481, 951-1363 (.394) - it conceded more. Why it looked worth it (`look/dbg/last_far.py`): the last turn with the ball 13+
+  out, we had an unmarked team-mate within MA+2 of scoring 12% of the time (drefsante 48-57%), threw 10-14% (56-66%), scored 6-8% (19-27%).
   Study files: `nn/look/dref/study_{pos,aa,x1,x1b}.jsonl`, reports `rep_*.txt`. Not doing for now: the special-action
   skills (Stab, Gaze, Breathe Fire) for other races.
 

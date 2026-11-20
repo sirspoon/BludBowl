@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.41 (20 Nov 2026)
+- Behind the scenes: a fix to the test link that plays the computer coach against other bots. No change to how the game plays.
+
 ## v5.40 (19 Nov 2026)
 - Behind the scenes: the experimental computer coach keeps its ball carrier off the sideline.
 
