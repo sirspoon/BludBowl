@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.45 (20 Nov 2026)
+- Experimental computer coach (brain x): with the ball loose in its half, it only sends players to cover the ball when one of yours could
+  actually get to it that turn without a dodge. After a kick-off it used to pull four or five players back from the line towards the ball
+  with nobody near it, leaving room to run into. Receiving turns: players going back 3+ squares 2.1 -> 1.8 a turn (drefsante 1.9), ground
+  given up 12.7 -> 11.0 squares, the ball still picked up as often. 1,000 games v drefsante: won 261, drew 268, lost 471, touchdowns 911-1308,
+  against v5.44's 271-263-466, 907-1264 - level. Also tried and dropped: keeping the carrier from finishing a run alone where two or more
+  opponents can reach him (he held back too much; 750 games: .374 against .409).
+
 ## v5.44 (20 Nov 2026)
 - Experimental computer coach (brain x, the default since v5.43): the Blitz comes earlier in the turn, while team-mates can still give
   assists, and only at players worth it - the ball carrier, a player who could score or reach its own carrier, one in its carrier's way, or a

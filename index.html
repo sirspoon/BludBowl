@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.44</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.45</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27296,7 +27296,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1 },   // (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4 },   // (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -28497,6 +28497,8 @@ ol.ci-steps li::marker { content: none; }
                 if (bpMemo) return bpMemo;
                 const ms = movesFor(c), m0 = carrierPick(ms, c), stay = { x: c.x, y: c.y, prob: 100, stay: true }, base = m0 || stay, go0 = toGo(base.x, me);
                 if (base.x === endX(me)) return (bpMemo = { x: base.x, y: base.y, m: m0 });
+                // (tried, not kept - v5.45 NOTES: bpAlone, a cost for finishing with nobody of ours next to him and 2+ of theirs able to get at
+                // him: lone exposed runs 0.26 -> 0.16 a game, but 750 games v drefsante .374 v .409 - he held back and we scored less)
                 const prog = AIX.p(me, 'bpProg', 0.025), edgeW = AIX.p(me, 'bpEdge', 0), val = o => -bpLoss(bpCount(me, c, o.x, o.y)) + (go0 - toGo(o.x, me)) * prog - (1 - o.prob / 100) * 0.5 - (edgeW ? edgeRisk(o.x, o.y, me, c.id) * edgeW : 0);   // (bpEdge: the sideline, where a push alone loses the ball)
                 let best = base, bv = val(base) + AIX.p(me, 'bpMargin', 0.05);
                 [stay, ...ms.filter(o => o.prob >= 100 && !o.isRush && o.x !== endX(me) && toGo(o.x, me) <= go0 + AIX.p(me, 'bpGive', 4))]
@@ -28615,6 +28617,12 @@ ol.ci-steps li::marker { content: none; }
                 if (cbDone.n >= AIX.p(me, 'cbN', 0)) return null;
                 const bx = state.ball.x, by = state.ball.y, o = { x: bx, y: by }, v0 = cbValue(me, bx, by);
                 if (v0 < AIX.p(me, 'cbMin', 0.15)) return null;
+                // (cbThreat, v5.45) only when one of theirs could really get to the ball this coming turn (cbFree: 1 for each within his move with
+                // no dodge, 0.4 within two Rushes): cbValue's floor (26% with nobody able to) made players run back to the ball after a kick-off
+                // with no threat to it, giving up ground (the owner's game; receiving turns, players going back 3+ squares 1.7 -> 2.1, drefsante 1.9)
+                // ON in brain x since v5.45 (cbThreat 0.4): going back 3+ 2.1 -> 1.8, ground given up 12.7 -> 11.0 squares, the ball still ours
+                // at the end of 73% of those turns; 1,000 games v drefsante 261-268-471, 911-1308 (.395) v v5.44's 271-263-466, 907-1264 (.403).
+                if (cbFree(me, bx, by) < AIX.p(me, 'cbThreat', 0)) return null;
                 const pk = lbPicker(me, act), keep = pk && pk.pr >= AIX.p(me, 'cbPick', 50) ? pk.p.id : null, cands = [];
                 act.forEach(p => {
                     if (p.id === keep || p.isStunned || !canReposition(p, me)) return;

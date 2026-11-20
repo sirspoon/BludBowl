@@ -173,6 +173,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   deep runners, escorts), in our carrier's way, positional - on 2+ dice we choose; `btWorth`). Why: we Blitz in 61% of turns (drefsante 85%,
   mostly as its 3rd-5th action); 24% of ours had no Blitz and no Turnover - at the end of the turn no 2-dice target was left (`look/dbg/
   blitz_targets.py`). bt1 alone (late): Blitzes 8.8 -> 9.3 a game, study 79-79-142, 282-396 v 93-76-131, 305-390. With be1: 1,000 games v drefsante (seeds 910000+): 271-263-466, touchdowns 907-1264 (.403) v v5.42's 275-268-457, 977-1318 (.409) - level (fewer conceded, fewer scored).
+  v5.45: `cbThreat` 0.4 ON in brain x (cb1 covers a loose ball only if one of theirs could get to it with no dodge - cbFree >= 0.4; the owner
+  saw 4-5 run back after a kick-off). Receiving turns (`look/dbg/recv_retreat.py`): 3+ squares back 2.1 -> 1.8 (drefsante 1.9), ground given
+  up 12.7 -> 11.0, ball held 73% either way; 1,000 games 261-268-471, 911-1308 (.395) v v5.44 (`k_bebt`) .403. Tried, not kept: `bpAlone`
+  (bpEnd: a cost for finishing with nobody of ours next to the carrier and 2+ of theirs able to get at him - the owner's game, a run through
+  the gap; `look/dbg/lone_run.py`: such runs 0.26 a game, ball gone 59%, drefsante 0.54): counting team-mates who could still get there as
+  support changed nothing; strict (0.5) cut them to 0.16 but 750 games .374 v .409 - he held back and we scored less.
   Fresh study of v5.42: `look/dref/study_v542.jsonl` (300 games, seeds 760000+), report `rep_study_v542.txt`.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question
