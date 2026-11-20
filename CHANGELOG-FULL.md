@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.46 (20 Nov 2026)
+- Experimental computer coach (brain x): when its ball carrier starts the turn marked, it now weighs each dodge away (with a team re-roll
+  counted) against the real risk of staying marked. Before, the rule that picks where the carrier finishes only looked at moves with no
+  dice, and from a marked square every move is a dodge, so the carrier often stayed put: 23% of those turns (drefsante 11%), though a 4+
+  dodge was nearly always there. Now 17%, with more hand-offs. 1,000 games v drefsante: won 270, drew 244, lost 486, touchdowns 930-1306,
+  against v5.45's 261-268-471, 911-1308 - level.
+
 ## v5.45 (20 Nov 2026)
 - Experimental computer coach (brain x): with the ball loose in its half, it only sends players to cover the ball when one of yours could
   actually get to it that turn without a dodge. After a kick-off it used to pull four or five players back from the line towards the ball

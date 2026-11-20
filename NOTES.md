@@ -179,6 +179,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   (bpEnd: a cost for finishing with nobody of ours next to the carrier and 2+ of theirs able to get at him - the owner's game, a run through
   the gap; `look/dbg/lone_run.py`: such runs 0.26 a game, ball gone 59%, drefsante 0.54): counting team-mates who could still get there as
   support changed nothing; strict (0.5) cut them to 0.16 but 750 games .374 v .409 - he held back and we scored less.
+  v5.46: `bpDodge` 1 ON in brain x (bpEnd weighs dodges away for a marked carrier: success -> that square's bpLoss, failure -> bpFail 0.85;
+  before, only staying and sure moves were weighed). `look/dbg/marked_opts.py` (marked at own turn start, 7+ out): we did nothing 23% (ball
+  kept 31%), drefsante 11%; a 4+ dodge to a free square was there 95%. With it: nothing 17%, hand-offs 19 -> 25%, kept ~50% either way;
+  1,000 games 270-244-486, 930-1306 (.392) v v5.45 (`k_cbt`) .395. Still open: with 3+ markers we do nothing 25% (drefsante blocks a marker
+  with the carrier 30%, dodges 29%); and we are marked 2.8 times a game v 1.7-2.2 (prevention: where the carrier ends).
   Fresh study of v5.42: `look/dref/study_v542.jsonl` (300 games, seeds 760000+), report `rep_study_v542.txt`.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.46 (20 Nov 2026)
+- The experimental computer coach's ball carrier no longer just stands there when marked: it weighs dodging away against staying put.
+
 ## v5.45 (20 Nov 2026)
 - The experimental computer coach no longer sends players running back to a loose ball after the kick-off when nobody of yours can get to it.
 
