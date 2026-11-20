@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.43 (20 Nov 2026)
+- The computer coach you play against is now brain x, the experimental AI worked on against drefsante (BotBowl's strongest scripted bot):
+  it protects its ball carrier, covers loose balls, lines up finishers, marks your scorers and hits your carrier with assists first. A new
+  setting, Settings → Computer coach, switches between Experimental (the default) and Classic (the AI as it was in v5.42). It has been tuned
+  on Humans v Humans only so far. Test runs (the BotBowl bridge, tools/ai-match.js, headless runs) still get Classic unless they ask for
+  brain x, so earlier comparisons still hold.
+
 ## v5.42 (20 Nov 2026)
 - No change to the game's normal computer coach. Brain x now switches on cb1 (`cbN` 4): with the ball loose in our half, up to four of its
   sure moves (no dice) go first to where they most cut the other side's chances - fewer of theirs able to reach the ball without a dodge, more

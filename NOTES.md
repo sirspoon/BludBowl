@@ -166,6 +166,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   those turns but nothing else moved, and 300 games (seeds 760000+) 73-64-163, 262-426 v 93-76-131, 305-390. Milder (fcTurn 0.12, blocks
   only): 1,000 games 268-249-483, 928-1317 (.393) v .409. Note: v5.42's .409 (k_cb3) was the best of several runs of nearly the same AI
   (fb0 .394, lbcb .398, pub45 .402) - picked because it scored best, so it likely flatters v5.42 by ~.01.
+  v5.43: a person playing the game faces brain x by default (Settings -> Computer coach: Experimental / Classic, localStorage
+  `bb-brain`; `AIX.person` is false in test runs - ?simtest, Playwright, jsdom - so the bridge, ai-match and headless runs still get Classic
+  unless they ask for `{"brain":"x"}`). The owner wanted to play against it; Classic stays for comparisons.
   Fresh study of v5.42: `look/dref/study_v542.jsonl` (300 games, seeds 760000+), report `rep_study_v542.txt`.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question

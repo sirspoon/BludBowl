@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.42</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.43</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1292,6 +1292,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="moot">Mootland Green</option><option value="khemri">Khemri</option><option value="warpstone">Warped Flagstones</option><option value="chaos">Chaos Wastes</option></select></div>
+            <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43</small></span><button type="button" class="st-tog" id="st-brain"></button></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
@@ -27281,16 +27282,22 @@ ol.ci-steps li::marker { content: none; }
         // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
-            p(t, k, d) { const P = window.AIP && window.AIP[t]; return P && P[k] != null ? P[k] : (P && P.brain === 'x' && this.X[k] != null ? this.X[k] : d); },
-            // (brain: x) the experimental AI, worked on to beat drefsante (Humans v Humans in BotBowl) and played only when a test run asks
-            // for it ('{"brain":"x"}': nn/evaluate.py --aip, tools/ai-match.js --newp). Its changes are code behind AIX.x(team) and its own
-            // tuning values here in X (used when a run doesn't set them); the game's AI stays as it is until brain x clearly beats it v
-            // drefsante (~1,000 games) and isn't clearly worse in the all-races mirror guard, then x becomes the default.
+            p(t, k, d) { const P = this.P(t); return P && P[k] != null ? P[k] : (P && P.brain === 'x' && this.X[k] != null ? this.X[k] : d); },
+            // (brain: x) the experimental AI, worked on to beat drefsante (Humans v Humans in BotBowl). A test run asks for it with
+            // '{"brain":"x"}' (nn/evaluate.py --aip, tools/ai-match.js --newp); without that, test runs get the Classic AI as before. Since
+            // v5.43 a person playing the game faces brain x unless Settings -> Computer coach is set to Classic (localStorage 'bb-brain':
+            // 'x' or 'classic'). Its changes are code behind AIX.x(team) and its own tuning values here in X (used when a run doesn't set
+            // them). Tuned on Humans v Humans; not yet checked in the all-races mirror guard.
+            // person: a person's game in a browser (not a test run: no ?simtest, no Playwright, not jsdom - the bridge, headless runs)
+            person: (() => { try { return !navigator.webdriver && !/jsdom/i.test(navigator.userAgent || '') && !/simtest/.test(location.search); } catch (e) { return false; } })(),
+            pref: (() => { try { return localStorage.getItem('bb-brain') === 'classic' ? 'classic' : 'x'; } catch (e) { return 'x'; } })(),
+            setPref(v) { this.pref = v === 'classic' ? 'classic' : 'x'; try { localStorage.setItem('bb-brain', this.pref); } catch (e) {} },
+            P(t) { const A = window.AIP && window.AIP[t]; return A ? A : (this.person && this.pref === 'x' ? this.PX : null); }, PX: { brain: 'x' },
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
             X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4 },   // (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
-            x(t) { const P = window.AIP && window.AIP[t]; return !!(P && P.brain === 'x'); },
+            x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
         const AI = (function () {
@@ -31918,6 +31925,7 @@ ol.ci-steps li::marker { content: none; }
                 on('st-replay-kick', REPLAY.kickEnabled(), 'On', 'Off');
                 { const k = document.getElementById('st-replay-kick'); if (k) k.disabled = !REPLAY.enabled(); }
                 on('st-move', twoTapPref, 'Tap twice', 'Tap once');
+                on('st-brain', AIX.pref === 'x', 'Experimental', 'Classic');
                 on('st-hd', HD.on, HD.size === 64 ? '2x' : '1.5x', 'Off');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
                 document.getElementById('st-text').textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';
@@ -31933,6 +31941,7 @@ ol.ci-steps li::marker { content: none; }
             });
             document.getElementById('st-replay').addEventListener('click', () => { REPLAY.setEnabled(!REPLAY.enabled()); paintSettings(); });
             document.getElementById('st-replay-kick').addEventListener('click', () => { REPLAY.setKickEnabled(!REPLAY.kickEnabled()); paintSettings(); });
+            document.getElementById('st-brain').addEventListener('click', () => { AIX.setPref(AIX.pref === 'x' ? 'classic' : 'x'); paintSettings(); });
             document.getElementById('st-move').addEventListener('click', () => { twoTapPref = !twoTapPref; try { localStorage.setItem('bb-two-tap', twoTapPref ? '1' : '0'); } catch (e) {} state.movePlan = null; paintSettings(); });
             document.getElementById('st-weather').addEventListener('click', () => {
                 wxFX = wxFX === 1 ? 0.55 : wxFX > 0 ? 0 : 1;

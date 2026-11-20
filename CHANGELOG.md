@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.43 (20 Nov 2026)
+- The computer coach now plays its newest, experimental AI. Settings → Computer coach switches back to Classic.
+
 ## v5.42 (20 Nov 2026)
 - Behind the scenes: the experimental computer coach covers a loose ball in its own half before anyone rolls dice.
 
