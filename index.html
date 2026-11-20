@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.43</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.44</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27296,7 +27296,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4 },   // (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1 },   // (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -28808,7 +28808,8 @@ ol.ci-steps li::marker { content: none; }
             // (nn/look/dbg/block_sources.py, blitz_look.py). Knocking one over to free an assist for the next block we already do as often as it does (8.0 blocks a game
             // to 7.8). So: pick the Blitz early, on 2+ dice by a sure route, counting what it does to the blocks still to come - the helper who leaves, the
             // block he gives up, and the assists freed if the target goes down.
-            // OFF (beAt 0). It did Blitz early (87% of turns, half of them as the 1st or 2nd action) but over 1,000 games v drefsante, against 207-245-548, touchdowns
+            // ON in brain x since v5.44 with bt1 (btOn 1, beAt 1: only at the owner's targets, see btWorth): 1,000 games v drefsante (seeds 910000+): 271-263-466, touchdowns 907-1264 (.403) v v5.42's 275-268-457, 977-1318 (.409) - level (fewer conceded, fewer scored).
+            // Before (old bridge, any target): OFF (beAt 0). It did Blitz early (87% of turns, half of them as the 1st or 2nd action) but over 1,000 games v drefsante, against 207-245-548, touchdowns
             // 697-1337: beAt 1 192-272-536, 676-1294; beAt 2 189-256-555, 646-1310; beAt 2 + beProb 75 199-250-551, 683-1319. Blocks a game fell (39.7 -> 37.5-37.9)
             // and knock-downs stayed at 25.3: the early Blitz took the place of blocks thrown later in the turn.
             function bzExtra(me) {   // what knocking this target down is worth on top of the block itself
@@ -28837,6 +28838,7 @@ ol.ci-steps li::marker { content: none; }
                 if (state.blitzUsed || state.charge) return null;
                 if (c && c.team !== me && onPitch(c) && carrierBlitz(me, act, c)) return null;   // (the Blitz is for their carrier)
                 const ourC = c && c.team === me && onPitch(c) ? c : null, minP = AIX.p(me, 'beProb', 100), lim = AIX.p(me, 'bzTurn', 0.12), extra = bzExtra(me), cands = [];
+                const bt = AIX.p(me, 'btOn', 0) ? btWorth(me) : null;   // (brain x: bt1) only at the owner's targets, worth more
                 let keep = null;
                 if (!c && state.ball.x >= 0) { const pk = lbPicker(me, act); if (pk && pk.pr >= 50) keep = pk.p.id; }
                 act.forEach(p => {
@@ -28849,8 +28851,9 @@ ol.ci-steps li::marker { content: none; }
                             if (d.team === me || !onPitch(d) || d.isDown || Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) !== 1) return;
                             blitzCtx = true; const e = blockEval(p, d, m.x, m.y); blitzCtx = false;
                             if (e.chooser !== me || e.n < 2 || e.pTurn > lim) return;
-                            const pr = mp / 100 * (left >= 1 ? 1 : 5 / 6);
-                            cands.push({ p, d, m, e, pr, s: pr * (e.ev + e.pDown * extra(p, d)) - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0) });
+                            const pr = mp / 100 * (left >= 1 ? 1 : 5 / 6), w = bt ? bt(d) : 0;
+                            if (bt && w <= 0) return;
+                            cands.push({ p, d, m, e, pr, s: pr * (e.ev + e.pDown * extra(p, d)) - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0) + AIX.p(me, 'btW', 2) * w * pr * e.pDown });
                         });
                     });
                 });
@@ -28879,10 +28882,30 @@ ol.ci-steps li::marker { content: none; }
                 const tx = best.m.x, ty = best.m.y, tid = best.d.id, back = blitzOn(best.p, tid).pick;
                 return { pid: best.p.id, kind: 'blitz', target: tid, pick: (ms, q) => ms.find(m => m.x === tx && m.y === ty) || back(ms, q) };
             }
+            // ---- (brain x: bt1) Blitz more, but at the right players ----
+            // drefsante Blitzes 13.1 times a game, we 9.3 (study_v542). The owner's rule for whom: their carrier, a threat (one who could
+            // score or get at our carrier - dp1's and bp1's dpHits - a free receiver, a deep runner, or an escort of their carrier), one in
+            // the way of our carrier (1-5 squares ahead of him, within 2 squares across), or a positional player (any skills) - and only on
+            // 2+ dice we choose. Those Blitzes get btW x the target's worth x the chance of knocking him down on top, and a lower bar (btMin).
+            // Alone (late in the turn, where blitzPlan comes): Blitzes 8.8 -> 9.3 a game, at positional players 2.5 -> 3.2 (study, 300 games) -
+            // the Blitz comes so late that the helpers are gone (of the end-of-turn chances skipped, most for lack of 2 dice). So with be1
+            // (beAt 1), whose early Blitz takes only these targets (bePlan): ON in brain x since v5.44. 1,000 games v drefsante (seeds 910000+): 271-263-466, touchdowns 907-1264 (.403) v v5.42's 275-268-457, 977-1318 (.409) - level (fewer conceded, fewer scored).
+            function btWorth(me) {
+                const bc = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null, frees = freeReceivers(me);
+                const ourB = bc && bc.team === me && onPitch(bc) ? bc : null, theirB = bc && bc.team !== me && onPitch(bc) && !bc.isDown ? bc : null;
+                return d => {
+                    if (theirB && d.id === theirB.id) return AIX.p(me, 'btCar', 2);
+                    let w = 0;
+                    if (dpHits.has(d.id) || frees.has(d.id) || deepThreat(d) || (theirB && cheb(d, theirB) <= 2)) w = Math.max(w, AIX.p(me, 'btThreat', 1));
+                    if (ourB) { const ah = toGo(ourB.x, me) - toGo(d.x, me); if (ah >= 1 && ah <= 5 && Math.abs(d.y - ourB.y) <= 2) w = Math.max(w, AIX.p(me, 'btWay', 1)); }
+                    if ((d.skills || []).length) w = Math.max(w, AIX.p(me, 'btPos', 0.5));
+                    return w;
+                };
+            }
             function blitzPlan(me, act) {
                 if (state.blitzUsed) return null;
-                let best = null;
-                const extra = bzExtra(me);
+                let best = null, bestT = null;
+                const extra = bzExtra(me), bt = AIX.x(me) && AIX.p(me, 'btOn', 0) ? btWorth(me) : null;
                 act.forEach(p => {
                     const c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
                     if (c && c.id === p.id) return;
@@ -28897,9 +28920,14 @@ ol.ci-steps li::marker { content: none; }
                             const pr = mp / 100 * (left >= 1 ? 1 : 5 / 6);
                             const s = pr * (e.ev + e.pDown * extra(p, d)) - (1 - pr) * 8 - e.pTurn * 6 + (d.st >= 4 ? 0.5 : 0);
                             if (!best || s > best.s) best = { p, d, s };
+                            if (bt && e.chooser === me && e.n >= 2) {   // (brain x: bt1)
+                                const w = bt(d), s2 = s + AIX.p(me, 'btW', 2) * w * pr * e.pDown;
+                                if (w > 0 && (!bestT || s2 > bestT.s)) bestT = { p, d, s: s2 };
+                            }
                         });
                     });
                 });
+                if (bestT && bestT.s >= AIX.p(me, 'btMin', 0.5) && (!best || bestT.s >= best.s - 1)) { AIX.count(me, 'bt1'); return blitzOn(bestT.p, bestT.d.id); }
                 // (bz2) when they have the ball, a lower bar: strong FUMBBL coaches Blitz in 80% of their turns (the AI in about half),
                 // on defence mostly away from the ball, on a player already next to one of theirs (an assist: 2 dice) - wearing the
                 // other side down (ai-training/README.md, "Blitzes")

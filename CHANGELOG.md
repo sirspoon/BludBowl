@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.44 (20 Nov 2026)
+- The experimental computer coach Blitzes earlier in its turn, and picks its targets: your ball carrier, a scoring threat, someone in its way or a positional player, on 2 dice it chooses.
+
 ## v5.43 (20 Nov 2026)
 - The computer coach now plays its newest, experimental AI. Settings → Computer coach switches back to Classic.
 

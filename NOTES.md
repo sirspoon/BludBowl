@@ -169,6 +169,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   v5.43: a person playing the game faces brain x by default (Settings -> Computer coach: Experimental / Classic, localStorage
   `bb-brain`; `AIX.person` is false in test runs - ?simtest, Playwright, jsdom - so the bridge, ai-match and headless runs still get Classic
   unless they ask for `{"brain":"x"}`). The owner wanted to play against it; Classic stays for comparisons.
+  v5.44: the targeted Blitz, mid-turn, ON in brain x (`btOn` 1 + `beAt` 1; owner's targets - carrier, threat (dpHits, free receivers,
+  deep runners, escorts), in our carrier's way, positional - on 2+ dice we choose; `btWorth`). Why: we Blitz in 61% of turns (drefsante 85%,
+  mostly as its 3rd-5th action); 24% of ours had no Blitz and no Turnover - at the end of the turn no 2-dice target was left (`look/dbg/
+  blitz_targets.py`). bt1 alone (late): Blitzes 8.8 -> 9.3 a game, study 79-79-142, 282-396 v 93-76-131, 305-390. With be1: 1,000 games v drefsante (seeds 910000+): 271-263-466, touchdowns 907-1264 (.403) v v5.42's 275-268-457, 977-1318 (.409) - level (fewer conceded, fewer scored).
   Fresh study of v5.42: `look/dref/study_v542.jsonl` (300 games, seeds 760000+), report `rep_study_v542.txt`.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question

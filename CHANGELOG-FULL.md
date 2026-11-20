@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.44 (20 Nov 2026)
+- Experimental computer coach (brain x, the default since v5.43): the Blitz comes earlier in the turn, while team-mates can still give
+  assists, and only at players worth it - the ball carrier, a player who could score or reach its own carrier, one in its carrier's way, or a
+  positional player - and only on 2 dice it chooses (bt1 with be1). drefsante Blitzes in 85% of its turns, mostly as its 3rd-5th action; the
+  computer coach used to Blitz in 61%, and in a quarter of its turns skipped the Blitz with no good dice left by then. 1,000 games v drefsante
+  (Humans v Humans): won 271, drew 263, lost 466, touchdowns 907-1264, against v5.42's 275-268-457, 977-1318 - level, kept as the owner's
+  idea of how to Blitz. Classic is unchanged.
+
 ## v5.43 (20 Nov 2026)
 - The computer coach you play against is now brain x, the experimental AI worked on against drefsante (BotBowl's strongest scripted bot):
   it protects its ball carrier, covers loose balls, lines up finishers, marks your scorers and hits your carrier with assists first. A new
