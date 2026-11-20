@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.42 (20 Nov 2026)
+- No change to the game's normal computer coach. Brain x now switches on cb1 (`cbN` 4): with the ball loose in our half, up to four of its
+  sure moves (no dice) go first to where they most cut the other side's chances - fewer of theirs able to reach the ball without a dodge, more
+  of ours next to it. It was tried before v5.41 and left off, but those tests had the BotBowl bridge bug. On the fixed bridge, 1,000 games v
+  drefsante (Humans v Humans): won 275, drew 268, lost 457, touchdowns 977-1318, against 269-250-481, 951-1363 without it. A little better
+  (within luck), kept because it is how strong coaches play. lb1 (the plan with the ball on the ground) alone: 284-244-472, 979-1300; both
+  together: 279-238-483, 906-1269 - so lb1 stays off.
+- Testing tools: the BotBowl bridge numbers each question, uses a clean UTF-8 pipe, and asks again on a fresh Node if an answer goes missing
+  or can't be read (one unanswered question had hung a test run for hours).
+
 ## v5.41 (20 Nov 2026)
 - No change to how the game plays. A fix to the bridge that plays the computer coach in BotBowl (`AI.bridge`, `tools/botbowl/bludbowl_bot.py`),
   where every test against drefsante runs: a player who picked the ball up on the move stopped on the ball's square, where in the game he carries

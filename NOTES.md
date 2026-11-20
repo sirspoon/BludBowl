@@ -146,7 +146,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   seeds' 269-250-481, 951-1363 (.394) - it conceded more. Why it looked worth it (`look/dbg/last_far.py`): the last turn with the ball 13+
   out, we had an unmarked team-mate within MA+2 of scoring 12% of the time (drefsante 48-57%), threw 10-14% (56-66%), scored 6-8% (19-27%).
   Re-tried on the fixed bridge (same seeds, run one at a time): `lb1` (`lbOn` 1) 284-244-472, 979-1300 (.406; 21 games lost to errors and a
-  hang replayed on their own seeds with evaluate.py's new `--only`) and `cb1` (`cbN` 4) 275-268-457, 977-1318 (.409) v .394 - both a little better (each about 0.7 standard errors), not yet switched on.
+  hang replayed on their own seeds with evaluate.py's new `--only`) and `cb1` (`cbN` 4) 275-268-457, 977-1318 (.409) v .394 - both a little
+  better (each about 1 standard error). Both together (`k_lbcb.txt`): 279-238-483, 906-1269 (.398) - no better, fewer scored.
+  v5.42: cb1 (`cbN` 4) switched on in brain x (`AIX.X`) as not worse and coach-like; lb1 stays off. Not in the all-races guard.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question
   (Node echoes `id`; stray or late lines are skipped and printed), gives up after `BB_BRIDGE_TIMEOUT` (120 s) and asks once more on a fresh
