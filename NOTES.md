@@ -159,6 +159,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   only did anything placed before the Blitz on him (36%), and then drefsante lost the ball no more often (in its own turn 7% -> 6%) and we
   scored less (300-game study, seeds 760000+, `study_mc2b`: 78-79-143, 266-389 v `study_v542` 93-76-131, 305-390). drefsante's marked
   carrier copes; ours doesn't (`look/dbg/marked_carrier.py`: still marked when drefsante's turn began 118 times in 300 games v 21).
+  How drefsante frees its marked carrier (`look/dbg/marked_free.py`, 7+ out): it blocks his markers before he acts in 91% of those turns (1.2
+  blocks, after 3.8 other actions; we 65%, 0.8, after 5.3, with a Turnover first 16% v 10%); then he walks off without a dodge 49% (we 21%),
+  dodges 9% (24%), stays 12% (23%). `fc1` (not kept, code removed): with our carrier marked and still to act, the best block on a marker
+  first (up to fcTurn 0.25 risk), else a Blitz on one, else he blocks the marker himself if safer than the dodge: marker blocks 65% -> 74% of
+  those turns but nothing else moved, and 300 games (seeds 760000+) 73-64-163, 262-426 v 93-76-131, 305-390. Milder (fcTurn 0.12, blocks
+  only): 1,000 games 268-249-483, 928-1317 (.393) v .409. Note: v5.42's .409 (k_cb3) was the best of several runs of nearly the same AI
+  (fb0 .394, lbcb .398, pub45 .402) - picked because it scored best, so it likely flatters v5.42 by ~.01.
   Fresh study of v5.42: `look/dref/study_v542.jsonl` (300 games, seeds 760000+), report `rep_study_v542.txt`.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question
