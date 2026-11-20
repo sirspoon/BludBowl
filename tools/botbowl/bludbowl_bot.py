@@ -11,13 +11,16 @@ Use: put this folder on PYTHONPATH (or copy the file into BotBowl), `import blud
 import collections
 import json
 import os
+import queue
 import subprocess
+import threading
 
 import botbowl
 from botbowl import Action, ActionType, BBDieResult, Square, ProcBot
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERVER = os.path.join(HERE, '..', 'bridge-server.js')
+TIMEOUT = float(os.environ.get('BB_BRIDGE_TIMEOUT', 120))   # seconds to wait for one answer
 WEATHER = {'NICE': 'perfect', 'VERY_SUNNY': 'sunny', 'POURING_RAIN': 'rain', 'BLIZZARD': 'blizzard', 'SWELTERING_HEAT': 'heat'}
 FACE = {BBDieResult.ATTACKER_DOWN: 1, BBDieResult.BOTH_DOWN: 2, BBDieResult.PUSH: 3, BBDieResult.DEFENDER_STUMBLES: 5, BBDieResult.DEFENDER_DOWN: 6}
 SELECT = {1: ActionType.SELECT_ATTACKER_DOWN, 2: ActionType.SELECT_BOTH_DOWN, 3: ActionType.SELECT_PUSH, 4: ActionType.SELECT_PUSH,
@@ -42,7 +45,11 @@ class Bridge:
         here_modules = os.path.join(HERE, '..', '..', 'node_modules')
         env['NODE_PATH'] = os.pathsep.join(p for p in [env.get('NODE_PATH', ''), here_modules] if p)
         self.proc = subprocess.Popen(['node', SERVER], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, env=env, bufsize=1)
-        first = json.loads(self.proc.stdout.readline())
+        # replies are read on a thread, so a reply that never comes (seen once in 2,000+ games: the bridge stayed idle) ends that one
+        # game as an error after TIMEOUT seconds - Node is restarted for the next - instead of hanging the whole run
+        self.lines = queue.Queue()
+        threading.Thread(target=lambda: [self.lines.put(l) for l in iter(self.proc.stdout.readline, '')], daemon=True).start()
+        first = json.loads(self.read())
         assert first.get('ready'), first
 
     def ask(self, op, desc=None, arg=None, record=False):
@@ -51,11 +58,18 @@ class Bridge:
             q['record'] = True
         self.proc.stdin.write(json.dumps(q) + '\n')
         self.proc.stdin.flush()
-        r = json.loads(self.proc.stdout.readline())
+        r = json.loads(self.read())
         if not r.get('ok'):
             raise RuntimeError('BludBowl AI: ' + r.get('error', '?'))
         self.last_nn = r.get('nn')   # (with record: each decision as the neural network sees it, labelled with the AI's answer)
         return r.get('result')
+
+    def read(self):
+        try:
+            return self.lines.get(timeout=TIMEOUT)
+        except queue.Empty:
+            self.proc.kill()   # (bridge() starts a fresh one for the next question)
+            raise RuntimeError(f'BludBowl AI: no reply in {TIMEOUT}s')
 
     def close(self):
         try:
