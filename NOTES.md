@@ -184,6 +184,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   kept 31%), drefsante 11%; a 4+ dodge to a free square was there 95%. With it: nothing 17%, hand-offs 19 -> 25%, kept ~50% either way;
   1,000 games 270-244-486, 930-1306 (.392) v v5.45 (`k_cbt`) .395. Still open: with 3+ markers we do nothing 25% (drefsante blocks a marker
   with the carrier 30%, dodges 29%); and we are marked 2.8 times a game v 1.7-2.2 (prevention: where the carrier ends).
+  Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
+  did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
+  planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
+  passes and fouls were made, pick-ups carried on (85; 25 stopped on the ball - 17 with no MA left). Fallbacks over 3,000 games: 54 blitz
+  targets, 4 passes. runPlan's extras the bridge lacks only touch Bloodlust (feedPick/feedMove) and Squig Herders (herdPick). Kick-off Charge
+  and Quick Snap: the bot ends them at once, but BotBowl's ProcBot answers the kick-off player selection with SELECT_NONE for drefsante too, so
+  in BotBowl neither side gets them (the game's AI does play a Charge; using them in BotBowl would be a small edge, not a fix).
   Fresh study of v5.42: `look/dref/study_v542.jsonl` (300 games, seeds 760000+), report `rep_study_v542.txt`.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question

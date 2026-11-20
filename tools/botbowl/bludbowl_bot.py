@@ -290,8 +290,42 @@ class BludBowlBot(ProcBot):
     def blitz(self, game):
         return Action(ActionType.END_TURN)
 
+    def plan_log(self, game, plan=None):
+        """BB_PLANLOG=file: each plan as asked (kind, player, target, receiver, the route's last square) and what BotBowl then did with that
+        player (the outcomes reported for him, where he ended up, whether the turn went on), one JSON line each - to check that what
+        BludBowl's AI means is what gets played (look/dbg/plan_check.py)."""
+        fn = os.environ.get('BB_PLANLOG')
+        if not fn:
+            return
+        cur = getattr(self, 'cur_plan', None)
+        if cur is not None:
+            p = game.get_player(cur['player'])
+            same = (game.state.half, self.my_team.state.turn) == cur['key'] and game.state.current_team == self.my_team
+            outs = []
+            for r in game.state.reports[cur['i0']:]:   # (up to the end of this turn: not the other side's)
+                n = r.outcome_type.name
+                if n in ('END_OF_TURN', 'TURN_START') and outs:
+                    break
+                outs.append((n, r.player.player_id if r.player else None, r.opp_player.player_id if getattr(r, 'opp_player', None) else None))
+                if n == 'TURNOVER':
+                    break
+            cur['outcomes'] = [o for o in outs if cur['player'] in (o[1], o[2])]
+            cur['turn_went_on'] = same
+            cur['at'] = [p.position.x - 1, p.position.y - 1] if same and p is not None and p.position is not None else None
+            cur['carrier'] = (game.get_ball_carrier().player_id if game.get_ball_carrier() else None) if same else None
+            del cur['key'], cur['i0']
+            with open(fn, 'a') as fh:
+                fh.write(json.dumps(cur) + '\n')
+            self.cur_plan = None
+        if plan is not None and plan.get('player'):
+            route = plan.get('route') or []
+            self.cur_plan = {'kind': plan.get('kind'), 'player': plan['player'], 'target': plan.get('target'), 'receiver': plan.get('receiver'),
+                             'end': [route[-1]['x'], route[-1]['y']] if route else None, 'steps': len(route), 'standUp': plan.get('standUp'),
+                             'key': (game.state.half, self.my_team.state.turn), 'i0': len(game.state.reports)}
+
     def turn(self, game):
         self.my_team = game.get_team_by_id(self.my_team.team_id)
+        self.plan_log(game)
         key = (game.state.half, self.my_team.state.turn)
         if key != self.turn_key or (self.queue and self.queue[0].action_type in (ActionType.PLACE_PLAYER, ActionType.END_SETUP)):
             self.turn_key, self.tried, self.queue, self.asks = key, set(), [], 0
@@ -314,6 +348,7 @@ class BludBowlBot(ProcBot):
                 self.tried.add(plan['player'])
             if acts and self.allowed(game, acts[0]):
                 self.queue = acts[1:]
+                self.plan_log(game, plan)
                 return acts[0]
             self.fallbacks['plan not allowed: ' + plan.get('kind', '?')] += 1
             if os.environ.get('BB_TRACE') and acts:
