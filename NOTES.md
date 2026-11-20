@@ -149,6 +149,17 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   hang replayed on their own seeds with evaluate.py's new `--only`) and `cb1` (`cbN` 4) 275-268-457, 977-1318 (.409) v .394 - both a little
   better (each about 1 standard error). Both together (`k_lbcb.txt`): 279-238-483, 906-1269 (.398) - no better, fewer scored.
   v5.42: cb1 (`cbN` 4) switched on in brain x (`AIX.X`) as not worse and coach-like; lb1 stays off. Not in the all-races guard.
+  Tried after v5.42, not kept (code removed), 1,000 games each v v5.42's .409 (seeds 910000+): `pusBar` 0.45 (pus1 at the usual hand-off bar
+  now the pick-up-then-hand-off works in BotBowl) 274-255-471, 916-1244 (.402). Secure the Ball rated with the team re-roll, as pPlan rates the
+  normal pick-up (2+ twice 97%, so a Lineman's 3+ with a re-roll, 89%, no longer always wins), chosen with <= 2 squares left on the ball if as
+  safe, else if 15 points safer: 262-254-484, 898-1312 (.389); only with no squares left (but this also dropped v5.42's own rule - secure when
+  the normal pick-up is <= 75% - so it secured in 2% of pick-ups, not 7%): 263-239-498, 884-1307 (.383). Not tried: v5.42's rule plus
+  "secure when out of movement and safer". `mc1`, marking their carrier (up to 2 free players a turn step with no dice next to him when he is
+  7+ out; drefsante, when 2+ of its free players could, ends with 2+ next to our carrier 55% of the time, we 24% - `look/dbg/mark_def.py`):
+  only did anything placed before the Blitz on him (36%), and then drefsante lost the ball no more often (in its own turn 7% -> 6%) and we
+  scored less (300-game study, seeds 760000+, `study_mc2b`: 78-79-143, 266-389 v `study_v542` 93-76-131, 305-390). drefsante's marked
+  carrier copes; ours doesn't (`look/dbg/marked_carrier.py`: still marked when drefsante's turn began 118 times in 300 games v 21).
+  Fresh study of v5.42: `look/dref/study_v542.jsonl` (300 games, seeds 760000+), report `rep_study_v542.txt`.
   Bridge plumbing (tools only, 20 Nov): one question went unanswered and hung a run for 5 hours (Node idle), and ~20 games ended "bad JSON".
   `bludbowl_bot.py` now sends UTF-8 with plain newlines (text mode on Windows sent CR LF and read answers as cp1252), numbers each question
   (Node echoes `id`; stray or late lines are skipped and printed), gives up after `BB_BRIDGE_TIMEOUT` (120 s) and asks once more on a fresh
