@@ -223,7 +223,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   v5.48: `fwD` 2 ON in brain x (defending, screen / second line / deep / safeties two squares nearer their carrier; `look/dbg/depth.py`):
   players 3+ behind the ball 3.05 -> 2.49 (dref 2.40), mean place v ball -1.49 -> -1.38 (dref -0.7), deepest still 7.3 from our line
   (dref 9.0). `k_seq` (v v5.47 .392): fwD 2 .399 over 1,000 (no gain, level - released as asked, not worse); fwD 1 .363 after 375; fwD 2 +
-  dpBack 0.02 .391 after 625. Baseline for v5.48: `k_fw2` (+ `k_b548`).
+  dpBack 0.02 .391 after 625. Baseline for v5.48: `k_fw2` + `k_b548` (3,000 games, .396; `k_seq.py`'s default).
+  Scoring-route map (21 Nov, after v5.48; `influence.py` 'def_route'): their carrier's squares nearer our line within two turns, weighted
+  by progress; we reach 91% (weighted) first, drefsante's defence 86%; less covered than usual -> conceded that turn 28% v 14% (dref 35% v
+  7%). Tried as `imR` (formation squares and spare players by route value, defending only; code removed): route value 193 -> 227 in a
+  120-game study, but `k_seq` v v5.48 .396: imW 0.1 .366 after 250, imW 0.3 .332 after 125 (no gain) - scored fewer, conceded the same.
+  The one-turn route-cutting (dp1) already covers it; two turns ahead only pulls players off the counter-attack.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
