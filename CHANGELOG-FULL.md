@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.48 (21 Nov 2026)
+- Experimental computer coach (brain x): defending, its screen, second line, deep player and safeties stand two squares nearer the
+  opposing ball carrier (the screen still at least a square behind him). Against drefsante it kept more players three or more squares
+  behind the ball than drefsante does (3.05 to its 2.40); now 2.49. 1,000 games v drefsante: won 274, drew 249, lost 477, touchdowns
+  971-1336 (.399), against v5.47's .392 over 3,000 games - level. Also in, switched off: an influence map (which side can get to each
+  square first), tried as a guide for where players stand - chasing open space lost.
+
 ## v5.47 (20 Nov 2026)
 - Experimental computer coach (brain x): a ball carrier who starts the turn marked can now block one of his markers himself, when that is
   safer than dodging away or staying put (if he falls the ball is gone; if the marker goes down or is pushed off, one marker fewer).

@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.47</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.48</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27296,7 +27296,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1 },   // (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2 },   // (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -28213,7 +28213,14 @@ ol.ci-steps li::marker { content: none; }
                     // a column defence: two lines across the pitch between the carrier and our end zone, players three rows apart
                     // (two empty squares between them, so slipping through means a hard dodge), the second line staggered two
                     // squares further back. The lines lean towards the middle, squeezing the attack out towards the sideline.
-                    const k = Math.max(1, Math.min(4, Math.floor(dz / 2)));
+                    // (fw1, brain x) fwD squares further up: the screen, second line, deep player and safeties nearer their carrier (the screen
+                    // still at least a square behind him). Defending, our standing players are 1.9 squares behind their carrier on average,
+                    // drefsante's 0.6; we keep 3.4 more than 3 squares behind the ball (it 2.4), our deepest 7.1 out from our line (it 9.0)
+                    // (study, 300 games of v5.47). ON in brain x since v5.48 (fwD 2): players 3+ squares behind the ball 3.05 -> 2.49 (120-game
+                    // study; drefsante 2.40); 1,000 games v drefsante 274-249-477, touchdowns 971-1336 (.399) v v5.47's 3,000-game .392 - level.
+                    // fwD 1 .363 after 375 games; fwD 2 with dpBack 0.02 (route-cutting moves pay more for going back) .391 after 625 - no better.
+                    const fw = AIX.x(me) ? AIX.p(me, 'fwD', 0) : 0;
+                    const k = Math.max(1, Math.min(4, Math.floor(dz / 2)) - fw);
                     const midY = Math.floor(CFG.rows / 2), cy = c.y + Math.sign(midY - c.y);
                     const fx = c.x + k * back, bx = fx + 2 * back, ownEZ = endX(other(me));
                     // the screen runs right across the pitch (rows 1, 4, 7, 10, 13: every square of the column is in someone's
@@ -28227,14 +28234,14 @@ ol.ci-steps li::marker { content: none; }
                     // him - strong coaches keep a couple of players back (2.2 standing 5+ squares in front of him, the AI 0.9), so a
                     // break past the front line doesn't find the whole team chasing back (ai-training/README.md, "Defending a break")
                     if (AIX.on(me, 'dep1') && dz >= 13) {
-                        const sx = c.x + Math.min(dz - 1, (c.ma || 6) + 3) * back;
+                        const sx = c.x + Math.max(2, Math.min(dz - 1, (c.ma || 6) + 3) - fw) * back;
                         [-3, 3].forEach(dy => add(sx, c.y + dy, 'safety'));
                     }
                     // anyone of theirs already past the screen, loose behind our lines, gets marked
                     state.players.filter(q => q.team === c.team && q.id !== c.id && onPitch(q) && !q.isDown && !q.isStunned && toGo(q.x, c.team) < toGo(fx, c.team) && tzFor(q.x, q.y, c.team) === 0)
                         .sort((a, b) => toGo(a.x, c.team) - toGo(b.x, c.team)).forEach(q => add(q.x + back, q.y, 'mark'));
                     if (toGo(bx, c.team) >= 1 || bx === ownEZ) [-2, 2, -5, 5].forEach(dy => add(bx, cy + dy, 'screen2'));
-                    if (dz > 6) add(Math.max(1, Math.min(CFG.cols - 2, ownEZ - 2 * back)), c.y, 'deep');
+                    if (dz > 6 + fw) add(Math.max(1, Math.min(CFG.cols - 2, ownEZ - (2 + fw) * back)), c.y, 'deep');
                     // everyone else: find space up the pitch, ready for the counter-attack when the ball is won back
                     outletSquares(me).forEach(o => add(o.x, o.y, 'outlet'));
                 } else if (state.ball.x >= 0) {
@@ -28246,6 +28253,78 @@ ol.ci-steps li::marker { content: none; }
                     SCREEN_ROWS.slice().sort((a, c2) => Math.abs(a - b.y) - Math.abs(c2 - b.y)).forEach(y => add(sx, y, 'screen'));
                 }
                 return T;
+            }
+            // ---- (im1, brain x) the influence map: for every square, how soon each side could get a player there (squares moved, +3 to
+            // dodge out of a tackle zone - +1 with Dodge - and +3 to stand up, over the player's Move + 2 Rushes, so 1 = one full turn;
+            // 9 = not within two turns), and so who controls it. At the end of its own turns drefsante controls 54% of the pitch with as
+            // many players standing as us, we 44%: its players stand ~1.2 squares further up, fewer of them in contact, and spread wider
+            // with the ball (nn/look/dbg/influence.py, 300 games of v5.47). imValue: our control, each square from -1 (theirs) to +1
+            // (ours), squares within 5 of the ball counting 1 + imBall. imW > 0: a formation move's square also counts what it adds to
+            // our control (imW per square), and players with nothing else to do move to where they add most (at least imMin).
+            function imTimes(team) {
+                const W = CFG.cols, H = CFG.rows, N = W * H, opp = other(team);
+                const occ = new Uint8Array(N), tz = new Uint8Array(N), best = new Float32Array(N).fill(9), cost = new Int16Array(N);
+                state.players.forEach(q => {
+                    if (!onPitch(q)) return;
+                    occ[q.y * W + q.x] = 1;
+                    if (q.team === opp && !q.isDown && !q.isStunned && !q.isDistracted)
+                        for (const [dx, dy] of DIRS8) { const x = q.x + dx, y = q.y + dy; if (x >= 0 && y >= 0 && x < W && y < H) tz[y * W + x] = 1; }
+                });
+                state.players.forEach(p => {
+                    if (p.team !== team || !onPitch(p) || p.isStunned) return;
+                    const ma = (p.ma || 6) + 2, lim = 2 * ma, dodge = hasSk(p, 'Dodge') ? 1 : 3, s0 = p.y * W + p.x, c0 = p.isDown ? 3 : 0;
+                    cost.fill(999); cost[s0] = c0;
+                    const bk = []; bk[c0] = [s0];
+                    for (let c = c0; c <= lim; c++) {
+                        if (!bk[c]) continue;
+                        for (const sq of bk[c]) {
+                            if (cost[sq] !== c) continue;
+                            const t = c / ma; if (t < best[sq]) best[sq] = t;
+                            const nc = c + 1 + (tz[sq] ? dodge : 0); if (nc > lim) continue;
+                            const x = sq % W, y = (sq - x) / W;
+                            for (const [dx, dy] of DIRS8) {
+                                const nx = x + dx, ny = y + dy;
+                                if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+                                const n = ny * W + nx;
+                                if (occ[n] || nc >= cost[n]) continue;
+                                cost[n] = nc; (bk[nc] || (bk[nc] = [])).push(n);
+                            }
+                        }
+                    }
+                });
+                return best;
+            }
+            // imDef 1: only while the ball isn't ours (defending, or loose)
+            const imOn = me => { if (!AIX.x(me)) return 0; const w = AIX.p(me, 'imW', 0); if (!w) return 0;
+                if (AIX.p(me, 'imDef', 0)) { const c = state.ball.carrierId && getPlayerById(state.ball.carrierId); if (c && c.team === me) return 0; }
+                return w; };
+            function imValue(me) {
+                const us = imTimes(me), them = imTimes(other(me)), W = CFG.cols, near = AIX.p(me, 'imBall', 1);
+                const bx = state.ball.carrierId ? (getPlayerById(state.ball.carrierId) || {}).x : state.ball.x, by = state.ball.carrierId ? (getPlayerById(state.ball.carrierId) || {}).y : state.ball.y;
+                let v = 0;
+                for (let i = 0; i < us.length; i++) {
+                    if (us[i] >= 9 && them[i] >= 9) continue;
+                    const x = i % W, y = (i - x) / W;
+                    v += (1 + (bx >= 0 && Math.max(Math.abs(x - bx), Math.abs(y - by)) <= 5 ? near : 0)) * Math.tanh((them[i] - us[i]) * 3);
+                }
+                return v;
+            }
+            // our control with p standing on (x, y) instead
+            function imAt(p, x, y) {
+                const ox = p.x, oy = p.y, d = p.isDown;
+                p.x = x; p.y = y; p.isDown = false;
+                try { return imValue(p.team); } finally { p.x = ox; p.y = oy; p.isDown = d; }
+            }
+            // a player with nothing else to do: the sure move that adds most to our control (at least imMin), or null
+            function imPick(ms, p) {
+                const base = imValue(p.team), min = AIX.p(p.team, 'imMin', 1);
+                let bm = null, bg = min;
+                ms.forEach(m => {
+                    if (m.prob < 100 || m.isRush || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
+                    const g = imAt(p, m.x, m.y) - base - edgeRisk(m.x, m.y, p.team, p.id) * 2;
+                    if (g > bg) { bg = g; bm = m; }
+                });
+                return bm;
             }
             const SCREEN_ROWS_11 = [1, 4, 7, 10, 13], SCREEN_ROWS_7 = [1, 4, 6, 9];
             const SCREEN_ROWS = { slice: () => (GEO.sev ? SCREEN_ROWS_7 : SCREEN_ROWS_11).slice() };
@@ -28297,13 +28376,15 @@ ol.ci-steps li::marker { content: none; }
                     taken.add(best.id); used.set(t.role, (used.get(t.role) || 0) + 1); claims.m.set(ck, best.id);
                     const tx = t.x, ty = t.y, role = t.role;
                     const pick = (ms, p) => {
+                        const imW = imOn(p.team), imB = imW ? imValue(p.team) : 0;   // (im1)
                         let bm = null, bs = cheb(p, { x: tx, y: ty }) * 2 + (role === 'hunt' || role === 'mark' || role === 'cover' ? 0 : tzFor(p.x, p.y, p.team) * (role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) - 0.5;
                         ms.forEach(m => {
                             if (m.prob < (safeOnly ? 100 : okProb(p)) || (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y)) return;
                             if (m.isRush && role !== 'hunt' && role !== 'mark' && role !== 'cover' && AIX.on(p.team, 'safepos')) return;   // not worth a Turnover to reach a formation square
-                            const s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' || role === 'cover' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) + (100 - m.prob) / 10
+                            let s = (defending && role !== 'hunt' ? (100 - m.prob) / 4 : 0) + Math.max(Math.abs(m.x - tx), Math.abs(m.y - ty)) * 2 + (role === 'hunt' || role === 'mark' || role === 'cover' ? 0 : tzFor(m.x, m.y, p.team) * (role === 'cage' ? 3 : role === 'runner' || role === 'outlet' || role === 'flank' || role === 'strike' ? 1.5 : 0.5)) + (100 - m.prob) / 10
                                 + edgeRisk(m.x, m.y, p.team, p.id) * (role === 'hunt' ? 1.5 : 3)   // keep off the sidelines
                                 + (['runner', 'outlet', 'deep', 'flank', 'strike'].includes(role) ? Math.min(3, reachers(m.x, m.y, p.team)) * 0.5 * exposureCost(p) : 0);   // and out of reach
+                            if (imW && s - imW * 30 < bs) s -= imW * (imAt(p, m.x, m.y) - imB);   // (im1) what the square adds to our control
                             if (s < bs) { bs = s; bm = m; }
                         });
                         return bm;
@@ -30191,6 +30272,10 @@ ol.ci-steps li::marker { content: none; }
                 }
                 const order = avail(me).filter(p => !keep.has(p.id) && canReposition(p, me));
                 if (AIX.on(me, 'blk1') && !state.charge) { const la = lateAssist(me, order); if (la) return la; }
+                if (imOn(me) > 0) for (const p of order) {   // (im1) to where they add most to our control
+                    const m = imPick(movesFor(p), p);
+                    if (m) { AIX.count(me, 'im1'); return { pid: p.id, kind: 'move', pick: (ms, q) => imPick(ms, q) || supportPick(ms, q) }; }
+                }
                 for (const p of order) {
                     const m = supportPick(movesFor(p), p);
                     if (m || p.isDown) return { pid: p.id, kind: 'move', pick: supportPick };

@@ -220,6 +220,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   125 games (`k_seq`, no gain), 193 conceded; imW 0.1 .383 after 375 (no gain); imW 0.5 only without the ball (`imDef` 1) .320 after 125.
   Raw space control is a side effect of drefsante's shape, not what wins: chasing it pulls players off the screen and the carrier's paths.
   Next ideas: weight squares by relevance (their scoring routes - dpThreat's hot squares - in defence), or just stand further up.
+  v5.48: `fwD` 2 ON in brain x (defending, screen / second line / deep / safeties two squares nearer their carrier; `look/dbg/depth.py`):
+  players 3+ behind the ball 3.05 -> 2.49 (dref 2.40), mean place v ball -1.49 -> -1.38 (dref -0.7), deepest still 7.3 from our line
+  (dref 9.0). `k_seq` (v v5.47 .392): fwD 2 .399 over 1,000 (no gain, level - released as asked, not worse); fwD 1 .363 after 375; fwD 2 +
+  dpBack 0.02 .391 after 625. Baseline for v5.48: `k_fw2` (+ `k_b548`).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
