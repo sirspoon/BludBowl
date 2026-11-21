@@ -6,6 +6,10 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
+- **Overnight auto-tuning of brain x (21-22 Nov, running on the owner's PC until ~07:00; don't start evaluate.py meanwhile).**
+  `nn/look/dbg/spsa.py n1`: SPSA (as fishtest) over 18 of brain x's weights and thresholds v drefsante, 72 games a side a round,
+  ~95 rounds, on the frozen v5.48 (`nn/look/dbg/frozen_tune.html`); then the average of the second half is checked with `k_seq.py`
+  (gain mode) against v5.48's 3,000-game .396. Log `nn/look/dbg/spsa_n1.log`, state `spsa_n1.json`.
 - **Brain x (v5.18, the owner's plan, 18 Nov): make the AI a real challenge for drefsante, Humans v Humans.** Work goes into the
   experimental brain (`'{"brain":"x"}'`; code behind `AIX.x(team)`, its own tuning values in `AIX.X`), not the game's AI, so it may
   test worse for a while. Measure each step v drefsante (`nn/evaluate.py --model bludbowl --opponent drefsante --rules season3
