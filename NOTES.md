@@ -188,6 +188,17 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Study: kept/scored 49 -> 56%; 1,000 games (seeds 910000+) 258-250-492, 929-1321 (.383) v v5.46 .392. Drift check (seeds 930000+, `k_d542`,
   `k_d546`, `look/dbg/k_chunks.sh` now takes SEED=): v5.42's settings (btOn/beAt/cbThreat/bpDodge 0) 263-284-453, 927-1288 (.405) v v5.46
   275-274-451, 924-1260 (.412) - the slide on seeds 910000+ (.409 -> .392 over v5.42-v5.46) was luck; over both seed sets level.
+  Scoring from deep (21 Nov, after v5.47; `look/dbg/deep_ready.py`, `look/dbg/fwd_recv.py`): with the ball 11+ out we score that turn 3.3%
+  (drefsante 8.6%); with an unmarked receiver in reach (within MA+2 of the end zone, within the carrier's MA+10) we score as often (23% v 20%)
+  but have one at 11% of turn starts (31%) - at the end of our turn a receiver forward at 36% (drefsante 89-92%; still free at its next turn
+  ~40% either side). drefsante carries with its Thrower 31% of those turns (ours: Catchers 50%) and scores 61 of 98 such touchdowns by a
+  pass (ours 7-9). Tried, not kept (1,000 games each v v5.47 .383, seeds 910000+): `tpN` 2 .388 (receivers forward unchanged at 36%: nobody
+  can reach a ready square with a sure move, so the cap isn't the limit); `tpRoute` 1 (everyone not yet ready steps towards it) .372, 64 more
+  conceded; `tpRouteC` (Catchers only; code removed) .363, with tpN 2 .361 - forward 36 -> 43%, scored from 11+ 3.3 -> 4.3%, but more
+  conceded; `qbN` 1 (Thrower as quarterback) stopped at 500 games .345 v .385, with tpRouteC .370. Players sent upfield cost the defence more
+  than the scores they set up; drefsante's 89% must come with a sounder defence elsewhere. Reading (21 Nov): drefsante's blog
+  (drefsante.blogspot.com, 2019-2025) - per-action success / Turnover chances, a priority order (safe first, ball actions first), TD search
+  over run / hand-off / pass combinations; nothing on formations or weights. GrodBot's source is no longer in njustesen/botbowl.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
