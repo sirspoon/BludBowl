@@ -199,6 +199,18 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   than the scores they set up; drefsante's 89% must come with a sounder defence elsewhere. Reading (21 Nov): drefsante's blog
   (drefsante.blogspot.com, 2019-2025) - per-action success / Turnover chances, a priority order (safe first, ball actions first), TD search
   over run / hand-off / pass combinations; nothing on formations or weights. GrodBot's source is no longer in njustesen/botbowl.
+  Testing (21 Nov): `nn/look/dbg/k_seq.py NAME 'AIP' --mode gain|notworse` - an early-stopping test (Wald's SPRT, blocks of 125, at most
+  1,500 games) against a stored run of the release, not re-played each time. Default baseline v5.47 = `k_blk` + `k_b547` (3,000 games,
+  .392; the 2,000 new games .396, k_blk's .383 was the low one). `gain` answers better / no gain, `notworse` not worse / worse, about 0.04
+  apart; simulated (`--simulate`): an idea 0.04 worse is called in ~240 games, a level one ~650 (5% wrongly 'better'), a real +0.04 is found
+  83%. Replayed over the deep-scoring runs it threw out each loser after 250-625 games (tpN 2, level, no verdict in 1,000). After a release:
+  `--fixed 2000` builds the new baseline. Our tweaks' real differences are only ~0.01 (`look/dbg/metric_power.py`: true spread .011 v luck
+  .014 per 1,000 games), so small gains stay out of reach - the test finds big wins and drops losers cheaply. `--metric td2` (TD difference
+  capped at 2): ranks runs as score share does (correlation .99), ~20% fewer games; same verdicts on the replay, usually sooner. Repeatable
+  games: the bridge seeds Math.random from each question and `evaluate.py` gives players fixed ids and seeds drefsante's dice and (patched
+  jar, `drefsante/seeded/`) its player/team ids - our side now repeats exactly; drefsante still varies a little (thread timing?), and one
+  difference shifts every later roll, so same-seed pairing gains nothing for now. `evaluate.py` prints each game's seed; `BB_ACTLOG=file`
+  logs every action of both sides.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
