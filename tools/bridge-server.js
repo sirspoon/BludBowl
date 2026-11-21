@@ -17,6 +17,13 @@ const { openGame } = require('./headless-match');
   await new Promise(r => setTimeout(r, 1500));
   const B = w.eval('AI.bridge');
   const out = o => process.stdout.write(JSON.stringify(o) + '\n');
+  // the AI's Math.random is seeded from each question (its text without the id), so the same position always gets the same answer and a
+  // BotBowl game is repeatable from its seed: two AI versions then play identical games until their choices differ (nn/evaluate.py pairs them
+  // by seed). BRIDGE_RANDOM=1: unseeded, as before.
+  let rs = 1;
+  const rnd = () => { rs = (rs + 0x6D2B79F5) | 0; let t = Math.imul(rs ^ (rs >>> 15), 1 | rs); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const seedFrom = s => { if (process.env.BRIDGE_RANDOM) return; let h = 0x811C9DC5; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193); rs = h | 0; };
+  if (!process.env.BRIDGE_RANDOM) w.Math.random = rnd;
   out({ ready: true });
   const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });   // (CR LF is always one line end)
   rl.on('line', line => {
@@ -28,6 +35,7 @@ const { openGame } = require('./headless-match');
       out({ ok: false, error: 'bad JSON', id }); return;
     }
     const say = o => out(q.id === undefined ? o : Object.assign(o, { id: q.id }));
+    seedFrom(line.replace(/,? ?"id": ?\d+\}\s*$/, '}'));
     try {
       const t0 = TIMING ? performance.now() : 0;
       if (q.desc) B.load(q.desc);
