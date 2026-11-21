@@ -211,6 +211,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   jar, `drefsante/seeded/`) its player/team ids - our side now repeats exactly; drefsante still varies a little (thread timing?), and one
   difference shifts every later roll, so same-seed pairing gains nothing for now. `evaluate.py` prints each game's seed; `BB_ACTLOG=file`
   logs every action of both sides.
+  Influence map (21 Nov, after v5.47; `nn/look/dbg/influence.py`): for each square, how soon each side gets a player there (moves, +3 a dodge,
+  +3 to stand, over MA+2) and so who controls it. At the end of its own turns drefsante controls 54% of the pitch with as many players
+  standing as us, we 44% (gap the same attacking, defending, loose ball); it stands ~1.2 squares further up in every phase, 43% of its
+  standing players in contact v our 46%, and with the ball is spread wider (lengthwise sd 3.2 v 2.4). Tried in brain x (code in index.html,
+  `imTimes`/`imValue`/`imPick`, switch `imW`, not released): formation moves count the control a square adds (imW per square) and players
+  left over go where they add most. imW 0.5: our control 47 -> 56% (120-game study), but v the 3,000-game v5.47 baseline (.392) .288 after
+  125 games (`k_seq`, no gain), 193 conceded; imW 0.1 .383 after 375 (no gain); imW 0.5 only without the ball (`imDef` 1) .320 after 125.
+  Raw space control is a side effect of drefsante's shape, not what wins: chasing it pulls players off the screen and the carrier's paths.
+  Next ideas: weight squares by relevance (their scoring routes - dpThreat's hot squares - in defence), or just stand further up.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
