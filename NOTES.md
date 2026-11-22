@@ -6,10 +6,6 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- **Overnight auto-tuning of brain x (21-22 Nov, running on the owner's PC until ~07:00; don't start evaluate.py meanwhile).**
-  `nn/look/dbg/spsa.py n1`: SPSA (as fishtest) over 18 of brain x's weights and thresholds v drefsante, 72 games a side a round,
-  ~95 rounds, on the frozen v5.48 (`nn/look/dbg/frozen_tune.html`); then the average of the second half is checked with `k_seq.py`
-  (gain mode) against v5.48's 3,000-game .396. Log `nn/look/dbg/spsa_n1.log`, state `spsa_n1.json`.
 - **Brain x (v5.18, the owner's plan, 18 Nov): make the AI a real challenge for drefsante, Humans v Humans.** Work goes into the
   experimental brain (`'{"brain":"x"}'`; code behind `AIX.x(team)`, its own tuning values in `AIX.X`), not the game's AI, so it may
   test worse for a while. Measure each step v drefsante (`nn/evaluate.py --model bludbowl --opponent drefsante --rules season3
@@ -233,6 +229,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   7%). Tried as `imR` (formation squares and spare players by route value, defending only; code removed): route value 193 -> 227 in a
   120-game study, but `k_seq` v v5.48 .396: imW 0.1 .366 after 250, imW 0.3 .332 after 125 (no gain) - scored fewer, conceded the same.
   The one-turn route-cutting (dp1) already covers it; two turns ahead only pulls players off the counter-attack.
+  Overnight auto-tuning (21-22 Nov; `nn/look/dbg/spsa.py`, SPSA over 18 weights/thresholds, 97 rounds of 72+72 games, ~14,000
+  games, frozen v5.48): no gain. The rounds' own score share didn't rise (quarters .403 .409 .395 .399); the second-half average
+  (dangerW 1.3->1.95, bpGain .03->.046, dpMin .1->.14, supW .5->.64, caGain .04->.056, btW 2->1.23, blkMin 1.5->1.24, blkTurn .17->.15,
+  bkTurn .4->.46, bpEdge .15->.11; the rest within half a step) gave .390 after 625 in `k_seq` v .396 (`k_n1v`; NO GAIN). Most drift
+  is the size of the noise (~0.5-1 step); dangerW (+2 steps, steadily) is the only one worth a test of its own. These values are flat
+  near v5.48: the gains left aren't in re-weighting what brain x already does.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
