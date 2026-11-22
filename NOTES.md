@@ -283,6 +283,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.61 (22 Nov): the computer's acting player in a match gets the replays' marker (`actorMark(c, ts, p, q)`, shared with `FREP.overlay`;
+  `aiActorMark` in the render, from `AI.focus()` = the current `plan`'s pid / target, else `state.selectedId`, or `state.combat`'s defender).
 - v5.60 (22 Nov): the turn banner after the computer's sped-up turn lasted ~0.5 s (its timer was set while CLOCK was still at 4x; the
   speed drops back only on the next frame). `showTurnBanner` now calls `SIMSPEED.sync()` (= its `apply`) first. Watch for the same trap
   anywhere a timer is set at a speed change. Check: `node tools/ui-tests/turn-banner.js`.

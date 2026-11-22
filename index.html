@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.60</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.61</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -16608,6 +16608,37 @@ ol.ci-steps li::marker { content: none; }
             return down ? Math.min(1.06, e) : 1 - e;
         }
         // where to draw a player: part-way between squares while walking (or sliding after a push)
+        // the one acting, made plain: a pulsing yellow ring and a bobbing pointer over them, and for a block, blitz, foul or hand-off a
+        // red ring on the target with a dashed line to it (the replays, and the computer's players in a match)
+        function actorMark(c, ts, p, q) {
+            if (!p || p.isReserve || p.x < 0) return;
+            const t = (() => { try { return CLOCK.real(); } catch (e) { return performance.now(); } })();
+            const dp = drawPos(p), cx = (dp.x + 0.5) * ts, cy = (dp.y + 0.5) * ts, k = 0.5 + 0.5 * Math.sin(t / 210);
+            c.save();
+            c.strokeStyle = `rgba(250,204,21,${0.55 + 0.45 * k})`; c.lineWidth = ts * 0.08;
+            c.beginPath(); c.arc(cx, cy, ts * (0.53 + 0.05 * k), 0, Math.PI * 2); c.stroke();
+            const by = cy - ts * (0.98 + 0.12 * k);
+            c.fillStyle = '#facc15'; c.strokeStyle = '#1b1d2a'; c.lineWidth = ts * 0.05;
+            c.beginPath(); c.moveTo(cx - ts * 0.22, by - ts * 0.2); c.lineTo(cx + ts * 0.22, by - ts * 0.2); c.lineTo(cx, by + ts * 0.08); c.closePath(); c.fill(); c.stroke();
+            if (q && q !== p && !q.isReserve && q.x >= 0) {
+                const dq = drawPos(q), tx = (dq.x + 0.5) * ts, ty = (dq.y + 0.5) * ts, L = Math.hypot(tx - cx, ty - cy) || 1, ux = (tx - cx) / L, uy = (ty - cy) / L;
+                if (L > ts * 1.1) { c.setLineDash([ts * 0.14, ts * 0.1]); c.strokeStyle = 'rgba(248,113,113,0.9)'; c.lineWidth = ts * 0.06;
+                    c.beginPath(); c.moveTo(cx + ux * ts * 0.55, cy + uy * ts * 0.55); c.lineTo(tx - ux * ts * 0.55, ty - uy * ts * 0.55); c.stroke(); c.setLineDash([]); }
+                c.strokeStyle = `rgba(239,68,68,${0.6 + 0.4 * k})`; c.lineWidth = ts * 0.08;
+                c.beginPath(); c.arc(tx, ty, ts * (0.5 + 0.05 * k), 0, Math.PI * 2); c.stroke();
+            }
+            c.restore();
+        }
+        // in a match: the computer's player while it plays them (the one it has picked, its target once it has one)
+        function aiActorMark(c, ts) {
+            if (!state.players || state.isGameOver || document.body.classList.contains('sim-max')) return;
+            const tm = state.activeTeam; if (!AI.isOn(tm)) return;
+            const f = AI.focus(), sel = state.selectedId != null ? getPlayerById(state.selectedId) : null;
+            const p = (f && getPlayerById(f.pid)) || sel;
+            if (!p || p.team !== tm || (p.hasActed && !(state.combat && state.combat.atk === p))) return;
+            const q = state.combat && state.combat.atk === p ? state.combat.def : f && f.pid === p.id && f.target != null ? getPlayerById(f.target) : null;
+            actorMark(c, ts, p, q);
+        }
         function drawPos(p) {
             const H = state.blockHold, h = H && H.pos[p.id];
             if (h) { if (!state.combat) releaseBlock(); else return { x: h.x, y: h.y }; }   // (held while the block's choices are made)
@@ -22624,7 +22655,7 @@ ol.ci-steps li::marker { content: none; }
             }
             drawPitchPick(ts);
             WFX.air(ctx, CFG.cols * ts, CFG.rows * ts, ts, performance.now(), wxFX, wxDim, wxStill());
-            try { if (FREP.on()) FREP.overlay(ctx, ts); } catch (e) {}   // (a FUMBBL replay: who's acting, and their target)
+            try { if (FREP.on()) FREP.overlay(ctx, ts); else aiActorMark(ctx, ts); } catch (e) {}   // (a replay, or the computer's turn: who's acting, and their target)
             if (state.floaters && state.floaters.length) drawFloaters(ts);
 
             ctx.restore();
@@ -25451,24 +25482,7 @@ ol.ci-steps li::marker { content: none; }
             function overlay(c, ts) {
                 if (!D) return; const F = D.frames[at]; if (!F || F.act < 0) return;
                 const p = state.players[F.act]; if (!p || p.isReserve || p.x < 0) return;
-                const dp = drawPos(p), cx = (dp.x + 0.5) * ts, cy = (dp.y + 0.5) * ts, k = 0.5 + 0.5 * Math.sin(performance.now() / 210);
-                c.save();
-                c.strokeStyle = `rgba(250,204,21,${0.55 + 0.45 * k})`; c.lineWidth = ts * 0.08;
-                c.beginPath(); c.arc(cx, cy, ts * (0.53 + 0.05 * k), 0, Math.PI * 2); c.stroke();
-                const by = cy - ts * (0.98 + 0.12 * k);
-                c.fillStyle = '#facc15'; c.strokeStyle = '#1b1d2a'; c.lineWidth = ts * 0.05;
-                c.beginPath(); c.moveTo(cx - ts * 0.22, by - ts * 0.2); c.lineTo(cx + ts * 0.22, by - ts * 0.2); c.lineTo(cx, by + ts * 0.08); c.closePath(); c.fill(); c.stroke();
-                if (F.tgt >= 0) {
-                    const q = state.players[F.tgt];
-                    if (q && !q.isReserve && q.x >= 0) {
-                        const dq = drawPos(q), tx = (dq.x + 0.5) * ts, ty = (dq.y + 0.5) * ts, L = Math.hypot(tx - cx, ty - cy) || 1, ux = (tx - cx) / L, uy = (ty - cy) / L;
-                        if (L > ts * 1.1) { c.setLineDash([ts * 0.14, ts * 0.1]); c.strokeStyle = 'rgba(248,113,113,0.9)'; c.lineWidth = ts * 0.06;
-                            c.beginPath(); c.moveTo(cx + ux * ts * 0.55, cy + uy * ts * 0.55); c.lineTo(tx - ux * ts * 0.55, ty - uy * ts * 0.55); c.stroke(); c.setLineDash([]); }
-                        c.strokeStyle = `rgba(239,68,68,${0.6 + 0.4 * k})`; c.lineWidth = ts * 0.08;
-                        c.beginPath(); c.arc(tx, ty, ts * (0.5 + 0.05 * k), 0, Math.PI * 2); c.stroke();
-                    }
-                }
-                c.restore();
+                actorMark(c, ts, p, F.tgt >= 0 ? state.players[F.tgt] : null);
             }
             function leave() {   // back to the main menu (as after a match), not the title screen
                 stop(); try { MUSIC.matchEnd(); } catch (e) {}
@@ -32381,6 +32395,7 @@ ol.ci-steps li::marker { content: none; }
                     return { ball: [state.ball.x, state.ball.y], turn: state.turn[me], rec, pk, best: b ? { v: b.v, kind: b.kind, p: nm(b.p), r: nm(b.r), s: [b.s.x, b.s.y] } : null }; },
                 activationRR: (p, label) => activationRR(p, label),   // (rr3)
                 bridge,   // (tools/bridge-server.js)
+                focus: () => plan && plan.pid != null ? { pid: plan.pid, target: typeof plan.target === 'number' || typeof plan.target === 'string' ? plan.target : null, kind: plan.kind } : null,   // (who it is moving now, and at whom)
                 isAI, act, ownerTeam, decider, coachFace: (f, a, d) => faceScore(f, a, d), isOn: t => !!on[t], isStarted: () => started, reset, setPaused: v => { paused = !!v; }, isPaused: () => paused, bncPick, debugForm: () => formationTargets(state.activeTeam, false), debugBomb: () => bombPlan(state.activeTeam, avail(state.activeTeam)),
                 set(t, v) { on[t] = !!v; save(); },
                 start() { started = true; },

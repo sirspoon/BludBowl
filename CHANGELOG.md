@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.61 (22 Nov 2026)
+- In a match, the computer's acting player now gets the replays' marker - a pulsing ring and a bobbing pointer - and its block or Blitz target a red ring with a line to it.
+
 ## v5.60 (22 Nov 2026)
 - Fixed: the "your turn" banner after the computer's sped-up turn flashed by in half a second (it only showed properly after a turnover).
 

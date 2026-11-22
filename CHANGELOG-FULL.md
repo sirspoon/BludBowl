@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.61 (22 Nov 2026)
+- The computer's turns are easier to follow: the player it is moving gets the same marker as in the replays (a pulsing yellow ring and
+  a bobbing pointer above), and once it has a target - the player it is going to block, Blitz, foul or hand off to - that player gets a
+  pulsing red ring with a dashed line to it. It shows from the moment the computer picks the player until their action is over (the
+  usual yellow hoop stays too). Not drawn at MAX speed. The drawing is shared with the replay viewer (`actorMark`); the computer's
+  current plan comes from `AI.focus()`.
+
 ## v5.60 (22 Nov 2026)
 - Fixed: after the computer's turn with Speed up on, the "TEAM'S TURN" banner for your turn vanished after about half a second.
   The game's timers run at the speed in force when they are set, and the clock only dropped back from 4x to normal on the next
