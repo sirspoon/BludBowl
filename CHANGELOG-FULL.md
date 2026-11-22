@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.49 (22 Nov 2026)
+- Experimental computer coach (brain x), kick-off: it works out, for every square of the opponents' half, the chance the kick goes out
+  for a touchback (the ball deviates one to six squares in any of eight directions, then bounces once) and how near their players it
+  comes to rest, and kicks to the best one - in practice the middle of their half. Against drefsante our kicks went out for a
+  touchback 21% of the time (it then scored 46% of those drives); now 8%, and it scores on 40% of its receiving drives, not 45%.
+- Receiving, after the kicking team has set up: it puts its best hitter on the line of scrimmage next to the weakest player on theirs
+  (drefsante kicks with a Catcher there): with an assist, a Blitzer's Block and Tackle knock a Catcher with Dodge down on two dice 75%
+  of the time, a Lineman's 31%, and it leaves our Blitz free for someone else.
+- 1,000 games v drefsante: won 265, drew 266, lost 469, touchdowns 954-1330 (.398), against v5.48's .396 over 3,000 - level.
+
 ## v5.48 (21 Nov 2026)
 - Experimental computer coach (brain x): defending, its screen, second line, deep player and safeties stand two squares nearer the
   opposing ball carrier (the screen still at least a square behind him). Against drefsante it kept more players three or more squares

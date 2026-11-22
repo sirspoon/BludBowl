@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.48</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.49</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27296,7 +27296,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2 },   // (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1 },   // (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -30974,7 +30974,41 @@ ol.ci-steps li::marker { content: none; }
                 byRole('back').forEach(s => put(s, take((a, b) => val(b) - val(a))));
                 byRole('wide').forEach(s => put(s, take((a, b) => (b.ma + b.st + b.av / 3) - (a.ma + a.st + a.av / 3))));
                 byRole('screen').forEach(s => put(s, take((a, b) => (b.st + b.av / 3) - (a.st + a.av / 3))));
+                if (kind === 'offence' && AIX.x(team) && AIX.p(team, 'losHit', 0)) { try { losHit(team, placed); } catch (e) { console.error('losHit', e); } }
                 return pool.length === 0;
+            }
+            // (brain x: lh1) receiving, they've set up first: put our best hitter on our line next to the softest of their line players (drefsante
+            // kicks with a Catcher on its line, Dodge): with a team-mate's assist, a Blitzer's Block + Tackle knock him down on 2 dice 75% of the time, a Lineman's 31%
+            // (and a Lineman falls on a skull or both-down: a Turnover with our first action). A swap of two of our squares, so the set-up stays legal.
+            function losHit(team, placed) {
+                const opp = state.players.filter(q => q.team !== team && onPitch(q) && !q.isDown && !q.isStunned);
+                const ours = placed.filter(p => onPitch(p));
+                const adj = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) === 1;
+                const hitVal = (h, q, line) => {   // chance of a knock-down on the dice (attacker's choice; one of our others on him assists:
+                    // BotBowl's Catcher is ST 3, and our full line has his helpers marked), 0 if we'd have fewer dice than him
+                    const st = h.st + (line.some(L => L !== h) ? 1 : 0), dice = st >= 2 * q.st ? 3 : st > q.st ? 2 : st === q.st ? 1 : 0;
+                    if (!dice) return 0;
+                    const good = 1 + ((!hasSk(q, 'Dodge') || hasSk(h, 'Tackle')) ? 1 : 0) + (hasSk(h, 'Block') && !hasSk(q, 'Block') ? 1 : 0);
+                    return 1 - Math.pow(1 - good / 6, dice);
+                };
+                let best = null;
+                opp.forEach(q => {
+                    const line = ours.filter(L => adj(L, q));
+                    if (line.length < 2) return;
+                    const now = Math.max(...line.map(L => hitVal(L, q, line)));
+                    ours.forEach(h => {
+                        const g = hitVal(h, q, line) - now + (q.av <= 8 ? 0.05 : 0) + (q.ma >= 8 ? 0.05 : 0);
+                        if (g > 0.15 && (!best || g > best.g)) best = { q, h, g, line };
+                    });
+                });
+                if (!best) return;
+                const { q, h, line } = best;
+                if (line.includes(h)) return;
+                // the line player to swap out: straight across first (fewest of their players next to that square to help him)
+                const help = L => opp.filter(o => o !== q && adj(o, L)).length;
+                const L = line.slice().sort((a, b) => help(a) - help(b) || Math.abs(a.y - q.y) - Math.abs(b.y - q.y))[0];
+                [h.x, L.x] = [L.x, h.x]; [h.y, L.y] = [L.y, h.y];
+                AIX.count(team, 'lh1');
             }
             function setupTeam(team) {
                 let custom = false;
@@ -31000,11 +31034,44 @@ ol.ci-steps li::marker { content: none; }
             // short into a corner of their half normally (a Blitz! kick-off can get there); deep late in a half, to slow them down
             function kickTarget() {
                 const r = state.kickoff.receivingTeam, late = (state.turn[r] || 0) >= 5;
+                if (!GEO.sev && AIX.x(other(r)) && AIX.p(other(r), 'kkOn', 0)) { const t = kickPick(r); if (t) { AIX.count(other(r), 'kk1'); grid(t.x, t.y); return; } }
                 const back = GEO.sev ? (late ? 1 + Math.floor(Math.random() * 2) : 3 + Math.floor(Math.random() * 2)) : late ? 2 + Math.floor(Math.random() * 3) : 6 + Math.floor(Math.random() * 2);   // squares from their end zone
                 const x = r === TEAMS.HUMAN ? back : CFG.cols - 1 - back;
                 const y = GEO.sev ? (late ? 3 + Math.floor(Math.random() * 5) : (Math.random() < 0.5 ? 2 : 8))
                     : late ? 5 + Math.floor(Math.random() * 5) : (Math.random() < 0.5 ? 3 + Math.floor(Math.random() * 2) : 10 + Math.floor(Math.random() * 2));
                 grid(x, y);
+            }
+            // (brain x: kk1) the kick: every target square in their half scored over all 48 deviations (d8 direction, d6 squares, diagonals both
+            // ways) and then the one bounce: out of their half at either step is a touchback (BotBowl's LandKick / Bounce); otherwise worse the
+            // nearer it comes to rest to one of their standing players (drefsante receives with 9 on the line and two deep; v5.48 v drefsante:
+            // touchbacks 21% of our kicks, it scored 46% of those drives; ball 4+ squares from its nearest player 29%, nearer ~48%)
+            function kickPick(r) {
+                const W = CFG.cols, H = CFG.rows, k = other(r), TB = AIX.p(k, 'kkTb', 3);
+                const opp = state.players.filter(p => p.team === r && onPitch(p) && !p.isDown && !p.isStunned);
+                const on = (x, y) => x >= 0 && x < W && y >= 0 && y < H && GEO.inHalf(r, x);
+                const near = new Map();
+                const bad = (x, y) => {
+                    const key = x * 100 + y;
+                    if (!near.has(key)) near.set(key, opp.reduce((m, p) => Math.min(m, Math.max(Math.abs(p.x - x), Math.abs(p.y - y))), 99));
+                    const d = near.get(key);
+                    return d <= 1 ? 1 : d === 2 ? 0.92 : d === 3 ? 0.84 : d === 4 ? 0.62 : d === 5 ? 0.55 : 0.5;
+                };
+                const D = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+                let best = null, bv = -1e9;
+                for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) {
+                    if (!on(x, y)) continue;
+                    let v = 0;
+                    for (const [dx, dy] of D) for (let n = 1; n <= 6; n++) {
+                        const lx = x + dx * n, ly = y + dy * n;
+                        if (!on(lx, ly)) { v -= TB; continue; }
+                        if (getPlayer(lx, ly)) { v -= bad(lx, ly); continue; }   // onto one of theirs: a catch
+                        let s = 0;
+                        for (const [bx, by] of D) s += on(lx + bx, ly + by) ? bad(lx + bx, ly + by) : TB;
+                        v -= s / 8;
+                    }
+                    if (v > bv) { bv = v; best = { x, y }; }
+                }
+                return best;
             }
             function touchback() { const best = touchbackPick(); if (best) grid(best.x, best.y); }
             function touchbackPick() {

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.49 (22 Nov 2026)
+- The experimental computer coach kicks off to the middle of your half, so the ball rarely goes out for a touchback, and when receiving it lines a Blitzer up against the weakest player on your line.
+
 ## v5.48 (21 Nov 2026)
 - The experimental computer coach defends further up the pitch: its screen and back line stand two squares nearer your ball carrier.
 

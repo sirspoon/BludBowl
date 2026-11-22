@@ -249,6 +249,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Both lose a held ball in ~31% of the other's turns and block carriers equally (400 v 374); after a loss it scores 28%, we 17%.
   Per own turn with the ball we score 17%, it 19%. Our kicks: touchback 21% (46 of 214; it then scores 46%) - we aim at y 3-4 / 10-11,
   and land 6-7 from its end zone, where its two deep players stand; landing 4+ from its nearest player (28 drives) it scored 29%, we 32%.
+  v5.49 (the owner: no touchbacks, and hit its line-of-scrimmage Catcher): `kkOn` 1 (`kickPick`: each target square over the 48
+  deviations + the bounce, BotBowl's LandKick/Bounce; touchback cost `kkTb` 3, else worse the nearer its players; at cost 1 it aimed
+  at the square before its end zone and 33% went out, `nn/look/dbg/kick_model.py`) -> the middle of its half, touchbacks 21% -> 8%,
+  it scores on its receiving drives 45% -> 40%, we 17% -> 20% (study_kk2, `nn/look/dbg/kick_cmp.py`). `losHit` 1 (`losHit`, receiving,
+  after its set-up: our best hitter swapped onto our line next to its softest line player). BotBowl's Human Catcher is ST 3, so the 2
+  dice come from our line's assist (we already blocked it on 2 dice on our first turn 156/170, mostly a Blitzer brought in by the
+  Blitz, 76% down); now a Blitzer stands by it 149 times, 81% down, our Blitz free. Our receiving drives unchanged (25% v 24%).
+  `k_seq` v .396: .398 over 1,000 (`k_kk1`; NO GAIN, then NOT WORSE) - released, as asked. 12 all-races jsdom matches: no page errors.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
