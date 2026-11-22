@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.54 (22 Nov 2026)
+- Animated dice: the result ("Rolled 4, needed 3+ ✓") now stays in the roll or re-roll window for 2.2 seconds after the die lands
+  (it was under half a second), and the armour / injury strip at the top for 2.2 seconds too (was 1.3). A tap anywhere puts a result
+  away at once. In a roll window that tap does nothing else (it can't land on the pitch underneath); the armour / injury strip
+  holds nothing up, so a tap there still counts as well as closing it.
+
 ## v5.53 (22 Nov 2026)
 - Animated dice, the roll window (Dodge, Rush, pick-up, catch, pass and the rest): with Animate other rolls on, the die tumbles in
   the window from the moment it opens; pressing Roll Dice (or tapping the die) rolls, and that same die jumps and lands on the result

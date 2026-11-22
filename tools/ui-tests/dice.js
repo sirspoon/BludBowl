@@ -145,9 +145,20 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   await page.waitForTimeout(250);
   await page.screenshot({ path: OUT + '/dice-roll-window-phone.png' });
   check(rr.open && rr.box && rr.res === null, 'Roll Dice (animated): the window stays open with the die rolling, the game waits', rr);
-  await page.waitForTimeout(1600);
+  await page.waitForTimeout(1300);
+  const rrShow = await page.evaluate(() => ({ open: !document.getElementById('modal-roll').classList.contains('hidden'), lab: (document.querySelector('#roll-dfx .dfx-lab') || {}).textContent, res: window.__res }));
+  check(rrShow.open && /Rolled \d/.test(rrShow.lab || '') && rrShow.res === null, 'the result stays up in the window after landing', rrShow);
+  await page.tap('#roll-title');
+  await page.waitForTimeout(120);
   const rr2 = await page.evaluate(() => ({ open: !document.getElementById('modal-roll').classList.contains('hidden'), res: window.__res, trr: !document.getElementById('modal-team-reroll').classList.contains('hidden') }));
-  check(!rr2.open && rr2.res && rr2.res[1] >= 1, 'then the window closes and the roll is carried out', rr2);
+  check(!rr2.open && rr2.res && rr2.res[1] >= 1, 'a tap puts it away at once and the roll is carried out', rr2);
+  // left alone, it goes by itself after a while
+  await page.waitForTimeout(500);
+  await page.evaluate(() => { const [a] = __scene(); const p = getPlayerById(a); state.selectedId = p.id; window.__res = null;
+    setupRoll('DODGE', p, 3, 'None', r => { window.__res = ['pass', r]; }, r => { window.__res = ['fail', r]; }, { desc: 'test dodge', prevMode: MODES.IDLE }); document.getElementById('btn-roll-confirm').click(); });
+  await page.waitForTimeout(3600);
+  const rr2b = await page.evaluate(() => ({ open: !document.getElementById('modal-roll').classList.contains('hidden'), res: window.__res }));
+  check(!rr2b.open && rr2b.res, 'left alone, the result goes by itself (about 2 s after landing)', rr2b);
   const rr3 = await page.evaluate(() => {
     localStorage.setItem('bb-dice-anim-other', '0');
     const [a] = __scene(); const p = getPlayerById(a); state.selectedId = p.id; window.__res = null;

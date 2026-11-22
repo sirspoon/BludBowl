@@ -1272,7 +1272,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.53</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.54</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -20524,13 +20524,17 @@ ol.ci-steps li::marker { content: none; }
                 const T = reuse ? o.tray : tray(host, { n, kind: 'd6', col: o.col, size: 46, gap: 14, height: 64, faces: o.from });   // (o.from: the dice as they lie, for a re-roll)
                 let lab = reuse && host.querySelector('.dfx-lab'); if (!lab) { lab = el('div', 'dfx-lab'); host.appendChild(lab); }
                 let k = 0, over = false;
-                const end = () => { if (over) return; over = true; host.onclick = null; stop(T); done(); };
+                // once the result is up: a tap anywhere puts it away at once (and that tap does nothing else)
+                const tapAway = e => { if (!showing) return; e.stopPropagation(); e.preventDefault(); swallow(); end(); };
+                let showing = false;
+                const end = () => { if (over) return; over = true; host.onclick = null; document.removeEventListener('pointerdown', tapAway, true); stop(T); done(); };
                 const next = () => {
                     const vals = seq[k], last = k === seq.length - 1, which = k ? vals.map((v, i) => i).filter(i => vals[i] !== seq[k - 1][i] || seq[k - 1].length !== vals.length) : null;
                     settle(T, vals, which && which.length ? which : null, () => {
                         if (o.label) { const L = o.label(k, last); lab.innerHTML = L.html; lab.className = 'dfx-lab ' + (L.cls || ''); }
                         if (!last) { k++; T.timer = setTimeout(next, 380); return; }
-                        T.timer = setTimeout(end, 420);
+                        showing = true; document.addEventListener('pointerdown', tapAway, true);
+                        T.timer = setTimeout(end, HOLD);
                     });
                 };
                 host.onclick = e => { e.stopPropagation(); if (T.state === 'rolling') finish(T); else if (T.state === 'done' && k === seq.length - 1) end(); };
@@ -20546,6 +20550,13 @@ ol.ci-steps li::marker { content: none; }
                 tumble(T); return T;
             }
             function clearBox(host) { if (!host) return; host.onclick = null; host.innerHTML = ''; host.classList.add('hidden'); }
+            const HOLD = 2200;   // how long a result stays up (a tap puts it away sooner)
+            // the click that follows a tap used to put a result away goes nowhere (not onto the pitch or a button underneath)
+            function swallow() {
+                const off = () => document.removeEventListener('click', eat, true), eat = e => { e.stopPropagation(); e.preventDefault(); off(); };   // (just that one click)
+                document.addEventListener('click', eat, true);
+                setTimeout(off, 400);
+            }
             // ---- a quick look at dice the game rolls by itself (armour, injury): shown at the top of the screen, holds nothing up
             const queue = []; let showing = false;
             function toast(vals, o) {
@@ -20566,7 +20577,11 @@ ol.ci-steps li::marker { content: none; }
                 tumble(T);
                 setTimeout(() => settle(T, it.vals, null, () => {
                     lab.textContent = it.o.label || ''; lab.className = 'dfx-tlab ' + (it.o.cls || '');
-                    setTimeout(() => { box.className = ''; setTimeout(() => { stop(T); nextToast(); }, 220); }, 1300);
+                    let gone = false;
+                    const away = () => { if (gone) return; gone = true; document.removeEventListener('pointerdown', away, true);   // (the tap still counts: this strip holds nothing up)
+                        box.className = ''; setTimeout(() => { stop(T); nextToast(); }, 220); };
+                    document.addEventListener('pointerdown', away, true);   // a tap anywhere puts it away
+                    setTimeout(() => away(), HOLD);
                 }), 160);
             }
             return {
