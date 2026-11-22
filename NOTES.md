@@ -475,7 +475,7 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 - **Animated dice (prototype agreed so far, not in the game yet).** Prototype: https://claude.ai/artifact/8gderHAHk5PHbUqqNVamNu
   (control room, 22 Nov). Dice tumble in place where the block dice show now, waiting for the Roll button; on the press the
   roll is made, and the dice jump a little (still spinning fast), settle on the result with a clack (~1.0 s, adjustable).
-  Off = nothing until the roll, then the dice face on, as now. For the game, the owner wants: separate settings for
+  Off = rolled as the window opens, dice shown face on straight away (no button), as now. For the game, the owner wants: separate settings for
   animating block dice and other rolls (off by default with reduced motion; computer rolls and `?simtest` stay instant);
   dice in team colours (die = primary, pips/symbols = secondary; if too alike, darken/lighten the pip colour until it
   reads, contrast 3:1); dice colours editable per team in the team's setup, defaulting to the team colours, with a small
