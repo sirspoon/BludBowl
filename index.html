@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.58</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.59</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -18082,7 +18082,7 @@ ol.ci-steps li::marker { content: none; }
                 rolledArray.forEach(face => {
                     const b = document.createElement('button');
                     b.className = 'die-canvas-btn p-1 bg-slate-200 border-2 border-slate-400 rounded shadow-md';
-                    if (dcol) { b.style.background = dcol.body; b.style.borderColor = 'rgba(0,0,0,.45)'; }
+                    if (dcol) { b.style.backgroundColor = dcol.body; b.style.backgroundImage = `linear-gradient(135deg, ${DICEFX.shade(dcol.body, .18)}, ${DICEFX.shade(dcol.body, -.22)})`; b.style.borderColor = 'rgba(0,0,0,.4)'; }   // (as the rolling dice's faces)
                     b.dataset.face = face; b.onclick = () => resolveBlock(face);
                     const cv = document.createElement('canvas'); cv.width = 50; cv.height = 50;
                     b.appendChild(cv); c.appendChild(b); renderDieIcon(cv.getContext('2d'), face, 50, dcol);
@@ -18179,7 +18179,7 @@ ol.ci-steps li::marker { content: none; }
                     let T = combat.dfx;
                     const midAir = T && T.state === 'rolling' && c.contains(T.box) && T.dice.length === arr.length;   // (re-rolled before landing: they all carry on to the new result)
                     if (!midAir && (!T || T.state === 'gone' || !c.contains(T.box) || T.dice.length !== arr.length)) {   // (a re-roll: the dice as they lay, then the jump)
-                        c.classList.add('dfx-on'); T = DICEFX.tray(c, { n: arr.length, kind: 'block', col: dcol, size: 56, gap: 18, height: 62, faces: prev });
+                        c.classList.add('dfx-on'); T = DICEFX.tray(c, { n: arr.length, kind: 'block', col: dcol, size: 62, gap: 12, height: 62, faces: prev });
                         combat.dfx = T;
                     }
                     T.box.onclick = e => { e.stopPropagation(); DICEFX.finish(T); };
@@ -18229,7 +18229,7 @@ ol.ci-steps li::marker { content: none; }
             if (!aiRolls && state.rr[state.activeTeam] > 0 && !state.combat.brawlerUsed && !state.combat.proUsed) document.getElementById('btn-combat-trr').classList.remove('hidden');   // (its room kept, unseen, till they land)
             m.classList.remove('hidden');
             c.classList.add('dfx-on');
-            const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 56, gap: 18, height: 62 });   // (62: as tall as the dice to pick, so nothing moves when they swap)
+            const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 62, gap: 12, height: 62 });   // (62: as tall as the dice to pick, so nothing moves when they swap)
             state.combat.dfx = T0; DICEFX.tumble(T0);
             if (aiRolls) { state.combat.diceWait = false; rollNow(); return; }   // the computer rolls at once: the dice jump and land, then it picks
             // no Roll button: the tumbling dice are the button (a line under them says so)
@@ -20475,7 +20475,7 @@ ol.ci-steps li::marker { content: none; }
                 const n = o.n, s = o.size || 54, gap = o.gap == null ? 20 : o.gap, H = o.height || s + 12;
                 host.innerHTML = '';
                 const box = el('div', 'dfx-tray'); box.style.height = H + 'px'; host.appendChild(box);
-                const W = host.clientWidth || (n * s + (n - 1) * gap + 16), total = n * s + (n - 1) * gap, left0 = Math.max(0, (W - total) / 2), top = (H - s) / 2;
+                const W = box.clientWidth || host.clientWidth || (n * s + (n - 1) * gap + 16), total = n * s + (n - 1) * gap, left0 = Math.max(0, (W - total) / 2), top = (H - s) / 2;
                 const dice = Array.from({ length: n }, (_, i) => {
                     const slot = el('div', 'dfx-slot'); slot.style.cssText = `left:${left0 + i * (s + gap)}px;top:${top}px;width:${s}px;height:${s}px`;
                     const sh = el('div', 'dfx-shadow'), mover = el('div', 'dfx-mover'), cube = el('div', 'dfx-cube'), core = el('div', 'dfx-core');
@@ -20632,7 +20632,7 @@ ol.ci-steps li::marker { content: none; }
                 }), 160);
             }
             return {
-                S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, waitIn, restIn, clearBox, toast, okHex,
+                S, live, ink, colFor, contrast, shade, tray, tumble, settle, finish, stop, rollIn, waitIn, restIn, clearBox, toast, okHex,
                 set: (k, v) => put(k, v),
                 blockOn: () => S.block() && live(),   // (the computer's blocks too: they roll at once, then land the same way)
                 otherOn: team => S.other() && live() && !AI.isAI(team)

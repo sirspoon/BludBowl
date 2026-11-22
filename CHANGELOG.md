@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.59 (22 Nov 2026)
+- Animated block dice land exactly where they stay: no little sideways shift as they become the dice to pick.
+
 ## v5.58 (22 Nov 2026)
 - Animated dice: the block, roll and re-roll windows keep the same size from waiting to rolling to the result.
 

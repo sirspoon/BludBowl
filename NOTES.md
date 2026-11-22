@@ -312,6 +312,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   v5.58: windows keep their size - block tray 62 px (the flat dice), `#dice-tap-hint` reused for "Tap the dice to roll" (`.dfx-tap`,
   card `.dfx-wait`), `.dfx-busy` hides the buttons with visibility (room kept), trr pre-shown while waiting; `.dfx-lab` fixed 18 px;
   re-roll window: `DICEFX.restIn` lays the failed die there on opening (`pData.dfxRest`, reused by `rollIn`).
+  v5.59: tray() centres on its own box's width (not the host's, which includes padding); block cubes 62 px, gap 12 = the flat buttons;
+  team-colour flat buttons get the faces' gradient (`DICEFX.shade`).
 - v5.39 (job session, 19 Nov): **roster PDF easier to read in print**. `ROSTER_PDF.draw` tries type sizes `SIZES` (11pt down to 7) with
   `rosterPage(doc, S, z, last, extra)` and keeps the largest that fits one page (returns the spare room; a small team redraws with
   taller rows). Column widths come from the contents; names, numbers, characteristics, headings and box values bold; changed

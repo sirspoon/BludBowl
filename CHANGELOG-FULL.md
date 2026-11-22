@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.59 (22 Nov 2026)
+- Animated block dice: no shift as the landed dice turn into the dice to pick. The rolling dice were laid out across the dice box's
+  full width including its padding, so they sat a few pixels off the picking dice, and were a little smaller (56 v 62 px). Now they
+  use the box's inner width and the same size and spacing, and team-colour picking dice have the same light-to-dark shading as the
+  rolling dice's faces. The browser check compares the two sets' centres and sizes (equal to the pixel).
+
 ## v5.58 (22 Nov 2026)
 - Animated dice: the windows no longer change size as the dice roll.
   - Block window: the tumbling dice take exactly the room of the dice to pick; the "Tap the dice to roll" line is the window's own

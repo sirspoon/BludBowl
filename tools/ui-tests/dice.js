@@ -100,6 +100,17 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   await page.evaluate(() => document.querySelector('#dice-container .dfx-tray').click()); await page.waitForTimeout(250); const h2 = await H();
   await page.waitForTimeout(800); const h3 = await H();
   check(h1 === h2 && h2 === h3, 'the block window stays the same size waiting, rolling and with the dice to pick', [h1, h2, h3]);
+  // ---- no sideways shift when the landed dice turn into the dice to pick: same centres and size
+  const pos = await page.evaluate(async () => {
+    const [a, d] = __scene(); startBlock(a, d); document.querySelector('#dice-container .dfx-tray').click();
+    await new Promise(r => setTimeout(r, 560));
+    const cubes = [...document.querySelectorAll('#dice-container .dfx-slot')].map(e => { const r = e.getBoundingClientRect(); return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2), Math.round(r.width)]; });
+    await new Promise(r => setTimeout(r, 500));
+    const flat = [...document.querySelectorAll('#dice-container button.die-canvas-btn')].map(e => { const r = e.getBoundingClientRect(); return [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2), Math.round(r.width)]; });
+    return { cubes, flat };
+  });
+  check(pos.cubes.length === 2 && pos.flat.length === 2 && pos.cubes.every((c, i) => Math.abs(c[0] - pos.flat[i][0]) <= 1 && Math.abs(c[1] - pos.flat[i][1]) <= 1 && Math.abs(c[2] - pos.flat[i][2]) <= 1),
+    'the landed dice sit exactly where (and as big as) the dice to pick appear: no shift', pos);
   // ---- tapping during the roll skips to the end
   await page.evaluate(() => { localStorage.setItem('bb-dice-dur', '2000'); const [a, d] = __scene(); startBlock(a, d); document.querySelector('#dice-container .dfx-tray').click(); });
   await page.waitForTimeout(120);
@@ -131,7 +142,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     const bg = getComputedStyle(document.querySelector('#dice-container button.die-canvas-btn')).backgroundColor;
     localStorage.setItem('bb-dice-team', '0');
     const [a2, d2] = __scene(); startBlock(a2, d2);
-    const plain = document.querySelector('#dice-container button.die-canvas-btn').style.background;
+    const plain = document.querySelector('#dice-container button.die-canvas-btn').style.backgroundColor + document.querySelector('#dice-container button.die-canvas-btn').style.backgroundImage;
     localStorage.removeItem('bb-dice-team');
     return { bg, plain, col: DICEFX.colFor(0), alike: DICEFX.ink('#b91c1c', '#c2410c'), c: DICEFX.contrast('#b91c1c', DICEFX.ink('#b91c1c', '#c2410c').pip) };
   });
