@@ -22,9 +22,10 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     a.isKO = true; a.inSquad = false; removePlayerWithFade(a, 'KNOCKED OUT', "KO'd - test", false);
     b.isCasualty = true; b.casualtyStatus = 'Dead'; removePlayerWithFade(b, 'CASUALTY', 'Dead - test', false);
     const during = STADIUM.occupants(0);
-    return { a: a.id, b: b.id, base, koDuring: during.ko.some(p => p.id === a.id) };
+    return { a: a.id, b: b.id, base, koDuring: during.ko.some(p => p.id === a.id), carried: STADIUM.carried(a.id) && STADIUM.carried(b.id) };
   });
   check(!ids.koDuring, 'a KO\'d player still fading off the pitch is not in the dugout yet');
+  check(ids.carried, 'the KO\'d and the dead player are being stretchered off (the 2 s scene)');
   await page.waitForTimeout(2600);
   const after = await page.evaluate(({ a, b }) => { finishFades(); render(); const o = STADIUM.occupants(0), o1 = STADIUM.occupants(1);
     return { ko: o.ko.map(p => p.id), cas: o.cas.map(p => p.id), res: o.res.map(p => p.id), other: [...o1.ko, ...o1.cas].map(p => p.id), boxes: STADIUM.boxes().map(x => x.id) }; }, ids);
@@ -64,7 +65,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     state.camera.zoom = 2; state.camera.x = 9000; state.camera.y = -9000; render(); const a = view();
     state.camera.zoom = 0.4; state.camera.x = -9000; state.camera.y = 9000; render(); const b = view();
     resizeCanvas(); const before = { x: state.camera.x, y: state.camera.y }; render(); const moved = Math.abs(before.x - state.camera.x) + Math.abs(before.y - state.camera.y);
-    return { inX: a.x0 >= -6 * ts && a.x1 <= W + 6 * ts, inY: a.y0 >= -9 * ts && a.y1 <= H + 9 * ts, pitchSeen: b.x0 <= 0 && b.x1 >= W && b.y0 <= 0 && b.y1 >= H, moved };
+    return { inX: a.x0 >= -7 * ts && a.x1 <= W + 7 * ts, inY: a.y0 >= -9 * ts && a.y1 <= H + 9 * ts, pitchSeen: b.x0 <= 0 && b.x1 >= W && b.y0 <= 0 && b.y1 >= H, moved };
   });
   check(cam.inX && cam.inY, 'zoomed in, the view can\'t be dragged far from the pitch', cam);
   check(cam.pitchSeen, 'zoomed right out, the pitch stays on screen', cam);
@@ -73,6 +74,15 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   const st = await page.evaluate(() => { localStorage.removeItem('bb-stadium'); STADIUM.set(false); const q = STADIUM.query; STADIUM.set(true); const v = localStorage.getItem('bb-stadium'); STADIUM.set(false); return { q, v, off: localStorage.getItem('bb-stadium') }; });
   check(st.v === '1' && st.off === '0', 'Settings switch saves bb-stadium', st);
   check(!errors.length, 'no page errors', errors.slice(0, 3));
+  // the High Elf and Orc pitches have their own stadiums (?stadium=elven / =shanty): on, drawn without errors, with their own line colour
+  for (const [st, race] of [['elven', 'highelf'], ['shanty', 'orc']]) {
+    const s3 = await openGame(browser, { query: '?stadium=' + st });
+    const r3 = await s3.page.evaluate(([race]) => { localStorage.setItem('bb-replays', '0'); AI.set(0, true); AI.set(1, true); window.launchMatch(race, 'human', { replaceOk: true }); return true; }, [race]);
+    await s3.page.waitForTimeout(2500);
+    const o = await s3.page.evaluate(() => { drawFrame(); return { on: STADIUM.active(), style: PITCH.style, line: STADIUM.lineCol() }; });
+    check(r3 && o.on && o.style === st && !s3.errors.length, `${st} pitch: its own stadium is drawn`, Object.assign(o, { errors: s3.errors.slice(0, 2) }));
+    await s3.page.screenshot({ path: OUT + `/stadium-${st}.png` }); await s3.ctx.close();
+  }
   // ?simtest: never drawn
   const s2 = await openGame(browser, { query: '?simtest&stadium' });
   check(await s2.page.evaluate(() => !STADIUM.active()), 'not drawn in ?simtest');

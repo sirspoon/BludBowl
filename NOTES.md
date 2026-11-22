@@ -283,6 +283,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.66 (job session, 22 Nov): Stadium & dugouts, second round (again made locally and pushed as one version). Theme table `TH`
+  (blades / elven / shanty; `theme()` fills gaps from blades): terrace/step/wash, apron/blade/stripe/mud, line, ads/board/wall,
+  `dug` materials (awning 'stripes' | 'silk' | 'iron'), `extras` (`elvenExtras`, `orcExtras`), `roof` (`roofSlate`, `roofSilk`,
+  `roofIron`, ring depth `RD` 3.4 tiles, helpers `roofRing` / `roofEdge` / `roofShadow`), `outside` (the ground beyond, replaces the far
+  crowd tile). `active()` = any pitch in TH; `?stadium=elven|shanty`. Carried off: `STADIUM.removal(p, title)` from
+  `removePlayerWithFade` (KO / CASUALTY / BEATEN UP), `anims` drawn by `drawFront` after the players (the pitch loop skips
+  `carried(id)`); crowd scene when the player is off the pitch (fans `runner()` with race heads, junk, dust); medics `medicFor(team)`
+  = the race's lineman grid via `paintSprite` in white/red + a cross (`medicCv`). Camera x margin END+4.6. Next: more pitches' themes.
 - v5.65 (job session, 22 Nov): Stadium & dugouts, the owner's first round (made and checked locally, pushed as one version at the
   owner's request - they prefer a batch of changes to many small versions). Stands: `paintStands` returns two frames (fans bobbed
   1.8 px in the second); `fanBlocks` = 3x3-tile patches holding bobbing fans, `drawBack` copies a patch from frame 2 when its own

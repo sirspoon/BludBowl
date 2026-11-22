@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.65</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.66</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1347,7 +1347,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Kick-off replays<small>a close-up of each kick-off too, once the ball has come down (with Replays on)</small></span><button type="button" class="st-tog" id="st-replay-kick"></button></div>
             <div class="st-row"><span>HD sprites (test)<small>High Elves only: 1.5x the pixels (the originals, smoothed) or 2x (redrawn); other teams unchanged</small></span><button type="button" class="st-tog" id="st-hd"></button></div>
-            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. Classic grass pitch only for now (turning it on sets Pitch to Grass; leagues and tournaments play at the home ground, so not there yet). Also ?stadium in the address</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
+            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. On the grass, High Elf and Orc pitches for now (turning it on on another pitch sets Pitch to Grass; leagues and tournaments play at the home ground). Also ?stadium in the address (?stadium=elven, ?stadium=shanty)</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress, your saved replays (My matches) and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
@@ -8225,6 +8225,7 @@ ol.ci-steps li::marker { content: none; }
             if (addBlood && player.x >= 0 && player.y >= 0 && player.x < CFG.cols && player.y < CFG.rows) {
                 addBloodSplatter(player.x, player.y);
             }
+            try { STADIUM.removal(player, reasonTitle); } catch (e) {}   // (Stadium & dugouts: fans and a stretcher)
             showRemovalNotice(reasonTitle, `${ROSTERS[player.team].name} ${player.type} #${pNo(player)}: ${reasonDesc}`);
             log(`  ${ROSTERS[player.team].name} ${player.type} #${pNo(player)} leaves the pitch (${reasonDesc})!`, 'text-red-400 font-bold');
         }
@@ -22123,7 +22124,10 @@ ol.ci-steps li::marker { content: none; }
         const STADIUM = (() => {
             const Q = /[?&]stadium(?:[=&]|$)/.test(location.search);
             let pref = false; try { pref = localStorage.getItem('bb-stadium') === '1'; } catch (e) {}
-            if (Q) { pitchPref = 'blades'; PITCH.style = 'blades'; }   // (?stadium: the grass pitch for this visit, without changing the saved Pitch setting)
+            {   // (?stadium: the grass pitch for this visit, without changing the saved Pitch setting; ?stadium=elven / =shanty: that pitch)
+                const m = location.search.match(/[?&]stadium=(\w+)/), want = m && ['blades', 'elven', 'shanty'].includes(m[1]) ? m[1] : 'blades';
+                if (Q) { pitchPref = want; PITCH.style = want; }
+            }
             const T = () => CFG.tileSize;
             const SIDE = 1.2, END = 1.8, GAP = 0.2, DH = 3.9, WALL = 0.32, MX = 11, MY = 15, SC = 0.75;   // (tiles; SC: the stands' canvas resolution, 3 tiles = a whole 99 px)
             // both dugouts centred on the halfway line (the line of scrimmage), one on each touchline: team 0 below, team 1 above
@@ -22134,7 +22138,222 @@ ol.ci-steps li::marker { content: none; }
             const kits = () => [0, 1].map(t => { const s = teamStyle(t); return { fill: hex(s.fill, t ? '#16a34a' : '#2563eb'), text: hex(s.text, '#ffffff') }; });
             const names = () => [0, 1].map(t => String((ROSTERS[t] && (ROSTERS[t].name || ROSTERS[t].baseName)) || (t ? 'Away' : 'Home')));
             let stands = null, bobRate = [], standsKey = '', dugs = [null, null], dugKeys = ['', ''], cheerAt = -1e9, cheerTeam = 0, picked = null, hits = [];
-            function active() { return (pref || Q) && PITCH.style === 'blades' && !CLOCK.sim; }
+            function active() { return (pref || Q) && !!TH[PITCH.style] && !CLOCK.sim; }
+
+            // ---- each pitch's own stadium (from the close-up backdrops: clashBackdrop). Missing fields fall back to the grass pitch's ----
+            // terrace / step / wash: the stands' floor, its step lines, the dark wash over the crowd; apron, blade, stripe: the grass strip;
+            // line: the line round the pitch; ads / board / wall: the advertising boards; dug: the dugouts' materials; extras: towers, idols...
+            const TH = {
+                blades: {
+                    terrace: '#2b3038', step: 'rgba(255,255,255,0.05)', wash: 'rgba(12,15,22,0.38)',
+                    apron: ['#2b6e2d', '#276629'], blade: ['rgba(10,40,12,0.35)', 'rgba(120,190,100,0.18)'], stripe: 'rgba(255,255,255,0.035)', line: 'rgba(255,255,255,0.85)',
+                    ads: ['BLUDBOWL', 'NUFFLE SAYS NO', 'SPIKED ALE', 'STUNTY PIES', 'BONE HEAD BREWS', 'TROLL-TOUGH TAPE', 'GOBBO BOMBS'],
+                    dug: { shell: '#2a1d14', floor: ['#4b5058', '#3d4148'], speck: ['rgba(255,255,255,0.03)', 'rgba(0,0,0,0.05)'], bench: '#7c4a22', divider: '#2a1d14', rail: '#3b2a1e',
+                        plaque: '#0f172a', plaqueText: '#fde68a', plaqueEdge: 'rgba(251,191,36,0.6)', font: 'Teko, Inter, sans-serif', awning: 'stripes' },
+                    roof: roofSlate, outside: '#07090c'
+                },
+                // the High Elves: white marble, gold trim, silk awnings, slender towers with blue roofs and pennants, an emerald strip
+                elven: {
+                    terrace: '#9fa4a6', step: 'rgba(70,80,95,0.28)', wash: 'rgba(22,32,48,0.26)',
+                    apron: ['#2a8a50', '#257f49'], blade: ['rgba(18,70,40,0.3)', 'rgba(140,214,150,0.2)'], stripe: 'rgba(255,255,255,0.05)', line: 'rgba(252,244,214,0.95)',
+                    ads: ['ULTHUAN', 'PHOENIX ALE', 'STARWOOD BOWS', 'SAPHERY SPELLS', 'BLUDBOWL', 'SILVER HELM POLISH', 'LOTHERN LINES'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#e8e5dc'; g.fillRect(x, y, w, h); g.fillStyle = '#c9a85a'; g.fillRect(x, y, w, Math.max(1.5, h * 0.06)); g.fillRect(x, y + h - Math.max(1.5, h * 0.06), w, Math.max(1.5, h * 0.06)); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts) => {
+                        g.fillStyle = '#f2efe7'; g.fillRect(x + 1, y + 1, w - 2, h - 2);
+                        g.strokeStyle = '#c9a85a'; g.lineWidth = Math.max(1, ts * 0.035); g.strokeRect(x + 2.5, y + 2.5, w - 5, h - 5);
+                        g.fillStyle = kk ? kk.fill : '#1e3a5f'; g.font = `italic bold ${Math.round(Math.min(vert ? w : h, ts) * 0.6)}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, (vert ? h : w) * 0.86); g.restore();
+                    },
+                    dug: { shell: '#d6d2c6', floor: ['#e4e1d8', '#d4d0c6'], speck: ['rgba(120,128,140,0.12)', 'rgba(255,255,255,0.25)'], veins: true, bench: '#c9a66b', divider: '#bdb8aa', rail: '#cbc6b8', railTrim: '#c9a85a',
+                        plaque: '#1e3a5f', plaqueText: '#f3e3b0', plaqueEdge: '#c9a85a', font: "Georgia, 'Times New Roman', serif", fontStyle: 'italic bold', awning: 'silk', bannerEdge: '#c9a85a' },
+                    extras: elvenExtras, roof: roofSilk, outside: '#121c16'
+                },
+                // the Orcs: a shanty of rusty corrugated iron and planks on trampled mud - scrap watchtowers, skull totems, smoke, Gork and Mork
+                shanty: {
+                    terrace: '#3a2e23', step: 'rgba(0,0,0,0.3)', wash: 'rgba(16,10,6,0.3)', planks: true,
+                    apron: ['#5d4a2c', '#55432a'], blade: ['rgba(44,40,18,0.38)', 'rgba(120,124,60,0.3)'], stripe: null, mud: true, line: 'rgba(232,222,196,0.78)',
+                    ads: ['WAAAGH!', 'GORK', 'MORK', 'SQUIG PIES', 'ZOG OFF', 'TEEF 4 SALE', 'DA BOSS', 'BASH EM'],
+                    wall: (g, x, y, w, h) => {
+                        g.fillStyle = '#6a3a1f'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(30,14,6,0.35)';
+                        const vert = h > w; for (let k = 2; k < (vert ? h : w); k += 4) vert ? g.fillRect(x, y + k, w, 1.2) : g.fillRect(x + k, y, 1.2, h);
+                    },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {
+                        const rust = ['#7a4122', '#6c3a1e', '#84502a', '#5e4636'][(r() * 4) | 0];
+                        g.save(); g.translate(x + w / 2, y + h / 2); g.rotate((r() - 0.5) * 0.03);
+                        g.fillStyle = rust; g.fillRect(-w / 2 + 1, -h / 2 + 1, w - 2, h - 2);
+                        g.fillStyle = 'rgba(30,14,6,0.32)'; const L = vert ? h : w, S = vert ? w : h; for (let k = 2; k < L; k += 4) vert ? g.fillRect(-w / 2, -h / 2 + k, w, 1.2) : g.fillRect(-w / 2 + k, -h / 2, 1.2, h);
+                        if (r() < 0.5) { g.fillStyle = 'rgba(170,100,50,0.45)'; g.fillRect(-w * 0.2, -h * 0.3, w * 0.25, h * 0.4); }   // a patch
+                        g.fillStyle = kk && r() < 0.5 ? kk.fill : r() < 0.5 ? '#efe6d0' : '#c81e1e'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.66)}px Impact, Teko, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        if (vert) g.rotate(-Math.PI / 2); g.rotate((r() - 0.5) * 0.08); g.fillText(txt, 0, h * 0.03, L * 0.82); g.restore();
+                    },
+                    dug: { shell: '#4a3220', floor: ['#4d3d29', '#433523'], speck: ['rgba(20,12,4,0.25)', 'rgba(140,110,70,0.12)'], planksShell: true, bench: '#6b4a2a', divider: '#5a3c22', rail: '#6c3a1e', railIron: true,
+                        plaque: '#2e2216', plaqueText: '#efe6d0', plaqueEdge: 'rgba(0,0,0,0)', font: 'Impact, Teko, sans-serif', awning: 'iron', bannerEdge: '#3b2a1a' },
+                    extras: orcExtras, roof: roofIron, outside: '#120d08'
+                }
+            };
+            const theme = () => { const b = TH.blades, t = TH[PITCH.style] || b; return Object.assign({}, b, t, { dug: Object.assign({}, b.dug, t.dug || {}) }); };
+            // High Elf extras: slender marble towers at the corners and behind each end zone, seen from above (blue cone roofs, gold
+            // finials, team-coloured pennants), silk banners on the boards and gold-edged steps
+            function elfTower(g, cx, cy, R, k) {   // a slender marble tower seen from above: blue cone roof, gold finial, a pennant in k's colour
+                g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.ellipse(cx + R * 0.25, cy + R * 0.3, R * 1.08, R * 1.02, 0, 0, 7); g.fill();
+                g.fillStyle = '#efece4'; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.fill(); g.strokeStyle = '#c9a85a'; g.lineWidth = R * 0.07; g.stroke();
+                for (let i = 0; i < 12; i++) { const a0 = i * Math.PI / 6, a1 = a0 + Math.PI / 6; g.fillStyle = i % 2 ? '#3e6a96' : '#5a86b2'; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R * 0.82, a0, a1); g.closePath(); g.fill(); }
+                g.fillStyle = '#e9cf86'; g.beginPath(); g.arc(cx, cy, R * 0.14, 0, 7); g.fill();
+                g.strokeStyle = '#c9a85a'; g.lineWidth = R * 0.05; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - R * 1.5); g.stroke();
+                g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - R * 1.5); g.lineTo(cx + R * 0.9, cy - R * 1.32); g.lineTo(cx, cy - R * 1.12); g.closePath(); g.fill();
+            }
+            function elvenExtras(g, o) {
+                const { ts, K, r } = o, tower = (cx, cy, R, k) => elfTower(g, cx, cy, R, k);
+                const ax0 = (-END - WALL) * ts, ax1 = (CFG.cols + END + WALL) * ts, ay0 = (-SIDE - WALL) * ts, ay1 = (CFG.rows + SIDE + WALL) * ts, my = CFG.rows * ts / 2;
+                [[ax0 - ts * 1.1, ay0 - ts * 1.1, 0], [ax1 + ts * 1.1, ay0 - ts * 1.1, 1], [ax0 - ts * 1.1, ay1 + ts * 1.1, 0], [ax1 + ts * 1.1, ay1 + ts * 1.1, 1]].forEach(([x, y, t]) => tower(x, y, ts * 1.25, K[t]));
+                [[ax0 - ts * 2.2, my - ts * 3.5, 0], [ax0 - ts * 2.2, my + ts * 3.5, 0], [ax1 + ts * 2.2, my - ts * 3.5, 1], [ax1 + ts * 2.2, my + ts * 3.5, 1]].forEach(([x, y, t]) => tower(x, y, ts * 0.8, K[t]));
+                // a reflecting pool behind each end zone, between the towers
+                [[ax0 - ts * 3.2, 0], [ax1 + ts * 1.2, 1]].forEach(([x]) => {
+                    const pw = ts * 2, ph = ts * 4.4, py = my - ph / 2, gr = g.createLinearGradient(x, py, x + pw, py + ph); gr.addColorStop(0, '#7fb4d8'); gr.addColorStop(1, '#3f7fae');
+                    g.fillStyle = '#e8e5dc'; g.fillRect(x - ts * 0.15, py - ts * 0.15, pw + ts * 0.3, ph + ts * 0.3); g.fillStyle = gr; g.fillRect(x, py, pw, ph);
+                    g.fillStyle = 'rgba(255,255,255,0.35)'; for (let i = 0; i < 6; i++) g.fillRect(x + r() * pw * 0.7, py + r() * ph, pw * 0.25, 1.5);
+                });
+            }
+            // Orc extras: scrap watchtowers at the corners, skull totems along the boards, Gork and Mork's stone heads behind the end
+            // zones, and smoke drifting over the stands
+            function orcTower(g, cx, cy, s) {   // a plank platform on stilts, braced, a red war banner with a white skull
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(cx - s * 0.5 + s * 0.15, cy - s * 0.5 + s * 0.2, s, s);
+                g.strokeStyle = '#3a2716'; g.lineWidth = s * 0.07; g.beginPath(); g.moveTo(cx - s * 0.6, cy - s * 0.6); g.lineTo(cx + s * 0.6, cy + s * 0.6); g.moveTo(cx + s * 0.6, cy - s * 0.6); g.lineTo(cx - s * 0.6, cy + s * 0.6); g.stroke();
+                for (let i = 0; i < 5; i++) { g.fillStyle = ['#6b4a2a', '#5a3c22', '#7a5530'][i % 3]; g.fillRect(cx - s * 0.5, cy - s * 0.5 + i * s / 5, s, s / 5 - 1); }
+                g.fillStyle = '#84502a'; g.fillRect(cx - s * 0.5, cy - s * 0.5, s * 0.35, s * 0.3);
+                g.fillStyle = '#2e2216'; g.fillRect(cx - s * 0.03, cy - s * 1.25, s * 0.06, s * 0.8);
+                g.fillStyle = '#9b1c1c'; g.beginPath(); g.moveTo(cx + s * 0.03, cy - s * 1.25); g.lineTo(cx + s * 0.75, cy - s * 1.18); g.lineTo(cx + s * 0.6, cy - s * 1.02); g.lineTo(cx + s * 0.78, cy - s * 0.86); g.lineTo(cx + s * 0.03, cy - s * 0.9); g.fill();
+                g.fillStyle = '#efe6d0'; g.beginPath(); g.arc(cx + s * 0.33, cy - s * 1.08, s * 0.1, 0, 7); g.fill(); g.fillRect(cx + s * 0.27, cy - s * 1.02, s * 0.12, s * 0.06);
+            }
+            function orcExtras(g, o) {
+                const { ts, K, r } = o;
+                const ax0 = (-END - WALL) * ts, ax1 = (CFG.cols + END + WALL) * ts, ay0 = (-SIDE - WALL) * ts, ay1 = (CFG.rows + SIDE + WALL) * ts, my = CFG.rows * ts / 2;
+                const tower = (cx, cy, s) => orcTower(g, cx, cy, s);
+                [[ax0 - ts * 1.2, ay0 - ts * 1.2], [ax1 + ts * 1.2, ay0 - ts * 1.2], [ax0 - ts * 1.2, ay1 + ts * 1.2], [ax1 + ts * 1.2, ay1 + ts * 1.2]].forEach(([x, y]) => tower(x, y, ts * 1.8));
+                // Gork (broad, brutal) and Mork (narrow, cunning): stone heads behind each end zone, their eyes glowing
+                const head = (cx, cy, s, mork) => {
+                    const st = '#77736a', dk = '#55524b', lt = '#94907f';
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.ellipse(cx + s * 0.1, cy + s * 0.12, s * (mork ? 0.5 : 0.62), s * 0.62, 0, 0, 7); g.fill();
+                    g.fillStyle = st; g.beginPath(); g.ellipse(cx, cy, s * (mork ? 0.45 : 0.58), s * 0.58, 0, 0, 7); g.fill();
+                    g.fillStyle = dk; g.beginPath(); g.ellipse(cx, cy + s * 0.32, s * (mork ? 0.36 : 0.5), s * 0.24, 0, 0, Math.PI); g.fill();   // the jaw
+                    g.fillStyle = '#efe6d0'; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(cx + sd * s * 0.22, cy + s * 0.34); g.lineTo(cx + sd * s * 0.17, cy + s * 0.1); g.lineTo(cx + sd * s * 0.12, cy + s * 0.34); g.fill(); });   // tusks
+                    g.fillStyle = lt; g.fillRect(cx - s * (mork ? 0.32 : 0.42), cy - s * 0.2, s * (mork ? 0.64 : 0.84), s * 0.09);   // the brow
+                    g.fillStyle = '#f97316'; [-1, 1].forEach(sd => { g.beginPath(); g.arc(cx + sd * s * 0.17, cy - s * 0.04, s * 0.07, 0, 7); g.fill(); });
+                    g.fillStyle = 'rgba(249,115,22,0.25)'; [-1, 1].forEach(sd => { g.beginPath(); g.arc(cx + sd * s * 0.17, cy - s * 0.04, s * 0.16, 0, 7); g.fill(); });
+                    g.fillStyle = dk; g.beginPath(); g.moveTo(cx - s * 0.06, cy + s * 0.02); g.lineTo(cx + s * 0.06, cy + s * 0.02); g.lineTo(cx, cy + s * 0.16); g.fill();   // the nose
+                };
+                head(ax0 - ts * 2.4, my, ts * 3.2, false); head(ax1 + ts * 2.4, my, ts * 3.2, true);
+                // skull totems on poles along the boards
+                const skull = (x, y, s) => { g.fillStyle = '#3a2716'; g.fillRect(x - s * 0.06, y - s * 0.1, s * 0.12, s * 0.9); g.fillStyle = '#e8dfc6'; g.beginPath(); g.arc(x, y - s * 0.22, s * 0.24, 0, 7); g.fill(); g.fillRect(x - s * 0.13, y - s * 0.06, s * 0.26, s * 0.12);
+                    g.fillStyle = '#1c1410'; g.fillRect(x - s * 0.13, y - s * 0.28, s * 0.09, s * 0.09); g.fillRect(x + s * 0.04, y - s * 0.28, s * 0.09, s * 0.09); };
+                for (let x = ax0 + ts * 2; x < ax1 - ts; x += ts * 4.3) { if (x > (CFG.cols / 2 - 7.5) * ts && x < (CFG.cols / 2 + 7.5) * ts) continue; skull(x, ay0 - ts * 0.35, ts * 0.9); skull(x + ts * 2, ay1 + ts * 0.85, ts * 0.9); }
+                // smoke drifting over the stands
+                for (let i = 0; i < 26; i++) {
+                    const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (x > ax0 - ts && x < ax1 + ts && y > ay0 - ts * 6 && y < ay1 + ts * 6) continue;
+                    for (let k = 0; k < 5; k++) { g.fillStyle = `rgba(70,62,58,${(0.13 - k * 0.02).toFixed(3)})`; g.beginPath(); g.arc(x + k * ts * 0.25, y - k * ts * 0.35, ts * (0.5 + k * 0.28), 0, 7); g.fill(); }
+                }
+            }
+
+            // ---- the roof round the outside of the stands (over the top rows), in each pitch's style, with its towers. o: the stands'
+            // box X0..Y1 in pitch coordinates, R the roof's depth, K the kits, r a seeded random ----
+            const RD = 3.4;   // (tiles: the roof's depth)
+            function roofRing(g, o, paint) {   // the four sides of the ring, each handed to paint(x, y, w, h, side) - side: 'top', 'bottom', 'left', 'right'
+                const { X0, Y0, X1, Y1, R } = o;
+                paint(X0, Y0, X1 - X0, R, 'top'); paint(X0, Y1 - R, X1 - X0, R, 'bottom'); paint(X0, Y0 + R, R, Y1 - Y0 - 2 * R, 'left'); paint(X1 - R, Y0 + R, R, Y1 - Y0 - 2 * R, 'right');
+            }
+            function roofShadow(g, o, depth) {   // the roof's shadow falling on the rows inside it
+                const { X0, Y0, X1, Y1, R } = o, d = depth, sh = (x, y, w, h, ax, ay, bx, by) => { const gr = g.createLinearGradient(ax, ay, bx, by); gr.addColorStop(0, 'rgba(0,0,0,0.5)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(x, y, w, h); };
+                sh(X0 + R, Y0 + R, X1 - X0 - 2 * R, d, 0, Y0 + R, 0, Y0 + R + d); sh(X0 + R, Y1 - R - d, X1 - X0 - 2 * R, d, 0, Y1 - R, 0, Y1 - R - d);
+                sh(X0 + R, Y0 + R, d, Y1 - Y0 - 2 * R, X0 + R, 0, X0 + R + d, 0); sh(X1 - R - d, Y0 + R, d, Y1 - Y0 - 2 * R, X1 - R, 0, X1 - R - d, 0);
+            }
+            // the inner edge of the ring as a list of points along each side (for scallops, pennants, a jagged edge)
+            function roofEdge(o, step, each) {
+                const { X0, Y0, X1, Y1, R } = o, ix0 = X0 + R, iy0 = Y0 + R, ix1 = X1 - R, iy1 = Y1 - R;
+                for (let x = ix0; x < ix1; x += step) { each(x, iy0, Math.min(step, ix1 - x), 0, 1); each(x, iy1, Math.min(step, ix1 - x), 0, -1); }
+                for (let y = iy0; y < iy1; y += step) { each(ix0, y, Math.min(step, iy1 - y), 1, 0); each(ix1, y, Math.min(step, iy1 - y), -1, 0); }
+            }
+            // grass: an Old World stand roof - dark slate shingles on timber beams, a carved timber fascia - with stone turrets (slate
+            // cone roofs, flags in the teams' colours) at the corners and halfway along each side
+            function roofSlate(g, o) {
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.5 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right';
+                    g.fillStyle = '#3a3f47'; g.fillRect(x, y, w, h);
+                    const row = ts * 0.32, sh = ts * 0.5;   // rows of shingles, each row offset by half a shingle, each shingle a shade of slate
+                    for (let a = 0, n = 0; a < (v ? w : h); a += row, n++) for (let b = (n % 2) * sh / 2 - sh; b < (v ? h : w); b += sh) {
+                        g.fillStyle = ['#454b54', '#3c4149', '#4e545e', '#363b42'][(r() * 4) | 0];
+                        v ? g.fillRect(x + a, y + b, row - 1, sh - 1) : g.fillRect(x + b, y + a, sh - 1, row - 1);
+                    }
+                    g.fillStyle = '#5a3d24';   // the timber beams across it
+                    for (let k = ts * 2; k < (v ? h : w); k += ts * 4) v ? g.fillRect(x, y + k, w, ts * 0.14) : g.fillRect(x + k, y, ts * 0.14, h);
+                });
+                roofEdge(o, ts * 0.5, (x, y, len, nx, ny) => {   // the timber fascia along the inner edge, with a carved scallop
+                    g.fillStyle = '#6b4a2a'; const d = ts * 0.2;
+                    if (ny) { g.fillRect(x, y - (ny > 0 ? d : 0), len, d); g.beginPath(); g.arc(x + len / 2, y, len * 0.32, ny > 0 ? 0 : Math.PI, ny > 0 ? Math.PI : 0); g.fill(); }
+                    else { g.fillRect(x - (nx > 0 ? d : 0), y, d, len); g.beginPath(); g.arc(x, y + len / 2, len * 0.32, nx > 0 ? -Math.PI / 2 : Math.PI / 2, nx > 0 ? Math.PI / 2 : Math.PI * 1.5); g.fill(); }
+                });
+                const turret = (cx, cy, Rr, k) => {   // a round stone turret seen from above: a ring of stone, a slate cone, a flag
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.ellipse(cx + Rr * 0.25, cy + Rr * 0.3, Rr * 1.05, Rr, 0, 0, 7); g.fill();
+                    g.fillStyle = '#b3ad9f'; g.beginPath(); g.arc(cx, cy, Rr, 0, 7); g.fill(); g.strokeStyle = '#7d776b'; g.lineWidth = Rr * 0.08; g.stroke();
+                    for (let i = 0; i < 10; i++) { const a0 = i * Math.PI / 5; g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(cx + Math.cos(a0) * Rr * 0.86 - 1, cy + Math.sin(a0) * Rr * 0.86 - 1, 2, 2); }
+                    for (let i = 0; i < 10; i++) { const a0 = i * Math.PI / 5, a1 = a0 + Math.PI / 5; g.fillStyle = i % 2 ? '#4a515c' : '#626a76'; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, Rr * 0.78, a0, a1); g.closePath(); g.fill(); }
+                    g.strokeStyle = '#3a2716'; g.lineWidth = Rr * 0.06; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - Rr * 1.6); g.stroke();
+                    g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - Rr * 1.6); g.lineTo(cx + Rr * 0.95, cy - Rr * 1.45); g.lineTo(cx + Rr * 0.8, cy - Rr * 1.3); g.lineTo(cx + Rr * 0.95, cy - Rr * 1.12); g.lineTo(cx, cy - Rr * 1.2); g.fill();
+                    g.fillStyle = k.text; g.fillRect(cx + Rr * 0.12, cy - Rr * 1.42, Rr * 0.5, Rr * 0.08);
+                };
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx, Y0 + e, r() < 0.5 ? 0 : 1], [mx, Y1 - e, r() < 0.5 ? 0 : 1], [X0 + e, my, 0], [X1 - e, my, 1]].forEach(([x, y, t]) => turret(x, y, ts * 1.1, K[t]));
+            }
+            // High Elves: canopies of white silk with gold trim, their inner edge cut in pennant points of blue and the teams' colours;
+            // slender towers along the ring
+            function roofSilk(g, o) {
+                const { ts, R, K } = o; roofShadow(g, o, 1.3 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    g.fillStyle = '#d8d4c8'; g.fillRect(x, y, w, h); const v = side === 'left' || side === 'right';
+                    for (let k = 0; k < (v ? h : w); k += ts * 0.9) { g.fillStyle = 'rgba(150,160,175,0.18)'; v ? g.fillRect(x, y + k, w, ts * 0.45) : g.fillRect(x + k, y, ts * 0.45, h); }   // folds
+                    g.fillStyle = '#c9a85a'; const t = Math.max(2, ts * 0.06); v ? g.fillRect(side === 'left' ? x + w - t : x, y, t, h) : g.fillRect(x, side === 'top' ? y + h - t : y, w, t);
+                });
+                let i = 0;
+                roofEdge(o, ts * 0.8, (x, y, len, nx, ny) => {
+                    const col = [ '#3e6a96', K[0].fill, '#e9e5da', K[1].fill ][i++ % 4]; g.fillStyle = col; g.beginPath();
+                    if (ny) { g.moveTo(x, y); g.lineTo(x + len / 2, y + ny * ts * 0.45); g.lineTo(x + len, y); } else { g.moveTo(x, y); g.lineTo(x + nx * ts * 0.45, y + len / 2); g.lineTo(x, y + len); }
+                    g.fill();
+                });
+                const { X0, Y0, X1, Y1 } = o, e = R * 0.45;
+                for (let x = X0 + e; x <= X1 - e + 1; x += (X1 - X0 - 2 * e) / 6) { elfTower(g, x, Y0 + e, ts * 0.85, K[x < (X0 + X1) / 2 ? 0 : 1]); elfTower(g, x, Y1 - e, ts * 0.85, K[x < (X0 + X1) / 2 ? 0 : 1]); }
+                for (let y = Y0 + e + (Y1 - Y0 - 2 * e) / 4; y < Y1 - e - 1; y += (Y1 - Y0 - 2 * e) / 4) { elfTower(g, X0 + e, y, ts * 0.85, K[0]); elfTower(g, X1 - e, y, ts * 0.85, K[1]); }
+            }
+            // Orcs: sheets of rusty corrugated iron nailed over the top rows, patched, their inner edge jagged; watchtowers at the
+            // corners and halfway along, skulls on spikes along the edge
+            function roofIron(g, o) {
+                const { ts, R, r } = o;
+                const RUST = ['#6a3a1f', '#7a4122', '#5e4636', '#84502a', '#4f3a2a'];
+                // sheets nailed on from the outside in, each its own length (some short, some sticking out further), the odd one missing
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right', L = v ? h : w, out = side === 'top' || side === 'left' ? 1 : -1;
+                    const edge = side === 'top' ? y : side === 'bottom' ? y + h : side === 'left' ? x : x + w;   // the outer edge; sheets run inward from it
+                    for (let k = 0; k < L; ) {
+                        const sw = ts * (1.1 + r() * 1.3), a0 = (v ? y : x) + k, gap = r() < 0.12, dep = R * (0.62 + r() * 0.56), skew = (r() - 0.5) * ts * 0.35;
+                        if (gap) {   // a missing sheet: just the rafters, the crowd showing through
+                            g.fillStyle = '#3a2716'; v ? (g.fillRect(edge + (out > 0 ? 0 : -dep), a0 + sw * 0.15, dep, ts * 0.1), g.fillRect(edge + (out > 0 ? 0 : -dep), a0 + sw * 0.75, dep, ts * 0.1)) : (g.fillRect(a0 + sw * 0.15, edge + (out > 0 ? 0 : -dep), ts * 0.1, dep), g.fillRect(a0 + sw * 0.75, edge + (out > 0 ? 0 : -dep), ts * 0.1, dep));
+                            k += sw; continue;
+                        }
+                        const end = edge + out * dep;
+                        const quad = (e0, e1, sk) => { g.beginPath(); if (v) { g.moveTo(e0, a0); g.lineTo(e1 + sk, a0); g.lineTo(e1 - sk, a0 + sw); g.lineTo(e0, a0 + sw); } else { g.moveTo(a0, e0); g.lineTo(a0, e1 + sk); g.lineTo(a0 + sw, e1 - sk); g.lineTo(a0 + sw, e0); } g.closePath(); g.fill(); };
+                        { const sh = g.createLinearGradient(v ? end : 0, v ? 0 : end, v ? end + out * ts * 0.7 : 0, v ? 0 : end + out * ts * 0.7); sh.addColorStop(0, 'rgba(0,0,0,0.45)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = sh; quad(end, end + out * ts * 0.7, skew); }   // its shadow on the rows below
+                        g.fillStyle = RUST[(r() * RUST.length) | 0]; quad(edge, end, skew);
+                        g.save(); g.clip(); g.fillStyle = 'rgba(25,12,5,0.35)';
+                        for (let q = 3; q < sw; q += 4) v ? g.fillRect(Math.min(edge, end) - ts, a0 + q, Math.abs(dep) + 2 * ts, 1.2) : g.fillRect(a0 + q, Math.min(edge, end) - ts, 1.2, Math.abs(dep) + 2 * ts);   // ridges
+                        if (r() < 0.35) { g.fillStyle = 'rgba(160,96,50,0.45)'; const pd = dep * (0.2 + r() * 0.4); v ? g.fillRect(edge + out * pd - (out < 0 ? dep * 0.3 : 0), a0 + sw * 0.2, dep * 0.3, sw * 0.5) : g.fillRect(a0 + sw * 0.2, edge + out * pd - (out < 0 ? dep * 0.3 : 0), sw * 0.5, dep * 0.3); }   // a patch
+                        g.restore();
+                        k += sw - ts * 0.08;   // (sheets overlap a little)
+                    }
+                });
+                const spike = (x, y) => { g.fillStyle = '#2e2216'; g.fillRect(x - ts * 0.04, y - ts * 0.55, ts * 0.08, ts * 0.6); g.fillStyle = '#e8dfc6'; g.beginPath(); g.arc(x, y - ts * 0.6, ts * 0.17, 0, 7); g.fill(); g.fillStyle = '#1c1410'; g.fillRect(x - ts * 0.1, y - ts * 0.66, ts * 0.07, ts * 0.07); g.fillRect(x + ts * 0.03, y - ts * 0.66, ts * 0.07, ts * 0.07); };
+                let n = 0; roofEdge(o, ts * 3.1, (x, y, len, nx, ny) => { if (n++ % 2) return; spike(x + (ny ? len / 2 : 0) + nx * ts * 0.25, y + (nx ? len / 2 : 0) + ny * ts * 0.25); });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e], [X1 - e, Y0 + e], [X0 + e, Y1 - e], [X1 - e, Y1 - e], [mx - ts * 9, Y0 + e], [mx + ts * 9, Y1 - e], [X0 + e, my], [X1 - e, my]].forEach(([x, y]) => orcTower(g, x, y, ts * 1.6));
+            }
 
             // ---- the stands: everything outside the apron. Painted twice, once with about half the fans bobbing up (at the knees),
             // and each patch of BL x BL flips between the two at its own pace (drawBack): a crowd that shifts about, for a few image
@@ -22203,7 +22422,7 @@ ol.ci-steps li::marker { content: none; }
             }
             let fanBlocks = null;   // [bx, by] patches that hold bobbing fans (drawBack flips only those)
             function paintStands() {
-                const ts = T(), K = kits(), W = (CFG.cols + 2 * MX) * ts, H = (CFG.rows + 2 * MY) * ts, r = pitchRng(9071 + CFG.cols);
+                const th = theme(), ts = T(), K = kits(), W = (CFG.cols + 2 * MX) * ts, H = (CFG.rows + 2 * MY) * ts, r = pitchRng(9071 + CFG.cols);
                 const X0 = -MX * ts, Y0 = -MY * ts, X1 = (CFG.cols + MX) * ts, Y1 = (CFG.rows + MY) * ts;
                 const d0 = dugRect(0), d1 = dugRect(1);
                 const aprons = [{ x: -END, y: -SIDE, w: CFG.cols + 2 * END, h: CFG.rows + 2 * SIDE }].concat([d0, d1].map(d => ({ x: d.x - 0.3, y: d.y - (d.flip ? GAP : 0.3), w: d.w + 0.6, h: d.h + GAP + 0.3 })));
@@ -22238,39 +22457,43 @@ ol.ci-steps li::marker { content: none; }
                 fans.sort((a, b) => a.y - b.y);   // (back rows first)
                 const blocks = new Set(); fans.forEach(f => { if (f.bob) blocks.add(f.bob.join(',')); });
                 fanBlocks = [...blocks].map(s => s.split(',').map(Number));
-                const ADS = ['BLUDBOWL', 'NUFFLE SAYS NO', 'SPIKED ALE', 'STUNTY PIES', 'BONE HEAD BREWS', 'TROLL-TOUGH TAPE', 'GOBBO BOMBS'];
+                const ADS = th.ads;
                 const frame = bob => {
                     const cv = document.createElement('canvas'); cv.width = Math.round(W * SC); cv.height = Math.round(H * SC);
                     const g = cv.getContext('2d'); g.setTransform(SC, 0, 0, SC, MX * ts * SC, MY * ts * SC);   // (pitch coordinates from here on)
-                    g.fillStyle = '#2b3038'; g.fillRect(X0, Y0, W, H);
-                    g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,0.05)';   // the terrace steps
+                    g.fillStyle = th.terrace; g.fillRect(X0, Y0, W, H);
+                    if (th.planks) { const pr = pitchRng(61); for (let y = Y0; y < Y1; y += ROW / 2) for (let x = X0; x < X1; x += ts * (1.5 + pr() * 2)) { g.fillStyle = `rgba(${pr() < 0.5 ? '90,64,40' : '20,12,6'},${(0.12 + pr() * 0.18).toFixed(2)})`; g.fillRect(x, y, ts * 2, ROW / 2 - 1.5); } }   // (the orcs' terraces: rough planks)
+                    g.lineWidth = 2; g.strokeStyle = th.step;   // the terrace steps
                     for (let y = Y0; y < Y1; y += ROW) if (!endBand(y)) { g.beginPath(); g.moveTo(X0, y); g.lineTo(X1, y); g.stroke(); }
                     for (let x = X0; x < X1; x += ROW) { g.beginPath(); g.moveTo(x, -SIDE * ts); g.lineTo(x, (CFG.rows + SIDE) * ts); g.stroke(); }
                     fans.forEach(f => drawFan(g, f, bob && f.bob ? 1.8 : 0));
-                    g.fillStyle = 'rgba(12,15,22,0.38)'; g.fillRect(X0, Y0, W, H);   // (a dark wash: the crowd stays in the background)
+                    g.fillStyle = th.wash; g.fillRect(X0, Y0, W, H);   // (a dark wash: the crowd stays in the background)
                     g.fillStyle = 'rgba(255,255,255,0.06)';   // the aisles' stair treads
                     for (let y = Y0; y < Y1; y += ROW / 2) for (let x = X0; x < X1; x += ROW / 2) if (aisle(x, y) && !inWall(x, y, 0.1)) g.fillRect(x, y, ROW / 2 - 1, 2);
                     // the top rows fade into the roof's shadow
                     const fade = (x0, y0, x1, y1, ax, ay, bx, by) => { const gr = g.createLinearGradient(ax, ay, bx, by); gr.addColorStop(0, 'rgba(5,7,10,0)'); gr.addColorStop(1, 'rgba(5,7,10,0.75)'); g.fillStyle = gr; g.fillRect(x0, y0, x1 - x0, y1 - y0); };
                     // (each edge reaches the far crowd's darkness exactly at the canvas edge; in the corners the darker of the two, not both)
-                    const fz = 7 * ts, ed = (x, y) => Math.min(1, Math.max(0, 1 - Math.min(x - X0, X1 - x) / fz, 1 - Math.min(y - Y0, Y1 - y) / fz));
-                    for (let y = Y0; y < Y1; y += ts / 4) for (let x = X0; x < X1; x += ts / 4) { const k = ed(x + ts / 8, y + ts / 8); if (k > 0) { g.fillStyle = `rgba(5,7,10,${(0.75 * k).toFixed(3)})`; g.fillRect(x, y, ts / 4, ts / 4); } }
+                    const fz = 6 * ts, ed = (x, y) => Math.min(1, Math.max(0, 1 - Math.min(x - X0, X1 - x) / fz, 1 - Math.min(y - Y0, Y1 - y) / fz));
+                    for (let y = Y0; y < Y1; y += ts / 4) for (let x = X0; x < X1; x += ts / 4) { const k = ed(x + ts / 8, y + ts / 8); if (k > 0) { g.fillStyle = `rgba(5,7,10,${(0.45 * k).toFixed(3)})`; g.fillRect(x, y, ts / 4, ts / 4); } }
                     // the advertising boards round the apron, then the apron's grass (darker than the pitch, mown in stripes)
-                    aprons.forEach(a => { g.fillStyle = '#111317'; g.fillRect((a.x - WALL) * ts, (a.y - WALL) * ts, (a.w + 2 * WALL) * ts, (a.h + 2 * WALL) * ts); });
+                    aprons.forEach(a => { const x = (a.x - WALL) * ts, y = (a.y - WALL) * ts, w = (a.w + 2 * WALL) * ts, h = (a.h + 2 * WALL) * ts; if (th.wall) { th.wall(g, x, y, w, WALL * ts); th.wall(g, x, y + h - WALL * ts, w, WALL * ts); th.wall(g, x, y, WALL * ts, h); th.wall(g, x + w - WALL * ts, y, WALL * ts, h); } else { g.fillStyle = '#111317'; g.fillRect(x, y, w, h); } });
                     aprons.forEach(a => {
-                        const gr = g.createLinearGradient(0, a.y * ts, 0, (a.y + a.h) * ts); gr.addColorStop(0, '#2b6e2d'); gr.addColorStop(1, '#276629');
+                        const gr = g.createLinearGradient(0, a.y * ts, 0, (a.y + a.h) * ts); gr.addColorStop(0, th.apron[0]); gr.addColorStop(1, th.apron[1]);
                         g.fillStyle = gr; g.fillRect(a.x * ts, a.y * ts, a.w * ts, a.h * ts);
-                        for (let x = Math.ceil(a.x); x < a.x + a.w; x += 2) { g.fillStyle = 'rgba(255,255,255,0.035)'; g.fillRect(x * ts, a.y * ts, ts, a.h * ts); }
+                        if (th.stripe) for (let x = Math.ceil(a.x); x < a.x + a.w; x += 2) { g.fillStyle = th.stripe; g.fillRect(x * ts, a.y * ts, ts, a.h * ts); }
+                        if (th.mud) { const mr = pitchRng(17 + Math.round(a.x * 10)); for (let i = 0; i < a.w * a.h * 0.5; i++) { const x = (a.x + mr() * a.w) * ts, y = (a.y + mr() * a.h) * ts, rr = ts * (0.3 + mr() * 0.9); g.fillStyle = `rgba(${(52 + mr() * 20) | 0},${(38 + mr() * 12) | 0},${(22 + mr() * 8) | 0},${(0.14 + mr() * 0.2).toFixed(2)})`; g.beginPath(); g.ellipse(x, y, rr, rr * 0.6, mr() * 3, 0, 7); g.fill(); } }   // (trampled mud)
                         const gr2 = pitchRng(5 + Math.round(a.x * 10 + a.y * 100));   // blades of grass, like the pitch's own (not under the pitch itself)
                         for (let i = 0; i < a.w * a.h * 36; i++) {
                             const x = (a.x + gr2() * a.w) * ts, y = (a.y + gr2() * a.h) * ts; if (x > 0 && x < CFG.cols * ts && y > 0 && y < CFG.rows * ts) continue;
-                            g.fillStyle = gr2() < 0.5 ? 'rgba(10,40,12,0.35)' : 'rgba(120,190,100,0.18)'; g.fillRect(x, y, 1.6, 3 + gr2() * 3);
+                            if (th.mud && gr2() < 0.55) continue;   // (sparse tufts on the orcs' mud)
+                            g.fillStyle = gr2() < 0.5 ? th.blade[0] : th.blade[1]; g.fillRect(x, y, 1.6, 3 + gr2() * 3);
                         }
                     });
-                    let ai = 0;
+                    let ai = 0; const br = pitchRng(733);
                     const board = (x, y, w, h, vert) => {
                         const cx = x + w / 2, cy = y + h / 2; if (aprons.some(a => cx > a.x * ts && cx < (a.x + a.w) * ts && cy > a.y * ts && cy < (a.y + a.h) * ts)) return;
                         const kk = ai % 3 === 2 ? null : K[ai % 3], txt = ADS[ai++ % ADS.length];
+                        if (th.board) { th.board(g, x, y, w, h, vert, kk, txt, ts, br); return; }
                         g.fillStyle = kk ? kk.fill : '#0f172a'; g.fillRect(x + 1, y + 1, w - 2, h - 2);
                         g.fillStyle = kk ? kk.text : '#fbbf24'; g.font = `bold ${Math.round(Math.min(vert ? w : h, ts) * 0.62)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
                         g.save(); g.translate(cx, cy + (vert ? 0 : h * 0.06)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, (vert ? h : w) * 0.9); g.restore();
@@ -22280,22 +22503,16 @@ ol.ci-steps li::marker { content: none; }
                         for (let x = (a.x - WALL) * ts; x < (a.x + a.w + WALL) * ts - 1; x += L) { const w = Math.min(L, (a.x + a.w + WALL) * ts - x); if (w > ts) { board(x, (a.y - WALL) * ts, w, wl); board(x, (a.y + a.h) * ts, w, wl); } }
                         for (let y = a.y * ts; y < (a.y + a.h) * ts - 1; y += L) { const h = Math.min(L, (a.y + a.h) * ts - y); if (h > ts) { board((a.x - WALL) * ts, y, wl, h, true); board((a.x + a.w) * ts, y, wl, h, true); } }
                     });
+                    if (th.extras) th.extras(g, { ts, K, r: pitchRng(4242), X0, Y0, X1, Y1 });   // (the pitch's own towers, idols...)
+                    if (th.roof) th.roof(g, { ts, K, r: pitchRng(919), X0, Y0, X1, Y1, R: RD * ts });   // (the roof round the outside, over the top rows)
                     const gl = g.createRadialGradient(midX, CFG.rows * ts / 2, CFG.rows * ts * 0.6, midX, CFG.rows * ts / 2, CFG.cols * ts * 0.85);   // floodlight glow on the near rows
                     gl.addColorStop(0, 'rgba(255,250,230,0.07)'); gl.addColorStop(1, 'rgba(255,250,230,0)'); g.fillStyle = gl; g.fillRect(X0, Y0, W, H);
                     return cv;
                 };
                 // the far crowd beyond the painted stands (seen only zoomed right out): a small tile of fans, as dark as the stands' faded
                 // top rows, repeated (drawBack fills the view with it before drawing the stands)
-                const tw = 6 * ts, th = 4 * ts, tc = document.createElement('canvas'); tc.width = tw; tc.height = th;
-                const tg = tc.getContext('2d'); tg.fillStyle = '#2b3038'; tg.fillRect(0, 0, tw, th);
-                const far = [];
-                for (let y = ROW * 0.6; y < th; y += ROW) for (let x = 0.2 * ts; x < tw - 0.2 * ts; x += ts * 0.4) {
-                    const team = r() < 0.5 ? 0 : 1, k = K[team], f = { seed: (r() * 1e9) | 0, fam: r() < 0.75 ? fam[team] : pickOf(FAMS, r), shirt: shade(r() < 0.72 ? k.fill : k.text, (r() - 0.5) * 0.36), x, y, s: ts * 1.05 };
-                    if (f.fam === 'underworld') f.fam = 'goblin';
-                    far.push(f);
-                }
-                far.forEach(f => drawFan(tg, f, 0));
-                tg.fillStyle = 'rgba(12,15,22,0.38)'; tg.fillRect(0, 0, tw, th); tg.fillStyle = 'rgba(5,7,10,0.75)'; tg.fillRect(0, 0, tw, th);
+                // outside the stadium (seen only zoomed right out): the dark ground round it, in the pitch's own tone
+                const tc = document.createElement('canvas'); tc.width = tc.height = 8; const tg = tc.getContext('2d'); tg.fillStyle = th.outside || '#07090c'; tg.fillRect(0, 0, 8, 8);
                 farTile = tc;
                 return [frame(false), frame(true)];
             }
@@ -22306,24 +22523,26 @@ ol.ci-steps li::marker { content: none; }
             const AWN = 0.9, BENCH = 0.24, RAIL = 0.52;   // (tiles)
             const bays = d => { const w = d.w / 3; return [['res', 'RESERVES', 0, w], ['ko', 'KNOCKED OUT', w, w], ['cas', 'CASUALTIES', 2 * w, w]]; };   // (equal thirds: a bloody match fills the last two)
             function paintDugout(t) {
-                const ts = T(), d = dugRect(t), K = kits()[t], W = d.w * ts, H = d.h * ts, cv = document.createElement('canvas');
+                const D = theme().dug, ts = T(), d = dugRect(t), K = kits()[t], W = d.w * ts, H = d.h * ts, cv = document.createElement('canvas');
                 cv.width = Math.round(W * DS); cv.height = Math.round(H * DS);
                 const g = cv.getContext('2d'); g.scale(DS, DS);
                 const awY = d.flip ? H - AWN * ts : 0, railY = d.flip ? 0 : H - RAIL * ts, benchY = d.flip ? awY - BENCH * ts : AWN * ts;
                 // shell and floor
-                g.fillStyle = '#2a1d14'; if (g.roundRect) { g.beginPath(); g.roundRect(0, 0, W, H, ts * 0.12); g.fill(); } else g.fillRect(0, 0, W, H);
-                const fl = g.createLinearGradient(0, 0, 0, H); fl.addColorStop(0, '#4b5058'); fl.addColorStop(1, '#3d4148');
-                g.fillStyle = fl; g.fillRect(ts * 0.08, ts * 0.08, W - ts * 0.16, H - ts * 0.16);
+                g.fillStyle = D.shell; if (g.roundRect) { g.beginPath(); g.roundRect(0, 0, W, H, ts * 0.12); g.fill(); } else g.fillRect(0, 0, W, H);
                 const r = pitchRng(311 + t);
-                for (let i = 0; i < W * H / 60; i++) { g.fillStyle = r() < 0.5 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)'; g.fillRect(r() * W, r() * H, 1.5, 1.5); }
+                if (D.planksShell) { g.fillStyle = 'rgba(0,0,0,0.25)'; for (let y = ts * 0.12; y < H; y += ts * 0.16) g.fillRect(0, y, W, 1.2); }   // (rough planks)
+                const fl = g.createLinearGradient(0, 0, 0, H); fl.addColorStop(0, D.floor[0]); fl.addColorStop(1, D.floor[1]);
+                g.fillStyle = fl; g.fillRect(ts * 0.08, ts * 0.08, W - ts * 0.16, H - ts * 0.16);
+                for (let i = 0; i < W * H / 60; i++) { g.fillStyle = r() < 0.5 ? D.speck[0] : D.speck[1]; g.fillRect(r() * W, r() * H, 1.5, 1.5); }
+                if (D.veins) { g.strokeStyle = 'rgba(130,136,146,0.28)'; g.lineWidth = 1; for (let i = 0; i < 14; i++) { let x = r() * W, y = r() * H; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (r() - 0.3) * ts * 0.6; y += (r() - 0.5) * ts * 0.3; g.lineTo(x, y); } g.stroke(); } }   // (marble veins)
                 // the bench along the back
-                g.fillStyle = '#7c4a22'; g.fillRect(ts * 0.1, benchY, W - ts * 0.2, BENCH * ts);
+                g.fillStyle = D.bench; g.fillRect(ts * 0.1, benchY, W - ts * 0.2, BENCH * ts);
                 g.fillStyle = 'rgba(0,0,0,0.25)'; for (let x = ts * 0.1; x < W - ts * 0.1; x += ts * 1.1) g.fillRect(x, benchY, 1.5, BENCH * ts);
                 g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(ts * 0.1, benchY + (d.flip ? BENCH * ts - 2 : 0), W - ts * 0.2, 2);
                 // bays: low walls between them, a plaque on the front rail, a sign on the back wall
                 const B = bays(d);
                 B.forEach(([k, lab, x0, w], i) => {
-                    if (i) { g.fillStyle = '#2a1d14'; g.fillRect(x0 * ts - ts * 0.05, 0, ts * 0.1, H); g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(x0 * ts - ts * 0.05, 0, 1.5, H); }
+                    if (i) { g.fillStyle = D.divider; g.fillRect(x0 * ts - ts * 0.05, 0, ts * 0.1, H); g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(x0 * ts - ts * 0.05, 0, 1.5, H); }
                     if (k === 'ko') {   // a bucket of water and a sponge
                         const bx = (x0 + w) * ts - ts * 0.32, by = d.flip ? railY + RAIL * ts + ts * 0.3 : railY - ts * 0.3;
                         g.fillStyle = '#64748b'; g.beginPath(); g.moveTo(bx - ts * 0.13, by - ts * 0.12); g.lineTo(bx + ts * 0.13, by - ts * 0.12); g.lineTo(bx + ts * 0.1, by + ts * 0.12); g.lineTo(bx - ts * 0.1, by + ts * 0.12); g.closePath(); g.fill();
@@ -22339,25 +22558,45 @@ ol.ci-steps li::marker { content: none; }
                     }
                 });
                 // the front rail (the side facing the pitch), with the bays' plaques
-                g.fillStyle = '#3b2a1e'; g.fillRect(0, railY, W, RAIL * ts);
-                g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(0, d.flip ? railY + RAIL * ts - 2 : railY, W, 2);
+                g.fillStyle = D.rail; g.fillRect(0, railY, W, RAIL * ts);
+                if (D.railIron) { g.fillStyle = 'rgba(30,14,6,0.35)'; for (let x = 2; x < W; x += 4) g.fillRect(x, railY, 1.2, RAIL * ts); }   // (corrugated iron)
+                g.fillStyle = D.railTrim || 'rgba(255,255,255,0.1)'; g.fillRect(0, d.flip ? railY + RAIL * ts - 2 : railY, W, 2);
                 B.forEach(([k, lab, x0, w]) => {
                     const pw = Math.min(w * ts - ts * 0.3, ts * 3), px = (x0 + w / 2) * ts - pw / 2, py = railY + ts * 0.05, ph = RAIL * ts - ts * 0.1;
-                    g.fillStyle = '#0f172a'; g.fillRect(px, py, pw, ph); g.strokeStyle = 'rgba(251,191,36,0.6)'; g.lineWidth = 1; g.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
-                    g.fillStyle = '#fde68a'; g.font = `bold ${Math.round(ph * 0.86)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-                    g.fillText(lab, px + pw / 2, py + ph / 2 + ph * 0.08, pw - 6);
+                    g.fillStyle = D.plaque; g.fillRect(px, py, pw, ph); g.strokeStyle = D.plaqueEdge; g.lineWidth = 1; g.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
+                    const serif = /Georgia/.test(D.font), fz = Math.round(ph * (serif ? 0.62 : D.font.startsWith('Impact') ? 0.66 : 0.86));
+                    g.fillStyle = D.plaqueText; g.font = `${D.fontStyle || 'bold'} ${fz}px ${D.font}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                    g.fillText(serif ? lab.charAt(0) + lab.slice(1).toLowerCase().replace(/ (\w)/g, (m, c) => ' ' + c.toUpperCase()) : lab, px + pw / 2, py + ph / 2 + ph * (serif ? 0.04 : 0.08), pw - 6);
                 });
                 // the awning in team colours: stripes, a scalloped edge over the bench, the team's name on a banner
-                const aw = AWN * ts;
-                for (let x = 0, i = 0; x < W; x += ts * 0.5, i++) { g.fillStyle = i % 2 ? shade(K.fill, -0.18) : K.fill; g.fillRect(x, awY, ts * 0.5 + 0.5, aw); }
-                const sh = g.createLinearGradient(0, awY, 0, awY + aw); sh.addColorStop(0, d.flip ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.18)'); sh.addColorStop(1, d.flip ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.25)');
-                g.fillStyle = sh; g.fillRect(0, awY, W, aw);
-                g.fillStyle = K.fill; const ey = d.flip ? awY : awY + aw;
-                for (let x = 0, i = 0; x < W; x += ts * 0.5, i++) { g.fillStyle = i % 2 ? shade(K.fill, -0.18) : K.fill; g.beginPath(); g.arc(x + ts * 0.25, ey, ts * 0.25, d.flip ? Math.PI : 0, d.flip ? 0 : Math.PI); g.fill(); }
-                g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(0, d.flip ? awY - 2 : awY + aw, W, 2);
+                // (stripes and a scalloped edge on grass; on the elves' ground, smooth silk with a pennant-pointed edge and gold trim; on the
+                // orcs', corrugated iron sheets painted in the team's colour, rusting, with a jagged edge)
+                const aw = AWN * ts, ey = d.flip ? awY : awY + aw, out = d.flip ? -1 : 1;
+                if (D.awning === 'silk') {
+                    const sk = g.createLinearGradient(0, awY, 0, awY + aw); sk.addColorStop(0, shade(K.fill, d.flip ? -0.15 : 0.12)); sk.addColorStop(1, shade(K.fill, d.flip ? 0.12 : -0.15));
+                    g.fillStyle = sk; g.fillRect(0, awY, W, aw);
+                    g.fillStyle = 'rgba(255,255,255,0.08)'; for (let x = ts * 0.3; x < W; x += ts * 0.6) g.fillRect(x, awY, 1, aw);   // (the silk's folds)
+                    for (let x = 0; x < W; x += ts * 0.6) { g.fillStyle = K.fill; g.beginPath(); g.moveTo(x, ey); g.lineTo(x + ts * 0.3, ey + out * ts * 0.34); g.lineTo(x + ts * 0.6, ey); g.fill(); g.fillStyle = '#c9a85a'; g.beginPath(); g.arc(x + ts * 0.3, ey + out * ts * 0.34, ts * 0.04, 0, 7); g.fill(); }
+                    g.fillStyle = '#c9a85a'; g.fillRect(0, ey - (d.flip ? 0 : 2), W, 2);
+                } else if (D.awning === 'iron') {
+                    for (let x = 0, i = 0; x < W; x += ts * 0.9, i++) {
+                        g.fillStyle = i % 3 === 2 ? '#7a4122' : shade(K.fill, (r() - 0.5) * 0.3); g.fillRect(x - 1, awY, ts * 0.9 + 2, aw);
+                        g.fillStyle = 'rgba(30,14,6,0.3)'; for (let k = 3; k < ts * 0.9; k += 4) g.fillRect(x + k, awY, 1.2, aw);
+                        g.fillStyle = 'rgba(122,65,34,0.55)'; g.beginPath(); g.ellipse(x + r() * ts * 0.9, awY + r() * aw, ts * 0.2, ts * 0.12, 0, 0, 7); g.fill();   // rust
+                        g.fillStyle = '#2e2216'; g.fillRect(x + ts * 0.1, awY + aw * 0.5, 2, 2);   // a rivet
+                    }
+                    g.fillStyle = shade(K.fill, -0.3); g.beginPath(); g.moveTo(0, ey); for (let x = 0; x <= W; x += ts * 0.3) g.lineTo(x, ey + out * ts * (0.08 + r() * 0.16)); g.lineTo(W, ey); g.fill();
+                } else {
+                    for (let x = 0, i = 0; x < W; x += ts * 0.5, i++) { g.fillStyle = i % 2 ? shade(K.fill, -0.18) : K.fill; g.fillRect(x, awY, ts * 0.5 + 0.5, aw); }
+                    const sh = g.createLinearGradient(0, awY, 0, awY + aw); sh.addColorStop(0, d.flip ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.18)'); sh.addColorStop(1, d.flip ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.25)');
+                    g.fillStyle = sh; g.fillRect(0, awY, W, aw);
+                    for (let x = 0, i = 0; x < W; x += ts * 0.5, i++) { g.fillStyle = i % 2 ? shade(K.fill, -0.18) : K.fill; g.beginPath(); g.arc(x + ts * 0.25, ey, ts * 0.25, d.flip ? Math.PI : 0, d.flip ? 0 : Math.PI); g.fill(); }
+                    g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(0, d.flip ? awY - 2 : awY + aw, W, 2);
+                }
                 const nm = names()[t].toUpperCase(), bw = Math.min(W * 0.7, ts * 8), bh = aw * 0.8, bx = W / 2 - bw / 2, by = awY + (aw - bh) / 2;
-                g.fillStyle = K.text; g.fillRect(bx, by, bw, bh); g.strokeStyle = shade(K.fill, -0.4); g.lineWidth = 2; g.strokeRect(bx + 1, by + 1, bw - 2, bh - 2);
-                g.fillStyle = K.fill; g.font = `bold ${Math.round(bh * 0.92)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(nm, W / 2, by + bh / 2 + bh * 0.1, bw - 10);
+                g.fillStyle = K.text; g.fillRect(bx, by, bw, bh); g.strokeStyle = D.bannerEdge || shade(K.fill, -0.4); g.lineWidth = 2; g.strokeRect(bx + 1, by + 1, bw - 2, bh - 2);
+                const serif = /Georgia/.test(D.font);
+                g.fillStyle = K.fill; g.font = `${D.fontStyle || 'bold'} ${Math.round(bh * (serif ? 0.7 : D.font.startsWith('Impact') ? 0.74 : 0.92))}px ${D.font}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(nm, W / 2, by + bh / 2 + bh * (serif ? 0.04 : 0.1), bw - 10);
                 return cv;
             }
             // where a bay's players go: as large as fits (up to a square each), in rows
@@ -22419,7 +22658,7 @@ ol.ci-steps li::marker { content: none; }
             // drawn under the pitch, inside drawFrame's camera transform (pitch coordinates)
             function drawBack(c) {
                 const ts = T(), K = kits(), nm = names();
-                const sk = [CFG.cols, CFG.rows, ts, K[0].fill, K[0].text, K[1].fill, K[1].text, famOf(0), famOf(1)].join('|');
+                const sk = [PITCH.style, CFG.cols, CFG.rows, ts, K[0].fill, K[0].text, K[1].fill, K[1].text, famOf(0), famOf(1)].join('|');
                 if (!stands || sk !== standsKey) { stands = paintStands(); standsKey = sk; const r = pitchRng(77); bobRate = fanBlocks.map(() => [450 + r() * 700, r() * 6.3]); }
                 [0, 1].forEach(t => { const dk = [sk, nm[t]].join('|'); if (!dugs[t] || dugKeys[t] !== dk) { dugs[t] = paintDugout(t); dugKeys[t] = dk; } });
                 const z = state.camera.zoom, vx = -state.camera.x / z, vy = -state.camera.y / z, vw = (canvas.width / (window.devicePixelRatio || 1)) / z, vh = (canvas.height / (window.devicePixelRatio || 1)) / z;
@@ -22443,10 +22682,141 @@ ol.ci-steps li::marker { content: none; }
                 hits = [];
                 [0, 1].forEach(t => { const d = dugRect(t); c.drawImage(dugs[t], d.x * ts, d.y * ts, d.w * ts, d.h * ts); drawDugoutPlayers(c, t); });
             }
+            // ---- carried off (about 2 s, the length of the game's own fade): a player knocked out, hurt or beaten up is stretchered
+            // to their dugout by two of their team's medics (their race's lineman in white, with a red cross); one pushed into the crowd is first set on by a few of the other side's
+            // fans (running out of the stands, laying into them in a cloud of dust) while rubbish rains in from the stands.
+            // Timed on the game clock (performance.now, like the fade), so it keeps pace when play is sped up ----
+            const DUR = 2000, anims = [];
+            const lerp = (a, b, k) => a + (b - a) * k, ease = k => k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+            function removal(p, title) {
+                if (!active() || !/KNOCKED OUT|CASUALTY|BEATEN UP/.test(title || '')) return;
+                const ts = T(), crowd = p.x < 0 || p.x >= CFG.cols || p.y < 0 || p.y >= CFG.rows, d = dugRect(p.team), bay = bays(d).find(b => b[0] === bayOf(p)) || bays(d)[0];
+                const px = (p.x + 0.5) * ts, py = (p.y + 0.5) * ts, railY = (d.flip ? d.y : d.y + d.h) * ts, bx = (d.x + bay[2] + bay[3] / 2) * ts, by = (d.y + d.h / 2) * ts;
+                const a = { id: p.id, p, t0: performance.now(), crowd, px, py, path: [[px, py], [bx, railY + (d.flip ? -0.3 : 0.3) * ts], [bx, by]], door: [(d.x + d.w / 2) * ts, railY + (d.flip ? -0.3 : 0.3) * ts], fans: [], junk: [], dust: [] };
+                if (crowd) {   // where the fans come from: the stands just behind the boards, beside the player (not out of a dugout)
+                    const r = Math.random, W = CFG.cols * ts, H = CFG.rows * ts, wallOut = (SIDE + WALL + 0.6) * ts, endOut = (END + WALL + 0.6) * ts;
+                    const top = py < 0, bot = py > H, left = !top && !bot && px < 0;
+                    const spot = () => {
+                        if (top || bot) { let x = px + (r() - 0.5) * 5 * ts; const dx0 = d.x * ts - 0.6 * ts, dx1 = (d.x + d.w) * ts + 0.6 * ts; if (x > dx0 && x < dx1) x = x - dx0 < dx1 - x ? dx0 : dx1; return [x, top ? -wallOut : H + wallOut]; }
+                        return [left ? -endOut : W + endOut, py + (r() - 0.5) * 5 * ts];
+                    };
+                    const foe = 1 - p.team, n = 3 + (r() < 0.5 ? 1 : 0);
+                    for (let i = 0; i < n; i++) { const ang = i / n * Math.PI * 2 + r() * 0.5; a.fans.push({ from: spot(), at: [px + Math.cos(ang) * 0.55 * ts, py + Math.sin(ang) * 0.42 * ts], team: foe, fam: famOf(foe), seed: (r() * 1e9) | 0, ph: r() * 6 }); }
+                    for (let i = 0; i < 11; i++) a.junk.push({ from: spot(), to: [px + (r() - 0.5) * 0.8 * ts, py + (r() - 0.5) * 0.6 * ts], t: 100 + r() * 900, kind: (r() * 4) | 0, spin: r() * 6 });
+                    for (let i = 0; i < 10; i++) a.dust.push({ t: 480 + r() * 450, x: px + (r() - 0.5) * 1.1 * ts, y: py + (r() - 0.3) * 0.6 * ts, s: 0.25 + r() * 0.3 });
+                    cheer(1 - p.team);
+                }
+                a.medics = [0, 1].map(() => medicFor(p.team));   // (the team's own medics: their race)
+                p.fadeDuration = DUR; anims.push(a);
+            }
+            const carried = id => anims.some(a => a.id === id);
+            // the medics: a race's own lineman sprite (the teams' pixel style) in a white kit with red trim and a red cross on the chest
+            const MED = [['human', 'Lineman'], ['orc', 'Lineman'], ['goblin', 'Goblin Lineman'], ['highelf', 'Lineman'], ['dwarf', 'Dwarf Lineman'], ['skaven', 'Clanrat'], ['lizardmen', 'Skink Lineman'],
+                ['halfling', 'Halfling Hopeful'], ['norse', 'Norse Raider'], ['undead', 'Skeleton Lineman'], ['darkelf', 'Dark Elf Lineman'], ['woodelf', 'Wood Elf Lineman'], ['gnome', 'Gnome Lineman'],
+                ['nurgle', 'Rotter'], ['ogre', 'Gnoblar'], ['chaosdwarf', 'Hobgoblin Lineman'], ['nightgoblin', 'Night Goblin Lineman'], ['vampire', 'Thrall Lineman'], ['amazon', 'Eagle Warrior'], ['snotling', 'Snotling Lineman']];
+            // a team's medics: its race's lineman (or the nearest thing: Clanrat, Raider, Rotter...), else a random one from MED
+            function medicFor(t) {
+                const R = ROSTERS[t] || {}, race = R.race || R.key, set = SPRITES[race];
+                if (set) { const keys = Object.keys(set).filter(k => k[0] !== '_'), k = keys.find(k => /Lineman|Linewoman|Clanrat|Raider|Rotter|Retainer|Squire|Hopeful|Marauder|Renegade Human|Eagle Warrior/.test(k)) || keys[0]; if (k) return [race, k]; }
+                return pickOf(MED, Math.random);
+            }
+            const MED_SMALL = /Goblin|Halfling|Gnome|Gnoblar|Snotling|Skink/;
+            const medCache = new Map();
+            function medicCv(m, frame, flip) {
+                const key = m[0] + '|' + frame + '|' + flip; if (medCache.has(key)) return medCache.get(key);
+                let grid = (SPRITES[m[0]] || {})[m[1]], cv = null;
+                if (grid) {
+                    if (frame) grid = crouchGrid(grid, 1);
+                    cv = paintSprite(grid, '#efefea', '#c81e1e', false, flip);
+                    let sx = 0, sy = 0, n = 0, W = grid[0].length;   // the red cross: in the middle of the kit
+                    grid.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === 'k' || ch === 'K' || ch === 'd') { sx += flip ? W - 1 - i : i; sy += j; n++; } }));
+                    if (n) { const c = cv.getContext('2d'), u = Math.max(1, Math.round(grid.length / 32)), cx = Math.round(sx / n), cy = Math.round(sy / n); c.fillStyle = '#d11a1a'; c.fillRect(cx - u, cy - 2 * u, 2 * u, 5 * u); c.fillRect(cx - 2 * u - (u > 1 ? 0 : 0), cy - u, 5 * u + (u > 1 ? 0 : -1), 2 * u); }
+                }
+                medCache.set(key, cv); return cv;
+            }
+            function medic(c, m, x, y, t, ang) {
+                const ts = T(), set = SPRITES[m[0]] || {}, left = Math.cos(ang) < -0.2, flip = set._face === 'right' ? left : !left && Math.abs(Math.cos(ang)) > 0.2;
+                const frame = Math.floor(t / 110) % 2, cv = medicCv(m, frame, flip);
+                if (!cv) { runner(c, x, y, ts * 0.85, t, '', true, { fam: 'human', r: pitchRng(1) }); return; }
+                const size = ts * 0.92 * (MED_SMALL.test(m[1]) ? 0.8 : 1), hop = frame ? 0 : -ts * 0.05;
+                c.fillStyle = 'rgba(0,0,0,0.3)'; c.beginPath(); c.ellipse(x, y + ts * 0.3, ts * 0.24, ts * 0.08, 0, 0, 7); c.fill();
+                const prev = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false;
+                c.drawImage(cv, x - size / 2, y + ts * 0.33 - size + hop, size, size); c.imageSmoothingEnabled = prev;
+            }
+            // a little running figure: legs scissoring, then body, then head (fans: their race's head and team colours; medics: a white tunic with a red cross)
+            function runner(c, x, y, s, t, shirt, ref, f) {
+                const sw = Math.sin(t / 60) * 0.12 * s;
+                c.fillStyle = 'rgba(0,0,0,0.3)'; c.beginPath(); c.ellipse(x, y + 0.3 * s, 0.22 * s, 0.07 * s, 0, 0, 7); c.fill();
+                c.strokeStyle = ref ? '#d6d3d1' : '#3b3026'; c.lineWidth = 0.09 * s; c.beginPath(); c.moveTo(x - 0.06 * s, y + 0.05 * s); c.lineTo(x - 0.06 * s + sw, y + 0.3 * s); c.moveTo(x + 0.06 * s, y + 0.05 * s); c.lineTo(x + 0.06 * s - sw, y + 0.3 * s); c.stroke();
+                if (ref) { c.fillStyle = '#f4f4f0'; c.fillRect(x - 0.16 * s, y - 0.22 * s, 0.32 * s, 0.3 * s); c.fillStyle = '#dc2626'; c.fillRect(x - 0.035 * s, y - 0.18 * s, 0.07 * s, 0.2 * s); c.fillRect(x - 0.1 * s, y - 0.115 * s, 0.2 * s, 0.07 * s); }   // a medic's white tunic with a red cross
+                else { c.fillStyle = shirt; c.fillRect(x - 0.16 * s, y - 0.22 * s, 0.32 * s, 0.3 * s); }
+                if (f) head(c, f, x, y - 0.33 * s, 0.11 * s);
+                else { c.fillStyle = '#e0ac69'; c.beginPath(); c.arc(x, y - 0.33 * s, 0.11 * s, 0, 7); c.fill(); c.fillStyle = '#111'; c.beginPath(); c.arc(x, y - 0.36 * s, 0.115 * s, Math.PI, 0); c.fill(); c.fillRect(x, y - 0.38 * s, 0.17 * s, 0.035 * s); }
+            }
+            function lying(c, p, x, y, s, shake) {   // the player, flat out (their own sprite, turned on its side)
+                c.save(); c.translate(x + shake, y); c.scale(s, s);
+                const was = [p.isDown, p.isStunned]; p.isDown = true; p.isStunned = false;
+                try { if (spriteFor(p)) drawSpriteToken(p, T(), { noGlow: true }); else { c.fillStyle = hex(teamStyle(p.team).fill); c.beginPath(); c.arc(0, 0, T() * 0.3, 0, 7); c.fill(); } } finally { p.isDown = was[0]; p.isStunned = was[1]; }
+                c.restore();
+            }
+            const along = (path, k) => {   // a point k (0..1) of the way along a path of points
+                const seg = path.slice(1).map((q, i) => Math.hypot(q[0] - path[i][0], q[1] - path[i][1])), tot = seg.reduce((a, b) => a + b, 0) || 1;
+                let dd = k * tot; for (let i = 0; i < seg.length; i++) { if (dd <= seg[i] || i === seg.length - 1) { const u = seg[i] ? Math.min(1, dd / seg[i]) : 1; return [lerp(path[i][0], path[i + 1][0], u), lerp(path[i][1], path[i + 1][1], u), Math.atan2(path[i + 1][1] - path[i][1], path[i + 1][0] - path[i][0])]; } dd -= seg[i]; }
+                return [path[path.length - 1][0], path[path.length - 1][1], 0];
+            };
+            // drawn over the players, inside drawFrame's camera transform
+            function drawFront(c) {
+                if (!anims.length) return;
+                const now = performance.now(), ts = T();
+                for (let i = anims.length - 1; i >= 0; i--) {
+                    const a = anims[i], t = now - a.t0;
+                    if (t > DUR || t < 0) { anims.splice(i, 1); continue; }
+                    const tRef = a.crowd ? 450 : 0, arrive = tRef + (a.crowd ? 550 : 600), lift = arrive + 80;   // (medics: set off, reach the player, lift)
+                    // the player: on the ground (shaken while the fans lay in), then on the stretcher
+                    const beat = a.crowd && t > 500 && t < 950, shake = beat ? Math.sin(t / 25) * ts * 0.06 : 0;
+                    if (t < lift) lying(c, a.p, a.px, a.py, 0.85, shake);
+                    // dust and rubbish
+                    a.dust.forEach(q => { const k = (t - q.t) / 500; if (k < 0 || k > 1) return; c.fillStyle = `rgba(190,170,130,${(0.55 * (1 - k)).toFixed(3)})`; c.beginPath(); c.arc(q.x, q.y - k * ts * 0.3, ts * q.s * (0.6 + k), 0, 7); c.fill(); });
+                    a.junk.forEach(q => {
+                        const k = (t - q.t) / 450; if (k < 0) return;
+                        if (k > 1) { if (k < 2.2 && q.kind === 2) { c.fillStyle = `rgba(200,30,30,${(0.7 * (2.2 - k) / 1.2).toFixed(2)})`; c.beginPath(); c.ellipse(q.to[0], q.to[1], ts * 0.13, ts * 0.08, 0, 0, 7); c.fill(); } return; }   // (a tomato's splat)
+                        const x = lerp(q.from[0], q.to[0], k), y = lerp(q.from[1], q.to[1], k) - Math.sin(k * Math.PI) * ts * 1.6;
+                        c.save(); c.translate(x, y); c.rotate(q.spin + k * 9); c.scale(1.6, 1.6);
+                        if (q.kind === 0) { c.fillStyle = '#2f7d32'; c.fillRect(-ts * 0.05, -ts * 0.12, ts * 0.1, ts * 0.24); c.fillRect(-ts * 0.025, -ts * 0.18, ts * 0.05, ts * 0.07); }   // a bottle
+                        else if (q.kind === 1) { c.fillStyle = '#efe6d0'; c.fillRect(-ts * 0.12, -ts * 0.025, ts * 0.24, ts * 0.05); [-1, 1].forEach(sd => { c.beginPath(); c.arc(sd * ts * 0.12, 0, ts * 0.045, 0, 7); c.fill(); }); }   // a bone
+                        else if (q.kind === 2) { c.fillStyle = '#dc2626'; c.beginPath(); c.arc(0, 0, ts * 0.07, 0, 7); c.fill(); }   // a tomato
+                        else { c.fillStyle = '#a8a29e'; c.fillRect(-ts * 0.06, -ts * 0.09, ts * 0.12, ts * 0.18); }   // a tankard
+                        c.restore();
+                    });
+                    // the fans: run in, lay into the player (lunging and jolting), run back to the stands
+                    a.fans.forEach((f, j) => {
+                        let x, y; const kIn = Math.min(1, t / 500), kOut = Math.max(0, (t - 950) / 450);
+                        if (t < 500) { x = lerp(f.from[0], f.at[0], ease(kIn)); y = lerp(f.from[1], f.at[1], ease(kIn)); }
+                        else if (t < 950) { const lunge = Math.max(0, Math.sin(t / 55 + f.ph)) * 0.28; x = lerp(f.at[0], a.px, lunge); y = lerp(f.at[1], a.py, lunge); }
+                        else { if (kOut >= 1) return; x = lerp(f.at[0], f.from[0], ease(kOut)); y = lerp(f.at[1], f.from[1], ease(kOut)); }
+                        c.save(); if (kOut > 0.6) c.globalAlpha = (1 - kOut) / 0.4;
+                        runner(c, x, y, ts * 0.85, t + j * 40, kits()[f.team].fill, false, Object.assign({ r: pitchRng(f.seed) }, f, { fam: f.fam === 'underworld' ? 'goblin' : f.fam }));
+                        c.restore();
+                    });
+                    // the medics and their stretcher: out of the dugout's door to the player, then carrying them to the bay
+                    if (t >= tRef) {
+                        let x, y, ang;
+                        if (t < arrive) { const k = ease((t - tRef) / (arrive - tRef)); x = lerp(a.door[0], a.px, k); y = lerp(a.door[1], a.py, k); ang = Math.atan2(a.py - a.door[1], a.px - a.door[0]); }
+                        else if (t < lift) { x = a.px; y = a.py; ang = Math.atan2(a.path[1][1] - a.py, a.path[1][0] - a.px); }
+                        else { const q = along(a.path, ease(Math.min(1, (t - lift) / (DUR - lift)))); x = q[0]; y = q[1]; ang = q[2]; }
+                        const dx = Math.cos(ang) * ts * 0.62, dy = Math.sin(ang) * ts * 0.62;
+                        c.fillStyle = '#6b4a2a'; c.strokeStyle = '#6b4a2a'; c.lineWidth = ts * 0.04;   // the stretcher between them
+                        c.save(); c.translate(x, y); c.rotate(ang); c.fillStyle = '#e7dcc0'; c.fillRect(-ts * 0.45, -ts * 0.16, ts * 0.9, ts * 0.32); c.strokeRect(-ts * 0.55, -ts * 0.16, ts * 1.1, ts * 0.32); c.restore();
+                        if (t >= lift) lying(c, a.p, x, y - ts * 0.08, 0.72, 0);
+                        // (drawn back to front, so the nearer medic overlaps the stretcher's far end)
+                        [[x + dx, y + dy, 0], [x - dx, y - dy, 1]].sort((p, q) => p[1] - q[1]).forEach(([mx, my, j]) => medic(c, a.medics[j], mx, my, t + j * 55, ang));
+                    }
+                }
+            }
             // a tap in pitch coordinates: the dugout player under it, if any
             function hit(wx, wy) { if (!active()) return null; const h = hits.find(b => wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h); return h ? h.p : null; }
             function pick(p) { picked = p ? p.id : null; }
-            function set(v) { pref = !!v; try { localStorage.setItem('bb-stadium', pref ? '1' : '0'); } catch (e) {} if (pref && PITCH.style !== 'blades') setPitchPref('blades'); }
+            function set(v) { pref = !!v; try { localStorage.setItem('bb-stadium', pref ? '1' : '0'); } catch (e) {} if (pref && !TH[PITCH.style]) setPitchPref('blades'); }
             function cheer(team) { if (team === 0 || team === 1) { cheerAt = CLOCK.real(); cheerTeam = team; } }
             const bounds = () => { const ts = T(), z = state.camera.zoom, D = window.devicePixelRatio || 1;
                 return { x: -MX * ts, y: -MY * ts, w: (CFG.cols + 2 * MX) * ts, h: (CFG.rows + 2 * MY) * ts, ground: apron(), view: { x: -state.camera.x / z, y: -state.camera.y / z, w: canvas.width / D / z, h: canvas.height / D / z } }; };
@@ -22454,13 +22824,13 @@ ol.ci-steps li::marker { content: none; }
             // that the view is bigger than that, the whole of it stays on screen. Runs each frame before drawing (drags, pinches, glides)
             function clampCam() {
                 const ts = T(), z = state.camera.zoom, vw = window.innerWidth / z, vh = window.innerHeight / z;
-                const x0 = -(END + 2) * ts, x1 = (CFG.cols + END + 2) * ts, y0 = -(SIDE + GAP + DH + 1.4) * ts, y1 = (CFG.rows + SIDE + GAP + DH + 2.4) * ts;
+                const x0 = -(END + 4.6) * ts, x1 = (CFG.cols + END + 4.6) * ts, y0 = -(SIDE + GAP + DH + 1.4) * ts, y1 = (CFG.rows + SIDE + GAP + DH + 2.4) * ts;
                 const lim = (v, size, a, b) => size <= b - a ? Math.min(b - size, Math.max(a, v)) : Math.min(a, Math.max(b - size, v));
                 const vx = -state.camera.x / z, vy = -state.camera.y / z, nx = lim(vx, vw, x0, x1), ny = lim(vy, vh, y0, y1);
                 if (nx !== vx) state.camera.x = -nx * z; if (ny !== vy) state.camera.y = -ny * z;
             }
             const apron = () => { const ts = T(); return { x: -END * ts, y: -SIDE * ts, sx: (CFG.cols + 2 * END) / CFG.cols, sy: (CFG.rows + 2 * SIDE) / CFG.rows }; };
-            return { active, drawBack, hit, pick, set, cheer, occupants, dugRect, bounds, apron, clampCam, boxes: () => hits.map(h => ({ id: h.p.id, x: h.x, y: h.y, w: h.w, h: h.h })), get on() { return pref || Q; }, get query() { return Q; } };
+            return { active, drawBack, drawFront, removal, carried, hit, pick, set, cheer, occupants, dugRect, bounds, apron, clampCam, lineCol: () => theme().line, boxes: () => hits.map(h => ({ id: h.p.id, x: h.x, y: h.y, w: h.w, h: h.h })), get on() { return pref || Q; }, get query() { return Q; } };
         })();
         function render() { if (!CLOCK.sim) drawFrame(); }
         // While the kicking team sets up, the receiving team isn't shown: they set up afterwards, as in a real game
@@ -22505,7 +22875,7 @@ ol.ci-steps li::marker { content: none; }
                 }
                 if (STADIUM.active()) {   // a chalk line round the pitch, just outside the squares, so it stands apart from the grass strip
                     const lw = Math.max(2.5, ts * 0.07);
-                    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = lw; ctx.strokeRect(-lw / 2, -lw / 2, CFG.cols * ts + lw, CFG.rows * ts + lw); ctx.restore();
+                    ctx.save(); ctx.strokeStyle = STADIUM.lineCol(); ctx.lineWidth = lw; ctx.strokeRect(-lw / 2, -lw / 2, CFG.cols * ts + lw, CFG.rows * ts + lw); ctx.restore();
                 }
             }
 
@@ -22801,6 +23171,7 @@ ol.ci-steps li::marker { content: none; }
                         p.y = -10;
                         return;
                     }
+                    if (STADIUM.carried(p.id)) return;   // (Stadium & dugouts: drawn by its stretcher scene instead)
                 }
 
                 ctx.save(); 
@@ -23052,6 +23423,7 @@ ol.ci-steps li::marker { content: none; }
                     ctx.restore();
                 }
             }
+            if (STADIUM.active()) try { STADIUM.drawFront(ctx); } catch (e) { console.error(e); }   // (players being carried off)
             drawPitchPick(ts);
             WFX.air(ctx, CFG.cols * ts, CFG.rows * ts, ts, performance.now(), wxFX, wxDim, wxStill(), STADIUM.active() ? STADIUM.bounds() : null);   // (over the stands too with Stadium & dugouts)
             try { if (curMark) actorMark(ctx, ts, curMark.p, curMark.q); } catch (e) {}   // (a replay, or the computer's turn: the pointer over who's acting, a line to their target)

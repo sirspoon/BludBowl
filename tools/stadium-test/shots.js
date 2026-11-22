@@ -1,5 +1,5 @@
 // Screenshots of a match on the classic grass pitch at desktop, phone portrait (~400 px) and phone landscape.
-// node tools/stadium-test/shots.js <prefix> [query]   e.g. node tools/stadium-test/shots.js after '?stadium'
+// node tools/stadium-test/shots.js <prefix> [query]   e.g. node tools/stadium-test/shots.js after '?stadium', ... elven '?stadium=elven' (High Elves v Orcs), ... orc '?stadium=shanty'
 const { chromium, devices } = require('playwright');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'), OUT = __dirname;
@@ -13,8 +13,8 @@ const SIZES = [['desktop', { viewport: { width: 1366, height: 768 } }], ['portra
     page.on('pageerror', e => errs.push(String(e)));
     await page.goto('file://' + path.join(ROOT, 'index.html') + query);
     await page.waitForTimeout(1200);
-    await page.evaluate(() => { const s = document.getElementById('splash'); if (s) s.style.display = 'none'; localStorage.setItem('bb-replays', '0'); localStorage.setItem('bb-pitch', 'blades');
-      setPitchPref('blades'); AI.set(0, true); AI.set(1, true); window.launchMatch('human', 'orc', { replaceOk: true }); });
+    await page.evaluate(() => { const s = document.getElementById('splash'); if (s) s.style.display = 'none'; localStorage.setItem('bb-replays', '0'); 
+      { const m = location.search.match(/stadium=(\w+)/); if (!m) setPitchPref('blades'); } AI.set(0, true); AI.set(1, true); const m2 = location.search.match(/stadium=(\w+)/), home = m2 && m2[1] === 'elven' ? 'highelf' : 'human'; window.launchMatch(home, 'orc', { replaceOk: true }); });
     // let the computer play a while so some players are knocked out / hurt
     for (let i = 0; i < 300; i++) {
       await page.waitForTimeout(200);

@@ -2,6 +2,24 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.66 (22 Nov 2026)
+- Stadium & dugouts (test, still off by default: Settings or `?stadium`), the owner's second round:
+  - Each pitch's own stadium, after the block and pass close-ups' backdrops. **High Elf** (`?stadium=elven`): pale marble
+    terraces, white-marble boards with gold trim and serif lettering, marble dugouts with silk awnings cut in pennant points,
+    slender blue-roofed towers and reflecting pools, an emerald strip and a pale gold line. **Orc** (`?stadium=shanty`): plank
+    terraces, rusty corrugated-iron boards with crude painted slogans (WAAAGH!, ZOG OFF, TEEF 4 SALE...), plank-and-iron dugouts
+    on mud, scrap watchtowers, skull totems, smoke, and Gork and Mork's stone heads behind the end zones, on a trampled mud strip.
+    Other pitches keep today's look.
+  - A roof round the outside of the stands, over the top rows, with dark ground beyond it, so zoomed right out the stadium has an
+    edge: slate shingles on timber with stone turrets and flags (grass), white silk with gold trim and towers (High Elf), patched
+    corrugated iron of uneven sheets with gaps, watchtowers and skulls on spikes (Orc).
+  - A player pushed into the crowd is set on by a few of the other side's fans, running out of the stands and laying into them
+    in a cloud of dust while bottles, bones and tomatoes fly in. Then two medics - the team's own race, their lineman sprite in
+    white with a red cross - run out of the dugout with a stretcher and carry the player to the right bay. The medics come for any
+    player knocked out or hurt. About 2 seconds, the game's own fade time, so play never waits; on the game clock, so it keeps pace
+    when play is sped up.
+  - Zoomed in, the view can move as far left and right as up and down.
+
 ## v5.65 (22 Nov 2026)
 - Stadium & dugouts (test, still off by default: Settings or `?stadium`), the owner's first round of changes:
   - The crowd: fans placed loosely, not in a grid, of varied sizes; mostly in the two teams' colours (lighter and darker shades,
