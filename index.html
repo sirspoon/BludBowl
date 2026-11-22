@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.59</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.60</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -8459,7 +8459,7 @@ ol.ci-steps li::marker { content: none; }
                 const f = document.getElementById('btn-aifast'); if (f) f.onclick = e => { e.stopPropagation(); if (aiTurn()) { turbo = !turbo; turboShown = null; apply(); paint(true); } };
             }
             document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', wire) : wire();
-            return { paint, matchOver, cycle, get want() { return want; }, get turbo() { return turbo; }, reset() { want = +window.BB_SIM_SPEED || 1; if (!STEPS.includes(want) || want === 0) want = 1; shown = null; tick = ''; turbo = false; turboShown = null; } };
+            return { paint, matchOver, cycle, sync: apply, get want() { return want; }, get turbo() { return turbo; }, reset() { want = +window.BB_SIM_SPEED || 1; if (!STEPS.includes(want) || want === 0) want = 1; shown = null; tick = ''; turbo = false; turboShown = null; } };
         })();
 
         // ---------- Saving a match in progress ----------
@@ -12140,6 +12140,9 @@ ol.ci-steps li::marker { content: none; }
         let turnBannerTimer = null;
         function showTurnBanner(team) {
             const el = document.getElementById('turn-banner'); if (!el) return;
+            // the speed for the new turn first: after the computer's sped-up turn ("Speed up") the clock was still at 4x here (it only
+            // dropped back on the next frame), so the banner's timer ran 4x fast and the coach's "your turn" vanished after half a second
+            try { SIMSPEED.sync(); } catch (e) {}
             const st = teamStyle(team);
             const lum = h => { const m = /^#([0-9a-f]{6})$/i.exec(h || ''); if (!m) return 1; const n = parseInt(m[1], 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
             el.style.setProperty('--tb-edge', st.fill);

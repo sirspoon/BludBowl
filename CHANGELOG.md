@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.60 (22 Nov 2026)
+- Fixed: the "your turn" banner after the computer's sped-up turn flashed by in half a second (it only showed properly after a turnover).
+
 ## v5.59 (22 Nov 2026)
 - Animated block dice land exactly where they stay: no little sideways shift as they become the dice to pick.
 

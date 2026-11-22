@@ -283,6 +283,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.60 (22 Nov): the turn banner after the computer's sped-up turn lasted ~0.5 s (its timer was set while CLOCK was still at 4x; the
+  speed drops back only on the next frame). `showTurnBanner` now calls `SIMSPEED.sync()` (= its `apply`) first. Watch for the same trap
+  anywhere a timer is set at a speed change. Check: `node tools/ui-tests/turn-banner.js`.
 - v5.51 (job session, 22 Nov): **animated dice**, from the agreed prototype (`tools/dice-prototype/`). `DICEFX` (by `renderDieIcon`, which
   now takes an optional team colour `col`). Settings: Animate block dice / other rolls (localStorage `bb-dice-anim-block` / `-other`;
   unset = on for a person, off with reduced motion and in automated runs), Roll length `bb-dice-dur`, Dice in team colours `bb-dice-team`.

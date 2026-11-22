@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.60 (22 Nov 2026)
+- Fixed: after the computer's turn with Speed up on, the "TEAM'S TURN" banner for your turn vanished after about half a second.
+  The game's timers run at the speed in force when they are set, and the clock only dropped back from 4x to normal on the next
+  frame, after the banner had set its 1.9 s timer - so it lasted a quarter of that. After a turnover the "Turnover" announcement
+  came first, by which time the speed was back to normal, which is why those banners looked fine. The speed for the new turn is now
+  set before the banner (`SIMSPEED.sync`). Check: `node tools/ui-tests/turn-banner.js` (477 ms before, 1,935 ms after).
+
 ## v5.59 (22 Nov 2026)
 - Animated block dice: no shift as the landed dice turn into the dice to pick. The rolling dice were laid out across the dice box's
   full width including its padding, so they sat a few pixels off the picking dice, and were a little smaller (56 v 62 px). Now they
