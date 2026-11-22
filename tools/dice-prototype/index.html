@@ -1,0 +1,447 @@
+<title>BludBowl Dice Roller</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column like the game's side panel: the dice panel on top, roll controls under it, team colours and settings below. Single dark look (the game's own slate). */
+:root {
+  --bg: #0b1220; --panel: #1e293b; --panel-2: #121b2f; --line: #334155; --fg: #e6eaf3; --muted: #95a2bb;
+  --gold: #fbbf24; --good: #4ade80; --bad: #f87171;
+  --display: 'Teko', 'Arial Narrow', sans-serif; --body: 'Inter', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { font-family: var(--display); font-weight: 600; font-size: 2.6rem; line-height: 1; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+h1 span { color: var(--gold); }
+.lede { color: var(--muted); margin: 6px 0 0; line-height: 1.5; max-width: 62ch; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 1.5rem; margin: 0 0 8px; letter-spacing: .03em; }
+
+.tray { position: relative; height: 200px; border-radius: 10px; overflow: hidden; perspective: 800px; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--line); box-shadow: 0 4px 6px -1px rgba(0,0,0,.5); }
+.tray-hint { position: absolute; left: 0; right: 0; top: 8px; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); pointer-events: none; }
+.slot { position: absolute; transform-style: preserve-3d; }
+.mover { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.cube { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.face { position: absolute; inset: 0; border-radius: 14%; background-size: 100% 100%; backface-visibility: hidden; }
+.core { position: absolute; inset: 4%; }
+.shadow { position: absolute; left: 8%; right: 8%; bottom: -12%; height: 20%; border-radius: 50%; background: rgba(0,0,0,.6); filter: blur(4px); will-change: transform, opacity; }
+.slot.picked .mover { filter: drop-shadow(0 0 10px var(--gold)); }
+.slot.good .mover { filter: drop-shadow(0 0 10px var(--good)); }
+.slot.bad .mover { filter: drop-shadow(0 0 10px var(--bad)); }
+.slot.pickable { cursor: pointer; }
+.label { position: absolute; left: -30px; right: -30px; top: calc(100% + 10px); text-align: center; font-family: var(--display); font-size: 1.15rem; line-height: 1; color: var(--fg); opacity: 0; transition: opacity .2s; pointer-events: none; }
+.slot.done .label { opacity: 1; }
+
+.result { min-height: 3.2em; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: var(--display); font-size: 1.6rem; line-height: 1.05; letter-spacing: .02em; }
+.result small { display: block; font-family: var(--body); font-size: .8rem; color: var(--muted); letter-spacing: 0; margin-top: 4px; }
+.result .good { color: var(--good); } .result .bad { color: var(--bad); } .result .gold { color: var(--gold); }
+
+.panel { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.modes, .teams-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip, .roll { font: inherit; color: var(--fg); background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 8px 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.chip[aria-pressed="true"] { background: #334155; border-color: #94a3b8; }
+.chip:focus-visible, .roll:focus-visible, .set input:focus-visible, .set select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.roll { display: block; width: 100%; margin-top: 12px; padding: 12px; font-family: var(--display); font-size: 1.6rem; line-height: 1; letter-spacing: .08em; text-transform: uppercase;
+  background: #b45309; border-color: #f59e0b; }
+.roll:hover { background: #c2620e; }
+.roll.again { background: #334155; border-color: #64748b; }
+.sets { display: grid; gap: 12px; }
+.set { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.set label, .set .name { font-weight: 600; font-size: 14px; }
+.set .hint { flex-basis: 100%; color: var(--muted); font-size: 12px; margin-top: -6px; }
+.set input[type=range] { flex: 1 1 160px; max-width: 260px; accent-color: var(--gold); }
+.set output { font-variant-numeric: tabular-nums; min-width: 3.5em; text-align: right; color: var(--gold); font-weight: 700; }
+.set select { font: inherit; font-size: 13px; color: var(--fg); background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 6px 8px; }
+.cols { display: flex; align-items: center; gap: 8px; }
+.tray.flat { perspective: none; }
+.dice-cols { display: flex; align-items: center; gap: 8px; flex-basis: 100%; flex-wrap: wrap; }
+.dice-cols .name { font-size: 13px; color: var(--muted); min-width: 3.2em; }
+.chip.small { padding: 6px 9px; font-size: 12px; }
+.chip:disabled { opacity: .45; cursor: default; }
+.cols input[type=color], .dice-cols input[type=color] { width: 36px; height: 30px; padding: 0; border: 1px solid #475569; border-radius: 6px; background: none; cursor: pointer; }
+.swatch { width: 22px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,.25); display: inline-grid; place-items: center; font-size: 13px; font-weight: 800; }
+.switch { appearance: none; width: 44px; height: 24px; border-radius: 12px; background: #334155; position: relative; cursor: pointer; flex: none; transition: background .15s; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; transition: left .15s; }
+.switch:checked { background: #b45309; } .switch:checked::after { left: 23px; }
+.warn { color: var(--gold); font-size: 12px; flex-basis: 100%; margin-top: -6px; }
+.notes { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.notes b { color: var(--fg); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>BludBowl <span>Dice</span> Roller</h1>
+    <p class="lede">Prototype of animated dice for the game. The dice tumble in place while they wait. Press Roll and they jump up a little and settle on the result, in the rolling team's colours. Tap the dice panel during a roll to skip to the end.</p>
+  </header>
+
+  <div class="tray" id="tray" role="button" tabindex="0" aria-label="Dice panel: tap to roll, or to skip the animation">
+    <div class="tray-hint" id="hint"></div>
+  </div>
+  <div class="result" id="result" aria-live="polite"></div>
+
+  <section class="panel">
+    <h2>Roll</h2>
+    <div class="modes" id="modes">
+      <button class="chip" data-mode="block1">Block: 1 die</button>
+      <button class="chip" data-mode="block2" aria-pressed="true">Block: 2 dice</button>
+      <button class="chip" data-mode="block3">Block: 3 dice</button>
+      <button class="chip" data-mode="dodge">Dodge 3+</button>
+      <button class="chip" data-mode="rush">Rush 2+</button>
+      <button class="chip" data-mode="armour">Armour 9+</button>
+      <button class="chip" data-mode="injury">Injury</button>
+    </div>
+    <button class="roll" id="roll">Roll</button>
+  </section>
+
+  <section class="panel">
+    <h2>Team colours</h2>
+    <div class="sets">
+      <div class="set"><span class="name">Rolling</span>
+        <div class="teams-pick" id="side">
+          <button class="chip" data-side="0" aria-pressed="true">Home</button>
+          <button class="chip" data-side="1">Away</button>
+        </div></div>
+      <div class="set" id="row0"><label for="t0">Home team</label>
+        <div class="cols"><select id="t0"></select></div>
+        <div class="dice-cols"><span class="name">Dice</span><input type="color" id="p0" aria-label="Home dice colour"><input type="color" id="s0" aria-label="Home pip colour"><button class="chip small" id="r0" type="button">Use team colours</button></div>
+        <div class="warn" id="w0" hidden></div></div>
+      <div class="set" id="row1"><label for="t1">Away team</label>
+        <div class="cols"><select id="t1"></select></div>
+        <div class="dice-cols"><span class="name">Dice</span><input type="color" id="p1" aria-label="Away dice colour"><input type="color" id="s1" aria-label="Away pip colour"><button class="chip small" id="r1" type="button">Use team colours</button></div>
+        <div class="warn" id="w1" hidden></div></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Settings</h2>
+    <div class="sets">
+      <div class="set"><label for="s-animb">Animate block dice</label><input class="switch" type="checkbox" id="s-animb" checked></div>
+      <div class="set"><label for="s-animo">Animate other rolls</label><input class="switch" type="checkbox" id="s-animo" checked>
+        <div class="hint">Dodges, Rushes, armour, injury and the rest. Off shows the result straight away, as the game does now.</div></div>
+      <div class="set"><label for="s-team">Dice in team colours</label><input class="switch" type="checkbox" id="s-team" checked>
+        <div class="hint">Off uses the game's current plain dice.</div></div>
+      <div class="set"><label for="s-dur">Jump and settle</label><input type="range" id="s-dur" min="500" max="2000" step="100" value="1000"><output id="o-dur" for="s-dur">1.0 s</output></div>
+      <div class="set"><label for="s-sound">Dice sound</label><input class="switch" type="checkbox" id="s-sound" checked></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>How it would go into the game</h2>
+    <ul class="notes">
+      <li><b>Same place as now.</b> The dice tumble where the block dice already appear, waiting for the Roll button, then settle where they'd be shown today.</li>
+      <li><b>The result is rolled when you press the button.</b> The animation only shows it, so it can't change the odds, replays or two-device play.</li>
+      <li><b>Dice colours per team</b>, set in the team's setup. They start as the team's two kit colours, can be changed freely, and a Use team colours button puts them back. If the two colours are too alike to read, the pips are darkened or lightened until they do.</li>
+      <li><b>Two settings</b> under Settings: animate block dice, and animate other rolls. Both are off by default for anyone whose phone asks for reduced motion. The computer's rolls and fast test matches stay instant.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(() => {
+  const FACES = { SKULL: 1, BOTH_DOWN: 2, PUSH1: 3, PUSH2: 4, STUMBLE: 5, POW: 6 };
+  const BLOCK_NAME = { 1: 'Attacker Down', 2: 'Both Down', 3: 'Push', 4: 'Push', 5: 'Stumbles', 6: 'POW!' };
+  const MODES = {
+    block1: { kind: 'block', n: 1 }, block2: { kind: 'block', n: 2 }, block3: { kind: 'block', n: 3 },
+    dodge: { kind: 'd6', n: 1, target: 3, label: 'Dodge' }, rush: { kind: 'd6', n: 1, target: 2, label: 'Rush' },
+    armour: { kind: 'd6', n: 2, target: 9, label: 'Armour' }, injury: { kind: 'd6', n: 2, label: 'Injury' }
+  };
+  // example kits (dice colour, pip colour); the game would use each team's own primary and secondary
+  const KITS = [
+    ['Reikland Reavers (Human)', '#1d4ed8', '#f8fafc'], ['Gouged Eye (Orc)', '#166534', '#fde68a'], ['Night Goblins', '#facc15', '#1e3a8a'],
+    ['Elfheim Eagles (High Elf)', '#f1f5f9', '#1d4ed8'], ['Chaos All-Stars', '#b91c1c', '#fde68a'], ['Champions of Death (Undead)', '#1f2937', '#a3e635'],
+    ['Skavenblight Scramblers', '#7c2d12', '#e5e7eb'], ['Dwarf Giants', '#475569', '#fbbf24'], ['Too alike (test)', '#b91c1c', '#c2410c']
+  ];
+
+  // ---- settings (kept per browser) ----
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const S = { animBlock: !reduce, animOther: !reduce, team: true, dur: 1000, sound: true, side: 0, kits: [[KITS[0][1], KITS[0][2]], [KITS[2][1], KITS[2][2]]], kitIdx: [0, 2] };
+  try { Object.assign(S, JSON.parse(localStorage.getItem('bb-dice-proto3') || '{}')); } catch (e) {}
+  const save = () => { try { localStorage.setItem('bb-dice-proto3', JSON.stringify(S)); } catch (e) {} };
+  const $ = id => document.getElementById(id);
+
+  // ---- colours ----
+  const hex2rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const lum = h => { const [r, g, b] = hex2rgb(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * b; };
+  const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+  const shade = (h, k) => '#' + hex2rgb(h).map(v => Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k).toString(16).padStart(2, '0')).join('');
+  // the pip colour; when the kit's two colours are too alike to read on a die, the pip colour is darkened or lightened
+  // step by step (whichever way the die colour leaves more room) until it reads
+  const NEED = 3;
+  function ink(body, pip) {
+    if (contrast(body, pip) >= NEED) return { pip, swapped: false };
+    const first = lum(body) > .18 ? -1 : 1, tries = [first, -first];
+    for (const dir of tries) for (let k = .1; k <= 1.001; k += .05) {
+      const c = shade(pip, dir * k);
+      if (contrast(body, c) >= NEED) return { pip: c, swapped: true, dir };
+    }
+    return { pip: contrast(body, '#ffffff') >= contrast(body, '#111827') ? '#ffffff' : '#111827', swapped: true, dir: 0 };
+  }
+  function diceColours() {
+    if (!S.team) return null;
+    const [body, pip] = S.kits[S.side]; return { body, pip: ink(body, pip).pip };
+  }
+
+  // ---- face art: the game's block-die icons, drawn in one ink colour for team dice ----
+  function renderDieIcon(ctx, face, sz, col) {
+    const INK = col ? col.pip : '#0f172a', RED = col ? col.pip : '#b91c1c', BONE = col ? col.pip : '#f8fafc', HOLE = col ? col.body : '#0f172a';
+    ctx.clearRect(0, 0, sz, sz); const cx = sz / 2, cy = sz / 2;
+    const drawSkull = (x, y, s, bone, hole) => {
+      ctx.fillStyle = bone; ctx.beginPath(); ctx.arc(x, y - s * 0.1, s * 0.4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(x - s * 0.2, y + s * 0.1, s * 0.4, s * 0.3);
+      ctx.fillStyle = hole; ctx.beginPath(); ctx.arc(x - s * 0.15, y - s * 0.1, s * 0.12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + s * 0.15, y - s * 0.1, s * 0.12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x, y + s * 0.1); ctx.lineTo(x - s * 0.1, y + s * 0.2); ctx.lineTo(x + s * 0.1, y + s * 0.2); ctx.fill();
+    };
+    const star = (color, or, ir, n) => { ctx.fillStyle = color; ctx.beginPath(); for (let i = 0; i < n * 2; i++) { const r = i % 2 ? ir : or, a = i * Math.PI / n; ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } ctx.closePath(); ctx.fill(); };
+    if (face === FACES.SKULL) {
+      if (!col) { ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(cx, cy, sz * 0.36, 0, Math.PI * 2); ctx.fill(); }
+      drawSkull(cx, cy, sz * 0.7, BONE, HOLE);
+    } else if (face === FACES.BOTH_DOWN) {
+      star(RED, sz * .45, sz * .25, 8);
+      const b2 = col ? col.body : '#f8fafc', h2 = col ? col.pip : '#0f172a';
+      drawSkull(cx - sz * 0.18, cy + sz * 0.08, sz * 0.35, b2, h2); drawSkull(cx + sz * 0.18, cy - sz * 0.08, sz * 0.35, b2, h2);
+    } else if (face === FACES.PUSH1 || face === FACES.PUSH2) {
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(cx - sz * 0.3, cy + sz * 0.3); ctx.lineTo(cx + sz * 0.1, cy - sz * 0.1);
+      ctx.lineTo(cx - sz * 0.1, cy - sz * 0.3); ctx.lineTo(cx + sz * 0.4, cy - sz * 0.4); ctx.lineTo(cx + sz * 0.4, cy + sz * 0.1);
+      ctx.lineTo(cx + sz * 0.2, cy - sz * 0.1); ctx.lineTo(cx - sz * 0.1, cy + sz * 0.4); ctx.closePath(); ctx.fill();
+    } else if (face === FACES.STUMBLE) {
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(cx - sz * 0.2, cy - sz * 0.4); ctx.lineTo(cx + sz * 0.2, cy - sz * 0.4);
+      ctx.lineTo(cx, cy + sz * 0.1); ctx.closePath(); ctx.fill(); ctx.fillRect(cx - sz * 0.1, cy + sz * 0.2, sz * 0.2, sz * 0.2);
+    } else if (face === FACES.POW) {
+      ctx.fillStyle = RED; ctx.beginPath();
+      const pts = [[0,-1],[0.3,-0.4],[0.9,-0.6],[0.5,-0.1],[1,0.4],[0.4,0.4],[0.2,1],[-0.2,0.5],[-0.8,0.8],[-0.5,0.1],[-1,-0.3],[-0.4,-0.4]];
+      ctx.moveTo(cx + pts[0][0] * sz * 0.45, cy + pts[0][1] * sz * 0.45);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(cx + pts[i][0] * sz * 0.45, cy + pts[i][1] * sz * 0.45);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = col ? col.body : '#fff'; ctx.font = `bold ${sz * 0.3}px Teko, sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('POW', cx, cy + sz * 0.05);
+    }
+  }
+  const faceCache = {};
+  function faceURL(kind, v, col) {
+    const key = kind + v + (col ? col.body + col.pip : ''); if (faceCache[key]) return faceCache[key];
+    const N = 128, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d');
+    const r = 18, grad = g.createLinearGradient(0, 0, N, N);
+    if (col) { grad.addColorStop(0, shade(col.body, .18)); grad.addColorStop(1, shade(col.body, -.22)); }
+    else if (kind === 'block') { grad.addColorStop(0, '#f1f5f9'); grad.addColorStop(1, '#cbd5e1'); }
+    else { grad.addColorStop(0, '#fffaf0'); grad.addColorStop(1, '#e7dcc6'); }
+    g.fillStyle = grad; g.beginPath(); g.roundRect(0, 0, N, N, r); g.fill();
+    g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 4; g.beginPath(); g.roundRect(2, 2, N - 4, N - 4, r - 2); g.stroke();
+    if (kind === 'block') {
+      const ic = document.createElement('canvas'); ic.width = ic.height = 96; renderDieIcon(ic.getContext('2d'), v, 96, col); g.drawImage(ic, 16, 16);
+    } else {
+      const P = { 1: [[.5,.5]], 2: [[.27,.27],[.73,.73]], 3: [[.27,.27],[.5,.5],[.73,.73]], 4: [[.27,.27],[.73,.27],[.27,.73],[.73,.73]],
+        5: [[.27,.27],[.73,.27],[.5,.5],[.27,.73],[.73,.73]], 6: [[.27,.25],[.73,.25],[.27,.5],[.73,.5],[.27,.75],[.73,.75]] }[v];
+      g.fillStyle = col ? col.pip : (v === 1 ? '#b91c1c' : '#1e293b');
+      P.forEach(([x, y]) => { g.beginPath(); g.arc(x * N, y * N, v === 1 ? 15 : 11, 0, Math.PI * 2); g.fill(); });
+    }
+    return faceCache[key] = c.toDataURL();
+  }
+
+  // ---- sound: short clacks made on the fly ----
+  let ac = null;
+  function clack(vol) {
+    if (!S.sound) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t = ac.currentTime, len = 0.06, buf = ac.createBuffer(1, Math.floor(ac.sampleRate * len), ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 4);
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800 + Math.random() * 1600; bp.Q.value = 4;
+      const gn = ac.createGain(); gn.gain.value = vol;
+      src.connect(bp).connect(gn).connect(ac.destination); src.start(t);
+    } catch (e) {}
+  }
+
+  // ---- dice ----
+  const tray = $('tray'), result = $('result'), hint = $('hint'), rollBtn = $('roll');
+  const PLACE = { 1: 'rotateY(0deg)', 6: 'rotateY(180deg)', 3: 'rotateY(90deg)', 4: 'rotateY(-90deg)', 2: 'rotateX(90deg)', 5: 'rotateX(-90deg)' };
+  const TARGET = { 1: [0, 0, 0], 2: [-90, 0, 0], 3: [0, -90, 0], 4: [0, 90, 0], 5: [90, 0, 0], 6: [0, 180, 0] };
+  const el = (t, c) => { const e = document.createElement(t); e.className = c; return e; };
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const HOVER = -10;   // waiting dice float a little above their resting place
+
+  let dice = [], state = 'idle', raf = 0, mode = 'block2';
+  const animOn = () => MODES[mode].kind === 'block' ? S.animBlock : S.animOther;
+
+  function makeDie(kind, s, x, y, col) {
+    const slot = el('div', 'slot'); slot.style.cssText = `left:${x}px;top:${y}px;width:${s}px;height:${s}px`;
+    const sh = el('div', 'shadow'), mover = el('div', 'mover'), cube = el('div', 'cube'), lab = el('div', 'label'), core = el('div', 'core');
+    core.style.background = col ? shade(col.body, -.3) : '#9aa3b0'; cube.appendChild(core);
+    for (let f = 1; f <= 6; f++) {
+      const face = el('div', 'face'); face.style.backgroundImage = `url(${faceURL(kind, f, col)})`;
+      face.style.transform = `${PLACE[f]} translateZ(${s / 2}px)`; cube.appendChild(face);
+    }
+    mover.appendChild(cube); slot.append(sh, mover, lab); tray.appendChild(slot);
+    return { slot, sh, mover, cube, lab, s,
+      ang: [Math.random() * 360, Math.random() * 360, Math.random() * 360],
+      w: [0, 1, 2].map(() => (Math.random() < .5 ? -1 : 1) * (320 + Math.random() * 240)), phase: Math.random() * 6 };
+  }
+  function setPose(d, y, a, sx, sy) {
+    d.mover.style.transform = `translate3d(0,${y}px,0) scale(${sx},${sy})`;
+    d.cube.style.transform = `rotateX(${a[0]}deg) rotateY(${a[1]}deg) rotateZ(${a[2]}deg)`;
+    const k = Math.max(.35, 1 - Math.max(0, -y) / 120);
+    d.sh.style.transform = `scale(${k})`; d.sh.style.opacity = (.9 * k).toFixed(2);
+  }
+
+  // lay out fresh dice for the chosen roll and set them tumbling
+  function setup() {
+    cancelAnimationFrame(raf);
+    const m = MODES[mode], col = diceColours();
+    tray.querySelectorAll('.slot').forEach(n => n.remove());
+    result.innerHTML = '';
+    const W = tray.clientWidth, H = tray.clientHeight;
+    const s = Math.round(Math.min(64, W / (m.n * 1.7 + .8))), gap = s * .7;
+    const total = m.n * s + (m.n - 1) * gap, left0 = (W - total) / 2, top = H * .46 - s / 2;
+    dice = Array.from({ length: m.n }, (_, i) => makeDie(m.kind, s, left0 + i * (s + gap), top, col));
+    state = 'idle'; rollBtn.textContent = 'Roll'; rollBtn.classList.remove('again');
+    tray.classList.toggle('flat', !animOn());
+    hint.textContent = animOn() ? 'Waiting for the roll' : 'Press Roll';
+    // no animation: the dice are rolled as the window opens and show face on straight away, as the game does now
+    if (!animOn()) { dice.forEach(d => { d.v = 1 + Math.floor(Math.random() * 6); }); finish(true); return; }
+    let last = performance.now();
+    const tick = now => {
+      const dt = Math.min(.05, (now - last) / 1000); last = now;
+      dice.forEach(d => {
+        d.ang = d.ang.map((a, k) => a + d.w[k] * dt);
+        setPose(d, HOVER + 4 * Math.sin(now / 260 + d.phase), d.ang, 1, 1);
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  }
+
+  function roll() {
+    if (state === 'rolling') { finish(); return; }
+    if (state === 'done') { setup(); return; }
+    cancelAnimationFrame(raf);
+    const m = MODES[mode];
+    dice.forEach(d => { d.v = 1 + Math.floor(Math.random() * 6); });   // the roll is made now; the animation only shows it
+    if (!animOn()) { finish(true); return; }
+    state = 'rolling'; hint.textContent = 'Tap to skip';
+    const D = S.dur, gapMs = Math.min(90, D * .08), t0 = performance.now();
+    const J = .62;   // share of the time spent in the air; the rest is the landing
+    dice.forEach((d, i) => {
+      d.start = i * gapMs; d.len = D - (dice.length - 1) * gapMs;
+      d.from = d.ang.slice();
+      // keep spinning at the tumbling speed, then slow onto the result face just before landing:
+      // the end angle is the result face, at least ~90% of what the tumble would turn in the air
+      const air = d.len * J / 1000;
+      d.v0 = d.w.map(w => w * air);
+      d.tgt = TARGET[d.v].map((t, k) => {
+        const want = d.from[k] + d.v0[k] * .9;
+        return d.w[k] > 0 ? t + 360 * Math.ceil((want - t) / 360) : t + 360 * Math.floor((want - t) / 360);
+      });
+      d.y0 = HOVER + 4 * Math.sin(t0 / 260 + d.phase); d.landed = false;
+    });
+    const frame = now => {
+      let all = true;
+      dice.forEach(d => {
+        const p = Math.min(1, Math.max(0, (now - t0 - d.start) / d.len));
+        if (p < 1) all = false;
+        if (p < J) {
+          const q = p / J, e = ease(q);
+          const y = d.y0 * (1 - q) - d.s * .85 * Math.sin(Math.PI * q), sc = 1 + .12 * Math.sin(Math.PI * q);
+          // starts at the tumbling speed, ends at rest on the result (cubic Hermite)
+          const h00 = 2 * q * q * q - 3 * q * q + 1, h10 = q * q * q - 2 * q * q + q, h01 = 3 * q * q - 2 * q * q * q;
+          setPose(d, y, d.from.map((a, k) => h00 * a + h10 * d.v0[k] + h01 * d.tgt[k]), sc, sc);
+        } else {
+          const q = (p - J) / (1 - J);
+          if (!d.landed) { d.landed = true; clack(.55); }
+          const hop = q > .35 && q < .75 ? -d.s * .08 * Math.sin(Math.PI * (q - .35) / .4) : 0;
+          if (q > .5 && !d.hop2) { d.hop2 = true; clack(.18); }
+          const sq = q < .35 ? .15 * Math.sin(Math.PI * q / .35) : 0;
+          setPose(d, hop, d.tgt, 1 + sq * .6, 1 - sq);
+          if (p >= 1) d.slot.classList.add('done');
+        }
+      });
+      if (all) { done(); return; }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+  }
+  function finish(quiet) {
+    cancelAnimationFrame(raf);
+    dice.forEach(d => { setPose(d, 0, TARGET[d.v], 1, 1); d.slot.style.visibility = ''; d.slot.classList.add('done'); });
+    if (!quiet) clack(.5);
+    done();
+  }
+  function done() {
+    state = 'done'; hint.textContent = ''; rollBtn.textContent = 'New roll'; rollBtn.classList.add('again');
+    showResult(MODES[mode]);
+  }
+
+  function showResult(m) {
+    const vals = dice.map(d => d.v);
+    if (m.kind === 'block') {
+      dice.forEach(d => { d.lab.textContent = BLOCK_NAME[d.v]; });
+      if (m.n === 1) { result.innerHTML = `<span class="gold">${BLOCK_NAME[vals[0]]}</span><small>One die: it counts whatever it shows.</small>`; dice[0].slot.classList.add('picked'); return; }
+      result.innerHTML = `Choose a die<small>Tap the die you want to use.</small>`;
+      dice.forEach(d => {
+        d.slot.classList.add('pickable');
+        d.slot.onclick = ev => {
+          ev.stopPropagation(); dice.forEach(o => o.slot.classList.toggle('picked', o === d));
+          result.innerHTML = `<span class="gold">${BLOCK_NAME[d.v]}</span><small>Chosen.</small>`;
+        };
+      });
+      return;
+    }
+    const sum = vals.reduce((a, b) => a + b, 0);
+    dice.forEach(d => { d.lab.textContent = d.v; });
+    if (m.label === 'Injury') {
+      const r = sum >= 10 ? ['bad', 'Casualty!'] : sum >= 8 ? ['gold', 'Knocked Out'] : ['good', 'Stunned'];
+      result.innerHTML = `<span class="${r[0]}">${r[1]}</span><small>Injury roll: ${vals.join(' + ')} = ${sum}</small>`; return;
+    }
+    if (m.label === 'Armour') {
+      const br = sum >= m.target; dice.forEach(d => d.slot.classList.add(br ? 'bad' : 'good'));
+      result.innerHTML = `<span class="${br ? 'bad' : 'good'}">${br ? 'Armour broken' : 'Armour holds'}</span><small>${vals.join(' + ')} = ${sum}, needs ${m.target}+ to break</small>`; return;
+    }
+    const ok = vals[0] === 6 || (vals[0] !== 1 && vals[0] >= m.target);
+    dice[0].slot.classList.add(ok ? 'good' : 'bad');
+    result.innerHTML = `<span class="${ok ? 'good' : 'bad'}">${m.label} ${ok ? 'made it' : 'failed'}</span><small>Rolled ${vals[0]}, needed ${m.target}+</small>`;
+  }
+
+  // ---- controls ----
+  const pick = (box, attr, val) => [...box.children].forEach(x => x.setAttribute('aria-pressed', x.dataset[attr] === String(val) ? 'true' : 'false'));
+  $('modes').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.mode; pick($('modes'), 'mode', mode); setup(); });
+  $('side').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.side = +b.dataset.side; pick($('side'), 'side', S.side); save(); setup(); });
+  [0, 1].forEach(t => {
+    const sel = $('t' + t);
+    KITS.forEach((k, i) => sel.add(new Option(k[0], i)));
+    if (S.kitIdx[t] == null) S.kitIdx[t] = t ? 2 : 0;
+    const kit = () => KITS[S.kitIdx[t]];
+    const paint = () => {
+      const [b, p] = S.kits[t]; $('p' + t).value = b; $('s' + t).value = p;
+      $('r' + t).disabled = b === kit()[1] && p === kit()[2];
+      const w = $('w' + t), r = ink(b, p);
+      w.hidden = !r.swapped; w.innerHTML = r.swapped ? `These two colours are too alike to read, so the pips are made ${r.dir < 0 ? 'darker' : r.dir > 0 ? 'lighter' : 'black or white'}: <span class="swatch" style="background:${b};color:${r.pip}">6</span>` : '';
+    };
+    sel.value = String(S.kitIdx[t]);
+    // picking a team resets its dice to the team's colours; the dice colours can then be changed on their own
+    sel.onchange = () => { S.kitIdx[t] = +sel.value; S.kits[t] = [kit()[1], kit()[2]]; paint(); save(); setup(); };
+    const own = () => { S.kits[t] = [$('p' + t).value, $('s' + t).value]; paint(); save(); setup(); };
+    $('p' + t).oninput = own; $('s' + t).oninput = own;
+    $('r' + t).onclick = () => { S.kits[t] = [kit()[1], kit()[2]]; paint(); save(); setup(); };
+    paint();
+  });
+  pick($('side'), 'side', S.side);
+
+  $('s-animb').checked = S.animBlock; $('s-animo').checked = S.animOther; $('s-team').checked = S.team; $('s-dur').value = S.dur; $('s-sound').checked = S.sound;
+  const showDur = () => { $('o-dur').textContent = (S.dur / 1000).toFixed(1) + ' s'; }; showDur();
+  $('s-animb').onchange = e => { S.animBlock = e.target.checked; save(); setup(); };
+  $('s-animo').onchange = e => { S.animOther = e.target.checked; save(); setup(); };
+  $('s-team').onchange = e => { S.team = e.target.checked; save(); setup(); };
+  $('s-dur').oninput = e => { S.dur = +e.target.value; showDur(); save(); };
+  $('s-sound').onchange = e => { S.sound = e.target.checked; save(); };
+
+  rollBtn.onclick = roll;
+  tray.addEventListener('click', roll);
+  tray.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
+  let rt = 0; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (state !== 'rolling') setup(); }, 200); });
+  document.fonts && document.fonts.ready.then(() => { for (const k in faceCache) delete faceCache[k]; if (state === 'idle') setup(); });
+
+  setup();
+})();
+</script>
