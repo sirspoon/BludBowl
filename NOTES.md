@@ -297,6 +297,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Check: `node tools/ui-tests/dice.js`.
   v5.52 (owner's request): the armour/injury toast says "Armour roll…" / "Injury roll…" in the air, the result only once landed
   (`o.title` then `o.label`), placed under the top bar (`#btn-end-turn`'s bottom).
+  v5.53: the roll window's die tumbles from the moment it opens (`DICEFX.waitIn` in setupRoll, `pr.dfxTray`; `rollIn` reuses it).
+  Also fixed `refScare` (the "Sent off!" referee): it mixed the game clock (runs ahead after sped-up spells) with rAF's real time, so the
+  referee could appear long after the send-off. Lesson for any animation: time it with `CLOCK.real()` or one clock throughout.
 - v5.39 (job session, 19 Nov): **roster PDF easier to read in print**. `ROSTER_PDF.draw` tries type sizes `SIZES` (11pt down to 7) with
   `rosterPage(doc, S, z, last, extra)` and keeps the largest that fits one page (returns the spare room; a small team redraws with
   taller rows). Column widths come from the contents; names, numbers, characteristics, headings and box values bold; changed

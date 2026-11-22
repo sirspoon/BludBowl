@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.53 (22 Nov 2026)
+- With animated dice on, the die now tumbles in the roll window as soon as it opens and lands when you press Roll Dice (or tap the die).
+- Fixed: the referee's "Sent off!" picture could pop up much later, at a random moment, after a sped-up spell.
+
 ## v5.52 (22 Nov 2026)
 - Armour and injury dice at the top of the screen now show their result only once the dice have landed, just below the top bar.
 

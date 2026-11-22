@@ -1272,7 +1272,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.52</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.53</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -14871,9 +14871,12 @@ ol.ci-steps li::marker { content: none; }
                     document.body.appendChild(cv);
                     const g = cv.getContext('2d'); g.imageSmoothingEnabled = false;
                     const base = Math.max(3, Math.floor(H * 0.86 / 96)), px = ref.k > 1 ? Math.round(base * ref.k * 0.95) : base;   // screen pixels per sprite pixel (the troll nearly twice as big, so his card and cap go off the top)
-                    const sw = ref.c.width * px, sh = ref.c.height * px, t0 = performance.now(), DUR = 1900;
-                    const frame = now => {
-                        const t = now - t0; if (t > DUR) { cv.remove(); return; }
+                    // (real time on both sides: the game's clock runs ahead after a sped-up spell, and the rAF stamp is real time, so mixing them
+                    // left the referee invisible until the difference had passed - then he popped up out of nowhere, much later)
+                    const rnow = () => { try { return CLOCK.real(); } catch (e) { return performance.now(); } };
+                    const sw = ref.c.width * px, sh = ref.c.height * px, t0 = rnow(), DUR = 1900;
+                    const frame = () => {
+                        const t = rnow() - t0; if (t > DUR) { cv.remove(); return; }
                         g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.imageSmoothingEnabled = false;
                         const fade = t < 90 ? t / 90 : t > DUR - 300 ? (DUR - t) / 300 : 1;
                         g.fillStyle = `rgba(0,0,0,${0.55 * fade})`; g.fillRect(0, 0, W, H);   // the pitch stays in view, darkened
@@ -16777,6 +16780,10 @@ ol.ci-steps li::marker { content: none; }
             const pr = state.pendingRoll, forced = !pr || pr.prevMode === MODES.LOCKED || ['LANDING', 'CATCH', 'INTERCEPT', 'EAT TEAM-MATE', 'ALWAYS HUNGRY'].includes(pr.type);
             document.getElementById('btn-roll-cancel').classList.toggle('hidden', forced);
             document.getElementById('modal-roll').classList.remove('hidden'); 
+            {   // animated dice (a person's own roll): the die tumbles in the window until Roll Dice (or the die) is pressed
+                const box = document.getElementById('roll-dfx'); DICEFX.clearBox(box);
+                if (pr && DICEFX.otherOn(player.team)) pr.dfxTray = DICEFX.waitIn(box, 1, DICEFX.colFor(player.team), () => document.getElementById('btn-roll-confirm').click());
+            }
             camFocus(player, 'modal-roll');
             render();
         }
@@ -16808,7 +16815,7 @@ ol.ci-steps li::marker { content: none; }
             if (!state.pendingRoll || state.pendingRoll.prevMode === MODES.LOCKED) return;   // forced rolls can't be called off
             REPLAY.cancel();   // the action was called off: nothing to replay
             if (state.pathData && !state.pathData.done) state.pathData.done = true;   // the move stops where the player is
-            document.getElementById('modal-roll').classList.add('hidden'); state.mode = state.pendingRoll.prevMode;
+            document.getElementById('modal-roll').classList.add('hidden'); state.mode = state.pendingRoll.prevMode; DICEFX.clearBox(document.getElementById('roll-dfx'));
             log(`  ${state.pendingRoll.type} cancelled.`, 'text-slate-400');
             state.pendingRoll = null; updateValidActions(getPlayerById(state.selectedId));
         });
@@ -16823,7 +16830,7 @@ ol.ci-steps li::marker { content: none; }
             if (pData0 && pData0.dfxBusy) return;   // (animated dice still rolling)
             // animated dice (Settings -> Animate other rolls, a person's own roll): the window stays open while the die settles
             const animO = !!pData0 && DICEFX.otherOn(pData0.player.team);
-            if (!animO) document.getElementById('modal-roll').classList.add('hidden');
+            if (!animO) { document.getElementById('modal-roll').classList.add('hidden'); DICEFX.clearBox(document.getElementById('roll-dfx')); }
             const pData = state.pendingRoll; 
             if (!pData) return;
 
@@ -16991,7 +16998,7 @@ ol.ci-steps li::marker { content: none; }
             const box = document.getElementById('roll-dfx'), btns = document.getElementById('btn-roll-confirm').parentNode;
             btns.classList.add('invisible'); btns.parentNode.classList.add('dfx-rolling');
             const seq = roll0 !== roll || skillRerolled ? [[roll0], [roll]] : [[roll]];
-            DICEFX.rollIn(box, seq, { col: DICEFX.colFor(pData.player.team), label: (k, last) => {
+            DICEFX.rollIn(box, seq, { tray: pData.dfxTray, col: DICEFX.colFor(pData.player.team), label: (k, last) => {
                 const r = seq[k][0], ok = last ? passed : (r !== 1 && (r === 6 || r >= pData.target));
                 return { html: `Rolled ${r}, needed ${pData.target}+ ${ok ? '✓' : '✗'}${!last ? ' <span style="color:#93c5fd">(re-roll)</span>' : ''}`, cls: ok ? 'ok' : 'bad' };
             } }, () => {
@@ -20456,7 +20463,7 @@ ol.ci-steps li::marker { content: none; }
                 const go = which || T.dice.map((_, i) => i);
                 go.forEach(i => { T.dice[i].spinning = true; });
                 let last = rt();
-                const tick = () => { const now = rt();
+                const tick = () => { const now = rt(); if (!T.box.isConnected) { T.state = 'gone'; return; }
                     const dt = Math.min(.05, (now - last) / 1000); last = now;
                     T.dice.forEach(d => { if (!d.spinning) return; d.ang = d.ang.map((a, k) => a + d.w[k] * dt); pose(d, HOVER + 3 * Math.sin(now / 260 + d.phase), d.ang, 1, 1); });
                     T.raf = requestAnimationFrame(tick);
@@ -20513,8 +20520,9 @@ ol.ci-steps li::marker { content: none; }
             function rollIn(host, seq, o, done) {
                 const n = seq[0].length;
                 host.classList.remove('hidden');
-                const T = tray(host, { n, kind: 'd6', col: o.col, size: 46, gap: 14, height: 64, faces: o.from });   // (o.from: the dice as they lie, for a re-roll)
-                const lab = el('div', 'dfx-lab'); host.appendChild(lab);
+                const reuse = o.tray && o.tray.state === 'tumble' && o.tray.box.isConnected && o.tray.dice.length === n;   // (already tumbling in the window)
+                const T = reuse ? o.tray : tray(host, { n, kind: 'd6', col: o.col, size: 46, gap: 14, height: 64, faces: o.from });   // (o.from: the dice as they lie, for a re-roll)
+                let lab = reuse && host.querySelector('.dfx-lab'); if (!lab) { lab = el('div', 'dfx-lab'); host.appendChild(lab); }
                 let k = 0, over = false;
                 const end = () => { if (over) return; over = true; host.onclick = null; stop(T); done(); };
                 const next = () => {
@@ -20526,9 +20534,18 @@ ol.ci-steps li::marker { content: none; }
                     });
                 };
                 host.onclick = e => { e.stopPropagation(); if (T.state === 'rolling') finish(T); else if (T.state === 'done' && k === seq.length - 1) end(); };
-                if (o.from) next(); else { tumble(T); T.timer = setTimeout(next, 260); }
+                if (o.from || reuse) next(); else { tumble(T); T.timer = setTimeout(next, 260); }
                 return T;
             }
+            // dice tumbling in a roll window while it waits for the coach's press (onTap: tapping them counts as the press)
+            function waitIn(host, n, col, onTap) {
+                host.classList.remove('hidden');
+                const T = tray(host, { n, kind: 'd6', col, size: 46, gap: 14, height: 64 });
+                host.appendChild(el('div', 'dfx-lab'));
+                host.onclick = e => { e.stopPropagation(); if (onTap) onTap(); };
+                tumble(T); return T;
+            }
+            function clearBox(host) { if (!host) return; host.onclick = null; host.innerHTML = ''; host.classList.add('hidden'); }
             // ---- a quick look at dice the game rolls by itself (armour, injury): shown at the top of the screen, holds nothing up
             const queue = []; let showing = false;
             function toast(vals, o) {
@@ -20553,7 +20570,7 @@ ol.ci-steps li::marker { content: none; }
                 }), 160);
             }
             return {
-                S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, toast, okHex,
+                S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, waitIn, clearBox, toast, okHex,
                 set: (k, v) => put(k, v),
                 blockOn: atkTeam => S.block() && live() && !AI.isAI(atkTeam),
                 otherOn: team => S.other() && live() && !AI.isAI(team)
@@ -25058,7 +25075,7 @@ ol.ci-steps li::marker { content: none; }
                     $('roll-title').textContent = `${type} REQUIRED!`;
                     $('roll-desc').textContent = nameOf(e.p) + (e.mods ? ` (${e.mods})` : '');
                     $('roll-target').textContent = e.min + '+'; $('roll-odds').textContent = `(${pct(e.min)}% Chance)`;
-                    $('break-tackle-container').classList.add('hidden'); $('btn-roll-cancel').classList.add('hidden');
+                    $('break-tackle-container').classList.add('hidden'); $('btn-roll-cancel').classList.add('hidden'); try { DICEFX.clearBox($('roll-dfx')); } catch (er) {}
                     const cb = $('btn-roll-confirm'); cb.textContent = 'Roll Dice'; cb.classList.remove('fx-ok', 'fx-bad');
                     $('modal-roll').classList.remove('hidden');
                     later(() => { cb.textContent = `Rolled ${e.roll} ${e.ok ? '✓' : '✗'}`; cb.classList.add(e.ok ? 'fx-ok' : 'fx-bad'); sfxRoll(e.ok, type); }, T1);

@@ -137,9 +137,11 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   const rr = await page.evaluate(() => {
     const [a] = __scene(); const p = getPlayerById(a); state.selectedId = p.id; window.__res = null;
     setupRoll('DODGE', p, 3, 'None', r => { window.__res = ['pass', r]; }, r => { window.__res = ['fail', r]; }, { desc: 'test dodge', prevMode: MODES.IDLE });
+    const waiting = { box: !document.getElementById('roll-dfx').classList.contains('hidden'), cubes: document.querySelectorAll('#roll-dfx .dfx-slot').length, res: window.__res };
     document.getElementById('btn-roll-confirm').click();
-    return { open: !document.getElementById('modal-roll').classList.contains('hidden'), box: !document.getElementById('roll-dfx').classList.contains('hidden'), res: window.__res };
+    return { waiting, open: !document.getElementById('modal-roll').classList.contains('hidden'), box: !document.getElementById('roll-dfx').classList.contains('hidden'), res: window.__res };
   });
+  check(rr.waiting.box && rr.waiting.cubes === 1 && rr.waiting.res === null, 'Roll Dice window (animated): the die already tumbles in the window while it waits for the press', rr.waiting);
   await page.waitForTimeout(250);
   await page.screenshot({ path: OUT + '/dice-roll-window-phone.png' });
   check(rr.open && rr.box && rr.res === null, 'Roll Dice (animated): the window stays open with the die rolling, the game waits', rr);
@@ -150,10 +152,11 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     localStorage.setItem('bb-dice-anim-other', '0');
     const [a] = __scene(); const p = getPlayerById(a); state.selectedId = p.id; window.__res = null;
     setupRoll('DODGE', p, 3, 'None', r => { window.__res = ['pass', r]; }, r => { window.__res = ['fail', r]; }, { desc: 'test dodge', prevMode: MODES.IDLE });
+    const boxOff = !document.getElementById('roll-dfx').classList.contains('hidden');
     document.getElementById('btn-roll-confirm').click();
-    return { open: !document.getElementById('modal-roll').classList.contains('hidden'), res: window.__res };
+    return { boxOff, open: !document.getElementById('modal-roll').classList.contains('hidden'), res: window.__res };
   });
-  check(!rr3.open && rr3.res, 'Animate other rolls off: carried out at once, as before', rr3);
+  check(!rr3.boxOff && !rr3.open && rr3.res, 'Animate other rolls off: carried out at once, as before', rr3);
 
   // ---- the computer's block stays instant even with the animation on
   const ai = await page.evaluate(() => {

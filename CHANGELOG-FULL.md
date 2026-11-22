@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.53 (22 Nov 2026)
+- Animated dice, the roll window (Dodge, Rush, pick-up, catch, pass and the rest): with Animate other rolls on, the die tumbles in
+  the window from the moment it opens; pressing Roll Dice (or tapping the die) rolls, and that same die jumps and lands on the result
+  in place. Before, it only appeared after the press. Cancel clears it; off is unchanged.
+- Fixed: the referee jump-scare after a foul send-off timed itself with the game clock but drew with real time. After any sped-up
+  spell (Speed up on the computer's turns, or a fast computer-v-computer stretch) the game clock runs ahead, so the referee stayed
+  invisible until the difference had passed and then appeared out of nowhere, e.g. in the middle of a later pass. It now uses real time
+  throughout, so he shows at the send-off and is gone 2 seconds later.
+
 ## v5.52 (22 Nov 2026)
 - Animated dice, the armour and injury strip at the top of the screen: while the dice are in the air it says just "Armour roll…" or
   "Injury roll…"; the result (e.g. "Armour 9 v AV 9+: broken") appears once they have landed, and stays a little longer (1.3 s) before
