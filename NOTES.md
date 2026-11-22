@@ -472,6 +472,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
+- **Animated dice (prototype agreed so far, not in the game yet).** Prototype: https://claude.ai/artifact/8gderHAHk5PHbUqqNVamNu
+  (control room, 22 Nov). Dice tumble in place where the block dice show now, waiting for the Roll button; on the press the
+  roll is made, and the dice jump a little (still spinning fast), settle on the result with a clack (~1.0 s, adjustable).
+  Off = nothing until the roll, then the dice face on, as now. For the game, the owner wants: separate settings for
+  animating block dice and other rolls (off by default with reduced motion; computer rolls and `?simtest` stay instant);
+  dice in team colours (die = primary, pips/symbols = secondary; if too alike, darken/lighten the pip colour until it
+  reads, contrast 3:1); dice colours editable per team in the team's setup, defaulting to the team colours, with a small
+  "Use team colours" button to reset.
 - **AI, defence: knock down their free receivers (from the position study, 18 Nov).** When the opponent holds the ball and has a
   team-mate deep with a free run in (in hand-off / pass reach of the carrier), Blitz or block that player down rather than the
   far-off, caged carrier. Test v drefsante.
