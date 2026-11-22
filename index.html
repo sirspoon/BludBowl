@@ -814,6 +814,17 @@
         .st-row small { display: block; font-size: 11px; color: #94a3b8; font-weight: 600; }
         .st-tog { min-width: 96px; padding: 6px 12px; border-radius: 8px; border: 1px solid #475569; background: #0a1020; color: #e2e8f0; font-weight: 800; font-size: 12px; }
         .st-tog.on { background: #059669; border-color: #10b981; color: #fff; }
+        /* the in-match Settings sheet (⚙ in the top bar): the title screen's rows that can change mid-match, moved in while it's open */
+        #game-settings { position: fixed; inset: 0; z-index: 70; background: rgba(2,6,15,.72); display: flex; align-items: center; justify-content: center; padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left)); }
+        #game-settings.hidden { display: none; }
+        @media (max-width: 389px) { #btn-music { display: none; } }   /* (very narrow phones: room for ⚙; Music is in its sheet) */
+        #game-settings .gs-card { width: min(480px, 100%); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; background: #0f172a; border: 1px solid #334155; border-top: 3px solid #f59e0b; border-radius: 12px; padding: 10px 12px 12px; display: grid; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+        #game-settings .gs-head { display: flex; align-items: center; justify-content: space-between; position: sticky; top: -10px; background: #0f172a; padding: 4px 0; z-index: 1; }
+        #game-settings h2 { margin: 0; font-size: 1.5rem; color: #fbbf24; letter-spacing: .06em; text-transform: uppercase; }
+        #gs-close { padding: 6px 16px; border-radius: 8px; background: #b45309; border: 1px solid #f59e0b; color: #fff; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+        #gs-rows { display: grid; gap: 6px; }
+        #game-settings .st-row { padding: 8px 12px; font-size: 13px; }
+        #game-settings .gs-note { margin: 2px 2px 0; font-size: 11px; color: #94a3b8; }
         .st-range { display: flex; align-items: center; gap: 8px; flex: 0 1 190px; min-width: 130px; }
         .st-range input { flex: 1; min-width: 0; accent-color: #f59e0b; }
         .st-range output { min-width: 3em; text-align: right; color: #fcd34d; font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -1272,7 +1283,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.54</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.55</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1324,7 +1335,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43</small></span><button type="button" class="st-tog" id="st-brain"></button></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
-            <div class="st-row"><span>Animate block dice<small>the dice tumble until you press Roll, then jump and land on the result (your own blocks)</small></span><button type="button" class="st-tog" id="st-dice-block"></button></div>
+            <div class="st-row"><span>Animate block dice<small>your dice tumble until you press Roll, then jump and land on the result; the computer's roll at once and land the same way</small></span><button type="button" class="st-tog" id="st-dice-block"></button></div>
             <div class="st-row"><span>Animate other rolls<small>Dodges, Rushes, pick-ups, catches, passes and team re-rolls land in the roll window; armour and injury dice show for a moment at the top</small></span><button type="button" class="st-tog" id="st-dice-other"></button></div>
             <div class="st-row"><span>Roll length<small>how long the dice take to jump and land (the sound follows Sound effects)</small></span><span class="st-range"><input type="range" id="st-dice-dur" min="500" max="2000" step="100" aria-label="Roll length"><output id="st-dice-dur-o" for="st-dice-dur"></output></span></div>
             <div class="st-row"><span>Dice in team colours<small>the rolling team's dice in its colours (each team's dice colours are set in the Team Builder); off: the plain dice</small></span><button type="button" class="st-tog" id="st-dice-team"></button></div>
@@ -1639,6 +1650,7 @@ ol.ci-steps li::marker { content: none; }
                         <button id="btn-rosters" title="Team Rosters & Dugouts" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow flex items-center gap-1">
                             <span>📋</span> <span class="hidden sm:inline">Rosters</span>
                         </button>
+                        <button id="btn-gsettings" type="button" title="Settings" aria-label="Settings" aria-haspopup="dialog" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow">⚙</button>
                         <button id="btn-help" type="button" title="Help: how to play" aria-label="Help" class="bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow">?</button>
 
  <button id="btn-sound" title="Sound on / off" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded font-bold text-[10px] border border-slate-600 transition shadow">
@@ -1881,6 +1893,14 @@ ol.ci-steps li::marker { content: none; }
             <div id="dice-container" class="flex flex-wrap justify-center gap-3 p-3 rounded-lg w-full transition-all"></div>
             
             <p id="dice-tap-hint" class="text-[10px] text-slate-400 italic mt-3">Tap a die to select</p>
+        </div>
+    </div>
+
+    <div id="game-settings" class="hidden" role="dialog" aria-modal="true" aria-labelledby="gs-title">
+        <div class="gs-card">
+            <div class="gs-head"><h2 id="gs-title" class="fantasy-font">Settings</h2><button type="button" id="gs-close">Done</button></div>
+            <div id="gs-rows"></div>
+            <p class="gs-note">The pitch, the computer coach, HD sprites and backups are in Settings on the title screen.</p>
         </div>
     </div>
 
@@ -18136,7 +18156,7 @@ ol.ci-steps li::marker { content: none; }
             };
             // animated dice (a person's own block, Settings -> Animate block dice): the dice tumble in place until Roll is pressed, then
             // jump and settle on what the game rolled; re-rolls replay the jump for the dice that changed. Then the usual dice to pick.
-            const animB = DICEFX.blockOn(atk.team) && !state.combat.bnc;
+            const animB = DICEFX.blockOn() && !state.combat.bnc, aiRolls = AI.isAI(atk.team);
             const busy = on => { card.classList.toggle('dfx-busy', on); state.combat.diceAnim = on; };
             if (animB) {
                 const drawFlat = drawDice, combat = state.combat;
@@ -18146,12 +18166,13 @@ ol.ci-steps li::marker { content: none; }
                     if (state.combat !== combat || (which && !which.length)) { drawFlat(arr); return; }
                     combat.dice = arr.slice(); busy(true);
                     let T = combat.dfx;
-                    if (!T || T.state === 'gone' || !c.contains(T.box) || T.dice.length !== arr.length) {   // (a re-roll: the dice as they lay, then the jump)
+                    const midAir = T && T.state === 'rolling' && c.contains(T.box) && T.dice.length === arr.length;   // (re-rolled before landing: they all carry on to the new result)
+                    if (!midAir && (!T || T.state === 'gone' || !c.contains(T.box) || T.dice.length !== arr.length)) {   // (a re-roll: the dice as they lay, then the jump)
                         c.classList.add('dfx-on'); T = DICEFX.tray(c, { n: arr.length, kind: 'block', col: dcol, size: 56, gap: 18, height: 66, faces: prev });
                         combat.dfx = T;
                     }
                     T.box.onclick = e => { e.stopPropagation(); DICEFX.finish(T); };
-                    DICEFX.settle(T, arr, which, () => { DICEFX.stop(T); combat.dfx = null; if (state.combat !== combat) return; busy(false); drawFlat(arr); });
+                    DICEFX.settle(T, arr, midAir ? null : which, () => { DICEFX.stop(T); combat.dfx = null; if (state.combat !== combat) return; busy(false); drawFlat(arr); });
                 };
             }
             const rollNow = () => {
@@ -18197,6 +18218,7 @@ ol.ci-steps li::marker { content: none; }
             c.classList.add('dfx-on');
             const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 56, gap: 18, height: 66 });
             state.combat.dfx = T0; DICEFX.tumble(T0);
+            if (aiRolls) { state.combat.diceWait = false; rollNow(); return; }   // the computer rolls at once: the dice jump and land, then it picks
             const rb = document.createElement('button'); rb.type = 'button'; rb.id = 'btn-dice-roll'; rb.textContent = 'Roll';
             const combat0 = state.combat;
             const press = e => { if (e) e.stopPropagation(); if (state.combat !== combat0 || !combat0.diceWait) return; combat0.diceWait = false; rb.remove(); rollNow(); };
@@ -20587,7 +20609,7 @@ ol.ci-steps li::marker { content: none; }
             return {
                 S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, waitIn, clearBox, toast, okHex,
                 set: (k, v) => put(k, v),
-                blockOn: atkTeam => S.block() && live() && !AI.isAI(atkTeam),
+                blockOn: () => S.block() && live(),   // (the computer's blocks too: they roll at once, then land the same way)
                 otherOn: team => S.other() && live() && !AI.isAI(team)
             };
         })();
@@ -32671,6 +32693,31 @@ ol.ci-steps li::marker { content: none; }
             document.getElementById('st-dice-dur').addEventListener('input', e => { DICEFX.set('bb-dice-dur', String(+e.target.value)); document.getElementById('st-dice-dur-o').textContent = (+e.target.value / 1000).toFixed(1) + ' s'; });
             document.getElementById('st-hd').addEventListener('click', () => { HD.set(HD.size === 0 ? 48 : HD.size === 48 ? 64 : 0); paintSettings(); });
             document.getElementById('st-pitch').addEventListener('change', e => { setPitchPref(e.target.value); selPitch.value = pitchPref; });
+            {   // the in-match Settings sheet (⚙ in the top bar): the rows above that are safe to change mid-match are moved into it while
+                // it's open (their buttons, handlers and paintSettings stay the same) and put back where they were when it closes
+                const LIVE = ['st-sound', 'st-music', 'st-text', 'st-move', 'st-anim', 'st-dice-block', 'st-dice-other', 'st-dice-dur', 'st-dice-team', 'st-replay', 'st-replay-kick', 'st-weather'];
+                const sheet = document.getElementById('game-settings'), box = document.getElementById('gs-rows');
+                let moved = [];
+                const close = () => {
+                    if (sheet.classList.contains('hidden')) return;
+                    moved.forEach(([row, mark]) => mark.replaceWith(row)); moved = [];
+                    sheet.classList.add('hidden');
+                    try { document.getElementById('btn-gsettings').focus({ preventScroll: true }); } catch (e) {}
+                };
+                const open = () => {
+                    if (!sheet.classList.contains('hidden')) return;
+                    moved = LIVE.map(id => { const el = document.getElementById(id), row = el && el.closest('.st-row'); if (!row) return null; const mark = document.createComment('st-row'); row.before(mark); box.appendChild(row); return [row, mark]; }).filter(Boolean);
+                    paintSettings(); sheet.classList.remove('hidden');
+                    try { document.getElementById('gs-close').focus({ preventScroll: true }); } catch (e) {}
+                };
+                document.getElementById('btn-gsettings').addEventListener('click', open);
+                document.getElementById('gs-close').addEventListener('click', close);
+                sheet.addEventListener('click', e => { if (e.target === sheet) close(); });
+                document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.classList.contains('hidden')) { e.stopPropagation(); close(); } }, true);
+                // the sound / music buttons in the top bar and the sheet's switches stay in step
+                ['btn-sound', 'btn-music', 'btn-uiscale'].forEach(id => { const b = document.getElementById(id); if (b) b.addEventListener('click', () => { if (!sheet.classList.contains('hidden')) setTimeout(paintSettings, 0); }); });
+                window.GAME_SETTINGS = { open, close, isOpen: () => !sheet.classList.contains('hidden') };
+            }
 
             // start a match between two teams (race keys or 'custom:<id>'); opts.career records it for saved teams, opts.league is a league fixture
             window.launchMatch = (k0, k1, opts = {}) => {

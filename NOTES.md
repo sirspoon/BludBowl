@@ -302,6 +302,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   referee could appear long after the send-off. Lesson for any animation: time it with `CLOCK.real()` or one clock throughout.
   v5.54: results stay up `HOLD` (2.2 s) after landing; a tap anywhere (capturing pointerdown) puts them away - in a roll window the tap's
   click is swallowed (`swallow`, one click), for the armour/injury strip it passes through.
+  v5.55: in-match Settings sheet (`#game-settings`, ⚙ `#btn-gsettings`, `GAME_SETTINGS.open/close`): the `LIVE` list of title-screen
+  Settings rows is moved into it while open (comment markers put them back), so add a new mid-match-safe setting by its id there. Under
+  390 px wide `#btn-music` is hidden to make room. The computer's block dice animate too when Animate block dice is on (`aiRolls`: no
+  Roll wait; a re-roll before landing carries all dice on, `midAir`); its pick waits on `state.combat.diceAnim` as before.
 - v5.39 (job session, 19 Nov): **roster PDF easier to read in print**. `ROSTER_PDF.draw` tries type sizes `SIZES` (11pt down to 7) with
   `rosterPage(doc, S, z, last, extra)` and keeps the largest that fits one page (returns the spare room; a small team redraws with
   taller rows). Column widths come from the contents; names, numbers, characteristics, headings and box values bold; changed

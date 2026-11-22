@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.55 (22 Nov 2026)
+- In-match Settings: a ⚙ button in the top bar opens a Settings sheet over the match with the settings that can safely change during
+  a match - Sound effects, Music, Text size, Moving, Animations, Animate block dice, Animate other rolls, Roll length, Dice in team
+  colours, Replays, Kick-off replays and Weather effects. They are the title screen's own Settings rows, moved into the sheet while it is
+  open and put back after, so both places always agree. Done, a tap outside or Escape closes it. The pitch, the computer coach, HD sprites
+  and backups stay on the title screen (they only take effect at the start of a match, or aren't for mid-match). On very narrow phones
+  (under 390 px) the top bar's music button makes way for the ⚙ (Music is in the sheet).
+- Animated block dice now include the computer's blocks: with Animate block dice on, its dice are rolled straight away (no Roll button),
+  jump and land with the same animation and Roll length as yours, and only then does it pick (its usual highlight). If it uses Brawler,
+  Pro, Savage Blow or Veteran straight after rolling, the dice carry on in the air to the new result. Off, or in test runs, sped-up
+  computer turns, replays and two-device play: instant, as before.
+
 ## v5.54 (22 Nov 2026)
 - Animated dice: the result ("Rolled 4, needed 3+ ✓") now stays in the roll or re-roll window for 2.2 seconds after the die lands
   (it was under half a second), and the armour / injury strip at the top for 2.2 seconds too (was 1.3). A tap anywhere puts a result

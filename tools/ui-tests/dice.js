@@ -169,17 +169,39 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   });
   check(!rr3.boxOff && !rr3.open && rr3.res, 'Animate other rolls off: carried out at once, as before', rr3);
 
-  // ---- the computer's block stays instant even with the animation on
+  // ---- the computer's block (animation on): rolled at once, no Roll button, the dice land the same way, then its pick
   const ai = await page.evaluate(() => {
     localStorage.setItem('bb-dice-anim-block', '1'); AI.set(0, true);
     const [a, d] = __scene(); state.mode = MODES.LOCKED; startBlock(a, d);
-    const r = { dice: state.combat.dice && state.combat.dice.length, roll: !!document.getElementById('btn-dice-roll'), cubes: document.querySelectorAll('#dice-container .dfx-slot').length };
+    return { dice: state.combat.dice && state.combat.dice.length, roll: !!document.getElementById('btn-dice-roll'), cubes: document.querySelectorAll('#dice-container .dfx-slot').length, anim: !!state.combat.diceAnim };
+  });
+  check(ai.dice === 2 && !ai.roll && ai.cubes === 2 && ai.anim, "the computer's block: rolled at once (no Roll button), the dice in the air", ai);
+  await page.waitForTimeout(900);
+  const ai2 = await page.evaluate(() => { const r = { dice: state.combat.dice.slice(), flat: [...document.querySelectorAll('#dice-container button.die-canvas-btn')].map(b => +b.dataset.face), anim: !!state.combat.diceAnim }; AI.set(0, false); return r; });
+  check(JSON.stringify(ai2.dice) === JSON.stringify(ai2.flat) && !ai2.anim, "then they land on what it rolled, ready for its pick", ai2);
+  const ai3 = await page.evaluate(() => {
+    localStorage.setItem('bb-dice-anim-block', '0'); AI.set(0, true);
+    const [a, d] = __scene(); state.mode = MODES.LOCKED; startBlock(a, d);
+    const r = { dice: state.combat.dice && state.combat.dice.length, cubes: document.querySelectorAll('#dice-container .dfx-slot').length, flat: document.querySelectorAll('#dice-container button.die-canvas-btn').length };
     AI.set(0, false); return r;
   });
-  check(ai.dice === 2 && !ai.roll && !ai.cubes, "the computer's own block: rolled and shown at once", ai);
+  check(ai3.dice === 2 && !ai3.cubes && ai3.flat === 2, "animation off: the computer's block shown at once, as before", ai3);
   await page.evaluate(() => ['modal-choice', 'modal-dice', 'modal-roll', 'modal-team-reroll'].forEach(id => document.getElementById(id).classList.add('hidden')));
   check(!errors.length, 'no page errors in the match', errors.slice(0, 3));
 
+  // ---- the in-match Settings sheet (⚙ in the top bar)
+  await page.evaluate(() => ['modal-choice', 'modal-dice', 'modal-roll', 'modal-team-reroll'].forEach(id => document.getElementById(id).classList.add('hidden')));
+  await page.tap('#btn-gsettings'); await page.waitForTimeout(200);
+  const gs = await page.evaluate(() => ({ open: GAME_SETTINGS.isOpen(), rows: document.querySelectorAll('#gs-rows .st-row').length, dice: document.getElementById('st-dice-block').textContent,
+    fits: document.querySelector('#game-settings .gs-card').getBoundingClientRect().bottom <= innerHeight + 1 }));
+  await page.screenshot({ path: OUT + '/dice-game-settings-phone.png' });
+  await page.tap('#st-dice-block'); await page.waitForTimeout(100);
+  const gs2 = await page.evaluate(() => ({ dice: document.getElementById('st-dice-block').textContent, stored: localStorage.getItem('bb-dice-anim-block') }));
+  await page.tap('#gs-close'); await page.waitForTimeout(150);
+  const gs3 = await page.evaluate(() => ({ open: GAME_SETTINGS.isOpen(), back: document.getElementById('settings-panel').contains(document.getElementById('st-dice-block')), rows: document.querySelectorAll('#settings-panel .st-row').length }));
+  check(gs.open && gs.rows === 12 && gs.fits, 'in-match Settings: the ⚙ button opens a sheet with the 12 settings that can change mid-match, fitting a phone', gs);
+  check(gs2.dice !== gs.dice && gs2.stored === (gs2.dice === 'On' ? '1' : '0'), 'a switch in the sheet changes the setting', [gs, gs2]);
+  check(!gs3.open && gs3.back, "Done closes it and the rows go back to the title screen's Settings", gs3);
   // ---- Team Builder: the dice colours
   const tb = await openGame(browser, { device: 'Pixel 7' });
   const P = tb.page;
