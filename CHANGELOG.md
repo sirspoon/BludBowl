@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.56 (22 Nov 2026)
+- A tidier top bar in matches: sound, music and text size are now only in the ⚙ Settings sheet.
+
 ## v5.55 (22 Nov 2026)
 - A ⚙ Settings button in the match's top bar: sound, music, text size, moving, animations, dice, replays and weather effects can be changed mid-match.
 - With Animate block dice on, the computer's block dice roll and land with the same animation (no waiting for a button).

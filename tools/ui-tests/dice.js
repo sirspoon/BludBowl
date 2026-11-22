@@ -197,6 +197,12 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   await page.screenshot({ path: OUT + '/dice-game-settings-phone.png' });
   await page.tap('#st-dice-block'); await page.waitForTimeout(100);
   const gs2 = await page.evaluate(() => ({ dice: document.getElementById('st-dice-block').textContent, stored: localStorage.getItem('bb-dice-anim-block') }));
+  const snd = await page.evaluate(() => { const m0 = SFX.isMuted(), mu0 = MUSIC.isEnabled(), t0 = document.getElementById('st-sound').textContent;
+    document.getElementById('st-sound').click(); document.getElementById('st-music').click();
+    const r = { muted: SFX.isMuted() !== m0, music: MUSIC.isEnabled() !== mu0, label: document.getElementById('st-sound').textContent !== t0,
+      barHidden: ['btn-sound', 'btn-music', 'btn-uiscale'].every(id => !document.getElementById(id).offsetParent) };
+    document.getElementById('st-sound').click(); document.getElementById('st-music').click(); return r; });
+  check(snd.muted && snd.music && snd.label && snd.barHidden, "Sound and Music switch from the sheet (their top-bar buttons are gone)", snd);
   await page.tap('#gs-close'); await page.waitForTimeout(150);
   const gs3 = await page.evaluate(() => ({ open: GAME_SETTINGS.isOpen(), back: document.getElementById('settings-panel').contains(document.getElementById('st-dice-block')), rows: document.querySelectorAll('#settings-panel .st-row').length }));
   check(gs.open && gs.rows === 12 && gs.fits, 'in-match Settings: the ⚙ button opens a sheet with the 12 settings that can change mid-match, fitting a phone', gs);

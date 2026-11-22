@@ -817,7 +817,8 @@
         /* the in-match Settings sheet (⚙ in the top bar): the title screen's rows that can change mid-match, moved in while it's open */
         #game-settings { position: fixed; inset: 0; z-index: 70; background: rgba(2,6,15,.72); display: flex; align-items: center; justify-content: center; padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left)); }
         #game-settings.hidden { display: none; }
-        @media (max-width: 389px) { #btn-music { display: none; } }   /* (very narrow phones: room for ⚙; Music is in its sheet) */
+        /* sound, music and text size live in the ⚙ sheet now: their top-bar buttons stay in the page (the sheet's switches use them), unseen */
+        #btn-sound, #btn-music, #btn-uiscale { display: none !important; }
         #game-settings .gs-card { width: min(480px, 100%); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; background: #0f172a; border: 1px solid #334155; border-top: 3px solid #f59e0b; border-radius: 12px; padding: 10px 12px 12px; display: grid; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
         #game-settings .gs-head { display: flex; align-items: center; justify-content: space-between; position: sticky; top: -10px; background: #0f172a; padding: 4px 0; z-index: 1; }
         #game-settings h2 { margin: 0; font-size: 1.5rem; color: #fbbf24; letter-spacing: .06em; text-transform: uppercase; }
@@ -1283,7 +1284,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.55</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.56</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game

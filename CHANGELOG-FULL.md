@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.56 (22 Nov 2026)
+- The match's top bar loses its sound, music and text-size buttons: all three are in the ⚙ Settings sheet (v5.55). The top bar keeps
+  Rosters, ⚙, Help, Save & exit, Fullscreen, the speed buttons and End Turn. (The buttons stay in the page, unseen, as the sheet's
+  switches work through them.)
+
 ## v5.55 (22 Nov 2026)
 - In-match Settings: a ⚙ button in the top bar opens a Settings sheet over the match with the settings that can safely change during
   a match - Sound effects, Music, Text size, Moving, Animations, Animate block dice, Animate other rolls, Roll length, Dice in team
