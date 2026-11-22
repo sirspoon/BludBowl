@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.62 (22 Nov 2026)
+- The acting player's marker is simpler: no ring around them, just their base glowing yellow (a bright flare as they're picked, then a pulse) under the pointer; a target's base glows red.
+
 ## v5.61 (22 Nov 2026)
 - In a match, the computer's acting player now gets the replays' marker - a pulsing ring and a bobbing pointer - and its block or Blitz target a red ring with a line to it.
 

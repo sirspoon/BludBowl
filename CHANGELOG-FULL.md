@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.62 (22 Nov 2026)
+- The acting-player marker (the computer's turns and the replays): the big pulsing ring around the player is gone. Instead the ground
+  under their base lights up yellow, flaring brightly the moment they're picked and then pulsing for as long as they act, with the
+  base's rim glowing too; the pointer above them stays. A block, Blitz, foul or hand-off target gets the same on its base in red, with
+  the dashed line to it. (Teams drawn as plain discs instead of sprites keep the rings.)
+
 ## v5.61 (22 Nov 2026)
 - The computer's turns are easier to follow: the player it is moving gets the same marker as in the replays (a pulsing yellow ring and
   a bobbing pointer above), and once it has a target - the player it is going to block, Blitz, foul or hand off to - that player gets a

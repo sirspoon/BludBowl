@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.61</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.62</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -16615,8 +16615,7 @@ ol.ci-steps li::marker { content: none; }
             const t = (() => { try { return CLOCK.real(); } catch (e) { return performance.now(); } })();
             const dp = drawPos(p), cx = (dp.x + 0.5) * ts, cy = (dp.y + 0.5) * ts, k = 0.5 + 0.5 * Math.sin(t / 210);
             c.save();
-            c.strokeStyle = `rgba(250,204,21,${0.55 + 0.45 * k})`; c.lineWidth = ts * 0.08;
-            c.beginPath(); c.arc(cx, cy, ts * (0.53 + 0.05 * k), 0, Math.PI * 2); c.stroke();
+            if (!spriteFor(p)) { c.strokeStyle = `rgba(250,204,21,${0.55 + 0.45 * k})`; c.lineWidth = ts * 0.08; c.beginPath(); c.arc(cx, cy, ts * (0.53 + 0.05 * k), 0, Math.PI * 2); c.stroke(); }   // (sprites: their base glows instead, markGlow)
             const by = cy - ts * (0.98 + 0.12 * k);
             c.fillStyle = '#facc15'; c.strokeStyle = '#1b1d2a'; c.lineWidth = ts * 0.05;
             c.beginPath(); c.moveTo(cx - ts * 0.22, by - ts * 0.2); c.lineTo(cx + ts * 0.22, by - ts * 0.2); c.lineTo(cx, by + ts * 0.08); c.closePath(); c.fill(); c.stroke();
@@ -16624,20 +16623,38 @@ ol.ci-steps li::marker { content: none; }
                 const dq = drawPos(q), tx = (dq.x + 0.5) * ts, ty = (dq.y + 0.5) * ts, L = Math.hypot(tx - cx, ty - cy) || 1, ux = (tx - cx) / L, uy = (ty - cy) / L;
                 if (L > ts * 1.1) { c.setLineDash([ts * 0.14, ts * 0.1]); c.strokeStyle = 'rgba(248,113,113,0.9)'; c.lineWidth = ts * 0.06;
                     c.beginPath(); c.moveTo(cx + ux * ts * 0.55, cy + uy * ts * 0.55); c.lineTo(tx - ux * ts * 0.55, ty - uy * ts * 0.55); c.stroke(); c.setLineDash([]); }
-                c.strokeStyle = `rgba(239,68,68,${0.6 + 0.4 * k})`; c.lineWidth = ts * 0.08;
-                c.beginPath(); c.arc(tx, ty, ts * (0.5 + 0.05 * k), 0, Math.PI * 2); c.stroke();
+                if (!spriteFor(q)) { c.strokeStyle = `rgba(239,68,68,${0.6 + 0.4 * k})`; c.lineWidth = ts * 0.08; c.beginPath(); c.arc(tx, ty, ts * (0.5 + 0.05 * k), 0, Math.PI * 2); c.stroke(); }
             }
             c.restore();
         }
+        // who is marked right now (a replay's actor and target, or the computer's player and its target), worked out once a frame
+        let curMark = null; const markSince = new Map();
+        function markNow() {
+            let m = null;
+            try { m = FREP.on() ? FREP.mark() : aiMark(); } catch (e) { m = null; }
+            const t = (() => { try { return CLOCK.real(); } catch (e) { return performance.now(); } })(), seen = new Set();
+            if (m && m.p) { const kA = m.p.id + ':a'; seen.add(kA); if (!markSince.has(kA)) markSince.set(kA, t); if (m.q) { const kT = m.q.id + ':t'; seen.add(kT); if (!markSince.has(kT)) markSince.set(kT, t); } }
+            [...markSince.keys()].forEach(k => { if (!seen.has(k)) markSince.delete(k); });
+            curMark = m && m.p ? m : null;
+            return curMark;
+        }
+        // the glow on a marked player's base: a bright flare as they're picked, then a steady pulse (yellow: acting, red: target)
+        function markGlow(p) {
+            const m = curMark; if (!m) return null;
+            const role = m.p === p ? 'a' : m.q === p ? 't' : null; if (!role) return null;
+            const t = (() => { try { return CLOCK.real(); } catch (e) { return performance.now(); } })(), t0 = markSince.get(p.id + ':' + role);
+            const flare = t0 == null ? 0 : Math.max(0, 1 - (t - t0) / 700), pulse = 0.5 + 0.5 * Math.sin(t / 230);
+            return { col: role === 'a' ? [250, 204, 21] : [239, 68, 68], a: Math.min(1, 0.4 + 0.35 * pulse + 0.6 * flare), grow: 0.35 * flare + 0.08 * pulse };
+        }
         // in a match: the computer's player while it plays them (the one it has picked, its target once it has one)
-        function aiActorMark(c, ts) {
-            if (!state.players || state.isGameOver || document.body.classList.contains('sim-max')) return;
-            const tm = state.activeTeam; if (!AI.isOn(tm)) return;
+        function aiMark() {
+            if (!state.players || state.isGameOver || document.body.classList.contains('sim-max')) return null;
+            const tm = state.activeTeam; if (!AI.isOn(tm)) return null;
             const f = AI.focus(), sel = state.selectedId != null ? getPlayerById(state.selectedId) : null;
             const p = (f && getPlayerById(f.pid)) || sel;
-            if (!p || p.team !== tm || (p.hasActed && !(state.combat && state.combat.atk === p))) return;
+            if (!p || p.team !== tm || (p.hasActed && !(state.combat && state.combat.atk === p))) return null;
             const q = state.combat && state.combat.atk === p ? state.combat.def : f && f.pid === p.id && f.target != null ? getPlayerById(f.target) : null;
-            actorMark(c, ts, p, q);
+            return { p, q };
         }
         function drawPos(p) {
             const H = state.blockHold, h = H && H.pos[p.id];
@@ -20332,6 +20349,12 @@ ol.ci-steps li::marker { content: none; }
             const baseCol = kit;   // the base is the team's main kit colour, so the two sides stand apart
             const down = p.isDown || p.isStunned;
             if (!opts.flying) {
+                if (opts.glow) {   // a marked player (markGlow): the ground under the base lights up, flaring as they're picked, then pulsing
+                    const g = opts.glow, [r, gg, b] = g.col, rx = ts * (0.36 + g.grow * 0.5), ry = ts * (0.13 + g.grow * 0.18);
+                    ctx.save(); ctx.shadowColor = `rgba(${r},${gg},${b},${g.a})`; ctx.shadowBlur = ts * (0.25 + g.grow * 0.6);
+                    ctx.fillStyle = `rgba(${r},${gg},${b},${(0.55 * g.a).toFixed(3)})`; ctx.beginPath(); ctx.ellipse(0, ts * 0.34, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                }
                 // a little round base like a miniature's, with a shadow
                 ctx.fillStyle = 'rgba(0,0,0,0.28)'; ctx.beginPath(); ctx.ellipse(0, ts * 0.36, ts * 0.33, ts * 0.11, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = baseCol; ctx.beginPath(); ctx.ellipse(0, ts * 0.33, ts * 0.3, ts * 0.095, 0, 0, Math.PI * 2); ctx.fill();
@@ -20339,6 +20362,11 @@ ol.ci-steps li::marker { content: none; }
                 if (opts.rings) opts.rings.forEach(([col, w, grow]) => {
                     ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.ellipse(0, ts * 0.33, ts * 0.3 + grow, ts * 0.095 + grow * 0.45, 0, 0, Math.PI * 2); ctx.stroke();
                 });
+                if (opts.glow) {   // and its rim glows in the same colour
+                    const g = opts.glow, [r, gg, b] = g.col;
+                    ctx.save(); ctx.shadowColor = `rgba(${r},${gg},${b},1)`; ctx.shadowBlur = ts * 0.18; ctx.strokeStyle = `rgba(${Math.min(255, r + 30)},${Math.min(255, gg + 30)},${Math.min(255, b + 30)},${g.a.toFixed(3)})`;
+                    ctx.lineWidth = Math.max(2, ts * (0.05 + 0.05 * g.grow)); ctx.beginPath(); ctx.ellipse(0, ts * 0.33, ts * 0.31, ts * 0.1, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+                }
             }
             const cv = spriteCanvas(p, opts.dim, opts.flying || down ? 0 : idleFrame(p));
             ctx.save();
@@ -22384,6 +22412,7 @@ ol.ci-steps li::marker { content: none; }
                 ctx.fillText('FOLLOW UP', s.x*ts + ts/2, s.y*ts + ts/2);
             }
 
+            markNow();   // (who is acting / targeted: their bases glow, markGlow)
             // back to front: a player lower on the screen is nearer the viewer and drawn over the one behind (a foul's stomp on top of all)
             const depth = new Map(state.players.map(q => [q, drawPos(q).y]));
             [...state.players].sort((a, b) => (a.foulAnim ? 1 : 0) - (b.foulAnim ? 1 : 0) || depth.get(a) - depth.get(b)).forEach(p => {
@@ -22417,7 +22446,7 @@ ol.ci-steps li::marker { content: none; }
                     if (state.selectedId === p.id) rings.push(['#facc15', 3, ts * 0.06]);
                     if (p.actionTaken === 'blitz') rings.push(['#f59e0b', 2, ts * 0.11]);
                     if (p.actionTaken === 'foul') rings.push(['#a8a29e', 2, ts * 0.11]);
-                    drawSpriteToken(p, ts, { dim: dim && !p.isFading, rings });
+                    drawSpriteToken(p, ts, { dim: dim && !p.isFading, rings, glow: markGlow(p) });
                     if (p.isStunned) { ctx.font = `${ts*0.32}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('💫', ts*0.3, -ts*0.3); }
                     if (p.isDistracted) { ctx.font = `${ts*0.32}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('❓', ts*0.3, -ts*0.3); }
                     if (state.ball.carrierId === p.id && !state.ballAnimation.active) {
@@ -22655,7 +22684,7 @@ ol.ci-steps li::marker { content: none; }
             }
             drawPitchPick(ts);
             WFX.air(ctx, CFG.cols * ts, CFG.rows * ts, ts, performance.now(), wxFX, wxDim, wxStill());
-            try { if (FREP.on()) FREP.overlay(ctx, ts); else aiActorMark(ctx, ts); } catch (e) {}   // (a replay, or the computer's turn: who's acting, and their target)
+            try { if (curMark) actorMark(ctx, ts, curMark.p, curMark.q); } catch (e) {}   // (a replay, or the computer's turn: the pointer over who's acting, a line to their target)
             if (state.floaters && state.floaters.length) drawFloaters(ts);
 
             ctx.restore();
@@ -25479,6 +25508,7 @@ ol.ci-steps li::marker { content: none; }
             }
             // drawn on the pitch, over the players: a bobbing pointer and a pulsing ring on whoever is acting, and for a block,
             // blitz, foul or hand-off a red ring on the target with a dashed line to it
+            function mark() { if (!D) return null; const F = D.frames[at]; if (!F || F.act < 0) return null; return { p: state.players[F.act], q: F.tgt >= 0 ? state.players[F.tgt] : null }; }
             function overlay(c, ts) {
                 if (!D) return; const F = D.frames[at]; if (!F || F.act < 0) return;
                 const p = state.players[F.act]; if (!p || p.isReserve || p.x < 0) return;
@@ -25642,7 +25672,7 @@ ol.ci-steps li::marker { content: none; }
             }
             // (tests) the players a replay would put on the pitch, with FUMBBL's position name beside ours
             function debugBuild(d) { const keep = D; D = d; try { buildMatch(); return state.players.map((p, i) => ({ team: p.team, type: p.type, star: p.star, ffb: d.roster[i].pos })); } finally { D = keep; } }
-            return { wire, on: () => on, parse, start, tap, overlay, debugBuild, raceOf: raceKey, debug: () => ({ D, at, show: (i, a) => { at = i; show(i, a); } }) };
+            return { wire, on: () => on, parse, start, tap, overlay, mark, debugBuild, raceOf: raceKey, debug: () => ({ D, at, show: (i, a) => { at = i; show(i, a); } }) };
         })();
 
         // ---------- My matches: each match is quietly recorded as it's played, in the same form as a FUMBBL replay (the subset
