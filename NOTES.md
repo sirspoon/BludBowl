@@ -233,8 +233,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   games, frozen v5.48): no gain. The rounds' own score share didn't rise (quarters .403 .409 .395 .399); the second-half average
   (dangerW 1.3->1.95, bpGain .03->.046, dpMin .1->.14, supW .5->.64, caGain .04->.056, btW 2->1.23, blkMin 1.5->1.24, blkTurn .17->.15,
   bkTurn .4->.46, bpEdge .15->.11; the rest within half a step) gave .390 after 625 in `k_seq` v .396 (`k_n1v`; NO GAIN). Most drift
-  is the size of the noise (~0.5-1 step); dangerW (+2 steps, steadily) is the only one worth a test of its own. These values are flat
-  near v5.48: the gains left aren't in re-weighting what brain x already does.
+  is the size of the noise (~0.5-1 step); dangerW (+2 steps, steadily) was the only one worth a test of its own: dangerW 1.95 alone
+  (the carrier's fear of squares opponents can really reach, carrierScore) .388 after 375 in `k_seq` (`k_dw195`; NO GAIN). These
+  values are flat near v5.48: the gains left aren't in re-weighting what brain x already does.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
