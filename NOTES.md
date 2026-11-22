@@ -309,6 +309,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   v5.56: `#btn-sound`, `#btn-music`, `#btn-uiscale` hidden from the top bar by CSS (kept in the DOM: `st-sound` etc. click them).
   v5.57: no Roll buttons when animated: block window shows `#dice-roll-hint`, the tray is the button; the roll window hides
   `#btn-roll-confirm` (still clicked by code / the AI) and `waitIn`'s hint label says "Tap the die to roll".
+  v5.58: windows keep their size - block tray 62 px (the flat dice), `#dice-tap-hint` reused for "Tap the dice to roll" (`.dfx-tap`,
+  card `.dfx-wait`), `.dfx-busy` hides the buttons with visibility (room kept), trr pre-shown while waiting; `.dfx-lab` fixed 18 px;
+  re-roll window: `DICEFX.restIn` lays the failed die there on opening (`pData.dfxRest`, reused by `rollIn`).
 - v5.39 (job session, 19 Nov): **roster PDF easier to read in print**. `ROSTER_PDF.draw` tries type sizes `SIZES` (11pt down to 7) with
   `rosterPage(doc, S, z, last, extra)` and keeps the largest that fits one page (returns the spare room; a small team redraws with
   taller rows). Column widths come from the contents; names, numbers, characteristics, headings and box values bold; changed

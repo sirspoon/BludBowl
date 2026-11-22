@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.58 (22 Nov 2026)
+- Animated dice: the block, roll and re-roll windows keep the same size from waiting to rolling to the result.
+
 ## v5.57 (22 Nov 2026)
 - Animated dice: no more Roll / Roll Dice buttons - just tap the tumbling dice to roll them.
 

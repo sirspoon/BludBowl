@@ -865,15 +865,18 @@
         .dfx-core { position: absolute; inset: 4%; }
         .dfx-shadow { position: absolute; left: 8%; right: 8%; bottom: -12%; height: 20%; border-radius: 50%; background: rgba(0,0,0,.55); filter: blur(4px); will-change: transform, opacity; }
         #dice-container.dfx-on { display: block !important; overflow: visible; }
-        #dice-roll-hint, .dfx-lab.dfx-hint { margin: 8px 0 0; text-align: center; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #fbbf24; animation: dfxHint 1.4s ease-in-out infinite alternate; }
+        .dfx-lab.dfx-hint { letter-spacing: .08em; text-transform: uppercase; color: #fbbf24; animation: dfxHint 1.4s ease-in-out infinite alternate; }   /* (same size as the result line it turns into) */
         @keyframes dfxHint { from { opacity: .55; } to { opacity: 1; } }
-        @media (prefers-reduced-motion: reduce) { #dice-roll-hint, .dfx-lab.dfx-hint { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { #dice-tap-hint.dfx-tap, .dfx-lab.dfx-hint { animation: none; } }
+        /* while the dice wait or roll: the buttons under them keep their room (so the window doesn't change size) but can't be seen or pressed */
         #dice-modal-card.dfx-busy #btn-combat-trr, #dice-modal-card.dfx-busy #btn-combat-brawler, #dice-modal-card.dfx-busy #btn-combat-pro,
-        #dice-modal-card.dfx-busy #btn-combat-savage, #dice-modal-card.dfx-busy #btn-combat-vet, #dice-modal-card.dfx-busy #dice-tap-hint { display: none !important; }
+        #dice-modal-card.dfx-busy #btn-combat-savage, #dice-modal-card.dfx-busy #btn-combat-vet { visibility: hidden !important; pointer-events: none; }
+        #dice-modal-card.dfx-busy:not(.dfx-wait) #dice-tap-hint { visibility: hidden; }
+        #dice-tap-hint.dfx-tap { color: #fbbf24; font-weight: 800; font-style: normal; letter-spacing: .08em; text-transform: uppercase; animation: dfxHint 1.4s ease-in-out infinite alternate; }
         #roll-dfx, #trr-dfx { width: 100%; margin: 2px 0 6px; cursor: pointer; }
         #roll-dfx.hidden, #trr-dfx.hidden { display: none; }
         .dfx-rolling #break-tackle-container, .dfx-rolling #btn-star-swift, .dfx-rolling #btn-trr-pro { pointer-events: none; opacity: .45; }
-        .dfx-lab { min-height: 1.3em; text-align: center; font-weight: 800; font-size: 13px; margin-top: 4px; color: #e2e8f0; }
+        .dfx-lab { height: 18px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; font-weight: 800; font-size: 13px; margin-top: 4px; color: #e2e8f0; }   /* (a fixed height: hint, nothing or the result, the window doesn't move) */
         .dfx-lab.ok { color: #4ade80; } .dfx-lab.bad { color: #f87171; }
         #dfx-toast { position: fixed; left: 50%; top: max(58px, calc(env(safe-area-inset-top) + 52px)); transform: translate(-50%, -8px); z-index: 45; pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s;
             display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border-radius: 999px; background: rgba(15,23,42,.88); border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
@@ -1285,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.57</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.58</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -16943,7 +16946,7 @@ ol.ci-steps li::marker { content: none; }
                 return b;
             })();
             proBtn.classList.toggle('hidden', !proOk && !tmtOk); proBtn.textContent = tmtOk ? `★ ${freeRR.label}: free re-roll` : 'Use Pro (3+ to re-roll)';
-            proBtn.onclick = () => { document.getElementById('modal-team-reroll').classList.add('hidden'); if (tmtOk) useTmt(); else usePro(); };
+            proBtn.onclick = () => { document.getElementById('modal-team-reroll').classList.add('hidden'); DICEFX.clearBox(document.getElementById('trr-dfx')); if (tmtOk) useTmt(); else usePro(); };
             document.getElementById('btn-trr-yes').classList.toggle('hidden', !trrOk);
             if (!passed && pData.player.team === state.activeTeam && (trrOk || proOk || tmtOk)) {
                 
@@ -16967,21 +16970,25 @@ ol.ci-steps li::marker { content: none; }
 
                 state.trrCtx = { type: pData.type, player: pData.player, target: pData.target };   // for the computer's re-roll budget
                 document.getElementById('modal-team-reroll').classList.remove('hidden');
+                {   // animated dice: the failed die lies in the window from the start (it jumps again if re-rolled), so the window keeps its size
+                    const box = document.getElementById('trr-dfx'); DICEFX.clearBox(box);
+                    if (DICEFX.otherOn(pl.team)) pData.dfxRest = DICEFX.restIn(box, [roll], DICEFX.colFor(pl.team), `Rolled ${roll}, needed ${pData.target}+ ✗`, 'bad');
+                }
                 camFocus(pData.player, 'modal-team-reroll');
                 document.getElementById('btn-trr-no').onclick = () => {
-                    document.getElementById('modal-team-reroll').classList.add('hidden');
+                    document.getElementById('modal-team-reroll').classList.add('hidden'); DICEFX.clearBox(document.getElementById('trr-dfx'));
                     state.mode = pData.prevMode; state.pendingRoll = null;
                     pData.onFail(roll, pData);
                 };
                 document.getElementById('btn-trr-yes').onclick = () => {
                     if (pData.dfxBusy) return;
                     const animR = DICEFX.otherOn(pData.player.team);   // (animated dice: the re-roll settles in this window first)
-                    if (!animR) document.getElementById('modal-team-reroll').classList.add('hidden');
+                    if (!animR) { document.getElementById('modal-team-reroll').classList.add('hidden'); DICEFX.clearBox(document.getElementById('trr-dfx')); }
                     spendTeamReroll(state.activeTeam); state.teamRRUsedThisTurn = true; updateTopBar();
                     log(`  TEAM RE-ROLL used!`, 'text-amber-400 font-bold');
                     sfx('teamReroll');
                     if (lonerBlocks(pData.player)) {
-                        document.getElementById('modal-team-reroll').classList.add('hidden');
+                        document.getElementById('modal-team-reroll').classList.add('hidden'); DICEFX.clearBox(document.getElementById('trr-dfx'));
                         state.mode = pData.prevMode; state.pendingRoll = null;
                         pData.onFail(roll, pData);
                         return;
@@ -17000,7 +17007,7 @@ ol.ci-steps li::marker { content: none; }
                     pData.dfxBusy = true;
                     const box = document.getElementById('trr-dfx'), btns = document.getElementById('btn-trr-yes').parentNode;
                     btns.classList.add('invisible'); btns.parentNode.classList.add('dfx-rolling');
-                    DICEFX.rollIn(box, [[rr]], { from: [roll], col: DICEFX.colFor(pData.player.team),
+                    DICEFX.rollIn(box, [[rr]], { from: [roll], tray: pData.dfxRest, col: DICEFX.colFor(pData.player.team),
                         label: () => ({ html: `Re-rolled ${rr}, needed ${pData.target}+ ${rrPassed ? '✓' : '✗'}`, cls: rrPassed ? 'ok' : 'bad' }) }, () => {
                         box.classList.add('hidden'); box.innerHTML = ''; btns.classList.remove('invisible'); btns.parentNode.classList.remove('dfx-rolling');
                         pData.dfxBusy = false;
@@ -18172,7 +18179,7 @@ ol.ci-steps li::marker { content: none; }
                     let T = combat.dfx;
                     const midAir = T && T.state === 'rolling' && c.contains(T.box) && T.dice.length === arr.length;   // (re-rolled before landing: they all carry on to the new result)
                     if (!midAir && (!T || T.state === 'gone' || !c.contains(T.box) || T.dice.length !== arr.length)) {   // (a re-roll: the dice as they lay, then the jump)
-                        c.classList.add('dfx-on'); T = DICEFX.tray(c, { n: arr.length, kind: 'block', col: dcol, size: 56, gap: 18, height: 66, faces: prev });
+                        c.classList.add('dfx-on'); T = DICEFX.tray(c, { n: arr.length, kind: 'block', col: dcol, size: 56, gap: 18, height: 62, faces: prev });
                         combat.dfx = T;
                     }
                     T.box.onclick = e => { e.stopPropagation(); DICEFX.finish(T); };
@@ -18213,24 +18220,25 @@ ol.ci-steps li::marker { content: none; }
                 trrBtn.classList.add('hidden');
             }
             };
-            { const old = document.getElementById('dice-roll-hint'); if (old) old.remove(); }
+            const resetHint = () => { const h = document.getElementById('dice-tap-hint'); h.textContent = 'Tap a die to select'; h.classList.remove('dfx-tap'); card.classList.remove('dfx-wait'); };
+            resetHint();
             if (!animB) { rollNow(); m.classList.remove('hidden'); return; }
             // waiting for the roll: the dice tumble where they will land, a Roll button under them (tapping the dice rolls too)
             ['btn-combat-trr', 'btn-combat-keep', 'btn-combat-brawler', 'btn-combat-pro', 'btn-combat-savage', 'btn-combat-vet'].forEach(id => { const b = document.getElementById(id); if (b) b.classList.add('hidden'); });
             busy(true); state.combat.diceWait = true;
+            if (!aiRolls && state.rr[state.activeTeam] > 0 && !state.combat.brawlerUsed && !state.combat.proUsed) document.getElementById('btn-combat-trr').classList.remove('hidden');   // (its room kept, unseen, till they land)
             m.classList.remove('hidden');
             c.classList.add('dfx-on');
-            const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 56, gap: 18, height: 66 });
+            const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 56, gap: 18, height: 62 });   // (62: as tall as the dice to pick, so nothing moves when they swap)
             state.combat.dfx = T0; DICEFX.tumble(T0);
             if (aiRolls) { state.combat.diceWait = false; rollNow(); return; }   // the computer rolls at once: the dice jump and land, then it picks
             // no Roll button: the tumbling dice are the button (a line under them says so)
-            const hint = document.createElement('p'); hint.id = 'dice-roll-hint'; hint.textContent = 'Tap the dice to roll';
+            const hint = document.getElementById('dice-tap-hint'); hint.textContent = 'Tap the dice to roll'; hint.classList.add('dfx-tap'); card.classList.add('dfx-wait');
             const combat0 = state.combat;
-            const press = e => { if (e) e.stopPropagation(); if (state.combat !== combat0 || !combat0.diceWait) return; combat0.diceWait = false; hint.remove(); rollNow(); };
+            const press = e => { if (e) e.stopPropagation(); if (state.combat !== combat0 || !combat0.diceWait) return; combat0.diceWait = false; resetHint(); rollNow(); };
             T0.box.onclick = press;
             T0.box.tabIndex = 0; T0.box.setAttribute('role', 'button'); T0.box.setAttribute('aria-label', 'Roll the block dice');
             T0.box.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); press(e); } };
-            c.after(hint);
         }
 
         function initFoul(atkId, defId) {
@@ -20549,7 +20557,7 @@ ol.ci-steps li::marker { content: none; }
             function rollIn(host, seq, o, done) {
                 const n = seq[0].length;
                 host.classList.remove('hidden');
-                const reuse = o.tray && o.tray.state === 'tumble' && o.tray.box.isConnected && o.tray.dice.length === n;   // (already tumbling in the window)
+                const reuse = o.tray && (o.tray.state === 'tumble' || o.tray.state === 'rest') && o.tray.box.isConnected && o.tray.dice.length === n;   // (already tumbling in the window)
                 const T = reuse ? o.tray : tray(host, { n, kind: 'd6', col: o.col, size: 46, gap: 14, height: 64, faces: o.from });   // (o.from: the dice as they lie, for a re-roll)
                 let lab = reuse && host.querySelector('.dfx-lab'); if (!lab) { lab = el('div', 'dfx-lab'); host.appendChild(lab); }
                 lab.textContent = ''; lab.className = 'dfx-lab';   // (the "tap to roll" hint goes)
@@ -20580,6 +20588,13 @@ ol.ci-steps li::marker { content: none; }
                 T.box.tabIndex = 0; T.box.setAttribute('role', 'button'); T.box.setAttribute('aria-label', hint || 'Roll');
                 T.box.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && onTap) { e.preventDefault(); onTap(); } };
                 tumble(T); return T;
+            }
+            // dice lying still in a window (a failed roll waiting on the re-roll choice), with a line under them
+            function restIn(host, faces, col, text, cls) {
+                host.classList.remove('hidden'); host.onclick = null;
+                const T = tray(host, { n: faces.length, kind: 'd6', col, size: 46, gap: 14, height: 64, faces });
+                const lab = el('div', 'dfx-lab ' + (cls || '')); lab.textContent = text || ''; host.appendChild(lab);
+                T.state = 'rest'; return T;
             }
             function clearBox(host) { if (!host) return; host.onclick = null; host.innerHTML = ''; host.classList.add('hidden'); }
             const HOLD = 2200;   // how long a result stays up (a tap puts it away sooner)
@@ -20617,7 +20632,7 @@ ol.ci-steps li::marker { content: none; }
                 }), 160);
             }
             return {
-                S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, waitIn, clearBox, toast, okHex,
+                S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, waitIn, restIn, clearBox, toast, okHex,
                 set: (k, v) => put(k, v),
                 blockOn: () => S.block() && live(),   // (the computer's blocks too: they roll at once, then land the same way)
                 otherOn: team => S.other() && live() && !AI.isAI(team)
@@ -25144,7 +25159,7 @@ ol.ci-steps li::marker { content: none; }
                         $('trr-target').textContent = e.min != null ? e.min + '+' : '?'; $('trr-roll').textContent = e.roll != null ? e.roll : '?';
                         $('trr-odds').textContent = e.min != null ? `${pct(e.min)}% Chance of Success on Reroll` : '';
                         const mb = $('trr-meaning-box'); if (mb) mb.classList.add('hidden');
-                        $('modal-team-reroll').classList.remove('hidden');
+                        try { DICEFX.clearBox($('trr-dfx')); } catch (er) {} $('modal-team-reroll').classList.remove('hidden');
                         pickWin('modal-team-reroll', 'btn-trr-yes', 'btn-trr-no', e.choice, T);
                     }, close: () => { $('modal-team-reroll').classList.add('hidden'); ['btn-trr-yes', 'btn-trr-no'].forEach(id => $(id).classList.remove('fx-pick', 'fx-off')); } };
                 }

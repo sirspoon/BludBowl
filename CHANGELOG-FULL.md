@@ -2,6 +2,16 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.58 (22 Nov 2026)
+- Animated dice: the windows no longer change size as the dice roll.
+  - Block window: the tumbling dice take exactly the room of the dice to pick; the "Tap the dice to roll" line is the window's own
+    "Tap a die to select" line with other words (hidden, room kept, while the dice are in the air); the re-roll button's room is kept
+    (unseen) while the dice wait and roll when a team re-roll is there to use.
+  - Roll window: the line under the die has a fixed height, whether it holds the hint, nothing or the result.
+  - Re-roll window: the failed die now lies in the window from the moment it opens, then jumps if you re-roll (before, the die
+    area appeared only after "Use Reroll", making the window grow).
+  Measured in the browser check: each window the same height through every step.
+
 ## v5.57 (22 Nov 2026)
 - Animated dice: the dice are the button. The block window no longer has a Roll button: "Tap the dice to roll" sits under the
   tumbling dice. The roll window (Dodge, Rush, pick-up and the rest) hides its Roll Dice button the same way ("Tap the die to roll");
