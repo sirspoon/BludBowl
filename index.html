@@ -865,8 +865,9 @@
         .dfx-core { position: absolute; inset: 4%; }
         .dfx-shadow { position: absolute; left: 8%; right: 8%; bottom: -12%; height: 20%; border-radius: 50%; background: rgba(0,0,0,.55); filter: blur(4px); will-change: transform, opacity; }
         #dice-container.dfx-on { display: block !important; overflow: visible; }
-        #btn-dice-roll { width: 100%; margin-top: 10px; padding: 9px; border-radius: 8px; background: #b45309; border: 1px solid #f59e0b; color: #fff; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
-        #btn-dice-roll:hover { background: #c2620e; }
+        #dice-roll-hint, .dfx-lab.dfx-hint { margin: 8px 0 0; text-align: center; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #fbbf24; animation: dfxHint 1.4s ease-in-out infinite alternate; }
+        @keyframes dfxHint { from { opacity: .55; } to { opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) { #dice-roll-hint, .dfx-lab.dfx-hint { animation: none; } }
         #dice-modal-card.dfx-busy #btn-combat-trr, #dice-modal-card.dfx-busy #btn-combat-brawler, #dice-modal-card.dfx-busy #btn-combat-pro,
         #dice-modal-card.dfx-busy #btn-combat-savage, #dice-modal-card.dfx-busy #btn-combat-vet, #dice-modal-card.dfx-busy #dice-tap-hint { display: none !important; }
         #roll-dfx, #trr-dfx { width: 100%; margin: 2px 0 6px; cursor: pointer; }
@@ -1284,7 +1285,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.56</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.57</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -16803,7 +16804,9 @@ ol.ci-steps li::marker { content: none; }
             document.getElementById('modal-roll').classList.remove('hidden'); 
             {   // animated dice (a person's own roll): the die tumbles in the window until Roll Dice (or the die) is pressed
                 const box = document.getElementById('roll-dfx'); DICEFX.clearBox(box);
-                if (pr && DICEFX.otherOn(player.team)) pr.dfxTray = DICEFX.waitIn(box, 1, DICEFX.colFor(player.team), () => document.getElementById('btn-roll-confirm').click());
+                const anim = !!pr && DICEFX.otherOn(player.team), cb = document.getElementById('btn-roll-confirm');
+                cb.classList.toggle('hidden', anim);   // (animated: no Roll Dice button - tapping the die rolls; Cancel stays when allowed)
+                if (anim) pr.dfxTray = DICEFX.waitIn(box, 1, DICEFX.colFor(player.team), () => cb.click(), 'Tap the die to roll');
             }
             camFocus(player, 'modal-roll');
             render();
@@ -18210,7 +18213,7 @@ ol.ci-steps li::marker { content: none; }
                 trrBtn.classList.add('hidden');
             }
             };
-            { const old = document.getElementById('btn-dice-roll'); if (old) old.remove(); }
+            { const old = document.getElementById('dice-roll-hint'); if (old) old.remove(); }
             if (!animB) { rollNow(); m.classList.remove('hidden'); return; }
             // waiting for the roll: the dice tumble where they will land, a Roll button under them (tapping the dice rolls too)
             ['btn-combat-trr', 'btn-combat-keep', 'btn-combat-brawler', 'btn-combat-pro', 'btn-combat-savage', 'btn-combat-vet'].forEach(id => { const b = document.getElementById(id); if (b) b.classList.add('hidden'); });
@@ -18220,11 +18223,14 @@ ol.ci-steps li::marker { content: none; }
             const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 56, gap: 18, height: 66 });
             state.combat.dfx = T0; DICEFX.tumble(T0);
             if (aiRolls) { state.combat.diceWait = false; rollNow(); return; }   // the computer rolls at once: the dice jump and land, then it picks
-            const rb = document.createElement('button'); rb.type = 'button'; rb.id = 'btn-dice-roll'; rb.textContent = 'Roll';
+            // no Roll button: the tumbling dice are the button (a line under them says so)
+            const hint = document.createElement('p'); hint.id = 'dice-roll-hint'; hint.textContent = 'Tap the dice to roll';
             const combat0 = state.combat;
-            const press = e => { if (e) e.stopPropagation(); if (state.combat !== combat0 || !combat0.diceWait) return; combat0.diceWait = false; rb.remove(); rollNow(); };
-            rb.onclick = press; T0.box.onclick = press;
-            c.after(rb);
+            const press = e => { if (e) e.stopPropagation(); if (state.combat !== combat0 || !combat0.diceWait) return; combat0.diceWait = false; hint.remove(); rollNow(); };
+            T0.box.onclick = press;
+            T0.box.tabIndex = 0; T0.box.setAttribute('role', 'button'); T0.box.setAttribute('aria-label', 'Roll the block dice');
+            T0.box.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); press(e); } };
+            c.after(hint);
         }
 
         function initFoul(atkId, defId) {
@@ -20546,6 +20552,7 @@ ol.ci-steps li::marker { content: none; }
                 const reuse = o.tray && o.tray.state === 'tumble' && o.tray.box.isConnected && o.tray.dice.length === n;   // (already tumbling in the window)
                 const T = reuse ? o.tray : tray(host, { n, kind: 'd6', col: o.col, size: 46, gap: 14, height: 64, faces: o.from });   // (o.from: the dice as they lie, for a re-roll)
                 let lab = reuse && host.querySelector('.dfx-lab'); if (!lab) { lab = el('div', 'dfx-lab'); host.appendChild(lab); }
+                lab.textContent = ''; lab.className = 'dfx-lab';   // (the "tap to roll" hint goes)
                 let k = 0, over = false;
                 // once the result is up: a tap anywhere puts it away at once (and that tap does nothing else)
                 const tapAway = e => { if (!showing) return; e.stopPropagation(); e.preventDefault(); swallow(); end(); };
@@ -20565,11 +20572,13 @@ ol.ci-steps li::marker { content: none; }
                 return T;
             }
             // dice tumbling in a roll window while it waits for the coach's press (onTap: tapping them counts as the press)
-            function waitIn(host, n, col, onTap) {
+            function waitIn(host, n, col, onTap, hint) {
                 host.classList.remove('hidden');
                 const T = tray(host, { n, kind: 'd6', col, size: 46, gap: 14, height: 64 });
-                host.appendChild(el('div', 'dfx-lab'));
+                const lab = el('div', 'dfx-lab' + (hint ? ' dfx-hint' : '')); lab.textContent = hint || ''; host.appendChild(lab);
                 host.onclick = e => { e.stopPropagation(); if (onTap) onTap(); };
+                T.box.tabIndex = 0; T.box.setAttribute('role', 'button'); T.box.setAttribute('aria-label', hint || 'Roll');
+                T.box.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && onTap) { e.preventDefault(); onTap(); } };
                 tumble(T); return T;
             }
             function clearBox(host) { if (!host) return; host.onclick = null; host.innerHTML = ''; host.classList.add('hidden'); }
@@ -25114,7 +25123,7 @@ ol.ci-steps li::marker { content: none; }
                     $('roll-desc').textContent = nameOf(e.p) + (e.mods ? ` (${e.mods})` : '');
                     $('roll-target').textContent = e.min + '+'; $('roll-odds').textContent = `(${pct(e.min)}% Chance)`;
                     $('break-tackle-container').classList.add('hidden'); $('btn-roll-cancel').classList.add('hidden'); try { DICEFX.clearBox($('roll-dfx')); } catch (er) {}
-                    const cb = $('btn-roll-confirm'); cb.textContent = 'Roll Dice'; cb.classList.remove('fx-ok', 'fx-bad');
+                    const cb = $('btn-roll-confirm'); cb.textContent = 'Roll Dice'; cb.classList.remove('fx-ok', 'fx-bad', 'hidden');
                     $('modal-roll').classList.remove('hidden');
                     later(() => { cb.textContent = `Rolled ${e.roll} ${e.ok ? '✓' : '✗'}`; cb.classList.add(e.ok ? 'fx-ok' : 'fx-bad'); sfxRoll(e.ok, type); }, T1);
                 }, close: () => { $('modal-roll').classList.add('hidden'); $('btn-roll-cancel').classList.remove('hidden'); } };

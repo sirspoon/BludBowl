@@ -53,7 +53,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   await page.waitForTimeout(300);
   const flat = () => page.evaluate(() => [...document.querySelectorAll('#dice-container button.die-canvas-btn')].map(b => +b.dataset.face));
   const st = () => page.evaluate(() => ({ dice: state.combat && state.combat.dice ? state.combat.dice.slice() : null, flat: [...document.querySelectorAll('#dice-container button.die-canvas-btn')].map(b => +b.dataset.face),
-    cubes: document.querySelectorAll('#dice-container .dfx-slot').length, roll: !!document.getElementById('btn-dice-roll'), open: !document.getElementById('modal-dice').classList.contains('hidden'),
+    cubes: document.querySelectorAll('#dice-container .dfx-slot').length, roll: !!document.getElementById('dice-roll-hint'), open: !document.getElementById('modal-dice').classList.contains('hidden'),
     busy: document.getElementById('dice-modal-card').classList.contains('dfx-busy') }));
 
   // ---- animation off: rolled as the window opens, face on, no Roll button
@@ -65,13 +65,13 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   await page.evaluate(() => { localStorage.setItem('bb-dice-anim-block', '1'); localStorage.setItem('bb-dice-anim-other', '1'); const [a, d] = __scene(); startBlock(a, d); });
   await page.waitForTimeout(350);
   s = await st();
-  check(s.open && !s.dice && s.cubes === 2 && s.roll && !s.flat.length && s.busy, 'animation on: 2 tumbling dice and a Roll button, nothing rolled yet', s);
+  check(s.open && !s.dice && s.cubes === 2 && s.roll && !s.flat.length && s.busy, 'animation on: 2 tumbling dice with "Tap the dice to roll" (no Roll button), nothing rolled yet', s);
   const ang1 = await page.evaluate(() => document.querySelector('#dice-container .dfx-cube').style.transform);
   await page.waitForTimeout(150);
   const ang2 = await page.evaluate(() => document.querySelector('#dice-container .dfx-cube').style.transform);
   check(ang1 !== ang2, 'the waiting dice spin');
   await page.screenshot({ path: OUT + '/dice-waiting-phone.png' });
-  await page.evaluate(() => document.getElementById('btn-dice-roll').click());
+  await page.evaluate(() => document.querySelector('#dice-container .dfx-tray').click());
   await page.waitForTimeout(200);
   s = await st();
   check(s.dice && s.dice.length === 2 && !s.flat.length && s.cubes === 2 && !s.roll && s.busy, 'Roll: the result is rolled at once (state.combat.dice), the dice still in the air', s);
@@ -82,7 +82,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   await page.screenshot({ path: OUT + '/dice-settled-phone.png' });
 
   // ---- a team re-roll replays the jump, then pickable again
-  await page.evaluate(() => { const [a, d] = __scene(); state.rr[0] = 1; startBlock(a, d); document.getElementById('btn-dice-roll').click(); });
+  await page.evaluate(() => { const [a, d] = __scene(); state.rr[0] = 1; startBlock(a, d); document.querySelector('#dice-container .dfx-tray').click(); });
   await page.waitForTimeout(900);
   const trrShown = await page.evaluate(() => !document.getElementById('btn-combat-trr').classList.contains('hidden'));
   await page.evaluate(() => document.getElementById('btn-combat-trr').click());
@@ -94,7 +94,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(JSON.stringify(s.flat) === JSON.stringify(s.dice) && !s.busy, 'after the re-roll: pickable dice showing the new state.combat.dice', s);
 
   // ---- tapping during the roll skips to the end
-  await page.evaluate(() => { localStorage.setItem('bb-dice-dur', '2000'); const [a, d] = __scene(); startBlock(a, d); document.getElementById('btn-dice-roll').click(); });
+  await page.evaluate(() => { localStorage.setItem('bb-dice-dur', '2000'); const [a, d] = __scene(); startBlock(a, d); document.querySelector('#dice-container .dfx-tray').click(); });
   await page.waitForTimeout(120);
   await page.tap('#dice-container .dfx-tray');
   await page.waitForTimeout(120);
@@ -137,11 +137,12 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   const rr = await page.evaluate(() => {
     const [a] = __scene(); const p = getPlayerById(a); state.selectedId = p.id; window.__res = null;
     setupRoll('DODGE', p, 3, 'None', r => { window.__res = ['pass', r]; }, r => { window.__res = ['fail', r]; }, { desc: 'test dodge', prevMode: MODES.IDLE });
-    const waiting = { box: !document.getElementById('roll-dfx').classList.contains('hidden'), cubes: document.querySelectorAll('#roll-dfx .dfx-slot').length, res: window.__res };
-    document.getElementById('btn-roll-confirm').click();
+    const waiting = { box: !document.getElementById('roll-dfx').classList.contains('hidden'), cubes: document.querySelectorAll('#roll-dfx .dfx-slot').length, res: window.__res,
+      noButton: document.getElementById('btn-roll-confirm').classList.contains('hidden'), hint: document.querySelector('#roll-dfx .dfx-lab').textContent };
+    document.querySelector('#roll-dfx .dfx-tray').click();
     return { waiting, open: !document.getElementById('modal-roll').classList.contains('hidden'), box: !document.getElementById('roll-dfx').classList.contains('hidden'), res: window.__res };
   });
-  check(rr.waiting.box && rr.waiting.cubes === 1 && rr.waiting.res === null, 'Roll Dice window (animated): the die already tumbles in the window while it waits for the press', rr.waiting);
+  check(rr.waiting.box && rr.waiting.cubes === 1 && rr.waiting.res === null && rr.waiting.noButton && /Tap the die/.test(rr.waiting.hint), 'roll window (animated): the die tumbles with "Tap the die to roll" and no Roll Dice button; tapping it rolls', rr.waiting);
   await page.waitForTimeout(250);
   await page.screenshot({ path: OUT + '/dice-roll-window-phone.png' });
   check(rr.open && rr.box && rr.res === null, 'Roll Dice (animated): the window stays open with the die rolling, the game waits', rr);
@@ -163,7 +164,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     localStorage.setItem('bb-dice-anim-other', '0');
     const [a] = __scene(); const p = getPlayerById(a); state.selectedId = p.id; window.__res = null;
     setupRoll('DODGE', p, 3, 'None', r => { window.__res = ['pass', r]; }, r => { window.__res = ['fail', r]; }, { desc: 'test dodge', prevMode: MODES.IDLE });
-    const boxOff = !document.getElementById('roll-dfx').classList.contains('hidden');
+    const boxOff = !document.getElementById('roll-dfx').classList.contains('hidden') || document.getElementById('btn-roll-confirm').classList.contains('hidden');
     document.getElementById('btn-roll-confirm').click();
     return { boxOff, open: !document.getElementById('modal-roll').classList.contains('hidden'), res: window.__res };
   });
@@ -173,7 +174,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   const ai = await page.evaluate(() => {
     localStorage.setItem('bb-dice-anim-block', '1'); AI.set(0, true);
     const [a, d] = __scene(); state.mode = MODES.LOCKED; startBlock(a, d);
-    return { dice: state.combat.dice && state.combat.dice.length, roll: !!document.getElementById('btn-dice-roll'), cubes: document.querySelectorAll('#dice-container .dfx-slot').length, anim: !!state.combat.diceAnim };
+    return { dice: state.combat.dice && state.combat.dice.length, roll: !!document.getElementById('dice-roll-hint'), cubes: document.querySelectorAll('#dice-container .dfx-slot').length, anim: !!state.combat.diceAnim };
   });
   check(ai.dice === 2 && !ai.roll && ai.cubes === 2 && ai.anim, "the computer's block: rolled at once (no Roll button), the dice in the air", ai);
   await page.waitForTimeout(900);
@@ -256,12 +257,12 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     state.players.forEach(p => { if (p !== a && p !== d) { p.x = -10; p.y = -10; p.isReserve = true; } });
     Object.assign(a, { x: 10, y: 7, isDown: false, actionTaken: 'block', hasBlocked: false }); Object.assign(d, { x: 11, y: 7, isDown: false });
     state.activeTeam = 0; state.combat = null; startBlock(a.id, d.id);
-    const r = document.getElementById('btn-dice-roll').getBoundingClientRect(), c = document.getElementById('dice-modal-card').getBoundingClientRect();
+    const r = document.getElementById('dice-roll-hint').getBoundingClientRect(), c = document.getElementById('dice-modal-card').getBoundingClientRect();
     return { rollIn: r.bottom <= innerHeight && r.top >= 0, card: c.height <= innerHeight };
   });
   await ls.page.waitForTimeout(300);
   await ls.page.screenshot({ path: OUT + '/dice-waiting-landscape.png' });
-  check(lsr.rollIn && lsr.card, 'landscape phone: the block window and its Roll button fit the screen', lsr);
+  check(lsr.rollIn && lsr.card, 'landscape phone: the block window and its tap-to-roll line fit the screen', lsr);
   check(!ls.errors.length, 'no page errors (landscape)', ls.errors.slice(0, 3));
   await done(browser);
 })();

@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.57 (22 Nov 2026)
+- Animated dice: the dice are the button. The block window no longer has a Roll button: "Tap the dice to roll" sits under the
+  tumbling dice. The roll window (Dodge, Rush, pick-up and the rest) hides its Roll Dice button the same way ("Tap the die to roll");
+  Cancel stays where the roll can be called off. Enter or Space on the dice also rolls (keyboard). With the animation off both windows
+  are as before. Checked the other dice windows: the team re-roll window's two buttons are choices (use the re-roll or accept the
+  failure), so they stay; the armour / injury strip never had a button.
+
 ## v5.56 (22 Nov 2026)
 - The match's top bar loses its sound, music and text-size buttons: all three are in the ⚙ Settings sheet (v5.55). The top bar keeps
   Rosters, ⚙, Help, Save & exit, Fullscreen, the speed buttons and End Turn. (The buttons stay in the page, unseen, as the sheet's

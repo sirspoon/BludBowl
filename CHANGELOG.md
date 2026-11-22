@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.57 (22 Nov 2026)
+- Animated dice: no more Roll / Roll Dice buttons - just tap the tumbling dice to roll them.
+
 ## v5.56 (22 Nov 2026)
 - A tidier top bar in matches: sound, music and text size are now only in the ⚙ Settings sheet.
 
