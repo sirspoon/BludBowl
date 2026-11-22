@@ -526,6 +526,9 @@
         #team-builder .tb-sprite-row canvas { width: 40px; height: 40px; image-rendering: pixelated; background: #2f5a2f; border-radius: 6px; }
         #team-builder .tb-swatch { width: 54px; height: 32px; border: 1px solid var(--tb-edge); border-radius: 6px; box-shadow: inset 0 0 0 3px #0a1020; }
         #team-builder .tb-swatch:hover { border-color: var(--tb-amber); }
+        #team-builder .tb-dicerow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        #team-builder #tb-dieprev { width: 40px; height: 40px; border-radius: 7px; box-shadow: 0 2px 0 rgba(0,0,0,.4); }
+        #team-builder #tb-dicereset:disabled { opacity: .45; cursor: default; }
         /* colour picker (our own, so phones don't show their system picker) */
         #tb-picker { position: fixed; inset: 0; z-index: 5; background: rgba(2,6,15,.7); display: flex; align-items: center; justify-content: center; padding: 16px; }
         #tb-picker.hidden { display: none; }
@@ -811,6 +814,9 @@
         .st-row small { display: block; font-size: 11px; color: #94a3b8; font-weight: 600; }
         .st-tog { min-width: 96px; padding: 6px 12px; border-radius: 8px; border: 1px solid #475569; background: #0a1020; color: #e2e8f0; font-weight: 800; font-size: 12px; }
         .st-tog.on { background: #059669; border-color: #10b981; color: #fff; }
+        .st-range { display: flex; align-items: center; gap: 8px; flex: 0 1 190px; min-width: 130px; }
+        .st-range input { flex: 1; min-width: 0; accent-color: #f59e0b; }
+        .st-range output { min-width: 3em; text-align: right; color: #fcd34d; font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums; }
         .st-sel { background: #0a1020; color: #e2e8f0; border: 1px solid #475569; border-radius: 8px; padding: 6px 8px; font-weight: 700; font-size: 12px; }
         /* Start screen: scrolls on short windows so the Start Match button is always reachable */
         #start-screen { justify-content: flex-start !important; overflow-y: auto; padding: 12px 8px; box-sizing: border-box; }
@@ -839,6 +845,29 @@
         }
         .die-canvas-btn:hover { transform: scale(1.1); box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
         .die-canvas-btn.ai-pick { transform: scale(1.14); background: #fffbe8; border-color: #fde68a; box-shadow: 0 0 0 3px #fde68a, 0 0 22px 8px rgba(253, 230, 138, 0.85); animation: aiPick 0.9s ease-in-out infinite alternate; }
+        /* animated dice (DICEFX): 3D cubes that tumble in place, then jump and settle */
+        .dfx-tray { position: relative; width: 100%; perspective: 700px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .dfx-slot { position: absolute; transform-style: preserve-3d; pointer-events: none; }
+        .dfx-mover, .dfx-cube { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+        .dfx-face { position: absolute; inset: 0; border-radius: 14%; background-size: 100% 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .dfx-core { position: absolute; inset: 4%; }
+        .dfx-shadow { position: absolute; left: 8%; right: 8%; bottom: -12%; height: 20%; border-radius: 50%; background: rgba(0,0,0,.55); filter: blur(4px); will-change: transform, opacity; }
+        #dice-container.dfx-on { display: block !important; overflow: visible; }
+        #btn-dice-roll { width: 100%; margin-top: 10px; padding: 9px; border-radius: 8px; background: #b45309; border: 1px solid #f59e0b; color: #fff; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+        #btn-dice-roll:hover { background: #c2620e; }
+        #dice-modal-card.dfx-busy #btn-combat-trr, #dice-modal-card.dfx-busy #btn-combat-brawler, #dice-modal-card.dfx-busy #btn-combat-pro,
+        #dice-modal-card.dfx-busy #btn-combat-savage, #dice-modal-card.dfx-busy #btn-combat-vet, #dice-modal-card.dfx-busy #dice-tap-hint { display: none !important; }
+        #roll-dfx, #trr-dfx { width: 100%; margin: 2px 0 6px; cursor: pointer; }
+        #roll-dfx.hidden, #trr-dfx.hidden { display: none; }
+        .dfx-rolling #break-tackle-container, .dfx-rolling #btn-star-swift, .dfx-rolling #btn-trr-pro { pointer-events: none; opacity: .45; }
+        .dfx-lab { min-height: 1.3em; text-align: center; font-weight: 800; font-size: 13px; margin-top: 4px; color: #e2e8f0; }
+        .dfx-lab.ok { color: #4ade80; } .dfx-lab.bad { color: #f87171; }
+        #dfx-toast { position: fixed; left: 50%; top: max(58px, calc(env(safe-area-inset-top) + 52px)); transform: translate(-50%, -8px); z-index: 45; pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s;
+            display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border-radius: 999px; background: rgba(15,23,42,.88); border: 1px solid #334155; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+        #dfx-toast.show { opacity: 1; transform: translate(-50%, 0); }
+        #dfx-toast .dfx-tdice { width: 78px; }
+        #dfx-toast .dfx-tlab { font-size: 12px; font-weight: 800; color: #e2e8f0; white-space: nowrap; }
+        #dfx-toast .dfx-tlab.ok { color: #4ade80; } #dfx-toast .dfx-tlab.bad { color: #f87171; } #dfx-toast .dfx-tlab.warn { color: #fbbf24; }
         @keyframes aiPick { from { box-shadow: 0 0 0 3px #fde68a, 0 0 12px 4px rgba(253,230,138,.6); } to { box-shadow: 0 0 0 3px #fff7d1, 0 0 26px 10px rgba(253,230,138,.95); } }
         .ai-toggle { display: inline-flex; margin-top: 6px; border: 1px solid #475569; border-radius: 8px; overflow: hidden; font-size: 11px; font-weight: 700; }
         .ai-toggle button { padding: 4px 10px; background: #0f172a; color: #94a3b8; letter-spacing: .04em; }
@@ -1243,7 +1272,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.50</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.51</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1295,6 +1324,10 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43</small></span><button type="button" class="st-tog" id="st-brain"></button></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
+            <div class="st-row"><span>Animate block dice<small>the dice tumble until you press Roll, then jump and land on the result (your own blocks)</small></span><button type="button" class="st-tog" id="st-dice-block"></button></div>
+            <div class="st-row"><span>Animate other rolls<small>Dodges, Rushes, pick-ups, catches, passes and team re-rolls land in the roll window; armour and injury dice show for a moment at the top</small></span><button type="button" class="st-tog" id="st-dice-other"></button></div>
+            <div class="st-row"><span>Roll length<small>how long the dice take to jump and land (the sound follows Sound effects)</small></span><span class="st-range"><input type="range" id="st-dice-dur" min="500" max="2000" step="100" aria-label="Roll length"><output id="st-dice-dur-o" for="st-dice-dur"></output></span></div>
+            <div class="st-row"><span>Dice in team colours<small>the rolling team's dice in its colours (each team's dice colours are set in the Team Builder); off: the plain dice</small></span><button type="button" class="st-tog" id="st-dice-team"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Kick-off replays<small>a close-up of each kick-off too, once the ball has come down (with Replays on)</small></span><button type="button" class="st-tog" id="st-replay-kick"></button></div>
             <div class="st-row"><span>HD sprites (test)<small>High Elves only: 1.5x the pixels (the originals, smoothed) or 2x (redrawn); other teams unchanged</small></span><button type="button" class="st-tog" id="st-hd"></button></div>
@@ -1495,6 +1528,9 @@ ol.ci-steps li::marker { content: none; }
               <div class="tb-field"><span>Lettering</span><button id="tb-col2" type="button" class="tb-swatch" data-colour="secondary" aria-label="Lettering colour"></button></div>
               <div id="tb-token" class="tb-token" aria-hidden="true"></div>
             </div>
+            <div id="tb-dicewrap" class="tb-field"><span>Dice colours</span>
+              <div class="tb-dicerow"><button id="tb-dice0" type="button" class="tb-swatch" data-colour="dice0" aria-label="Dice colour"></button><button id="tb-dice1" type="button" class="tb-swatch" data-colour="dice1" aria-label="Colour of the dice's pips and symbols"></button><canvas id="tb-dieprev" width="80" height="80" aria-hidden="true"></canvas><button id="tb-dicereset" type="button" class="tb-ghost tb-small" data-dicereset="1">Use team colours</button></div>
+              <div id="tb-dicenote" class="tb-dim"></div></div>
             <div id="tb-sprites-wrap" class="tb-field"><label for="tb-sprites">Sprite set</label><select id="tb-sprites" class="tb-in"></select></div>
             <div id="tb-sprite-row" class="tb-sprite-row" aria-hidden="true"></div>
             <div id="tb-league-wrap" class="tb-field"><label for="tb-league">League (which Star Players will play for you)</label><select id="tb-league" class="tb-in"></select></div>
@@ -1759,6 +1795,7 @@ ol.ci-steps li::marker { content: none; }
                 </button>
             </div>
 
+            <div id="roll-dfx" class="hidden" aria-live="polite"></div>
             <div class="flex gap-2.5 w-full">
                 <button id="btn-roll-cancel" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded font-bold uppercase text-xs">Cancel</button>
                 <button id="btn-roll-confirm" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white py-2 rounded font-bold uppercase text-xs shadow-lg">Roll Dice</button>
@@ -1818,6 +1855,7 @@ ol.ci-steps li::marker { content: none; }
                 <p id="trr-meaning-text" class="text-[11px] text-slate-200 leading-snug"></p>
             </div>
             <p class="text-sm text-slate-300 text-center mb-3 font-bold">Use a Team Reroll?</p>
+            <div id="trr-dfx" class="hidden" aria-live="polite"></div>
             <div class="flex gap-3 w-full">
                 <button id="btn-trr-no" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded font-bold uppercase text-[10px]">Accept Failure</button>
                 <button id="btn-trr-yes" class="flex-1 bg-yellow-600 hover:bg-yellow-500 text-slate-900 py-2 rounded font-bold uppercase text-[10px] shadow-lg">Use Reroll</button>
@@ -4002,6 +4040,9 @@ ol.ci-steps li::marker { content: none; }
                 CAREER.normTeam(c);
                 if (!/^#[0-9a-f]{6}$/i.test(c.primary)) c.primary = '#b91c1c';
                 if (!/^#[0-9a-f]{6}$/i.test(c.secondary)) c.secondary = '#fde68a';
+                // dice colours (v5.51): [die, pips/symbols], kept only when they differ from the team colours (else the dice follow those)
+                if (c.dice && !(Array.isArray(c.dice) && c.dice.length === 2 && c.dice.every(h => /^#[0-9a-f]{6}$/i.test(h)))) delete c.dice;
+                if (c.dice) { c.dice = c.dice.map(h => h.toLowerCase()); if (c.dice[0] === c.primary.toLowerCase() && c.dice[1] === c.secondary.toLowerCase()) delete c.dice; }
                 if (c.sprites && !(SPRITE_SETS[c.race] || []).some(x => x.id === c.sprites)) delete c.sprites;
                 if (c.league && !(RACE_LEAGUES[c.race] || []).includes(c.league)) delete c.league;
                 if (c.format !== 'matched' && c.format !== 'sevens-mp') { delete c.budget; delete c.stars; delete c.mind; delete c.rules; c.players.forEach(p => { delete p.mp; delete p.mp2; }); if (c.format === 'sevens') c.bribes = 0; }
@@ -4210,6 +4251,10 @@ ol.ci-steps li::marker { content: none; }
                 const n = parseInt(hex.slice(1), 16), r = Math.round((n >> 16) * f), g = Math.round(((n >> 8) & 255) * f), b = Math.round((n & 255) * f);
                 return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
             }
+            // a team's dice colours [die, pips/symbols]: its own, else the team colours (t.dice is only kept when it differs)
+            function diceOf(t) { return t && Array.isArray(t.dice) && t.dice.length === 2 && t.dice.every(h => /^#[0-9a-f]{6}$/i.test(h)) ? t.dice.slice() : [t.primary, t.secondary]; }
+            function setDice(t, i, hex) { const d = diceOf(t); d[i] = hex.toLowerCase(); if (d[0] === String(t.primary).toLowerCase() && d[1] === String(t.secondary).toLowerCase()) delete t.dice; else t.dice = d; }
+            const isDiceKey = k => k === 'dice0' || k === 'dice1';
             function toRace(id) {
                 const t = teams.find(x => x.id === id);
                 if (!t) return null;
@@ -4239,7 +4284,7 @@ ol.ci-steps li::marker { content: none; }
                     lineup: lineup.map(p => p.pos), bench: bench.map(p => p.pos),
                     names: { lineup: lineup.map(p => p.name), bench: bench.map(p => p.name) },
                     ovr: { lineup: lineup.map(p => p.ovr), bench: bench.map(p => p.ovr) }, careerTeamId: t.id, careerStarted: CAREER.started(t),
-                    name: t.name, color: t.primary,
+                    name: t.name, color: t.primary, dice: diceOf(t),
                     style: { fill: t.primary, text: t.secondary, endBg: shade(t.primary, 0.7), endText: t.secondary, shade: 'rgba(0,0,0,0.5)' },
                     fans: t.fans, assistantCoaches: t.coaches, cheerleaders: t.cheerleaders, apothecary: t.apothecary && !noApo(t.race) ? 1 : 0,
                     rerolls: t.rerolls, bribes: t.bribes, specialRules: (R.specialRules || []).slice(),
@@ -4411,6 +4456,14 @@ ol.ci-steps li::marker { content: none; }
                 $('tb-race').innerHTML = Object.values(RACES).filter(r => r.positions).map(r => `<option value="${r.key}" ${r.key === t.race ? 'selected' : ''}>${esc(r.name)}${r.preRelease ? ' (pre-release)' : ''}</option>`).join('');
                 $('tb-pre').textContent = R.preRelease || ''; $('tb-pre').style.display = R.preRelease ? '' : 'none';
                 $('tb-col1').style.background = t.primary; $('tb-col2').style.background = t.secondary;
+                {   // the dice: two swatches, a die drawn in them (pips made to read if the two are too alike), the reset
+                    const [db, dp] = diceOf(t), r = DICEFX.ink(db, dp);
+                    $('tb-dice0').style.background = db; $('tb-dice1').style.background = dp;
+                    $('tb-dicereset').disabled = !t.dice;
+                    const cv = $('tb-dieprev'), g = cv.getContext('2d'); cv.style.background = db;
+                    try { renderDieIcon(g, FACES.POW, 80, { body: db, pip: r.pip }); } catch (e) {}
+                    $('tb-dicenote').textContent = r.changed ? `Those two are too alike to read, so the symbols are drawn ${r.changed === -1 ? 'darker' : r.changed === 1 ? 'lighter' : 'in ' + (r.pip === '#ffffff' ? 'white' : 'black')}.` : '';
+                }
                 const tok = $('tb-token'); tok.style.background = t.primary; tok.style.color = t.secondary; tok.textContent = R.types[Object.keys(R.positions)[0]].label;
                 const sets = SPRITE_SETS[t.race] || [];
                 if (t.sprites && !sets.some(x => x.id === t.sprites)) delete t.sprites;
@@ -4589,12 +4642,14 @@ ol.ci-steps li::marker { content: none; }
                 const other = pick.key === 'primary' ? cur.secondary : cur.primary, pv = $('tbp-preview');
                 pv.style.background = pick.key === 'primary' ? hex : other; pv.style.color = pick.key === 'primary' ? other : hex;
                 pv.textContent = R0().types[Object.keys(R0().positions)[0]].label;
+                if (isDiceKey(pick.key)) { const dc = diceOf(cur).slice(); dc[+pick.key.slice(4)] = hex; pv.style.background = dc[0]; pv.style.color = DICEFX.ink(dc[0], dc[1]).pip; pv.style.borderRadius = '9px'; pv.textContent = '⚅'; pv.style.fontSize = '30px'; }
+                else { pv.style.borderRadius = ''; pv.style.fontSize = ''; }
                 $('tbp-swatches').querySelectorAll('.tbp-sw').forEach(b => b.classList.toggle('on', b.dataset.sw === hex.toLowerCase()));
             }
             const R0 = () => RACES[cur.race];
             function openPicker(key) {
-                pick = { key, hex: cur[key] };
-                $('tbp-title').textContent = key === 'primary' ? 'Main colour' : 'Lettering';
+                pick = { key, hex: isDiceKey(key) ? diceOf(cur)[+key.slice(4)] : cur[key] };
+                $('tbp-title').textContent = key === 'primary' ? 'Main colour' : key === 'dice0' ? 'Dice colour' : key === 'dice1' ? 'Dice pips and symbols' : 'Lettering';
                 $('tbp-swatches').innerHTML = SWATCHES.map(c => `<button type="button" class="tbp-sw" data-sw="${c}" style="background:${c}" aria-label="${c}"></button>`).join('');
                 $('tb-picker').classList.remove('hidden');
                 paintPicker(false);
@@ -4606,7 +4661,7 @@ ol.ci-steps li::marker { content: none; }
                     if (e.target === p || (b && b.id === 'tbp-cancel')) { p.classList.add('hidden'); return; }
                     if (!b) return;
                     if (b.dataset.sw) { pick.hex = b.dataset.sw; paintPicker(false); }
-                    else if (b.id === 'tbp-set') { const k2 = pick.key, hex = pick.hex; p.classList.add('hidden'); change(() => { cur[k2] = hex; }); }
+                    else if (b.id === 'tbp-set') { const k2 = pick.key, hex = pick.hex; p.classList.add('hidden'); change(() => { if (isDiceKey(k2)) setDice(cur, +k2.slice(4), hex); else cur[k2] = hex; }); }
                 });
                 ['tbp-h', 'tbp-s', 'tbp-l'].forEach(id => $(id).addEventListener('input', () => { pick.hex = hslToHex(+$('tbp-h').value, +$('tbp-s').value, +$('tbp-l').value); paintPicker(true); }));
                 $('tbp-hexin').addEventListener('input', e => { let v = e.target.value.trim(); if (v[0] !== '#') v = '#' + v; if (/^#[0-9a-f]{6}$/i.test(v)) { pick.hex = v.toLowerCase(); paintPicker(false); } });
@@ -4691,6 +4746,7 @@ ol.ci-steps li::marker { content: none; }
                         return;
                     }
                     if (d.fallen != null) { HONOURS.show(cur, 'fallen', +d.fallen); return; }
+                    if (d.dicereset) { change(() => { delete cur.dice; }); return; }
                     if (d.colour) { openPicker(d.colour); return; }
                     const car = CAREER.started(cur), R = RACES[cur.race];
                     const pay = (cost, what) => { if (!car) return true; if (cur.treasury < cost) { msg(`Not enough in the treasury for ${what} (${k(cost)}).`, true); return false; } cur.treasury -= cost; return true; };
@@ -4818,7 +4874,7 @@ ol.ci-steps li::marker { content: none; }
             const putRaw = t => { load(); const c = clean(JSON.parse(JSON.stringify(t))), i = teams.findIndex(x => x.id === c.id); if (i >= 0) teams[i] = c; else teams.push(c); return persist(); };
             const watchers = new Set();
             const temp = (t, cb) => { temps.set(t.id, clean(JSON.parse(JSON.stringify(t)))); onTemp = cb; load(); };
-            return { temp, putRaw, watch: f => watchers.add(f), open, list: () => { load(); return teams.filter(t => !temps.has(t.id) && !t.ext); }, toRace, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf, mpBudget, rulesOf, mpAdvs, mpText, mpView, rulesCheck };
+            return { temp, putRaw, watch: f => watchers.add(f), open, list: () => { load(); return teams.filter(t => !temps.has(t.id) && !t.ext); }, toRace, diceOf, costs, get, put, randomName, remove, importData, download, isMP, isSev, mpProblems, sevProblems, spUsed, tierOf, spOf, mpBudget, rulesOf, mpAdvs, mpText, mpView, rulesCheck };
         })();
         // ---------- Trophies: gold, silver and bronze for the top three of a league season, cup or Swiss event ----------
         const TROPHY = {
@@ -5098,14 +5154,14 @@ ol.ci-steps li::marker { content: none; }
                         const c = JSON.parse(JSON.stringify(t)); c.id = uid(); c.name = (t.name + ' (copy)').slice(0, 30);
                         TB.put(c); sel = c.id; msg(`Made an exact copy: ${c.name}.`);
                     } else if (d.act === 'dupfresh') {
-                        const c = { id: uid(), name: (t.name + ' (new)').slice(0, 30), race: t.race, primary: t.primary, secondary: t.secondary, rerolls: t.rerolls, apothecary: t.apothecary,
+                        const c = { id: uid(), name: (t.name + ' (new)').slice(0, 30), race: t.race, primary: t.primary, secondary: t.secondary, dice: t.dice, rerolls: t.rerolls, apothecary: t.apothecary,
                             coaches: t.coaches, cheerleaders: t.cheerleaders, fans: Math.min(3, t.fans), bribes: 0, players: t.players.map(p => Object.assign({ pos: p.pos, name: p.name }, TB.isMP(t) && p.mp ? { mp: p.mp } : {}, TB.isMP(t) && p.mp2 ? { mp2: p.mp2 } : {}, p.vet ? { vet: true } : {})) };
                         if (TB.isMP(t)) Object.assign(c, { format: t.format, budget: t.budget, stars: (t.stars || []).slice(), mind: Object.assign({}, t.mind) }, t.rules ? { rules: t.rules } : {});
                         else if (TB.isSev(t)) c.format = 'sevens';
                         TB.put(c); sel = c.id; msg(TB.isMP(t) ? `Made a copy of the Matched Play team: ${c.name}.` : `Made a fresh copy with no career: ${c.name}. It starts on the usual ${TB.isSev(t) ? '600k Sevens' : '1,000k'} budget.`);
                     } else if (d.act === 'reset') {
                         if (armed.reset > Date.now()) {
-                            const c = { id: t.id, name: t.name, race: t.race, primary: t.primary, secondary: t.secondary, rerolls: t.rerolls, apothecary: t.apothecary,
+                            const c = { id: t.id, name: t.name, race: t.race, primary: t.primary, secondary: t.secondary, dice: t.dice, rerolls: t.rerolls, apothecary: t.apothecary,
                                 coaches: t.coaches, cheerleaders: t.cheerleaders, fans: Math.min(3, t.fans), bribes: 0, players: t.players.map(p => Object.assign({ id: p.id, pos: p.pos, name: p.name }, p.vet ? { vet: true } : {})), trophies: t.trophies };
                             if (t.format === 'sevens') c.format = 'sevens';
                             TB.put(c); armed.reset = 0; msg(`${t.name} is back to a draft team: no SPP, injuries, treasury or record.`);
@@ -12112,6 +12168,8 @@ ol.ci-steps li::marker { content: none; }
             }
 
             REPLAY.injury(player.id, inj.out);
+            DICEFX.toast([r1, r2], { col: DICEFX.colFor(injCause && injCause.team !== player.team ? injCause.team : player.team),
+                label: `Injury ${roll}: ${inj.out === 'stun' ? 'Stunned' : inj.out === 'ko' ? 'KO' : 'Casualty!'}`, cls: inj.out === 'stun' ? 'ok' : inj.out === 'ko' ? 'warn' : 'bad' });
             COACH.injury(player, roll, inj, injuryBonus);
             if (inj.out === 'stun') {
                 if (inj.saved) {
@@ -12981,6 +13039,8 @@ ol.ci-steps li::marker { content: none; }
   function arp(notes, step, wave, vol, len) { notes.forEach((n, i) => tone(N[n] || n, N[n] || n, len || step * 1.6, wave, vol, i * step)); }
 
   const SOUNDS = {
+    'diceClack': () => { noise(0.05, 0.42, 0, 4200 + Math.random() * 1600); tone(700 + Math.random() * 500, 320, 0.035, 'square', 0.05); },   // (an animated die landing)
+    'diceClackSoft': () => { noise(0.04, 0.16, 0, 3800 + Math.random() * 1600); },
     'dice': () => { for (let i = 0; i < 9; i++) { noise(0.045, 0.3, i * 0.06 + (i * i) * 0.002, 5200); tone(300 + Math.random() * 260, 180, 0.04, 'square', 0.05, i * 0.06); } },
     'rollPass': () => { tone(N.E5, N.E5, 0.09, 'p25', 0.28); tone(N.A5, N.A5, 0.18, 'p25', 0.28, 0.09); },
     'rollFail': () => { tone(220, 110, 0.32, 'sawtooth', 0.26); tone(165, 82, 0.32, 'square', 0.14, 0.02); },
@@ -14610,11 +14670,11 @@ ol.ci-steps li::marker { content: none; }
         };
         const skillPopQueue = []; let skillPopBusy = false;
         // dice rattle, then the pass or fail jingle; a successful pick-up or catch also gets its own sound
-        function sfxRoll(ok, type, extra = 0) {
-            sfx('dice', extra);
-            sfx(ok ? 'rollPass' : 'rollFail', extra + 420);
-            if (ok && type === 'PICKUP') sfx('pickUp', extra + 650);
-            if (ok && (type === 'CATCH' || type === 'INTERCEPT')) sfx('catch', extra + 650);
+        function sfxRoll(ok, type, extra = 0, settled = false) {   // settled: animated dice have already clacked down, so no rattle
+            if (settled) extra -= 400; else sfx('dice', extra);
+            sfx(ok ? 'rollPass' : 'rollFail', Math.max(0, extra + 420));
+            if (ok && type === 'PICKUP') sfx('pickUp', Math.max(0, extra + 650));
+            if (ok && (type === 'CATCH' || type === 'INTERCEPT')) sfx('catch', Math.max(0, extra + 650));
         }
         // Star Player Points earned in a career match: logged, and a little "+3 SPP" floats up from the player
         let injCause = null;   // who caused the injury being rolled (for Casualty SPP)
@@ -15817,6 +15877,8 @@ ol.ci-steps li::marker { content: none; }
             }
             if (attacker && attacker.skills.includes('Mighty Blow')) sfx('bigHit');
             sfx(finalArmorRoll >= player.av || clawsBreak ? 'armourBreak' : 'armourHolds', 250);
+            { const br = finalArmorRoll >= player.av || clawsBreak;   // (animated dice: a quick look at the two dice, holding nothing up)
+              DICEFX.toast([r1, r2], { col: DICEFX.colFor(attacker ? attacker.team : player.team), label: `Armour ${finalArmorRoll} v AV ${player.av}+: ${br ? 'broken' : 'holds'}`, cls: br ? 'bad' : 'ok' }); }
             if(finalArmorRoll >= player.av || clawsBreak) {
                 if (clawsBreak && finalArmorRoll < player.av) { log(`  Claws! A natural ${baseRoll} breaks ${player.type}'s armour whatever its value.`, 'text-red-400 font-bold'); skillPop('Claws'); }
                 else log(`  Armor broken (${finalArmorRoll} >= AV${player.av}+).`, 'text-red-400');
@@ -16757,7 +16819,11 @@ ol.ci-steps li::marker { content: none; }
             helps.forEach(([sk, mod]) => { if (mod > 0 && roll !== 6 && roll < pData.target + mod) skillPop(sk); });
         }
         document.getElementById('btn-roll-confirm').addEventListener('click', () => {
-            document.getElementById('modal-roll').classList.add('hidden');
+            const pData0 = state.pendingRoll;
+            if (pData0 && pData0.dfxBusy) return;   // (animated dice still rolling)
+            // animated dice (Settings -> Animate other rolls, a person's own roll): the window stays open while the die settles
+            const animO = !!pData0 && DICEFX.otherOn(pData0.player.team);
+            if (!animO) document.getElementById('modal-roll').classList.add('hidden');
             const pData = state.pendingRoll; 
             if (!pData) return;
 
@@ -16772,6 +16838,7 @@ ol.ci-steps li::marker { content: none; }
             const btApplied = pData.type === 'DODGE' && pData.usingBreakTackle && pData.availableBtMod > 0;
             const btMadeDifference = r => btApplied && r !== 6 && r < pData.baseTarget;
             let roll = Math.floor(Math.random()*6)+1; 
+            const roll0 = roll;
             log(`  Rolled ${roll} (Needed ${pData.target}+)`);
             let passed = roll !== 1 && (roll === 6 || roll >= pData.target);
 
@@ -16809,7 +16876,8 @@ ol.ci-steps li::marker { content: none; }
                 starSpend(pData.player, 'pro', 'Consummate Professional'); passed = true;
                 log(`  CONSUMMATE PROFESSIONAL! Griff adds +1: the ${roll} becomes ${roll + 1} (needed ${pData.target}+).`, 'text-yellow-300 font-bold');
             }
-            sfxRoll(passed, pData.type);
+            const rest = () => {
+            sfxRoll(passed, pData.type, 0, pData.dfxQuiet);
             // Pro: during their own activation, a 3+ lets them re-roll the dice (and then no other re-roll may be used)
             const pl = pData.player, proOk = !passed && !skillRerolled && pl.skills.includes('Pro') && !pl.usedSkills.includes('Pro') && pl.team === state.activeTeam && pl.id === state.selectedId;
             const usePro = () => {
@@ -16875,23 +16943,39 @@ ol.ci-steps li::marker { content: none; }
                     pData.onFail(roll, pData);
                 };
                 document.getElementById('btn-trr-yes').onclick = () => {
-                    document.getElementById('modal-team-reroll').classList.add('hidden');
+                    if (pData.dfxBusy) return;
+                    const animR = DICEFX.otherOn(pData.player.team);   // (animated dice: the re-roll settles in this window first)
+                    if (!animR) document.getElementById('modal-team-reroll').classList.add('hidden');
                     spendTeamReroll(state.activeTeam); state.teamRRUsedThisTurn = true; updateTopBar();
                     log(`  TEAM RE-ROLL used!`, 'text-amber-400 font-bold');
                     sfx('teamReroll');
                     if (lonerBlocks(pData.player)) {
+                        document.getElementById('modal-team-reroll').classList.add('hidden');
                         state.mode = pData.prevMode; state.pendingRoll = null;
                         pData.onFail(roll, pData);
                         return;
                     }
                     let rr = Math.floor(Math.random()*6)+1; log(`  TRR Rolled ${rr} (Needed ${pData.target}+)`);
                     let rrPassed = rr !== 1 && (rr === 6 || rr >= pData.target);
+                    const after = () => {
                     state.mode = pData.prevMode; state.pendingRoll = null;
-                    sfxRoll(rrPassed, pData.type, 450);
+                    sfxRoll(rrPassed, pData.type, animR ? 0 : 450, animR);
                     if (rrPassed && btMadeDifference(rr)) skillPop('Break Tackle');
                     state.lastRollTarget = pData.target;
                     if (rrPassed) helpPops(pData, rr);
                     if(rrPassed) pData.onPass(rr); else pData.onFail(rr, pData);
+                    };
+                    if (!animR) { after(); return; }
+                    pData.dfxBusy = true;
+                    const box = document.getElementById('trr-dfx'), btns = document.getElementById('btn-trr-yes').parentNode;
+                    btns.classList.add('invisible'); btns.parentNode.classList.add('dfx-rolling');
+                    DICEFX.rollIn(box, [[rr]], { from: [roll], col: DICEFX.colFor(pData.player.team),
+                        label: () => ({ html: `Re-rolled ${rr}, needed ${pData.target}+ ${rrPassed ? '✓' : '✗'}`, cls: rrPassed ? 'ok' : 'bad' }) }, () => {
+                        box.classList.add('hidden'); box.innerHTML = ''; btns.classList.remove('invisible'); btns.parentNode.classList.remove('dfx-rolling');
+                        pData.dfxBusy = false;
+                        document.getElementById('modal-team-reroll').classList.add('hidden');
+                        after();
+                    });
                 };
             } else {
                 state.mode = pData.prevMode; state.pendingRoll = null;
@@ -16900,6 +16984,22 @@ ol.ci-steps li::marker { content: none; }
                 if (passed) helpPops(pData, roll);
                 if(passed) pData.onPass(roll); else pData.onFail(roll, pData);
             }
+            };
+            if (!animO) { rest(); return; }
+            // the die (or the first roll, then the re-rolled die jumping again) settles in the window, then the game carries on
+            pData.dfxBusy = true;
+            const box = document.getElementById('roll-dfx'), btns = document.getElementById('btn-roll-confirm').parentNode;
+            btns.classList.add('invisible'); btns.parentNode.classList.add('dfx-rolling');
+            const seq = roll0 !== roll || skillRerolled ? [[roll0], [roll]] : [[roll]];
+            DICEFX.rollIn(box, seq, { col: DICEFX.colFor(pData.player.team), label: (k, last) => {
+                const r = seq[k][0], ok = last ? passed : (r !== 1 && (r === 6 || r >= pData.target));
+                return { html: `Rolled ${r}, needed ${pData.target}+ ${ok ? '✓' : '✗'}${!last ? ' <span style="color:#93c5fd">(re-roll)</span>' : ''}`, cls: ok ? 'ok' : 'bad' };
+            } }, () => {
+                box.classList.add('hidden'); box.innerHTML = ''; btns.classList.remove('invisible'); btns.parentNode.classList.remove('dfx-rolling');
+                pData.dfxBusy = false;
+                document.getElementById('modal-roll').classList.add('hidden');
+                pData.dfxQuiet = true; rest();
+            });
         });
 
         function getPassRangeInfo(dist) {
@@ -17937,25 +18037,31 @@ ol.ci-steps li::marker { content: none; }
             
             state.combat.chooser = chooser;
             COACH.block({ atkSt, stNotes, dice });
+            const dcol = DICEFX.colFor(atk.team);   // the rolling team's dice colours (null: the plain dice)
             let drawDice = function (rolledArray) {
-                c.innerHTML = '';
+                c.innerHTML = ''; c.classList.remove('dfx-on');
                 state.combat.dice = rolledArray.slice();
                 rolledArray.forEach(face => {
-                    const b = document.createElement('button'); 
+                    const b = document.createElement('button');
                     b.className = 'die-canvas-btn p-1 bg-slate-200 border-2 border-slate-400 rounded shadow-md';
-                    b.onclick = () => resolveBlock(face);
+                    if (dcol) { b.style.background = dcol.body; b.style.borderColor = 'rgba(0,0,0,.45)'; }
+                    b.dataset.face = face; b.onclick = () => resolveBlock(face);
                     const cv = document.createElement('canvas'); cv.width = 50; cv.height = 50;
-                    b.appendChild(cv); c.appendChild(b); renderDieIcon(cv.getContext('2d'), face, 50);
+                    b.appendChild(cv); c.appendChild(b); renderDieIcon(cv.getContext('2d'), face, 50, dcol);
                 });
                 COACH.blockDice();
             };
-            
+
+            // the roll: as the window opens, or (animated dice) when the coach presses Roll
+            const rollBlockDice = () => {
             const rolled = []; for(let i=0; i<dice; i++) rolled.push(Math.floor(Math.random()*6)+1);
             const hate = atk.skills.includes('Hatred (Big Guy)') && isBigGuyP(def) ? 'Hatred (Big Guy)' : atk.skills.includes('Hatred (Troll)') && /Troll/.test(def.type) && !/Slayer/.test(def.type) ? 'Hatred (Troll)'
                 : atk.skills.includes('Hatred (Undead)') && isUndeadP(def) ? 'Hatred (Undead)' : atk.skills.includes('Hatred (Dwarf)') && isDwarfP(def) ? 'Hatred (Dwarf)' : '';
             if (hate && rolled.includes(FACES.SKULL)) {   // Hatred: one Player Down re-rolled
                 const i = rolled.indexOf(FACES.SKULL); rolled[i] = d6(); log(`  ${hate}! ${atk.name || atk.type} re-rolls an Attacker Down.`, 'text-red-300 font-bold'); skillPop(hate);
             }
+            return rolled;
+            };
             // Brawler (Block action only): one Both Down may be re-rolled
             const brawlerOk = () => atk.skills.includes('Brawler') && atk.actionTaken === 'block' && !state.combat.bnc && !state.combat.brawlerUsed && state.combat.dice.includes(FACES.BOTH_DOWN);
             const brawl = () => {
@@ -17963,7 +18069,7 @@ ol.ci-steps li::marker { content: none; }
                 state.combat.brawlerUsed = true; nd[i] = Math.floor(Math.random() * 6) + 1;
                 document.getElementById('btn-combat-trr').classList.add('hidden');   // that die can't be re-rolled again
                 log(`  Brawler! ${atk.type} re-rolls a Both Down: ${({1:'Attacker Down',2:'Both Down',3:'Push',4:'Push',5:'Defender Stumbles',6:'POW!'})[nd[i]]}.`, 'text-orange-300 font-bold'); skillPop('Brawler');
-                drawDice(nd);
+                state.combat.animIdx = [i]; drawDice(nd);
             };
             const brBtn = (() => {
                 let b = document.getElementById('btn-combat-brawler');
@@ -17982,7 +18088,7 @@ ol.ci-steps li::marker { content: none; }
                 document.getElementById('btn-combat-trr').classList.add('hidden');
                 const r = tmt ? 6 : d6(), nd = state.combat.dice.slice(), name = f => ({ 1: 'Attacker Down', 2: 'Both Down', 3: 'Push', 4: 'Push', 5: 'Defender Stumbles', 6: 'POW!' })[f];
                 if (r < 3) { log(`  Pro: rolled ${r} (needs 3+). No re-roll.`, 'text-slate-400'); drawDice(nd); return; }
-                const was = nd[i]; nd[i] = d6(); if (!tmt) skillPop('Pro');
+                const was = nd[i]; nd[i] = d6(); if (!tmt) skillPop('Pro'); state.combat.animIdx = [i];
                 log(tmt ? `  ${tmt.label.toUpperCase()}! ${atk.name} re-rolls the ${name(was)}: ${name(nd[i])}.` : `  Pro (${r}): ${atk.type} re-rolls the ${name(was)}: ${name(nd[i])}.`, tmt ? 'text-yellow-300 font-bold' : 'text-sky-300 font-bold');
                 drawDice(nd);
             };
@@ -18002,7 +18108,7 @@ ol.ci-steps li::marker { content: none; }
             })();
             const savage = () => {
                 starSpend(atk, 'savage', 'Savage Blow'); state.combat.proUsed = true;
-                const nd = state.combat.dice.map(f => savBad(f) ? d6() : f);
+                const nd = state.combat.dice.map(f => savBad(f) ? d6() : f); state.combat.animIdx = state.combat.dice.map((f, i) => savBad(f) ? i : -1).filter(i => i >= 0);
                 log(`  SAVAGE BLOW! Anqi re-rolls the bad dice.`, 'text-yellow-300 font-bold'); drawDice(nd);
             };
             // Sevens: the Veteran may re-roll the block dice once a game when their own Block would knock them down
@@ -18012,7 +18118,7 @@ ol.ci-steps li::marker { content: none; }
                 if (!b) { b = document.createElement('button'); b.id = 'btn-combat-vet'; b.type = 'button'; b.className = 'w-full bg-teal-700 hover:bg-teal-600 text-white font-bold uppercase text-xs py-2 rounded mb-4 shadow'; document.getElementById('btn-combat-trr').after(b); }
                 return b;
             })();
-            const vetRoll = () => { atk.vetUsed = true; state.combat.proUsed = true; skillPop('Veteran'); const nd = state.combat.dice.map(() => d6()); log(`  VETERAN! ${atk.name || atk.type} re-rolls the block dice.`, 'text-yellow-300 font-bold'); drawDice(nd); };
+            const vetRoll = () => { atk.vetUsed = true; state.combat.proUsed = true; skillPop('Veteran'); const nd = state.combat.dice.map(() => d6()); state.combat.animIdx = nd.map((f, i) => i); log(`  VETERAN! ${atk.name || atk.type} re-rolls the block dice.`, 'text-yellow-300 font-bold'); drawDice(nd); };
             function paintVet() { vetBtn.textContent = 'Veteran: re-roll the block dice'; vetBtn.classList.toggle('hidden', !vetOk() || AI.isAI(atk.team)); vetBtn.onclick = () => { if (vetOk()) vetRoll(); }; }
             function paintSavage() { savBtn.textContent = '★ Savage Blow: re-roll the bad dice'; savBtn.classList.toggle('hidden', !savageOk() || AI.isAI(atk.team)); savBtn.onclick = () => { if (savageOk()) savage(); }; }
             proBtn.onclick = () => { if (!proOk()) return; if (state.combat.dice.length === 1) proRoll(0); else { state.combat.proPick = !state.combat.proPick; paintPro(); } };
@@ -18021,7 +18127,28 @@ ol.ci-steps li::marker { content: none; }
                 drawDice0(arr); paintBrawler(); paintPro(); try { paintVet(); } catch (e) {}
                 [...c.children].forEach((b, i) => { const fn = b.onclick; b.onclick = () => { if (state.combat.proPick && proOk()) proRoll(i); else fn(); }; });
             };
-            drawDice(rolled);
+            // animated dice (a person's own block, Settings -> Animate block dice): the dice tumble in place until Roll is pressed, then
+            // jump and settle on what the game rolled; re-rolls replay the jump for the dice that changed. Then the usual dice to pick.
+            const animB = DICEFX.blockOn(atk.team) && !state.combat.bnc;
+            const busy = on => { card.classList.toggle('dfx-busy', on); state.combat.diceAnim = on; };
+            if (animB) {
+                const drawFlat = drawDice, combat = state.combat;
+                drawDice = arr => {
+                    const prev = combat.dice, idx = combat.animIdx; combat.animIdx = null;
+                    const which = prev && prev.length === arr.length ? (idx || arr.map((f, i) => i).filter(i => f !== prev[i])) : null;
+                    if (state.combat !== combat || (which && !which.length)) { drawFlat(arr); return; }
+                    combat.dice = arr.slice(); busy(true);
+                    let T = combat.dfx;
+                    if (!T || T.state === 'gone' || !c.contains(T.box) || T.dice.length !== arr.length) {   // (a re-roll: the dice as they lay, then the jump)
+                        c.classList.add('dfx-on'); T = DICEFX.tray(c, { n: arr.length, kind: 'block', col: dcol, size: 56, gap: 18, height: 66, faces: prev });
+                        combat.dfx = T;
+                    }
+                    T.box.onclick = e => { e.stopPropagation(); DICEFX.finish(T); };
+                    DICEFX.settle(T, arr, which, () => { DICEFX.stop(T); combat.dfx = null; if (state.combat !== combat) return; busy(false); drawFlat(arr); });
+                };
+            }
+            const rollNow = () => {
+            drawDice(rollBlockDice());
             // the computer's Veteran re-rolls when there is no safe die to pick
             if (AI.isAI(atk.team) && vetOk() && (chooser === atk.team ? state.combat.dice.every(savBad) : true)) vetRoll();
             // the computer uses Brawler when the Both Down would hurt (no Block) and no better die is there to pick
@@ -18048,13 +18175,26 @@ ol.ci-steps li::marker { content: none; }
                     log(`  TEAM RE-ROLL used for Block dice!`, 'text-amber-400 font-bold');
                     if (lonerBlocks(state.combat.atk)) return;
                     const newRolled = []; for(let i=0; i<dice; i++) newRolled.push(Math.floor(Math.random()*6)+1);
-                    drawDice(newRolled);
+                    state.combat.animIdx = newRolled.map((f, i) => i); drawDice(newRolled);
                 };
             } else {
                 trrBtn.classList.add('hidden');
             }
-
+            };
+            { const old = document.getElementById('btn-dice-roll'); if (old) old.remove(); }
+            if (!animB) { rollNow(); m.classList.remove('hidden'); return; }
+            // waiting for the roll: the dice tumble where they will land, a Roll button under them (tapping the dice rolls too)
+            ['btn-combat-trr', 'btn-combat-keep', 'btn-combat-brawler', 'btn-combat-pro', 'btn-combat-savage', 'btn-combat-vet'].forEach(id => { const b = document.getElementById(id); if (b) b.classList.add('hidden'); });
+            busy(true); state.combat.diceWait = true;
             m.classList.remove('hidden');
+            c.classList.add('dfx-on');
+            const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 56, gap: 18, height: 66 });
+            state.combat.dfx = T0; DICEFX.tumble(T0);
+            const rb = document.createElement('button'); rb.type = 'button'; rb.id = 'btn-dice-roll'; rb.textContent = 'Roll';
+            const combat0 = state.combat;
+            const press = e => { if (e) e.stopPropagation(); if (state.combat !== combat0 || !combat0.diceWait) return; combat0.diceWait = false; rb.remove(); rollNow(); };
+            rb.onclick = press; T0.box.onclick = press;
+            c.after(rb);
         }
 
         function initFoul(atkId, defId) {
@@ -20165,12 +20305,14 @@ ol.ci-steps li::marker { content: none; }
             }
         }
 
-        function renderDieIcon(ctx, face, sz) {
+        // col (optional): team-colour dice { body, pip }: every symbol in the one pip colour, the skulls' eyes and POW cut out in the die colour
+        function renderDieIcon(ctx, face, sz, col) {
             ctx.clearRect(0, 0, sz, sz); const cx = sz/2, cy = sz/2;
-            const drawSkull = (x, y, s) => {
-                ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(x, y - s*0.1, s*0.4, 0, Math.PI*2); ctx.fill();
+            const BONE = col ? col.pip : '#f8fafc', HOLE = col ? col.body : '#0f172a', INK = col ? col.pip : '#0f172a', RED = col ? col.pip : '#b91c1c';
+            const drawSkull = (x, y, s, bone = BONE, hole = HOLE) => {
+                ctx.fillStyle = bone; ctx.beginPath(); ctx.arc(x, y - s*0.1, s*0.4, 0, Math.PI*2); ctx.fill();
                 ctx.fillRect(x - s*0.2, y + s*0.1, s*0.4, s*0.3);
-                ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(x - s*0.15, y - s*0.1, s*0.12, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = hole; ctx.beginPath(); ctx.arc(x - s*0.15, y - s*0.1, s*0.12, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.arc(x + s*0.15, y - s*0.1, s*0.12, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.moveTo(x, y + s*0.1); ctx.lineTo(x-s*0.1, y+s*0.2); ctx.lineTo(x+s*0.1, y+s*0.2); ctx.fill();
             };
@@ -20184,29 +20326,234 @@ ol.ci-steps li::marker { content: none; }
 
             if(face === FACES.SKULL) { drawSkull(cx, cy, sz*0.7); } 
             else if(face === FACES.BOTH_DOWN) {
-                ctx.fillStyle = '#b91c1c'; ctx.beginPath();
+                ctx.fillStyle = RED; ctx.beginPath();
                 const or = sz * 0.45, ir = sz * 0.25, spikes = 8;
                 for (let i = 0; i < spikes * 2; i++) {
                     const r = i % 2 === 0 ? or : ir, a = (i * Math.PI) / spikes;
                     ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
                 }
                 ctx.closePath(); ctx.fill();
-                drawSkull(cx - sz*0.18, cy + sz*0.08, sz*0.35); drawSkull(cx + sz*0.18, cy - sz*0.08, sz*0.35);
-            } 
+                const b2 = col ? col.body : '#f8fafc', h2 = col ? col.pip : '#0f172a';   // (team dice: the skulls cut out of the star)
+                drawSkull(cx - sz*0.18, cy + sz*0.08, sz*0.35, b2, h2); drawSkull(cx + sz*0.18, cy - sz*0.08, sz*0.35, b2, h2);
+            }
             else if(face === FACES.PUSH1 || face === FACES.PUSH2) {
-                ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.moveTo(cx - sz*0.3, cy + sz*0.3); ctx.lineTo(cx + sz*0.1, cy - sz*0.1);
+                ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(cx - sz*0.3, cy + sz*0.3); ctx.lineTo(cx + sz*0.1, cy - sz*0.1);
                 ctx.lineTo(cx - sz*0.1, cy - sz*0.3); ctx.lineTo(cx + sz*0.4, cy - sz*0.4); ctx.lineTo(cx + sz*0.4, cy + sz*0.1); 
                 ctx.lineTo(cx + sz*0.2, cy - sz*0.1); ctx.lineTo(cx - sz*0.1, cy + sz*0.4); ctx.closePath(); ctx.fill();
             } 
             else if(face === FACES.STUMBLE) {
-                ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.moveTo(cx - sz*0.2, cy - sz*0.4); ctx.lineTo(cx + sz*0.2, cy - sz*0.4);
+                ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(cx - sz*0.2, cy - sz*0.4); ctx.lineTo(cx + sz*0.2, cy - sz*0.4);
                 ctx.lineTo(cx, cy + sz*0.1); ctx.closePath(); ctx.fill(); ctx.fillRect(cx - sz*0.1, cy + sz*0.2, sz*0.2, sz*0.2);
-            } 
+            }
             else if(face === FACES.POW) {
-                drawPow('#b91c1c'); ctx.fillStyle = '#fff'; ctx.font = `bold ${sz*0.3}px Teko`;
+                drawPow(RED); ctx.fillStyle = col ? col.body : '#fff'; ctx.font = `bold ${sz*0.3}px Teko`;
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText("POW", cx, cy+sz*0.05);
             }
         }
+
+        // ---------- Animated dice (v5.51): 3D dice that tumble, then jump and settle on a result the game has already rolled ----------
+        // Settings (localStorage): bb-dice-anim-block / bb-dice-anim-other ('1' / '0'; unset = on for a person, off with reduced motion
+        // and in test runs), bb-dice-dur (the jump-and-settle in ms, 500-2000), bb-dice-team ('0' = the plain dice).
+        // Nothing here decides a roll: the game's own code rolls, these only show the numbers they are given. Never used for the
+        // computer's rolls, in ?simtest, above normal speed or in two-device play (live()).
+        const DICEFX = (function () {
+            const rt = () => { try { return CLOCK.real(); } catch (e) { return performance.now(); } };   // real time (the game's clock can run ahead)
+            const LS = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+            const put = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+            const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+            const sim = () => /[?&]simtest\b/.test(location.search) || !!window.BB_SIMTEST;
+            const person = () => { try { return !navigator.webdriver && !/jsdom/i.test(navigator.userAgent || '') && !sim(); } catch (e) { return false; } };
+            const flag = k => { const v = LS(k); return v === '1' ? true : v === '0' ? false : person() && !reduced(); };
+            const S = {
+                block: () => flag('bb-dice-anim-block'), other: () => flag('bb-dice-anim-other'),
+                team: () => LS('bb-dice-team') !== '0',
+                dur: () => { const v = +LS('bb-dice-dur'); return v >= 500 && v <= 2000 ? v : 1000; }
+            };
+            function live() {
+                if (sim()) return false;
+                try { if (NET.on()) return false; } catch (e) {}
+                try { if (CLOCK.speed > 1) return false; } catch (e) {}
+                const b = document.body.classList; return !b.contains('sim-max') && !b.contains('frep-on');
+            }
+            // ---- colours ----
+            const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+            const lum = h => { const [r, g, b] = rgb(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * b; };
+            const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+            const shade = (h, k) => '#' + rgb(h).map(v => Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k).toString(16).padStart(2, '0')).join('');
+            const okHex = h => typeof h === 'string' && /^#[0-9a-f]{6}$/i.test(h);
+            // the pip colour: when the two are too alike to read (contrast under 3:1), darken or lighten it step by step
+            // (whichever way the die colour leaves more room); black or white only as a last resort
+            function ink(body, pip) {
+                if (contrast(body, pip) >= 3) return { pip, changed: 0 };
+                const first = lum(body) > .18 ? -1 : 1;
+                for (const dir of [first, -first]) for (let k = .1; k <= 1.001; k += .05) { const c = shade(pip, dir * k); if (contrast(body, c) >= 3) return { pip: c, changed: dir }; }
+                return { pip: contrast(body, '#ffffff') >= contrast(body, '#111827') ? '#ffffff' : '#111827', changed: 2 };
+            }
+            // a team's dice in a match: its saved dice colours, else the kit it plays in; null = the plain dice
+            function colFor(team) {
+                if (!S.team()) return null;
+                let b, p;
+                try { const R = ROSTERS[team]; if (R && Array.isArray(R.dice) && okHex(R.dice[0]) && okHex(R.dice[1])) [b, p] = R.dice; else { const s = teamStyle(team); b = s.fill; p = s.text; } } catch (e) { return null; }
+                if (!okHex(b) || !okHex(p)) return null;
+                return { body: b.toLowerCase(), pip: ink(b.toLowerCase(), p.toLowerCase()).pip };
+            }
+            // ---- faces ----
+            const cache = {};
+            function faceURL(kind, v, col) {
+                const key = kind + v + (col ? col.body + col.pip : ''); if (cache[key]) return cache[key];
+                const N = 128, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d');
+                const r = 18, grad = g.createLinearGradient(0, 0, N, N), rr = (x, y, w, h, q) => { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, q); else g.rect(x, y, w, h); };
+                if (col) { grad.addColorStop(0, shade(col.body, .18)); grad.addColorStop(1, shade(col.body, -.22)); }
+                else if (kind === 'block') { grad.addColorStop(0, '#f1f5f9'); grad.addColorStop(1, '#cbd5e1'); }
+                else { grad.addColorStop(0, '#fffaf0'); grad.addColorStop(1, '#e7dcc6'); }
+                g.fillStyle = grad; rr(0, 0, N, N, r); g.fill();
+                g.strokeStyle = col ? 'rgba(0,0,0,.35)' : kind === 'block' ? '#94a3b8' : 'rgba(0,0,0,.3)'; g.lineWidth = 5; rr(2.5, 2.5, N - 5, N - 5, r - 2); g.stroke();
+                if (kind === 'block') { const ic = document.createElement('canvas'); ic.width = ic.height = 104; try { renderDieIcon(ic.getContext('2d'), v, 104, col); } catch (e) {} g.drawImage(ic, 12, 12); }
+                else {
+                    const P = { 1: [[.5,.5]], 2: [[.27,.27],[.73,.73]], 3: [[.27,.27],[.5,.5],[.73,.73]], 4: [[.27,.27],[.73,.27],[.27,.73],[.73,.73]],
+                        5: [[.27,.27],[.73,.27],[.5,.5],[.27,.73],[.73,.73]], 6: [[.27,.25],[.73,.25],[.27,.5],[.73,.5],[.27,.75],[.73,.75]] }[v] || [];
+                    g.fillStyle = col ? col.pip : (v === 1 ? '#b91c1c' : '#1e293b');
+                    P.forEach(([x, y]) => { g.beginPath(); g.arc(x * N, y * N, v === 1 ? 15 : 11, 0, Math.PI * 2); g.fill(); });
+                }
+                try { return cache[key] = c.toDataURL(); } catch (e) { return ''; }
+            }
+            // ---- sound: a clack as a die lands (the game's own sound setting) ----
+            const clack = soft => { try { sfx(soft ? 'diceClackSoft' : 'diceClack'); } catch (e) {} };
+            // ---- the dice ----
+            const PLACE = { 1: 'rotateY(0deg)', 6: 'rotateY(180deg)', 3: 'rotateY(90deg)', 4: 'rotateY(-90deg)', 2: 'rotateX(90deg)', 5: 'rotateX(-90deg)' };
+            const TARGET = { 1: [0, 0, 0], 2: [-90, 0, 0], 3: [0, -90, 0], 4: [0, 90, 0], 5: [90, 0, 0], 6: [0, 180, 0] };
+            const HOVER = -6;   // waiting dice float a little above their resting place
+            const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            const el = (t, c) => { const e = document.createElement(t); e.className = c; return e; };
+            const spin = () => [0, 1, 2].map(() => (Math.random() < .5 ? -1 : 1) * (320 + Math.random() * 240));
+            // a row of dice in host (cleared first): opts { n, kind 'block' | 'd6', col, size, gap, height, faces (shown at rest) }
+            function tray(host, o) {
+                const n = o.n, s = o.size || 54, gap = o.gap == null ? 20 : o.gap, H = o.height || s + 12;
+                host.innerHTML = '';
+                const box = el('div', 'dfx-tray'); box.style.height = H + 'px'; host.appendChild(box);
+                const W = host.clientWidth || (n * s + (n - 1) * gap + 16), total = n * s + (n - 1) * gap, left0 = Math.max(0, (W - total) / 2), top = (H - s) / 2;
+                const dice = Array.from({ length: n }, (_, i) => {
+                    const slot = el('div', 'dfx-slot'); slot.style.cssText = `left:${left0 + i * (s + gap)}px;top:${top}px;width:${s}px;height:${s}px`;
+                    const sh = el('div', 'dfx-shadow'), mover = el('div', 'dfx-mover'), cube = el('div', 'dfx-cube'), core = el('div', 'dfx-core');
+                    core.style.background = o.col ? shade(o.col.body, -.3) : '#9aa3b0'; cube.appendChild(core);
+                    for (let f = 1; f <= 6; f++) { const face = el('div', 'dfx-face'); face.style.backgroundImage = `url(${faceURL(o.kind, f, o.col)})`; face.style.transform = `${PLACE[f]} translateZ(${s / 2}px)`; cube.appendChild(face); }
+                    mover.appendChild(cube); slot.append(sh, mover); box.appendChild(slot);
+                    const v = o.faces ? o.faces[i] : 0;
+                    return { slot, sh, mover, cube, s, v, ang: v ? TARGET[v].slice() : [Math.random() * 360, Math.random() * 360, Math.random() * 360], w: spin(), phase: Math.random() * 6, y: 0 };
+                });
+                const T = { box, dice, raf: 0, timer: 0, state: 'idle', done: null, kind: o.kind };
+                dice.forEach(d => pose(d, 0, d.ang, 1, 1));
+                return T;
+            }
+            function pose(d, y, a, sx, sy) {
+                d.y = y; d.mover.style.transform = `translate3d(0,${y.toFixed(1)}px,0) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+                d.cube.style.transform = `rotateX(${a[0].toFixed(1)}deg) rotateY(${a[1].toFixed(1)}deg) rotateZ(${a[2].toFixed(1)}deg)`;
+                const k = Math.max(.35, 1 - Math.max(0, -y) / 120); d.sh.style.transform = `scale(${k.toFixed(3)})`; d.sh.style.opacity = (.9 * k).toFixed(2);
+            }
+            // set the dice (those listed, or all) tumbling in place
+            function tumble(T, which) {
+                cancelAnimationFrame(T.raf); T.state = 'tumble';
+                const go = which || T.dice.map((_, i) => i);
+                go.forEach(i => { T.dice[i].spinning = true; });
+                let last = rt();
+                const tick = () => { const now = rt();
+                    const dt = Math.min(.05, (now - last) / 1000); last = now;
+                    T.dice.forEach(d => { if (!d.spinning) return; d.ang = d.ang.map((a, k) => a + d.w[k] * dt); pose(d, HOVER + 3 * Math.sin(now / 260 + d.phase), d.ang, 1, 1); });
+                    T.raf = requestAnimationFrame(tick);
+                };
+                T.raf = requestAnimationFrame(tick);
+            }
+            // the jump and settle: values = every die's result; which = the dice that move (default all; the rest stay as they are)
+            function settle(T, values, which, done) {
+                cancelAnimationFrame(T.raf); clearTimeout(T.timer);
+                const go = new Set(which || T.dice.map((_, i) => i));
+                T.state = 'rolling'; T.done = done; T.values = values;
+                const D = S.dur(), movers = T.dice.filter((d, i) => go.has(i)), gapMs = Math.min(90, D * .08), t0 = rt(), J = .62;
+                T.dice.forEach((d, i) => { d.v = values[i]; d.moving = go.has(i); });
+                movers.forEach((d, j) => {
+                    d.start = j * gapMs; d.len = D - (movers.length - 1) * gapMs; d.from = d.ang.slice(); d.landed = d.hop2 = false;
+                    // keep spinning at the tumbling speed, then slow onto the result face just before landing (cubic Hermite)
+                    const air = d.len * J / 1000; d.v0 = d.w.map(w => w * air);
+                    d.tgt = TARGET[d.v].map((t, k) => { const want = d.from[k] + d.v0[k] * .9; return d.w[k] > 0 ? t + 360 * Math.ceil((want - t) / 360) : t + 360 * Math.floor((want - t) / 360); });
+                    d.y0 = d.spinning ? d.y : 0;
+                });
+                const frame = () => { const now = rt();
+                    let all = true;
+                    movers.forEach(d => {
+                        const p = Math.min(1, Math.max(0, (now - t0 - d.start) / d.len)); if (p < 1) all = false;
+                        if (p < J) {
+                            const q = p / J, y = d.y0 * (1 - q) - d.s * .8 * Math.sin(Math.PI * q), sc = 1 + .12 * Math.sin(Math.PI * q);
+                            const h00 = 2 * q * q * q - 3 * q * q + 1, h10 = q * q * q - 2 * q * q + q, h01 = 3 * q * q - 2 * q * q * q;
+                            d.ang = d.from.map((a, k) => h00 * a + h10 * d.v0[k] + h01 * d.tgt[k]); pose(d, y, d.ang, sc, sc);
+                        } else {
+                            const q = (p - J) / (1 - J);
+                            if (!d.landed) { d.landed = true; clack(false); }
+                            if (q > .5 && !d.hop2) { d.hop2 = true; clack(true); }
+                            const hop = q > .35 && q < .75 ? -d.s * .08 * Math.sin(Math.PI * (q - .35) / .4) : 0, sq = q < .35 ? .15 * Math.sin(Math.PI * q / .35) : 0;
+                            d.ang = d.tgt; pose(d, hop, d.ang, 1 + sq * .6, 1 - sq);
+                        }
+                    });
+                    if (all) { finish(T, true); return; }
+                    T.raf = requestAnimationFrame(frame);
+                };
+                T.raf = requestAnimationFrame(frame);
+                T.timer = setTimeout(() => finish(T, true), D + 600);   // (a hidden tab draws no frames: the game must not wait for them)
+            }
+            // straight to the end (a tap during the roll)
+            function finish(T, quietly) {
+                if (T.state !== 'rolling') return;
+                cancelAnimationFrame(T.raf); clearTimeout(T.timer); T.state = 'done';
+                T.dice.forEach(d => { d.spinning = false; if (d.v) { d.ang = TARGET[d.v].slice(); pose(d, 0, d.ang, 1, 1); } });
+                if (!quietly) clack(false);
+                const f = T.done; T.done = null; if (f) f();
+            }
+            function stop(T) { if (!T) return; cancelAnimationFrame(T.raf); clearTimeout(T.timer); T.state = 'gone'; T.done = null; }
+            // ---- other rolls: a short tumble, then the jump and settle, in a box inside a roll window; seq = the rolls in order
+            // (a skill re-roll shows the first result, then the re-rolled die jumping again); done() once they've settled
+            function rollIn(host, seq, o, done) {
+                const n = seq[0].length;
+                host.classList.remove('hidden');
+                const T = tray(host, { n, kind: 'd6', col: o.col, size: 46, gap: 14, height: 64, faces: o.from });   // (o.from: the dice as they lie, for a re-roll)
+                const lab = el('div', 'dfx-lab'); host.appendChild(lab);
+                let k = 0, over = false;
+                const end = () => { if (over) return; over = true; host.onclick = null; stop(T); done(); };
+                const next = () => {
+                    const vals = seq[k], last = k === seq.length - 1, which = k ? vals.map((v, i) => i).filter(i => vals[i] !== seq[k - 1][i] || seq[k - 1].length !== vals.length) : null;
+                    settle(T, vals, which && which.length ? which : null, () => {
+                        if (o.label) { const L = o.label(k, last); lab.innerHTML = L.html; lab.className = 'dfx-lab ' + (L.cls || ''); }
+                        if (!last) { k++; T.timer = setTimeout(next, 380); return; }
+                        T.timer = setTimeout(end, 420);
+                    });
+                };
+                host.onclick = e => { e.stopPropagation(); if (T.state === 'rolling') finish(T); else if (T.state === 'done' && k === seq.length - 1) end(); };
+                if (o.from) next(); else { tumble(T); T.timer = setTimeout(next, 260); }
+                return T;
+            }
+            // ---- a quick look at dice the game rolls by itself (armour, injury): shown at the top of the screen, holds nothing up
+            const queue = []; let showing = false;
+            function toast(vals, o) {
+                if (!S.other() || !live()) return;
+                queue.push({ vals, o }); if (queue.length > 3) queue.shift();
+                if (!showing) nextToast();
+            }
+            function nextToast() {
+                const it = queue.shift(); if (!it) { showing = false; return; }
+                showing = true;
+                let box = document.getElementById('dfx-toast');
+                if (!box) { box = el('div', ''); box.id = 'dfx-toast'; box.setAttribute('aria-hidden', 'true'); document.body.appendChild(box); }
+                box.innerHTML = '<div class="dfx-tdice"></div><div class="dfx-tlab"></div>'; box.className = 'show';
+                const T = tray(box.firstChild, { n: it.vals.length, kind: 'd6', col: it.o.col, size: 30, gap: 8, height: 40 });
+                box.lastChild.textContent = it.o.label || ''; box.lastChild.className = 'dfx-tlab ' + (it.o.cls || '');
+                tumble(T);
+                setTimeout(() => settle(T, it.vals, null, () => setTimeout(() => { box.className = ''; setTimeout(() => { stop(T); nextToast(); }, 220); }, 900)), 160);
+            }
+            return {
+                S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, toast, okHex,
+                set: (k, v) => put(k, v),
+                blockOn: atkTeam => S.block() && live() && !AI.isAI(atkTeam),
+                otherOn: team => S.other() && live() && !AI.isAI(team)
+            };
+        })();
         
         // ---------- pitch texture: painted once by the game itself (no image files) ----------
         // 'blades' = lush grass, 'worn' = the same with churned-up mud; one is picked at random each time the game loads
@@ -31416,7 +31763,7 @@ ol.ci-steps li::marker { content: none; }
                     });
                     return;
                 }
-                if (vis('modal-dice')) { const c = state.combat; if (c && c.dice && !c.aiPicking && bbOn(state.activeTeam) && c.atk && c.atk.team === state.activeTeam && isAI(state.activeTeam)) bbDice(c); else diceChoice(); return; }
+                if (vis('modal-dice')) { const c = state.combat; if (c && (c.diceAnim || c.diceWait)) return; if (c && c.dice && !c.aiPicking && bbOn(state.activeTeam) && c.atk && c.atk.team === state.activeTeam && isAI(state.activeTeam)) bbDice(c); else diceChoice(); return; }
                 if (state.ballAnimation.active || state.flightAnimation.active || REPLAY.busy()) return;   // (and a replay playing)
                 const d = decider();
                 switch (state.mode) {
@@ -32257,6 +32604,10 @@ ol.ci-steps li::marker { content: none; }
                 on('st-brain', AIX.pref === 'x', 'Experimental', 'Classic');
                 on('st-hd', HD.on, HD.size === 64 ? '2x' : '1.5x', 'Off');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
+                on('st-dice-block', DICEFX.S.block(), 'On', 'Off');
+                on('st-dice-other', DICEFX.S.other(), 'On', 'Off');
+                on('st-dice-team', DICEFX.S.team(), 'On', 'Off');
+                { const d = DICEFX.S.dur(); document.getElementById('st-dice-dur').value = d; document.getElementById('st-dice-dur-o').textContent = (d / 1000).toFixed(1) + ' s'; }
                 document.getElementById('st-text').textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';
                 document.getElementById('st-pitch').value = pitchPref;
             };
@@ -32277,6 +32628,10 @@ ol.ci-steps li::marker { content: none; }
                 try { localStorage.setItem('bb-weather-fx', String(wxFX)); } catch (e) {}
                 paintSettings();
             });
+            document.getElementById('st-dice-block').addEventListener('click', () => { DICEFX.set('bb-dice-anim-block', DICEFX.S.block() ? '0' : '1'); paintSettings(); });
+            document.getElementById('st-dice-other').addEventListener('click', () => { DICEFX.set('bb-dice-anim-other', DICEFX.S.other() ? '0' : '1'); paintSettings(); });
+            document.getElementById('st-dice-team').addEventListener('click', () => { DICEFX.set('bb-dice-team', DICEFX.S.team() ? '0' : '1'); paintSettings(); });
+            document.getElementById('st-dice-dur').addEventListener('input', e => { DICEFX.set('bb-dice-dur', String(+e.target.value)); document.getElementById('st-dice-dur-o').textContent = (+e.target.value / 1000).toFixed(1) + ' s'; });
             document.getElementById('st-hd').addEventListener('click', () => { HD.set(HD.size === 0 ? 48 : HD.size === 48 ? 64 : 0); paintSettings(); });
             document.getElementById('st-pitch').addEventListener('change', e => { setPitchPref(e.target.value); selPitch.value = pitchPref; });
 

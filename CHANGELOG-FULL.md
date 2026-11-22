@@ -2,6 +2,27 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.51 (22 Nov 2026)
+- Animated dice, as agreed in the prototype (`tools/dice-prototype/`). New settings: Animate block dice, Animate other rolls, Roll
+  length (0.5-2.0 s, default 1.0 s) and Dice in team colours. The two animation settings start off on a device that asks for reduced
+  motion. The game still makes every roll with its own code; the animation only shows the result.
+- Block dice (animation on, your own block): the dice tumble in the block window with a Roll button under them (tapping the dice
+  rolls too). On the press the roll is made, then the dice jump up still spinning, land with a little hop and become the usual dice to
+  pick. A team re-roll, Brawler, Pro, Savage Blow or Veteran replays the jump for the dice that changed. Tapping during the roll skips
+  to the end. Off: rolled as the window opens and shown face on, as before. The computer's blocks are always instant.
+- Other rolls (animation on, your own roll): after you press Roll Dice in the roll window (Dodge, Rush, pick-up, catch, pass and the
+  rest), the window stays open while the die settles, with "Rolled 4, needed 3+" under it. A skill re-roll shows the first die, then the
+  re-roll jumping again. A team re-roll settles in the re-roll window. Armour and injury dice show for a moment at the top of the screen
+  without holding the game up. No new button presses: the roll window already waited for one.
+- Dice in team colours: the rolling team's dice use its main colour, with pips and block symbols in its second colour (the skulls'
+  eyes and POW cut out in the die colour). If the two are too alike to read (contrast under 3:1), the symbol colour is made darker or
+  lighter until it reads. Team Builder: two dice colour swatches (using the colour picker) with a preview die and a "Use team colours"
+  button. Dice still on the team colours follow a change of team colours. Saved with the team (`dice`) and carried into matches,
+  leagues, tournaments, export/import and two-device play.
+- Landing clacks use the game's Sound effects setting. Nothing waits in `?simtest`, in AI-only matches above normal speed, in replays
+  or in two-device play (there the dice show at once, as before; the host draws them in the roller's colours, so the other device
+  sees those too).
+
 ## v5.50 (22 Nov 2026)
 - Experimental computer coach (brain x), its ball carrier: where he stops, and the sure moves of team-mates guarding him, are now judged
   by the chance he's knocked over (or pushed off the pitch, or stripped) in the opponents' next turn - each opponent's best route to a

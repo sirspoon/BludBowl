@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.51 (22 Nov 2026)
+- Animated dice: your block dice tumble until you press Roll, then jump and land on the result; Dodges, Rushes and other rolls land in the roll window. Dice in each team's colours (set them in the Team Builder). All of it can be switched off in Settings.
+
 ## v5.50 (22 Nov 2026)
 - The experimental computer coach guards its ball carrier by the hit you could really make on him (your dice once your helpers step in, against its own), not just by how many of your players can reach him.
 

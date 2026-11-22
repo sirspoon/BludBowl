@@ -283,6 +283,18 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.51 (job session, 22 Nov): **animated dice**, from the agreed prototype (`tools/dice-prototype/`). `DICEFX` (by `renderDieIcon`, which
+  now takes an optional team colour `col`). Settings: Animate block dice / other rolls (localStorage `bb-dice-anim-block` / `-other`;
+  unset = on for a person, off with reduced motion and in automated runs), Roll length `bb-dice-dur`, Dice in team colours `bb-dice-team`.
+  Block dice (a person's own block, not Ball & Chain): tumble + Roll button; the roll (`rollBlockDice`, the game's own code incl. Hatred)
+  is made on the press; re-rolls replay the jump for the changed dice (`state.combat.animIdx`); `state.combat.diceWait/diceAnim` keep the
+  AI's dice pick waiting. Choice made for other rolls: no new presses - the Roll Dice window already waits, so it stays open while the die
+  settles (skill re-roll shown as a second jump); the team re-roll settles in its window; armour/injury: a non-blocking toast at the top.
+  Not animated: Pro / Thinking Man's Troll re-rolls of other rolls, rolls without a window (kick-off, weather, Bone Head etc.), and
+  two-device play (dice at once as before; each device could animate locally later - the guest gets the host's dice as images).
+  Team dice: `t.dice` [die, pips] kept only when it differs from the team colours (so default dice follow them); `TB.toRace` puts it in
+  `ROSTERS[i].dice`; built-in teams use the kit they wear. The game clock virtualises `performance.now`, so `DICEFX` uses `CLOCK.real()`.
+  Check: `node tools/ui-tests/dice.js`.
 - v5.39 (job session, 19 Nov): **roster PDF easier to read in print**. `ROSTER_PDF.draw` tries type sizes `SIZES` (11pt down to 7) with
   `rosterPage(doc, S, z, last, extra)` and keeps the largest that fits one page (returns the spare room; a small team redraws with
   taller rows). Column widths come from the contents; names, numbers, characteristics, headings and box values bold; changed
@@ -472,14 +484,6 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   scripted bot: about 60% wins, up from 55% at v4.24.
 
 ## Ideas and open threads
-- **Animated dice (prototype agreed so far, not in the game yet).** Prototype: https://claude.ai/artifact/8gderHAHk5PHbUqqNVamNu
-  (control room, 22 Nov). Dice tumble in place where the block dice show now, waiting for the Roll button; on the press the
-  roll is made, and the dice jump a little (still spinning fast), settle on the result with a clack (~1.0 s, adjustable).
-  Off = rolled as the window opens, dice shown face on straight away (no button), as now. For the game, the owner wants: separate settings for
-  animating block dice and other rolls (off by default with reduced motion; computer rolls and `?simtest` stay instant);
-  dice in team colours (die = primary, pips/symbols = secondary; if too alike, darken/lighten the pip colour until it
-  reads, contrast 3:1); dice colours editable per team in the team's setup, defaulting to the team colours, with a small
-  "Use team colours" button to reset.
 - **AI, defence: knock down their free receivers (from the position study, 18 Nov).** When the opponent holds the ball and has a
   team-mate deep with a free run in (in hand-off / pass reach of the carrier), Blitz or block that player down rather than the
   far-off, caged carrier. Test v drefsante.
