@@ -35,7 +35,8 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
       return state.turn[0] >= 1 && state.turn[1] >= 1 && [MODES.IDLE, MODES.SELECT].includes(state.mode); });
     if (ok) break;
   }
-  await page.evaluate(() => {
+  // (after a computer match has got going: both sides handed to people, and __scene() stages a Lineman next to an opponent)
+  const sceneSrc = () => {
     AI.set(0, false); AI.set(1, false); CLOCK.set(1);
     window.__scene = () => {
       ['modal-choice', 'modal-dice', 'modal-roll', 'modal-team-reroll'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -49,7 +50,8 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
       Object.assign(state, { activeTeam: 0, mode: MODES.IDLE, teamRRUsedThisTurn: false }); state.rr[0] = 0; state.combat = null;
       return [a.id, d.id];
     };
-  });
+  };
+  await page.evaluate(sceneSrc);
   await page.waitForTimeout(300);
   const flat = () => page.evaluate(() => [...document.querySelectorAll('#dice-container button.die-canvas-btn')].map(b => +b.dataset.face));
   const st = () => page.evaluate(() => ({ dice: state.combat && state.combat.dice ? state.combat.dice.slice() : null, flat: [...document.querySelectorAll('#dice-container button.die-canvas-btn')].map(b => +b.dataset.face),
@@ -133,20 +135,6 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   s = await st();
   check(s.dice && !s.roll, 'tapping the tumbling dice rolls them', s);
   await page.waitForTimeout(900);
-
-  // ---- your block where the computer chooses (it is stronger): your tap still rolls; then it picks
-  await page.evaluate(() => { const [a, d] = __scene(); getPlayerById(d).st = 6; AI.set(1, true); startBlock(a, d); });
-  await page.waitForTimeout(200);
-  const ch0 = await page.evaluate(() => ({ chooser: state.combat.chooser, wait: !!state.combat.diceWait }));
-  await page.tap('#dice-container .dfx-tray');
-  await page.waitForTimeout(150);
-  const ch1 = await page.evaluate(() => ({ dice: state.combat.dice && state.combat.dice.length, wait: !!state.combat.diceWait }));
-  check(ch0.chooser === 1 && ch0.wait && ch1.dice === 2 && !ch1.wait, "your block with the computer choosing: tapping the dice rolls them", [ch0, ch1]);
-  for (let i = 0; i < 40 && await page.evaluate(() => !document.getElementById('modal-dice').classList.contains('hidden')); i++) await page.waitForTimeout(250);
-  const ch2 = await page.evaluate(() => ({ open: !document.getElementById('modal-dice').classList.contains('hidden') }));
-  check(!ch2.open, 'then the computer picks a die as usual', ch2);
-  await page.waitForTimeout(1500);   // (the push and armour roll that follow)
-  await page.evaluate(() => { AI.set(1, false); ['modal-choice', 'modal-dice', 'modal-roll', 'modal-team-reroll'].forEach(id => document.getElementById(id).classList.add('hidden')); });
 
   // ---- team colours on the dice
   const cols = await page.evaluate(() => {
@@ -263,6 +251,66 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(gs.open && gs.rows === 12 && gs.fits, 'in-match Settings: the ⚙ button opens a sheet with the 12 settings that can change mid-match, fitting a phone', gs);
   check(gs2.dice !== gs.dice && gs2.stored === (gs2.dice === 'On' ? '1' : '0'), 'a switch in the sheet changes the setting', [gs, gs2]);
   check(!gs3.open && gs3.back, "Done closes it and the rows go back to the title screen's Settings", gs3);
+
+  // ---- your block when the computer chooses the die (its player is stronger), each in a fresh match (a block left waiting for
+  // your push choice would get in the way of the next): your tap rolls; your team re-roll and Pro are still yours to use, the
+  // computer waiting (Keep dice) until you use them or keep the dice; then it picks
+  for (const step of ['tap', 'rr', 'pro']) {
+    const fresh = await openGame(browser, { device: 'Pixel 7' });
+    const page = fresh.page;
+    await page.evaluate(() => { localStorage.setItem('bb-replays', '0'); localStorage.setItem('bb-dice-dur', '600'); localStorage.setItem('bb-dice-anim-block', '1'); AI.set(0, true); AI.set(1, true); window.launchMatch('human', 'orc', { replaceOk: true }); });
+    for (let i = 0; i < 400; i++) {
+      await page.waitForTimeout(250);
+      const ok = await page.evaluate(() => { try { CLOCK.set(16); } catch (e) {} const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) b.click();
+        return state.turn[0] >= 1 && state.turn[1] >= 1 && [MODES.IDLE, MODES.SELECT].includes(state.mode); });
+      if (ok) break;
+    }
+    await page.evaluate(sceneSrc);
+    await page.waitForTimeout(400);
+    if (step === 'tap') {
+  // ---- your block where the computer chooses (it is stronger): your tap still rolls; then it picks
+  await page.evaluate(() => { const [a, d] = __scene(); getPlayerById(d).st = 6; AI.set(1, true); startBlock(a, d); });
+  await page.waitForTimeout(200);
+  const ch0 = await page.evaluate(() => ({ chooser: state.combat.chooser, wait: !!state.combat.diceWait }));
+  await page.tap('#dice-container .dfx-tray');
+  await page.waitForTimeout(150);
+  const ch1 = await page.evaluate(() => ({ dice: state.combat.dice && state.combat.dice.length, wait: !!state.combat.diceWait }));
+  check(ch0.chooser === 1 && ch0.wait && ch1.dice === 2 && !ch1.wait, "your block with the computer choosing: tapping the dice rolls them", [ch0, ch1]);
+  for (let i = 0; i < 40 && await page.evaluate(() => !document.getElementById('modal-dice').classList.contains('hidden')); i++) await page.waitForTimeout(250);
+  const ch2 = await page.evaluate(() => ({ open: !document.getElementById('modal-dice').classList.contains('hidden') }));
+  check(!ch2.open, 'then the computer picks a die as usual', ch2);
+
+    } else if (step === 'rr') {
+  // ---- the same, with a team re-roll: the computer waits (Keep dice shown) while you may re-roll; your re-roll works; then it picks
+  await page.evaluate(() => { const [a, d] = __scene(); getPlayerById(d).st = 6; state.rr[0] = 1; AI.set(1, true); startBlock(a, d); });
+  await page.waitForTimeout(200); await page.tap('#dice-container .dfx-tray');
+  await page.waitForTimeout(3000);
+  const rw = await page.evaluate(() => { const v = id => { const e = document.getElementById(id); return !!e && !e.classList.contains('hidden') && getComputedStyle(e).visibility !== 'hidden'; };
+    return { open: v('modal-dice'), trr: v('btn-combat-trr'), keep: v('btn-combat-keep'), picked: !!document.querySelector('#dice-container .ai-pick'), dice: state.combat.dice.slice() }; });
+  check(rw.open && rw.trr && rw.keep && !rw.picked, 'computer choosing: after the dice land you can still use your team re-roll - the computer waits, with Keep dice', rw);
+  await page.tap('#btn-combat-trr'); await page.waitForTimeout(150);
+  const rw2 = await page.evaluate(() => ({ rr: state.rr[0], anim: !!state.combat.diceAnim }));
+  check(rw2.rr === 0 && rw2.anim, 'your re-roll is spent and the dice jump again', rw2);
+  for (let i = 0; i < 40 && await page.evaluate(() => !document.getElementById('modal-dice').classList.contains('hidden')); i++) await page.waitForTimeout(250);
+  check(await page.evaluate(() => document.getElementById('modal-dice').classList.contains('hidden')), 'then the computer picks from the re-rolled dice');
+  await page.waitForTimeout(1500);
+    } else {
+  // Pro: its button shows for you once the dice land, and the computer waits for you
+  const pb = await page.evaluate(async () => {
+    const [a, d] = __scene(); const A = getPlayerById(a); getPlayerById(d).st = 6; A.skills = ['Pro']; A.usedSkills = []; state.rr[0] = 0; state.selectedId = a; AI.set(1, true);
+    startBlock(a, d); document.querySelector('#dice-container .dfx-tray').click();
+    await new Promise(r => setTimeout(r, 2500));
+    const v = id => { const e = document.getElementById(id); return !!e && !e.classList.contains('hidden') && getComputedStyle(e).visibility !== 'hidden'; };
+    const r = { pro: v('btn-combat-pro'), keep: v('btn-combat-keep'), picked: !!document.querySelector('#dice-container .ai-pick'), dice: state.combat.dice.slice() };
+    document.getElementById('btn-combat-keep').click(); return r;
+  });
+  check(pb.pro && pb.keep && !pb.picked, 'computer choosing: your Pro button is there after the dice land, and the computer waits', pb);
+  for (let i = 0; i < 40 && await page.evaluate(() => !document.getElementById('modal-dice').classList.contains('hidden')); i++) await page.waitForTimeout(250);
+
+    }
+    check(!fresh.errors.length, `no page errors (computer choosing: ${step})`, fresh.errors.slice(0, 3));
+    await fresh.ctx.close();
+  }
   // ---- Team Builder: the dice colours
   const tb = await openGame(browser, { device: 'Pixel 7' });
   const P = tb.page;
