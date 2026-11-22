@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.50 (22 Nov 2026)
+- Experimental computer coach (brain x), its ball carrier: where he stops, and the sure moves of team-mates guarding him, are now judged
+  by the chance he's knocked over (or pushed off the pitch, or stripped) in the opponents' next turn - each opponent's best route to a
+  square next to him (dodges and Rushes in the odds), the dice he'd get there (his helpers next to the carrier, and those who could step in
+  first, against the carrier's own helpers next to that square), the skills on both sides, one Blitz and then plain blocks. Before, it
+  only counted who could reach him, so a 2-dice Blitz and one on the dice against counted the same. Weighted twice as much as before
+  against ground gained. Against drefsante (1,000 games) it was level with v5.49 (.390 v .396), so it went in as not worse; in a 120-game
+  study our carrier kept the ball through their turn 70% of the time (v5.49 68%) and our receiving drives scored 32% (24%).
+
 ## v5.49 (22 Nov 2026)
 - Experimental computer coach (brain x), kick-off: it works out, for every square of the opponents' half, the chance the kick goes out
   for a touchback (the ball deviates one to six squares in any of eight directions, then bounces once) and how near their players it

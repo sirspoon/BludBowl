@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.50 (22 Nov 2026)
+- The experimental computer coach guards its ball carrier by the hit you could really make on him (your dice once your helpers step in, against its own), not just by how many of your players can reach him.
+
 ## v5.49 (22 Nov 2026)
 - The experimental computer coach kicks off to the middle of your half, so the ball rarely goes out for a touchback, and when receiving it lines a Blitzer up against the weakest player on your line.
 

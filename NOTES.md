@@ -257,6 +257,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   dice come from our line's assist (we already blocked it on 2 dice on our first turn 156/170, mostly a Blitzer brought in by the
   Blitz, 76% down); now a Blitzer stands by it 149 times, 81% down, our Blitz free. Our receiving drives unchanged (25% v 24%).
   `k_seq` v .396: .398 over 1,000 (`k_kk1`; NO GAIN, then NOT WORSE) - released, as asked. 12 all-races jsdom matches: no page errors.
+  v5.50 (the owner: our own take on dodging its carrier Blitz, not its rules): `sp1` 1 + `spW` 2 (`spRisk`, used through `bpRisk` by
+  bpEnd, bpDodge, bpBlk, bpFindHits, bpMovePlan in place of bpLoss(bpCount)): the chance our carrier goes down next turn - each of its
+  players' best route to a free square next to him (dodges/Rushes in the odds), his dice there (free helpers next to the carrier + its
+  free players able to step in with sure moves, v our helpers by that square), skills, one Blitz + plain blocks (spL 0.6), spBase 0.05.
+  Why: by the dice once its helpers step in (carrier_dice.py, study_kk2) our carrier in our half is lost 62% at 2 dice, 42% 1 die, 17%
+  dice against, 10% no hit - and only 10% of turns were dice against. Studies on study_kk2's seeds (120 games): spW 1 (study_sp1)
+  dice against 10% -> 26% but no hit 47% -> 36%, ball kept through its turn 67% (v 68%), .362; spW 2 (study_sp2) 70%, our receiving
+  drives score 32% (24%), .438. `k_seq` (`k_sp2`): NO GAIN after 375 (.381), NOT WORSE after 1,000 (.390 v .396) - released, as asked.
+  The model rates dice-against squares close to no-hit ones; in the games they cost 19% v 10% - a calibration to try (spBase by tier).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,

@@ -1243,7 +1243,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.49</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.50</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27296,7 +27296,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1 },   // (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2 },   // (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -28561,6 +28561,113 @@ ol.ci-steps li::marker { content: none; }
                     return n;
                 } finally { c.x = ox; c.y = oy; }
             }
+            // ---- (brain x: sp1) the hit they could really make on our carrier next turn ----
+            // bpCount counts who could get at him; it can't tell a 2-dice Blitz from one on the dice against him. In the study v drefsante
+            // (study_kk2.jsonl, carrier_dice.py: the best dice once their free players have stepped in to assist) our carrier in our half is lost
+            // 62% of the time when that's 2 dice, 42% on 1 die, 17% with the dice against them and 10% with no hit at all - and only 10% of our
+            // turns leave him where it's dice against. So spRisk(x, y) is the chance he's knocked over (or pushed off the pitch, or stripped) in
+            // their next turn: each of theirs, his best route to a free square next to him (dodges out of our tackle zones and Rushes in the odds,
+            // a prone one standing up first); there, his dice - his assists (theirs next to the carrier and free, and their free players who could
+            // step in first with sure moves) against ours (next to that square, free of everyone else of theirs); the knock-down chance on those
+            // dice with both players' skills. One Blitz (the best of those), then plain blocks by any already standing next to him (each spL).
+            function spRisk(me, c, x, y) {
+                const W = CFG.cols, key = (a, b) => b * W + a, ox = c.x, oy = c.y;
+                c.x = x; c.y = y;
+                try {
+                    const occ = new Map(), tzN = new Int8Array(W * CFG.rows);
+                    state.players.forEach(q => { if (onPitch(q)) occ.set(key(q.x, q.y), q); });
+                    state.players.forEach(q => {
+                        if (q.team !== me || !onPitch(q) || q.isDown || q.isStunned || q.isDistracted) return;
+                        for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if ((dx || dy) && inPitch(q.x + dx, q.y + dy)) tzN[key(q.x + dx, q.y + dy)]++;
+                    });
+                    const adj = [];
+                    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if ((dx || dy) && inPitch(x + dx, y + dy)) adj.push({ x: x + dx, y: y + dy, k: key(x + dx, y + dy), o: occ.get(key(x + dx, y + dy)) || null });
+                    const freeK = new Set(adj.filter(a => !a.o).map(a => a.k));
+                    const opp = state.players.filter(q => q.team !== me && onPitch(q) && !q.isStunned && !q.isDistracted);
+                    // their tackle zones on a square (for our assists: one of ours marked by anyone but the attacker can't help)
+                    const oppTz = (px, py, skip) => { let n = 0; opp.forEach(q => { if (q.id !== skip && !q.isDown && Math.max(Math.abs(q.x - px), Math.abs(q.y - py)) === 1) n++; }); return n; };
+                    const reach = new Map();
+                    opp.forEach(q => {
+                        const ma = (q.ma || 0) - (q.isDown ? 3 : 0);
+                        if (ma < 0 || Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) - 1 > ma + 2) return;
+                        const ag = q.ag || 3, dodgeSk = hasSk(q, 'Dodge');
+                        const dp = n => { const t = Math.min(6, Math.max(2, ag + n)); const p = (7 - t) / 6; return dodgeSk ? p + (1 - p) * p : p; };
+                        const s0 = key(q.x, q.y), seen = new Map([[s0, 1]]), best = new Map(), sure = new Set();
+                        let cur = new Map([[s0, 1]]);
+                        for (let step = 1; step <= ma + 2 && cur.size; step++) {
+                            const nxt = new Map();
+                            cur.forEach((p, sq) => {
+                                const sx = sq % W, sy = (sq - sx) / W, leave = tzN[sq] > 0;
+                                for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+                                    if (!dx && !dy) continue;
+                                    const nx = sx + dx, ny = sy + dy; if (!inPitch(nx, ny)) continue;
+                                    const k = key(nx, ny); if (occ.has(k)) continue;
+                                    const np = leave ? p * dp(tzN[k]) : p;
+                                    if (np > 0.03 && np > (nxt.get(k) || 0)) nxt.set(k, np);
+                                }
+                            });
+                            cur = new Map();
+                            nxt.forEach((p, k) => {
+                                if (freeK.has(k)) {
+                                    const v = p * Math.pow(5 / 6, Math.max(0, step - ma));
+                                    if (v > (best.get(k) || 0)) best.set(k, v);
+                                    if (step <= ma && p >= 1 && !q.isDown) sure.add(k);
+                                    return;   // (he stops there)
+                                }
+                                if (p > (seen.get(k) || 0) + 1e-9) { seen.set(k, p); cur.set(k, p); }
+                            });
+                        }
+                        if (best.size) reach.set(q.id, { best, sure });
+                    });
+                    // their players next to him now, standing: assists already there (if free of all ours but the carrier) and plain blocks
+                    const standAdj = opp.filter(q => !q.isDown && Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) === 1);
+                    const freeAssist = q => hasSk(q, 'Guard') || tzN[key(q.x, q.y)] <= 1;
+                    // squares their helpers could step into to assist (next to him, in no tackle zone of ours but his)
+                    const helpSq = adj.filter(a => !a.o && tzN[a.k] <= 1).map(a => a.k);
+                    const stepOn = AIX.p(me, 'spStep', 1);
+                    const kdP = (q, ax, ay) => {
+                        let A = 0, D = 0;
+                        standAdj.forEach(h => { if (h.id !== q.id && freeAssist(h)) A++; });
+                        if (stepOn) {
+                            const sq = helpSq.filter(k => k !== key(ax, ay));
+                            let helpers = 0;
+                            reach.forEach((r, id) => { if (id !== q.id && sq.some(k => r.sure.has(k))) helpers++; });
+                            A += Math.min(helpers, sq.length);
+                        }
+                        state.players.forEach(p => {
+                            if (p.team !== me || p.id === c.id || !onPitch(p) || p.isDown || p.isStunned || p.isDistracted) return;
+                            if (Math.max(Math.abs(p.x - ax), Math.abs(p.y - ay)) !== 1) return;
+                            if (hasSk(p, 'Guard') || oppTz(p.x, p.y, q.id) === 0) D++;
+                        });
+                        const sa = q.st + (hasSk(q, 'Horns') ? 1 : 0) + A, sd = c.st + D;
+                        const n = sa > sd ? (sa > 2 * sd ? 3 : 2) : sa < sd ? (2 * sa < sd ? 3 : 2) : 1, mine = sa >= sd;
+                        const dodged = hasSk(c, 'Dodge') && !hasSk(q, 'Tackle');
+                        const ddx = Math.sign(x - ax), ddy = Math.sign(y - ay);
+                        const psq = ddx && ddy ? [[x + ddx, y + ddy], [x + ddx, y], [x, y + ddy]] : ddx ? [[x + ddx, y], [x + ddx, y - 1], [x + ddx, y + 1]] : [[x, y + ddy], [x - 1, y + ddy], [x + 1, y + ddy]];
+                        const pushLoses = !hasSk(c, 'Stand Firm') && ((hasSk(q, 'Strip Ball') && !hasSk(c, 'Sure Hands')) || psq.some(([px, py]) => !inPitch(px, py)));
+                        // faces that knock him over (or lose the ball): Pow, Stumble (not if he dodges it), Both Down (not with Block), pushes if they lose it
+                        const k = (1 + (dodged ? 0 : 1) + (hasSk(c, 'Block') ? 0 : 1) + (pushLoses ? 2 + (dodged ? 1 : 0) : 0)) / 6;
+                        return mine ? 1 - Math.pow(1 - k, n) : Math.pow(k, n);
+                    };
+                    let blitz = 0, bq = null;
+                    reach.forEach((r, id) => {
+                        const q = opp.find(o => o.id === id);
+                        r.best.forEach((p, k) => { const ax = k % W, v = p * kdP(q, ax, (k - ax) / W); if (v > blitz) { blitz = v; bq = id; } });
+                    });
+                    const here = standAdj.map(q => ({ id: q.id, v: kdP(q, q.x, q.y) }));
+                    here.forEach(h => { if (h.v > blitz) { blitz = h.v; bq = h.id; } });
+                    const lam = AIX.p(me, 'spL', 0.6), base = AIX.p(me, 'spBase', 0.05);
+                    let keep = 1 - blitz;
+                    here.forEach(h => { if (h.id !== bq) keep *= 1 - lam * h.v; });
+                    return AIX.p(me, 'spW', 1) * (base + (1 - base) * (1 - keep));   // (spW: how much it counts against ground gained)
+                    // ON in brain x since v5.50 (sp1 1, spW 2). Study v drefsante, 120 games on v5.49's seeds: with sp1 alone (spW 1) the carrier
+                    // ended where it's dice against them 10% -> 26% of turns in our half, but came off squares nobody could reach (47% -> 36%), and
+                    // the ball was kept through their turn no more (67% v 68%); with spW 2, 70%, our receiving drives scored 32% (v 24%).
+                    // k_seq (k_sp2): NO GAIN after 375 games (.381), NOT WORSE after 1,000 (.390 v the baseline's .396) - level, in as asked for.
+                } finally { c.x = ox; c.y = oy; }
+            }
+            // the carrier's risk at (x, y): spRisk with sp1, else bpLoss of bpCount
+            const bpRisk = (me, c, x, y) => AIX.p(me, 'sp1', 0) ? spRisk(me, c, x, y) : bpLoss(bpCount(me, c, x, y));
             // bpProg: what each square of progress is worth against the carrier's safety. Brain x uses 0.1 (AIX.X, v5.38): the study v drefsante
             // (study_v537.jsonl) found our carrier 13-18 squares out gaining nothing in 51% of own turns (drefsante's 28%), so it sat in our half
             // where it gets knocked over. 1,000 games v drefsante, against 0.025: seeds 910000+ 229-261-510, 807-1348 v 210-269-521, 790-1362;
@@ -28580,7 +28687,7 @@ ol.ci-steps li::marker { content: none; }
                 if (base.x === endX(me)) return (bpMemo = { x: base.x, y: base.y, m: m0 });
                 // (tried, not kept - v5.45 NOTES: bpAlone, a cost for finishing with nobody of ours next to him and 2+ of theirs able to get at
                 // him: lone exposed runs 0.26 -> 0.16 a game, but 750 games v drefsante .374 v .409 - he held back and we scored less)
-                const prog = AIX.p(me, 'bpProg', 0.025), edgeW = AIX.p(me, 'bpEdge', 0), val = o => -bpLoss(bpCount(me, c, o.x, o.y)) + (go0 - toGo(o.x, me)) * prog - (1 - o.prob / 100) * 0.5 - (edgeW ? edgeRisk(o.x, o.y, me, c.id) * edgeW : 0);   // (bpEdge: the sideline, where a push alone loses the ball)
+                const prog = AIX.p(me, 'bpProg', 0.025), edgeW = AIX.p(me, 'bpEdge', 0), val = o => -bpRisk(me, c, o.x, o.y) + (go0 - toGo(o.x, me)) * prog - (1 - o.prob / 100) * 0.5 - (edgeW ? edgeRisk(o.x, o.y, me, c.id) * edgeW : 0);   // (bpEdge: the sideline, where a push alone loses the ball)
                 let best = base, bv = val(base) + AIX.p(me, 'bpMargin', 0.05);
                 [stay, ...ms.filter(o => o.prob >= 100 && !o.isRush && o.x !== endX(me) && toGo(o.x, me) <= go0 + AIX.p(me, 'bpGive', 4))]
                     .sort((a, b) => toGo(a.x, me) - toGo(b.x, me)).slice(0, AIX.p(me, 'bpLook', 30)).forEach(o => { if (o === base) return; const v = val(o); if (v > bv) { bv = v; best = o; } });
@@ -28595,7 +28702,7 @@ ol.ci-steps li::marker { content: none; }
                     ms.forEach(o => {
                         if (o.prob >= 100 || o.prob < AIX.p(me, 'bpDodgeMin', 40) || o.x === endX(me) || o === base) return;
                         const pe = pPlan(c, o, true) / 100;
-                        const v = -(pe * bpLoss(bpCount(me, c, o.x, o.y)) + (1 - pe) * failL) + (go0 - toGo(o.x, me)) * prog - (edgeW ? edgeRisk(o.x, o.y, me, c.id) * edgeW : 0);
+                        const v = -(pe * bpRisk(me, c, o.x, o.y) + (1 - pe) * failL) + (go0 - toGo(o.x, me)) * prog - (edgeW ? edgeRisk(o.x, o.y, me, c.id) * edgeW : 0);
                         if (v > bv) { bv = v; best = o; }
                     });
                     if (!best.stay && best.prob < 100) AIX.count(me, 'bpDodge');
@@ -28606,12 +28713,12 @@ ol.ci-steps li::marker { content: none; }
                 // ON in brain x since v5.47 (bpBlk 1): marked carrier, ball still ours (or scored) by our next turn 49% -> 56% (study, 300 games);
                 // 1,000 games v drefsante 258-250-492, 929-1321 (.383) v v5.46's 270-244-486, 930-1306 (.392) - level.
                 if (AIX.p(me, 'bpBlk', 0) && tzFor(c.x, c.y, me) > 0 && !c.isDown) {
-                    const failL = AIX.p(me, 'bpFail', 0.85), here = bpLoss(bpCount(me, c, c.x, c.y));
+                    const failL = AIX.p(me, 'bpFail', 0.85), here = bpRisk(me, c, c.x, c.y);
                     state.players.forEach(d => {
                         if (d.team === me || !onPitch(d) || d.isDown || d.isStunned || cheb(d, c) !== 1) return;
                         const e = blockEval(c, d);
                         d.isDown = true;
-                        let gone = here; try { gone = bpLoss(bpCount(me, c, c.x, c.y)); } finally { d.isDown = false; }
+                        let gone = here; try { gone = bpRisk(me, c, c.x, c.y); } finally { d.isDown = false; }
                         const v = -(e.pTurn * failL + (1 - e.pTurn) * (e.pMove * gone + (1 - e.pMove) * here));
                         if (v > bv + AIX.p(me, 'bpBlkMargin', 0.02)) { bv = v; best = { x: c.x, y: c.y, stay: true, block: d.id }; }
                     });
@@ -28619,11 +28726,11 @@ ol.ci-steps li::marker { content: none; }
                 return (bpMemo = { x: best.x, y: best.y, m: best.stay ? null : best, block: best.block || null });
             }
             function bpFindHits(me, c, act) {
-                const E = bpEnd(me, c, act), L0 = bpLoss(bpCount(me, c, E.x, E.y));
+                const E = bpEnd(me, c, act), L0 = bpRisk(me, c, E.x, E.y);
                 state.players.forEach(q => {
                     if (q.team === me || !onPitch(q) || q.isDown || q.isStunned || cheb(q, E) - 1 > (q.ma || 6) + 2) return;
                     q.isDown = true;
-                    let L = L0; try { L = bpLoss(bpCount(me, c, E.x, E.y)); } finally { q.isDown = false; }
+                    let L = L0; try { L = bpRisk(me, c, E.x, E.y); } finally { q.isDown = false; }
                     if (L0 - L > 0.01) dpHits.set(q.id, L0 - L);
                 });
             }
@@ -28631,9 +28738,10 @@ ol.ci-steps li::marker { content: none; }
                 const ck = state.half + ':' + me + ':' + state.turn[me];
                 if (bpDone.key !== ck) bpDone = { key: ck, n: 0 };
                 if (bpDone.n >= AIX.p(me, 'bpN', 0)) return null;
-                const E = end || bpEnd(me, c, act), n0 = bpCount(me, c, E.x, E.y);
-                if (n0 <= AIX.p(me, 'bpOk', 0.4)) return null;
-                const L0 = bpLoss(n0), route = E.m && E.m.path ? E.m.path : [], cands = [];
+                const E = end || bpEnd(me, c, act), sp = AIX.p(me, 'sp1', 0), n0 = sp ? 0 : bpCount(me, c, E.x, E.y);
+                const L0 = sp ? spRisk(me, c, E.x, E.y) : bpLoss(n0);
+                if (sp ? L0 <= AIX.p(me, 'spOk', 0.15) : n0 <= AIX.p(me, 'bpOk', 0.4)) return null;
+                const route = E.m && E.m.path ? E.m.path : [], cands = [];
                 act.forEach(p => {
                     if (p.id === c.id || p.isStunned || !canReposition(p, me)) return;
                     movesFor(p).forEach(m => {
@@ -28647,8 +28755,8 @@ ol.ci-steps li::marker { content: none; }
                 cands.slice(0, AIX.p(me, 'bpLook', 30) + 6).forEach(({ p, m }) => {
                     const ox = p.x, oy = p.y, od = p.isDown;
                     p.x = m.x; p.y = m.y; p.isDown = false;
-                    let n = n0; try { n = bpCount(me, c, E.x, E.y); } finally { p.x = ox; p.y = oy; p.isDown = od; }
-                    const g = L0 - bpLoss(n) - m.path.length * 0.002 - edgeRisk(m.x, m.y, me, p.id) * 0.02;
+                    let L = L0; try { L = sp ? spRisk(me, c, E.x, E.y) : bpLoss(bpCount(me, c, E.x, E.y)); } finally { p.x = ox; p.y = oy; p.isDown = od; }
+                    const g = L0 - L - m.path.length * 0.002 - edgeRisk(m.x, m.y, me, p.id) * 0.02;
                     if (!best || g > best.g) best = { p, m, g };
                 });
                 if (!best || best.g < AIX.p(me, 'bpGain', 0.03)) return null;
