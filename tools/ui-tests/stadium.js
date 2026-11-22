@@ -26,7 +26,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   });
   check(!ids.koDuring, 'a KO\'d player still fading off the pitch is not in the dugout yet');
   check(ids.carried, 'the KO\'d and the dead player are being stretchered off (the 2 s scene)');
-  await page.waitForTimeout(2600);
+  await page.waitForTimeout(3100);   // (the medics take ~2.5 s)
   const after = await page.evaluate(({ a, b }) => { finishFades(); render(); const o = STADIUM.occupants(0), o1 = STADIUM.occupants(1);
     return { ko: o.ko.map(p => p.id), cas: o.cas.map(p => p.id), res: o.res.map(p => p.id), other: [...o1.ko, ...o1.cas].map(p => p.id), boxes: STADIUM.boxes().map(x => x.id) }; }, ids);
   check(after.ko.includes(ids.a) && !after.res.includes(ids.a), "the KO'd player is in their team's Knocked Out bay", after.ko);
@@ -65,17 +65,45 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     state.camera.zoom = 2; state.camera.x = 9000; state.camera.y = -9000; render(); const a = view();
     state.camera.zoom = 0.4; state.camera.x = -9000; state.camera.y = 9000; render(); const b = view();
     resizeCanvas(); const before = { x: state.camera.x, y: state.camera.y }; render(); const moved = Math.abs(before.x - state.camera.x) + Math.abs(before.y - state.camera.y);
-    return { inX: a.x0 >= -7 * ts && a.x1 <= W + 7 * ts, inY: a.y0 >= -9 * ts && a.y1 <= H + 9 * ts, pitchSeen: b.x0 <= 0 && b.x1 >= W && b.y0 <= 0 && b.y1 >= H, moved };
+    return { inX: a.x0 >= -10.5 * ts && a.x1 <= W + 10.5 * ts, inY: a.y0 >= -9 * ts && a.y1 <= H + 9 * ts, pitchSeen: b.x0 <= 0 && b.x1 >= W && b.y0 <= 0 && b.y1 >= H, moved };
   });
   check(cam.inX && cam.inY, 'zoomed in, the view can\'t be dragged far from the pitch', cam);
   check(cam.pitchSeen, 'zoomed right out, the pitch stays on screen', cam);
   check(cam.moved < 1, 'the starting view is left alone', cam);
+  // the secret option "Reposition opposition": the button in the person's turn, tap a computer player, tap an empty square; the ball goes with them
+  const rp = await page.evaluate(() => {
+    localStorage.setItem('bb-secret', JSON.stringify({ repo: true })); return true; });
+  // (the option is read when the page loads: reload, start a match, then hand team 0 to a person in an exhibition)
+  await page.reload(); await page.waitForTimeout(1200);
+  await page.evaluate(() => { document.getElementById('splash').style.display = 'none'; localStorage.setItem('bb-replays', '0'); AI.set(0, true); AI.set(1, true); window.launchMatch('human', 'orc', { replaceOk: true, exhibition: true }); });
+  for (let i = 0; i < 200; i++) { await page.waitForTimeout(200); if (await page.evaluate(() => { try { CLOCK.set(16); } catch (e) {} const b = document.getElementById('btn-lineup-confirm'); if (b && b.offsetParent) b.click(); return state.turn[0] >= 1 && state.mode === MODES.IDLE; })) break; }
+  const pick = await page.evaluate(() => {
+    CLOCK.set(1); AI.setPaused(true); AI.set(0, false); state.cheatSide = 0; state.activeTeam = 0; state.mode = MODES.IDLE;
+    ['modal-choice', 'modal-dice', 'modal-roll', 'modal-team-reroll', 'modal-announce', 'turn-banner'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    const foe = state.players.find(p => p.team === 1 && p.x >= 0 && p.x < CFG.cols && !p.isFading && !p.isCasualty);
+    state.ball.carrierId = foe.id; state.ball.x = foe.x; state.ball.y = foe.y;   // (give them the ball, to see it go with them)
+    let free = null; for (let x = 0; x < CFG.cols && !free; x++) if (!getPlayer(x, 0)) free = { x, y: 0 };
+    const ts = CFG.tileSize, z = 0.8; state.camera.zoom = z; state.camera.x = 20; state.camera.y = 140; camUserAt = performance.now() + 1e7; render();
+    const at = q => ({ x: state.camera.x + (q.x + 0.5) * ts * z, y: state.camera.y + (q.y + 0.5) * ts * z });
+    return { id: foe.id, a: at(foe), b: at(free), free };
+  });
+  await page.waitForTimeout(600);
+  const btn = await page.evaluate(() => { const b = document.getElementById('secret-repo'); return b && b.style.display !== 'none'; });
+  check(btn, 'Reposition opposition: the button shows in the person\'s turn');
+  await page.waitForTimeout(2500);   // (let any dice result clear: it takes the first tap)
+  await page.click('#secret-repo'); await page.waitForTimeout(100);
+  await page.mouse.click(pick.a.x, pick.a.y); await page.waitForTimeout(150);
+  await page.mouse.click(pick.b.x, pick.b.y); await page.waitForTimeout(150);
+  const moved = await page.evaluate(([id, f]) => { const p = getPlayerById(id); return { x: p.x, y: p.y, ball: state.ball.carrierId === id && state.ball.x === f.x && state.ball.y === f.y }; }, [pick.id, pick.free]);
+  check(moved.x === pick.free.x && moved.y === pick.free.y && moved.ball, 'Reposition opposition: the computer player (and the ball they carry) moves to the tapped square', moved);
+  await page.screenshot({ path: OUT + '/stadium-reposition.png' });
+  await page.evaluate(() => localStorage.removeItem('bb-secret'));
   // the setting
   const st = await page.evaluate(() => { localStorage.removeItem('bb-stadium'); STADIUM.set(false); const q = STADIUM.query; STADIUM.set(true); const v = localStorage.getItem('bb-stadium'); STADIUM.set(false); return { q, v, off: localStorage.getItem('bb-stadium') }; });
   check(st.v === '1' && st.off === '0', 'Settings switch saves bb-stadium', st);
   check(!errors.length, 'no page errors', errors.slice(0, 3));
-  // the High Elf and Orc pitches have their own stadiums (?stadium=elven / =shanty): on, drawn without errors, with their own line colour
-  for (const [st, race] of [['elven', 'highelf'], ['shanty', 'orc']]) {
+  // the other themed pitches have their own stadiums (?stadium=elven / =shanty / =worn / =flagstone / =jungle): on, drawn without errors, with their own line colour
+  for (const [st, race] of [['elven', 'highelf'], ['shanty', 'orc'], ['worn', 'human'], ['flagstone', 'goblin'], ['jungle', 'lizardmen']]) {
     const s3 = await openGame(browser, { query: '?stadium=' + st });
     const r3 = await s3.page.evaluate(([race]) => { localStorage.setItem('bb-replays', '0'); AI.set(0, true); AI.set(1, true); window.launchMatch(race, 'human', { replaceOk: true }); return true; }, [race]);
     await s3.page.waitForTimeout(2500);

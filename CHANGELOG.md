@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.67 (22 Nov 2026)
+- Stadium & dugouts (test): the Worn, Flagstone (a goblin lair underground) and Jungle pitches get their own stadiums; the medics take their time; more room to scroll left and right. New secret option: Reposition opposition.
+
 ## v5.66 (22 Nov 2026)
 - Stadium & dugouts (test): the High Elf and Orc pitches get their own stadiums; roofs and turrets round each stadium; fans beat up a player pushed into the crowd, and the team's medics stretcher off anyone hurt.
 

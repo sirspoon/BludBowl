@@ -2,6 +2,25 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.67 (22 Nov 2026)
+- Stadium & dugouts (test, still off by default: Settings or `?stadium`), three more pitches with their own stadiums:
+  - **Worn** (muddy grass, most teams' ground, `?stadium=worn`): a rustic home ground - weathered timber terraces, hand-painted
+    plank boards, timber dugouts on packed earth with canvas awnings, a roof of mossy wooden shakes with timber lookouts, hay bales
+    and ale barrels by the corners, a mud-patched strip.
+  - **Flagstone** (goblins and snotlings, `?stadium=flagstone`): a run-down lair underground - rough black rock terraces lit by
+    torches and glowing mushrooms, cracked flagstones with dark puddles, rotten lashed-plank boards with daubed letters and the odd
+    skull, cracked stone dugouts with ragged awnings, a cave ceiling with stalactites and roots, giant spotted toadstools, squig
+    cages, and a gloomy tint over the pitch.
+  - **Jungle** (Lustria, `?stadium=jungle`): sandstone terraces and boards carved with glyph borders, mossy paving, dugouts of packed
+    earth with fallen leaves and reed mats under palm-thatch awnings, the jungle canopy closing over the top rows with stepped
+    temples and palms, Aztec-style glyph blocks (frets, spirals, sun discs, serpents, masks) around the ground and among the crowd,
+    bushes, ferns, flowers and vines among the fans, and a little mist.
+  - The medics take about 2.5 seconds to stretcher a player off (the player's fade is stretched to match; play still never waits).
+  - Zoomed in, the view can go further left and right, to the towers and temples behind the end zones.
+- New secret option, **Reposition opposition**: in your turn in an exhibition against the computer, a Reposition button lets you
+  move one of the computer's players to any empty square, taking the ball with them if they have it (handy for trying out the
+  crowd scene: put one on the touchline and push them off).
+
 ## v5.66 (22 Nov 2026)
 - Stadium & dugouts (test, still off by default: Settings or `?stadium`), the owner's second round:
   - Each pitch's own stadium, after the block and pass close-ups' backdrops. **High Elf** (`?stadium=elven`): pale marble

@@ -283,6 +283,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.67 (job session, 22 Nov): Stadium & dugouts, third round (made locally, pushed as one version). `TH` gains worn, flagstone
+  (reworked as an underground goblin lair: `caveExtras`, `roofCave`, `torch`, `glowShrooms`, `toadstool`, `pitchTint`) and jungle
+  (`jungleExtras` with `glyphBlock`, `bush`, `fern`, `palm`, `temple`; `roofCanopy`); worn: `wornExtras`, `roofShakes`, `woodTower`.
+  New theme fields: terrace `rock` / `blocks`, apron `paving` / `cracks` / `moss`, `blade: null` to skip grass, dug `floorTiles` /
+  `cracked` / `leaves` / `mat`, awnings 'canvas' | 'ragged' | 'thatch'. `TH_KEYS` lists the themed pitches for `?stadium=<pitch>`.
+  Medics: `MEDIC` 2500 ms (+`CROWD` 450 before them), `a.dur` = the player's fade. Camera x margin END+8. Secret option `repo`
+  (Reposition opposition): `CHEAT.repoClick` from the canvas click, button `#secret-repo` repainted every 400 ms.
+  Themed so far: blades, worn, flagstone, jungle, elven, shanty. Next in the list: graveyard, brimstone, woodland, warpstone...
 - v5.66 (job session, 22 Nov): Stadium & dugouts, second round (again made locally and pushed as one version). Theme table `TH`
   (blades / elven / shanty; `theme()` fills gaps from blades): terrace/step/wash, apron/blade/stripe/mud, line, ads/board/wall,
   `dug` materials (awning 'stripes' | 'silk' | 'iron'), `extras` (`elvenExtras`, `orcExtras`), `roof` (`roofSlate`, `roofSilk`,

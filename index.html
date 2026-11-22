@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.66</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.67</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1347,7 +1347,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Kick-off replays<small>a close-up of each kick-off too, once the ball has come down (with Replays on)</small></span><button type="button" class="st-tog" id="st-replay-kick"></button></div>
             <div class="st-row"><span>HD sprites (test)<small>High Elves only: 1.5x the pixels (the originals, smoothed) or 2x (redrawn); other teams unchanged</small></span><button type="button" class="st-tog" id="st-hd"></button></div>
-            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. On the grass, High Elf and Orc pitches for now (turning it on on another pitch sets Pitch to Grass; leagues and tournaments play at the home ground). Also ?stadium in the address (?stadium=elven, ?stadium=shanty)</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
+            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. On the grass, worn grass, flagstone, jungle, High Elf and Orc pitches for now (turning it on on another pitch sets Pitch to Grass; leagues and tournaments play at the home ground). Also ?stadium in the address (e.g. ?stadium=elven, =shanty, =worn, =flagstone, =jungle)</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress, your saved replays (My matches) and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
@@ -10185,7 +10185,8 @@ ol.ci-steps li::marker { content: none; }
         // spend on Star Players and inducements, kicking off first, and setting up the computer's team as well as their own.
         const CHEAT = (function () {
             const LS = 'bb-secret', KEYS = [['rr', '99 team re-rolls'], ['gold', '9,999,999k to spend on Star Players and inducements'], ['kick', 'Kick off first'], ['place', "Set up the computer's players too"],
-                ['socks', "Fancy Socks: Morg 'n' Thorg wears his finest blue and yellow socks, and gains Hypnotic Gaze"], ['mum', 'Your Mum: a Star Player for any team, 30k (you always have the gold for her)']];
+                ['socks', "Fancy Socks: Morg 'n' Thorg wears his finest blue and yellow socks, and gains Hypnotic Gaze"], ['mum', 'Your Mum: a Star Player for any team, 30k (you always have the gold for her)'],
+                ['repo', "Reposition opposition: in your turn, move one of the computer's players (and the ball, if they have it) to any empty square"]];
             let o = {};
             try { o = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) {}
             const save = () => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch (e) {} };
@@ -10226,7 +10227,42 @@ ol.ci-steps li::marker { content: none; }
                 paintTag();
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else hook();
-            return { on, placesFor, humanSide, opt: k => !!o[k] };
+            // ---- Reposition opposition: a button in the person's turn; tap it, tap one of the computer's players, tap an empty square ----
+            let repo = null, repoBtn = null;   // repo: null, { step: 'pick' } or { step: 'place', id }
+            const repoAllowed = () => !!o.repo && state.cheatSide != null && !CLOCK.sim && state.activeTeam === state.cheatSide && !AI.isAI(state.activeTeam) && !state.isGameOver
+                && state.mode === MODES.IDLE && (typeof FREP === 'undefined' || !FREP.on || !FREP.on());
+            function repoPaint() {
+                if (!repoBtn) {
+                    repoBtn = document.createElement('button'); repoBtn.type = 'button'; repoBtn.id = 'secret-repo';
+                    repoBtn.style.cssText = 'position:fixed;left:12px;z-index:40;border-radius:8px;border:2px solid #fbbf24;background:#0f172a;color:#fcd34d;font-weight:800;font-size:12px;padding:6px 10px;box-shadow:0 0 14px rgba(251,191,36,.35);cursor:pointer;display:none';
+                    repoBtn.addEventListener('click', e => { e.stopPropagation(); repo = repo ? null : { step: 'pick' }; repoPaint(); try { sfx('menuClick'); } catch (er) {} });
+                    document.body.appendChild(repoBtn);
+                }
+                const ok = repoAllowed(); if (!ok) repo = null;
+                repoBtn.style.display = ok ? '' : 'none';
+                const tb = $('top-bar-panel'); repoBtn.style.top = Math.round((tb ? tb.getBoundingClientRect().bottom : 60) + 8) + 'px';
+                repoBtn.textContent = !repo ? '⇄ Reposition' : repo.step === 'pick' ? "Tap a computer player (tap here to cancel)" : 'Now tap an empty square (tap here to cancel)';
+                repoBtn.style.background = repo ? '#78350f' : '#0f172a';
+            }
+            setInterval(() => { try { if (o.repo || repoBtn) repoPaint(); } catch (e) {} }, 400);
+            // a tap on the pitch while repositioning: true if it was used
+            function repoClick(x, y) {
+                if (!repo || !repoAllowed()) { repo = null; return false; }
+                const inP = x >= 0 && x < CFG.cols && y >= 0 && y < CFG.rows;
+                if (repo.step === 'pick') {
+                    const p = inP && getPlayer(x, y);
+                    if (p && p.team === 1 - state.cheatSide) { repo = { step: 'place', id: p.id }; updateUI(p); document.getElementById('action-toolbar').classList.add('hidden'); }
+                    repoPaint(); return true;
+                }
+                const p = getPlayerById(repo.id);
+                if (!p || !inP || getPlayer(x, y)) { repoPaint(); return true; }   // (only an empty square on the pitch)
+                const had = state.ball.carrierId === p.id;
+                p.x = x; p.y = y; p.spawnX = x; p.spawnY = y;
+                if (had) { state.ball.x = x; state.ball.y = y; }
+                log(`  [Secret] ${ROSTERS[p.team].name} ${p.type} #${pNo(p)} moved to [${x}, ${y}]${had ? ', ball and all' : ''}.`, 'text-amber-300');
+                repo = null; repoPaint(); try { updateTopBar(); } catch (e) {} render(); return true;
+            }
+            return { on, placesFor, humanSide, opt: k => !!o[k], repoClick };
         })();
 
         // ---------- Saved formations: five slots for your own kick-off set-ups ----------
@@ -22122,10 +22158,10 @@ ol.ci-steps li::marker { content: none; }
         // to offscreen canvases (repainted only when the teams, their colours or the pitch size change); per frame only the players
         // in the dugouts are drawn. Never drawn in ?simtest (render() skips drawFrame there).
         const STADIUM = (() => {
-            const Q = /[?&]stadium(?:[=&]|$)/.test(location.search);
+            const Q = /[?&]stadium(?:[=&]|$)/.test(location.search), TH_KEYS = ['blades', 'elven', 'shanty', 'worn', 'flagstone', 'jungle'];   // (the pitches with their own stadium so far)
             let pref = false; try { pref = localStorage.getItem('bb-stadium') === '1'; } catch (e) {}
             {   // (?stadium: the grass pitch for this visit, without changing the saved Pitch setting; ?stadium=elven / =shanty: that pitch)
-                const m = location.search.match(/[?&]stadium=(\w+)/), want = m && ['blades', 'elven', 'shanty'].includes(m[1]) ? m[1] : 'blades';
+                const m = location.search.match(/[?&]stadium=(\w+)/), want = m && TH_KEYS.includes(m[1]) ? m[1] : 'blades';
                 if (Q) { pitchPref = want; PITCH.style = want; }
             }
             const T = () => CFG.tileSize;
@@ -22189,6 +22225,61 @@ ol.ci-steps li::marker { content: none; }
                     dug: { shell: '#4a3220', floor: ['#4d3d29', '#433523'], speck: ['rgba(20,12,4,0.25)', 'rgba(140,110,70,0.12)'], planksShell: true, bench: '#6b4a2a', divider: '#5a3c22', rail: '#6c3a1e', railIron: true,
                         plaque: '#2e2216', plaqueText: '#efe6d0', plaqueEdge: 'rgba(0,0,0,0)', font: 'Impact, Teko, sans-serif', awning: 'iron', bannerEdge: '#3b2a1a' },
                     extras: orcExtras, roof: roofIron, outside: '#120d08'
+                },
+                // Worn (muddy grass, most teams' ground): a rustic home ground - weathered timber terraces, hand-painted plank boards,
+                // canvas awnings, a roof of wooden shakes with timber lookouts, hay bales and ale barrels
+                worn: {
+                    terrace: '#4a3a2a', planks: true, step: 'rgba(0,0,0,0.25)', wash: 'rgba(14,10,6,0.32)',
+                    apron: ['#3f6a2c', '#3a6229'], stripe: null, mud: true, line: 'rgba(240,236,220,0.82)',
+                    ads: ['BLUDBOWL', 'THE BLOODY BOOT', 'HOGSHEAD ALE', 'MUDDY MEAT PIES', 'NUFFLE PROVIDES', 'STOUT & STITCHES', 'THE TWO SPIKES'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#5f4024'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(20,10,4,0.35)'; const vert = h > w; for (let k = 0; k < (vert ? h : w); k += 11) vert ? g.fillRect(x, y + k, w, 1.5) : g.fillRect(x + k, y, 1.5, h); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {
+                        g.fillStyle = ['#7a5530', '#6b4a2a', '#84603a'][(r() * 3) | 0]; g.fillRect(x + 1, y + 1, w - 2, h - 2);
+                        g.fillStyle = 'rgba(30,16,6,0.3)'; const L = vert ? h : w, S = vert ? w : h; for (let k = S / 3; k < S; k += S / 3) vert ? g.fillRect(x + k, y, 1, h) : g.fillRect(x, y + k, w, 1);   // planks
+                        g.fillStyle = kk ? kk.fill : '#f3e6c8'; g.globalAlpha = 0.88; g.font = `bold ${Math.round(Math.min(S, ts) * 0.62)}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.86); g.restore(); g.globalAlpha = 1;
+                    },
+                    dug: { shell: '#4a3220', floor: ['#5a4630', '#4e3c28'], speck: ['rgba(20,12,4,0.22)', 'rgba(140,110,70,0.12)'], planksShell: true, bench: '#7c5a32', divider: '#5a3c22', rail: '#5f4024', railTrim: 'rgba(255,255,255,0.08)',
+                        plaque: '#3b2a1a', plaqueText: '#f3e6c8', plaqueEdge: '#8b6a3a', awning: 'canvas', bannerEdge: '#5f4024' },
+                    extras: wornExtras, roof: roofShakes, outside: '#0d0f0a'
+                },
+                // Flagstone (the goblins' and snotlings' ground): a lair underground, run down and dark - rough rock terraces lit by torches
+                // and glowing fungus, cracked slabs with puddles, rotten plank boards, a cave ceiling with stalactites, giant toadstools
+                flagstone: {
+                    terrace: '#2b2a27', rock: true, step: 'rgba(0,0,0,0.35)', wash: 'rgba(4,4,6,0.5)',
+                    apron: ['#43423d', '#3b3a35'], paving: true, cracks: true, blade: null, stripe: null, line: 'rgba(225,225,210,0.78)',
+                    ads: ['DA BIG SQUIG', "STABBA'S SHIVS", 'LOONEY SHROOMS', 'BLUDBOWL', 'POGO STIKS', 'FANATIK FUEL', 'NETTA NETS', 'MOOK MUSHROOMS'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#34332f'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(0,0,0,0.45)'; const vert = h > w; for (let k = 0; k < (vert ? h : w); k += 9 + (k * 7) % 11) vert ? g.fillRect(x, y + k, w, 1.5) : g.fillRect(x + k, y, 1.5, h); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // rotten planks lashed together (a board missing here and there), crude daubed letters, now and then a skull nailed on
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.save(); g.translate(x + w / 2, y + h / 2); if (vert) g.rotate(-Math.PI / 2); g.rotate((r() - 0.5) * 0.05);
+                        const n = 3; for (let i = 0; i < n; i++) { if (r() < 0.12) continue; g.fillStyle = ['#3a2a1a', '#33251a', '#45311e'][(r() * 3) | 0]; g.fillRect(-L / 2 + 1 + (r() - 0.5) * 3, -S / 2 + i * S / n, L - 2, S / n - 1); }
+                        g.fillStyle = '#6b5a3a'; g.fillRect(-L / 2 + L * 0.12, -S / 2, 2, S); g.fillRect(L / 2 - L * 0.12, -S / 2, 2, S);   // rope lashings
+                        g.fillStyle = r() < 0.5 ? '#b3261e' : kk && r() < 0.5 ? kk.fill : '#d9cfb4'; g.globalAlpha = 0.85; g.font = `bold ${Math.round(Math.min(S, ts) * 0.6)}px Impact, Teko, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.rotate((r() - 0.5) * 0.1); g.fillText(txt, 0, S * 0.04, L * 0.78); g.globalAlpha = 1;
+                        if (r() < 0.25) { g.fillStyle = '#d8cfb6'; g.beginPath(); g.arc(L * 0.42, 0, S * 0.22, 0, 7); g.fill(); g.fillStyle = '#111'; g.fillRect(L * 0.42 - S * 0.1, -S * 0.06, S * 0.07, S * 0.07); g.fillRect(L * 0.42 + S * 0.03, -S * 0.06, S * 0.07, S * 0.07); }
+                        g.restore();
+                    },
+                    dug: { shell: '#2e2d2a', floor: ['#4a4944', '#3f3e39'], speck: ['rgba(0,0,0,0.22)', 'rgba(255,255,255,0.04)'], floorTiles: true, cracked: true, bench: '#4a3420', divider: '#2b2a27', rail: '#2b2a27', railTrim: '#55534d',
+                        plaque: '#3a2a1a', plaqueText: '#d9cfb4', plaqueEdge: 'rgba(0,0,0,0)', font: 'Impact, Teko, sans-serif', awning: 'ragged', bannerEdge: '#241a10' },
+                    extras: caveExtras, roof: roofCave, outside: '#050505', pitchTint: 'rgba(12,10,8,0.22)'
+                },
+                // Jungle (Lustria): a temple ground - sandstone steps, mossy paving, carved glyph tablets, palm-thatch awnings, the jungle
+                // canopy closing over the top rows with stepped temples rising through it, palms and mist
+                jungle: {
+                    terrace: '#8a7550', blocks: true, step: 'rgba(60,40,10,0.3)', wash: 'rgba(14,20,12,0.34)',
+                    apron: ['#8f7a52', '#86714b'], paving: true, moss: true, blade: ['rgba(40,70,30,0.35)', 'rgba(110,160,80,0.22)'], stripe: null, line: 'rgba(245,240,220,0.85)',
+                    ads: ['SOTEK SAYS', 'LUSTRIA LAGER', 'COLD ONE CHOPS', 'BLUDBOWL', 'SLANN SPAWN', 'SKINK SANDALS', 'JADE IDOLS'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#a08a5c'; g.fillRect(x, y, w, h); g.fillStyle = '#2f8f7a'; const vert = h > w; vert ? g.fillRect(x + w * 0.42, y, w * 0.16, h) : g.fillRect(x, y + h * 0.42, w, h * 0.16); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {
+                        g.fillStyle = '#b39c6c'; g.fillRect(x + 1, y + 1, w - 2, h - 2);
+                        g.fillStyle = '#2f8f7a'; const L = vert ? h : w, S = vert ? w : h; for (let k = 4; k < L - 4; k += 7) { vert ? (g.fillRect(x + 2, y + k, 2, 3), g.fillRect(x + w - 4, y + k, 2, 3)) : (g.fillRect(x + k, y + 2, 3, 2), g.fillRect(x + k, y + h - 4, 3, 2)); }   // glyph borders
+                        g.fillStyle = kk ? kk.fill : '#7a2e1c'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.56)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.06)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.8); g.restore();
+                    },
+                    dug: { shell: '#8a7550', floor: ['#7d6a45', '#6f5d3b'], speck: ['rgba(40,28,10,0.2)', 'rgba(200,180,130,0.12)'], leaves: true, mat: true, bench: '#6b4a2a', divider: '#5a3c22', rail: '#8a7550', railTrim: '#2f8f7a',
+                        plaque: '#2f5f4f', plaqueText: '#f3e3b0', plaqueEdge: '#d9b44a', awning: 'thatch', bannerEdge: '#2f8f7a' },
+                    extras: jungleExtras, roof: roofCanopy, outside: '#0a120b'
                 }
             };
             const theme = () => { const b = TH.blades, t = TH[PITCH.style] || b; return Object.assign({}, b, t, { dug: Object.assign({}, b.dug, t.dug || {}) }); };
@@ -22355,6 +22446,199 @@ ol.ci-steps li::marker { content: none; }
                 [[X0 + e, Y0 + e], [X1 - e, Y0 + e], [X0 + e, Y1 - e], [X1 - e, Y1 - e], [mx - ts * 9, Y0 + e], [mx + ts * 9, Y1 - e], [X0 + e, my], [X1 - e, my]].forEach(([x, y]) => orcTower(g, x, y, ts * 1.6));
             }
 
+            // ---- Worn (muddy grass), Flagstone (the goblins' stone ground) and Jungle (Lustria): their towers, extras and roofs ----
+            function woodTower(g, cx, cy, s, k) {   // a timber lookout seen from above: four posts, a pyramid roof of shakes, a flag
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(cx - s * 0.42, cy - s * 0.38, s * 0.95, s * 0.95);
+                [[0, -1], [1, 0], [0, 1], [-1, 0]].forEach(([dx, dy], i) => { g.fillStyle = ['#7a5530', '#5f4024', '#6b4a2a', '#563a20'][i]; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + (dx - dy) * s * 0.45, cy + (dy + dx) * s * 0.45); g.lineTo(cx + (dx + dy) * s * 0.45, cy + (dy - dx) * s * 0.45); g.closePath(); g.fill(); });
+                g.strokeStyle = 'rgba(30,18,8,0.4)'; g.lineWidth = 1; for (let q = 0.15; q < 0.45; q += 0.1) g.strokeRect(cx - s * q, cy - s * q, s * q * 2, s * q * 2);
+                g.strokeStyle = '#3a2716'; g.lineWidth = s * 0.05; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - s * 1.05); g.stroke();
+                g.fillStyle = k.fill; g.fillRect(cx, cy - s * 1.05, s * 0.6, s * 0.3); g.fillStyle = k.text; g.fillRect(cx, cy - s * 0.95, s * 0.6, s * 0.08);
+            }
+            function stoneTower(g, cx, cy, s, k) {   // a square stone tower seen from above: crenellated parapet, a ragged goblin banner
+                g.fillStyle = 'rgba(0,0,0,0.38)'; g.fillRect(cx - s * 0.42, cy - s * 0.38, s * 0.95, s * 0.95);
+                g.fillStyle = '#7d7f7a'; g.fillRect(cx - s * 0.5, cy - s * 0.5, s, s); g.fillStyle = '#5c5e5a'; g.fillRect(cx - s * 0.36, cy - s * 0.36, s * 0.72, s * 0.72);
+                g.fillStyle = '#9a9c96'; for (let i = 0; i < 5; i++) { const q = -0.5 + i * 0.25; [[q, -0.5], [q, 0.38], [-0.5, q], [0.38, q]].forEach(([x, y]) => g.fillRect(cx + x * s, cy + y * s, s * 0.12, s * 0.12)); }   // merlons
+                g.strokeStyle = '#3a2716'; g.lineWidth = s * 0.05; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - s * 1.1); g.stroke();
+                g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - s * 1.1); g.lineTo(cx + s * 0.7, cy - s * 1.06); g.lineTo(cx + s * 0.55, cy - s * 0.95); g.lineTo(cx + s * 0.68, cy - s * 0.82); g.lineTo(cx + s * 0.4, cy - s * 0.86); g.lineTo(cx, cy - s * 0.78); g.fill();
+                g.fillStyle = k.text; g.beginPath(); g.arc(cx + s * 0.28, cy - s * 0.95, s * 0.07, 0, 7); g.fill();
+            }
+            function temple(g, cx, cy, s, r) {   // a stepped Lustrian pyramid seen from above, a shrine of jade and gold on top, vines on its steps
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(cx - s * 0.46, cy - s * 0.42, s * 1.04, s * 1.04);
+                for (let k = 0; k < 5; k++) { const h = s * (0.5 - k * 0.085); g.fillStyle = ['#a8905f', '#b89f6c', '#c7ae7a', '#b19867', '#9e8657'][k]; g.fillRect(cx - h, cy - h, h * 2, h * 2); g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(cx - h, cy + h - 2, h * 2, 2); }
+                g.fillStyle = '#2f8f7a'; g.fillRect(cx - s * 0.1, cy - s * 0.1, s * 0.2, s * 0.2); g.fillStyle = '#d9b44a'; g.fillRect(cx - s * 0.04, cy - s * 0.04, s * 0.08, s * 0.08);
+                g.strokeStyle = 'rgba(40,90,40,0.8)'; g.lineWidth = s * 0.03; for (let i = 0; i < 4; i++) { const a = r() * 6.3; g.beginPath(); g.moveTo(cx + Math.cos(a) * s * 0.5, cy + Math.sin(a) * s * 0.5); g.quadraticCurveTo(cx + Math.cos(a + 0.4) * s * 0.3, cy + Math.sin(a + 0.4) * s * 0.3, cx + Math.cos(a) * s * 0.2, cy + Math.sin(a) * s * 0.2); g.stroke(); }
+            }
+            function palm(g, cx, cy, s, r) {   // a palm seen from above: a star of fronds
+                g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(cx + s * 0.2, cy + s * 0.25, s * 0.85, 0, 7); g.fill();
+                for (let i = 0; i < 9; i++) { const a = i / 9 * 6.283 + r() * 0.3; g.fillStyle = i % 2 ? '#2f6a32' : '#3d7d3a'; g.beginPath(); g.ellipse(cx + Math.cos(a) * s * 0.45, cy + Math.sin(a) * s * 0.45, s * 0.5, s * 0.13, a, 0, 7); g.fill(); }
+                g.fillStyle = '#6b4a2a'; g.beginPath(); g.arc(cx, cy, s * 0.1, 0, 7); g.fill();
+            }
+            const aprons0 = (x, y) => { const ts = T(); return [0, 1].some(t => { const d = dugRect(t); return x > (d.x - 0.6) * ts && x < (d.x + d.w + 0.6) * ts && y > (d.y - 0.6) * ts && y < (d.y + d.h + 0.6) * ts; }); };   // (inside a dugout's bay)
+            const apronBox = ts => ({ ax0: (-END - WALL) * ts, ax1: (CFG.cols + END + WALL) * ts, ay0: (-SIDE - WALL) * ts, ay1: (CFG.rows + SIDE + WALL) * ts, my: CFG.rows * ts / 2 });
+            function wornExtras(g, o) {   // hay bales and ale barrels by the corners
+                const { ts, r } = o, { ax0, ax1, ay0, ay1 } = apronBox(ts);
+                const bale = (x, y) => { g.fillStyle = 'rgba(0,0,0,0.3)'; g.fillRect(x - ts * 0.5, y - ts * 0.25, ts * 1.1, ts * 0.65); g.fillStyle = '#d8b75a'; g.fillRect(x - ts * 0.55, y - ts * 0.32, ts * 1.1, ts * 0.62); g.strokeStyle = 'rgba(120,90,30,0.6)'; g.lineWidth = 1; for (let q = -0.45; q < 0.55; q += 0.12) { g.beginPath(); g.moveTo(x + q * ts, y - ts * 0.3); g.lineTo(x + q * ts + ts * 0.05, y + ts * 0.28); g.stroke(); } g.fillStyle = '#8b6a2a'; g.fillRect(x - ts * 0.2, y - ts * 0.32, ts * 0.05, ts * 0.62); g.fillRect(x + ts * 0.2, y - ts * 0.32, ts * 0.05, ts * 0.62); };
+                const barrel = (x, y) => { g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(x + ts * 0.06, y + ts * 0.08, ts * 0.3, 0, 7); g.fill(); g.fillStyle = '#7a5530'; g.beginPath(); g.arc(x, y, ts * 0.28, 0, 7); g.fill(); g.strokeStyle = '#3a2716'; g.lineWidth = ts * 0.04; [0.28, 0.18].forEach(rr => { g.beginPath(); g.arc(x, y, ts * rr, 0, 7); g.stroke(); }); };
+                [[ax0, ay0, -1, -1], [ax1, ay0, 1, -1], [ax0, ay1, -1, 1], [ax1, ay1, 1, 1]].forEach(([x, y, sx, sy]) => { bale(x + sx * ts * 1.1, y + sy * ts * 0.7); bale(x + sx * ts * 1.2, y + sy * ts * 1.4); barrel(x + sx * ts * 2.3, y + sy * ts * 0.8); barrel(x + sx * ts * 2.4, y + sy * ts * 1.5); });
+            }
+            function flagExtras(g, o) {   // braziers burning at the corners, squig cages behind the end zones
+                const { ts } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts);
+                const brazier = (x, y) => { const gl = g.createRadialGradient(x, y, 0, x, y, ts * 1.6); gl.addColorStop(0, 'rgba(255,160,60,0.45)'); gl.addColorStop(1, 'rgba(255,140,40,0)'); g.fillStyle = gl; g.fillRect(x - ts * 1.6, y - ts * 1.6, ts * 3.2, ts * 3.2);
+                    g.fillStyle = '#2d2d2b'; g.beginPath(); g.arc(x, y, ts * 0.32, 0, 7); g.fill(); g.fillStyle = '#f59e0b'; g.beginPath(); g.arc(x, y, ts * 0.22, 0, 7); g.fill(); g.fillStyle = '#fde68a'; g.beginPath(); g.arc(x - ts * 0.04, y - ts * 0.04, ts * 0.1, 0, 7); g.fill(); };
+                const cage = (x, y) => { g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(x - ts * 0.55, y - ts * 0.5, ts * 1.2, ts * 1.1); g.fillStyle = '#5a3c22'; g.fillRect(x - ts * 0.6, y - ts * 0.55, ts * 1.2, ts * 1.1);
+                    g.fillStyle = '#d23a2a'; g.beginPath(); g.arc(x, y, ts * 0.38, 0, 7); g.fill(); g.fillStyle = '#fff'; g.fillRect(x - ts * 0.2, y + ts * 0.06, ts * 0.4, ts * 0.08); g.fillStyle = '#111'; g.fillRect(x - ts * 0.16, y - ts * 0.12, ts * 0.08, ts * 0.08); g.fillRect(x + ts * 0.08, y - ts * 0.12, ts * 0.08, ts * 0.08);
+                    g.fillStyle = '#3a2716'; for (let q = -0.55; q <= 0.56; q += 0.22) g.fillRect(x + q * ts, y - ts * 0.55, ts * 0.06, ts * 1.1); };
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6]].forEach(([x, y]) => brazier(x, y));
+                [[ax0 - ts * 1.6, my - ts * 2], [ax0 - ts * 1.6, my + ts * 2], [ax1 + ts * 1.6, my - ts * 2], [ax1 + ts * 1.6, my + ts * 2]].forEach(([x, y]) => cage(x, y));
+            }
+            // a carved block with an Aztec-style glyph: a stepped fret, a spiral, a sun disc, a serpent's head or a face mask, in jade and gold
+            function glyphBlock(g, cx, cy, s, kind) {
+                const h = s / 2, u = s / 10;
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(cx - h + u, cy - h + u * 1.2, s, s);
+                g.fillStyle = '#b8a070'; g.fillRect(cx - h, cy - h, s, s); g.fillStyle = '#9c8558'; g.fillRect(cx - h + u * 0.8, cy - h + u * 0.8, s - u * 1.6, s - u * 1.6);
+                g.fillStyle = '#d9c291'; g.fillRect(cx - h, cy - h, s, u * 0.6); g.fillRect(cx - h, cy - h, u * 0.6, s);   // (lit edges)
+                const dark = '#5a4628', jade = '#2f8f7a', gold = '#d9b44a';
+                g.lineWidth = u * 0.9; g.lineCap = 'square';
+                if (kind === 0) {   // a stepped fret (greca)
+                    g.strokeStyle = jade; g.beginPath(); g.moveTo(cx - u * 3.5, cy + u * 3); g.lineTo(cx - u * 3.5, cy - u * 1); g.lineTo(cx - u * 1, cy - u * 1); g.lineTo(cx - u * 1, cy + u * 1.5); g.lineTo(cx + u * 1.5, cy + u * 1.5); g.lineTo(cx + u * 1.5, cy - u * 3.5); g.lineTo(cx + u * 3.5, cy - u * 3.5); g.stroke();
+                } else if (kind === 1) {   // a spiral
+                    g.strokeStyle = jade; g.beginPath(); for (let k = 0; k < 40; k++) { const a = k * 0.42, rr = u * 0.25 * k / 3; g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } g.stroke();
+                } else if (kind === 2) {   // a sun disc with rays
+                    g.fillStyle = gold; g.beginPath(); g.arc(cx, cy, u * 1.8, 0, 7); g.fill(); g.strokeStyle = gold; for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; g.beginPath(); g.moveTo(cx + Math.cos(a) * u * 2.4, cy + Math.sin(a) * u * 2.4); g.lineTo(cx + Math.cos(a) * u * 3.6, cy + Math.sin(a) * u * 3.6); g.stroke(); }
+                    g.fillStyle = dark; g.fillRect(cx - u * 0.9, cy - u * 0.6, u * 0.5, u * 0.5); g.fillRect(cx + u * 0.4, cy - u * 0.6, u * 0.5, u * 0.5); g.fillRect(cx - u * 0.6, cy + u * 0.5, u * 1.2, u * 0.35);
+                } else if (kind === 3) {   // a serpent's head: a coiled body, an eye, a forked tongue
+                    g.strokeStyle = jade; g.beginPath(); g.arc(cx - u * 0.5, cy + u * 0.5, u * 2.6, Math.PI * 0.2, Math.PI * 1.6); g.stroke();
+                    g.fillStyle = jade; g.fillRect(cx + u * 0.6, cy - u * 3, u * 2.6, u * 2); g.fillStyle = gold; g.fillRect(cx + u * 1.9, cy - u * 2.6, u * 0.6, u * 0.6);
+                    g.strokeStyle = '#b3261e'; g.lineWidth = u * 0.4; g.beginPath(); g.moveTo(cx + u * 3.2, cy - u * 1.6); g.lineTo(cx + u * 3.9, cy - u * 1.1); g.moveTo(cx + u * 3.2, cy - u * 1.6); g.lineTo(cx + u * 4, cy - u * 1.9); g.stroke();
+                } else {   // a face mask: square eyes, a wide mouth, ear plugs, a headdress band
+                    g.fillStyle = jade; g.fillRect(cx - u * 3, cy - u * 3.6, u * 6, u * 1.1);
+                    g.fillStyle = dark; g.fillRect(cx - u * 2.2, cy - u * 1.6, u * 1.4, u * 1.2); g.fillRect(cx + u * 0.8, cy - u * 1.6, u * 1.4, u * 1.2); g.fillRect(cx - u * 2, cy + u * 1.2, u * 4, u * 1.1);
+                    g.fillStyle = '#efe6d0'; [-1.2, -0.2, 0.8].forEach(k => g.fillRect(cx + k * u, cy + u * 1.2, u * 0.6, u * 0.5));
+                    g.fillStyle = gold; g.beginPath(); g.arc(cx - u * 3.4, cy, u * 0.6, 0, 7); g.arc(cx + u * 3.4, cy, u * 0.6, 0, 7); g.fill();
+                }
+                g.lineCap = 'butt';
+            }
+            function bush(g, cx, cy, s, r) {   // a clump of jungle leaves
+                g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.ellipse(cx + s * 0.15, cy + s * 0.2, s * 0.7, s * 0.45, 0, 0, 7); g.fill();
+                for (let i = 0; i < 9; i++) { const a = r() * 6.3, d = r() * s * 0.45; g.fillStyle = ['#2b5e2e', '#356f36', '#24502a', '#3f7d3a', '#4a8a3e'][(r() * 5) | 0]; g.beginPath(); g.ellipse(cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.7, s * (0.22 + r() * 0.18), s * (0.12 + r() * 0.1), a, 0, 7); g.fill(); }
+                if (r() < 0.3) { g.fillStyle = ['#e04a6a', '#f59e0b', '#f1f5f9'][(r() * 3) | 0]; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cx + (r() - 0.5) * s * 0.6, cy + (r() - 0.5) * s * 0.4, s * 0.06, 0, 7); g.fill(); } }   // flowers
+            }
+            function fern(g, cx, cy, s, r) {   // a fern: thin fronds fanning out
+                g.strokeStyle = '#3a7a38'; g.lineWidth = Math.max(1, s * 0.05);
+                for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + (i - 3) * 0.42 + (r() - 0.5) * 0.2, L = s * (0.6 + r() * 0.3); g.beginPath(); g.moveTo(cx, cy); g.quadraticCurveTo(cx + Math.cos(a) * L * 0.6, cy + Math.sin(a) * L * 0.4, cx + Math.cos(a) * L, cy + Math.sin(a) * L * 0.8); g.stroke(); }
+            }
+            function jungleExtras(g, o) {   // palms round the corners and behind the end zones, a temple behind each end, glyph blocks, plants among the crowd, a little mist
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts);
+                const clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);   // (not on the strip or a dugout)
+                // vegetation among the crowd: bushes, ferns, a few small palms, vines trailing over the terraces
+                for (let i = 0; i < 150; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; const k = r(); k < 0.55 ? bush(g, x, y, ts * (0.8 + r() * 0.8), r) : k < 0.85 ? fern(g, x, y, ts * (0.7 + r() * 0.5), r) : palm(g, x, y, ts * (0.9 + r() * 0.4), r); }
+                g.strokeStyle = 'rgba(46,96,44,0.85)'; g.lineWidth = ts * 0.06;
+                for (let i = 0; i < 40; i++) { let x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; g.beginPath(); g.moveTo(x, y); const pts = []; for (let k = 0; k < 6; k++) { x += (r() - 0.3) * ts * 1.4; y += (r() - 0.5) * ts * 0.9; g.lineTo(x, y); pts.push([x, y]); } g.stroke(); g.fillStyle = '#3f7d3a'; pts.forEach(([px, py]) => { g.beginPath(); g.ellipse(px, py, ts * 0.13, ts * 0.06, r() * 3, 0, 7); g.fill(); }); }
+                // glyph blocks: at the strip's corners, along the end walls, and standing among the crowd
+                let kind = 0; const gb = (x, y, s) => glyphBlock(g, x, y, s, kind++ % 5);
+                [[ax0 - ts * 0.5, ay0 - ts * 0.5], [ax1 + ts * 0.5, ay0 - ts * 0.5], [ax0 - ts * 0.5, ay1 + ts * 0.5], [ax1 + ts * 0.5, ay1 + ts * 0.5]].forEach(([x, y]) => gb(x, y, ts * 0.95));
+                [my - ts * 6.2, my + ts * 6.2].forEach(y => { gb(ax0 - ts * 0.55, y, ts * 0.8); gb(ax1 + ts * 0.55, y, ts * 0.8); });
+                for (let i = 0; i < 26; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; gb(x, y, ts * (0.9 + r() * 0.5)); }
+                temple(g, ax0 - ts * 2.6, my, ts * 3.4, r); temple(g, ax1 + ts * 2.6, my, ts * 3.4, r);
+                [[ax0 - ts * 0.9, ay0 - ts * 0.9], [ax1 + ts * 0.9, ay0 - ts * 0.9], [ax0 - ts * 0.9, ay1 + ts * 0.9], [ax1 + ts * 0.9, ay1 + ts * 0.9], [ax0 - ts * 1.2, my - ts * 4.2], [ax0 - ts * 1.2, my + ts * 4.2], [ax1 + ts * 1.2, my - ts * 4.2], [ax1 + ts * 1.2, my + ts * 4.2]].forEach(([x, y]) => palm(g, x, y, ts * 1.3, r));
+                for (let i = 0; i < 30; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (x > ax0 - ts * 2 && x < ax1 + ts * 2 && y > ay0 - ts * 6 && y < ay1 + ts * 6) continue; const gr = g.createRadialGradient(x, y, 0, x, y, ts * 3); gr.addColorStop(0, 'rgba(220,240,225,0.12)'); gr.addColorStop(1, 'rgba(220,240,225,0)'); g.fillStyle = gr; g.fillRect(x - ts * 3, y - ts * 3, ts * 6, ts * 6); }
+            }
+            // Worn: a roof of weathered wooden shakes on rafters, timber lookouts with flags
+            function roofShakes(g, o) {
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.4 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#4a3420'; g.fillRect(x, y, w, h);
+                    const row = ts * 0.3, sh = ts * 0.34;
+                    for (let a = 0, n = 0; a < (v ? w : h); a += row, n++) for (let b = (n % 2) * sh / 2 - sh; b < (v ? h : w); b += sh * (0.8 + r() * 0.4)) {
+                        g.fillStyle = ['#6b4a2a', '#5f4024', '#7a5530', '#574028', '#6e5232'][(r() * 5) | 0]; v ? g.fillRect(x + a, y + b, row - 1, sh - 1) : g.fillRect(x + b, y + a, sh - 1, row - 1);
+                    }
+                    if (r() < 1) { g.fillStyle = 'rgba(60,90,40,0.25)'; for (let i = 0; i < (v ? h : w) / ts; i++) { const px = v ? x + r() * w : x + r() * w, py = v ? y + r() * h : y + r() * h; g.beginPath(); g.arc(px, py, ts * (0.2 + r() * 0.4), 0, 7); g.fill(); } }   // moss
+                });
+                roofEdge(o, ts, (x, y, len, nx, ny) => { g.fillStyle = '#3a2716'; nx ? g.fillRect(x - (nx > 0 ? ts * 0.14 : 0), y, ts * 0.14, len) : g.fillRect(x, y - (ny > 0 ? ts * 0.14 : 0), len, ts * 0.14); });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx, Y0 + e, 0], [mx, Y1 - e, 1], [X0 + e, my, 0], [X1 - e, my, 1]].forEach(([x, y, t]) => woodTower(g, x, y, ts * 1.4, K[t]));
+            }
+            // Flagstone: the stands' top is a castle wall-walk - paved stone with a crenellated parapet - and square towers with banners
+            function roofBattlement(g, o) {
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.2 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#6e706b'; g.fillRect(x, y, w, h);
+                    const bw = ts * 0.9, bh = ts * 0.45;   // paving slabs
+                    for (let a = 0, n = 0; a < (v ? w : h); a += bh, n++) for (let b = (n % 2) * bw / 2 - bw; b < (v ? h : w); b += bw) { g.fillStyle = ['#787a75', '#6a6c67', '#82847e', '#646661'][(r() * 4) | 0]; v ? g.fillRect(x + a, y + b, bh - 1.5, bw - 1.5) : g.fillRect(x + b, y + a, bw - 1.5, bh - 1.5); }
+                });
+                roofEdge(o, ts * 0.6, (x, y, len, nx, ny) => {   // the parapet along the inner edge: merlons and gaps
+                    g.fillStyle = '#9a9c96'; const d = ts * 0.32;
+                    if (ny) { g.fillRect(x, y - (ny > 0 ? d * 0.45 : 0), len, d * 0.45); g.fillRect(x, y - (ny > 0 ? d : 0), len * 0.55, d); }
+                    else { g.fillRect(x - (nx > 0 ? d * 0.45 : 0), y, d * 0.45, len); g.fillRect(x - (nx > 0 ? d : 0), y, d, len * 0.55); }
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx - ts * 8, Y0 + e, 0], [mx + ts * 8, Y0 + e, 1], [mx - ts * 8, Y1 - e, 0], [mx + ts * 8, Y1 - e, 1], [X0 + e, my, 0], [X1 - e, my, 1]].forEach(([x, y, t]) => stoneTower(g, x, y, ts * 1.7, K[t]));
+            }
+            // Jungle: no roof - the jungle closes over the top rows: a canopy of overlapping leaves with palms, vines trailing in, and
+            // stepped temples rising through it
+            function roofCanopy(g, o) {
+                const { ts, R, r } = o; roofShadow(g, o, 1.6 * ts);
+                roofRing(g, o, (x, y, w, h) => {
+                    g.fillStyle = '#1f4a26'; g.fillRect(x, y, w, h);
+                    for (let i = 0; i < w * h / (ts * ts) * 2.2; i++) { const px = x + r() * w, py = y + r() * h, rr = ts * (0.4 + r() * 0.7); g.fillStyle = ['#24552b', '#2d6533', '#1c4423', '#357039', '#285c2e'][(r() * 5) | 0]; g.beginPath(); g.arc(px, py, rr, 0, 7); g.fill(); }
+                });
+                roofEdge(o, ts * 0.45, (x, y, len, nx, ny) => {   // a ragged edge of leaves, and vines hanging in over the crowd
+                    g.fillStyle = r() < 0.5 ? '#2d6533' : '#24552b'; const px = x + (ny ? len / 2 : 0), py = y + (nx ? len / 2 : 0); g.beginPath(); g.arc(px, py, ts * (0.3 + r() * 0.35), 0, 7); g.fill();
+                    if (r() < 0.25) { const L = ts * (0.6 + r() * 1.4); g.strokeStyle = '#2a5a2c'; g.lineWidth = ts * 0.05; g.beginPath(); g.moveTo(px, py); g.quadraticCurveTo(px + nx * L * 0.5 + (r() - 0.5) * ts * 0.5, py + ny * L * 0.5 + (r() - 0.5) * ts * 0.5, px + nx * L, py + ny * L); g.stroke(); g.fillStyle = '#3d7d3a'; g.beginPath(); g.ellipse(px + nx * L, py + ny * L, ts * 0.12, ts * 0.06, r() * 3, 0, 7); g.fill(); }
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, e = R * 0.5;
+                for (let i = 0; i < 26; i++) { const t = r(), side = (r() * 4) | 0, x = side < 2 ? X0 + t * (X1 - X0) : side === 2 ? X0 + e : X1 - e, y = side === 0 ? Y0 + e : side === 1 ? Y1 - e : Y0 + t * (Y1 - Y0); palm(g, x, y, ts * (1.0 + r() * 0.5), r); }
+                [[X0 + e * 1.2, Y0 + e * 1.2], [X1 - e * 1.2, Y0 + e * 1.2], [X0 + e * 1.2, Y1 - e * 1.2], [X1 - e * 1.2, Y1 - e * 1.2], [mx, Y0 + e], [mx, Y1 - e]].forEach(([x, y]) => temple(g, x, y, ts * 2.6, r));
+            }
+
+            // Flagstone as a goblin lair underground: torchlight, glowing fungus, a cave ceiling with stalactites, giant toadstools
+            function torch(g, x, y, s) {   // a torch on a pole, with its pool of light
+                const gl = g.createRadialGradient(x, y, 0, x, y, s * 3.2); gl.addColorStop(0, 'rgba(255,150,60,0.42)'); gl.addColorStop(0.4, 'rgba(255,120,40,0.16)'); gl.addColorStop(1, 'rgba(255,110,30,0)');
+                g.fillStyle = gl; g.fillRect(x - s * 3.2, y - s * 3.2, s * 6.4, s * 6.4);
+                g.fillStyle = '#2e2216'; g.fillRect(x - s * 0.05, y - s * 0.1, s * 0.1, s * 0.5);
+                g.fillStyle = '#f59e0b'; g.beginPath(); g.ellipse(x, y - s * 0.2, s * 0.13, s * 0.2, 0, 0, 7); g.fill(); g.fillStyle = '#fde68a'; g.beginPath(); g.ellipse(x, y - s * 0.16, s * 0.06, s * 0.1, 0, 0, 7); g.fill();
+            }
+            function glowShrooms(g, x, y, s, r) {   // a cluster of little glowing mushrooms
+                const col = r() < 0.5 ? [120, 230, 150] : [190, 140, 255];
+                const gl = g.createRadialGradient(x, y, 0, x, y, s * 1.4); gl.addColorStop(0, `rgba(${col},0.3)`); gl.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gl; g.fillRect(x - s * 1.4, y - s * 1.4, s * 2.8, s * 2.8);
+                for (let i = 0; i < 5; i++) { const px = x + (r() - 0.5) * s, py = y + (r() - 0.5) * s * 0.7, rr = s * (0.1 + r() * 0.12); g.fillStyle = `rgb(${col.map(c => Math.round(c * 0.75))})`; g.beginPath(); g.arc(px, py, rr, 0, 7); g.fill(); g.fillStyle = `rgba(255,255,255,0.5)`; g.beginPath(); g.arc(px - rr * 0.3, py - rr * 0.3, rr * 0.3, 0, 7); g.fill(); }
+            }
+            function toadstool(g, cx, cy, s, r) {   // a giant toadstool seen from above: a spotted cap, a glow beneath
+                const red = r() < 0.6;
+                g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.ellipse(cx + s * 0.2, cy + s * 0.25, s * 0.95, s * 0.85, 0, 0, 7); g.fill();
+                const cap = g.createRadialGradient(cx - s * 0.25, cy - s * 0.25, s * 0.1, cx, cy, s); cap.addColorStop(0, red ? '#d84a3a' : '#9b6ad8'); cap.addColorStop(1, red ? '#7a1f18' : '#4a2a78');
+                g.fillStyle = cap; g.beginPath(); g.arc(cx, cy, s * 0.9, 0, 7); g.fill();
+                g.fillStyle = 'rgba(245,240,220,0.9)'; for (let i = 0; i < 9; i++) { const a = r() * 6.3, d = r() * s * 0.7; g.beginPath(); g.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, s * (0.06 + r() * 0.08), 0, 7); g.fill(); }
+            }
+            function caveExtras(g, o) {   // torches round the boards, squig cages behind the end zones, glowing fungus in the stands, puddles
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts);
+                const cage = (x, y) => { g.fillStyle = 'rgba(0,0,0,0.4)'; g.fillRect(x - ts * 0.55, y - ts * 0.5, ts * 1.2, ts * 1.1); g.fillStyle = '#3a2a1a'; g.fillRect(x - ts * 0.6, y - ts * 0.55, ts * 1.2, ts * 1.1);
+                    g.fillStyle = '#c0392b'; g.beginPath(); g.arc(x, y, ts * 0.38, 0, 7); g.fill(); g.fillStyle = '#fff'; g.fillRect(x - ts * 0.2, y + ts * 0.06, ts * 0.4, ts * 0.08); g.fillStyle = '#111'; g.fillRect(x - ts * 0.16, y - ts * 0.12, ts * 0.08, ts * 0.08); g.fillRect(x + ts * 0.08, y - ts * 0.12, ts * 0.08, ts * 0.08);
+                    g.fillStyle = '#241a10'; for (let q = -0.55; q <= 0.56; q += 0.22) g.fillRect(x + q * ts, y - ts * 0.55, ts * 0.06, ts * 1.1); };
+                [[ax0 - ts * 1.6, my - ts * 2], [ax0 - ts * 1.6, my + ts * 2], [ax1 + ts * 1.6, my - ts * 2], [ax1 + ts * 1.6, my + ts * 2]].forEach(([x, y]) => cage(x, y));
+                for (let x = ax0; x <= ax1 + 1; x += (ax1 - ax0) / 6) { if (Math.abs(x - (ax0 + ax1) / 2) < ts * 7.5) continue; torch(g, x, ay0 - ts * 0.3, ts); torch(g, x, ay1 + ts * 0.3, ts); }
+                for (let y = ay0; y <= ay1 + 1; y += (ay1 - ay0) / 3) { torch(g, ax0 - ts * 0.3, y, ts); torch(g, ax1 + ts * 0.3, y, ts); }
+                for (let i = 0; i < 22; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (x > ax0 - ts && x < ax1 + ts && y > ay0 - ts && y < ay1 + ts) continue; glowShrooms(g, x, y, ts * (0.6 + r() * 0.5), r); }
+            }
+            function roofCave(g, o) {   // the cave ceiling closing over the top rows: rough rock, stalactites hanging in, roots, fungus, toadstools, torches
+                const { ts, R, r } = o; roofShadow(g, o, 2 * ts);
+                roofRing(g, o, (x, y, w, h) => {
+                    g.fillStyle = '#1c1b19'; g.fillRect(x, y, w, h);
+                    for (let i = 0; i < w * h / (ts * ts) * 2.5; i++) { const px = x + r() * w, py = y + r() * h, rr = ts * (0.3 + r() * 0.8); g.fillStyle = ['#262522', '#2e2c29', '#1f1e1b', '#34322e'][(r() * 4) | 0]; g.beginPath(); g.ellipse(px, py, rr, rr * (0.6 + r() * 0.4), r() * 3, 0, 7); g.fill(); }
+                    g.strokeStyle = 'rgba(70,52,30,0.55)'; g.lineWidth = ts * 0.05; for (let i = 0; i < w * h / (ts * ts) * 0.12; i++) { let px = x + r() * w, py = y + r() * h; g.beginPath(); g.moveTo(px, py); for (let k = 0; k < 5; k++) { px += (r() - 0.5) * ts; py += (r() - 0.5) * ts; g.lineTo(px, py); } g.stroke(); }   // roots
+                });
+                roofEdge(o, ts * 0.35, (x, y, len, nx, ny) => {   // stalactites pointing in over the crowd
+                    if (r() < 0.35) return; const L = ts * (0.25 + r() * 0.9), b = len * (0.5 + r() * 0.5), px = x + (ny ? len / 2 : 0), py = y + (nx ? len / 2 : 0);
+                    g.fillStyle = r() < 0.5 ? '#2e2c29' : '#3a3834'; g.beginPath();
+                    if (ny) { g.moveTo(px - b / 2, py); g.lineTo(px, py + ny * L); g.lineTo(px + b / 2, py); } else { g.moveTo(px, py - b / 2); g.lineTo(px + nx * L, py); g.lineTo(px, py + b / 2); }
+                    g.fill();
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                for (let i = 0; i < 28; i++) { const t = r(), side = (r() * 4) | 0, x = side < 2 ? X0 + t * (X1 - X0) : side === 2 ? X0 + e : X1 - e, y = side === 0 ? Y0 + e : side === 1 ? Y1 - e : Y0 + t * (Y1 - Y0); glowShrooms(g, x, y, ts * (0.5 + r() * 0.6), r); }
+                [[X0 + e, Y0 + e], [X1 - e, Y0 + e], [X0 + e, Y1 - e], [X1 - e, Y1 - e], [mx - ts * 8, Y0 + e], [mx + ts * 8, Y0 + e], [mx - ts * 8, Y1 - e], [mx + ts * 8, Y1 - e], [X0 + e, my], [X1 - e, my]].forEach(([x, y]) => toadstool(g, x, y, ts * (1.3 + r() * 0.5), r));
+                roofEdge(o, ts * 5.2, (x, y, len, nx, ny) => torch(g, x + (ny ? len / 2 : 0) + nx * ts * 0.4, y + (nx ? len / 2 : 0) + ny * ts * 0.4, ts));
+            }
+
             // ---- the stands: everything outside the apron. Painted twice, once with about half the fans bobbing up (at the knees),
             // and each patch of BL x BL flips between the two at its own pace (drawBack): a crowd that shifts about, for a few image
             // draws a frame. Fans are mostly the two teams' races, in their colours (varied a little), the home side at its end ----
@@ -22463,6 +22747,8 @@ ol.ci-steps li::marker { content: none; }
                     const g = cv.getContext('2d'); g.setTransform(SC, 0, 0, SC, MX * ts * SC, MY * ts * SC);   // (pitch coordinates from here on)
                     g.fillStyle = th.terrace; g.fillRect(X0, Y0, W, H);
                     if (th.planks) { const pr = pitchRng(61); for (let y = Y0; y < Y1; y += ROW / 2) for (let x = X0; x < X1; x += ts * (1.5 + pr() * 2)) { g.fillStyle = `rgba(${pr() < 0.5 ? '90,64,40' : '20,12,6'},${(0.12 + pr() * 0.18).toFixed(2)})`; g.fillRect(x, y, ts * 2, ROW / 2 - 1.5); } }   // (the orcs' terraces: rough planks)
+                    if (th.rock) { const kr = pitchRng(71); for (let i = 0; i < W * H / (ts * ts) * 3; i++) { g.fillStyle = ['rgba(0,0,0,0.18)', 'rgba(255,255,255,0.04)', 'rgba(20,18,14,0.25)'][(kr() * 3) | 0]; g.beginPath(); g.ellipse(X0 + kr() * W, Y0 + kr() * H, ts * (0.3 + kr() * 0.8), ts * (0.2 + kr() * 0.4), kr() * 3, 0, 7); g.fill(); } }   // (rough rock)
+                    if (th.blocks) { g.fillStyle = 'rgba(0,0,0,0.2)'; let n = 0; for (let y = Y0; y < Y1; y += ROW / 2, n++) for (let x = X0 + (n % 2) * ts * 0.6; x < X1; x += ts * 1.2) g.fillRect(x, y, 1.5, ROW / 2); const br = pitchRng(67); for (let i = 0; i < W * H / (ts * ts) * 1.5; i++) { g.fillStyle = br() < 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.07)'; g.fillRect(X0 + br() * W, Y0 + br() * H, ts * 1.2, ROW / 2 - 1.5); } }   // (stone terraces: blocks)
                     g.lineWidth = 2; g.strokeStyle = th.step;   // the terrace steps
                     for (let y = Y0; y < Y1; y += ROW) if (!endBand(y)) { g.beginPath(); g.moveTo(X0, y); g.lineTo(X1, y); g.stroke(); }
                     for (let x = X0; x < X1; x += ROW) { g.beginPath(); g.moveTo(x, -SIDE * ts); g.lineTo(x, (CFG.rows + SIDE) * ts); g.stroke(); }
@@ -22481,9 +22767,20 @@ ol.ci-steps li::marker { content: none; }
                         const gr = g.createLinearGradient(0, a.y * ts, 0, (a.y + a.h) * ts); gr.addColorStop(0, th.apron[0]); gr.addColorStop(1, th.apron[1]);
                         g.fillStyle = gr; g.fillRect(a.x * ts, a.y * ts, a.w * ts, a.h * ts);
                         if (th.stripe) for (let x = Math.ceil(a.x); x < a.x + a.w; x += 2) { g.fillStyle = th.stripe; g.fillRect(x * ts, a.y * ts, ts, a.h * ts); }
+                        if (th.paving) {   // (flagstones: slabs of varying tone, mortar between; moss in the jungle)
+                            const pr = pitchRng(91 + Math.round(a.x * 7 + a.y * 13)), sl = ts * 0.9;
+                            g.save(); g.beginPath(); g.rect(a.x * ts, a.y * ts, a.w * ts, a.h * ts); g.clip();
+                            for (let yy = a.y * ts, n = 0; yy < (a.y + a.h) * ts; yy += sl * 0.7, n++) for (let xx = a.x * ts - (n % 2) * sl / 2; xx < (a.x + a.w) * ts; xx += sl) { g.fillStyle = pr() < 0.5 ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'; g.fillRect(xx, yy, sl - 2, sl * 0.7 - 2); g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(xx + sl - 2, yy, 2, sl * 0.7); g.fillRect(xx, yy + sl * 0.7 - 2, sl, 2); }
+                            if (th.cracks) {   // (cracked and broken slabs, dark puddles)
+                                g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 1.5; for (let i = 0; i < a.w * a.h * 0.5; i++) { let cx = (a.x + pr() * a.w) * ts, cy = (a.y + pr() * a.h) * ts; g.beginPath(); g.moveTo(cx, cy); for (let k = 0; k < 4; k++) { cx += (pr() - 0.5) * ts * 0.8; cy += (pr() - 0.5) * ts * 0.8; g.lineTo(cx, cy); } g.stroke(); }
+                                for (let i = 0; i < a.w * a.h * 0.06; i++) { const cx = (a.x + pr() * a.w) * ts, cy = (a.y + pr() * a.h) * ts, rr = ts * (0.3 + pr() * 0.7); g.fillStyle = 'rgba(10,14,18,0.55)'; g.beginPath(); g.ellipse(cx, cy, rr, rr * 0.55, pr() * 3, 0, 7); g.fill(); g.fillStyle = 'rgba(140,160,180,0.12)'; g.beginPath(); g.ellipse(cx - rr * 0.2, cy - rr * 0.1, rr * 0.4, rr * 0.15, 0, 0, 7); g.fill(); }
+                            }
+                            if (th.moss) for (let i = 0; i < a.w * a.h * 1.2; i++) { g.fillStyle = `rgba(${(50 + pr() * 30) | 0},${(100 + pr() * 40) | 0},${(40 + pr() * 20) | 0},${(0.25 + pr() * 0.3).toFixed(2)})`; g.beginPath(); g.ellipse((a.x + pr() * a.w) * ts, (a.y + pr() * a.h) * ts, ts * (0.15 + pr() * 0.4), ts * (0.1 + pr() * 0.25), pr() * 3, 0, 7); g.fill(); }
+                            g.restore();
+                        }
                         if (th.mud) { const mr = pitchRng(17 + Math.round(a.x * 10)); for (let i = 0; i < a.w * a.h * 0.5; i++) { const x = (a.x + mr() * a.w) * ts, y = (a.y + mr() * a.h) * ts, rr = ts * (0.3 + mr() * 0.9); g.fillStyle = `rgba(${(52 + mr() * 20) | 0},${(38 + mr() * 12) | 0},${(22 + mr() * 8) | 0},${(0.14 + mr() * 0.2).toFixed(2)})`; g.beginPath(); g.ellipse(x, y, rr, rr * 0.6, mr() * 3, 0, 7); g.fill(); } }   // (trampled mud)
                         const gr2 = pitchRng(5 + Math.round(a.x * 10 + a.y * 100));   // blades of grass, like the pitch's own (not under the pitch itself)
-                        for (let i = 0; i < a.w * a.h * 36; i++) {
+                        if (th.blade) for (let i = 0; i < a.w * a.h * (th.paving ? 8 : 36); i++) {
                             const x = (a.x + gr2() * a.w) * ts, y = (a.y + gr2() * a.h) * ts; if (x > 0 && x < CFG.cols * ts && y > 0 && y < CFG.rows * ts) continue;
                             if (th.mud && gr2() < 0.55) continue;   // (sparse tufts on the orcs' mud)
                             g.fillStyle = gr2() < 0.5 ? th.blade[0] : th.blade[1]; g.fillRect(x, y, 1.6, 3 + gr2() * 3);
@@ -22534,7 +22831,15 @@ ol.ci-steps li::marker { content: none; }
                 const fl = g.createLinearGradient(0, 0, 0, H); fl.addColorStop(0, D.floor[0]); fl.addColorStop(1, D.floor[1]);
                 g.fillStyle = fl; g.fillRect(ts * 0.08, ts * 0.08, W - ts * 0.16, H - ts * 0.16);
                 for (let i = 0; i < W * H / 60; i++) { g.fillStyle = r() < 0.5 ? D.speck[0] : D.speck[1]; g.fillRect(r() * W, r() * H, 1.5, 1.5); }
+                if (D.floorTiles) { g.fillStyle = 'rgba(0,0,0,0.18)'; for (let y = ts * 0.08; y < H; y += ts * 0.6) g.fillRect(0, y, W, 1.5); for (let y = ts * 0.08, n = 0; y < H; y += ts * 0.6, n++) for (let x = (n % 2) * ts * 0.45; x < W; x += ts * 0.9) g.fillRect(x, y, 1.5, ts * 0.6); }   // (stone slabs)
+                if (D.leaves) for (let i = 0; i < W * H / (ts * ts) * 6; i++) { g.fillStyle = ['rgba(60,110,50,0.55)', 'rgba(120,140,60,0.5)', 'rgba(150,110,50,0.45)'][(r() * 3) | 0]; g.beginPath(); g.ellipse(r() * W, r() * H, ts * 0.08, ts * 0.04, r() * 3, 0, 7); g.fill(); }   // (fallen leaves on the packed earth)
+                if (D.cracked) { g.strokeStyle = 'rgba(0,0,0,0.45)'; g.lineWidth = 1.2; for (let i = 0; i < 12; i++) { let x = r() * W, y = r() * H; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 4; k++) { x += (r() - 0.5) * ts * 0.7; y += (r() - 0.5) * ts * 0.5; g.lineTo(x, y); } g.stroke(); } }   // (cracks)
                 if (D.veins) { g.strokeStyle = 'rgba(130,136,146,0.28)'; g.lineWidth = 1; for (let i = 0; i < 14; i++) { let x = r() * W, y = r() * H; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (r() - 0.3) * ts * 0.6; y += (r() - 0.5) * ts * 0.3; g.lineTo(x, y); } g.stroke(); } }   // (marble veins)
+                if (D.mat) {   // a woven reed mat along the bench
+                    const my0 = d.flip ? benchY - ts * 0.75 : benchY + BENCH * ts, mh = ts * 0.75; g.fillStyle = '#b39a5e'; g.fillRect(ts * 0.25, my0, W - ts * 0.5, mh);
+                    g.fillStyle = 'rgba(90,70,30,0.35)'; for (let x = ts * 0.25, n = 0; x < W - ts * 0.25; x += ts * 0.12, n++) for (let y = my0 + (n % 2) * ts * 0.06; y < my0 + mh; y += ts * 0.12) g.fillRect(x, y, ts * 0.12, ts * 0.06);
+                    g.fillStyle = '#2f8f7a'; g.fillRect(ts * 0.25, my0 + ts * 0.05, W - ts * 0.5, ts * 0.04); g.fillRect(ts * 0.25, my0 + mh - ts * 0.09, W - ts * 0.5, ts * 0.04);
+                }
                 // the bench along the back
                 g.fillStyle = D.bench; g.fillRect(ts * 0.1, benchY, W - ts * 0.2, BENCH * ts);
                 g.fillStyle = 'rgba(0,0,0,0.25)'; for (let x = ts * 0.1; x < W - ts * 0.1; x += ts * 1.1) g.fillRect(x, benchY, 1.5, BENCH * ts);
@@ -22578,6 +22883,16 @@ ol.ci-steps li::marker { content: none; }
                     g.fillStyle = 'rgba(255,255,255,0.08)'; for (let x = ts * 0.3; x < W; x += ts * 0.6) g.fillRect(x, awY, 1, aw);   // (the silk's folds)
                     for (let x = 0; x < W; x += ts * 0.6) { g.fillStyle = K.fill; g.beginPath(); g.moveTo(x, ey); g.lineTo(x + ts * 0.3, ey + out * ts * 0.34); g.lineTo(x + ts * 0.6, ey); g.fill(); g.fillStyle = '#c9a85a'; g.beginPath(); g.arc(x + ts * 0.3, ey + out * ts * 0.34, ts * 0.04, 0, 7); g.fill(); }
                     g.fillStyle = '#c9a85a'; g.fillRect(0, ey - (d.flip ? 0 : 2), W, 2);
+                } else if (D.awning === 'canvas' || D.awning === 'ragged') {   // canvas in faded team stripes, a straight hem with rope ties (ragged: torn, uneven)
+                    for (let x = 0, i = 0; x < W; x += ts * 0.6, i++) { g.fillStyle = shade(i % 2 ? K.text : K.fill, D.awning === 'ragged' ? -0.25 : -0.12); g.fillRect(x, awY, ts * 0.6 + 0.5, aw); }
+                    g.fillStyle = 'rgba(120,100,70,0.18)'; g.fillRect(0, awY, W, aw);   // (weathered)
+                    if (D.awning === 'ragged') { for (let x = 0; x < W; x += ts * 0.25) { g.fillStyle = shade(K.fill, -0.3); g.beginPath(); g.moveTo(x, ey); g.lineTo(x + ts * 0.12, ey + out * ts * (0.05 + r() * 0.3)); g.lineTo(x + ts * 0.25, ey); g.fill(); } g.fillStyle = 'rgba(0,0,0,0.35)'; for (let i = 0; i < 4; i++) { g.beginPath(); g.ellipse(r() * W, awY + r() * aw, ts * 0.12, ts * 0.07, 0, 0, 7); g.fill(); } }   // (and holes)
+                    else { g.fillStyle = '#d8c8a0'; g.fillRect(0, ey - (d.flip ? 0 : 2), W, 2); for (let x = ts * 0.3; x < W; x += ts * 1.2) { g.fillStyle = '#8b6a3a'; g.beginPath(); g.arc(x, ey + out * ts * 0.06, ts * 0.05, 0, 7); g.fill(); } }
+                } else if (D.awning === 'thatch') {   // palm thatch: layers of fronds with a fringe, a band in the team's colour
+                    g.fillStyle = '#7a6a38'; g.fillRect(0, awY, W, aw);
+                    for (let y = awY, n = 0; y < awY + aw; y += ts * 0.18, n++) for (let x = (n % 2) * ts * 0.1; x < W; x += ts * 0.2) { g.strokeStyle = ['#8f7d44', '#6b5c30', '#a08c4e'][(r() * 3) | 0]; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, y); g.lineTo(x + ts * 0.04, y + ts * 0.2); g.stroke(); }
+                    g.fillStyle = K.fill; g.fillRect(0, awY + aw * (d.flip ? 0.15 : 0.7), W, aw * 0.15);
+                    for (let x = 0; x < W; x += ts * 0.12) { g.strokeStyle = r() < 0.5 ? '#8f7d44' : '#6b5c30'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, ey); g.lineTo(x + (r() - 0.5) * ts * 0.08, ey + out * ts * (0.15 + r() * 0.2)); g.stroke(); }
                 } else if (D.awning === 'iron') {
                     for (let x = 0, i = 0; x < W; x += ts * 0.9, i++) {
                         g.fillStyle = i % 3 === 2 ? '#7a4122' : shade(K.fill, (r() - 0.5) * 0.3); g.fillRect(x - 1, awY, ts * 0.9 + 2, aw);
@@ -22682,11 +22997,11 @@ ol.ci-steps li::marker { content: none; }
                 hits = [];
                 [0, 1].forEach(t => { const d = dugRect(t); c.drawImage(dugs[t], d.x * ts, d.y * ts, d.w * ts, d.h * ts); drawDugoutPlayers(c, t); });
             }
-            // ---- carried off (about 2 s, the length of the game's own fade): a player knocked out, hurt or beaten up is stretchered
+            // ---- carried off (the medics take about 2.5 s; the player's fade is stretched to match): a player knocked out, hurt or beaten up is stretchered
             // to their dugout by two of their team's medics (their race's lineman in white, with a red cross); one pushed into the crowd is first set on by a few of the other side's
             // fans (running out of the stands, laying into them in a cloud of dust) while rubbish rains in from the stands.
             // Timed on the game clock (performance.now, like the fade), so it keeps pace when play is sped up ----
-            const DUR = 2000, anims = [];
+            const MEDIC = 2500, CROWD = 450, anims = [];   // (the medics' part takes MEDIC ms; a crowd scene starts CROWD ms before they set off)
             const lerp = (a, b, k) => a + (b - a) * k, ease = k => k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
             function removal(p, title) {
                 if (!active() || !/KNOCKED OUT|CASUALTY|BEATEN UP/.test(title || '')) return;
@@ -22707,7 +23022,8 @@ ol.ci-steps li::marker { content: none; }
                     cheer(1 - p.team);
                 }
                 a.medics = [0, 1].map(() => medicFor(p.team));   // (the team's own medics: their race)
-                p.fadeDuration = DUR; anims.push(a);
+                a.dur = (crowd ? CROWD : 0) + MEDIC;
+                p.fadeDuration = a.dur; anims.push(a);   // (the player's fade lasts as long: they appear in the dugout as the medics arrive)
             }
             const carried = id => anims.some(a => a.id === id);
             // the medics: a race's own lineman sprite (the teams' pixel style) in a white kit with red trim and a red cross on the chest
@@ -22770,8 +23086,8 @@ ol.ci-steps li::marker { content: none; }
                 const now = performance.now(), ts = T();
                 for (let i = anims.length - 1; i >= 0; i--) {
                     const a = anims[i], t = now - a.t0;
-                    if (t > DUR || t < 0) { anims.splice(i, 1); continue; }
-                    const tRef = a.crowd ? 450 : 0, arrive = tRef + (a.crowd ? 550 : 600), lift = arrive + 80;   // (medics: set off, reach the player, lift)
+                    if (t > a.dur || t < 0) { anims.splice(i, 1); continue; }
+                    const tRef = a.crowd ? CROWD : 0, arrive = tRef + MEDIC * 0.36, lift = arrive + MEDIC * 0.07;   // (medics: set off, reach the player, lift, then carry)
                     // the player: on the ground (shaken while the fans lay in), then on the stretcher
                     const beat = a.crowd && t > 500 && t < 950, shake = beat ? Math.sin(t / 25) * ts * 0.06 : 0;
                     if (t < lift) lying(c, a.p, a.px, a.py, 0.85, shake);
@@ -22803,7 +23119,7 @@ ol.ci-steps li::marker { content: none; }
                         let x, y, ang;
                         if (t < arrive) { const k = ease((t - tRef) / (arrive - tRef)); x = lerp(a.door[0], a.px, k); y = lerp(a.door[1], a.py, k); ang = Math.atan2(a.py - a.door[1], a.px - a.door[0]); }
                         else if (t < lift) { x = a.px; y = a.py; ang = Math.atan2(a.path[1][1] - a.py, a.path[1][0] - a.px); }
-                        else { const q = along(a.path, ease(Math.min(1, (t - lift) / (DUR - lift)))); x = q[0]; y = q[1]; ang = q[2]; }
+                        else { const q = along(a.path, ease(Math.min(1, (t - lift) / (a.dur - lift)))); x = q[0]; y = q[1]; ang = q[2]; }
                         const dx = Math.cos(ang) * ts * 0.62, dy = Math.sin(ang) * ts * 0.62;
                         c.fillStyle = '#6b4a2a'; c.strokeStyle = '#6b4a2a'; c.lineWidth = ts * 0.04;   // the stretcher between them
                         c.save(); c.translate(x, y); c.rotate(ang); c.fillStyle = '#e7dcc0'; c.fillRect(-ts * 0.45, -ts * 0.16, ts * 0.9, ts * 0.32); c.strokeRect(-ts * 0.55, -ts * 0.16, ts * 1.1, ts * 0.32); c.restore();
@@ -22824,13 +23140,13 @@ ol.ci-steps li::marker { content: none; }
             // that the view is bigger than that, the whole of it stays on screen. Runs each frame before drawing (drags, pinches, glides)
             function clampCam() {
                 const ts = T(), z = state.camera.zoom, vw = window.innerWidth / z, vh = window.innerHeight / z;
-                const x0 = -(END + 4.6) * ts, x1 = (CFG.cols + END + 4.6) * ts, y0 = -(SIDE + GAP + DH + 1.4) * ts, y1 = (CFG.rows + SIDE + GAP + DH + 2.4) * ts;
+                const x0 = -(END + 8) * ts, x1 = (CFG.cols + END + 8) * ts, y0 = -(SIDE + GAP + DH + 1.4) * ts, y1 = (CFG.rows + SIDE + GAP + DH + 2.4) * ts;
                 const lim = (v, size, a, b) => size <= b - a ? Math.min(b - size, Math.max(a, v)) : Math.min(a, Math.max(b - size, v));
                 const vx = -state.camera.x / z, vy = -state.camera.y / z, nx = lim(vx, vw, x0, x1), ny = lim(vy, vh, y0, y1);
                 if (nx !== vx) state.camera.x = -nx * z; if (ny !== vy) state.camera.y = -ny * z;
             }
             const apron = () => { const ts = T(); return { x: -END * ts, y: -SIDE * ts, sx: (CFG.cols + 2 * END) / CFG.cols, sy: (CFG.rows + 2 * SIDE) / CFG.rows }; };
-            return { active, drawBack, drawFront, removal, carried, hit, pick, set, cheer, occupants, dugRect, bounds, apron, clampCam, lineCol: () => theme().line, boxes: () => hits.map(h => ({ id: h.p.id, x: h.x, y: h.y, w: h.w, h: h.h })), get on() { return pref || Q; }, get query() { return Q; } };
+            return { active, drawBack, drawFront, removal, carried, hit, pick, set, cheer, occupants, dugRect, bounds, apron, clampCam, lineCol: () => theme().line, pitchTint: () => theme().pitchTint || null, boxes: () => hits.map(h => ({ id: h.p.id, x: h.x, y: h.y, w: h.w, h: h.h })), get on() { return pref || Q; }, get query() { return Q; } };
         })();
         function render() { if (!CLOCK.sim) drawFrame(); }
         // While the kicking team sets up, the receiving team isn't shown: they set up afterwards, as in a real game
@@ -22873,6 +23189,7 @@ ol.ci-steps li::marker { content: none; }
                     WFX.ground(ctx, CFG.cols * ts, CFG.rows * ts, ts, wxFX ? (wxFX < 1 ? 0.8 : 1) : 0);
                     if (ga) ctx.restore();
                 }
+                { const pt = STADIUM.active() && STADIUM.pitchTint(); if (pt) { ctx.fillStyle = pt; ctx.fillRect(0, 0, CFG.cols * ts, CFG.rows * ts); } }   // (a theme's light over the pitch: the goblins' lair is gloomy)
                 if (STADIUM.active()) {   // a chalk line round the pitch, just outside the squares, so it stands apart from the grass strip
                     const lw = Math.max(2.5, ts * 0.07);
                     ctx.save(); ctx.strokeStyle = STADIUM.lineCol(); ctx.lineWidth = lw; ctx.strokeRect(-lw / 2, -lw / 2, CFG.cols * ts + lw, CFG.rows * ts + lw); ctx.restore();
@@ -23624,6 +23941,7 @@ ol.ci-steps li::marker { content: none; }
             if([MODES.ROLL_PROMPT, MODES.LOCKED].includes(state.mode)) return;
             if(!document.getElementById('modal-roster').classList.contains('hidden')) return;
             if (state.drag.moved) return;   // the end of a drag across the pitch, not a tap
+            { const w0 = screenToWorld(e.clientX, e.clientY); if (CHEAT.repoClick(w0.gridX, w0.gridY)) return; }   // (secret option: Reposition opposition)
             {   // a player in a dugout (Stadium & dugouts): show them in the Unit Panel, as a tap on the pitch would (no actions)
                 const r = canvas.getBoundingClientRect(), dp = STADIUM.hit((e.clientX - r.left - state.camera.x) / state.camera.zoom, (e.clientY - r.top - state.camera.y) / state.camera.zoom);
                 if (dp) { STADIUM.pick(dp); updateUI(dp); document.getElementById('action-toolbar').classList.add('hidden');
