@@ -2,6 +2,21 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.64 (22 Nov 2026)
+- Test (off by default): **Stadium & dugouts**. Settings > "Stadium & dugouts (test)", or `?stadium` in the address. The black
+  space round the pitch becomes a stadium, drawn by the game itself like the pitch: an apron of grass with advertising boards, then
+  stands with a crowd, fans mostly in the home side's colours at its end and the away side's at theirs, fading into the dark higher up.
+  Each team has a dugout along the touchline beside its own half (Team 1 along the bottom, Team 2 along the top), with a striped
+  awning in its colours and its name on a banner, a bench, and three bays: Reserves, Knocked Out and Casualties. The players there are
+  their own small figures with their shirt numbers: the knocked out lie down with 💤, casualties with 🩹 Badly Hurt, ✚ Seriously
+  Hurt / Serious or Lasting Injury, 💀 Dead, and 🟥 for a sending-off. They update as it happens (a player arrives once they've
+  faded off the pitch), come back to Reserves when they recover from a KO, and tapping one shows them in the Unit Panel. The crowd
+  on a team's side cheers (a light wave) when it scores or hurts an opponent.
+  The pitch keeps its size: the stadium is part of the surroundings, so drag or zoom out to see the dugouts (phone portrait shows
+  them above and below the pitch anyway). Classic grass pitch only for now: turning it on sets Pitch to Grass; leagues and
+  tournaments play at the home team's ground, so it shows there only on grass. The other pitches will get their own stands later.
+  The stands and dugouts are painted once and kept; nothing is drawn in fast test runs. The Rosters window is unchanged.
+
 ## v5.63 (22 Nov 2026)
 - Fixed: animated block dice on your block when the computer gets to choose the die (it is stronger): tapping the tumbling dice
   did nothing, so you couldn't roll. The guard that stops you pressing the computer's controls counted the whole dice box as the

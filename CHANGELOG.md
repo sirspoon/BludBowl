@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.64 (22 Nov 2026)
+- Test: a stadium round the pitch, with stands, a crowd in each team's colours and each team's dugout (reserves, knocked out, casualties) along the touchlines. Settings > Stadium & dugouts (test), grass pitch only for now.
+
 ## v5.63 (22 Nov 2026)
 - Fixed: with animated block dice, when the computer gets to choose the die, tapping the dice to roll them did nothing.
 

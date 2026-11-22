@@ -283,6 +283,19 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.64 (job session, 22 Nov): **Stadium & dugouts (test)**, off by default: Settings row `st-stadium` (localStorage `bb-stadium`),
+  or `?stadium` (sets `pitchPref` to blades for that visit). `STADIUM` module (just before `render()`); drawn by `drawFrame` under
+  the pitch, in pitch coordinates (owner: don't shrink the pitch; dugouts are part of the surroundings, pan/zoom to see them).
+  Only when `PITCH.style === 'blades'` and not `CLOCK.sim`. Team 0's dugout along the bottom touchline beside its half
+  (`dugRect`), team 1's along the top; stands canvas (`paintStands`, 0.7x res, margins MX 12 / MY 18 tiles) and each dugout's
+  woodwork (`paintDugout`, 2x) are cached by a key of teams' colours/names/pitch size. Per frame: `occupants(t)` (off-pitch players
+  by bay: res / ko / cas incl. sent off; fading players wait until the fade ends) drawn with `drawSpriteToken` (KO + cas lying).
+  Taps: canvas click -> `STADIUM.hit` -> `updateUI` + "In the dugout: ..." (no toolbar); note the game swallows canvas taps while
+  the computer decides. Cheer wave: `STADIUM.cheer(team)` from `MATCH.note('td')` and `MATCH.casualty`. Check:
+  `node tools/ui-tests/stadium.js`; screenshots `tools/stadium-test/` (`shots.js before|after '?stadium'`).
+  Plan: once the owner is happy with grass, give each pitch its own dugouts/stands (a theme table: apron colour, wall/board style,
+  terrace colour, dugout materials, e.g. stone for dwarfhold, bone for graveyard, snow for fjord); then maybe make it the default,
+  and maybe dugouts in replays (FREP sets the same player flags, so it may already work: untested).
 - v5.61 (22 Nov): the computer's acting player in a match gets the replays' marker (`actorMark(c, ts, p, q)`, shared with `FREP.overlay`;
   `aiMark`, from `AI.focus()` = the current `plan`'s pid / target, else `state.selectedId`, or `state.combat`'s defender).
   v5.62: rings replaced by a glowing base: `markNow()` once a frame (`FREP.mark()` or `aiMark()`, flare start times in `markSince`),

@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.63</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.64</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1347,6 +1347,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Kick-off replays<small>a close-up of each kick-off too, once the ball has come down (with Replays on)</small></span><button type="button" class="st-tog" id="st-replay-kick"></button></div>
             <div class="st-row"><span>HD sprites (test)<small>High Elves only: 1.5x the pixels (the originals, smoothed) or 2x (redrawn); other teams unchanged</small></span><button type="button" class="st-tog" id="st-hd"></button></div>
+            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. Classic grass pitch only for now (turning it on sets Pitch to Grass; leagues and tournaments play at the home ground, so not there yet). Also ?stadium in the address</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress, your saved replays (My matches) and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
@@ -9027,11 +9028,11 @@ ol.ci-steps li::marker { content: none; }
             // event notes from the rules code
             function note(kind, team, extra) {
                 if (!S || !ok(team) || state.isGameOver) return;
-                if (kind === 'td') S.tds.push({ team, half: state.half, turn: state.turn[team], name: extra.name, type: extra.type, id: extra.id });
+                if (kind === 'td') { S.tds.push({ team, half: state.half, turn: state.turn[team], name: extra.name, type: extra.type, id: extra.id }); try { STADIUM.cheer(team); } catch (e) {} }
                 else if (S[kind]) S[kind][team]++;
             }
             // a casualty: who caused it (the final injury is read at full time, after any Apothecary)
-            function casualty(p, by) { if (S) S.cas.set(p.id, { by: by || (injCause && injCause.team !== p.team ? injCause : null) }); }
+            function casualty(p, by) { if (S) S.cas.set(p.id, { by: by || (injCause && injCause.team !== p.team ? injCause : null) }); try { STADIUM.cheer(1 - p.team); } catch (e) {} }
             function stats(p) { return p.gStats || {}; }
             const POINTS = { td: 3, cas: 2, int: 2, cp: 1, ttm: 1 };
             function body() {
@@ -22103,6 +22104,252 @@ ol.ci-steps li::marker { content: none; }
             requestAnimationFrame(frameLoop);
         }
         function startFrameLoop() { if (frameLoopOn) return; frameLoopOn = true; requestAnimationFrame(frameLoop); }
+        // ---------- Stadium & dugouts (test): Settings > "Stadium & dugouts (test)" (localStorage bb-stadium '1'), or ?stadium ----------
+        // Drawn in the pitch's own coordinates, around it, so the pitch keeps its size: team 0's dugout along the bottom touchline
+        // beside its own half, team 1's along the top beside its half, advertising boards, then stands and a crowd in each team's
+        // colours on its side. Classic grass pitch ('blades') only for now. The stands and each dugout's woodwork are painted once
+        // to offscreen canvases (repainted only when the teams, their colours or the pitch size change); per frame only the players
+        // in the dugouts are drawn. Never drawn in ?simtest (render() skips drawFrame there).
+        const STADIUM = (() => {
+            const Q = /[?&]stadium(?:[=&]|$)/.test(location.search);
+            let pref = false; try { pref = localStorage.getItem('bb-stadium') === '1'; } catch (e) {}
+            if (Q) { pitchPref = 'blades'; PITCH.style = 'blades'; }   // (?stadium: the grass pitch for this visit, without changing the saved Pitch setting)
+            const T = () => CFG.tileSize;
+            const SIDE = 0.45, END = 1.3, GAP = 0.2, DH = 3.4, WALL = 0.32, MX = 12, MY = 18, SC = 0.7;   // (tiles; SC: the stands' canvas resolution)
+            const dugRect = t => { const w = CFG.cols / 2 - 1; return t === 0 ? { x: 0.5, y: CFG.rows + SIDE + GAP, w, h: DH, flip: true } : { x: CFG.cols / 2 + 0.5, y: -SIDE - GAP - DH, w, h: DH, flip: false }; };
+            const hex = (c, d = '#888888') => /^#[0-9a-f]{6}/i.test(c || '') ? c.slice(0, 7) : d;
+            const rgb = c => { c = hex(c); return [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); };
+            const shade = (c, k) => { const [r, g, b] = rgb(c), f = v => Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k))); return `rgb(${f(r)},${f(g)},${f(b)})`; };
+            const kits = () => [0, 1].map(t => { const s = teamStyle(t); return { fill: hex(s.fill, t ? '#16a34a' : '#2563eb'), text: hex(s.text, '#ffffff') }; });
+            const names = () => [0, 1].map(t => String((ROSTERS[t] && (ROSTERS[t].name || ROSTERS[t].baseName)) || (t ? 'Away' : 'Home')));
+            let stands = null, standsKey = '', dugs = [null, null], dugKeys = ['', ''], cheerAt = -1e9, cheerTeam = 0, picked = null, hits = [];
+            function active() { return (pref || Q) && PITCH.style === 'blades' && !CLOCK.sim; }
+
+            // ---- the stands: everything outside the apron, painted once ----
+            function paintStands() {
+                const ts = T(), K = kits(), W = (CFG.cols + 2 * MX) * ts, H = (CFG.rows + 2 * MY) * ts;
+                const cv = document.createElement('canvas'); cv.width = Math.round(W * SC); cv.height = Math.round(H * SC);
+                const g = cv.getContext('2d'), r = pitchRng(9071 + CFG.cols);
+                g.setTransform(SC, 0, 0, SC, MX * ts * SC, MY * ts * SC);   // (pitch coordinates from here on)
+                const X0 = -MX * ts, Y0 = -MY * ts, X1 = (CFG.cols + MX) * ts, Y1 = (CFG.rows + MY) * ts;
+                // the apron (grass inside the boards) and the dugout bays in it
+                const d0 = dugRect(0), d1 = dugRect(1);
+                const aprons = [{ x: -END, y: -SIDE, w: CFG.cols + 2 * END, h: CFG.rows + 2 * SIDE }].concat([d0, d1].map(d => ({ x: d.x - 0.3, y: d.y - (d.flip ? GAP : 0.3), w: d.w + 0.6, h: d.h + GAP + 0.3 })));
+                const inWall = (x, y, m = 0) => aprons.some(a => x > (a.x - WALL - m) * ts && x < (a.x + a.w + WALL + m) * ts && y > (a.y - WALL - m) * ts && y < (a.y + a.h + WALL + m) * ts);
+                // concrete terraces: a step every row
+                g.fillStyle = '#2b3038'; g.fillRect(X0, Y0, W, H);
+                const ROW = 0.44 * ts, SEAT = 0.36 * ts, AISLE = 7 * ts;
+                const midX = CFG.cols * ts / 2, endL = -END * ts - WALL * ts, endR = (CFG.cols + END + WALL) * ts;
+                const side = (x, y) => (y < 0 || y > CFG.rows * ts) && x > endL && x < endR ? 'tb' : 'end';   // top/bottom stands have rows across, the end stands rows down
+                // steps (lines), drawn first
+                g.lineWidth = 2;
+                for (let y = Y0; y < Y1; y += ROW) { g.strokeStyle = 'rgba(255,255,255,0.05)'; g.beginPath(); g.moveTo(endL, y); g.lineTo(endR, y); g.stroke(); }
+                for (let x = X0; x < X1; x += ROW) { g.strokeStyle = 'rgba(255,255,255,0.05)'; g.beginPath(); g.moveTo(x, Y0); g.lineTo(x, Y1); g.stroke(); }
+                // aisles (stairs) through the stands
+                const aisle = (x, y) => side(x, y) === 'tb' ? Math.abs(((x - midX) % AISLE + AISLE) % AISLE - AISLE / 2) < 0.3 * ts : Math.abs(((y - CFG.rows * ts / 2) % AISLE + AISLE) % AISLE - AISLE / 2) < 0.3 * ts;
+                const SKIN = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#ffdbac', '#7a9a48', '#5e7f3a', '#9aa58f', '#b9c4a0', '#d9b38c'];
+                const DULL = ['#57534e', '#44403c', '#3f3f46', '#52525b', '#78350f', '#713f12', '#3f6212', '#1e3a8a', '#7f1d1d', '#a8a29e'];
+                const fan = (x, y) => {
+                    const t0 = Math.max(0, Math.min(1, 0.5 - (x - midX) / (7 * ts))), u = r();   // (chance this fan supports team 0: high on its end)
+                    const team = u < 0.84 ? (r() < t0 ? 0 : 1) : -1, k = team >= 0 ? K[team] : null;
+                    const shirt = k ? (r() < 0.8 ? k.fill : k.text) : DULL[(r() * DULL.length) | 0];
+                    const s = ts * (0.92 + r() * 0.16), jx = (r() - 0.5) * 0.06 * ts, jy = (r() - 0.5) * 0.05 * ts, cx = x + jx, cy = y + jy;
+                    g.fillStyle = 'rgba(0,0,0,0.28)'; g.beginPath(); g.ellipse(cx, cy + 0.07 * s, 0.17 * s, 0.07 * s, 0, 0, Math.PI * 2); g.fill();
+                    g.fillStyle = shirt; g.beginPath(); g.ellipse(cx, cy + 0.02 * s, 0.15 * s, 0.085 * s, 0, 0, Math.PI * 2); g.fill();
+                    if (k && r() < 0.18) { g.fillStyle = k.text === shirt ? k.fill : k.text; g.fillRect(cx - 0.13 * s, cy - 0.02 * s, 0.26 * s, 0.035 * s); }   // a scarf
+                    const raised = r() < 0.12;   // arms up
+                    if (raised) { g.strokeStyle = SKIN[(r() * 5) | 0]; g.lineWidth = 0.035 * s; g.beginPath(); g.moveTo(cx - 0.12 * s, cy); g.lineTo(cx - 0.17 * s, cy - 0.17 * s); g.moveTo(cx + 0.12 * s, cy); g.lineTo(cx + 0.17 * s, cy - 0.17 * s); g.stroke(); }
+                    g.fillStyle = SKIN[(r() * SKIN.length) | 0]; g.beginPath(); g.arc(cx, cy - 0.08 * s, 0.075 * s, 0, Math.PI * 2); g.fill();
+                    if (r() < 0.22) { g.fillStyle = k && r() < 0.6 ? k.fill : DULL[(r() * DULL.length) | 0]; g.beginPath(); g.arc(cx, cy - 0.1 * s, 0.07 * s, Math.PI, 0); g.fill(); }   // a hat
+                    if (k && r() < 0.025) {   // a flag on a pole
+                        const fx = cx + 0.1 * s, fy = cy - 0.5 * s;
+                        g.strokeStyle = '#d6d3d1'; g.lineWidth = 0.025 * s; g.beginPath(); g.moveTo(cx + 0.1 * s, cy); g.lineTo(fx, fy); g.stroke();
+                        g.fillStyle = k.fill; g.fillRect(fx, fy, 0.34 * s, 0.22 * s); g.fillStyle = k.text; g.fillRect(fx, fy + 0.08 * s, 0.34 * s, 0.06 * s);
+                    }
+                };
+                // rows of fans: across in the top and bottom stands, down the end stands; empty seats here and there
+                for (let y = Y0 + ROW * 0.6; y < Y1; y += ROW) for (let x = X0 + SEAT * 0.5; x < X1; x += SEAT) {
+                    if (inWall(x, y, 0.15) || aisle(x, y)) continue;
+                    if (side(x, y) === 'end') continue;
+                    if (r() < 0.06) continue;
+                    fan(x, y);
+                }
+                for (let x = X0 + ROW * 0.5; x < X1; x += ROW) for (let y = -SIDE * ts + SEAT * 0.5; y < (CFG.rows + SIDE) * ts; y += SEAT) {
+                    if (inWall(x, y, 0.15) || aisle(x, y) || side(x, y) !== 'end') continue;
+                    if (r() < 0.06) continue;
+                    fan(x, y);
+                }
+                g.fillStyle = 'rgba(12,15,22,0.42)'; g.fillRect(X0, Y0, W, H);   // (a dark wash: the crowd stays in the background, the pitch and players stand out)
+                // the aisles' stair treads
+                g.fillStyle = 'rgba(255,255,255,0.06)';
+                for (let y = Y0; y < Y1; y += ROW / 2) for (let x = X0; x < X1; x += ROW / 2) if (aisle(x, y) && !inWall(x, y, 0.1)) g.fillRect(x, y, ROW / 2 - 1, 2);
+                // the upper rows fade into the dark (the roof's shadow), the lower rows catch the floodlights
+                const fade = (x0, y0, x1, y1, ax, ay, bx, by) => { const gr = g.createLinearGradient(ax, ay, bx, by); gr.addColorStop(0, 'rgba(5,7,10,0)'); gr.addColorStop(1, 'rgba(5,7,10,0.9)'); g.fillStyle = gr; g.fillRect(x0, y0, x1 - x0, y1 - y0); };
+                const fz = 9 * ts;
+                fade(X0, Y0, X1, -5 * ts, 0, -5 * ts, 0, -5 * ts - fz); fade(X0, (CFG.rows + 5) * ts, X1, Y1, 0, (CFG.rows + 5) * ts, 0, (CFG.rows + 5) * ts + fz);
+                fade(X0, Y0, -2 * ts, Y1, -2 * ts, 0, -2 * ts - fz, 0); fade((CFG.cols + 2) * ts, Y0, X1, Y1, (CFG.cols + 2) * ts, 0, (CFG.cols + 2) * ts + fz, 0);
+                // the advertising boards round the apron, then the apron's grass (darker than the pitch, mown in stripes)
+                const ADS = ['BLUDBOWL', 'NUFFLE SAYS NO', 'SPIKED ALE', 'STUNTY PIES', 'BONE HEAD BREWS', 'TROLL-TOUGH TAPE', 'GOBBO BOMBS'];
+                aprons.forEach(a => { g.fillStyle = '#111317'; g.fillRect((a.x - WALL) * ts, (a.y - WALL) * ts, (a.w + 2 * WALL) * ts, (a.h + 2 * WALL) * ts); });
+                aprons.forEach(a => {
+                    const gr = g.createLinearGradient(0, a.y * ts, 0, (a.y + a.h) * ts); gr.addColorStop(0, '#1f5a26'); gr.addColorStop(1, '#1b4f22');
+                    g.fillStyle = gr; g.fillRect(a.x * ts, a.y * ts, a.w * ts, a.h * ts);
+                    for (let x = Math.ceil(a.x); x < a.x + a.w; x += 2) { g.fillStyle = 'rgba(255,255,255,0.035)'; g.fillRect(x * ts, a.y * ts, ts, a.h * ts); }
+                });
+                // boards: panels along each straight run of wall (only where the run isn't hidden inside another apron)
+                let ai = 0;
+                const board = (x, y, w, h, vert) => {
+                    const cx = x + w / 2, cy = y + h / 2; if (aprons.some(a => cx > a.x * ts && cx < (a.x + a.w) * ts && cy > a.y * ts && cy < (a.y + a.h) * ts)) return;
+                    const kk = ai % 3 === 2 ? null : K[ai % 3], txt = ADS[ai++ % ADS.length];
+                    g.fillStyle = kk ? kk.fill : '#0f172a'; g.fillRect(x + 1, y + 1, w - 2, h - 2);
+                    g.fillStyle = kk ? kk.text : '#fbbf24'; g.font = `bold ${Math.round(Math.min(vert ? w : h, ts) * 0.62)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                    g.save(); g.translate(cx, cy + (vert ? 0 : h * 0.06)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, (vert ? h : w) * 0.9); g.restore();
+                };
+                aprons.forEach(a => {
+                    const L = 3 * ts, wl = WALL * ts;
+                    for (let x = (a.x - WALL) * ts; x < (a.x + a.w + WALL) * ts - 1; x += L) { const w = Math.min(L, (a.x + a.w + WALL) * ts - x); if (w > ts) { board(x, (a.y - WALL) * ts, w, wl); board(x, (a.y + a.h) * ts, w, wl); } }
+                    for (let y = a.y * ts; y < (a.y + a.h) * ts - 1; y += L) { const h = Math.min(L, (a.y + a.h) * ts - y); if (h > ts) { board((a.x - WALL) * ts, y, wl, h, true); board((a.x + a.w) * ts, y, wl, h, true); } }
+                });
+                // floodlight glow on the near rows
+                const gl = g.createRadialGradient(midX, CFG.rows * ts / 2, CFG.rows * ts * 0.6, midX, CFG.rows * ts / 2, CFG.cols * ts * 0.85);
+                gl.addColorStop(0, 'rgba(255,250,230,0.07)'); gl.addColorStop(1, 'rgba(255,250,230,0)'); g.fillStyle = gl; g.fillRect(X0, Y0, W, H);
+                return cv;
+            }
+
+            // ---- a dugout's woodwork: floor, bench, awning in the team's colours with its name, three bays. Painted once per team ----
+            const DS = 2;   // (its canvas resolution)
+            const AWN = 0.62, BENCH = 0.24, RAIL = 0.34;   // (tiles)
+            const bays = d => { const w = d.w; return [['res', 'RESERVES', 0, w * 0.5], ['ko', 'KNOCKED OUT', w * 0.5, w * 0.25], ['cas', 'CASUALTIES', w * 0.75, w * 0.25]]; };
+            function paintDugout(t) {
+                const ts = T(), d = dugRect(t), K = kits()[t], W = d.w * ts, H = d.h * ts, cv = document.createElement('canvas');
+                cv.width = Math.round(W * DS); cv.height = Math.round(H * DS);
+                const g = cv.getContext('2d'); g.scale(DS, DS);
+                const awY = d.flip ? H - AWN * ts : 0, railY = d.flip ? 0 : H - RAIL * ts, benchY = d.flip ? awY - BENCH * ts : AWN * ts;
+                // shell and floor
+                g.fillStyle = '#2a1d14'; if (g.roundRect) { g.beginPath(); g.roundRect(0, 0, W, H, ts * 0.12); g.fill(); } else g.fillRect(0, 0, W, H);
+                const fl = g.createLinearGradient(0, 0, 0, H); fl.addColorStop(0, '#4b5058'); fl.addColorStop(1, '#3d4148');
+                g.fillStyle = fl; g.fillRect(ts * 0.08, ts * 0.08, W - ts * 0.16, H - ts * 0.16);
+                const r = pitchRng(311 + t);
+                for (let i = 0; i < W * H / 60; i++) { g.fillStyle = r() < 0.5 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.05)'; g.fillRect(r() * W, r() * H, 1.5, 1.5); }
+                // the bench along the back
+                g.fillStyle = '#7c4a22'; g.fillRect(ts * 0.1, benchY, W - ts * 0.2, BENCH * ts);
+                g.fillStyle = 'rgba(0,0,0,0.25)'; for (let x = ts * 0.1; x < W - ts * 0.1; x += ts * 1.1) g.fillRect(x, benchY, 1.5, BENCH * ts);
+                g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(ts * 0.1, benchY + (d.flip ? BENCH * ts - 2 : 0), W - ts * 0.2, 2);
+                // bays: low walls between them, a plaque on the front rail, a sign on the back wall
+                const B = bays(d);
+                B.forEach(([k, lab, x0, w], i) => {
+                    if (i) { g.fillStyle = '#2a1d14'; g.fillRect(x0 * ts - ts * 0.05, 0, ts * 0.1, H); g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(x0 * ts - ts * 0.05, 0, 1.5, H); }
+                    if (k === 'ko') {   // a bucket of water and a sponge
+                        const bx = (x0 + w) * ts - ts * 0.32, by = d.flip ? railY + RAIL * ts + ts * 0.3 : railY - ts * 0.3;
+                        g.fillStyle = '#64748b'; g.beginPath(); g.moveTo(bx - ts * 0.13, by - ts * 0.12); g.lineTo(bx + ts * 0.13, by - ts * 0.12); g.lineTo(bx + ts * 0.1, by + ts * 0.12); g.lineTo(bx - ts * 0.1, by + ts * 0.12); g.closePath(); g.fill();
+                        g.fillStyle = '#38bdf8'; g.beginPath(); g.ellipse(bx, by - ts * 0.11, ts * 0.12, ts * 0.04, 0, 0, Math.PI * 2); g.fill();
+                        g.fillStyle = '#facc15'; g.fillRect(bx - ts * 0.05, by - ts * 0.17, ts * 0.12, ts * 0.06);
+                    }
+                    if (k === 'cas') {   // a stretcher and a red cross on the wall
+                        const sx = x0 * ts + ts * 0.2, sw = w * ts - ts * 0.4, sy = d.flip ? railY + RAIL * ts + ts * 0.18 : railY - ts * 0.34;
+                        g.fillStyle = 'rgba(214,211,209,0.18)'; g.fillRect(sx, sy, sw, ts * 0.16);
+                        const cx = (x0 + w / 2) * ts, cy = d.flip ? awY - BENCH * ts - ts * 0.02 : benchY + BENCH * ts + ts * 0.02;
+                        g.fillStyle = '#f8fafc'; g.beginPath(); g.arc(cx + w * ts * 0.36, cy + (d.flip ? -ts * 0.14 : ts * 0.14), ts * 0.11, 0, Math.PI * 2); g.fill();
+                        g.fillStyle = '#dc2626'; const s = ts * 0.035, ccx = cx + w * ts * 0.36, ccy = cy + (d.flip ? -ts * 0.14 : ts * 0.14); g.fillRect(ccx - s * 2.2, ccy - s * 0.7, s * 4.4, s * 1.4); g.fillRect(ccx - s * 0.7, ccy - s * 2.2, s * 1.4, s * 4.4);
+                    }
+                });
+                // the front rail (the side facing the pitch), with the bays' plaques
+                g.fillStyle = '#3b2a1e'; g.fillRect(0, railY, W, RAIL * ts);
+                g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(0, d.flip ? railY + RAIL * ts - 2 : railY, W, 2);
+                B.forEach(([k, lab, x0, w]) => {
+                    const pw = Math.min(w * ts - ts * 0.3, ts * 3), px = (x0 + w / 2) * ts - pw / 2, py = railY + ts * 0.05, ph = RAIL * ts - ts * 0.1;
+                    g.fillStyle = '#0f172a'; g.fillRect(px, py, pw, ph); g.strokeStyle = 'rgba(251,191,36,0.6)'; g.lineWidth = 1; g.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
+                    g.fillStyle = '#fde68a'; g.font = `bold ${Math.round(ph * 0.72)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                    g.fillText(lab, px + pw / 2, py + ph / 2 + ph * 0.08, pw - 6);
+                });
+                // the awning in team colours: stripes, a scalloped edge over the bench, the team's name on a banner
+                const aw = AWN * ts;
+                for (let x = 0, i = 0; x < W; x += ts * 0.5, i++) { g.fillStyle = i % 2 ? shade(K.fill, -0.18) : K.fill; g.fillRect(x, awY, ts * 0.5 + 0.5, aw); }
+                const sh = g.createLinearGradient(0, awY, 0, awY + aw); sh.addColorStop(0, d.flip ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.18)'); sh.addColorStop(1, d.flip ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.25)');
+                g.fillStyle = sh; g.fillRect(0, awY, W, aw);
+                g.fillStyle = K.fill; const ey = d.flip ? awY : awY + aw;
+                for (let x = 0, i = 0; x < W; x += ts * 0.5, i++) { g.fillStyle = i % 2 ? shade(K.fill, -0.18) : K.fill; g.beginPath(); g.arc(x + ts * 0.25, ey, ts * 0.25, d.flip ? Math.PI : 0, d.flip ? 0 : Math.PI); g.fill(); }
+                g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(0, d.flip ? awY - 2 : awY + aw, W, 2);
+                const nm = names()[t].toUpperCase(), bw = Math.min(W * 0.62, ts * 7), bh = aw * 0.72, bx = W / 2 - bw / 2, by = awY + (aw - bh) / 2;
+                g.fillStyle = K.text; g.fillRect(bx, by, bw, bh); g.strokeStyle = shade(K.fill, -0.4); g.lineWidth = 2; g.strokeRect(bx + 1, by + 1, bw - 2, bh - 2);
+                g.fillStyle = K.fill; g.font = `bold ${Math.round(bh * 0.8)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(nm, W / 2, by + bh / 2 + bh * 0.08, bw - 10);
+                return cv;
+            }
+            // where a bay's players go: as large as fits (up to a square each), in rows
+            function layout(d, x0, w, n) {
+                const ts = T(), top = d.flip ? RAIL + 0.08 : AWN + BENCH * 0.35, bot = d.flip ? d.h - AWN - BENCH * 0.35 : d.h - RAIL - 0.08, h = bot - top, ww = w - 0.2;
+                let c = 1.0; while (c > 0.4 && Math.floor(ww / c) * Math.floor(h / c) < n) c -= 0.05;
+                const cols = Math.max(1, Math.floor(ww / c)), rows = Math.max(1, Math.floor(h / c));
+                const ox = x0 + 0.1 + (ww - Math.min(cols, n) * c) / 2;
+                return i => { const cx = i % cols, ry = Math.floor(i / cols); return { x: (d.x + ox + (cx + 0.5) * c) * ts, y: (d.y + top + (Math.min(ry, rows - 1) + 0.5) * c + (d.flip ? 0 : 0)) * ts, c: c * ts }; };
+            }
+            const offPitch = p => p.x < 0 || p.x >= CFG.cols || p.y < 0 || p.y >= CFG.rows || p.isReserve || p.isCasualty || p.isEjected;
+            const bayOf = p => p.isCasualty || p.isEjected ? 'cas' : p.isKO ? 'ko' : 'res';
+            // who is in a team's dugout, by bay (players still fading off the pitch arrive when the fade ends)
+            function occupants(t) {
+                const out = { res: [], ko: [], cas: [] }, fl = state.flightAnimation && state.flightAnimation.active && state.flightAnimation.player;
+                state.players.forEach(p => { if (p.team !== t || p.isFading || (fl && fl.id === p.id) || !offPitch(p)) return; out[bayOf(p)].push(p); });
+                const o = p => (p.nr != null ? p.nr : 99) * 1000 + p.id;
+                Object.values(out).forEach(a => a.sort((a, b) => o(a) - o(b)));
+                return out;
+            }
+            const casMark = p => p.isEjected ? '🟥' : p.casualtyStatus === 'Dead' ? '💀' : p.casualtyStatus === 'Badly Hurt' ? '🩹' : '✚';
+            const casCol = p => p.isEjected ? '#ef4444' : p.casualtyStatus === 'Dead' ? '#e5e7eb' : p.casualtyStatus === 'Badly Hurt' ? '#fde68a' : '#f87171';
+            function drawDugoutPlayers(c, t) {
+                const ts = T(), d = dugRect(t), occ = occupants(t);
+                bays(d).forEach(([k, , x0, w]) => {
+                    const list = occ[k], at = layout(d, x0, w, list.length);
+                    list.forEach((p, i) => {
+                        const q = at(i), s = q.c / ts * 0.92;
+                        hits.push({ p, x: q.x - q.c / 2, y: q.y - q.c / 2, w: q.c, h: q.c });
+                        c.save(); c.translate(q.x, q.y + q.c * 0.02); c.scale(s, s);
+                        if (k === 'cas') c.globalAlpha = 0.72;
+                        if (picked === p.id) { c.strokeStyle = '#facc15'; c.lineWidth = 3; c.beginPath(); c.ellipse(0, ts * 0.33, ts * 0.36, ts * 0.13, 0, 0, Math.PI * 2); c.stroke(); }
+                        const was = [p.isDown, p.isStunned]; p.isDown = k !== 'res'; p.isStunned = false;   // (the knocked out and the hurt lie down, the reserves stand)
+                        try { if (spriteFor(p)) drawSpriteToken(p, ts, { noGlow: true }); } finally { p.isDown = was[0]; p.isStunned = was[1]; }
+                        if (!spriteFor(p)) {
+                            const st = teamStyle(p.team); c.fillStyle = hex(st.fill); c.beginPath(); c.arc(0, 0, ts * 0.32, 0, Math.PI * 2); c.fill(); c.fillStyle = hex(st.text, '#fff'); c.font = `bold ${ts * 0.3}px Inter`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(p.label || '', 0, 0); }
+                        c.globalAlpha = 1;
+                        // the shirt number, bottom left; a mark for the knocked out and the hurt, top right
+                        c.font = `bold ${Math.round(ts * 0.22)}px Inter`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineWidth = ts * 0.06; c.strokeStyle = '#0b0d12'; c.fillStyle = '#ffffff';
+                        c.strokeText(String(pNo(p)), -ts * 0.34, ts * 0.33); c.fillText(String(pNo(p)), -ts * 0.34, ts * 0.33);
+                        const mk = k === 'ko' ? '💤' : k === 'cas' ? casMark(p) : p.heatBench ? '🥵' : '';
+                        if (mk) {
+                            if (mk === '✚') { c.fillStyle = '#f8fafc'; c.beginPath(); c.arc(ts * 0.3, -ts * 0.42, ts * 0.15, 0, Math.PI * 2); c.fill(); c.fillStyle = casCol(p); c.font = `bold ${Math.round(ts * 0.28)}px Inter`; c.fillText('✚', ts * 0.3, -ts * 0.41); }
+                            else { c.font = `${Math.round(ts * 0.3)}px sans-serif`; c.fillText(mk, ts * 0.3, -ts * 0.42); }
+                        }
+                        c.restore();
+                    });
+                });
+            }
+            // the crowd's cheer after a touchdown or a casualty: a bright wave rolls along that team's stands for a moment
+            function drawCheer(c, now) {
+                const k = (now - cheerAt) / 1600; if (k < 0 || k > 1) return;
+                const ts = T(), midX = CFG.cols * ts / 2, wx = cheerTeam === 0 ? -MX * ts : midX, ww = midX + MX * ts - (cheerTeam === 0 ? 0 : 0);
+                const pos = wx + ww * k, gr = c.createLinearGradient(pos - 3 * ts, 0, pos + 3 * ts, 0), a = 0.16 * Math.sin(k * Math.PI);
+                gr.addColorStop(0, 'rgba(255,255,220,0)'); gr.addColorStop(0.5, `rgba(255,255,220,${a.toFixed(3)})`); gr.addColorStop(1, 'rgba(255,255,220,0)');
+                c.save(); c.fillStyle = gr; c.globalCompositeOperation = 'lighter'; c.fillRect(Math.max(wx, pos - 3 * ts), -MY * ts, 6 * ts, (CFG.rows + 2 * MY) * ts); c.restore();
+            }
+            // drawn under the pitch, inside drawFrame's camera transform (pitch coordinates)
+            function drawBack(c) {
+                const ts = T(), K = kits(), nm = names();
+                const sk = [CFG.cols, CFG.rows, ts, K[0].fill, K[0].text, K[1].fill, K[1].text].join('|');
+                if (!stands || sk !== standsKey) { stands = paintStands(); standsKey = sk; }
+                [0, 1].forEach(t => { const dk = [sk, nm[t]].join('|'); if (!dugs[t] || dugKeys[t] !== dk) { dugs[t] = paintDugout(t); dugKeys[t] = dk; } });
+                const z = state.camera.zoom, vx = -state.camera.x / z, vy = -state.camera.y / z, vw = (canvas.width / (window.devicePixelRatio || 1)) / z, vh = (canvas.height / (window.devicePixelRatio || 1)) / z;
+                c.fillStyle = '#05070a'; c.fillRect(vx - 2, vy - 2, vw + 4, vh + 4);
+                c.drawImage(stands, -MX * ts, -MY * ts, (CFG.cols + 2 * MX) * ts, (CFG.rows + 2 * MY) * ts);
+                drawCheer(c, CLOCK.real());
+                hits = [];
+                [0, 1].forEach(t => { const d = dugRect(t); c.drawImage(dugs[t], d.x * ts, d.y * ts, d.w * ts, d.h * ts); drawDugoutPlayers(c, t); });
+            }
+            // a tap in pitch coordinates: the dugout player under it, if any
+            function hit(wx, wy) { if (!active()) return null; const h = hits.find(b => wx >= b.x && wx <= b.x + b.w && wy >= b.y && wy <= b.y + b.h); return h ? h.p : null; }
+            function pick(p) { picked = p ? p.id : null; }
+            function set(v) { pref = !!v; try { localStorage.setItem('bb-stadium', pref ? '1' : '0'); } catch (e) {} if (pref && PITCH.style !== 'blades') setPitchPref('blades'); }
+            function cheer(team) { if (team === 0 || team === 1) { cheerAt = CLOCK.real(); cheerTeam = team; } }
+            return { active, drawBack, hit, pick, set, cheer, occupants, dugRect, boxes: () => hits.map(h => ({ id: h.p.id, x: h.x, y: h.y, w: h.w, h: h.h })), get on() { return pref || Q; }, get query() { return Q; } };
+        })();
         function render() { if (!CLOCK.sim) drawFrame(); }
         // While the kicking team sets up, the receiving team isn't shown: they set up afterwards, as in a real game
         function hiddenInSetup(p) {
@@ -22114,6 +22361,7 @@ ol.ci-steps li::marker { content: none; }
             ctx.save(); ctx.translate(state.camera.x, state.camera.y); ctx.scale(state.camera.zoom, state.camera.zoom);
 
             const ts = CFG.tileSize;
+            if (STADIUM.active()) try { STADIUM.drawBack(ctx); } catch (e) { console.error(e); }   // (the stands and dugouts round the pitch, test)
             
             if (PITCH.tex) ctx.drawImage(PITCH.tex, 0, 0, CFG.cols*ts, CFG.rows*ts);
             else { ctx.fillStyle = '#166534'; ctx.fillRect(0,0, CFG.cols*ts, CFG.rows*ts); }
@@ -22882,7 +23130,12 @@ ol.ci-steps li::marker { content: none; }
             if([MODES.ROLL_PROMPT, MODES.LOCKED].includes(state.mode)) return;
             if(!document.getElementById('modal-roster').classList.contains('hidden')) return;
             if (state.drag.moved) return;   // the end of a drag across the pitch, not a tap
-            
+            {   // a player in a dugout (Stadium & dugouts): show them in the Unit Panel, as a tap on the pitch would (no actions)
+                const r = canvas.getBoundingClientRect(), dp = STADIUM.hit((e.clientX - r.left - state.camera.x) / state.camera.zoom, (e.clientY - r.top - state.camera.y) / state.camera.zoom);
+                if (dp) { STADIUM.pick(dp); updateUI(dp); document.getElementById('action-toolbar').classList.add('hidden');
+                    document.getElementById('stats-panel').insertAdjacentHTML('beforeend', `<div class="text-[9px] text-amber-300 mt-0.5">In the dugout: ${whyOut(dp) || 'Reserve'}</div>`); render(); return; }
+                STADIUM.pick(null);
+            }
             const w = screenToWorld(e.clientX, e.clientY);
             handleGridClick(w.gridX, w.gridY);
         });
@@ -32735,6 +32988,7 @@ ol.ci-steps li::marker { content: none; }
                 on('st-move', twoTapPref, 'Tap twice', 'Tap once');
                 on('st-brain', AIX.pref === 'x', 'Experimental', 'Classic');
                 on('st-hd', HD.on, HD.size === 64 ? '2x' : '1.5x', 'Off');
+                on('st-stadium', STADIUM.on, 'On', 'Off');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
                 on('st-dice-block', DICEFX.S.block(), 'On', 'Off');
                 on('st-dice-other', DICEFX.S.other(), 'On', 'Off');
@@ -32765,10 +33019,11 @@ ol.ci-steps li::marker { content: none; }
             document.getElementById('st-dice-team').addEventListener('click', () => { DICEFX.set('bb-dice-team', DICEFX.S.team() ? '0' : '1'); paintSettings(); });
             document.getElementById('st-dice-dur').addEventListener('input', e => { DICEFX.set('bb-dice-dur', String(+e.target.value)); document.getElementById('st-dice-dur-o').textContent = (+e.target.value / 1000).toFixed(1) + ' s'; });
             document.getElementById('st-hd').addEventListener('click', () => { HD.set(HD.size === 0 ? 48 : HD.size === 48 ? 64 : 0); paintSettings(); });
+            document.getElementById('st-stadium').addEventListener('click', () => { STADIUM.set(!STADIUM.on); paintSettings(); try { render(); } catch (e) {} });
             document.getElementById('st-pitch').addEventListener('change', e => { setPitchPref(e.target.value); selPitch.value = pitchPref; });
             {   // the in-match Settings sheet (⚙ in the top bar): the rows above that are safe to change mid-match are moved into it while
                 // it's open (their buttons, handlers and paintSettings stay the same) and put back where they were when it closes
-                const LIVE = ['st-sound', 'st-music', 'st-text', 'st-move', 'st-anim', 'st-dice-block', 'st-dice-other', 'st-dice-dur', 'st-dice-team', 'st-replay', 'st-replay-kick', 'st-weather'];
+                const LIVE = ['st-sound', 'st-music', 'st-text', 'st-move', 'st-anim', 'st-dice-block', 'st-dice-other', 'st-dice-dur', 'st-dice-team', 'st-replay', 'st-replay-kick', 'st-weather', 'st-stadium'];
                 const sheet = document.getElementById('game-settings'), box = document.getElementById('gs-rows');
                 let moved = [];
                 const close = () => {
