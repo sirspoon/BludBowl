@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.63 (22 Nov 2026)
+- Fixed: with animated block dice, when the computer gets to choose the die, tapping the dice to roll them did nothing.
+
 ## v5.62 (22 Nov 2026)
 - The acting player's marker is simpler: no ring around them, just their base glowing yellow (a bright flare as they're picked, then a pulse) under the pointer; a target's base glows red.
 

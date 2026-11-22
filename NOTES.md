@@ -287,6 +287,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   `aiMark`, from `AI.focus()` = the current `plan`'s pid / target, else `state.selectedId`, or `state.combat`'s defender).
   v5.62: rings replaced by a glowing base: `markNow()` once a frame (`FREP.mark()` or `aiMark()`, flare start times in `markSince`),
   `markGlow(p)` -> `drawSpriteToken`'s `opts.glow`; `actorMark` now draws only the pointer and the dashed line (rings for non-sprite tokens).
+  v5.63: `AI.ownerTeam` gave `#dice-container` to the chooser always, so a person couldn't tap to roll when the computer chooses; now the
+  roller's while `state.combat.diceWait` / `diceAnim`.
 - v5.60 (22 Nov): the turn banner after the computer's sped-up turn lasted ~0.5 s (its timer was set while CLOCK was still at 4x; the
   speed drops back only on the next frame). `showTurnBanner` now calls `SIMSPEED.sync()` (= its `apply`) first. Watch for the same trap
   anywhere a timer is set at a speed change. Check: `node tools/ui-tests/turn-banner.js`.

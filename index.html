@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.62</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.63</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -27833,7 +27833,7 @@ ol.ci-steps li::marker { content: none; }
                 if (el.closest('#modal-roll')) return state.pendingRoll ? state.pendingRoll.player.team : null;
                 if (el.closest('#modal-team-reroll')) return state.activeTeam;
                 if (el.closest('#btn-combat-trr')) return state.activeTeam;
-                if (el.closest('#dice-container')) return state.combat ? state.combat.chooser : null;
+                if (el.closest('#dice-container')) return !state.combat ? null : (state.combat.diceWait || state.combat.diceAnim) && state.combat.atk ? state.combat.atk.team : state.combat.chooser;   // (animated dice: rolling / skipping is the roller's; picking, the chooser's)
                 if (el.closest('#modal-choice')) return state.choice && state.choice.team != null ? state.choice.team : null;
                 if (el.closest('#btn-end-turn') || el.closest('#action-toolbar')) return state.activeTeam;
                 if (el.closest('#btn-confirm-setup')) return state.mode === MODES.SETUP ? state.setup.currentSettingTeam : null;

@@ -2,6 +2,12 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.63 (22 Nov 2026)
+- Fixed: animated block dice on your block when the computer gets to choose the die (it is stronger): tapping the tumbling dice
+  did nothing, so you couldn't roll. The guard that stops you pressing the computer's controls counted the whole dice box as the
+  chooser's. While the dice wait to be rolled or are in the air, the box now belongs to the side rolling them; once they land, picking
+  a die is the chooser's again (the computer then picks as usual). Check added to `tools/ui-tests/dice.js` (fails on v5.62).
+
 ## v5.62 (22 Nov 2026)
 - The acting-player marker (the computer's turns and the replays): the big pulsing ring around the player is gone. Instead the ground
   under their base lights up yellow, flaring brightly the moment they're picked and then pulsing for as long as they act, with the

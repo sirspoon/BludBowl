@@ -134,6 +134,20 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(s.dice && !s.roll, 'tapping the tumbling dice rolls them', s);
   await page.waitForTimeout(900);
 
+  // ---- your block where the computer chooses (it is stronger): your tap still rolls; then it picks
+  await page.evaluate(() => { const [a, d] = __scene(); getPlayerById(d).st = 6; AI.set(1, true); startBlock(a, d); });
+  await page.waitForTimeout(200);
+  const ch0 = await page.evaluate(() => ({ chooser: state.combat.chooser, wait: !!state.combat.diceWait }));
+  await page.tap('#dice-container .dfx-tray');
+  await page.waitForTimeout(150);
+  const ch1 = await page.evaluate(() => ({ dice: state.combat.dice && state.combat.dice.length, wait: !!state.combat.diceWait }));
+  check(ch0.chooser === 1 && ch0.wait && ch1.dice === 2 && !ch1.wait, "your block with the computer choosing: tapping the dice rolls them", [ch0, ch1]);
+  for (let i = 0; i < 40 && await page.evaluate(() => !document.getElementById('modal-dice').classList.contains('hidden')); i++) await page.waitForTimeout(250);
+  const ch2 = await page.evaluate(() => ({ open: !document.getElementById('modal-dice').classList.contains('hidden') }));
+  check(!ch2.open, 'then the computer picks a die as usual', ch2);
+  await page.waitForTimeout(1500);   // (the push and armour roll that follow)
+  await page.evaluate(() => { AI.set(1, false); ['modal-choice', 'modal-dice', 'modal-roll', 'modal-team-reroll'].forEach(id => document.getElementById(id).classList.add('hidden')); });
+
   // ---- team colours on the dice
   const cols = await page.evaluate(() => {
     ROSTERS[0].dice = ['#1d4ed8', '#f8fafc'];
