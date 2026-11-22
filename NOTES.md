@@ -236,6 +236,19 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   is the size of the noise (~0.5-1 step); dangerW (+2 steps, steadily) was the only one worth a test of its own: dangerW 1.95 alone
   (the carrier's fear of squares opponents can really reach, carrierScore) .388 after 375 in `k_seq` (`k_dw195`; NO GAIN). These
   values are flat near v5.48: the gains left aren't in re-weighting what brain x already does.
+  drefsante's weaknesses (22 Nov; the owner: exploit it rather than copy it). Its rules, read from the jar's bytecode (`javap -c -p`
+  on `be.drefsante.bloodbowl.ai.DrefsanteAI` / `UtilitiesAI`; no source in the zip): a fixed priority list per ball state, each step
+  with a threshold. Defending: Blitz/block our carrier if P(no turnover) >= .88 (best knock-down chance among those) -> players next
+  to the carrier by 99%-sure moves -> blocks next to the ball at .88 -> carrier Blitz at .65 -> mark our runners (only players within
+  MA+2 of its end zone, not by the ball, by 95%-sure moves, its best blockers) -> emergency (.4/.3 carrier hits, throw team-mate) ONLY
+  if our carrier can reach the end zone this turn -> its receivers forward to squares we can't reach -> cover the squares in front of
+  our carrier -> carrier at .5. Every branch ends moving players away from stronger ones, then fouls. Set-ups nearly fixed
+  (`FixedSetupTeam`): kicking, 3 on the line incl. a Catcher, the rest 2-3 back; receiving, 9 on the line, only Thrower + a
+  Lineman ~6 from its end zone. Kick placement random. Games (study_fw2, 120, v5.48; `nn/look/dbg/td_how.py`, `td_drive.py`,
+  `drives.py`, `strips.py`, `ready_cmp.py`): touchdowns 164-108; we receive -> we score 27%, it 26%; it receives -> it 45%, we 17%.
+  Both lose a held ball in ~31% of the other's turns and block carriers equally (400 v 374); after a loss it scores 28%, we 17%.
+  Per own turn with the ball we score 17%, it 19%. Our kicks: touchback 21% (46 of 214; it then scores 46%) - we aim at y 3-4 / 10-11,
+  and land 6-7 from its end zone, where its two deep players stand; landing 4+ from its nearest player (28 drives) it scored 29%, we 32%.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
