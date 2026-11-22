@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.52 (22 Nov 2026)
+- Armour and injury dice at the top of the screen now show their result only once the dice have landed, just below the top bar.
+
 ## v5.51 (22 Nov 2026)
 - Animated dice: your block dice tumble until you press Roll, then jump and land on the result; Dodges, Rushes and other rolls land in the roll window. Dice in each team's colours (set them in the Team Builder). All of it can be switched off in Settings.
 

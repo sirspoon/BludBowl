@@ -1272,7 +1272,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.51</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.52</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -12168,7 +12168,7 @@ ol.ci-steps li::marker { content: none; }
             }
 
             REPLAY.injury(player.id, inj.out);
-            DICEFX.toast([r1, r2], { col: DICEFX.colFor(injCause && injCause.team !== player.team ? injCause.team : player.team),
+            DICEFX.toast([r1, r2], { col: DICEFX.colFor(injCause && injCause.team !== player.team ? injCause.team : player.team), title: 'Injury roll…',
                 label: `Injury ${roll}: ${inj.out === 'stun' ? 'Stunned' : inj.out === 'ko' ? 'KO' : 'Casualty!'}`, cls: inj.out === 'stun' ? 'ok' : inj.out === 'ko' ? 'warn' : 'bad' });
             COACH.injury(player, roll, inj, injuryBonus);
             if (inj.out === 'stun') {
@@ -15878,7 +15878,7 @@ ol.ci-steps li::marker { content: none; }
             if (attacker && attacker.skills.includes('Mighty Blow')) sfx('bigHit');
             sfx(finalArmorRoll >= player.av || clawsBreak ? 'armourBreak' : 'armourHolds', 250);
             { const br = finalArmorRoll >= player.av || clawsBreak;   // (animated dice: a quick look at the two dice, holding nothing up)
-              DICEFX.toast([r1, r2], { col: DICEFX.colFor(attacker ? attacker.team : player.team), label: `Armour ${finalArmorRoll} v AV ${player.av}+: ${br ? 'broken' : 'holds'}`, cls: br ? 'bad' : 'ok' }); }
+              DICEFX.toast([r1, r2], { col: DICEFX.colFor(attacker ? attacker.team : player.team), title: 'Armour roll…', label: `Armour ${finalArmorRoll} v AV ${player.av}+: ${br ? 'broken' : 'holds'}`, cls: br ? 'bad' : 'ok' }); }
             if(finalArmorRoll >= player.av || clawsBreak) {
                 if (clawsBreak && finalArmorRoll < player.av) { log(`  Claws! A natural ${baseRoll} breaks ${player.type}'s armour whatever its value.`, 'text-red-400 font-bold'); skillPop('Claws'); }
                 else log(`  Armor broken (${finalArmorRoll} >= AV${player.av}+).`, 'text-red-400');
@@ -20541,11 +20541,16 @@ ol.ci-steps li::marker { content: none; }
                 showing = true;
                 let box = document.getElementById('dfx-toast');
                 if (!box) { box = el('div', ''); box.id = 'dfx-toast'; box.setAttribute('aria-hidden', 'true'); document.body.appendChild(box); }
+                { const eb = document.getElementById('btn-end-turn'), r = eb && eb.offsetParent ? eb.getBoundingClientRect() : null;   // (just under the top bar)
+                  box.style.top = r && r.bottom > 0 && r.bottom < innerHeight / 2 ? Math.round(r.bottom + 14) + 'px' : ''; }
                 box.innerHTML = '<div class="dfx-tdice"></div><div class="dfx-tlab"></div>'; box.className = 'show';
                 const T = tray(box.firstChild, { n: it.vals.length, kind: 'd6', col: it.o.col, size: 30, gap: 8, height: 40 });
-                box.lastChild.textContent = it.o.label || ''; box.lastChild.className = 'dfx-tlab ' + (it.o.cls || '');
+                const lab = box.lastChild; lab.textContent = it.o.title || ''; lab.className = 'dfx-tlab';   // (the result only once the dice have landed)
                 tumble(T);
-                setTimeout(() => settle(T, it.vals, null, () => setTimeout(() => { box.className = ''; setTimeout(() => { stop(T); nextToast(); }, 220); }, 900)), 160);
+                setTimeout(() => settle(T, it.vals, null, () => {
+                    lab.textContent = it.o.label || ''; lab.className = 'dfx-tlab ' + (it.o.cls || '');
+                    setTimeout(() => { box.className = ''; setTimeout(() => { stop(T); nextToast(); }, 220); }, 1300);
+                }), 160);
             }
             return {
                 S, live, ink, colFor, contrast, tray, tumble, settle, finish, stop, rollIn, toast, okHex,

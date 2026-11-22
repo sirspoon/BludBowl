@@ -2,6 +2,11 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.52 (22 Nov 2026)
+- Animated dice, the armour and injury strip at the top of the screen: while the dice are in the air it says just "Armour roll…" or
+  "Injury roll…"; the result (e.g. "Armour 9 v AV 9+: broken") appears once they have landed, and stays a little longer (1.3 s) before
+  the strip fades. It now sits just below the top bar instead of over its buttons on a phone.
+
 ## v5.51 (22 Nov 2026)
 - Animated dice, as agreed in the prototype (`tools/dice-prototype/`). New settings: Animate block dice, Animate other rolls, Roll
   length (0.5-2.0 s, default 1.0 s) and Dice in team colours. The two animation settings start off on a device that asks for reduced
