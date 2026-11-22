@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.65 (22 Nov 2026)
+- Stadium & dugouts (test) improved: a crowd of the two teams' races in their colours, shifting about and cheering; both dugouts on the halfway line with bigger labels and equal bays; a grass strip and white line round the pitch; weather over the whole stadium; the view stays near the pitch.
+
 ## v5.64 (22 Nov 2026)
 - Test: a stadium round the pitch, with stands, a crowd in each team's colours and each team's dugout (reserves, knocked out, casualties) along the touchlines. Settings > Stadium & dugouts (test), grass pitch only for now.
 

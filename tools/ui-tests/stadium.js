@@ -47,6 +47,28 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   // back on a 4+: from the KO bay to the reserves
   const back = await page.evaluate(a => { const p = getPlayerById(a); p.isKO = false; p.isReserve = true; p.x = -9; p.y = -9; render(); const o = STADIUM.occupants(0); return { res: o.res.some(q => q.id === a), ko: o.ko.some(q => q.id === a) }; }, ids.a);
   check(back.res && !back.ko, 'a KO\'d player who comes round moves to Reserves', back);
+  // a bloody match: seven of a team knocked out at once all fit in the Knocked Out bay (a third of the dugout), none overlapping
+  const crowd = await page.evaluate(() => {
+    const ps = state.players.filter(p => p.team === 1).slice(0, 7); ps.forEach(p => { p.isKO = true; p.isReserve = false; p.isFading = false; p.x = -9; p.y = -9; });
+    render(); const d = STADIUM.dugRect(1), ts = CFG.tileSize, bx0 = (d.x + d.w / 3) * ts, bx1 = (d.x + 2 * d.w / 3) * ts;
+    const bs = STADIUM.boxes().filter(b => ps.some(p => p.id === b.id));
+    const inside = bs.every(b => b.x >= bx0 - 1 && b.x + b.w <= bx1 + 1 && b.y >= d.y * ts - 1 && b.y + b.h <= (d.y + d.h) * ts + 1);
+    const overlap = bs.some((a, i) => bs.some((b, j) => j > i && a.x < b.x + b.w - 1 && b.x < a.x + a.w - 1 && a.y < b.y + b.h - 1 && b.y < a.y + a.h - 1));
+    return { n: bs.length, inside, overlap };
+  });
+  check(crowd.n === 7 && crowd.inside && !crowd.overlap, 'seven knocked out at once all fit in the Knocked Out bay, none overlapping', crowd);
+  // the view stays near the pitch: zoomed in, a drag far away is pulled back to the dugouts' edge; zoomed right out, the pitch stays on screen;
+  // the game's own starting view isn't moved
+  const cam = await page.evaluate(() => {
+    const ts = CFG.tileSize, W = CFG.cols * ts, H = CFG.rows * ts, view = () => { const z = state.camera.zoom; return { x0: -state.camera.x / z, y0: -state.camera.y / z, x1: (innerWidth - state.camera.x) / z, y1: (innerHeight - state.camera.y) / z }; };
+    state.camera.zoom = 2; state.camera.x = 9000; state.camera.y = -9000; render(); const a = view();
+    state.camera.zoom = 0.4; state.camera.x = -9000; state.camera.y = 9000; render(); const b = view();
+    resizeCanvas(); const before = { x: state.camera.x, y: state.camera.y }; render(); const moved = Math.abs(before.x - state.camera.x) + Math.abs(before.y - state.camera.y);
+    return { inX: a.x0 >= -6 * ts && a.x1 <= W + 6 * ts, inY: a.y0 >= -9 * ts && a.y1 <= H + 9 * ts, pitchSeen: b.x0 <= 0 && b.x1 >= W && b.y0 <= 0 && b.y1 >= H, moved };
+  });
+  check(cam.inX && cam.inY, 'zoomed in, the view can\'t be dragged far from the pitch', cam);
+  check(cam.pitchSeen, 'zoomed right out, the pitch stays on screen', cam);
+  check(cam.moved < 1, 'the starting view is left alone', cam);
   // the setting
   const st = await page.evaluate(() => { localStorage.removeItem('bb-stadium'); STADIUM.set(false); const q = STADIUM.query; STADIUM.set(true); const v = localStorage.getItem('bb-stadium'); STADIUM.set(false); return { q, v, off: localStorage.getItem('bb-stadium') }; });
   check(st.v === '1' && st.off === '0', 'Settings switch saves bb-stadium', st);

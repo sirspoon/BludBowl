@@ -283,6 +283,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.65 (job session, 22 Nov): Stadium & dugouts, the owner's first round (made and checked locally, pushed as one version at the
+  owner's request - they prefer a batch of changes to many small versions). Stands: `paintStands` returns two frames (fans bobbed
+  1.8 px in the second); `fanBlocks` = 3x3-tile patches holding bobbing fans, `drawBack` copies a patch from frame 2 when its own
+  sine is up (`bobRate`, 3x faster on a cheering side). Fans: `FAM` (race -> look), `head()`, `drawFan()`; 72% own race, 14%
+  opponent's, rest any; `farTile` pattern beyond the canvas (MX 11, MY 15, SC 0.75). Dugouts centred (`dugRect`), bays thirds,
+  lying bays wider (`layout` asp 1.35). Grass strip SIDE 1.2 / END 1.8 + white line (drawFrame). Weather: `WFX.air(..., ext)` takes
+  `STADIUM.bounds()` (stadium box, `view` for culling, `ground` = the apron stretch for puddle ripples; `dens` 0.35 out there);
+  `WFX.ground` drawn once stretched over pitch + strip (`STADIUM.apron()`). `STADIUM.clampCam()` each frame in drawFrame.
+  Headless frame times with the stadium ~16.7-19 ms (vsync 16.7) in any weather.
 - v5.64 (job session, 22 Nov): **Stadium & dugouts (test)**, off by default: Settings row `st-stadium` (localStorage `bb-stadium`),
   or `?stadium` (sets `pitchPref` to blades for that visit). `STADIUM` module (just before `render()`); drawn by `drawFrame` under
   the pitch, in pitch coordinates (owner: don't shrink the pitch; dugouts are part of the surroundings, pan/zoom to see them).

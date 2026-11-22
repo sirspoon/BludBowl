@@ -2,6 +2,24 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.65 (22 Nov 2026)
+- Stadium & dugouts (test, still off by default: Settings or `?stadium`), the owner's first round of changes:
+  - The crowd: fans placed loosely, not in a grid, of varied sizes; mostly in the two teams' colours (lighter and darker shades,
+    second colours, stripes, scarves, flags) with some in ordinary clothes. Each fan has their race's look - green orcs with tusks,
+    goblins with big ears, hooded night goblins, elves, dark elves, bearded dwarfs, chaos dwarfs in tall hats, skull-faced undead,
+    mummies, skaven, crested lizardmen, horned Norse, halflings, gnomes in pointy hats, ogres and more - mostly the two teams'
+    races (each side's own at its end). Patches of the crowd bob up and down a pixel or two at their own pace, faster on a team's
+    side when it scores or hurts an opponent.
+  - No more empty corners, and zoomed right out the crowd carries on (fading into the dark) instead of stopping at a black edge.
+  - Both dugouts are centred on the halfway line, one on each touchline. Their three bays (Reserves, Knocked Out, Casualties) are
+    equal thirds, so a bloody match has room: seven players fit in one bay. The team-name banner and bay labels are bigger. Players
+    lying down (knocked out, hurt) have wider spaces.
+  - A wider strip of grass round the pitch before the boards and dugouts, with a white line round the pitch itself.
+  - The weather covers the whole stadium: rain, snow, blood rain and the like fall over the stands, and snow drifts, puddles and wet
+    grass reach the boards (one layer over the pitch and strip, so no line at the pitch's edge).
+  - The view stays near the pitch: zoomed in, it can go as far as the dugouts and a little past the end zones; zoomed out, the
+    pitch and dugouts always stay on screen.
+
 ## v5.64 (22 Nov 2026)
 - Test (off by default): **Stadium & dugouts**. Settings > "Stadium & dugouts (test)", or `?stadium` in the address. The black
   space round the pitch becomes a stadium, drawn by the game itself like the pitch: an apron of grass with advertising boards, then
