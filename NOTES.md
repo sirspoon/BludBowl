@@ -265,7 +265,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   dice against, 10% no hit - and only 10% of turns were dice against. Studies on study_kk2's seeds (120 games): spW 1 (study_sp1)
   dice against 10% -> 26% but no hit 47% -> 36%, ball kept through its turn 67% (v 68%), .362; spW 2 (study_sp2) 70%, our receiving
   drives score 32% (24%), .438. `k_seq` (`k_sp2`): NO GAIN after 375 (.381), NOT WORSE after 1,000 (.390 v .396) - released, as asked.
-  The model rates dice-against squares close to no-hit ones; in the games they cost 19% v 10% - a calibration to try (spBase by tier).
+  Calibration (23 Nov, not kept): spRisk ported to Python (`nn/look/dbg/sp_calib.py`, 2,276 drefsante turns with our carrier standing,
+  study_kk2/sp1/sp2) is already about right from .5 up (.53 -> lost .52, .74 -> .75; both halves), too high below (.14 -> .08, .25 -> .15,
+  .34 -> .27) and on the sideline (.73 -> .42, 45 turns; a push off the pitch counted as sure). The "19% v 10%" above was carrier_dice's
+  cruder tiers, not the model. `spCal` (a table to the real rates + sideline pushes at 0.3) only nudged the Brier score (.143 -> .140) and
+  in the 120-game study on the same seeds (study_cal) kept the ball 68% (v5.50 70%), .346 (v5.50 .438, v5.49 .383): lower mid-range risk
+  lets the carrier swap safety for ground again. Code removed. The lever left is the safety-v-ground weight (spW: only 1 and 2 tried).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
