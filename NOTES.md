@@ -281,6 +281,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   squares ahead with up to 2 free team-mates first stepping (sure moves) to where they cut spRisk most, so the escort goes up first.
   Study (study_esc, same seeds): gain per turn 2.4 -> 3.1, stalls 50% -> 43%, model risk at its turn start .313 -> .318, but scored
   27% of drives (v5.50 study 32%), .396. `k_seq` (`k_esc1`): NO GAIN after 375 (.373). Faster alone doesn't score more.
+  First turn after receiving: Turnover 27% v 18%, the difference mostly pup1 throws after the pick-up (fumbles 3.7%, failed catches 1.7%,
+  other 2.1%; drefsante ~0) and blocks before it (8.3% v 6.1%). Our Thrower set up ON our line (11.9 from our end line; drefsante 6.0),
+  Catchers took the deep spots (same agility, more Move): pick-ups Catcher 344 / Thrower 285 of 1,008; 209 first-turn passes, 38% of
+  those turns a Turnover (`nn/look/dbg/recv_first.py`). drefsante's kicks come to rest nearest, on average, to 6 from our end line,
+  middle row (3.7 away, 96% within 6). v5.70 (the owner: the Thrower should fetch the ball and do the throwing, near where it lands):
+  `thDeep` 1 (`thDeep`, after losHit: best ball handler to that square; off the line first, the sturdiest off-line player taking his
+  line spot - the first version looked only off the line and did nothing) + `pupKick` 1 (no pup1 on the turn after their kick-off: ball
+  loose in our half, at most one of theirs over halfway). study_th2: Thrower 6.0 out, 140 of 164 pick-ups, no first-turn throws, ball
+  ours after our 1st turn 77% -> 81%, Turnover 24% -> 22%, drives scored 26%. `k_seq` (`k_th1`): NO GAIN after 500 (.380), NOT WORSE
+  after 1,125 (.393 v .396) - released, as asked. Drives still run out: 53% of our non-scoring drives end with the ball ours.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,

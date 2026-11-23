@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.70 (23 Nov 2026)
+- The experimental computer coach keeps its Thrower deep when receiving, where your kicks usually land, so he fetches the ball; and it no longer throws straight after picking the ball up on that first turn.
+
 ## v5.69 (23 Nov 2026)
 - Stadiums and dugouts are now on by default (Settings > Stadium & dugouts to switch them off): every pitch has its own stadium, crowd and dugouts. The last four, Fjord, Moot, Khemri and Chaos Wastes, are new (the Chaos Wastes is barely a stadium at all).
 

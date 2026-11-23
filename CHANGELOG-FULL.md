@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.70 (23 Nov 2026)
+- Experimental computer coach (brain x), receiving a kick-off: its best ball handler (Pass, then Sure Hands) is set up 6 squares
+  from its end line in the middle row - the square nearest, on average, to where the opponents' kicks come to rest (within 6 squares
+  96% of the time) - swapping off the line of scrimmage, where the set-up had been putting him. And on that first turn it no longer
+  picks up and throws in one action (38% of those turns had ended in a Turnover); it can still pass later. Against drefsante the
+  Thrower now makes most pick-ups (140 of 164 in a 120-game study, Catchers before), the ball is still ours after the first turn 81% of
+  the time (77%), and over 1,125 games it was level with v5.50 (.393 v .396), so it went in as not worse.
+
 ## v5.69 (23 Nov 2026)
 - **Stadium & dugouts is now on by default** (no longer a test): every match shows its pitch's stadium, crowd and the two dugouts.
   Settings > "Stadium & dugouts" switches it off (remembered in this browser); `?stadium=<pitch>` still picks a pitch for a visit.

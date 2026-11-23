@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.69</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.70</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -29779,7 +29779,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2 },   // (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1 },   // (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -32638,7 +32638,11 @@ ol.ci-steps li::marker { content: none; }
                     // nobody of theirs within pupGap (3) squares who is better placed, when that beats picking up and running
                     // (only a real thrower - passing 3+ or the Pass skill - and a throw at least pupRaw (50%) before any re-roll: with every
                     // team throwing, the poor passers dropped enough to lose ground, while passing teams gained a lot)
-                    if (AIX.on(me, 'pup1') && best && best.kind === 'pickup' && (best.pr >= 30 || lastTurn) && !state.passUsed && best.p.pa != null && (best.p.pa <= 3 || hasSk(best.p, 'Pass')) && !hasSk(best.p, 'My Ball') && !lastTurn) {
+                    // (brain x: th1, pupKick) not on our first turn after their kick-off - the ball loose in our half, at most one of theirs over
+                    // halfway - when 38% of those turns ended in a Turnover: he picks it up and goes on, and throws later if he chooses to
+                    const kickTurn = AIX.x(me) && AIX.p(me, 'pupKick', 0) && toGo(bx, me) >= CFG.cols / 2
+                        && state.players.filter(q => q.team !== me && onPitch(q) && toGo(q.x, me) >= CFG.cols / 2).length <= 1;
+                    if (AIX.on(me, 'pup1') && !kickTurn && best && best.kind === 'pickup' && (best.pr >= 30 || lastTurn) && !state.passUsed && best.p.pa != null && (best.p.pa <= 3 || hasSk(best.p, 'Pass')) && !hasSk(best.p, 'My Ball') && !lastTurn) {
                         const pk = best.p, here = ballSpotValue(me, bx, by), gap = AIX.p(me, 'pupGap', 3), drop = AIX.p(me, 'pupDrop', 4);
                         const rrOk = state.rr[me] > 0 && !state.teamRRUsedThisTurn;
                         let thr = null;
@@ -33566,11 +33570,36 @@ ol.ci-steps li::marker { content: none; }
                 byRole('wide').forEach(s => put(s, take((a, b) => (b.ma + b.st + b.av / 3) - (a.ma + a.st + a.av / 3))));
                 byRole('screen').forEach(s => put(s, take((a, b) => (b.st + b.av / 3) - (a.st + a.av / 3))));
                 if (kind === 'offence' && AIX.x(team) && AIX.p(team, 'losHit', 0)) { try { losHit(team, placed); } catch (e) { console.error('losHit', e); } }
+                if (kind === 'offence' && AIX.x(team) && !GEO.sev && AIX.p(team, 'thDeep', 0)) { try { thDeep(team, placed, mx); } catch (e) { console.error('thDeep', e); } }
                 return pool.length === 0;
             }
             // (brain x: lh1) receiving, they've set up first: put our best hitter on our line next to the softest of their line players (drefsante
             // kicks with a Catcher on its line, Dodge): with a team-mate's assist, a Blitzer's Block + Tackle knock him down on 2 dice 75% of the time, a Lineman's 31%
             // (and a Lineman falls on a skull or both-down: a Turnover with our first action). A swap of two of our squares, so the set-up stays legal.
+            // ---- (brain x: th1) the ball-getter deep ----
+            // Receiving, our Thrower set up just behind our line (11.9 squares from our end line at our first turn; drefsante's 6.0), the deep
+            // spots going to the Catchers (as agile, and quicker), so a Catcher fetched the ball 344 times in 1,008 first turns, the Thrower 285; and
+            // when the Thrower had it, pup1 threw at once: 209 first-turn passes, 80 of those turns ending in a Turnover (38%). drefsante's Thrower
+            // stands deep, picks up 443 of 850 and never throws then (nn/look/dbg: 480 study games). Its kicks come to rest all over our half; the
+            // square nearest them on average is 6 from our end line, in the middle row (3.7 squares away, 96% within 6). So once set up, our best
+            // ball handler (Pass, then Sure Hands, then the best passer) goes onto that square (swapping with whoever is there; if he was on
+            // the line, the sturdiest player off it takes his place there first). With the owner: near where the ball lands, he picks it up and can go on towards whoever he throws to.
+            function thDeep(team, placed, mx) {
+                const losX = mx(12), tx = mx(AIX.p(team, 'thX', 6)), ty = Math.floor(CFG.rows / 2);
+                const all = placed.filter(p => onPitch(p)), off = () => all.filter(p => p.x !== losX);
+                const hv = p => (hasSk(p, 'Pass') ? 4 : 0) + (hasSk(p, 'Sure Hands') ? 2 : 0) + (p.pa != null ? Math.max(0, 5 - p.pa) * 0.5 : 0) - (hasSk(p, 'No Hands') || hasSk(p, 'No Ball') ? 9 : 0);
+                const B = all.slice().sort((a, b) => hv(b) - hv(a))[0];
+                if (!B || hv(B) < 2) return;
+                const swap = (a, b) => { const x = a.x, y = a.y; a.x = b.x; a.y = b.y; b.x = x; b.y = y; };
+                // (on the line - the set-up had put him there: the sturdiest player off the line takes his place)
+                if (B.x === losX) { const L = off().sort((a, b) => (b.st - a.st) || (b.av - a.av) || (hasSk(b, 'Block') - hasSk(a, 'Block')) || (playerCost(a) - playerCost(b)))[0]; if (!L) return; swap(B, L); }
+                const Q = all.find(q => q !== B && q.x === tx && q.y === ty);
+                if (Q) swap(B, Q); else { B.x = tx; B.y = ty; }
+                AIX.count(team, 'th1');
+            }
+            // ON in brain x since v5.70 (thDeep 1, pupKick 1; the owner asked). Study (study_th2, 120 games on v5.50's seeds): Thrower 6.0 from our
+            // end line, picked up 140 of 164, no first-turn throws; ball ours after our 1st turn 77% -> 81% (drefsante 80%), Turnover 24% -> 22%;
+            // receiving drives scored 26% (all earlier studies 25%). k_seq (k_th1): NO GAIN after 500 (.380), NOT WORSE after 1,125 (.393 v .396).
             function losHit(team, placed) {
                 const opp = state.players.filter(q => q.team !== team && onPitch(q) && !q.isDown && !q.isStunned);
                 const ours = placed.filter(p => onPitch(p));
