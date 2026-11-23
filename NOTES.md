@@ -273,6 +273,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   lets the carrier swap safety for ground again. Code removed. The lever left is the safety-v-ground weight (spW: only 1 and 2 tried).
   spW 3 (23 Nov, study_w3, same seeds): ball kept 68%, touchdowns 88-159, .342 - no safer and scoring less; spW 2 stays. (v5.50's own
   study, .438, was a lucky run: k_seq gave .390.) spRisk looks done: right numbers, weight tried at 1/2/3.
+  Receiving drives in stages (23 Nov, `nn/look/dbg/drive_funnel.py`, 480 games study_kk2/sp2/cal/w3; us v drefsante receiving):
+  scored 25% v 39%; kickers scored 27% v 19%; half ended with the receivers holding it 22% v 14% of drives (13 squares out); Turnover in
+  own 1st turn 27% v 18%; ball lost in the kickers' turn 25% v 29% (we keep it as well - we just face more turns); gain per own turn with
+  the ball 2.6 v 3.2 squares, none at all in 48% v 30% (53% v 25% with 4+ turns left - we stall early). Last turn of a half, carrier
+  within his Move: scored 81% (55/68; the misses all marked). `bpEsc` (not kept; code in `nn/look/dbg/esc_code.js`): bpEnd weighs the
+  squares ahead with up to 2 free team-mates first stepping (sure moves) to where they cut spRisk most, so the escort goes up first.
+  Study (study_esc, same seeds): gain per turn 2.4 -> 3.1, stalls 50% -> 43%, model risk at its turn start .313 -> .318, but scored
+  27% of drives (v5.50 study 32%), .396. `k_seq` (`k_esc1`): NO GAIN after 375 (.373). Faster alone doesn't score more.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
