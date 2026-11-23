@@ -291,6 +291,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   loose in our half, at most one of theirs over halfway). study_th2: Thrower 6.0 out, 140 of 164 pick-ups, no first-turn throws, ball
   ours after our 1st turn 77% -> 81%, Turnover 24% -> 22%, drives scored 26%. `k_seq` (`k_th1`): NO GAIN after 500 (.380), NOT WORSE
   after 1,125 (.393 v .396) - released, as asked. Drives still run out: 53% of our non-scoring drives end with the ball ours.
+  Why drives stall (23 Nov, after v5.70; `nn/look/dbg/score_chance.py`, `mark_how.py`): a ready runner for a hand-off as often as
+  drefsante (10% of turns with the ball, scored 28% v 33%), but our carrier (7+ out, held through its turn) is marked at our next turn
+  72% (drefsante's 46%), by 1.36 markers (0.72): 0.54 a turn had blocked a guard next to him and followed up into the gap (2 dice 95%,
+  ~3 a game, guard down 59%, follow-up 79%), 0.80 walked in (hardly any dodges). We hit its carrier's guards 1.2 a game and follow up 7%
+  (`followUp`: only into a square with no more tackle zones than his own). By cage size, marked next turn / ball kept, us v drefsante:
+  0 next to him 30%/47% v 23%/56%; 2: 55%/71% v 44%/75%; 4+: 76%/93% v 43%/99%. `spMk` (not kept): spRisk + the chance he's marked
+  next turn (a sure walk-in, or a 2-dice block moving a guard): 0.2 marked 72% (no change), .404; 0.6 69%, .338, its drives 48%.
+  Shielding the guards costs more than it saves. Next idea: do it to drefsante - follow up next to its carrier (its drives 39%).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
