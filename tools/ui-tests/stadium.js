@@ -116,7 +116,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(st.v === '1' && st.off === '0', 'Settings switch saves bb-stadium', st);
   check(!errors.length, 'no page errors', errors.slice(0, 3));
   // the other themed pitches have their own stadiums (?stadium=elven / =shanty / =worn / =flagstone / =jungle): on, drawn without errors, with their own line colour
-  for (const [st, race] of [['elven', 'highelf'], ['shanty', 'orc'], ['worn', 'human'], ['flagstone', 'goblin'], ['jungle', 'lizardmen'], ['graveyard', 'undead'], ['brimstone', 'khorne'], ['woodland', 'woodelf'], ['warpstone', 'skaven'], ['blackark', 'darkelf'], ['dwarfhold', 'dwarf'], ['wastes', 'ogre'], ['plague', 'nurgle'], ['bretonnia', 'bretonnian'], ['ziggurat', 'chaosdwarf'], ['altdorf', 'human']]) {
+  for (const [st, race] of [['elven', 'highelf'], ['shanty', 'orc'], ['worn', 'human'], ['flagstone', 'goblin'], ['jungle', 'lizardmen'], ['graveyard', 'undead'], ['brimstone', 'khorne'], ['woodland', 'woodelf'], ['warpstone', 'skaven'], ['blackark', 'darkelf'], ['dwarfhold', 'dwarf'], ['wastes', 'ogre'], ['plague', 'nurgle'], ['bretonnia', 'bretonnian'], ['ziggurat', 'chaosdwarf'], ['altdorf', 'human'], ['fjord', 'norse'], ['moot', 'halfling'], ['khemri', 'tombkings'], ['chaos', 'chaoschosen']]) {
     const s3 = await openGame(browser, { query: '?stadium=' + st });
     const r3 = await s3.page.evaluate(([race]) => { localStorage.setItem('bb-replays', '0'); AI.set(0, true); AI.set(1, true); window.launchMatch(race, 'human', { replaceOk: true }); return true; }, [race]);
     await s3.page.waitForTimeout(2500);

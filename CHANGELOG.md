@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.69 (23 Nov 2026)
+- Stadium & dugouts (test): the last four pitches get their own stadiums (Fjord, Moot, Khemri, Chaos Wastes), so every pitch now has one. The Chaos Wastes is barely a stadium at all.
+
 ## v5.68 (23 Nov 2026)
 - Stadium & dugouts (test): eleven more pitches get their own stadiums (only Fjord, Moot, Khemri and Chaos Wastes left); a snappier ~3 s crowd beat-up with one last fan jumping in; injury notices wait for the dice; no armour/injury dice in the computer's turn; Reposition opposition highlights the picked player.
 

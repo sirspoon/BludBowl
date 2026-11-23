@@ -2,6 +2,19 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.69 (23 Nov 2026)
+- Stadium & dugouts (test, still off by default: Settings or `?stadium=<pitch>`): the last four pitches, so every pitch has its own:
+  - **Fjord** (Norse): timber terraces under snow, carved knotwork boards, snowy pines and drifts among the crowd, braziers, hide
+    awnings, a snowy strip, a red line; a ring of turf-roofed longhouses round the top and a longhouse with dragon gables behind
+    each end.
+  - **Moot** (Halflings): a flowering hedge, painted homely signs (SECOND BREAKFAST, ELEVENSES...), picnic tables of pies and ham,
+    bunting, a great stew pot behind each end; grassy banks round the top dug with round doors and smoking chimneys, windmills.
+  - **Khemri** (Tomb Kings): sandstone with blue-and-gold friezes, hieroglyph tablets, obelisks and toppled statues, sand drifts,
+    tomb-green braziers, a pyramid behind each end; a colonnade with lotus capitals round the top.
+  - **Chaos Wastes**: hardly a stadium - a thin scattering of fans on scorched, cracked ground among jagged rocks, twisted spires
+    and warp-lit fissures, a broken ring of runed standing stones, the eight-pointed star on a crag behind each end, spiked iron
+    boards, no terraces and no roof.
+
 ## v5.68 (23 Nov 2026)
 - Stadium & dugouts (test, still off by default: Settings or `?stadium=<pitch>`), eleven more themed stadiums:
   - **Graveyard** (Undead etc.): crumbling stone, wrought-iron fence, epitaph boards, gravestones and dead trees among the crowd,
