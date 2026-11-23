@@ -308,6 +308,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.72 (job session, 23 Nov, owner's ask): computer's block quicker (`T.fast` on its trays in `startBlock`: settle in 0.55x the roll
+  length, min 450 ms; `bbDice`/`diceChoice` pick waits 900+1300 -> 450+800 ms, block re-roll 1100 -> 700). Armour/injury toasts
+  off by default (`DICEFX.S.arm()`, `bb-dice-anim-arm`, Settings row `st-dice-arm`) - they lagged behind the pitch. Possible later:
+  make them keep up (show at once / skip when stale) and default them back on.
 - v5.71 (job session, 23 Nov): **new dice sounds**, sound G from `tools/dice-prototype/sounds.html`, in `SFX` (`SFX.dice`: `group`,
   `land`, `hit`, `rattle`, `log`; the old `diceClack`/`dice` keys now play it). Scheduled on the AudioContext clock from real time
   (`CLOCK.real()` - NB `performance.now` runs with the game's clock, so don't use it for audio sync). `DICEFX.settle` schedules each

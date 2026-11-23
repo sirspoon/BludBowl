@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.71</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.72</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1341,7 +1341,8 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Animate block dice<small>your dice tumble until you press Roll, then jump and land on the result; the computer's roll at once and land the same way</small></span><button type="button" class="st-tog" id="st-dice-block"></button></div>
-            <div class="st-row"><span>Animate other rolls<small>Dodges, Rushes, pick-ups, catches, passes and team re-rolls land in the roll window; armour and injury dice show for a moment at the top</small></span><button type="button" class="st-tog" id="st-dice-other"></button></div>
+            <div class="st-row"><span>Animate other rolls<small>Dodges, Rushes, pick-ups, catches, passes and team re-rolls land in the roll window</small></span><button type="button" class="st-tog" id="st-dice-other"></button></div>
+            <div class="st-row"><span>Armour and injury dice<small>show armour and injury rolls for a moment at the top (they can lag a little behind the pitch); off by default</small></span><button type="button" class="st-tog" id="st-dice-arm"></button></div>
             <div class="st-row"><span>Roll length<small>how long the dice take to jump and land (the sound follows Sound effects)</small></span><span class="st-range"><input type="range" id="st-dice-dur" min="500" max="2000" step="100" aria-label="Roll length"><output id="st-dice-dur-o" for="st-dice-dur"></output></span></div>
             <div class="st-row"><span>Dice in team colours<small>the rolling team's dice in its colours (each team's dice colours are set in the Team Builder); off: the plain dice</small></span><button type="button" class="st-tog" id="st-dice-team"></button></div>
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
@@ -18383,7 +18384,7 @@ ol.ci-steps li::marker { content: none; }
                     const midAir = T && T.state === 'rolling' && c.contains(T.box) && T.dice.length === arr.length;   // (re-rolled before landing: they all carry on to the new result)
                     if (!midAir && (!T || T.state === 'gone' || !c.contains(T.box) || T.dice.length !== arr.length)) {   // (a re-roll: the dice as they lay, then the jump)
                         c.classList.add('dfx-on'); T = DICEFX.tray(c, { n: arr.length, kind: 'block', col: dcol, size: 62, gap: 12, height: 62, faces: prev });
-                        combat.dfx = T;
+                        combat.dfx = T; T.fast = aiRolls;
                     }
                     T.box.onclick = e => { e.stopPropagation(); DICEFX.finish(T); };
                     DICEFX.settle(T, arr, midAir ? null : which, () => { DICEFX.stop(T); combat.dfx = null; if (state.combat !== combat) return; busy(false); drawFlat(arr); });
@@ -18433,7 +18434,7 @@ ol.ci-steps li::marker { content: none; }
             m.classList.remove('hidden');
             c.classList.add('dfx-on');
             const T0 = DICEFX.tray(c, { n: dice, kind: 'block', col: dcol, size: 62, gap: 12, height: 62 });   // (62: as tall as the dice to pick, so nothing moves when they swap)
-            state.combat.dfx = T0; DICEFX.tumble(T0);
+            state.combat.dfx = T0; T0.fast = aiRolls; DICEFX.tumble(T0);   // (fast: the computer's own roll lands quicker)
             if (aiRolls) { state.combat.diceWait = false; rollNow(); return; }   // the computer rolls at once: the dice jump and land, then it picks
             // no Roll button: the tumbling dice are the button (a line under them says so)
             const hint = document.getElementById('dice-tap-hint'); hint.textContent = 'Tap the dice to roll'; hint.classList.add('dfx-tap'); card.classList.add('dfx-wait');
@@ -20624,6 +20625,7 @@ ol.ci-steps li::marker { content: none; }
             const flag = k => { const v = LS(k); return v === '1' ? true : v === '0' ? false : person() && !reduced(); };
             const S = {
                 block: () => flag('bb-dice-anim-block'), other: () => flag('bb-dice-anim-other'),
+                arm: () => LS('bb-dice-anim-arm') === '1' && S.other(),   // armour / injury dice at the top: off unless switched on (v5.72: they could lag behind the pitch)
                 team: () => LS('bb-dice-team') !== '0',
                 dur: () => { const v = +LS('bb-dice-dur'); return v >= 500 && v <= 2000 ? v : 1000; }
             };
@@ -20734,7 +20736,7 @@ ol.ci-steps li::marker { content: none; }
                 cancelAnimationFrame(T.raf); clearTimeout(T.timer);
                 const go = new Set(which || T.dice.map((_, i) => i));
                 T.state = 'rolling'; T.done = done; T.values = values;
-                const D = S.dur(), movers = T.dice.filter((d, i) => go.has(i)), gapMs = Math.min(90, D * .08), t0 = rt(), J = .62;
+                const D = T.fast ? Math.max(450, Math.round(S.dur() * .55)) : S.dur(), movers = T.dice.filter((d, i) => go.has(i)), gapMs = Math.min(90, D * .08), t0 = rt(), J = .62;
                 T.dice.forEach((d, i) => { d.v = values[i]; d.moving = go.has(i); });
                 movers.forEach((d, j) => {
                     d.start = j * gapMs; d.len = D - (movers.length - 1) * gapMs; d.from = d.ang.slice(); d.landed = d.hop2 = false;
@@ -20836,7 +20838,7 @@ ol.ci-steps li::marker { content: none; }
             // ---- a quick look at dice the game rolls by itself (armour, injury): shown at the top of the screen, holds nothing up
             const queue = []; let showing = false;
             function toast(vals, o) {
-                if (!S.other() || !live()) return;
+                if (!S.arm() || !live()) return;
                 try { if (AI.isAI(state.activeTeam)) return; } catch (e) {}   // (not in the computer's turn: play has moved on before they'd land)
                 queue.push({ vals, o }); if (queue.length > 3) queue.shift();
                 if (!showing) nextToast();
@@ -33332,12 +33334,12 @@ ol.ci-steps li::marker { content: none; }
                     (down > 0 && !mine) || (down === n && mine)   // reroll(): a Player Down the defender would pick, or nothing but
                     || (mine && best < 4.5 && state.ball.carrierId === c.def.id)   // block(): no knock-down on their ball carrier
                     || (mine && best === 0 && n > 1));
-                if (rr) { after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); }); return; }
+                if (rr) { after('dice-rr', 700, () => { c.aiRerolled = true; click('btn-combat-trr'); }); return; }
                 if (!mine && !isAI(c.chooser)) return;   // (the other side picks)
-                after('dice', 900, () => {
+                after('dice', 450, () => {
                     const idx = ranks.indexOf(best), b = btns[idx]; if (!b) return;
                     c.aiPicking = true; b.classList.add('ai-pick');
-                    setTimeout(() => { c.aiPicking = false; if (vis('modal-dice')) act(() => b.click()); }, 1300 * speed);
+                    setTimeout(() => { c.aiPicking = false; if (vis('modal-dice')) act(() => b.click()); }, 800 * speed);
                 });
             }
             // set-up: its 'Wedge offense' receiving and 'Zone defense' kicking, players picked by role as its Formation does
@@ -33997,7 +33999,7 @@ ol.ci-steps li::marker { content: none; }
                 // going down on one die 52% of the time, a push 6% (the computer 79% and 34%) - only with the ball at stake
                 const oneDie = AIX.on(state.activeTeam, 'rr3') && AIX.p(state.activeTeam, 'rr3one', 0) && c.dice.length === 1 && c.chooser === c.atk.team && !blockCritical && !blockDecisive;
                 if (isAI(state.activeTeam) && !trr.classList.contains('hidden') && !c.aiRerolled && ((chosen < 0 && !oneDie && rrWorth(null, blockCritical, blockDecisive, chosen <= -7)) || onCarrier)) {
-                    after('dice-rr', 1100, () => { c.aiRerolled = true; click('btn-combat-trr'); });
+                    after('dice-rr', 700, () => { c.aiRerolled = true; click('btn-combat-trr'); });
                     return;
                 }
                 const keep = document.getElementById('btn-combat-keep');
@@ -34010,12 +34012,12 @@ ol.ci-steps li::marker { content: none; }
                     return;
                 }
                 keep.classList.add('hidden');
-                after('dice', 900, () => {
+                after('dice', 450, () => {   // (v5.72: quicker - was 900 + 1300 ms)
                     const idx = scores.indexOf(chosen), b = btns[idx];
                     if (!b) return;
                     c.aiPicking = true;
                     b.classList.add('ai-pick');
-                    setTimeout(() => { c.aiPicking = false; if (vis('modal-dice')) act(() => b.click()); }, 1300 * speed);
+                    setTimeout(() => { c.aiPicking = false; if (vis('modal-dice')) act(() => b.click()); }, 800 * speed);
                 });
             }
 
@@ -34898,6 +34900,7 @@ ol.ci-steps li::marker { content: none; }
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
                 on('st-dice-block', DICEFX.S.block(), 'On', 'Off');
                 on('st-dice-other', DICEFX.S.other(), 'On', 'Off');
+                on('st-dice-arm', DICEFX.S.arm(), 'On', 'Off');
                 on('st-dice-team', DICEFX.S.team(), 'On', 'Off');
                 { const d = DICEFX.S.dur(); document.getElementById('st-dice-dur').value = d; document.getElementById('st-dice-dur-o').textContent = (d / 1000).toFixed(1) + ' s'; }
                 document.getElementById('st-text').textContent = uiPref === 'auto' ? 'Auto' : Math.round(uiPref * 100) + '%';
@@ -34922,6 +34925,7 @@ ol.ci-steps li::marker { content: none; }
             });
             document.getElementById('st-dice-block').addEventListener('click', () => { DICEFX.set('bb-dice-anim-block', DICEFX.S.block() ? '0' : '1'); paintSettings(); });
             document.getElementById('st-dice-other').addEventListener('click', () => { DICEFX.set('bb-dice-anim-other', DICEFX.S.other() ? '0' : '1'); paintSettings(); });
+            document.getElementById('st-dice-arm').addEventListener('click', () => { DICEFX.set('bb-dice-anim-arm', DICEFX.S.arm() ? '0' : '1'); paintSettings(); });
             document.getElementById('st-dice-team').addEventListener('click', () => { DICEFX.set('bb-dice-team', DICEFX.S.team() ? '0' : '1'); paintSettings(); });
             document.getElementById('st-dice-dur').addEventListener('input', e => { DICEFX.set('bb-dice-dur', String(+e.target.value)); document.getElementById('st-dice-dur-o').textContent = (+e.target.value / 1000).toFixed(1) + ' s'; });
             document.getElementById('st-hd').addEventListener('click', () => { HD.set(HD.size === 0 ? 48 : HD.size === 48 ? 64 : 0); paintSettings(); });
@@ -34929,7 +34933,7 @@ ol.ci-steps li::marker { content: none; }
             document.getElementById('st-pitch').addEventListener('change', e => { setPitchPref(e.target.value); selPitch.value = pitchPref; });
             {   // the in-match Settings sheet (⚙ in the top bar): the rows above that are safe to change mid-match are moved into it while
                 // it's open (their buttons, handlers and paintSettings stay the same) and put back where they were when it closes
-                const LIVE = ['st-sound', 'st-music', 'st-text', 'st-move', 'st-anim', 'st-dice-block', 'st-dice-other', 'st-dice-dur', 'st-dice-team', 'st-replay', 'st-replay-kick', 'st-weather', 'st-stadium'];
+                const LIVE = ['st-sound', 'st-music', 'st-text', 'st-move', 'st-anim', 'st-dice-block', 'st-dice-other', 'st-dice-arm', 'st-dice-dur', 'st-dice-team', 'st-replay', 'st-replay-kick', 'st-weather', 'st-stadium'];
                 const sheet = document.getElementById('game-settings'), box = document.getElementById('gs-rows');
                 let moved = [];
                 const close = () => {

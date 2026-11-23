@@ -15,8 +15,16 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     const ctx = await browser.newContext({ viewport: { width: 900, height: 700 }, reducedMotion: rm });
     const page = await ctx.newPage(); await asPerson(page);
     await page.goto('file://' + require('path').resolve(__dirname, '..', '..', 'index.html')); await page.waitForTimeout(900);
-    const d = await page.evaluate(() => ({ b: DICEFX.S.block(), o: DICEFX.S.other(), team: DICEFX.S.team(), dur: DICEFX.S.dur() }));
-    check(d.b === want && d.o === want && d.team === true && d.dur === 1000, `defaults with prefers-reduced-motion: ${rm}: animations ${want ? 'on' : 'off'}, team colours on, 1.0 s`, d);
+    const d = await page.evaluate(() => ({ b: DICEFX.S.block(), o: DICEFX.S.other(), arm: DICEFX.S.arm(), team: DICEFX.S.team(), dur: DICEFX.S.dur() }));
+    check(d.b === want && d.o === want && d.arm === false && d.team === true && d.dur === 1000, `defaults with prefers-reduced-motion: ${rm}: animations ${want ? 'on' : 'off'}, armour/injury dice off, team colours on, 1.0 s`, d);
+    if (rm === 'no-preference') {   // armour/injury dice: nothing at the top unless switched on
+      const t = await page.evaluate(async () => { const f = () => !!document.querySelector('#dfx-toast.show');
+        try { state.activeTeam = 0; AI.set(0, false); } catch (e) {}
+        DICEFX.toast([3, 4], { title: 'Armour roll…' }); await new Promise(r => setTimeout(r, 300)); const off = f();
+        localStorage.setItem('bb-dice-anim-arm', '1'); DICEFX.toast([3, 4], { title: 'Armour roll…' }); await new Promise(r => setTimeout(r, 300)); const on = f();
+        localStorage.removeItem('bb-dice-anim-arm'); return { off, on }; });
+      check(!t.off && t.on, 'armour/injury dice: not shown by default, shown once switched on in Settings', t);
+    }
     await ctx.close();
   }
   {
@@ -248,7 +256,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(snd.muted && snd.music && snd.label && snd.barHidden, "Sound and Music switch from the sheet (their top-bar buttons are gone)", snd);
   await page.tap('#gs-close'); await page.waitForTimeout(150);
   const gs3 = await page.evaluate(() => ({ open: GAME_SETTINGS.isOpen(), back: document.getElementById('settings-panel').contains(document.getElementById('st-dice-block')), rows: document.querySelectorAll('#settings-panel .st-row').length }));
-  check(gs.open && gs.rows === 13 && gs.fits, 'in-match Settings: the ⚙ button opens a sheet with the 13 settings that can change mid-match (incl. Stadium & dugouts), fitting a phone', gs);
+  check(gs.open && gs.rows === 14 && gs.fits, 'in-match Settings: the ⚙ button opens a sheet with the 14 settings that can change mid-match (incl. Stadium & dugouts, armour/injury dice), fitting a phone', gs);
   check(gs2.dice !== gs.dice && gs2.stored === (gs2.dice === 'On' ? '1' : '0'), 'a switch in the sheet changes the setting', [gs, gs2]);
   check(!gs3.open && gs3.back, "Done closes it and the rows go back to the title screen's Settings", gs3);
 

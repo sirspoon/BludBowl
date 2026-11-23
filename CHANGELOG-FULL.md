@@ -2,6 +2,14 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.72 (23 Nov 2026)
+- The computer's block: its animated block dice land in 55% of the roll length (at least 0.45 s; 0.55 s at the default 1.0 s),
+  and it picks its die sooner (a 0.45 s pause then 0.8 s with the die highlighted, was 0.9 s + 1.3 s; its block re-roll after
+  0.7 s, was 1.1 s). The same quicker pick when the computer chooses the die on your block. About 1.8 s from roll to pick, was ~3.2 s.
+- Armour and injury dice (the strip at the top) are now off by default: they could show after the player had already left the
+  pitch. New Settings row "Armour and injury dice" (localStorage `bb-dice-anim-arm`) to switch them back on; "Animate other
+  rolls" now covers only the roll-window dice.
+
 ## v5.71 (23 Nov 2026)
 - New dice sounds: sound G ("Matched to your clip") from `tools/dice-prototype/sounds.html`, built from the owner's recording and
   ported with its numbers (bright clicks ringing at ~3.3 and ~4.5 kHz, a ~1 kHz body and a gritty "crunch" on table hits; the

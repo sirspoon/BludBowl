@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.72 (23 Nov 2026)
+- The computer's blocks are quicker: its block dice land faster and it picks its die sooner.
+- Armour and injury dice no longer pop up at the top by default (they could lag behind the pitch); switch them back on in Settings > Armour and injury dice.
+
 ## v5.71 (23 Nov 2026)
 - New dice sounds, built from a real throw: block dice rattle quietly while they wait for your tap, then each die clacks down on the exact moment it lands and bounces, with a little tumbling patter after. Other rolls get the same sound.
 
