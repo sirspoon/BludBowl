@@ -3,7 +3,9 @@
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
 ## v5.69 (23 Nov 2026)
-- Stadium & dugouts (test, still off by default: Settings or `?stadium=<pitch>`): the last four pitches, so every pitch has its own:
+- **Stadium & dugouts is now on by default** (no longer a test): every match shows its pitch's stadium, crowd and the two dugouts.
+  Settings > "Stadium & dugouts" switches it off (remembered in this browser); `?stadium=<pitch>` still picks a pitch for a visit.
+- The last four pitches, so every pitch has its own stadium:
   - **Fjord** (Norse): timber terraces under snow, carved knotwork boards, snowy pines and drifts among the crowd, braziers, hide
     awnings, a snowy strip, a red line; a ring of turf-roofed longhouses round the top and a longhouse with dragon gables behind
     each end.

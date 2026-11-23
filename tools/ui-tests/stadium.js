@@ -124,6 +124,10 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     check(r3 && o.on && o.style === st && !s3.errors.length, `${st} pitch: its own stadium is drawn`, Object.assign(o, { errors: s3.errors.slice(0, 2) }));
     await s3.page.screenshot({ path: OUT + `/stadium-${st}.png` }); await s3.ctx.close();
   }
+  // on by default: a fresh browser with no setting saved and no ?stadium
+  const s4 = await openGame(browser, {});
+  check(await s4.page.evaluate(() => STADIUM.on && localStorage.getItem('bb-stadium') == null), 'on by default (nothing saved, no ?stadium)');
+  await s4.ctx.close();
   // ?simtest: never drawn
   const s2 = await openGame(browser, { query: '?simtest&stadium' });
   check(await s2.page.evaluate(() => !STADIUM.active()), 'not drawn in ?simtest');

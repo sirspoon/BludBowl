@@ -285,7 +285,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
 ## Recently done (newest first)
 - v5.69 (job session, 23 Nov): Stadium & dugouts: the last four (fjord, moot, khemri, chaos) - all 21 pitches themed (`TH_KEYS`).
   New theme fields: `crowd` (0..1 fan density; chaos 0.12), `noAisles`, `roof: null` (none), apron `snow`. The stadium test now
-  opens all 21 pitches (~2.5 min). Still a test setting (off by default); the owner decides when to make it the default.
+  opens all 21 pitches (~2.5 min). Then made ON by default (owner, same version v5.69): `bb-stadium` unset = on, '0' = off.
+  Known flaky: the stadium test's Reposition checks (the computer still finishing a move when the test taps) - to fix.
 - v5.68 (job session, 23 Nov): Stadium & dugouts, fourth round (local, pushed as one). `TH` now covers 17 pitches (`TH_KEYS`);
   left: fjord, moot, khemri, chaos. New theme fields: `swamp` (`plagueSwamps()` / `inSwamp`: fan-free ponds), `roundApron` (tiles;
   rounded strip corners: `cut`, `CORN`, the stands canvas clipped evenodd), `wallCol` / `wallTrim`, apron `deck` / `lava` /

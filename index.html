@@ -1347,7 +1347,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Kick-off replays<small>a close-up of each kick-off too, once the ball has come down (with Replays on)</small></span><button type="button" class="st-tog" id="st-replay-kick"></button></div>
             <div class="st-row"><span>HD sprites (test)<small>High Elves only: 1.5x the pixels (the originals, smoothed) or 2x (redrawn); other teams unchanged</small></span><button type="button" class="st-tog" id="st-hd"></button></div>
-            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. Every pitch has its own stadium (turning it on on another pitch sets Pitch to Grass; leagues and tournaments play at the home ground). Also ?stadium in the address (e.g. ?stadium=elven, =shanty, =worn, =flagstone, =jungle)</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
+            <div class="st-row"><span>Stadium &amp; dugouts<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch, in each pitch's own style: drag or zoom out to see them. Off: the plain pitch on black</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress, your saved replays (My matches) and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
@@ -22166,7 +22166,7 @@ ol.ci-steps li::marker { content: none; }
         // in the dugouts are drawn. Never drawn in ?simtest (render() skips drawFrame there).
         const STADIUM = (() => {
             const Q = /[?&]stadium(?:[=&]|$)/.test(location.search), TH_KEYS = ['blades', 'elven', 'shanty', 'worn', 'flagstone', 'jungle', 'graveyard', 'brimstone', 'woodland', 'warpstone', 'blackark', 'dwarfhold', 'wastes', 'plague', 'bretonnia', 'ziggurat', 'altdorf', 'fjord', 'moot', 'khemri', 'chaos'];   // (the pitches with their own stadium so far)
-            let pref = false; try { pref = localStorage.getItem('bb-stadium') === '1'; } catch (e) {}
+            let pref = true; try { pref = localStorage.getItem('bb-stadium') !== '0'; } catch (e) {}   // (on unless switched off in Settings)
             {   // (?stadium: the grass pitch for this visit, without changing the saved Pitch setting; ?stadium=elven / =shanty: that pitch)
                 const m = location.search.match(/[?&]stadium=(\w+)/), want = m && TH_KEYS.includes(m[1]) ? m[1] : 'blades';
                 if (Q) { pitchPref = want; PITCH.style = want; }
