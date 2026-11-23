@@ -1,0 +1,238 @@
+<title>BludBowl Dice Sounds</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column of sound cards, each with the same three buttons, under a small control strip. Single dark look (the game's slate). */
+:root {
+  --bg: #0b1220; --panel: #121b2f; --line: #334155; --fg: #e6eaf3; --muted: #95a2bb; --gold: #fbbf24; --btn: #0f172a; --btn-line: #475569; --hot: #b45309;
+  --display: 'Teko', 'Arial Narrow', sans-serif; --body: 'Inter', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 14px; }
+h1 { font-family: var(--display); font-weight: 600; font-size: 2.6rem; line-height: 1; margin: 0; letter-spacing: .02em; }
+h1 span { color: var(--gold); }
+.lede { color: var(--muted); margin: 6px 0 0; line-height: 1.5; max-width: 62ch; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.controls { display: grid; gap: 12px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.row label, .row .name { font-weight: 600; font-size: 14px; }
+.row input[type=range] { flex: 1 1 160px; max-width: 260px; accent-color: var(--gold); }
+.row output { color: var(--gold); font-weight: 700; min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
+.seg { display: flex; gap: 6px; }
+button { font: inherit; color: var(--fg); background: var(--btn); border: 1px solid var(--btn-line); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
+button:hover { border-color: #94a3b8; }
+button[aria-pressed="true"] { background: #334155; border-color: #94a3b8; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.switch { appearance: none; width: 44px; height: 24px; border-radius: 12px; background: #334155; position: relative; cursor: pointer; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; transition: left .15s; }
+.switch:checked { background: var(--hot); } .switch:checked::after { left: 23px; }
+.card { display: grid; gap: 10px; }
+.card header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.tag { font-family: var(--display); font-size: 1.7rem; line-height: 1; color: var(--gold); min-width: 1ch; }
+.card h2 { font-family: var(--display); font-weight: 600; font-size: 1.6rem; line-height: 1; margin: 0; letter-spacing: .02em; }
+.card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.card .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.card .btns button { flex: 1 1 90px; }
+.card .btns button.main { background: var(--hot); border-color: #f59e0b; }
+.card.playing { border-color: var(--gold); }
+.hint { color: var(--muted); font-size: 12px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>BludBowl <span>Dice</span> Sounds</h1>
+    <p class="lede">Dice sounds to compare. <b>A</b> is the game's sound now; the rest are new. The one you described — dice rattling, then thrown so they land and tumble to a stop — is the <b>Throw</b> button, so start there. <b>G</b> is built from the recording you sent: try it first. <b>Land</b> is just the coming-down part (what the animated dice play in the game), and <b>Rattle</b> is dice knocking together. Tell me the letter you like and anything to change.</p>
+  </header>
+
+  <section class="panel controls">
+    <div class="row"><span class="name">Dice</span>
+      <div class="seg" id="count"><button data-n="1">1</button><button data-n="2" aria-pressed="true">2</button><button data-n="3">3</button></div></div>
+    <div class="row"><label for="vol">Volume</label><input type="range" id="vol" min="0" max="100" value="70"><output id="o-vol" for="vol">70%</output></div>
+    <div class="row"><label for="room">Room echo</label><input class="switch" type="checkbox" id="room" checked>
+      <span class="hint" style="flex-basis:100%;margin-top:-6px">A touch of stadium echo. Off is completely dry.</span></div>
+  </section>
+
+  <div id="cards"></div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let ac = null, out = null, roomGain = null, nbuf = null, n = 2;
+
+  function init() {
+    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    out = ac.createGain(); out.gain.value = $('vol').value / 100; out.connect(ac.destination);
+    // a short, dark room: decaying noise as the impulse
+    const len = Math.floor(ac.sampleRate * .45), ir = ac.createBuffer(2, len, ac.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5); }
+    const conv = ac.createConvolver(); conv.buffer = ir;
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5000;
+    roomGain = ac.createGain(); roomGain.gain.value = $('room').checked ? .18 : 0;
+    out.connect(lp).connect(conv).connect(roomGain).connect(ac.destination);
+    nbuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  function panner(p) { const s = ac.createStereoPanner ? ac.createStereoPanner() : ac.createGain(); if (s.pan) s.pan.value = p; s.connect(out); return s; }
+
+  // ---- building blocks ----
+  // ringing: a few damped sine partials at inharmonic ratios (how a small hard object rings when struck)
+  function ring(t, f, ratios, decays, gains, vol, dest) {
+    ratios.forEach((r, i) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = f * r * rnd(.99, 1.01);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * gains[i], t + .0006);
+      g.gain.exponentialRampToValueAtTime(.0001, t + decays[i]);
+      o.connect(g).connect(dest); o.start(t); o.stop(t + decays[i] + .02);
+    });
+  }
+  // the tick of the first contact: a very short burst of filtered noise
+  function tick(t, vol, freq, dur, type, dest, q = .8) {
+    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+    s.buffer = nbuf; f.type = type; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f).connect(g).connect(dest); s.start(t, Math.random() * .5); s.stop(t + dur + .01);
+  }
+  // a low knock: the table taking the weight
+  function knock(t, vol, f, dur, dest) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(f * 1.6, t); o.frequency.exponentialRampToValueAtTime(f, t + dur * .5);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(dest); o.start(t); o.stop(t + dur + .02);
+  }
+
+  // ---- the sounds: impact(t, strength 0-1, onDie, pan) ----
+  const SOUNDS = [
+    { id: 'A', name: 'Now in the game', text: 'A short burst of hiss and a buzzy tone, the same recipe as the game uses today.',
+      impact(t, s, onDie, pan) {
+        const d = panner(pan);
+        tick(t, .42 * s, rnd(4200, 5800), .05, 'lowpass', d, .7);
+        const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square';
+        o.frequency.setValueAtTime(rnd(700, 1200), t); o.frequency.exponentialRampToValueAtTime(320, t + .035);
+        g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.05 * s, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + .035);
+        o.connect(g).connect(d); o.start(t); o.stop(t + .06);
+      } },
+    { id: 'B', name: 'Resin dice', text: 'Ordinary plastic gaming dice on a hard table: a sharp click with a short, bright ring.',
+      impact(t, s, onDie, pan) {
+        const d = panner(pan), f = rnd(2600, 3300) * (onDie ? 1.35 : 1);
+        tick(t, .55 * s, 6500, .004, 'highpass', d);
+        ring(t, f, [1, 1.47, 2.09, 2.56, 3.9], [.05, .035, .03, .02, .015].map(x => x * (.6 + .4 * s)), [1, .6, .5, .35, .25], .16 * s, d);
+        if (!onDie) knock(t, .28 * s, 210, .035, d);
+      } },
+    { id: 'C', name: 'Clinky', text: 'Brighter and glassier, with a longer ring, like dice clinking on a glazed tray. The most clinky of the set.',
+      impact(t, s, onDie, pan) {
+        const d = panner(pan), f = rnd(3600, 4600) * (onDie ? 1.2 : 1);
+        tick(t, .35 * s, 7000, .003, 'highpass', d);
+        ring(t, f, [1, 2.76, 5.4, 8.93], [.13, .09, .05, .03].map(x => x * (.5 + .5 * s)), [1, .5, .3, .15], .14 * s, d);
+        if (!onDie) knock(t, .18 * s, 260, .03, d);
+      } },
+    { id: 'D', name: 'Chunky bone', text: 'Heavier, chunkier dice: a lower clack with more knock and less ring. Suits Blood Bowl’s grit.',
+      impact(t, s, onDie, pan) {
+        const d = panner(pan), f = rnd(1500, 1950) * (onDie ? 1.4 : 1);
+        tick(t, .5 * s, 3200, .006, 'highpass', d);
+        ring(t, f, [1, 1.6, 2.3, 3.1], [.04, .03, .02, .015].map(x => x * (.6 + .4 * s)), [1, .7, .5, .3], .2 * s, d);
+        if (!onDie) knock(t, .5 * s, 140, .06, d);
+      } },
+    { id: 'E', name: 'Wooden dice tray', text: 'Resin dice landing in a wooden tray: the click plus a warm, hollow knock from the wood.',
+      impact(t, s, onDie, pan) {
+        const d = panner(pan), f = rnd(2500, 3200) * (onDie ? 1.35 : 1);
+        tick(t, .45 * s, 6000, .004, 'highpass', d);
+        ring(t, f, [1, 1.47, 2.09, 2.56], [.045, .03, .025, .018], [1, .6, .45, .3], .12 * s, d);
+        if (!onDie) { tick(t, .9 * s, rnd(560, 720), .07, 'bandpass', d, 6); knock(t, .3 * s, 240, .05, d); }
+      } },
+    { id: 'F', name: 'Tabletop throw', text: 'What I think your clip is: solid dice thrown onto a wooden table — a crisp resin click, a bright ring and a warm wooden knock together. Best heard on Throw.',
+      impact(t, s, onDie, pan) {
+        const d = panner(pan), f = rnd(2700, 3400) * (onDie ? 1.3 : 1);
+        tick(t, (onDie ? .4 : .6) * s, 6800, .004, 'highpass', d);
+        ring(t, f, [1, 1.47, 2.09, 2.56, 3.9], [.05, .035, .028, .02, .014].map(x => x * (.6 + .4 * s)), [1, .6, .5, .35, .22], .15 * s, d);
+        if (!onDie) { tick(t, .8 * s, rnd(520, 680), .06, 'bandpass', d, 6); knock(t, .5 * s, 150, .06, d); }
+      } },
+    { id: 'G', name: 'Matched to your clip', clip: true,
+      text: 'Built from your recording: very bright, hard little clicks that ring around 3.3 and 4.5 kHz and die away almost at once, with hardly any low thud. The rattle is a steady, uneven shake; the throw is one big hit, a burst of bounces, then a long patter of smaller tumbles for most of a second.',
+      impact(t, s, onDie, pan) {
+        // everything through a gentle lowpass: the clip has almost nothing above 8 kHz
+        const d = ac.createBiquadFilter(); d.type = 'lowpass'; d.frequency.value = 7000; d.Q.value = .5; d.connect(panner(pan));
+        const k = rnd(.94, 1.06) * (onDie ? 1.15 : .9);
+        tick(t, .3 * s, rnd(4000, 5200), .004, 'bandpass', d, .7);
+        // the ring at 3.3 and 4.5 kHz, plus (on the table) the body around 1 kHz the clip has
+        const fr = [3300 * k, 4500 * k * rnd(.97, 1.03), 2100 * k], dc = [.016, .012, .01], g = [1, .85, .5];
+        if (!onDie) { fr.push(1050 * rnd(.95, 1.05)); dc.push(.012); g.push(.38); g[1] = 1.15; }
+        ring(t, 1, fr, dc.map(x => x * (.7 + .5 * s)), g, .3 * s, d);
+        // crunch: a landing is never one clean contact; a few gritty micro-hits as edges and corners touch down
+        if (!onDie) {
+          const m = 2 + Math.floor(Math.random() * 3 * s);
+          for (let i = 0; i < m; i++) tick(t + rnd(.002, .009) * (i + 1), rnd(.15, .3) * s, rnd(2200, 3800), rnd(.004, .008), 'bandpass', d, 1.1);
+          tick(t, .12 * s, 3000, .022, 'bandpass', d, .6);   // a short gritty tail under the ring
+        }
+      },
+      // the clip's first throw, as measured: seconds after the first hit, and loudness
+      landing: [[0, 1], [.038, .41], [.058, .42], [.144, .88], [.192, .66], [.227, .7], [.247, .66], [.307, .51], [.333, .28], [.363, .41],
+        [.475, .37], [.599, .3], [.666, .18], [.694, .25], [.714, .22], [.746, .31], [.778, .25], [.8, .18]] }
+  ];
+
+  // ---- sequences ----
+  // a die coming down: the landing, two quick bounces and a last tip over onto its face
+  function land(snd, t, pan) {
+    if (snd.landing) {   // the recorded pattern, a little loosened so no two throws are the same; extra dice share it out
+      const share = 1 / Math.sqrt(n);
+      snd.landing.forEach(([at, v], i) => { if (i && Math.random() > share + .25) return; snd.impact(t + at * rnd(.9, 1.1) + (i ? rnd(-.008, .008) : 0), v * rnd(.85, 1.1), i > 0 && Math.random() < .35, pan + rnd(-.15, .15)); });
+      return;
+    }
+    snd.impact(t, 1, false, pan);
+    snd.impact(t + rnd(.065, .08), .42, false, pan);
+    snd.impact(t + rnd(.11, .125), .2, false, pan);
+    snd.impact(t + rnd(.15, .17), .1, false, pan);
+  }
+  const pans = () => n === 1 ? [0] : n === 2 ? [-.3, .3] : [-.45, 0, .45];
+  function playLand(snd) { const t = ac.currentTime + .03; pans().forEach((p, i) => land(snd, t + i * .085, p)); return .25 + n * .085; }
+  // dice shaken in a cupped hand: dice-on-dice contacts, muffled (low strength), speeding up over the window
+  function rattle(snd, t, len, build) {
+    if (snd.clip) {   // the clip's shake: about 15 contacts a second, unevenly spaced (40-90 ms, now and then a quick double), steady not speeding up
+      let at = t + rnd(0, .04);
+      while (at < t + len) {
+        snd.impact(at, rnd(.25, 1) * (build ? .55 + .45 * (at - t) / len : .8), true, rnd(-.35, .35));
+        if (Math.random() < .18) snd.impact(at + rnd(.014, .022), rnd(.25, .6), true, rnd(-.35, .35));
+        at += rnd(.04, .09) / Math.sqrt(n / 2 + .5);
+      }
+      return;
+    }
+    const hits = Math.round((6 + n * 5) * (len / .5));
+    for (let i = 0; i < hits; i++) {
+      const u = i / hits;                              // accelerate: contacts bunch up toward the end
+      const at = t + len * Math.pow(u, 1.5) + rnd(-.01, .01);
+      const s = (build ? .18 + .32 * u : rnd(.25, .55)) * rnd(.8, 1.1);
+      snd.impact(at, s, true, rnd(-.35, .35));
+    }
+  }
+  function playRattle(snd, t0, len = .5) { const t = t0 ?? ac.currentTime + .03; rattle(snd, t, len, false); return len + .1; }
+  // the full throw: a cupped rattle that speeds up, a short release, then the dice land and tumble to rest
+  function playThrow(snd) {
+    const t = ac.currentTime + .03, rl = snd.clip ? 1.2 : .5;
+    rattle(snd, t, rl, true);
+    const land0 = t + rl + (snd.clip ? .45 : .13);     // the release gap after the last shake (the clip's is about half a second)
+    pans().forEach((p, i) => land(snd, land0 + i * rnd(.03, .07), p));
+    return rl + (snd.clip ? 1.4 : .5) + n * .1;
+  }
+
+  // ---- page ----
+  const cards = $('cards'); cards.style.display = 'grid'; cards.style.gap = '14px';
+  SOUNDS.forEach(snd => {
+    const c = document.createElement('section'); c.className = 'panel card';
+    c.innerHTML = `<header><span class="tag">${snd.id}</span><h2>${snd.name}</h2></header><p>${snd.text}</p>
+      <div class="btns"><button class="main" data-a="land">Land</button><button data-a="throw">Throw</button><button data-a="rattle">Rattle</button></div>`;
+    c.querySelector('.btns').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return; init();
+      const dur = b.dataset.a === 'land' ? playLand(snd) : b.dataset.a === 'throw' ? playThrow(snd) : playRattle(snd);
+      c.classList.add('playing'); clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove('playing'), dur * 1000 + 150);
+    });
+    cards.appendChild(c);
+  });
+  $('count').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; n = +b.dataset.n; [...$('count').children].forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
+  $('vol').oninput = e => { $('o-vol').textContent = e.target.value + '%'; if (out) out.gain.value = e.target.value / 100; };
+  $('room').onchange = e => { if (roomGain) roomGain.gain.value = e.target.checked ? .18 : 0; };
+})();
+</script>
