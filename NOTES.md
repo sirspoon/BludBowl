@@ -310,6 +310,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   they hold the ball 10+ from scoring, our quickest free player steps (sure move) to within his Move + 2 of their end zone, fewest of
   theirs able to reach him, before the formation. study_ol: ready runner at our defensive turn starts 26%, but our counters scored
   10% (9%), its receiving drives 39% -> 49%, .304 - one defender fewer costs far more. No full test.
+  Who carries (v5.70 study): Linemen 22% of turns with the ball for both sides. Ours by position: Thrower 39% (in our half 77%, kept
+  57%), Catcher 30%, Blitzer 9%, Lineman 22% (kept 49%); drefsante's Thrower 45% (in its half 52%, kept 63%), Lineman kept 60%. Our
+  Thrower in our half already hands off 27% of turns (drefsante 7%), passes 22% (21%), gains 4.1 v 3.2 - but starts marked 65% v 32%.
+  Where the ball slows (360 games): 14-18 out is 47% of our turns with it (drefsante 34%), marked there 72%; free there we gain 2.9 v
+  4.0; free 9-13 out 4% of our turns v 16%. `bpProg` 0.2 (study_pg2, v5.50's risk model): gain 3.0 -> 3.3, drives scored 28% (26%),
+  marked still 72%, .367 (v5.70 .388). Not kept. Speed-ups tried so far (escort, bpProg, spW 1) all fail to turn into wins.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
