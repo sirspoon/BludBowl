@@ -48,7 +48,8 @@ https://sirspoon.github.io/BludBowl/ (served from `main`).
 - `setupSkillTips`: skill-tag descriptions (touch: open on tap only; closing doesn't block scrolling).
 - `DICEFX`: animated dice (next to `renderDieIcon(ctx, face, sz, col)`). Block dice: `startBlock` (`animB`, `rollBlockDice`, `rollNow`;
   re-rolls set `state.combat.animIdx`); other rolls: the `btn-roll-confirm` / `btn-trr-yes` handlers (`rollIn`); armour/injury: `toast`.
-  `DICEFX.live()` keeps it out of `?simtest`, sped-up, replay and two-device play. Team dice colours: `t.dice` (`TB.diceOf`), `ROSTERS[i].dice`.
+  `DICEFX.live()` keeps it out of `?simtest`, sped-up, replay and two-device play. Dice sounds: `SFX.dice` (sound G; `settle` schedules the landings,
+  `tumble` the rattle; check `tools/ui-tests/dice-sound.js`). Team dice colours: `t.dice` (`TB.diceOf`), `ROSTERS[i].dice`.
 - Replays: `REPLAY` records close-ups during play, `PASSFX` draws them, `REC` saves "My matches" in FUMBBL's format, `FREP`
   is the viewer for our own and FUMBBL replays (FUMBBL player states: 16 picked up, 21 in the air while being thrown).
 

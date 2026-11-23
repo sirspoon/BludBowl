@@ -308,6 +308,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.71 (job session, 23 Nov): **new dice sounds**, sound G from `tools/dice-prototype/sounds.html`, in `SFX` (`SFX.dice`: `group`,
+  `land`, `hit`, `rattle`, `log`; the old `diceClack`/`dice` keys now play it). Scheduled on the AudioContext clock from real time
+  (`CLOCK.real()` - NB `performance.now` runs with the game's clock, so don't use it for audio sync). `DICEFX.settle` schedules each
+  die's landing (touchdown at J = .62, the pattern's 0.144 s hit on the hop's landing at q = .75, first 0.3 s mapped onto the landing
+  phase, tail 0.8x after); `tumble` rattles from its frame loop (stopped by settle/stop/clearBox, a hidden box or tab); `finish` (tap)
+  cuts to one hit. Choices: dice through `filt` like everything else (13 kHz, doesn't dull it), so they get the game's hall too;
+  computer's animated block dice keep a landing sound (replacing the old clack), no rattle; animation off plays the recorded landing.
+  Dice landing together keep each non-anchor hit with chance 1/n^0.75 (the prototype's 1/sqrt(n)+.25 left 2 dice twice as busy).
+  Level not tuned by ear (can't listen from the cloud): if it's too quiet/loud, the group gains in `DICE.group`/`rattle(n, vol)`.
+  Check: `tools/ui-tests/dice-sound.js`.
 - v5.69 (job session, 23 Nov): Stadium & dugouts: the last four (fjord, moot, khemri, chaos) - all 21 pitches themed (`TH_KEYS`).
   New theme fields: `crowd` (0..1 fan density; chaos 0.12), `noAisles`, `roof: null` (none), apron `snow`. The stadium test now
   opens all 21 pitches (~2.5 min). Then made ON by default (owner, same version v5.69): `bb-stadium` unset = on, '0' = off.

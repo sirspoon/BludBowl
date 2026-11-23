@@ -2,6 +2,20 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.71 (23 Nov 2026)
+- New dice sounds: sound G ("Matched to your clip") from `tools/dice-prototype/sounds.html`, built from the owner's recording and
+  ported with its numbers (bright clicks ringing at ~3.3 and ~4.5 kHz, a ~1 kHz body and a gritty "crunch" on table hits; the
+  recorded landing pattern; the shake at ~15 contacts a second). It replaces the old clack and rattle and goes through the game's
+  own sound chain (master volume, mute; the 13 kHz filter leaves it alone).
+- In step with the animated dice, scheduled on the audio clock from the animation's start (so a slow phone doesn't drift):
+  tumbling dice waiting for Roll rattle quietly (stopped at once on Roll, a tap, a closed window or a hidden tab); silence in the
+  air; each die's first hit on the frame it touches down and the recording's strong second hit on its hop's landing, scaled with
+  the roll length (0.5-2.0 s); the quiet tail of small tumbles runs on ~0.4 s after they settle. Dice landing together share the
+  pattern out. A tap that skips the roll cuts the sound to one hit. Re-rolls sound for the re-rolled dice only. Dodge, Rush,
+  armour and injury dice get a short rattle in their brief tumble, then the landing.
+- Dice animation off: the recorded landing (one die, as recorded) when the result comes up, in place of the old rattle.
+- No dice sound in `?simtest`, sped-up matches or replays. New check: `tools/ui-tests/dice-sound.js`.
+
 ## v5.70 (23 Nov 2026)
 - Experimental computer coach (brain x), receiving a kick-off: its best ball handler (Pass, then Sure Hands) is set up 6 squares
   from its end line in the middle row - the square nearest, on average, to where the opponents' kicks come to rest (within 6 squares

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.71 (23 Nov 2026)
+- New dice sounds, built from a real throw: block dice rattle quietly while they wait for your tap, then each die clacks down on the exact moment it lands and bounces, with a little tumbling patter after. Other rolls get the same sound.
+
 ## v5.70 (23 Nov 2026)
 - The experimental computer coach keeps its Thrower deep when receiving, where your kicks usually land, so he fetches the ball; and it no longer throws straight after picking the ball up on that first turn.
 

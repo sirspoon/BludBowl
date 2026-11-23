@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.70</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.71</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -13104,13 +13104,123 @@ ol.ci-steps li::marker { content: none; }
       src.start(ctx.currentTime + base + bell * spread);
     }
   }
+  // ---- dice: sound G, matched to the owner's recording (tools/dice-prototype/sounds.html; the numbers were tuned against it) ----
+  // Each sound is scheduled on the AudioContext clock in a group of its own (a gain into filt: the game's 13 kHz lowpass doesn't
+  // touch it, nothing in it is above 7 kHz), so a sound already scheduled can be cut at once (the Roll press, a skip, a window shut).
+  const dNow = () => CLOCK.real();   // (real time, as the dice animation uses: performance.now runs with the game's clock)
+  const drnd = (a, b) => a + Math.random() * (b - a);
+  let dnb = null;
+  const dNoise = () => { if (!dnb) { dnb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = dnb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; } return dnb; };
+  // ringing: damped sine partials (a small hard object struck)
+  function dRing(t, fr, decays, gains, vol, dest) {
+    fr.forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f * drnd(.99, 1.01);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * gains[i], t + .0006); g.gain.exponentialRampToValueAtTime(.0001, t + decays[i]);
+      o.connect(g); g.connect(dest); o.start(t); o.stop(t + decays[i] + .02);
+    });
+  }
+  // the tick of a contact: a very short burst of filtered noise
+  function dTick(t, vol, freq, dur, type, dest, q = .8) {
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = dNoise(); f.type = type; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(dest); s.start(t, Math.random() * .5); s.stop(t + dur + .01);
+  }
+  // one contact: t (ctx time), s strength 0-1, onDie (dice knocking together, not the table), pan, out (a group's gain)
+  function dImpact(t, s, onDie, pan, out) {
+    const d = ctx.createBiquadFilter(); d.type = 'lowpass'; d.frequency.value = 7000; d.Q.value = .5;   // (the clip has almost nothing above 8 kHz)
+    if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); d.connect(p); p.connect(out); } else d.connect(out);
+    const k = drnd(.94, 1.06) * (onDie ? 1.15 : .9);
+    dTick(t, .3 * s, drnd(4000, 5200), .004, 'bandpass', d, .7);
+    // the ring at 3.3 and 4.5 kHz (and 2.1), plus on the table the body around 1 kHz
+    const fr = [3300 * k, 4500 * k * drnd(.97, 1.03), 2100 * k], dc = [.016, .012, .01], g = [1, .85, .5];
+    if (!onDie) { fr.push(1050 * drnd(.95, 1.05)); dc.push(.012); g.push(.38); g[1] = 1.15; }
+    dRing(t, fr, dc.map(x => x * (.7 + .5 * s)), g, .3 * s, d);
+    // the crunch: a landing is never one clean contact; a few gritty micro-hits as edges and corners touch down, and a short gritty tail
+    if (!onDie) {
+      const m = 2 + Math.floor(Math.random() * 3 * s);
+      for (let i = 0; i < m; i++) dTick(t + drnd(.002, .009) * (i + 1), drnd(.15, .3) * s, drnd(2200, 3800), drnd(.004, .008), 'bandpass', d, 1.1);
+      dTick(t, .12 * s, 3000, .022, 'bandpass', d, .6);
+    }
+  }
+  // the owner's recorded throw: seconds after the first hit, and loudness. [3] (0.144 s) is the strong hit put on the hop's landing
+  const DLAND = [[0, 1], [.038, .41], [.058, .42], [.144, .88], [.192, .66], [.227, .7], [.247, .66], [.307, .51], [.333, .28], [.363, .41],
+    [.475, .37], [.599, .3], [.666, .18], [.694, .25], [.714, .22], [.746, .31], [.778, .25], [.8, .18]];
+  const DHOP = 3, DEARLY = .3;
+  const dSim = () => /[?&]simtest\b/.test(location.search) || !!window.BB_SIMTEST || (document.body && (document.body.classList.contains('sim-max') || document.body.classList.contains('frep-on')));
+  const dOk = () => !muted && !dSim() && !(CLOCK.speed > 1) && ensure();
+  // dNow() (ms) -> ctx time, worked out once per sound: from the output timestamp where the browser gives one (it allows
+  // for the output latency, so the sound is heard on the frame), else from currentTime less the output latency
+  function dClock() {
+    const now = dNow();
+    try { const ts = ctx.getOutputTimestamp && ctx.getOutputTimestamp();
+      if (ts && ts.performanceTime > 0 && Math.abs(now - ts.performanceTime) < 500) { const f = ms => ts.contextTime + (ms - ts.performanceTime) / 1000, d = f(now) - ctx.currentTime;
+        if (d < 0 && d > -.5) return f; } } catch (e) {}   // (sane: heard a little after it's handed over, never ahead)
+    const c = ctx.currentTime - (ctx.outputLatency || 0); return ms => c + (ms - now) / 1000;
+  }
+  const dlog = [];   // (what was scheduled, for tools/ui-tests/dice-sound.js: { kind, at (performance.now ms), s, die, i })
+  const dNote = e => { dlog.push(e); if (dlog.length > 400) dlog.splice(0, 100); };
+  function dGroup(vol = 1, life = 6000) {
+    const g = ctx.createGain(); g.gain.value = vol; g.connect(filt);
+    const G = { g, live: true, stop() { if (!G.live) return; G.live = false; const n = ctx.currentTime; try { g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value, n); g.gain.linearRampToValueAtTime(0, n + .004); } catch (e) {} setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 80); dNote({ kind: 'stop', at: dNow() }); } };
+    if (life) setTimeout(() => { if (G.live) { G.live = false; try { g.disconnect(); } catch (e) {} } }, life);   // (a landing is over well within this)
+    return G;
+  }
+  // one die's landing (o: at = touchdown, real-time ms; hop / end = ms after touchdown to the hop's landing / the dice at rest;
+  // n = dice landing together, which share the pattern out; die, pan). The pattern's first 0.3 s is fitted to the squash and hop
+  // (0.144 s on the hop's landing), the quiet tail runs on after they settle (0.8x speed, quieter), like dice still rocking
+  function dLand(G, o, clock) {
+    const n = o.n || 1, keep = n > 1 ? 1 / Math.pow(n, .75) : 1, H = o.hop, E = Math.max(o.end, H + 1), hopT = DLAND[DHOP][0];
+    const map = tau => tau <= hopT ? tau / hopT * H : tau <= DEARLY ? H + (tau - hopT) / (DEARLY - hopT) * (E - H) : E + (tau - DEARLY) * 800;
+    DLAND.forEach(([tau, v], i) => {
+      const anchor = i === 0 || i === DHOP;
+      if (!anchor && Math.random() > keep) return;   // (dice landing together share the pattern out: 2 dice ~1.3x as busy as one, 3 ~1.5x)
+      const ms = o.at + map(anchor ? tau : tau * drnd(.9, 1.1)) + (anchor ? 0 : drnd(-8, 8)), s = v * (anchor ? 1 : drnd(.85, 1.1)) * (tau > DEARLY ? .7 : 1);
+      if (ms < dNow() - 5) return;   // (its moment has passed: a held-up tab)
+      const t = Math.max(ctx.currentTime, clock(ms));
+      dImpact(t, s, !anchor && Math.random() < .35, (o.pan || 0) + drnd(-.15, .15), G.g);
+      dNote({ kind: 'land', at: ms, s, die: o.die || 0, i });
+    });
+  }
+  const DICE = {
+    // a group for one tray's landings (null: no sound now - muted, a test run, sped up, a replay)
+    group(n = 1) { if (!dOk()) return null; return dGroup(n > 1 ? 1 / Math.pow(n, .3) : 1); },
+    land(G, list) { if (!G || !G.live) return; const c = dClock(); list.forEach(o => dLand(G, o, c)); },
+    // a single landing hit now (a tap that skips the roll)
+    hit(s = 1) { if (!dOk()) return; const G = dGroup(1), t = ctx.currentTime + .005; dImpact(t, s, false, 0, G.g); dNote({ kind: 'hit', at: dNow(), s }); },
+    // the dice shaken (tumbling while they wait): ~15 dice-on-dice contacts a second, unevenly spaced 40-90 ms, the odd quick double,
+    // steady; scheduled ~0.12 s ahead in small chunks so stop() cuts it at once. Returns { stop } or null
+    rattle(n = 1, vol = .35) {
+      if (!dOk()) return null;
+      const G = dGroup(vol, 0); let at = ctx.currentTime + .02 + drnd(0, .04), tm = 0;
+      const step = () => {
+        if (!G.live) return;
+        if (dSim() || muted) { R.stop(); return; }
+        const until = ctx.currentTime + .12;
+        if (at < ctx.currentTime) at = ctx.currentTime + .01;   // (the timer was held up: carry on from now, no burst to catch up)
+        while (at < until) {
+          dImpact(at, drnd(.25, 1) * .8, true, drnd(-.35, .35), G.g); dNote({ kind: 'rattle', at: dNow() + (at - ctx.currentTime) * 1000 });
+          if (Math.random() < .18) dImpact(at + drnd(.014, .022), drnd(.25, .6), true, drnd(-.35, .35), G.g);
+          at += drnd(.04, .09) / Math.sqrt(n / 2 + .5);
+        }
+      };
+      const R = { live: true, stop() { if (!R.live) return; R.live = false; clearInterval(tm); G.stop(); } };
+      step(); tm = setInterval(step, 50);
+      return R;
+    },
+    log: dlog,
+    info: () => { let ts = null; try { ts = ctx && ctx.getOutputTimestamp ? ctx.getOutputTimestamp() : null; } catch (e) {} return { state: ctx && ctx.state, now: dNow(), ctxNow: ctx && ctx.currentTime, lat: ctx && ctx.outputLatency, ts: ts && { c: ts.contextTime, p: ts.performanceTime }, muted, ok: dOk() }; }
+  };
+  // the dice sound with the animation off (and the old one-shot keys): the recorded landing as it was, one die
+  const diceNow = () => { const G = DICE.group(1); if (!G) return; const t = dNow() + 10; DICE.land(G, [{ at: t, hop: 144, end: 300, n: 1 }]); };
   const N = { C4:261.6, D4:293.7, E4:329.6, F4:349.2, G4:392, A4:440, B4:493.9, C5:523.3, D5:587.3, E5:659.3, G5:784, A5:880, C6:1046.5, E6:1318.5 };
   function arp(notes, step, wave, vol, len) { notes.forEach((n, i) => tone(N[n] || n, N[n] || n, len || step * 1.6, wave, vol, i * step)); }
 
   const SOUNDS = {
-    'diceClack': () => { noise(0.05, 0.42, 0, 4200 + Math.random() * 1600); tone(700 + Math.random() * 500, 320, 0.035, 'square', 0.05); },   // (an animated die landing)
-    'diceClackSoft': () => { noise(0.04, 0.16, 0, 3800 + Math.random() * 1600); },
-    'dice': () => { for (let i = 0; i < 9; i++) { noise(0.045, 0.3, i * 0.06 + (i * i) * 0.002, 5200); tone(300 + Math.random() * 260, 180, 0.04, 'square', 0.05, i * 0.06); } },
+    'diceClack': () => DICE.hit(1),   // (one die hitting the table; the animated dice schedule their own landings: SFX.dice)
+    'diceClackSoft': () => DICE.hit(.4),
+    'dice': () => diceNow(),   // (a roll with the dice animation off: the recorded landing)
     'rollPass': () => { tone(N.E5, N.E5, 0.09, 'p25', 0.28); tone(N.A5, N.A5, 0.18, 'p25', 0.28, 0.09); },
     'rollFail': () => { tone(220, 110, 0.32, 'sawtooth', 0.26); tone(165, 82, 0.32, 'square', 0.14, 0.02); },
     'teamReroll': () => { tone(200, 1200, 0.28, 'triangle', 0.3); tone(260, 1500, 0.28, 'p25', 0.12, 0.03); },
@@ -13178,14 +13288,14 @@ ol.ci-steps li::marker { content: none; }
   const BIG = /Ogre|Troll|Kroxigor|Treeman|Minotaur/, SMALL = /Goblin|Skink|Gutter|Gnoblar|Halfling|Looney|Bomma|Ooligan|Doom Diver|Fanatic|Pogoer/;
   function sizeFor(p) { return !p ? 1 : SMALL.test(p.type) ? 1.4 : BIG.test(p.type) ? 0.76 : 1; }
   function play(key, delayMs, sz = 1) {
-    if (muted || CLOCK.speed > 1 || !ensure()) return;
+    if (muted || CLOCK.speed > 1 || (/^dice/.test(key) && dSim()) || !ensure()) return;
     const fn = SOUNDS[key]; if (!fn) return;
     const go = () => { try { MUSIC.duck(key); } catch (e) {} try { (voxLoading || Promise.resolve()).then(() => { try { vsize = sz; fn(); } catch (e) {} }); } catch (e) {} };
     delayMs ? setTimeout(go, delayMs) : go();
   }
   function voice(key, player, delayMs) { play(key, delayMs, sizeFor(player)); }
   function setMuted(m) { muted = !!m; try { localStorage.setItem('bb-sound-muted', muted ? '1' : '0'); } catch (e) {} if (master) master.gain.value = muted ? 0 : 0.29; }
-  return { play, voice, setMuted, isMuted: () => muted, has: k => !!SOUNDS[k], unlock: () => { if (!muted) ensure(); },
+  return { play, voice, setMuted, isMuted: () => muted, dice: DICE, has: k => !!SOUNDS[k], unlock: () => { if (!muted) ensure(); },
            team: race => { if (TEAM_CALLS[race]) play('team:' + race); } };
         })();
         const sfx = (k, d) => SFX.play(k, d), sfxVoice = (k, p, d) => SFX.voice(k, p, d);
@@ -20565,8 +20675,13 @@ ol.ci-steps li::marker { content: none; }
                 }
                 try { return cache[key] = c.toDataURL(); } catch (e) { return ''; }
             }
-            // ---- sound: a clack as a die lands (the game's own sound setting) ----
-            const clack = soft => { try { sfx(soft ? 'diceClackSoft' : 'diceClack'); } catch (e) {} };
+            // ---- sound (the game's own sound setting; SFX.dice, sound G): a rattle while dice tumble, the landing in step with each die ----
+            const SD = () => { try { return SFX.dice; } catch (e) { return null; } };
+            const shown = T => T.box.isConnected && !document.hidden && T.box.getClientRects().length > 0;   // (a shut window, a hidden tab: quiet)
+            function rattleOff(T) { if (T && T.rat) { T.rat.stop(); T.rat = null; } }
+            function landOff(T) { if (T && T.land) { T.land.stop(); T.land = null; } }
+            const allTrays = new Set();   // (the trays that may be rattling: silenced when the tab is hidden)
+            document.addEventListener('visibilitychange', () => { if (document.hidden) allTrays.forEach(T => { rattleOff(T); if (T.state !== 'tumble') allTrays.delete(T); }); });
             // ---- the dice ----
             const PLACE = { 1: 'rotateY(0deg)', 6: 'rotateY(180deg)', 3: 'rotateY(90deg)', 4: 'rotateY(-90deg)', 2: 'rotateX(90deg)', 5: 'rotateX(-90deg)' };
             const TARGET = { 1: [0, 0, 0], 2: [-90, 0, 0], 3: [0, -90, 0], 4: [0, 90, 0], 5: [90, 0, 0], 6: [0, 180, 0] };
@@ -20599,12 +20714,15 @@ ol.ci-steps li::marker { content: none; }
                 const k = Math.max(.35, 1 - Math.max(0, -y) / 120); d.sh.style.transform = `scale(${k.toFixed(3)})`; d.sh.style.opacity = (.9 * k).toFixed(2);
             }
             // set the dice (those listed, or all) tumbling in place
-            function tumble(T, which) {
+            // (rattleVol: how loud their rattle is - quiet while waiting for Roll, a little more for a roll's brief tumble)
+            function tumble(T, which, rattleVol = .35) {
                 cancelAnimationFrame(T.raf); T.state = 'tumble';
                 const go = which || T.dice.map((_, i) => i);
                 go.forEach(i => { T.dice[i].spinning = true; });
                 let last = rt();
-                const tick = () => { const now = rt(); if (!T.box.isConnected) { T.state = 'gone'; return; }
+                allTrays.add(T);
+                const tick = () => { const now = rt(); if (!T.box.isConnected) { T.state = 'gone'; rattleOff(T); allTrays.delete(T); return; }
+                    if (!shown(T)) rattleOff(T); else if (!T.rat) { const sd = SD(); T.rat = sd ? sd.rattle(go.length, rattleVol) : null; if (!T.rat) T.rat = { stop() {} }; }
                     const dt = Math.min(.05, (now - last) / 1000); last = now;
                     T.dice.forEach(d => { if (!d.spinning) return; d.ang = d.ang.map((a, k) => a + d.w[k] * dt); pose(d, HOVER + 3 * Math.sin(now / 260 + d.phase), d.ang, 1, 1); });
                     T.raf = requestAnimationFrame(tick);
@@ -20625,6 +20743,13 @@ ol.ci-steps li::marker { content: none; }
                     d.tgt = TARGET[d.v].map((t, k) => { const want = d.from[k] + d.v0[k] * .9; return d.w[k] > 0 ? t + 360 * Math.ceil((want - t) / 360) : t + 360 * Math.floor((want - t) / 360); });
                     d.y0 = d.spinning ? d.y : 0;
                 });
+                // the sound: the rattle stops at once; each die's landing on the AudioContext clock from t0 (touchdown at J, the
+                // pattern's strong second hit on the hop's landing, q = .75 of the landing phase); not for a box nobody can see
+                rattleOff(T); allTrays.delete(T); landOff(T);
+                const sd = SD(), G = sd && shown(T) ? sd.group(movers.length) : null;
+                if (G) { T.land = G; sd.land(G, movers.map(d => { const i = T.dice.indexOf(d), n = T.dice.length, L = d.len * (1 - J);
+                    return { at: t0 + d.start + d.len * J, hop: L * .75, end: L, n: movers.length, die: i, pan: n === 1 ? 0 : (i / (n - 1) * 2 - 1) * .35 }; })); }
+                T.t0 = t0;
                 const frame = () => { const now = rt();
                     let all = true;
                     movers.forEach(d => {
@@ -20635,8 +20760,8 @@ ol.ci-steps li::marker { content: none; }
                             d.ang = d.from.map((a, k) => h00 * a + h10 * d.v0[k] + h01 * d.tgt[k]); pose(d, y, d.ang, sc, sc);
                         } else {
                             const q = (p - J) / (1 - J);
-                            if (!d.landed) { d.landed = true; clack(false); }
-                            if (q > .5 && !d.hop2) { d.hop2 = true; clack(true); }
+                            if (!d.landed) { d.landed = true; d.landedAt = now; }
+                            if (q >= .75 && !d.hop2) { d.hop2 = true; d.hopAt = now; }   // (the hop's landing: where the second big hit sounds)
                             const hop = q > .35 && q < .75 ? -d.s * .08 * Math.sin(Math.PI * (q - .35) / .4) : 0, sq = q < .35 ? .15 * Math.sin(Math.PI * q / .35) : 0;
                             d.ang = d.tgt; pose(d, hop, d.ang, 1 + sq * .6, 1 - sq);
                         }
@@ -20652,10 +20777,10 @@ ol.ci-steps li::marker { content: none; }
                 if (T.state !== 'rolling') return;
                 cancelAnimationFrame(T.raf); clearTimeout(T.timer); T.state = 'done';
                 T.dice.forEach(d => { d.spinning = false; if (d.v) { d.ang = TARGET[d.v].slice(); pose(d, 0, d.ang, 1, 1); } });
-                if (!quietly) clack(false);
+                if (!quietly) { landOff(T); const sd = SD(); if (sd) sd.hit(1); }   // (skipped: the scheduled landing goes, one hit instead)
                 const f = T.done; T.done = null; if (f) f();
             }
-            function stop(T) { if (!T) return; cancelAnimationFrame(T.raf); clearTimeout(T.timer); T.state = 'gone'; T.done = null; }
+            function stop(T) { if (!T) return; cancelAnimationFrame(T.raf); clearTimeout(T.timer); T.state = 'gone'; T.done = null; rattleOff(T); allTrays.delete(T); }   // (a landing already sounding rings on)
             // ---- other rolls: a short tumble, then the jump and settle, in a box inside a roll window; seq = the rolls in order
             // (a skill re-roll shows the first result, then the re-rolled die jumping again); done() once they've settled
             function rollIn(host, seq, o, done) {
@@ -20680,7 +20805,7 @@ ol.ci-steps li::marker { content: none; }
                     });
                 };
                 host.onclick = e => { e.stopPropagation(); if (T.state === 'rolling') finish(T); else if (T.state === 'done' && k === seq.length - 1) end(); };
-                if (o.from || reuse) next(); else { tumble(T); T.timer = setTimeout(next, 260); }
+                if (o.from || reuse) next(); else { tumble(T, null, .5); T.timer = setTimeout(next, 260); }
                 return T;
             }
             // dice tumbling in a roll window while it waits for the coach's press (onTap: tapping them counts as the press)
@@ -20700,7 +20825,7 @@ ol.ci-steps li::marker { content: none; }
                 const lab = el('div', 'dfx-lab ' + (cls || '')); lab.textContent = text || ''; host.appendChild(lab);
                 T.state = 'rest'; return T;
             }
-            function clearBox(host) { if (!host) return; host.onclick = null; host.innerHTML = ''; host.classList.add('hidden'); }
+            function clearBox(host) { if (!host) return; allTrays.forEach(T => { if (host.contains(T.box)) { rattleOff(T); allTrays.delete(T); } }); host.onclick = null; host.innerHTML = ''; host.classList.add('hidden'); }
             const HOLD = 2200;   // how long a result stays up (a tap puts it away sooner)
             // the click that follows a tap used to put a result away goes nowhere (not onto the pitch or a button underneath)
             function swallow() {
@@ -20728,7 +20853,7 @@ ol.ci-steps li::marker { content: none; }
                 box.innerHTML = '<div class="dfx-tdice"></div><div class="dfx-tlab"></div>'; box.className = 'show';
                 const T = tray(box.firstChild, { n: it.vals.length, kind: 'd6', col: it.o.col, size: 30, gap: 8, height: 40 });
                 const lab = box.lastChild; lab.textContent = it.o.title || ''; lab.className = 'dfx-tlab';   // (the result only once the dice have landed)
-                tumble(T);
+                tumble(T, null, .5);
                 setTimeout(() => settle(T, it.vals, null, () => {
                     lab.textContent = it.o.label || ''; lab.className = 'dfx-tlab ' + (it.o.cls || '');
                     let gone = false;
@@ -20739,7 +20864,7 @@ ol.ci-steps li::marker { content: none; }
                 }), 160);
             }
             return {
-                S, live, ink, colFor, contrast, shade, tray, tumble, settle, finish, stop, rollIn, waitIn, restIn, clearBox, toast, okHex, whenIdle,
+                S, live, ink, colFor, contrast, shade, tray, tumble, settle, finish, stop, rollIn, rattling: T => !!(T && T.rat && T.rat.live), waitIn, restIn, clearBox, toast, okHex, whenIdle,
                 set: (k, v) => put(k, v),
                 blockOn: () => S.block() && live(),   // (the computer's blocks too: they roll at once, then land the same way)
                 otherOn: team => S.other() && live() && !AI.isAI(team)
