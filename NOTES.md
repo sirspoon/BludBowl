@@ -271,6 +271,8 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   cruder tiers, not the model. `spCal` (a table to the real rates + sideline pushes at 0.3) only nudged the Brier score (.143 -> .140) and
   in the 120-game study on the same seeds (study_cal) kept the ball 68% (v5.50 70%), .346 (v5.50 .438, v5.49 .383): lower mid-range risk
   lets the carrier swap safety for ground again. Code removed. The lever left is the safety-v-ground weight (spW: only 1 and 2 tried).
+  spW 3 (23 Nov, study_w3, same seeds): ball kept 68%, touchdowns 88-159, .342 - no safer and scoring less; spW 2 stays. (v5.50's own
+  study, .438, was a lucky run: k_seq gave .390.) spRisk looks done: right numbers, weight tried at 1/2/3.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
