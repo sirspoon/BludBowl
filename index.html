@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.67</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.68</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1347,7 +1347,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Replays<small>a close-up replay of each pass, Throw or Kick Team-mate and bomb, once its dice are done</small></span><button type="button" class="st-tog" id="st-replay"></button></div>
             <div class="st-row"><span>Kick-off replays<small>a close-up of each kick-off too, once the ball has come down (with Replays on)</small></span><button type="button" class="st-tog" id="st-replay-kick"></button></div>
             <div class="st-row"><span>HD sprites (test)<small>High Elves only: 1.5x the pixels (the originals, smoothed) or 2x (redrawn); other teams unchanged</small></span><button type="button" class="st-tog" id="st-hd"></button></div>
-            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. On the grass, worn grass, flagstone, jungle, High Elf and Orc pitches for now (turning it on on another pitch sets Pitch to Grass; leagues and tournaments play at the home ground). Also ?stadium in the address (e.g. ?stadium=elven, =shanty, =worn, =flagstone, =jungle)</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
+            <div class="st-row"><span>Stadium &amp; dugouts (test)<small>stands, a crowd and each team's dugout (reserves, knocked out, casualties) round the pitch: drag or zoom out to see them. On every pitch except Fjord, Moot, Khemri and Chaos Wastes so far (turning it on on another pitch sets Pitch to Grass; leagues and tournaments play at the home ground). Also ?stadium in the address (e.g. ?stadium=elven, =shanty, =worn, =flagstone, =jungle)</small></span><button type="button" class="st-tog" id="st-stadium"></button></div>
             <div class="st-row"><span>Weather effects<small>snow, rain, sunshine and heat on the pitch</small></span><button type="button" class="st-tog" id="st-weather"></button></div>
             <div class="st-row bk-row"><span>Back up &amp; restore<small>Teams, careers, leagues, tournaments, trophies, memorials, a match in progress, your saved replays (My matches) and these settings, in one file. Keep it in Google Drive or Files.</small><small id="bk-last" class="bk-last"></small></span>
                 <span class="bk-btns"><button type="button" class="sv-btn sv-go" id="bk-make">Back up everything</button><button type="button" class="sv-btn" id="bk-load">Restore from a backup…</button><button type="button" class="sv-btn sv-bad hidden" id="bk-undo">Undo the last restore</button></span></div>
@@ -8193,7 +8193,10 @@ ol.ci-steps li::marker { content: none; }
             state.bloodSplatters.push(...drops);
         }
 
-        function showRemovalNotice(title, desc) {
+        function showRemovalNotice(title, desc) {   // (after any armour/injury dice still showing at the top: they sit in the same place)
+            try { DICEFX.whenIdle(() => showRemovalNoticeNow(title, desc)); } catch (e) { showRemovalNoticeNow(title, desc); }
+        }
+        function showRemovalNoticeNow(title, desc) {
             const toast = document.getElementById('removal-toast');
             document.getElementById('toast-title').textContent = title;
             document.getElementById('toast-desc').textContent = desc;
@@ -10262,7 +10265,7 @@ ol.ci-steps li::marker { content: none; }
                 log(`  [Secret] ${ROSTERS[p.team].name} ${p.type} #${pNo(p)} moved to [${x}, ${y}]${had ? ', ball and all' : ''}.`, 'text-amber-300');
                 repo = null; repoPaint(); try { updateTopBar(); } catch (e) {} render(); return true;
             }
-            return { on, placesFor, humanSide, opt: k => !!o[k], repoClick };
+            return { on, placesFor, humanSide, opt: k => !!o[k], repoClick, repoPicked: () => repo && repo.step === 'place' ? repo.id : null };
         })();
 
         // ---------- Saved formations: five slots for your own kick-off set-ups ----------
@@ -16678,6 +16681,7 @@ ol.ci-steps li::marker { content: none; }
         }
         // the glow on a marked player's base: a bright flare as they're picked, then a steady pulse (yellow: acting, red: target)
         function markGlow(p) {
+            try { const rp = CHEAT.repoPicked(); if (rp != null) { if (rp !== p.id) return null; const t = CLOCK.real(), pulse = 0.5 + 0.5 * Math.sin(t / 160); return { col: [250, 204, 21], a: 0.8 + 0.2 * pulse, grow: 0.2 + 0.35 * pulse }; } } catch (e) {}   // (secret option Reposition opposition: the picked player's base pulses yellow until they're placed)
             const m = curMark; if (!m) return null;
             const role = m.p === p ? 'a' : m.q === p ? 't' : null; if (!role) return null;
             const t = (() => { try { return CLOCK.real(); } catch (e) { return performance.now(); } })(), t0 = markSince.get(p.id + ':' + role);
@@ -20708,11 +20712,14 @@ ol.ci-steps li::marker { content: none; }
             const queue = []; let showing = false;
             function toast(vals, o) {
                 if (!S.other() || !live()) return;
+                try { if (AI.isAI(state.activeTeam)) return; } catch (e) {}   // (not in the computer's turn: play has moved on before they'd land)
                 queue.push({ vals, o }); if (queue.length > 3) queue.shift();
                 if (!showing) nextToast();
             }
+            let idleFns = [];   // (whenIdle: run once the armour/injury strip has gone, e.g. the removal notice, so the two don't overlap)
+            function whenIdle(fn) { if (!showing && !queue.length) fn(); else idleFns.push(fn); }
             function nextToast() {
-                const it = queue.shift(); if (!it) { showing = false; return; }
+                const it = queue.shift(); if (!it) { showing = false; const f = idleFns; idleFns = []; f.forEach(fn => { try { fn(); } catch (e) {} }); return; }
                 showing = true;
                 let box = document.getElementById('dfx-toast');
                 if (!box) { box = el('div', ''); box.id = 'dfx-toast'; box.setAttribute('aria-hidden', 'true'); document.body.appendChild(box); }
@@ -20728,11 +20735,11 @@ ol.ci-steps li::marker { content: none; }
                     const away = () => { if (gone) return; gone = true; document.removeEventListener('pointerdown', away, true);   // (the tap still counts: this strip holds nothing up)
                         box.className = ''; setTimeout(() => { stop(T); nextToast(); }, 220); };
                     document.addEventListener('pointerdown', away, true);   // a tap anywhere puts it away
-                    setTimeout(() => away(), HOLD);
+                    setTimeout(() => away(), idleFns.length && !queue.length ? 1200 : HOLD);   // (a removal notice waiting for its turn: a shorter look at the result)
                 }), 160);
             }
             return {
-                S, live, ink, colFor, contrast, shade, tray, tumble, settle, finish, stop, rollIn, waitIn, restIn, clearBox, toast, okHex,
+                S, live, ink, colFor, contrast, shade, tray, tumble, settle, finish, stop, rollIn, waitIn, restIn, clearBox, toast, okHex, whenIdle,
                 set: (k, v) => put(k, v),
                 blockOn: () => S.block() && live(),   // (the computer's blocks too: they roll at once, then land the same way)
                 otherOn: team => S.other() && live() && !AI.isAI(team)
@@ -22158,7 +22165,7 @@ ol.ci-steps li::marker { content: none; }
         // to offscreen canvases (repainted only when the teams, their colours or the pitch size change); per frame only the players
         // in the dugouts are drawn. Never drawn in ?simtest (render() skips drawFrame there).
         const STADIUM = (() => {
-            const Q = /[?&]stadium(?:[=&]|$)/.test(location.search), TH_KEYS = ['blades', 'elven', 'shanty', 'worn', 'flagstone', 'jungle'];   // (the pitches with their own stadium so far)
+            const Q = /[?&]stadium(?:[=&]|$)/.test(location.search), TH_KEYS = ['blades', 'elven', 'shanty', 'worn', 'flagstone', 'jungle', 'graveyard', 'brimstone', 'woodland', 'warpstone', 'blackark', 'dwarfhold', 'wastes', 'plague', 'bretonnia', 'ziggurat', 'altdorf'];   // (the pitches with their own stadium so far)
             let pref = false; try { pref = localStorage.getItem('bb-stadium') === '1'; } catch (e) {}
             {   // (?stadium: the grass pitch for this visit, without changing the saved Pitch setting; ?stadium=elven / =shanty: that pitch)
                 const m = location.search.match(/[?&]stadium=(\w+)/), want = m && TH_KEYS.includes(m[1]) ? m[1] : 'blades';
@@ -22280,6 +22287,203 @@ ol.ci-steps li::marker { content: none; }
                     dug: { shell: '#8a7550', floor: ['#7d6a45', '#6f5d3b'], speck: ['rgba(40,28,10,0.2)', 'rgba(200,180,130,0.12)'], leaves: true, mat: true, bench: '#6b4a2a', divider: '#5a3c22', rail: '#8a7550', railTrim: '#2f8f7a',
                         plaque: '#2f5f4f', plaqueText: '#f3e3b0', plaqueEdge: '#d9b44a', awning: 'thatch', bannerEdge: '#2f8f7a' },
                     extras: jungleExtras, roof: roofCanopy, outside: '#0a120b'
+                },
+                // Graveyard (Undead, Necromantic, Vampires): a haunted boneyard - crumbling stone terraces, a wrought-iron fence, tombstone
+                // boards with epitaphs, dead turf, crypt dugouts under tattered shrouds, a gothic slate roof with spires and crypts
+                graveyard: {
+                    terrace: '#3c3e3c', blocks: true, step: 'rgba(0,0,0,0.3)', wash: 'rgba(8,10,16,0.42)',
+                    apron: ['#4e5236', '#474b31'], mud: true, stripe: null, blade: ['rgba(28,30,18,0.4)', 'rgba(170,160,100,0.22)'], line: 'rgba(220,226,214,0.8)',
+                    ads: ['REST IN PIECES', 'NECRO NOSH', 'BONEYARD BREW', 'BLUDBOWL', 'COFFIN & CO.', 'THE NIGHT OWL', 'DIG YOUR OWN'],
+                    wall: (g, x, y, w, h) => {   // a wrought-iron fence: railings with spear tips
+                        g.fillStyle = '#26282b'; g.fillRect(x, y, w, h); g.fillStyle = '#0e0f11'; const vert = h > w;
+                        vert ? (g.fillRect(x + w * 0.2, y, w * 0.12, h), g.fillRect(x + w * 0.68, y, w * 0.12, h)) : (g.fillRect(x, y + h * 0.2, w, h * 0.12), g.fillRect(x, y + h * 0.68, w, h * 0.12));
+                        for (let k = 3; k < (vert ? h : w); k += 6) { vert ? g.fillRect(x, y + k, w, 1.6) : g.fillRect(x + k, y, 1.6, h); }
+                    },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // a weathered headstone-grey slab with a carved epitaph
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.fillStyle = ['#7d7f7b', '#868884', '#737571'][(r() * 3) | 0]; g.fillRect(x + 1, y + 1, w - 2, h - 2);
+                        g.fillStyle = 'rgba(70,100,50,0.35)'; for (let i = 0; i < 3; i++) g.fillRect(x + r() * w * 0.9, y + r() * h * 0.8, ts * 0.25, ts * 0.12);   // moss
+                        g.fillStyle = 'rgba(30,32,30,0.85)'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.56)}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.84); g.restore();
+                    },
+                    dug: { shell: '#3a3c3a', floor: ['#4a4436', '#3f3a2e'], speck: ['rgba(0,0,0,0.25)', 'rgba(170,160,120,0.08)'], bench: '#3a2f24', divider: '#2e302e', rail: '#26282b', railTrim: '#55575a',
+                        plaque: '#2a2b2e', plaqueText: '#c9d6c2', plaqueEdge: '#55575a', font: "Georgia, 'Times New Roman', serif", fontStyle: 'bold', awning: 'shroud', bannerEdge: '#1c1c1e' },
+                    extras: graveExtras, roof: roofGothic, outside: '#07080a', pitchTint: 'rgba(20,26,44,0.12)'
+                },
+                // Brimstone (Khorne, Chaos Chosen, Renegades): black basalt with lava glowing in its cracks, iron-and-brass boards in blood
+                // red, riveted brass awnings, crags of basalt over the top rows, skull pyramids with braziers, lava pools, embers
+                brimstone: {
+                    terrace: '#1d1414', rock: true, step: 'rgba(0,0,0,0.4)', wash: 'rgba(10,4,4,0.42)',
+                    apron: ['#2a201e', '#241b19'], paving: true, cracks: true, lava: true, blade: null, stripe: null, line: 'rgba(230,214,196,0.8)',
+                    ads: ['SKULLS!', 'BRASS & BLOOD', 'GORE GROG', 'BLUDBOWL', 'RAGE ALE', 'SKULL THRONE SEATS', 'AXE TO GRIND'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#1a1a1c'; g.fillRect(x, y, w, h); g.fillStyle = '#b07830'; const vert = h > w, t = Math.max(1.5, (vert ? w : h) * 0.12); vert ? (g.fillRect(x, y, t, h), g.fillRect(x + w - t, y, t, h)) : (g.fillRect(x, y, w, t), g.fillRect(x, y + h - t, w, t)); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // a black iron plate, brass rim and rivets, letters in blood red
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.fillStyle = '#161618'; g.fillRect(x + 1, y + 1, w - 2, h - 2); g.strokeStyle = '#b07830'; g.lineWidth = Math.max(1.2, ts * 0.04); g.strokeRect(x + 2.5, y + 2.5, w - 5, h - 5);
+                        g.fillStyle = '#d9a44a'; [[x + 5, y + 5], [x + w - 5, y + 5], [x + 5, y + h - 5], [x + w - 5, y + h - 5]].forEach(([px, py]) => { g.beginPath(); g.arc(px, py, 1.4, 0, 7); g.fill(); });
+                        g.fillStyle = kk && r() < 0.35 ? kk.fill : '#c0281e'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.6)}px Impact, Teko, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.8); g.restore();
+                    },
+                    dug: { shell: '#1d1414', floor: ['#2a201e', '#221917'], speck: ['rgba(0,0,0,0.25)', 'rgba(255,120,40,0.06)'], lavaFloor: true, bench: '#3a2a20', divider: '#141010', rail: '#1a1a1c', railTrim: '#b07830',
+                        plaque: '#161618', plaqueText: '#d9a44a', plaqueEdge: '#b07830', font: 'Impact, Teko, sans-serif', awning: 'brass', bannerEdge: '#b07830' },
+                    extras: brimExtras, roof: roofCrag, outside: '#0a0404', pitchTint: 'rgba(60,12,4,0.08)'
+                },
+                // Woodland (Wood Elves, Gnomes): a forest glade - grassy banks, a hedge for a wall, carved wooden boards, leafy awnings,
+                // a canopy of oaks (a few turning) with treehouses, gnome toadstool houses, lanterns, sunbeams
+                woodland: {
+                    terrace: '#33452a', rock: true, step: 'rgba(0,0,0,0.25)', wash: 'rgba(8,14,8,0.34)',
+                    apron: ['#3a6a30', '#35622c'], stripe: null, blade: ['rgba(18,60,24,0.35)', 'rgba(140,200,110,0.2)'], flowers: true, line: 'rgba(245,240,220,0.85)',
+                    ads: ['ATHEL LOREN', 'ACORN ALE', 'TREEMAN TONIC', 'BLUDBOWL', 'GNOME HOMES', 'MUSHROOM MARKET', 'WARDANCER WAX'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#24482a'; g.fillRect(x, y, w, h); const vert = h > w, r = pitchRng(Math.round(x + y)); for (let k = 0; k < (vert ? h : w); k += 4) { g.fillStyle = ['#2d5a32', '#1e3d22', '#356a38'][(r() * 3) | 0]; g.beginPath(); g.arc(vert ? x + w * r() : x + k, vert ? y + k : y + h * r(), (vert ? w : h) * 0.35, 0, 7); g.fill(); } },   // a hedge
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // a carved wooden board with a leaf at each end
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.fillStyle = '#7a5530'; g.fillRect(x + 1, y + 1, w - 2, h - 2); g.fillStyle = 'rgba(40,24,10,0.3)'; vert ? g.fillRect(x + w / 2, y, 1, h) : g.fillRect(x, y + h / 2, w, 1);
+                        g.save(); g.translate(x + w / 2, y + h / 2); if (vert) g.rotate(-Math.PI / 2);
+                        g.fillStyle = '#4a8a3e'; [-1, 1].forEach(sd => { g.beginPath(); g.ellipse(sd * L * 0.42, 0, S * 0.32, S * 0.16, sd * 0.5, 0, 7); g.fill(); });
+                        g.fillStyle = kk ? kk.fill : '#f3e6c8'; g.font = `italic bold ${Math.round(Math.min(S, ts) * 0.56)}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 0, S * 0.04, L * 0.7); g.restore();
+                    },
+                    dug: { shell: '#5a3c22', floor: ['#4a5a32', '#3f4e2b'], speck: ['rgba(20,40,10,0.2)', 'rgba(160,200,110,0.12)'], leaves: true, planksShell: true, bench: '#7a5530', divider: '#4a3220', rail: '#5a3c22', railTrim: '#4a8a3e',
+                        plaque: '#3a2716', plaqueText: '#f3e6c8', plaqueEdge: '#4a8a3e', font: "Georgia, 'Times New Roman', serif", fontStyle: 'italic bold', awning: 'leafy', bannerEdge: '#4a8a3e' },
+                    extras: woodExtras, roof: roofForest, outside: '#08100a'
+                },
+                // Warpstone (Skaven): a ramshackle under-city stadium - plank terraces, scrap boards, warpstone glowing everywhere, a
+                // patched plank roof with holes, crooked bell towers, the Horned Rat's sigil
+                warpstone: {
+                    terrace: '#2c2620', planks: true, step: 'rgba(0,0,0,0.35)', wash: 'rgba(6,10,6,0.45)',
+                    apron: ['#4a4030', '#433a2b'], paving: true, cracks: true, blade: null, stripe: null, line: 'rgba(200,255,170,0.75)',
+                    ads: ['WARP-TOKENS', 'SKRYRE SPARKS', 'CLAN ESHIN', 'BLUDBOWL', 'RAT-ON-A-STICK', 'GNAW-GNAW', 'YES-YES!'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#4a3a28'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(0,0,0,0.4)'; const vert = h > w; for (let k = 0; k < (vert ? h : w); k += 7 + (k * 13) % 9) vert ? g.fillRect(x, y + k, w, 1.5) : g.fillRect(x + k, y, 1.5, h); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // scrap planks and a bent tin sign, green paint
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.save(); g.translate(x + w / 2, y + h / 2); if (vert) g.rotate(-Math.PI / 2); g.rotate((r() - 0.5) * 0.06);
+                        g.fillStyle = r() < 0.5 ? '#5a4a36' : '#6a6458'; g.fillRect(-L / 2 + 1, -S / 2 + 1, L - 2, S - 2); g.fillStyle = 'rgba(0,0,0,0.3)'; g.fillRect(-L / 2, -1, L, 2);
+                        g.fillStyle = r() < 0.6 ? '#8cff5a' : kk ? kk.fill : '#e8dfc6'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.58)}px Impact, Teko, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.rotate((r() - 0.5) * 0.08); g.fillText(txt, 0, S * 0.04, L * 0.8); g.restore();
+                    },
+                    dug: { shell: '#3a2e22', floor: ['#3e3628', '#352e22'], speck: ['rgba(0,0,0,0.25)', 'rgba(140,255,90,0.05)'], planksShell: true, cracked: true, bench: '#5a4430', divider: '#2a2018', rail: '#4a3a28', railTrim: '#4fbf2a',
+                        plaque: '#2a2018', plaqueText: '#8cff5a', plaqueEdge: 'rgba(0,0,0,0)', font: 'Impact, Teko, sans-serif', awning: 'ragged', bannerEdge: '#2a2018' },
+                    extras: warpExtras, roof: roofRamshackle, outside: '#050805', pitchTint: 'rgba(10,30,8,0.12)'
+                },
+                // Black Ark (Dark Elves): the deck of a black ship - dark planking, purple-black iron boards with silver script, violet
+                // lanterns, chains, black silk awnings with blade points, the decks and spires of the Ark round the top, the sea beyond
+                blackark: {
+                    terrace: '#1a1824', planks: true, step: 'rgba(0,0,0,0.4)', wash: 'rgba(6,4,14,0.45)',
+                    apron: ['#24202e', '#201c29'], deck: true, blade: null, stripe: null, line: 'rgba(214,206,236,0.82)',
+                    ads: ['NAGGAROTH', 'KHAINE WINE', 'CORSAIR CLOAKS', 'BLUDBOWL', 'HAG GRAEF', 'COLD ONE STABLES', 'THE BLACK ARK'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#121019'; g.fillRect(x, y, w, h); g.fillStyle = '#6a6e7a'; const vert = h > w, t = Math.max(1, (vert ? w : h) * 0.1); vert ? g.fillRect(x + w / 2 - t / 2, y, t, h) : g.fillRect(x, y + h / 2 - t / 2, w, t); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.fillStyle = '#1c1828'; g.fillRect(x + 1, y + 1, w - 2, h - 2); g.strokeStyle = '#8a8fa0'; g.lineWidth = 1; g.strokeRect(x + 2.5, y + 2.5, w - 5, h - 5);
+                        g.fillStyle = kk && r() < 0.4 ? kk.fill : '#c9c4e0'; g.font = `italic bold ${Math.round(Math.min(S, ts) * 0.56)}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.82); g.restore();
+                    },
+                    dug: { shell: '#1a1824', floor: ['#26222f', '#211d29'], speck: ['rgba(0,0,0,0.25)', 'rgba(190,140,255,0.04)'], planksShell: true, bench: '#2e2638', divider: '#121019', rail: '#121019', railTrim: '#8a8fa0',
+                        plaque: '#121019', plaqueText: '#c9c4e0', plaqueEdge: '#8a8fa0', font: "Georgia, 'Times New Roman', serif", fontStyle: 'italic bold', awning: 'blades', bannerEdge: '#8a8fa0' },
+                    extras: arkExtras, roof: roofArk, outside: '#060a14', pitchTint: 'rgba(16,10,40,0.12)'
+                },
+                // Dwarfhold (Dwarfs): a great hall under the mountain - carved stone terraces, gold-inlaid boards, braziers, barrels and anvils,
+                // stone dugouts with banner awnings, a vaulted stone ceiling with gold rune bands and pillars, kings carved behind each end
+                dwarfhold: {
+                    terrace: '#4a4038', blocks: true, step: 'rgba(0,0,0,0.3)', wash: 'rgba(14,10,6,0.36)',
+                    apron: ['#5a4e44', '#53483e'], paving: true, blade: null, stripe: null, line: 'rgba(230,196,110,0.9)',
+                    ads: ['BUGMAN\'S XXXXXX', 'KARAK EIGHT PEAKS', 'GRUDGE BOOK', 'BLUDBOWL', 'RUNE & RUIN', 'IRONBREAKER ARMOURY', 'BEARD OIL'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#5a4e44'; g.fillRect(x, y, w, h); g.fillStyle = '#c99a3a'; const vert = h > w, t = Math.max(1.5, (vert ? w : h) * 0.12); vert ? (g.fillRect(x, y, t, h), g.fillRect(x + w - t, y, t, h)) : (g.fillRect(x, y, w, t), g.fillRect(x, y + h - t, w, t)); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // carved stone, gold letters, rune knots at the ends
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.fillStyle = '#6a5c4e'; g.fillRect(x + 1, y + 1, w - 2, h - 2); g.strokeStyle = '#c99a3a'; g.lineWidth = Math.max(1, ts * 0.03); g.strokeRect(x + 2.5, y + 2.5, w - 5, h - 5);
+                        g.save(); g.translate(x + w / 2, y + h / 2); if (vert) g.rotate(-Math.PI / 2);
+                        g.fillStyle = '#c99a3a'; [-1, 1].forEach(sd => { g.fillRect(sd * L * 0.42 - S * 0.12, -S * 0.12, S * 0.24, S * 0.24); });
+                        g.fillStyle = kk && r() < 0.35 ? kk.fill : '#e6c46e'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.56)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 0, S * 0.06, L * 0.7); g.restore();
+                    },
+                    dug: { shell: '#4a4038', floor: ['#5a4e44', '#4f443b'], speck: ['rgba(0,0,0,0.18)', 'rgba(255,220,140,0.04)'], bench: '#6b4a2a', divider: '#3e3630', rail: '#4a4038', railTrim: '#c99a3a',
+                        plaque: '#3e3630', plaqueText: '#e6c46e', plaqueEdge: '#c99a3a', awning: 'banner', bannerEdge: '#c99a3a' },
+                    extras: dwarfExtras, roof: roofHall, outside: '#0a0806', pitchTint: 'rgba(30,16,4,0.08)'
+                },
+                // Wastes (Ogres): a palisade stadium in the steppe - sand terraces, hide-and-pole boards, cookfires and roasting beasts,
+                // horsetail standards, hide awnings, a palisade of sharpened logs round the top with lookouts, bones and dust
+                wastes: {
+                    terrace: '#8a7350', rock: true, step: 'rgba(60,40,10,0.25)', wash: 'rgba(30,20,8,0.28)',
+                    apron: ['#c2a676', '#b89c6c'], mud: true, blade: ['rgba(120,100,50,0.3)', 'rgba(150,140,80,0.25)'], stripe: null, line: 'rgba(250,246,236,0.9)',
+                    ads: ['GUT & GRUB', 'MAW-FEED', 'TYRANT TACKLE', 'BLUDBOWL', 'GNOBLAR RENTALS', 'RHINOX RIDES', 'EAT \'EM'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#4a3220'; g.fillRect(x, y, w, h); const vert = h > w, S = vert ? w : h; for (let k = S / 2; k < (vert ? h : w); k += S * 0.85) logTop(g, vert ? x + w / 2 : x + k, vert ? y + k : y + h / 2, S); },   // a palisade of sharpened logs
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // the palisade, with a long eastern banner (red, gold, black) hung on it, letters daubed on
+                        const L = vert ? h : w, S = vert ? w : h; g.fillStyle = '#4a3220'; g.fillRect(x, y, w, h);
+                        for (let k = S / 2; k < L; k += S * 0.85) logTop(g, vert ? x + w / 2 : x + k, vert ? y + k : y + h / 2, S);
+                        const [cl, tr] = [['#aa201a', '#e2b43c'], ['#1c1a1e', '#c83224'], ['#dcaa32', '#961c18']][(r() * 3) | 0];
+                        g.save(); g.translate(x + w / 2, y + h / 2); if (vert) g.rotate(-Math.PI / 2);
+                        g.fillStyle = tr; g.fillRect(-L * 0.4, -S * 0.42, L * 0.8, S * 0.84); g.fillStyle = cl; g.fillRect(-L * 0.38, -S * 0.36, L * 0.76, S * 0.72);
+                        g.fillStyle = cl === '#dcaa32' ? '#3a0c08' : '#efe6d0'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.52)}px Impact, Teko, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 0, S * 0.04, L * 0.7); g.restore();
+                    },
+                    dug: { shell: '#7a5530', floor: ['#b39a6c', '#a58e60'], speck: ['rgba(80,60,30,0.2)', 'rgba(255,240,200,0.08)'], planksShell: true, bench: '#5a3c22', divider: '#5a3c22', rail: '#7a5530', railTrim: '#3a2716',
+                        plaque: '#3a2716', plaqueText: '#e8d8b0', plaqueEdge: 'rgba(0,0,0,0)', font: 'Impact, Teko, sans-serif', awning: 'hide', bannerEdge: '#3a2716' },
+                    extras: wastesExtras, roof: roofPalisade, outside: '#1a140c'
+                },
+                // Plague (Nurgle): Nurgle's garden in the fog - rotten timber terraces, mouldy boards, sickly toadstools and dead trees,
+                // slime pools, bubbling cauldrons, plague bells, flies, a rotten mossy roof with tattered banners
+                plague: {
+                    terrace: '#3a3520', planks: true, step: 'rgba(0,0,0,0.3)', wash: 'rgba(14,16,6,0.4)',
+                    apron: ['#5a5a2e', '#53532a'], mud: true, stripe: null, blade: ['rgba(40,44,16,0.4)', 'rgba(170,180,80,0.25)'], line: 'rgba(214,224,150,0.8)',
+                    ads: ['GRANDFATHER\'S GROG', 'BUBO BREW', 'ROT & RUIN', 'BLUDBOWL', 'FLYBLOWN PIES', 'SEVEN PLAGUES', 'PUS-STOPPERS'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#4a4228'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(120,140,40,0.4)'; const vert = h > w; for (let k = 0; k < (vert ? h : w); k += 9) { g.beginPath(); g.arc(vert ? x + w * 0.5 : x + k, vert ? y + k : y + h * 0.5, (vert ? w : h) * 0.3, 0, 7); g.fill(); } },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.fillStyle = ['#5a5030', '#4e462a', '#625836'][(r() * 3) | 0]; g.fillRect(x + 1, y + 1, w - 2, h - 2);
+                        g.fillStyle = 'rgba(130,150,40,0.45)'; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(x + r() * w, y + r() * h, ts * (0.1 + r() * 0.15), 0, 7); g.fill(); }   // mould
+                        g.fillStyle = kk && r() < 0.35 ? kk.fill : '#c8d870'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.56)}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.82); g.restore();
+                    },
+                    dug: { shell: '#3a3520', floor: ['#4a4630', '#403c28'], speck: ['rgba(0,0,0,0.25)', 'rgba(160,180,60,0.1)'], planksShell: true, cracked: true, bench: '#4a3a22', divider: '#2e2a18', rail: '#4a4228', railTrim: '#8a9a30',
+                        plaque: '#2e2a18', plaqueText: '#c8d870', plaqueEdge: '#5a6a20', font: "Georgia, 'Times New Roman', serif", fontStyle: 'bold', awning: 'shroud', bannerEdge: '#2e2a18' },
+                    extras: plagueExtras, roof: roofRot, outside: '#0c0e06', pitchTint: 'rgba(40,46,10,0.1)', swamp: true, roundApron: 2.2, wallCol: '#4a4228', wallTrim: 'rgba(120,140,40,0.55)'
+                },
+                // Bretonnia: a castle on tourney day - pale stone terraces, a lawn strip, heraldic boards, striped pavilions, tilt barriers,
+                // fleur-de-lis shields, bunting, a crenellated wall-walk with blue-roofed turrets and the royal box
+                bretonnia: {
+                    terrace: '#9a9484', blocks: true, step: 'rgba(60,50,30,0.25)', wash: 'rgba(20,24,30,0.26)',
+                    apron: ['#3f8a3a', '#3a8035'], stripe: 'rgba(255,255,255,0.06)', line: 'rgba(255,255,255,0.9)',
+                    ads: ['LADY OF THE LAKE', 'GRAIL ALE', 'COUESNON CHEESE', 'BLUDBOWL', 'QUESTING KNIGHTS', 'LANCE & LUTE', 'BORDELEAUX WINE'],
+                    wall: (g, x, y, w, h) => { const vert = h > w; for (let k = 0, i = 0; k < (vert ? h : w); k += 10, i++) { g.fillStyle = i % 2 ? '#1f4fa8' : '#f2efe7'; vert ? g.fillRect(x, y + k, w, 10) : g.fillRect(x + k, y, 10, h); } },   // a striped tourney rail
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // a heraldic board: a field of blue or red, gold edge, white letters
+                        const L = vert ? h : w, S = vert ? w : h, f = kk && r() < 0.4 ? kk.fill : ['#1f4fa8', '#b3261e', '#1f6f3a'][(r() * 3) | 0];
+                        g.fillStyle = f; g.fillRect(x + 1, y + 1, w - 2, h - 2); g.strokeStyle = '#d6aa46'; g.lineWidth = Math.max(1, ts * 0.035); g.strokeRect(x + 2.5, y + 2.5, w - 5, h - 5);
+                        g.fillStyle = '#f8f4e8'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.56)}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.82); g.restore();
+                    },
+                    dug: { shell: '#b8b2a2', floor: ['#7a8a50', '#6e7e48'], speck: ['rgba(20,40,10,0.15)', 'rgba(255,255,255,0.05)'], bench: '#8a6a3a', divider: '#9a9484', rail: '#b8b2a2', railTrim: '#d6aa46',
+                        plaque: '#1f4fa8', plaqueText: '#f8f4e8', plaqueEdge: '#d6aa46', font: "Georgia, 'Times New Roman', serif", fontStyle: 'bold', awning: 'canvas', bannerEdge: '#d6aa46' },
+                    extras: bretExtras, roof: roofCastle, outside: '#121a10'
+                },
+                // Ziggurat (Chaos Dwarfs): Zharr-Naggrund - black basalt and blue glazed tiers with gold friezes, lava channels, furnace
+                // chimneys, brass boards, winged bulls of Hashut, a stepped ziggurat roof with fires
+                ziggurat: {
+                    terrace: '#241a18', blocks: true, step: 'rgba(0,0,0,0.4)', wash: 'rgba(10,4,4,0.4)',
+                    apron: ['#3a2a24', '#33251f'], paving: true, lava: true, blade: null, stripe: null, line: 'rgba(230,200,140,0.85)',
+                    ads: ['HASHUT HUNGERS', 'FURNACE FIRE', 'BULL CENTAUR RIDES', 'BLUDBOWL', 'ZHARR-NAGGRUND', 'OBSIDIAN & IRON', 'TALL HATS'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#1e3a6a'; g.fillRect(x, y, w, h); g.fillStyle = '#d6aa46'; const vert = h > w; for (let k = 4; k < (vert ? h : w); k += 12) vert ? g.fillRect(x + w * 0.3, y + k, w * 0.4, 4) : g.fillRect(x + k, y + h * 0.3, 4, h * 0.4); },   // blue glaze with gold studs
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {
+                        const L = vert ? h : w, S = vert ? w : h;
+                        g.fillStyle = '#1e3a6a'; g.fillRect(x + 1, y + 1, w - 2, h - 2); g.strokeStyle = '#d6aa46'; g.lineWidth = Math.max(1.2, ts * 0.04); g.strokeRect(x + 2.5, y + 2.5, w - 5, h - 5);
+                        g.fillStyle = kk && r() < 0.35 ? kk.fill : '#e6c46e'; g.font = `bold ${Math.round(Math.min(S, ts) * 0.58)}px Impact, Teko, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.04)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.8); g.restore();
+                    },
+                    dug: { shell: '#241a18', floor: ['#2e2220', '#281d1b'], speck: ['rgba(0,0,0,0.25)', 'rgba(255,120,40,0.05)'], lavaFloor: true, bench: '#3a2a20', divider: '#1e3a6a', rail: '#1e3a6a', railTrim: '#d6aa46',
+                        plaque: '#162c52', plaqueText: '#e6c46e', plaqueEdge: '#d6aa46', font: 'Impact, Teko, sans-serif', awning: 'brass', bannerEdge: '#d6aa46' },
+                    extras: zigExtras, roof: roofZiggurat, outside: '#0c0404', pitchTint: 'rgba(50,14,4,0.08)'
+                },
+                // Altdorf (Humans, Imperial, Old World): the city's stadium - concrete-grey terraces, Imperial black-and-gold boards, food carts,
+                // the grandstand's red-tiled roof with timber-framed houses round it, the Temple of Sigmar's spires, griffon banners
+                altdorf: {
+                    terrace: '#3a3634', step: 'rgba(255,255,255,0.05)', wash: 'rgba(12,12,16,0.36)',
+                    apron: ['#3a7030', '#35682c'], mud: true, stripe: 'rgba(255,255,255,0.03)', line: 'rgba(255,255,255,0.88)',
+                    ads: ['REIKLAND ALE', 'SIGMAR SAVES', 'ALTDORF SAUSAGES', 'BLUDBOWL', 'COLLEGE OF MAGIC', 'TALABHEIM TONIC', 'KARL FRANZ CUP'],
+                    wall: (g, x, y, w, h) => { g.fillStyle = '#1c1c1e'; g.fillRect(x, y, w, h); g.fillStyle = '#d6aa46'; const vert = h > w, t = Math.max(1.2, (vert ? w : h) * 0.1); vert ? (g.fillRect(x, y, t, h), g.fillRect(x + w - t, y, t, h)) : (g.fillRect(x, y, w, t), g.fillRect(x, y + h - t, w, t)); },
+                    board: (g, x, y, w, h, vert, kk, txt, ts, r) => {   // Imperial black-and-gold, or a team's colours
+                        const L = vert ? h : w, S = vert ? w : h, k2 = kk && r() < 0.5;
+                        g.fillStyle = k2 ? kk.fill : (r() < 0.5 ? '#1c1c1e' : '#d6aa46'); g.fillRect(x + 1, y + 1, w - 2, h - 2);
+                        g.fillStyle = k2 ? kk.text : (g.fillStyle === '#1c1c1e' ? '#d6aa46' : '#1c1c1e'); g.font = `bold ${Math.round(Math.min(S, ts) * 0.6)}px Teko, Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+                        g.save(); g.translate(x + w / 2, y + h / 2 + (vert ? 0 : h * 0.06)); if (vert) g.rotate(-Math.PI / 2); g.fillText(txt, 0, 0, L * 0.84); g.restore();
+                    },
+                    dug: { awning: 'stripes' },
+                    extras: altExtras, roof: roofAltdorf, outside: '#0b0c0e'
                 }
             };
             const theme = () => { const b = TH.blades, t = TH[PITCH.style] || b; return Object.assign({}, b, t, { dug: Object.assign({}, b.dug, t.dug || {}) }); };
@@ -22639,6 +22843,509 @@ ol.ci-steps li::marker { content: none; }
                 roofEdge(o, ts * 5.2, (x, y, len, nx, ny) => torch(g, x + (ny ? len / 2 : 0) + nx * ts * 0.4, y + (nx ? len / 2 : 0) + ny * ts * 0.4, ts));
             }
 
+            // ---- Graveyard, Brimstone and Woodland: their pieces, extras and roofs ----
+            function gravestone(g, x, y, s, r) {   // a headstone (rounded or a cross), leaning a little, mossy
+                g.save(); g.translate(x, y); g.rotate((r() - 0.5) * 0.3);
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(-s * 0.3 + s * 0.08, -s * 0.2 + s * 0.1, s * 0.6, s * 0.75);
+                g.fillStyle = ['#8a8c88', '#7a7c78', '#9a9b96'][(r() * 3) | 0];
+                if (r() < 0.3) { g.fillRect(-s * 0.08, -s * 0.5, s * 0.16, s * 0.95); g.fillRect(-s * 0.3, -s * 0.3, s * 0.6, s * 0.16); }
+                else { g.beginPath(); g.moveTo(-s * 0.3, s * 0.45); g.lineTo(-s * 0.3, -s * 0.15); g.arc(0, -s * 0.15, s * 0.3, Math.PI, 0); g.lineTo(s * 0.3, s * 0.45); g.fill(); g.fillStyle = 'rgba(30,30,28,0.5)'; g.fillRect(-s * 0.16, -s * 0.12, s * 0.32, s * 0.05); g.fillRect(-s * 0.16, 0, s * 0.32, s * 0.04); }
+                g.fillStyle = 'rgba(70,100,50,0.45)'; g.beginPath(); g.arc(-s * 0.15, s * 0.35, s * 0.14, 0, 7); g.fill();
+                g.restore();
+            }
+            function deadTree(g, x, y, s, r) {   // a bare tree seen from above: crooked branches spreading from the trunk
+                g.fillStyle = 'rgba(0,0,0,0.25)'; g.beginPath(); g.arc(x + s * 0.2, y + s * 0.2, s * 0.6, 0, 7); g.fill();
+                g.strokeStyle = '#2a221b'; g.lineCap = 'round';
+                const br = (bx, by, a, L, w, d) => { if (d > 3) return; const ex = bx + Math.cos(a) * L, ey = by + Math.sin(a) * L; g.lineWidth = w; g.beginPath(); g.moveTo(bx, by); g.lineTo(ex, ey); g.stroke(); br(ex, ey, a - 0.5 - r() * 0.3, L * 0.6, w * 0.6, d + 1); br(ex, ey, a + 0.4 + r() * 0.3, L * 0.6, w * 0.6, d + 1); };
+                for (let i = 0; i < 5; i++) br(x, y, i / 5 * 6.28 + r() * 0.5, s * 0.45, s * 0.12, 0);
+                g.fillStyle = '#3a2f24'; g.beginPath(); g.arc(x, y, s * 0.12, 0, 7); g.fill(); g.lineCap = 'butt';
+            }
+            function lantern(g, x, y, s, col) {   // a lantern on a post, glowing (eerie green, warm gold...)
+                const gl = g.createRadialGradient(x, y, 0, x, y, s * 2.2); gl.addColorStop(0, `rgba(${col},0.4)`); gl.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gl; g.fillRect(x - s * 2.2, y - s * 2.2, s * 4.4, s * 4.4);
+                g.fillStyle = '#1c1c1e'; g.fillRect(x - s * 0.12, y - s * 0.16, s * 0.24, s * 0.3); g.fillStyle = `rgb(${col})`; g.fillRect(x - s * 0.07, y - s * 0.1, s * 0.14, s * 0.18);
+            }
+            function crypt(g, cx, cy, s, r) {   // a mausoleum seen from above: a pitched stone roof, a cross on its ridge, moss
+                g.fillStyle = 'rgba(0,0,0,0.4)'; g.fillRect(cx - s * 0.42, cy - s * 0.28, s * 0.95, s * 0.7);
+                g.fillStyle = '#5d5f5c'; g.fillRect(cx - s * 0.5, cy - s * 0.35, s, s * 0.7); g.fillStyle = '#6e706c'; g.fillRect(cx - s * 0.5, cy - s * 0.35, s, s * 0.35);
+                g.fillStyle = '#3e403d'; g.fillRect(cx - s * 0.5, cy - s * 0.02, s, s * 0.04);
+                g.fillStyle = '#8a8c88'; g.fillRect(cx - s * 0.03, cy - s * 0.2, s * 0.06, s * 0.3); g.fillRect(cx - s * 0.1, cy - s * 0.13, s * 0.2, s * 0.06);
+                g.fillStyle = 'rgba(70,100,50,0.4)'; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(cx + (r() - 0.5) * s * 0.9, cy + (r() - 0.5) * s * 0.6, s * 0.08, 0, 7); g.fill(); }
+            }
+            function spire(g, cx, cy, s) {   // a gothic spire seen from above: a square tower, four-sided pointed roof, an iron finial
+                g.fillStyle = 'rgba(0,0,0,0.4)'; g.fillRect(cx - s * 0.4, cy - s * 0.35, s * 0.9, s * 0.9);
+                [[0, -1], [1, 0], [0, 1], [-1, 0]].forEach(([dx, dy], i) => { g.fillStyle = ['#3a3c44', '#2a2c33', '#33353d', '#24262c'][i]; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + (dx - dy) * s * 0.45, cy + (dy + dx) * s * 0.45); g.lineTo(cx + (dx + dy) * s * 0.45, cy + (dy - dx) * s * 0.45); g.closePath(); g.fill(); });
+                g.fillStyle = '#111'; g.beginPath(); g.arc(cx, cy, s * 0.06, 0, 7); g.fill();
+            }
+            function graveExtras(g, o) {   // gravestones and bare trees among the crowd, green lanterns, crypts behind the end zones, crows, mist
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);
+                crypt(g, ax0 - ts * 2.4, my, ts * 3, r); crypt(g, ax1 + ts * 2.4, my, ts * 3, r);
+                for (let i = 0; i < 60; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; r() < 0.75 ? gravestone(g, x, y, ts * (0.6 + r() * 0.3), r) : deadTree(g, x, y, ts * (1.0 + r() * 0.8), r); }
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6], [ax0 - ts * 0.6, my - ts * 4], [ax0 - ts * 0.6, my + ts * 4], [ax1 + ts * 0.6, my - ts * 4], [ax1 + ts * 0.6, my + ts * 4]].forEach(([x, y]) => lantern(g, x, y, ts, '150,255,170'));
+                g.strokeStyle = '#0d0d0f'; g.lineWidth = ts * 0.05; for (let i = 0; i < 14; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0), w = ts * 0.22; g.beginPath(); g.moveTo(x - w, y - w * 0.3); g.quadraticCurveTo(x - w * 0.4, y - w * 0.6, x, y); g.quadraticCurveTo(x + w * 0.4, y - w * 0.6, x + w, y - w * 0.3); g.stroke(); }   // crows
+                for (let i = 0; i < 26; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0), gr = g.createRadialGradient(x, y, 0, x, y, ts * 3.5); gr.addColorStop(0, 'rgba(200,215,225,0.12)'); gr.addColorStop(1, 'rgba(200,215,225,0)'); g.fillStyle = gr; g.fillRect(x - ts * 3.5, y - ts * 3.5, ts * 7, ts * 7); }   // mist
+            }
+            function roofGothic(g, o) {   // dark slate on the stands' top, a jagged iron cresting along the edge, gothic spires, crypts at the corners
+                const { ts, R, r } = o; roofShadow(g, o, 1.6 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#23242a'; g.fillRect(x, y, w, h);
+                    const row = ts * 0.3, sh = ts * 0.42;
+                    for (let a = 0, n = 0; a < (v ? w : h); a += row, n++) for (let b = (n % 2) * sh / 2 - sh; b < (v ? h : w); b += sh) { if (r() < 0.04) continue; g.fillStyle = ['#2c2e35', '#26272d', '#32343c', '#202126'][(r() * 4) | 0]; v ? g.fillRect(x + a, y + b, row - 1, sh - 1) : g.fillRect(x + b, y + a, sh - 1, row - 1); }   // (a few slates missing)
+                });
+                roofEdge(o, ts * 0.3, (x, y, len, nx, ny) => { g.fillStyle = '#121214'; const d = ts * 0.22, px = x + (ny ? len / 2 : 0), py = y + (nx ? len / 2 : 0); g.beginPath(); if (ny) { g.moveTo(x, y); g.lineTo(px, y + ny * d); g.lineTo(x + len, y); } else { g.moveTo(x, y); g.lineTo(x + nx * d, py); g.lineTo(x, y + len); } g.fill(); });   // iron cresting
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                for (let x = X0 + e * 3; x < X1 - e * 3; x += ts * 5.5) { spire(g, x, Y0 + e, ts * 1.3); spire(g, x, Y1 - e, ts * 1.3); }
+                for (let y = Y0 + e * 3; y < Y1 - e * 3; y += ts * 5.5) { spire(g, X0 + e, y, ts * 1.3); spire(g, X1 - e, y, ts * 1.3); }
+                [[X0 + e, Y0 + e], [X1 - e, Y0 + e], [X0 + e, Y1 - e], [X1 - e, Y1 - e]].forEach(([x, y]) => crypt(g, x, y, ts * 2.2, r));
+            }
+            function lavaCrack(g, x, y, L, r) {   // a crack with lava glowing in it
+                const pts = [[x, y]]; for (let k = 0; k < 5; k++) { x += (r() - 0.5) * L; y += (r() - 0.5) * L; pts.push([x, y]); }
+                const line = (w, col) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); pts.forEach(([px, py], i) => i ? g.lineTo(px, py) : g.moveTo(px, py)); g.stroke(); };
+                line(L * 0.22, 'rgba(255,90,20,0.18)'); line(L * 0.09, 'rgba(255,120,30,0.6)'); line(L * 0.035, 'rgba(255,220,120,0.9)');
+            }
+            function skullPile(g, cx, cy, s, r, fire) {   // a pyramid of skulls seen from above (rings of them), a brass brazier burning on top
+                for (let ring = 3; ring >= 0; ring--) { const rr = s * 0.12 * ring, n = Math.max(1, ring * 6); for (let i = 0; i < n; i++) { const a = i / n * 6.283 + ring; const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr; g.fillStyle = ring % 2 ? '#cdb994' : '#bba57e'; g.beginPath(); g.arc(x, y, s * 0.07, 0, 7); g.fill(); g.fillStyle = '#2a1410'; g.fillRect(x - s * 0.035, y - s * 0.01, s * 0.025, s * 0.025); g.fillRect(x + s * 0.01, y - s * 0.01, s * 0.025, s * 0.025); } }
+                if (fire) { const gl = g.createRadialGradient(cx, cy, 0, cx, cy, s * 1.3); gl.addColorStop(0, 'rgba(255,150,50,0.5)'); gl.addColorStop(1, 'rgba(255,90,20,0)'); g.fillStyle = gl; g.fillRect(cx - s * 1.3, cy - s * 1.3, s * 2.6, s * 2.6); g.fillStyle = '#b07830'; g.beginPath(); g.arc(cx, cy, s * 0.12, 0, 7); g.fill(); g.fillStyle = '#ffb347'; g.beginPath(); g.arc(cx, cy, s * 0.08, 0, 7); g.fill(); }
+            }
+            function brimExtras(g, o) {   // lava seams through the terraces, lava pools and skull piles round the boards, embers
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.4 && x < ax1 + ts * 0.4 && y > ay0 - ts * 0.4 && y < ay1 + ts * 0.4) && !aprons0(x, y);
+                for (let i = 0; i < 70; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) lavaCrack(g, x, y, ts * (0.6 + r() * 0.8), r); }
+                const pool = (x, y, s) => { const gl = g.createRadialGradient(x, y, 0, x, y, s * 1.6); gl.addColorStop(0, 'rgba(255,120,30,0.45)'); gl.addColorStop(1, 'rgba(255,80,20,0)'); g.fillStyle = gl; g.fillRect(x - s * 1.6, y - s * 1.6, s * 3.2, s * 3.2);
+                    g.fillStyle = '#1a0c08'; g.beginPath(); g.ellipse(x, y, s * 0.75, s * 0.55, 0, 0, 7); g.fill(); const lv = g.createRadialGradient(x, y, 0, x, y, s * 0.6); lv.addColorStop(0, '#ffd27a'); lv.addColorStop(0.5, '#ff7a1a'); lv.addColorStop(1, '#a12a0c'); g.fillStyle = lv; g.beginPath(); g.ellipse(x, y, s * 0.6, s * 0.42, 0, 0, 7); g.fill(); };
+                [[ax0 - ts * 0.9, ay0 - ts * 0.9], [ax1 + ts * 0.9, ay0 - ts * 0.9], [ax0 - ts * 0.9, ay1 + ts * 0.9], [ax1 + ts * 0.9, ay1 + ts * 0.9]].forEach(([x, y]) => pool(x, y, ts * 1.2));
+                skullPile(g, ax0 - ts * 2.6, my, ts * 3, r, true); skullPile(g, ax1 + ts * 2.6, my, ts * 3, r, true);
+                [[ax0 - ts * 0.7, my - ts * 4.5], [ax0 - ts * 0.7, my + ts * 4.5], [ax1 + ts * 0.7, my - ts * 4.5], [ax1 + ts * 0.7, my + ts * 4.5]].forEach(([x, y]) => skullPile(g, x, y, ts * 1.4, r, false));
+                for (let i = 0; i < 160; i++) { g.fillStyle = `rgba(255,${(110 + r() * 100) | 0},40,${(0.3 + r() * 0.5).toFixed(2)})`; g.beginPath(); g.arc(o.X0 + r() * (o.X1 - o.X0), o.Y0 + r() * (o.Y1 - o.Y0), ts * (0.02 + r() * 0.04), 0, 7); g.fill(); }   // embers
+            }
+            function roofCrag(g, o) {   // jagged basalt crags over the top rows, lava running down them, skull pyramids with braziers
+                const { ts, R, r } = o; roofShadow(g, o, 1.8 * ts);
+                roofRing(g, o, (x, y, w, h) => {
+                    g.fillStyle = '#140c0c'; g.fillRect(x, y, w, h);
+                    for (let i = 0; i < w * h / (ts * ts) * 2.6; i++) { const px = x + r() * w, py = y + r() * h, rr = ts * (0.3 + r() * 0.7); g.fillStyle = ['#1e1414', '#281a18', '#170f0f', '#30201c'][(r() * 4) | 0]; g.beginPath(); g.moveTo(px - rr, py + rr * 0.6); g.lineTo(px - rr * 0.2, py - rr); g.lineTo(px + rr * 0.3, py - rr * 0.4); g.lineTo(px + rr, py + rr * 0.6); g.closePath(); g.fill(); }
+                    for (let i = 0; i < w * h / (ts * ts) * 0.06; i++) lavaCrack(g, x + r() * w, y + r() * h, ts * (0.8 + r()), r);
+                });
+                roofEdge(o, ts * 0.4, (x, y, len, nx, ny) => { if (r() < 0.3) return; const L = ts * (0.3 + r() * 0.8), b = len * (0.5 + r() * 0.5), px = x + (ny ? len / 2 : 0), py = y + (nx ? len / 2 : 0); g.fillStyle = r() < 0.5 ? '#1e1414' : '#281a18'; g.beginPath(); if (ny) { g.moveTo(px - b / 2, py); g.lineTo(px + (r() - 0.5) * b * 0.4, py + ny * L); g.lineTo(px + b / 2, py); } else { g.moveTo(px, py - b / 2); g.lineTo(px + nx * L, py + (r() - 0.5) * b * 0.4); g.lineTo(px, py + b / 2); } g.fill(); });   // spikes of rock
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e], [X1 - e, Y0 + e], [X0 + e, Y1 - e], [X1 - e, Y1 - e], [mx - ts * 9, Y0 + e], [mx + ts * 9, Y0 + e], [mx - ts * 9, Y1 - e], [mx + ts * 9, Y1 - e], [X0 + e, my], [X1 - e, my]].forEach(([x, y]) => skullPile(g, x, y, ts * 2, r, true));
+            }
+            function oak(g, cx, cy, s, r, autumn) {   // a big tree seen from above: a layered round crown
+                g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(cx + s * 0.18, cy + s * 0.22, s, 0, 7); g.fill();
+                const pal = autumn ? ['#8a6a24', '#a5762a', '#6e5a22', '#b5862e', '#7a4a1e'] : ['#2b5a2c', '#356a33', '#24502a', '#3e7a38', '#2f6230'];
+                for (let i = 0; i < 12; i++) { const a = r() * 6.3, d = r() * s * 0.55; g.fillStyle = pal[(r() * pal.length) | 0]; g.beginPath(); g.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, s * (0.35 + r() * 0.25), 0, 7); g.fill(); }
+                g.fillStyle = 'rgba(255,250,200,0.12)'; g.beginPath(); g.arc(cx - s * 0.3, cy - s * 0.3, s * 0.4, 0, 7); g.fill();
+            }
+            function treehouse(g, cx, cy, s, k) {   // a round platform in a tree with a little pointed roof and a pennant
+                oak(g, cx, cy, s, pitchRng(Math.round(cx * 7 + cy)), false);
+                g.fillStyle = '#6b4a2a'; g.beginPath(); g.arc(cx, cy, s * 0.42, 0, 7); g.fill(); g.strokeStyle = '#4a3220'; g.lineWidth = s * 0.05; g.stroke();
+                for (let i = 0; i < 8; i++) { const a0 = i * Math.PI / 4, a1 = a0 + Math.PI / 4; g.fillStyle = i % 2 ? '#8a5a2e' : '#a06a36'; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, s * 0.3, a0, a1); g.closePath(); g.fill(); }
+                g.strokeStyle = '#3a2716'; g.lineWidth = s * 0.04; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - s * 0.8); g.stroke();
+                g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - s * 0.8); g.lineTo(cx + s * 0.55, cy - s * 0.7); g.lineTo(cx, cy - s * 0.6); g.closePath(); g.fill();
+            }
+            function woodExtras(g, o) {   // gnome toadstool houses, warm lanterns, flowers and bushes among the crowd, sunbeams through the trees
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);
+                oak(g, ax0 - ts * 2.6, my, ts * 2.6, r, false); oak(g, ax1 + ts * 2.6, my, ts * 2.6, r, true);
+                [[ax0 - ts * 1.2, my - ts * 4.5], [ax0 - ts * 1.2, my + ts * 4.5], [ax1 + ts * 1.2, my - ts * 4.5], [ax1 + ts * 1.2, my + ts * 4.5], [ax0 - ts * 0.9, ay0 - ts * 0.9], [ax1 + ts * 0.9, ay1 + ts * 0.9]].forEach(([x, y]) => toadstool(g, x, y, ts * (0.9 + r() * 0.4), r));
+                [[ax1 + ts * 0.9, ay0 - ts * 0.9], [ax0 - ts * 0.9, ay1 + ts * 0.9], [ax0 - ts * 0.6, my], [ax1 + ts * 0.6, my]].forEach(([x, y]) => lantern(g, x, y, ts, '255,210,120'));
+                for (let i = 0; i < 90; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; const k = r(); k < 0.45 ? bush(g, x, y, ts * (0.7 + r() * 0.6), r) : k < 0.75 ? fern(g, x, y, ts * (0.6 + r() * 0.4), r) : k < 0.88 ? toadstool(g, x, y, ts * (0.4 + r() * 0.25), r) : oak(g, x, y, ts * (0.9 + r() * 0.5), r, r() < 0.3); }
+                for (let k = 0; k < 7; k++) { const x0 = o.X0 + (k + r() * 0.6) * (o.X1 - o.X0) / 7, gr = g.createLinearGradient(x0, o.Y0, x0 + ts * 6, o.Y1); gr.addColorStop(0, 'rgba(255,248,200,0.09)'); gr.addColorStop(1, 'rgba(255,248,200,0)'); g.fillStyle = gr; g.beginPath(); g.moveTo(x0, o.Y0); g.lineTo(x0 + ts * 2.5, o.Y0); g.lineTo(x0 + ts * 9, o.Y1); g.lineTo(x0 + ts * 5, o.Y1); g.closePath(); g.fill(); }   // sunbeams
+            }
+            function roofForest(g, o) {   // no roof: the forest closes over the top rows - big oaks (a few turning), treehouses with pennants
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.6 * ts);
+                roofRing(g, o, (x, y, w, h) => { g.fillStyle = '#1e3d1f'; g.fillRect(x, y, w, h); for (let i = 0; i < w * h / (ts * ts) * 0.5; i++) oak(g, x + r() * w, y + r() * h, ts * (0.9 + r() * 0.6), r, r() < 0.15); });
+                roofEdge(o, ts * 0.5, (x, y, len, nx, ny) => { const px = x + (ny ? len / 2 : 0), py = y + (nx ? len / 2 : 0); g.fillStyle = ['#2b5a2c', '#356a33', '#3e7a38'][(r() * 3) | 0]; g.beginPath(); g.arc(px, py, ts * (0.3 + r() * 0.4), 0, 7); g.fill(); });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx - ts * 9, Y0 + e, 0], [mx + ts * 9, Y1 - e, 1], [X0 + e, my, 0], [X1 - e, my, 1]].forEach(([x, y, t]) => treehouse(g, x, y, ts * 1.5, K[t]));
+            }
+
+            // ---- Warpstone (Skaven), Black Ark (Dark Elves), Dwarfhold (Dwarfs), Wastes (Ogres): their pieces, extras and roofs ----
+            function warpGlow(g, x, y, s) {   // a lump of glowing warpstone
+                const gl = g.createRadialGradient(x, y, 0, x, y, s * 2); gl.addColorStop(0, 'rgba(140,255,90,0.4)'); gl.addColorStop(1, 'rgba(120,255,70,0)'); g.fillStyle = gl; g.fillRect(x - s * 2, y - s * 2, s * 4, s * 4);
+                g.fillStyle = '#4fbf2a'; g.beginPath(); g.moveTo(x - s * 0.3, y + s * 0.2); g.lineTo(x - s * 0.1, y - s * 0.35); g.lineTo(x + s * 0.3, y - s * 0.1); g.lineTo(x + s * 0.2, y + s * 0.3); g.closePath(); g.fill();
+                g.fillStyle = '#c8ff8a'; g.beginPath(); g.arc(x, y - s * 0.05, s * 0.08, 0, 7); g.fill();
+            }
+            function bellTower(g, cx, cy, s, k) {   // a crooked wooden bell tower seen from above, the great bell glinting, a ragged banner
+                g.save(); g.translate(cx, cy); g.rotate(0.12);
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(-s * 0.4, -s * 0.35, s * 0.9, s * 0.9);
+                [[0, -1], [1, 0], [0, 1], [-1, 0]].forEach(([dx, dy], i) => { g.fillStyle = ['#5a4430', '#463422', '#4f3c28', '#3e2e1e'][i]; g.beginPath(); g.moveTo(0, 0); g.lineTo((dx - dy) * s * 0.45, (dy + dx) * s * 0.45); g.lineTo((dx + dy) * s * 0.45, (dy - dx) * s * 0.45); g.closePath(); g.fill(); });
+                g.fillStyle = '#9a7a3a'; g.beginPath(); g.arc(0, 0, s * 0.16, 0, 7); g.fill(); g.fillStyle = '#d6b45a'; g.beginPath(); g.arc(-s * 0.04, -s * 0.04, s * 0.06, 0, 7); g.fill();
+                g.restore();
+                g.strokeStyle = '#2e2216'; g.lineWidth = s * 0.05; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - s * 1.1); g.stroke();
+                g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - s * 1.1); g.lineTo(cx + s * 0.6, cy - s * 1.02); g.lineTo(cx + s * 0.45, cy - s * 0.92); g.lineTo(cx + s * 0.62, cy - s * 0.8); g.lineTo(cx, cy - s * 0.84); g.fill();
+            }
+            function warpExtras(g, o) {   // warpstone lumps glowing among the crowd, warp lanterns, rubbish heaps, the Horned Rat's sigil behind each end
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);
+                for (let i = 0; i < 40; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) warpGlow(g, x, y, ts * (0.5 + r() * 0.4)); }
+                for (let i = 0; i < 30; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; for (let k = 0; k < 6; k++) { g.fillStyle = ['#4a3a2a', '#3a3028', '#5a4a30', '#2e2a24'][(r() * 4) | 0]; g.fillRect(x + (r() - 0.5) * ts, y + (r() - 0.5) * ts * 0.6, ts * (0.15 + r() * 0.25), ts * (0.1 + r() * 0.15)); } }   // junk heaps
+                const sigil = (cx, cy, s) => {   // the Horned Rat: a triangle of three bars, glowing green, on a slab
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(cx - s * 0.5 + s * 0.08, cy - s * 0.5 + s * 0.1, s, s); g.fillStyle = '#3a3a34'; g.fillRect(cx - s * 0.5, cy - s * 0.5, s, s);
+                    const gl = g.createRadialGradient(cx, cy, 0, cx, cy, s); gl.addColorStop(0, 'rgba(140,255,90,0.35)'); gl.addColorStop(1, 'rgba(120,255,70,0)'); g.fillStyle = gl; g.fillRect(cx - s, cy - s, s * 2, s * 2);
+                    g.strokeStyle = '#8cff5a'; g.lineWidth = s * 0.07; g.beginPath(); g.moveTo(cx - s * 0.32, cy + s * 0.28); g.lineTo(cx, cy - s * 0.3); g.lineTo(cx + s * 0.32, cy + s * 0.28); g.moveTo(cx - s * 0.32, cy - s * 0.05); g.lineTo(cx + s * 0.32, cy - s * 0.05); g.moveTo(cx - s * 0.26, cy + s * 0.28); g.lineTo(cx + s * 0.26, cy + s * 0.28); g.stroke();
+                };
+                sigil(ax0 - ts * 2.4, my, ts * 2.6); sigil(ax1 + ts * 2.4, my, ts * 2.6);
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6], [ax0 - ts * 0.6, my - ts * 4.5], [ax0 - ts * 0.6, my + ts * 4.5], [ax1 + ts * 0.6, my - ts * 4.5], [ax1 + ts * 0.6, my + ts * 4.5]].forEach(([x, y]) => lantern(g, x, y, ts, '140,255,90'));
+            }
+            function roofRamshackle(g, o) {   // planks nailed every which way, holes, sagging; crooked bell towers; warp glow leaking through
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.5 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    g.fillStyle = '#2a2018'; g.fillRect(x, y, w, h);
+                    for (let i = 0; i < w * h / (ts * ts) * 1.6; i++) { const px = x + r() * w, py = y + r() * h, L = ts * (0.8 + r() * 1.6); g.save(); g.translate(px, py); g.rotate((r() - 0.5) * 1.2 + (side === 'left' || side === 'right' ? Math.PI / 2 : 0)); g.fillStyle = ['#5a4430', '#4a3826', '#665038', '#3e3020'][(r() * 4) | 0]; g.fillRect(-L / 2, -ts * 0.12, L, ts * 0.24); g.fillStyle = '#1c1610'; g.fillRect(-L / 2 + 2, -1, 2, 2); g.fillRect(L / 2 - 4, -1, 2, 2); g.restore(); }
+                    for (let i = 0; i < w * h / (ts * ts) * 0.08; i++) { const px = x + r() * w, py = y + r() * h; g.fillStyle = '#0c0a08'; g.beginPath(); g.ellipse(px, py, ts * (0.2 + r() * 0.3), ts * (0.12 + r() * 0.2), r() * 3, 0, 7); g.fill(); const gl = g.createRadialGradient(px, py, 0, px, py, ts * 0.5); gl.addColorStop(0, 'rgba(120,255,70,0.25)'); gl.addColorStop(1, 'rgba(120,255,70,0)'); g.fillStyle = gl; g.fillRect(px - ts * 0.5, py - ts * 0.5, ts, ts); }   // holes with warp light below
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx, Y0 + e, 0], [mx, Y1 - e, 1], [X0 + e, my, 0], [X1 - e, my, 1]].forEach(([x, y, t]) => bellTower(g, x, y, ts * 1.6, K[t]));
+            }
+            function darkSpire(g, cx, cy, s, k) {   // a Dark Elf tower seen from above: a sharp eight-sided black spire, violet windows, a blade finial, a pennant
+                g.fillStyle = 'rgba(0,0,0,0.45)'; g.beginPath(); g.arc(cx + s * 0.2, cy + s * 0.25, s * 0.6, 0, 7); g.fill();
+                for (let i = 0; i < 8; i++) { const a0 = i * Math.PI / 4, a1 = a0 + Math.PI / 4; g.fillStyle = i % 2 ? '#1a1724' : '#262236'; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a0) * s * 0.55, cy + Math.sin(a0) * s * 0.55); g.lineTo(cx + Math.cos(a1) * s * 0.55, cy + Math.sin(a1) * s * 0.55); g.closePath(); g.fill(); }
+                g.fillStyle = '#b48cff'; for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + 0.39; g.fillRect(cx + Math.cos(a) * s * 0.4 - 1.5, cy + Math.sin(a) * s * 0.4 - 1.5, 3, 3); }
+                g.fillStyle = '#8a8fa0'; g.beginPath(); g.moveTo(cx, cy - s * 0.95); g.lineTo(cx + s * 0.05, cy); g.lineTo(cx - s * 0.05, cy); g.closePath(); g.fill();
+                g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - s * 0.85); g.lineTo(cx + s * 0.55, cy - s * 0.78); g.lineTo(cx, cy - s * 0.66); g.closePath(); g.fill();
+            }
+            function arkExtras(g, o) {   // chains along the boards, violet braziers, a sea serpent's skull behind each end, spray at the edges
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts);
+                g.strokeStyle = '#4a4e5a'; g.lineWidth = ts * 0.06; for (let x = ax0; x < ax1; x += ts * 0.3) { g.beginPath(); g.ellipse(x, ay0 - ts * 0.15, ts * 0.12, ts * 0.06, 0, 0, 7); g.stroke(); g.beginPath(); g.ellipse(x, ay1 + ts * 0.15, ts * 0.12, ts * 0.06, 0, 0, 7); g.stroke(); }
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6], [ax0 - ts * 0.6, my], [ax1 + ts * 0.6, my]].forEach(([x, y]) => lantern(g, x, y, ts * 1.1, '190,140,255'));
+                const skull = (cx, cy, s, dir) => {   // a sea dragon's skull: long jaws, teeth, eye sockets glowing violet
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.ellipse(cx + s * 0.08, cy + s * 0.1, s * 0.6, s * 0.3, 0, 0, 7); g.fill();
+                    g.fillStyle = '#d6d0bc'; g.beginPath(); g.ellipse(cx - dir * s * 0.15, cy, s * 0.3, s * 0.26, 0, 0, 7); g.fill(); g.beginPath(); g.moveTo(cx, cy - s * 0.15); g.lineTo(cx + dir * s * 0.6, cy - s * 0.05); g.lineTo(cx + dir * s * 0.6, cy + s * 0.05); g.lineTo(cx, cy + s * 0.15); g.fill();
+                    g.fillStyle = '#efe8d4'; for (let k = 0; k < 6; k++) { const tx = cx + dir * s * (0.08 + k * 0.08); g.beginPath(); g.moveTo(tx, cy - s * 0.05); g.lineTo(tx + dir * s * 0.02, cy - s * 0.13); g.lineTo(tx + dir * s * 0.04, cy - s * 0.05); g.fill(); }
+                    g.fillStyle = '#b48cff'; g.beginPath(); g.arc(cx - dir * s * 0.18, cy - s * 0.06, s * 0.06, 0, 7); g.fill();
+                };
+                skull(ax0 - ts * 2.4, my, ts * 3, 1); skull(ax1 + ts * 2.4, my, ts * 3, -1);
+            }
+            function dwarfExtras(g, o) {   // braziers, ale barrels and anvils, a carved king's head behind each end, gold rune lines
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6], [ax0 - ts * 0.6, my - ts * 4.5], [ax0 - ts * 0.6, my + ts * 4.5], [ax1 + ts * 0.6, my - ts * 4.5], [ax1 + ts * 0.6, my + ts * 4.5]].forEach(([x, y]) => torch(g, x, y, ts));
+                const king = (cx, cy, s) => {   // a dwarf king carved in stone, from above: crowned head, great braided beard
+                    g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.ellipse(cx + s * 0.1, cy + s * 0.15, s * 0.6, s * 0.75, 0, 0, 7); g.fill();
+                    g.fillStyle = '#7a6c5c'; g.beginPath(); g.arc(cx, cy - s * 0.2, s * 0.42, 0, 7); g.fill();
+                    g.fillStyle = '#6a5c4c'; g.beginPath(); g.moveTo(cx - s * 0.4, cy - s * 0.05); g.lineTo(cx, cy + s * 0.75); g.lineTo(cx + s * 0.4, cy - s * 0.05); g.fill();
+                    g.strokeStyle = '#4a3e32'; g.lineWidth = s * 0.03; for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(cx + k * s * 0.08, cy); g.lineTo(cx + k * s * 0.03, cy + s * 0.6); g.stroke(); }
+                    g.fillStyle = '#d6aa46'; for (let k = 0; k < 5; k++) { const a = Math.PI + k * Math.PI / 4; g.beginPath(); g.moveTo(cx + Math.cos(a) * s * 0.42, cy - s * 0.2 + Math.sin(a) * s * 0.42); g.lineTo(cx + Math.cos(a) * s * 0.58, cy - s * 0.2 + Math.sin(a) * s * 0.58); g.lineTo(cx + Math.cos(a + 0.2) * s * 0.42, cy - s * 0.2 + Math.sin(a + 0.2) * s * 0.42); g.fill(); }   // crown
+                    g.fillStyle = 'rgba(255,190,90,0.85)'; g.fillRect(cx - s * 0.16, cy - s * 0.24, s * 0.08, s * 0.05); g.fillRect(cx + s * 0.08, cy - s * 0.24, s * 0.08, s * 0.05);   // eyes lit by runes
+                    goldHammer(g, cx, cy + s * 0.55, s * 0.7, '#5a4e44');   // resting on a great stone hammer
+                };
+                const stall = (cx, cy) => {   // an ale stall: a striped red-and-cream awning, kegs, a sign with a foaming tankard
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(cx - ts * 0.9 + 4, cy - ts * 0.55 + 5, ts * 1.8, ts * 1.1);
+                    for (let k = 0; k < 6; k++) { g.fillStyle = k % 2 ? '#e6d6aa' : '#8c1e1a'; g.fillRect(cx - ts * 0.9 + k * ts * 0.3, cy - ts * 0.55, ts * 0.3, ts * 1.1); }
+                    [-0.55, 0.55].forEach(f => { g.fillStyle = '#7a5530'; g.beginPath(); g.arc(cx + f * ts, cy + ts * 0.75, ts * 0.22, 0, 7); g.fill(); g.strokeStyle = '#b08a3a'; g.lineWidth = ts * 0.04; g.stroke(); });
+                    g.fillStyle = '#5a3a1e'; g.fillRect(cx - ts * 0.3, cy - ts * 0.95, ts * 0.6, ts * 0.42); g.fillStyle = '#d6aa46'; g.fillRect(cx - ts * 0.1, cy - ts * 0.86, ts * 0.18, ts * 0.26); g.fillStyle = '#faf6ea'; g.beginPath(); g.arc(cx - ts * 0.02, cy - ts * 0.88, ts * 0.1, 0, 7); g.fill();
+                };
+                for (let i = 0; i < 9; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) stall(x, y); }
+                king(ax0 - ts * 2.4, my, ts * 3); king(ax1 + ts * 2.4, my, ts * 3);
+                const barrel = (x, y) => { g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(x + ts * 0.06, y + ts * 0.08, ts * 0.3, 0, 7); g.fill(); g.fillStyle = '#7a5530'; g.beginPath(); g.arc(x, y, ts * 0.28, 0, 7); g.fill(); g.strokeStyle = '#b08a3a'; g.lineWidth = ts * 0.04; [0.28, 0.18].forEach(rr => { g.beginPath(); g.arc(x, y, ts * rr, 0, 7); g.stroke(); }); };
+                for (let i = 0; i < 26; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; if (r() < 0.6) { barrel(x, y); barrel(x + ts * 0.55, y + ts * 0.1); } else { g.fillStyle = '#3a3a3e'; g.fillRect(x - ts * 0.35, y - ts * 0.15, ts * 0.7, ts * 0.3); g.fillRect(x - ts * 0.15, y + ts * 0.1, ts * 0.3, ts * 0.25); g.fillStyle = '#5a5a60'; g.fillRect(x - ts * 0.35, y - ts * 0.15, ts * 0.7, ts * 0.06); } }   // ale barrels, anvils
+            }
+            function goldHammer(g, cx, cy, s, col) {   // a dwarf hammer: a broad head on a short haft
+                g.fillStyle = col || '#d6aa46'; g.fillRect(cx - s * 0.06, cy - s * 0.1, s * 0.12, s * 0.55); g.fillRect(cx - s * 0.3, cy - s * 0.32, s * 0.6, s * 0.24); g.fillRect(cx - s * 0.36, cy - s * 0.28, s * 0.06, s * 0.16); g.fillRect(cx + s * 0.3, cy - s * 0.28, s * 0.06, s * 0.16);
+            }
+            function roofHall(g, o) {   // the great hall: walls of stone blocks, massive carved pillars with gold bands and braziers, red banners with gold
+                // hammers between them, and the hold's great rune gate in the middle of each end, glowing
+                const { ts, R, r } = o; roofShadow(g, o, 1.8 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#382f29'; g.fillRect(x, y, w, h);
+                    const bw = ts * 1.3, bh = ts * 0.65;
+                    for (let a = 0, n = 0; a < (v ? w : h); a += bh, n++) for (let b = (n % 2) * bw / 2 - bw; b < (v ? h : w); b += bw) { g.fillStyle = ['#4a4038', '#443a32', '#52473e', '#3c342e'][(r() * 4) | 0]; v ? g.fillRect(x + a, y + b, bh - 2, bw - 2) : g.fillRect(x + b, y + a, bw - 2, bh - 2); }
+                    g.fillStyle = '#c99a3a'; v ? g.fillRect(x + w * 0.62, y, ts * 0.1, h) : g.fillRect(x, y + h * 0.62, w, ts * 0.1);   // a gold rune band
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                const banner = (cx, cy, vert, dir) => {   // a long red banner with a gold hammer, hanging in towards the stands
+                    g.save(); g.translate(cx, cy); if (vert) g.rotate(dir > 0 ? -Math.PI / 2 : Math.PI / 2); else if (dir < 0) g.rotate(Math.PI);
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(-ts * 0.45 + 3, -ts * 0.2 + 4, ts * 0.9, ts * 2.2);
+                    g.fillStyle = '#d6aa46'; g.fillRect(-ts * 0.5, -ts * 0.25, ts, ts * 2.1); g.fillStyle = '#8c1c16'; g.beginPath(); g.moveTo(-ts * 0.44, -ts * 0.2); g.lineTo(ts * 0.44, -ts * 0.2); g.lineTo(ts * 0.44, ts * 1.6); g.lineTo(0, ts * 1.9); g.lineTo(-ts * 0.44, ts * 1.6); g.closePath(); g.fill();
+                    goldHammer(g, 0, ts * 0.75, ts * 0.8); g.fillStyle = '#5a4e44'; g.fillRect(-ts * 0.6, -ts * 0.32, ts * 1.2, ts * 0.12); g.restore();
+                };
+                const pillar = (cx, cy) => {   // seen from above: a great round column, carved, gold-banded, a brazier at its foot
+                    g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.arc(cx + ts * 0.25, cy + ts * 0.3, ts * 1.05, 0, 7); g.fill();
+                    g.fillStyle = '#6a5c4e'; g.beginPath(); g.arc(cx, cy, ts, 0, 7); g.fill(); g.fillStyle = '#7d6e5e'; g.beginPath(); g.arc(cx - ts * 0.2, cy - ts * 0.2, ts * 0.6, 0, 7); g.fill();
+                    g.strokeStyle = '#c99a3a'; g.lineWidth = ts * 0.1; [0.85, 0.55].forEach(k => { g.beginPath(); g.arc(cx, cy, ts * k, 0, 7); g.stroke(); });
+                    g.strokeStyle = '#4a3e32'; g.lineWidth = ts * 0.04; for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(cx + Math.cos(a) * ts * 0.6, cy + Math.sin(a) * ts * 0.6); g.lineTo(cx + Math.cos(a) * ts * 0.82, cy + Math.sin(a) * ts * 0.82); g.stroke(); }
+                };
+                const gate = (cx, cy) => {   // the great rune gate: a round stone door ringed with glowing runes, gold-bound
+                    const gl = g.createRadialGradient(cx, cy, 0, cx, cy, ts * 3.4); gl.addColorStop(0, 'rgba(255,190,90,0.32)'); gl.addColorStop(1, 'rgba(255,190,90,0)'); g.fillStyle = gl; g.fillRect(cx - ts * 3.4, cy - ts * 3.4, ts * 6.8, ts * 6.8);
+                    g.fillStyle = '#28201a'; g.beginPath(); g.arc(cx, cy, ts * 1.8, 0, 7); g.fill(); g.strokeStyle = '#c99a3a'; g.lineWidth = ts * 0.14; g.beginPath(); g.arc(cx, cy, ts * 1.6, 0, 7); g.stroke();
+                    g.beginPath(); g.moveTo(cx, cy - ts * 1.6); g.lineTo(cx, cy + ts * 1.6); g.stroke();
+                    g.fillStyle = '#ffc860'; for (let k = 0; k < 14; k++) { const a = k / 14 * 6.283; g.fillRect(cx + Math.cos(a) * ts * 1.25 - ts * 0.07, cy + Math.sin(a) * ts * 1.25 - ts * 0.07, ts * 0.14, ts * 0.14); }
+                    goldHammer(g, cx - ts * 0.6, cy + ts * 0.05, ts * 1.1); goldHammer(g, cx + ts * 0.6, cy + ts * 0.05, ts * 1.1);
+                };
+                gate(X0 + e, my); gate(X1 - e, my);
+                const pil = []; for (let x = X0 + e; x <= X1 - e + 1; x += (X1 - X0 - 2 * e) / 6) { pil.push([x, Y0 + e]); pil.push([x, Y1 - e]); }
+                [Y0 + e + (Y1 - Y0 - 2 * e) / 6, Y0 + e + (Y1 - Y0 - 2 * e) * 2 / 6, Y1 - e - (Y1 - Y0 - 2 * e) / 6, Y1 - e - (Y1 - Y0 - 2 * e) * 2 / 6].forEach(y => { pil.push([X0 + e, y]); pil.push([X1 - e, y]); });
+                // banners between the pillars, hanging in over the top rows
+                for (let i = 0; i < 6; i++) { const x = X0 + e + (i + 0.5) * (X1 - X0 - 2 * e) / 6; banner(x, Y0 + R * 0.75, false, 1); banner(x, Y1 - R * 0.75, false, -1); }
+                pil.forEach(([x, y]) => { pillar(x, y); torch(g, x + (x < mx ? 1 : -1) * ts * 1.2, y + (y < my ? 1 : -1) * ts * 1.2, ts); });
+            }
+
+            // ---- the Ogres' camp: palisades of sharpened logs, hide tents, cookfires, the Great Maw ----
+            function logTop(g, x, y, s) {   // the top of an upright log seen from above: a sharpened point (four faces), its rings
+                g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(x + s * 0.12, y + s * 0.15, s * 0.5, 0, 7); g.fill();
+                g.fillStyle = '#8a6036'; g.beginPath(); g.arc(x, y, s * 0.5, 0, 7); g.fill();
+                [['#a87a4a', -0.75], ['#6e4a28', 0.75]].forEach(([c, a]) => { g.fillStyle = c; g.beginPath(); g.moveTo(x, y); g.arc(x, y, s * 0.42, a * Math.PI - 0.8, a * Math.PI + 0.8); g.closePath(); g.fill(); });
+                g.fillStyle = '#d4b07a'; g.beginPath(); g.arc(x, y, s * 0.08, 0, 7); g.fill();
+            }
+            function palisadeLine(g, x0, y0, x1, y1, s) {   // a row of logs from one point to another
+                const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / (s * 0.85)));
+                g.strokeStyle = '#4a3220'; g.lineWidth = s * 0.25; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();   // (the lashings behind)
+                for (let i = 0; i <= n; i++) logTop(g, x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, s);
+            }
+            function hideTent(g, cx, cy, s, r, k) {   // a round hide tent seen from above: panels to a smoke hole, a stripe in the team's colour
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.arc(cx + s * 0.15, cy + s * 0.2, s, 0, 7); g.fill();
+                for (let i = 0; i < 8; i++) { const a0 = i * Math.PI / 4, a1 = a0 + Math.PI / 4; g.fillStyle = ['#c8a878', '#b89868', '#d4b484', '#a88858'][i % 4]; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, s, a0, a1); g.closePath(); g.fill(); }
+                g.strokeStyle = k.fill; g.lineWidth = s * 0.14; g.beginPath(); g.arc(cx, cy, s * 0.65, 0, 7); g.stroke();
+                g.fillStyle = '#2a1c10'; g.beginPath(); g.arc(cx, cy, s * 0.16, 0, 7); g.fill();
+                g.fillStyle = 'rgba(80,72,66,0.35)'; for (let q = 0; q < 3; q++) { g.beginPath(); g.arc(cx + q * s * 0.2, cy - q * s * 0.35, s * (0.2 + q * 0.12), 0, 7); g.fill(); }   // smoke
+            }
+            function cookfire(g, cx, cy, s) {   // a fire under a great cauldron, stew bubbling
+                const gl = g.createRadialGradient(cx, cy, 0, cx, cy, s * 1.8); gl.addColorStop(0, 'rgba(255,150,60,0.42)'); gl.addColorStop(1, 'rgba(255,120,40,0)'); g.fillStyle = gl; g.fillRect(cx - s * 1.8, cy - s * 1.8, s * 3.6, s * 3.6);
+                g.fillStyle = '#2a2a2c'; g.beginPath(); g.arc(cx, cy, s * 0.55, 0, 7); g.fill(); g.fillStyle = '#7a5a2a'; g.beginPath(); g.arc(cx, cy, s * 0.42, 0, 7); g.fill();
+                g.fillStyle = '#a07a3a'; [[-0.12, -0.08], [0.15, 0.06], [0, 0.18]].forEach(([dx, dy]) => { g.beginPath(); g.arc(cx + dx * s, cy + dy * s, s * 0.08, 0, 7); g.fill(); });
+                g.fillStyle = '#f59e0b'; [[-0.6, 0.2], [0.55, 0.3], [0.1, 0.62]].forEach(([dx, dy]) => { g.beginPath(); g.arc(cx + dx * s, cy + dy * s, s * 0.12, 0, 7); g.fill(); });
+            }
+            function greatMaw(g, cx, cy, s) {   // the Great Maw: a huge round mouth of teeth on a ring of logs
+                g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.arc(cx + s * 0.1, cy + s * 0.12, s * 0.62, 0, 7); g.fill();
+                g.fillStyle = '#7a5530'; g.beginPath(); g.arc(cx, cy, s * 0.6, 0, 7); g.fill();
+                g.fillStyle = '#3a0c08'; g.beginPath(); g.arc(cx, cy, s * 0.44, 0, 7); g.fill();
+                g.fillStyle = '#efe6d0'; for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283; g.beginPath(); g.moveTo(cx + Math.cos(a - 0.15) * s * 0.44, cy + Math.sin(a - 0.15) * s * 0.44); g.lineTo(cx + Math.cos(a) * s * 0.26, cy + Math.sin(a) * s * 0.26); g.lineTo(cx + Math.cos(a + 0.15) * s * 0.44, cy + Math.sin(a + 0.15) * s * 0.44); g.fill(); }
+                g.fillStyle = '#9a1c14'; g.beginPath(); g.arc(cx, cy, s * 0.12, 0, 7); g.fill();
+            }
+            function wastesExtras(g, o) {   // stockade fences cutting the stands into pens, hide tents, cookfires, bones, the Great Maw behind each end, dust
+                const { ts, r, K } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 1.2 && x < ax1 + ts * 1.2 && y > ay0 - ts * 1.2 && y < ay1 + ts * 1.2) && !aprons0(x, y);
+                // stockade fences: straight runs out from the boards through the crowd, every few squares
+                for (let x = ax0 + ts * 4; x < ax1 - ts * 3; x += ts * 6.5) { if (Math.abs(x - (ax0 + ax1) / 2) < ts * 7.5) continue; palisadeLine(g, x, ay0 - ts * 0.4, x + ts * (r() - 0.5) * 2, o.Y0 + ts * 4, ts * 0.42); palisadeLine(g, x, ay1 + ts * 0.4, x + ts * (r() - 0.5) * 2, o.Y1 - ts * 4, ts * 0.42); }
+                [my - ts * 3.2, my + ts * 3.2].forEach(y => { palisadeLine(g, ax0 - ts * 0.4, y, o.X0 + ts * 4, y + ts * (r() - 0.5) * 2, ts * 0.42); palisadeLine(g, ax1 + ts * 0.4, y, o.X1 - ts * 4, y + ts * (r() - 0.5) * 2, ts * 0.42); });
+                for (let i = 0; i < 26; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) hideTent(g, x, y, ts * (0.8 + r() * 0.5), r, K[x < (o.X0 + o.X1) / 2 ? 0 : 1]); }
+                for (let i = 0; i < 18; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) cookfire(g, x, y, ts * (0.6 + r() * 0.3)); }
+                for (let i = 0; i < 40; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; g.fillStyle = '#e8dfc6'; g.fillRect(x - ts * 0.2, y - ts * 0.03, ts * 0.4, ts * 0.06); g.beginPath(); g.arc(x - ts * 0.2, y, ts * 0.05, 0, 7); g.arc(x + ts * 0.2, y, ts * 0.05, 0, 7); g.fill(); }   // bones
+                greatMaw(g, ax0 - ts * 2.5, my, ts * 3.2); greatMaw(g, ax1 + ts * 2.5, my, ts * 3.2);
+                [[ax0 - ts * 0.9, ay0 - ts * 0.9], [ax1 + ts * 0.9, ay0 - ts * 0.9], [ax0 - ts * 0.9, ay1 + ts * 0.9], [ax1 + ts * 0.9, ay1 + ts * 0.9]].forEach(([x, y]) => cookfire(g, x, y, ts * 0.9));
+                for (let i = 0; i < 22; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0), gr = g.createRadialGradient(x, y, 0, x, y, ts * 3); gr.addColorStop(0, 'rgba(230,200,150,0.1)'); gr.addColorStop(1, 'rgba(230,200,150,0)'); g.fillStyle = gr; g.fillRect(x - ts * 3, y - ts * 3, ts * 6, ts * 6); }   // dust
+            }
+            function eastBanner(g, cx, cy, s, cl, tr) {   // a tall eastern banner seen from above: a crossbar with a long cloth hanging, the Maw on it
+                g.fillStyle = 'rgba(0,0,0,0.3)'; g.fillRect(cx - s * 0.3 + s * 0.08, cy - s * 0.1, s * 0.6, s * 1.4);
+                g.fillStyle = tr; g.fillRect(cx - s * 0.32, cy - s * 0.02, s * 0.64, s * 1.3); g.fillStyle = cl; g.fillRect(cx - s * 0.28, cy, s * 0.56, s * 1.24);
+                g.fillStyle = '#3a0c08'; g.beginPath(); g.arc(cx, cy + s * 0.55, s * 0.17, 0, 7); g.fill(); g.fillStyle = '#efe6d0'; for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283; g.fillRect(cx + Math.cos(a) * s * 0.13 - 1, cy + s * 0.55 + Math.sin(a) * s * 0.13 - 1, 2, 2); }
+                g.fillStyle = '#4a3220'; g.fillRect(cx - s * 0.4, cy - s * 0.06, s * 0.8, s * 0.08); g.fillStyle = '#e2b43c'; [-1, 1].forEach(sd => { g.beginPath(); g.arc(cx + sd * s * 0.42, cy - s * 0.02, s * 0.05, 0, 7); g.fill(); });
+            }
+            function roofPalisade(g, o) {   // a double palisade of sharpened logs round the camp, a walkway of planks between, gate towers, tall banners
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.2 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#5a3c22'; g.fillRect(x, y, w, h);
+                    for (let a = 0; a < (v ? h : w); a += ts * 0.3) { g.fillStyle = r() < 0.5 ? '#6b4a2a' : '#5f4024'; v ? g.fillRect(x + w * 0.3, y + a, w * 0.4, ts * 0.28) : g.fillRect(x + a, y + h * 0.3, ts * 0.28, h * 0.4); }   // the walkway
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, s = ts * 0.62;
+                [[0.15], [0.85]].forEach(([f]) => { const d = R * f; palisadeLine(g, X0 + d, Y0 + d, X1 - d, Y0 + d, s); palisadeLine(g, X0 + d, Y1 - d, X1 - d, Y1 - d, s); palisadeLine(g, X0 + d, Y0 + d, X0 + d, Y1 - d, s); palisadeLine(g, X1 - d, Y0 + d, X1 - d, Y1 - d, s); });
+                const e = R * 0.5, gate = (x, y, t) => { woodTower(g, x, y, ts * 1.7, K[t]); };
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx - ts * 2, Y0 + e, 0], [mx + ts * 2, Y0 + e, 1], [mx - ts * 2, Y1 - e, 0], [mx + ts * 2, Y1 - e, 1], [X0 + e, my - ts * 2, 0], [X0 + e, my + ts * 2, 0], [X1 - e, my - ts * 2, 1], [X1 - e, my + ts * 2, 1]].forEach(([x, y, t]) => gate(x, y, t));
+                const B = [['#aa201a', '#e2b43c'], ['#1c1a1e', '#c83224'], ['#dcaa32', '#961c18']];
+                let i = 0; for (let x = X0 + R * 2.2; x < X1 - R * 2; x += ts * 6) { if (Math.abs(x - mx) < ts * 4) continue; const [cl, tr] = B[i++ % 3]; eastBanner(g, x, Y0 + R * 0.5, ts * 1.4, cl, tr); eastBanner(g, x, Y1 - R * 0.5, ts * 1.4, cl, tr); }
+            }
+            // ---- the Black Ark: the stands are a black ship - masts with furled sails and crow's nests, rigging down over the crowd,
+            // the hull narrowing to a prow and a stern at the ends with the sea round them, bolt throwers on the rail ----
+            function mast(g, cx, cy, s, k) {   // a mast seen from above: a furled black sail along its yard, a crow's nest, a pennant
+                g.fillStyle = 'rgba(0,0,0,0.4)'; g.fillRect(cx - s * 1.5 + s * 0.15, cy - s * 0.12 + s * 0.2, s * 3, s * 0.3);
+                g.fillStyle = '#2a2230'; g.fillRect(cx - s * 1.5, cy - s * 0.06, s * 3, s * 0.12);   // the yard
+                g.fillStyle = '#16121c'; g.beginPath(); g.ellipse(cx, cy + s * 0.1, s * 1.4, s * 0.2, 0, 0, 7); g.fill();   // the furled sail
+                g.strokeStyle = '#3a3448'; g.lineWidth = 1; for (let q = -1.2; q <= 1.2; q += 0.3) { g.beginPath(); g.moveTo(cx + q * s, cy - s * 0.05); g.lineTo(cx + q * s, cy + s * 0.25); g.stroke(); }
+                g.fillStyle = '#3a2e44'; g.beginPath(); g.arc(cx, cy, s * 0.32, 0, 7); g.fill(); g.strokeStyle = '#8a8fa0'; g.lineWidth = s * 0.05; g.stroke();   // the crow's nest
+                g.fillStyle = '#b48cff'; g.beginPath(); g.arc(cx, cy, s * 0.08, 0, 7); g.fill();
+                g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - s * 0.3); g.lineTo(cx + s * 0.9, cy - s * 0.55); g.lineTo(cx + s * 0.2, cy - s * 0.1); g.closePath(); g.fill();
+            }
+            function boltThrower(g, cx, cy, s, ang) {   // a Reaper bolt thrower on the rail, pointing out
+                g.save(); g.translate(cx, cy); g.rotate(ang);
+                g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(-s * 0.3 + 2, -s * 0.15 + 3, s * 0.8, s * 0.32);
+                g.fillStyle = '#2a2230'; g.fillRect(-s * 0.3, -s * 0.12, s * 0.8, s * 0.24); g.strokeStyle = '#8a8fa0'; g.lineWidth = s * 0.06; g.beginPath(); g.moveTo(s * 0.25, -s * 0.45); g.quadraticCurveTo(s * 0.05, 0, s * 0.25, s * 0.45); g.stroke();
+                g.fillStyle = '#c9c4e0'; g.fillRect(s * 0.4, -s * 0.03, s * 0.25, s * 0.06);
+                g.restore();
+            }
+            function roofArk(g, o) {
+                const { ts, R, K, r } = o, { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2;
+                roofShadow(g, o, 1.6 * ts);
+                // the sea round the hull: at each end, everything beyond the line from the corners to a point (the prow, the stern)
+                const prow = (xEdge, xTip, dir) => {
+                    g.fillStyle = '#060a14'; g.beginPath(); g.moveTo(xEdge, Y0); g.lineTo(xTip, Y0); g.lineTo(xTip, Y1); g.lineTo(xEdge, Y1); g.lineTo(xTip + dir * 0, my); g.closePath();
+                    g.beginPath(); g.moveTo(xTip, Y0); g.lineTo(xEdge + dir * ts * 9, Y0); g.lineTo(xTip, my - ts * 1.2); g.closePath(); g.fill();
+                    g.beginPath(); g.moveTo(xTip, Y1); g.lineTo(xEdge + dir * ts * 9, Y1); g.lineTo(xTip, my + ts * 1.2); g.closePath(); g.fill();
+                    g.strokeStyle = 'rgba(120,130,170,0.3)'; g.lineWidth = 1; for (let i = 0; i < 30; i++) { const wx = xTip - dir * r() * ts * 7, wy = Y0 + r() * (Y1 - Y0); if (Math.abs(wy - my) < (ts * 1.2 + Math.abs(wx - xTip) / ts * 0 ) || Math.abs(wx - xTip) > Math.abs(wy - my) / (my - Y0) * ts * 9) continue; g.beginPath(); g.moveTo(wx, wy); g.quadraticCurveTo(wx + 4, wy - 2, wx + 8, wy); g.stroke(); }
+                    // the hull's edge: black planks with a silver rail, along the two slanted sides
+                    g.strokeStyle = '#0c0a12'; g.lineWidth = ts * 0.55; g.beginPath(); g.moveTo(xEdge + dir * ts * 9, Y0); g.lineTo(xTip, my - ts * 1.2); g.lineTo(xTip, my + ts * 1.2); g.lineTo(xEdge + dir * ts * 9, Y1); g.stroke();
+                    g.strokeStyle = '#8a8fa0'; g.lineWidth = ts * 0.08; g.stroke();
+                };
+                prow(X0 + ts * 0.01, X0, 1); prow(X1 - ts * 0.01, X1, -1);
+                // the decks along the long sides
+                [['top', Y0, 1], ['bottom', Y1, -1]].forEach(([side, ye, d]) => {
+                    const x0 = X0 + ts * 9, x1 = X1 - ts * 9, y = d > 0 ? ye : ye - R;
+                    g.fillStyle = '#141220'; g.fillRect(x0, y, x1 - x0, R);
+                    for (let a = 0; a < R; a += ts * 0.28) { g.fillStyle = r() < 0.5 ? '#1c1a2a' : '#181624'; g.fillRect(x0, y + a, x1 - x0, ts * 0.26); }
+                    g.fillStyle = '#0c0a12'; g.fillRect(x0, d > 0 ? ye : ye - ts * 0.35, x1 - x0, ts * 0.35); g.fillStyle = '#8a8fa0'; g.fillRect(x0, d > 0 ? ye + ts * 0.3 : ye - ts * 0.38, x1 - x0, ts * 0.08);   // the outer hull and rail
+                    g.fillStyle = '#4a4e5a'; g.fillRect(x0, d > 0 ? ye + R - ts * 0.1 : ye - R, x1 - x0, ts * 0.1);   // the inner rail
+                    for (let x = x0 + ts * 2; x < x1 - ts; x += ts * 3.2) boltThrower(g, x, d > 0 ? ye + R - ts * 0.4 : ye - R + ts * 0.4, ts * 0.9, d > 0 ? Math.PI / 2 : -Math.PI / 2);
+                });
+                // rigging: ropes from the masts down over the crowd to the inner rail
+                const masts = []; for (let x = X0 + ts * 13; x < X1 - ts * 12; x += ts * 8.5) { masts.push([x, Y0 + R * 0.5, 0]); masts.push([x, Y1 - R * 0.5, 1]); }
+                g.strokeStyle = 'rgba(120,110,90,0.55)'; g.lineWidth = Math.max(1, ts * 0.03);
+                masts.forEach(([x, y, t]) => { const d = t ? -1 : 1; for (let q = -2; q <= 2; q++) { g.beginPath(); g.moveTo(x, y); g.lineTo(x + q * ts * 1.6, y + d * ts * 7.5); g.stroke(); } });
+                masts.forEach(([x, y, t]) => mast(g, x, y, ts * 1.3, K[t]));
+                [[X0 + ts * 4, my - ts * 6], [X0 + ts * 4, my + ts * 6], [X1 - ts * 4, my - ts * 6], [X1 - ts * 4, my + ts * 6]].forEach(([x, y]) => lantern(g, x, y, ts * 1.1, '190,140,255'));
+            }
+
+            // ---- Plague (Nurgle), Bretonnia, Ziggurat (Chaos Dwarfs), Altdorf (Humans): their pieces, extras and roofs ----
+            function flies(g, x, y, s, r) { g.fillStyle = 'rgba(20,24,10,0.85)'; for (let i = 0; i < 14; i++) { const a = r() * 6.3, d = r() * s; g.fillRect(x + Math.cos(a) * d, y + Math.sin(a) * d * 0.7, 1.6, 1.6); } }
+            // the Nurgle ground's swampy clearings among the stands (no fans there): ponds with mud rims; the same list for the crowd and the drawing
+            function plagueSwamps() {
+                const ts = T(), r = pitchRng(5150 + CFG.cols), { ax0, ax1, ay0, ay1, my } = apronBox(ts), out = [], X0 = -MX * ts, Y0 = -MY * ts, X1 = (CFG.cols + MX) * ts, Y1 = (CFG.rows + MY) * ts;
+                const ok = (x, y, rx, ry) => !(x + rx > ax0 - ts * 0.8 && x - rx < ax1 + ts * 0.8 && y + ry > ay0 - ts * 0.8 && y - ry < ay1 + ts * 0.8) && ![0, 1].some(t => { const d = dugRect(t); return x + rx > (d.x - 0.8) * ts && x - rx < (d.x + d.w + 0.8) * ts && y + ry > (d.y - 0.8) * ts && y - ry < (d.y + d.h + 0.8) * ts; }) && x - rx > X0 + RD * ts && x + rx < X1 - RD * ts && y - ry > Y0 + RD * ts && y + ry < Y1 - RD * ts;
+                // big ponds in the corners and beside the dugouts, smaller ones scattered
+                const want = [[ax0 - ts * 4.5, ay0 - ts * 4, 3.4, 2.4], [ax1 + ts * 4.5, ay0 - ts * 4, 3.2, 2.6], [ax0 - ts * 4.5, ay1 + ts * 4, 3.3, 2.5], [ax1 + ts * 4.5, ay1 + ts * 4, 3.4, 2.3],
+                    [ax0 + ts * 4, ay0 - ts * 4.5, 2.6, 1.8], [ax1 - ts * 4, ay1 + ts * 4.5, 2.6, 1.8], [ax0 - ts * 5, my, 2.2, 3.2], [ax1 + ts * 5, my, 2.2, 3.2]];
+                want.forEach(([x, y, a, b]) => { const rx = a * ts, ry = b * ts; if (ok(x, y, rx, ry)) out.push({ x, y, rx, ry, rot: (r() - 0.5) * 0.6 }); });
+                for (let i = 0; i < 160 && out.length < 30; i++) { const x = X0 + r() * (X1 - X0), y = Y0 + r() * (Y1 - Y0), rx = ts * (1.4 + r() * 1.6), ry = rx * (0.55 + r() * 0.35); if (ok(x, y, rx, ry) && !out.some(q => Math.hypot(q.x - x, q.y - y) < q.rx + rx + ts * 0.4)) out.push({ x, y, rx, ry, rot: r() * 3 }); }
+                return out;
+            }
+            const inSwamp = (x, y, pad = 0.55) => { const ts = T(); return (theme().swamp ? plagueSwamps() : []).some(q => { const c = Math.cos(-q.rot), sn = Math.sin(-q.rot), dx = (x - q.x) * c - (y - q.y) * sn, dy = (x - q.x) * sn + (y - q.y) * c; return (dx * dx) / ((q.rx + ts * pad) ** 2) + (dy * dy) / ((q.ry + ts * pad) ** 2) < 1; }); };
+            function drawSwamp(g, q, r) {   // a stagnant pond: a mud rim, murky green water, scum and lily pads, bubbles, reeds, a rotting log, a drowned dead tree
+                const ts = T();
+                g.save(); g.translate(q.x, q.y); g.rotate(q.rot);
+                g.fillStyle = '#3a3420'; g.beginPath(); g.ellipse(0, 0, q.rx + ts * 0.55, q.ry + ts * 0.5, 0, 0, 7); g.fill();   // the mud rim
+                g.fillStyle = '#4a4428'; for (let i = 0; i < 10; i++) { const a = r() * 6.3; g.beginPath(); g.ellipse(Math.cos(a) * (q.rx + ts * 0.3), Math.sin(a) * (q.ry + ts * 0.28), ts * 0.35, ts * 0.2, a, 0, 7); g.fill(); }
+                const wg = g.createRadialGradient(-q.rx * 0.2, -q.ry * 0.2, 0, 0, 0, Math.max(q.rx, q.ry)); wg.addColorStop(0, '#4f5a22'); wg.addColorStop(0.7, '#3a4418'); wg.addColorStop(1, '#2a3010');
+                g.fillStyle = wg; g.beginPath(); g.ellipse(0, 0, q.rx, q.ry, 0, 0, 7); g.fill();
+                g.fillStyle = 'rgba(150,170,60,0.45)'; for (let i = 0; i < q.rx * q.ry / (ts * ts) * 2.2; i++) { const a = r() * 6.3, d = Math.sqrt(r()); g.beginPath(); g.ellipse(Math.cos(a) * q.rx * d * 0.9, Math.sin(a) * q.ry * d * 0.9, ts * (0.12 + r() * 0.3), ts * (0.08 + r() * 0.15), r() * 3, 0, 7); g.fill(); }   // scum
+                for (let i = 0; i < q.rx * q.ry / (ts * ts) * 0.6; i++) { const a = r() * 6.3, d = Math.sqrt(r()) * 0.8, lx = Math.cos(a) * q.rx * d, ly = Math.sin(a) * q.ry * d; g.fillStyle = '#5a7a26'; g.beginPath(); g.arc(lx, ly, ts * 0.16, 0.4, 6.0); g.lineTo(lx, ly); g.fill(); if (r() < 0.25) { g.fillStyle = '#c8a8c0'; g.beginPath(); g.arc(lx + ts * 0.04, ly - ts * 0.03, ts * 0.05, 0, 7); g.fill(); } }   // lily pads, a sickly flower or two
+                g.strokeStyle = 'rgba(200,220,120,0.5)'; g.lineWidth = 1; for (let i = 0; i < 6; i++) { const a = r() * 6.3, d = Math.sqrt(r()) * 0.7; g.beginPath(); g.arc(Math.cos(a) * q.rx * d, Math.sin(a) * q.ry * d, ts * (0.04 + r() * 0.06), 0, 7); g.stroke(); }   // bubbles
+                if (q.rx > ts * 1.6) {   // a rotting log half sunk, a drowned tree
+                    g.fillStyle = '#4a3a22'; g.save(); g.rotate(r() * 3); g.fillRect(-q.rx * 0.4, -ts * 0.14, q.rx * 0.7, ts * 0.28); g.fillStyle = '#6e8a2a'; g.fillRect(-q.rx * 0.2, -ts * 0.14, q.rx * 0.25, ts * 0.1); g.restore();
+                    deadTree(g, q.rx * 0.3, -q.ry * 0.25, ts * 1.2, r);
+                }
+                g.strokeStyle = '#5a6a28'; g.lineWidth = Math.max(1, ts * 0.04); for (let i = 0; i < 24; i++) { const a = r() * 6.3, bx = Math.cos(a) * (q.rx + ts * 0.15), by = Math.sin(a) * (q.ry + ts * 0.12); g.beginPath(); g.moveTo(bx, by); g.lineTo(bx + (r() - 0.5) * ts * 0.2, by - ts * (0.3 + r() * 0.35)); g.stroke(); if (r() < 0.3) { g.fillStyle = '#5a3a1e'; g.fillRect(bx - 1.5, by - ts * 0.5, 3, ts * 0.14); } }   // reeds and bulrushes
+                g.restore();
+                flies(g, q.x + q.rx * 0.3, q.y - q.ry * 0.3, ts * 0.8, r);
+            }
+            function plagueExtras(g, o) {   // giant sickly toadstools and dead trees among the crowd, a bubbling cauldron and plague bell behind the ends, slime pools, flies, fog
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y) && !inSwamp(x, y, 0.2);
+                plagueSwamps().forEach(q => drawSwamp(g, q, r));
+                const pus = (x, y, s) => { const gl = g.createRadialGradient(x, y, 0, x, y, s * 1.4); gl.addColorStop(0, 'rgba(180,210,60,0.35)'); gl.addColorStop(1, 'rgba(160,200,40,0)'); g.fillStyle = gl; g.fillRect(x - s * 1.4, y - s * 1.4, s * 2.8, s * 2.8); g.fillStyle = '#6e7f22'; g.beginPath(); g.ellipse(x, y, s * 0.7, s * 0.45, 0, 0, 7); g.fill(); g.fillStyle = '#a8c040'; [[-0.2, -0.1], [0.25, 0.05], [0, 0.15]].forEach(([dx, dy]) => { g.beginPath(); g.arc(x + dx * s, y + dy * s, s * 0.09, 0, 7); g.fill(); }); };
+                for (let i = 0; i < 50; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; const k = r(); if (k < 0.4) { g.save(); g.filter = 'hue-rotate(60deg) saturate(0.6)'; toadstool(g, x, y, ts * (0.5 + r() * 0.5), r); g.restore(); } else if (k < 0.65) deadTree(g, x, y, ts * (0.9 + r() * 0.6), r); else if (k < 0.85) pus(x, y, ts * (0.6 + r() * 0.4)); else flies(g, x, y, ts * 0.7, r); }
+                const cauldron = (cx, cy, s) => { const gl = g.createRadialGradient(cx, cy, 0, cx, cy, s * 1.6); gl.addColorStop(0, 'rgba(170,210,60,0.4)'); gl.addColorStop(1, 'rgba(150,200,40,0)'); g.fillStyle = gl; g.fillRect(cx - s * 1.6, cy - s * 1.6, s * 3.2, s * 3.2);
+                    g.fillStyle = '#2a2a24'; g.beginPath(); g.arc(cx, cy, s * 0.6, 0, 7); g.fill(); g.fillStyle = '#7d8f24'; g.beginPath(); g.arc(cx, cy, s * 0.48, 0, 7); g.fill(); g.fillStyle = '#b4cc4a'; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(cx + (r() - 0.5) * s * 0.6, cy + (r() - 0.5) * s * 0.6, s * (0.05 + r() * 0.06), 0, 7); g.fill(); } flies(g, cx, cy, s, r); };
+                cauldron(ax0 - ts * 2.4, my, ts * 2.4); cauldron(ax1 + ts * 2.4, my, ts * 2.4);
+                const bell = (cx, cy, s) => { g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.arc(cx + s * 0.15, cy + s * 0.2, s * 0.6, 0, 7); g.fill(); g.fillStyle = '#5a4a2a'; g.fillRect(cx - s * 0.6, cy - s * 0.08, s * 1.2, s * 0.16); g.fillStyle = '#8a7a3a'; g.beginPath(); g.arc(cx, cy, s * 0.42, 0, 7); g.fill(); g.fillStyle = '#5c6a1e'; g.beginPath(); g.arc(cx - s * 0.1, cy - s * 0.1, s * 0.2, 0, 7); g.fill(); };
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6]].forEach(([x, y]) => bell(x, y, ts * 1.1));
+                for (let i = 0; i < 28; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0), gr = g.createRadialGradient(x, y, 0, x, y, ts * 3.5); gr.addColorStop(0, 'rgba(190,200,120,0.14)'); gr.addColorStop(1, 'rgba(190,200,120,0)'); g.fillStyle = gr; g.fillRect(x - ts * 3.5, y - ts * 3.5, ts * 7, ts * 7); }   // sickly fog
+            }
+            function roofRot(g, o) {   // a rotten, sagging timber roof furred with moss and fungus, holes, tattered banners, plague bells on poles
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.5 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#33301e'; g.fillRect(x, y, w, h);
+                    for (let a = 0; a < (v ? h : w); a += ts * 0.35) { g.fillStyle = ['#4a4228', '#3e3822', '#554a2c'][(r() * 3) | 0]; v ? g.fillRect(x, y + a, w, ts * 0.33) : g.fillRect(x + a, y, ts * 0.33, h); }
+                    for (let i = 0; i < w * h / (ts * ts) * 1.4; i++) { g.fillStyle = r() < 0.6 ? `rgba(110,130,40,${(0.3 + r() * 0.35).toFixed(2)})` : `rgba(160,170,60,${(0.25 + r() * 0.3).toFixed(2)})`; g.beginPath(); g.arc(x + r() * w, y + r() * h, ts * (0.15 + r() * 0.45), 0, 7); g.fill(); }   // moss and slime
+                    for (let i = 0; i < w * h / (ts * ts) * 0.06; i++) { g.fillStyle = '#12110a'; g.beginPath(); g.ellipse(x + r() * w, y + r() * h, ts * (0.2 + r() * 0.3), ts * (0.15 + r() * 0.2), r() * 3, 0, 7); g.fill(); }   // holes
+                });
+                {   // rounded inner corners: each corner filled in a curve with the same rotten planks and moss
+                    const { X0, Y0, X1, Y1 } = o, rad = ts * 3.2, C = [[X0 + R, Y0 + R, 1, 1], [X1 - R, Y0 + R, -1, 1], [X0 + R, Y1 - R, 1, -1], [X1 - R, Y1 - R, -1, -1]];
+                    C.forEach(([ix, iy, sx, sy]) => {
+                        g.save(); g.beginPath(); g.moveTo(ix, iy); g.lineTo(ix + sx * rad, iy); g.arc(ix + sx * rad, iy + sy * rad, rad, sy > 0 ? -Math.PI / 2 : Math.PI / 2, sx > 0 ? Math.PI : 0, (sx > 0) === (sy > 0)); g.lineTo(ix, iy); g.closePath(); g.clip();
+                        g.fillStyle = '#33301e'; g.fillRect(ix - rad * 2, iy - rad * 2, rad * 4, rad * 4);
+                        for (let a = -rad; a < rad; a += ts * 0.35) { g.fillStyle = ['#4a4228', '#3e3822', '#554a2c'][(r() * 3) | 0]; g.fillRect(ix - rad, iy + a, rad * 2, ts * 0.33); }
+                        for (let i = 0; i < 6; i++) { g.fillStyle = `rgba(110,130,40,${(0.3 + r() * 0.35).toFixed(2)})`; g.beginPath(); g.arc(ix + sx * r() * rad * 0.6, iy + sy * r() * rad * 0.6, ts * (0.15 + r() * 0.4), 0, 7); g.fill(); }
+                        g.restore();
+                        g.strokeStyle = 'rgba(150,170,50,0.6)'; g.lineWidth = ts * 0.1; g.beginPath(); g.arc(ix + sx * rad, iy + sy * rad, rad, sy > 0 ? -Math.PI / 2 : Math.PI / 2, sx > 0 ? Math.PI : 0, (sx > 0) === (sy > 0)); g.stroke();   // a slimy lip along the curve
+                    });
+                }
+                roofEdge(o, ts * 0.4, (x, y, len, nx, ny) => { if (r() < 0.5) return; const px = x + (ny ? len / 2 : 0), py = y + (nx ? len / 2 : 0), L = ts * (0.15 + r() * 0.4); g.fillStyle = 'rgba(150,170,50,0.75)'; g.beginPath(); g.ellipse(px + nx * L / 2, py + ny * L / 2, ts * 0.06 + (nx ? L / 2 : 0), ts * 0.06 + (ny ? L / 2 : 0), 0, 0, 7); g.fill(); });   // slime dripping in
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                const tat = (cx, cy, k) => { g.strokeStyle = '#3a2a16'; g.lineWidth = ts * 0.07; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - ts * 1.4); g.stroke(); g.fillStyle = shade(k.fill, -0.35); g.beginPath(); g.moveTo(cx, cy - ts * 1.4); g.lineTo(cx + ts * 0.9, cy - ts * 1.3); for (let q = 0; q < 4; q++) g.lineTo(cx + ts * (0.9 - q * 0.22), cy - ts * (0.85 + (q % 2) * 0.18)); g.lineTo(cx, cy - ts * 0.9); g.fill(); g.fillStyle = '#a8c040'; [0, 1, 2].forEach(q => { g.beginPath(); g.arc(cx + ts * (0.25 + q * 0.18), cy - ts * 1.12, ts * 0.06, 0, 7); g.fill(); }); };   // the three dots of Nurgle
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx - ts * 8, Y0 + e, 0], [mx + ts * 8, Y0 + e, 1], [mx - ts * 8, Y1 - e, 0], [mx + ts * 8, Y1 - e, 1], [X0 + e, my, 0], [X1 - e, my, 1]].forEach(([x, y, t]) => { tat(x, y, K[t]); flies(g, x, y - ts, ts, r); });
+            }
+            function bretExtras(g, o) {   // pavilion tents in heraldic stripes, a tilt barrier and lances, fleur-de-lis banners, bunting
+                const { ts, r, K } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);
+                const pavilion = (cx, cy, s, c1, c2) => { g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(cx + s * 0.15, cy + s * 0.2, s, 0, 7); g.fill(); for (let i = 0; i < 12; i++) { const a0 = i * Math.PI / 6, a1 = a0 + Math.PI / 6; g.fillStyle = i % 2 ? c1 : c2; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, s, a0, a1); g.closePath(); g.fill(); }
+                    g.fillStyle = '#d6aa46'; g.beginPath(); g.arc(cx, cy, s * 0.12, 0, 7); g.fill(); g.strokeStyle = '#3a2716'; g.lineWidth = s * 0.05; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - s * 1.3); g.stroke(); g.fillStyle = c1; g.beginPath(); g.moveTo(cx, cy - s * 1.3); g.lineTo(cx + s * 0.6, cy - s * 1.2); g.lineTo(cx, cy - s * 1.1); g.fill(); };
+                const HER = [['#1f4fa8', '#f2efe7'], ['#b3261e', '#f2c94c'], ['#1f6f3a', '#f2efe7'], ['#6a2a8a', '#f2c94c']];
+                for (let i = 0; i < 22; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (!clear(x, y)) continue; const [a, b] = r() < 0.4 ? [K[x < (o.X0 + o.X1) / 2 ? 0 : 1].fill, '#f2efe7'] : HER[(r() * HER.length) | 0]; pavilion(x, y, ts * (0.8 + r() * 0.5), a, b); }
+                const tilt = (x0, y, x1) => { g.fillStyle = '#7a5530'; g.fillRect(x0, y - ts * 0.08, x1 - x0, ts * 0.16); for (let x = x0; x < x1; x += ts * 1.2) { g.fillStyle = '#1f4fa8'; g.fillRect(x, y - ts * 0.1, ts * 0.6, ts * 0.2); g.fillStyle = '#f2efe7'; g.fillRect(x + ts * 0.6, y - ts * 0.1, ts * 0.6, ts * 0.2); } };   // a tilt barrier
+                tilt(ax0 - ts * 3.6, my - ts * 2.6, ax0 - ts * 1); tilt(ax1 + ts * 1, my + ts * 2.6, ax1 + ts * 3.6);
+                const lion = (cx, cy, s) => { g.fillStyle = '#1f4fa8'; g.beginPath(); g.moveTo(cx - s * 0.5, cy - s * 0.55); g.lineTo(cx + s * 0.5, cy - s * 0.55); g.lineTo(cx + s * 0.5, cy + s * 0.1); g.quadraticCurveTo(cx + s * 0.45, cy + s * 0.55, cx, cy + s * 0.7); g.quadraticCurveTo(cx - s * 0.45, cy + s * 0.55, cx - s * 0.5, cy + s * 0.1); g.closePath(); g.fill(); g.strokeStyle = '#d6aa46'; g.lineWidth = s * 0.06; g.stroke();
+                    g.fillStyle = '#f2c94c'; g.beginPath(); g.moveTo(cx, cy - s * 0.35); g.quadraticCurveTo(cx + s * 0.22, cy - s * 0.05, cx, cy + s * 0.35); g.quadraticCurveTo(cx - s * 0.22, cy - s * 0.05, cx, cy - s * 0.35); g.fill(); g.fillRect(cx - s * 0.28, cy - s * 0.03, s * 0.56, s * 0.08); };   // a shield with the fleur-de-lis
+                lion(ax0 - ts * 2.3, my, ts * 2.6); lion(ax1 + ts * 2.3, my, ts * 2.6);
+                g.lineWidth = ts * 0.03; [[ax0, ay0 - ts * 0.4, ax1, ay0 - ts * 0.4], [ax0, ay1 + ts * 0.4, ax1, ay1 + ts * 0.4]].forEach(([x0, y0, x1]) => { for (let x = x0; x < x1; x += ts * 0.5) { g.fillStyle = ['#1f4fa8', '#b3261e', '#f2c94c', '#f2efe7'][((x - x0) / (ts * 0.5) | 0) % 4]; g.beginPath(); g.moveTo(x, y0); g.lineTo(x + ts * 0.5, y0); g.lineTo(x + ts * 0.25, y0 + ts * 0.3 * (y0 < my ? -1 : 1)); g.fill(); } });   // bunting
+            }
+            function roofCastle(g, o) {   // a curtain wall-walk of pale stone, crenellated, round turrets with pointed blue roofs and heraldic pennants, a gatehouse
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.3 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#b8b2a2'; g.fillRect(x, y, w, h);
+                    const bw = ts * 0.9, bh = ts * 0.45;
+                    for (let a = 0, n = 0; a < (v ? w : h); a += bh, n++) for (let b = (n % 2) * bw / 2 - bw; b < (v ? h : w); b += bw) { g.fillStyle = ['#c4beae', '#b2ac9c', '#cdc7b7', '#aaa494'][(r() * 4) | 0]; v ? g.fillRect(x + a, y + b, bh - 1.5, bw - 1.5) : g.fillRect(x + b, y + a, bw - 1.5, bh - 1.5); }
+                });
+                roofEdge(o, ts * 0.6, (x, y, len, nx, ny) => { g.fillStyle = '#d8d2c2'; const d = ts * 0.32; if (ny) { g.fillRect(x, y - (ny > 0 ? d * 0.45 : 0), len, d * 0.45); g.fillRect(x, y - (ny > 0 ? d : 0), len * 0.55, d); } else { g.fillRect(x - (nx > 0 ? d * 0.45 : 0), y, d * 0.45, len); g.fillRect(x - (nx > 0 ? d : 0), y, d, len * 0.55); } });
+                const turret = (cx, cy, Rr, k) => { g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.ellipse(cx + Rr * 0.25, cy + Rr * 0.3, Rr * 1.05, Rr, 0, 0, 7); g.fill(); g.fillStyle = '#d8d2c2'; g.beginPath(); g.arc(cx, cy, Rr, 0, 7); g.fill();
+                    for (let i = 0; i < 10; i++) { const a0 = i * Math.PI / 5, a1 = a0 + Math.PI / 5; g.fillStyle = i % 2 ? '#2a4f9a' : '#3a64b4'; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, Rr * 0.8, a0, a1); g.closePath(); g.fill(); }
+                    g.fillStyle = '#d6aa46'; g.beginPath(); g.arc(cx, cy, Rr * 0.12, 0, 7); g.fill(); g.strokeStyle = '#3a2716'; g.lineWidth = Rr * 0.06; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - Rr * 1.6); g.stroke();
+                    g.fillStyle = k.fill; g.beginPath(); g.moveTo(cx, cy - Rr * 1.6); g.lineTo(cx + Rr * 1.1, cy - Rr * 1.45); g.lineTo(cx, cy - Rr * 1.25); g.closePath(); g.fill(); };
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                [[X0 + e, Y0 + e, 0], [X1 - e, Y0 + e, 1], [X0 + e, Y1 - e, 0], [X1 - e, Y1 - e, 1], [mx - ts * 7, Y0 + e, 0], [mx + ts * 7, Y0 + e, 1], [mx - ts * 7, Y1 - e, 0], [mx + ts * 7, Y1 - e, 1], [X0 + e, my - ts * 3.5, 0], [X0 + e, my + ts * 3.5, 0], [X1 - e, my - ts * 3.5, 1], [X1 - e, my + ts * 3.5, 1]].forEach(([x, y, t]) => turret(x, y, ts * 1.15, K[t]));
+                [[mx, Y0 + e], [mx, Y1 - e]].forEach(([x, y]) => { g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(x - ts * 1.9, y - ts * 1.1, ts * 4, ts * 2.4); g.fillStyle = '#cdc7b7'; g.fillRect(x - ts * 2, y - ts * 1.2, ts * 4, ts * 2.4); g.fillStyle = '#8c1e1a'; g.fillRect(x - ts * 1.6, y - ts * 0.8, ts * 3.2, ts * 1.6); g.fillStyle = '#d6aa46'; g.fillRect(x - ts * 1.6, y - ts * 0.08, ts * 3.2, ts * 0.16); });   // the gatehouse and royal box
+            }
+            function zigExtras(g, o) {   // lava channels and furnace chimneys among the crowd, winged-bull statues behind the ends, braziers
+                const { ts, r } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);
+                const chimney = (cx, cy, s) => { g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.arc(cx + s * 0.15, cy + s * 0.2, s * 0.55, 0, 7); g.fill(); g.fillStyle = '#3a2a24'; g.beginPath(); g.arc(cx, cy, s * 0.5, 0, 7); g.fill(); const gl = g.createRadialGradient(cx, cy, 0, cx, cy, s * 0.4); gl.addColorStop(0, '#ffb347'); gl.addColorStop(1, '#a12a0c'); g.fillStyle = gl; g.beginPath(); g.arc(cx, cy, s * 0.32, 0, 7); g.fill();
+                    g.fillStyle = 'rgba(40,24,20,0.45)'; for (let q = 0; q < 4; q++) { g.beginPath(); g.arc(cx + q * s * 0.3, cy - q * s * 0.5, s * (0.35 + q * 0.18), 0, 7); g.fill(); } };
+                for (let i = 0; i < 16; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) chimney(x, y, ts * (0.8 + r() * 0.4)); }
+                for (let i = 0; i < 40; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) lavaCrack(g, x, y, ts * (0.6 + r() * 0.6), r); }
+                const bull = (cx, cy, s, dir) => {   // a winged bull of Hashut from above: body, spread wings, horned head, in bronze
+                    g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.ellipse(cx + s * 0.1, cy + s * 0.12, s * 0.75, s * 0.6, 0, 0, 7); g.fill();
+                    g.fillStyle = '#7a4e22'; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx - dir * s * 0.2, cy + sd * s * 0.75); g.lineTo(cx - dir * s * 0.55, cy + sd * s * 0.55); g.lineTo(cx - dir * s * 0.4, cy + sd * s * 0.15); g.fill(); });
+                    g.fillStyle = '#9a6430'; g.beginPath(); g.ellipse(cx, cy, s * 0.42, s * 0.24, 0, 0, 7); g.fill(); g.fillStyle = '#b07a3c'; g.beginPath(); g.arc(cx + dir * s * 0.42, cy, s * 0.16, 0, 7); g.fill();
+                    g.strokeStyle = '#e8d8b0'; g.lineWidth = s * 0.05; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(cx + dir * s * 0.45, cy + sd * s * 0.08); g.quadraticCurveTo(cx + dir * s * 0.6, cy + sd * s * 0.25, cx + dir * s * 0.7, cy + sd * s * 0.14); g.stroke(); });
+                };
+                bull(ax0 - ts * 2.4, my, ts * 2.8, 1); bull(ax1 + ts * 2.4, my, ts * 2.8, -1);
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6]].forEach(([x, y]) => torch(g, x, y, ts));
+            }
+            function roofZiggurat(g, o) {   // stepped blue glazed tiers with gold bull friezes, furnace chimneys smoking, a great fire on the ziggurat at each end
+                const { ts, R, r } = o; roofShadow(g, o, 1.7 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right';
+                    for (let k = 0; k < 4; k++) { const t = k / 4, inset = (v ? w : h) * t; g.fillStyle = ['#1e3a6a', '#24467c', '#2a528e', '#305ea0'][k]; if (side === 'top') g.fillRect(x, y + inset, w, h / 4 + 1); else if (side === 'bottom') g.fillRect(x, y + h - inset - h / 4, w, h / 4 + 1); else if (side === 'left') g.fillRect(x + inset, y, w / 4 + 1, h); else g.fillRect(x + w - inset - w / 4, y, w / 4 + 1, h);
+                        g.fillStyle = '#d6aa46'; const L = v ? h : w; for (let q = ts * 0.3; q < L; q += ts * 1.2) { if (side === 'top') g.fillRect(x + q, y + inset + h / 8 - ts * 0.05, ts * 0.4, ts * 0.1); else if (side === 'bottom') g.fillRect(x + q, y + h - inset - h / 8 - ts * 0.05, ts * 0.4, ts * 0.1); else if (side === 'left') g.fillRect(x + inset + w / 8 - ts * 0.05, y + q, ts * 0.1, ts * 0.4); else g.fillRect(x + w - inset - w / 8 - ts * 0.05, y + q, ts * 0.1, ts * 0.4); } }   // gold frieze on each tier
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                const fire = (cx, cy, s) => { const gl = g.createRadialGradient(cx, cy, 0, cx, cy, s * 2.4); gl.addColorStop(0, 'rgba(255,170,60,0.55)'); gl.addColorStop(1, 'rgba(255,90,20,0)'); g.fillStyle = gl; g.fillRect(cx - s * 2.4, cy - s * 2.4, s * 4.8, s * 4.8); g.fillStyle = '#1e3a6a'; g.fillRect(cx - s * 0.8, cy - s * 0.8, s * 1.6, s * 1.6); g.fillStyle = '#d6aa46'; g.fillRect(cx - s * 0.6, cy - s * 0.6, s * 1.2, s * 1.2); g.fillStyle = '#ff9a2e'; g.beginPath(); g.arc(cx, cy, s * 0.45, 0, 7); g.fill(); g.fillStyle = '#ffe08a'; g.beginPath(); g.arc(cx, cy, s * 0.2, 0, 7); g.fill(); };
+                fire(X0 + e, my, ts * 1.6); fire(X1 - e, my, ts * 1.6);
+                for (let x = X0 + e * 3; x < X1 - e * 3; x += ts * 6) { if (Math.abs(x - mx) < ts * 3) continue; [Y0 + e, Y1 - e].forEach(y => { const gl = g.createRadialGradient(x, y, 0, x, y, ts * 0.9); gl.addColorStop(0, '#ffb347'); gl.addColorStop(1, 'rgba(160,40,12,0)'); g.fillStyle = '#2a1c18'; g.beginPath(); g.arc(x, y, ts * 0.7, 0, 7); g.fill(); g.fillStyle = gl; g.beginPath(); g.arc(x, y, ts * 0.45, 0, 7); g.fill(); g.fillStyle = 'rgba(40,24,20,0.4)'; for (let q = 0; q < 3; q++) { g.beginPath(); g.arc(x + q * ts * 0.3, y - (y < my ? 1 : -1) * 0 - q * ts * 0.45, ts * (0.4 + q * 0.2), 0, 7); g.fill(); } }); }   // furnace chimneys
+            }
+            function altExtras(g, o) {   // timber-framed houses peeking over the back rows, griffon and comet banners, food carts, scarves
+                const { ts, r, K } = o, { ax0, ax1, ay0, ay1, my } = apronBox(ts), clear = (x, y) => !(x > ax0 - ts * 0.6 && x < ax1 + ts * 0.6 && y > ay0 - ts * 0.6 && y < ay1 + ts * 0.6) && !aprons0(x, y);
+                const cart = (cx, cy) => { g.fillStyle = 'rgba(0,0,0,0.3)'; g.fillRect(cx - ts * 0.6 + 3, cy - ts * 0.4 + 4, ts * 1.2, ts * 0.8); for (let k = 0; k < 4; k++) { g.fillStyle = k % 2 ? '#f2efe7' : '#b3261e'; g.fillRect(cx - ts * 0.6 + k * ts * 0.3, cy - ts * 0.4, ts * 0.3, ts * 0.8); } g.fillStyle = '#3a2716'; [-1, 1].forEach(sd => { g.beginPath(); g.arc(cx + sd * ts * 0.45, cy + ts * 0.45, ts * 0.14, 0, 7); g.fill(); }); };
+                for (let i = 0; i < 12; i++) { const x = o.X0 + r() * (o.X1 - o.X0), y = o.Y0 + r() * (o.Y1 - o.Y0); if (clear(x, y)) cart(x, y); }
+                const crest = (cx, cy, s) => {   // the Empire: a shield quartered black and gold with a white twin-tailed comet, gold-rimmed
+                    const shield = () => { g.beginPath(); g.moveTo(cx - s * 0.5, cy - s * 0.55); g.lineTo(cx + s * 0.5, cy - s * 0.55); g.lineTo(cx + s * 0.5, cy + s * 0.1); g.quadraticCurveTo(cx + s * 0.45, cy + s * 0.55, cx, cy + s * 0.7); g.quadraticCurveTo(cx - s * 0.45, cy + s * 0.55, cx - s * 0.5, cy + s * 0.1); g.closePath(); };
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; g.save(); g.translate(s * 0.06, s * 0.08); shield(); g.fill(); g.restore();
+                    g.save(); shield(); g.clip();
+                    g.fillStyle = '#1c1c1e'; g.fillRect(cx - s * 0.6, cy - s * 0.7, s * 1.2, s * 1.5);
+                    g.fillStyle = '#d6aa46'; g.fillRect(cx, cy - s * 0.7, s * 0.6, s * 0.75); g.fillRect(cx - s * 0.6, cy + s * 0.05, s * 0.6, s * 0.75);
+                    g.strokeStyle = '#f2efe7'; g.lineWidth = s * 0.06; g.lineCap = 'round'; [-1, 1].forEach(sd => { g.beginPath(); g.moveTo(cx - s * 0.12, cy - s * 0.12); g.quadraticCurveTo(cx + s * 0.08, cy + sd * s * 0.04, cx + s * 0.32, cy + sd * s * 0.26); g.stroke(); }); g.lineCap = 'butt';
+                    g.fillStyle = '#f2efe7'; g.beginPath(); g.arc(cx - s * 0.14, cy - s * 0.14, s * 0.13, 0, 7); g.fill();
+                    g.restore();
+                    shield(); g.strokeStyle = '#d6aa46'; g.lineWidth = s * 0.06; g.stroke();
+                };
+                crest(ax0 - ts * 2.3, my, ts * 2.6); crest(ax1 + ts * 2.3, my, ts * 2.6);
+                [[ax0 - ts * 0.6, ay0 - ts * 0.6], [ax1 + ts * 0.6, ay0 - ts * 0.6], [ax0 - ts * 0.6, ay1 + ts * 0.6], [ax1 + ts * 0.6, ay1 + ts * 0.6]].forEach(([x, y]) => lantern(g, x, y, ts, '255,210,120'));
+            }
+            function roofAltdorf(g, o) {   // the covered grandstand's red-tiled roof, the city's timber-framed houses round it, the Temple of Sigmar's spire, griffon banners
+                const { ts, R, K, r } = o; roofShadow(g, o, 1.4 * ts);
+                roofRing(g, o, (x, y, w, h, side) => {
+                    const v = side === 'left' || side === 'right'; g.fillStyle = '#7a2e1e'; g.fillRect(x, y, w, h);
+                    const row = ts * 0.26, sh = ts * 0.3;
+                    for (let a = 0, n = 0; a < (v ? w : h); a += row, n++) for (let b = (n % 2) * sh / 2 - sh; b < (v ? h : w); b += sh) { g.fillStyle = ['#8a3622', '#7a2e1e', '#963e28', '#6e2818'][(r() * 4) | 0]; v ? g.fillRect(x + a, y + b, row - 1, sh - 1) : g.fillRect(x + b, y + a, sh - 1, row - 1); }   // red clay tiles
+                    // timber-framed houses along the outside edge: plaster, black beams, steep roofs
+                    const L = v ? h : w; for (let k = 0; k < L; k += ts * (1.6 + r() * 0.8)) { const hw = ts * (1.3 + r() * 0.6), hd = R * 0.4; let hx, hy, ww, hh; if (side === 'top') { hx = x + k; hy = y; ww = hw; hh = hd; } else if (side === 'bottom') { hx = x + k; hy = y + h - hd; ww = hw; hh = hd; } else if (side === 'left') { hx = x; hy = y + k; ww = hd; hh = hw; } else { hx = x + w - hd; hy = y + k; ww = hd; hh = hw; }
+                        g.fillStyle = r() < 0.5 ? '#5a4a3a' : '#6e3a28'; g.fillRect(hx, hy, ww, hh); g.fillStyle = 'rgba(0,0,0,0.3)'; v ? g.fillRect(hx, hy + hh / 2 - 1, ww, 2) : g.fillRect(hx + ww / 2 - 1, hy, 2, hh); g.fillStyle = '#e8dcc0'; g.fillRect(hx + ww * 0.15, hy + hh * 0.15, ts * 0.2, ts * 0.2); }
+                });
+                const { X0, Y0, X1, Y1 } = o, mx = (X0 + X1) / 2, my = (Y0 + Y1) / 2, e = R * 0.5;
+                const spire = (cx, cy, s) => { g.fillStyle = 'rgba(0,0,0,0.4)'; g.fillRect(cx - s * 0.4, cy - s * 0.35, s * 0.95, s * 0.95); [[0, -1], [1, 0], [0, 1], [-1, 0]].forEach(([dx, dy], i) => { g.fillStyle = ['#4a6a7a', '#3a5a6a', '#456574', '#344f5e'][i]; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + (dx - dy) * s * 0.45, cy + (dy + dx) * s * 0.45); g.lineTo(cx + (dx + dy) * s * 0.45, cy + (dy - dx) * s * 0.45); g.closePath(); g.fill(); }); g.fillStyle = '#d6aa46'; g.beginPath(); g.arc(cx, cy, s * 0.1, 0, 7); g.fill(); };   // copper-green spire, a gold hammer on top
+                spire(X0 + e, my, ts * 2.2); spire(X1 - e, my, ts * 2.2);
+                const griffon = (cx, cy, k) => { g.strokeStyle = '#3a2716'; g.lineWidth = ts * 0.07; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - ts * 1.5); g.stroke(); g.fillStyle = k.fill; g.fillRect(cx, cy - ts * 1.5, ts * 0.9, ts * 0.6); g.fillStyle = '#d6aa46'; g.beginPath(); g.arc(cx + ts * 0.45, cy - ts * 1.2, ts * 0.16, 0, 7); g.fill(); };
+                for (let x = X0 + e * 3; x < X1 - e * 3; x += ts * 5) { griffon(x, Y0 + e, K[x < mx ? 0 : 1]); griffon(x, Y1 - e, K[x < mx ? 0 : 1]); }
+            }
+
             // ---- the stands: everything outside the apron. Painted twice, once with about half the fans bobbing up (at the knees),
             // and each patch of BL x BL flips between the two at its own pace (drawBack): a crowd that shifts about, for a few image
             // draws a frame. Fans are mostly the two teams' races, in their colours (varied a little), the home side at its end ----
@@ -22710,15 +23417,21 @@ ol.ci-steps li::marker { content: none; }
                 const X0 = -MX * ts, Y0 = -MY * ts, X1 = (CFG.cols + MX) * ts, Y1 = (CFG.rows + MY) * ts;
                 const d0 = dugRect(0), d1 = dugRect(1);
                 const aprons = [{ x: -END, y: -SIDE, w: CFG.cols + 2 * END, h: CFG.rows + 2 * SIDE }].concat([d0, d1].map(d => ({ x: d.x - 0.3, y: d.y - (d.flip ? GAP : 0.3), w: d.w + 0.6, h: d.h + GAP + 0.3 })));
-                const inWall = (x, y, m = 0) => aprons.some(a => x > (a.x - WALL - m) * ts && x < (a.x + a.w + WALL + m) * ts && y > (a.y - WALL - m) * ts && y < (a.y + a.h + WALL + m) * ts);
+                // (roundApron: the strip's four outer corners are rounded, so the crowd curves round them; cut(x, y) = in a corner, beyond the curve)
+                const RAD = (th.roundApron || 0) * ts, A0 = aprons[0], bx0 = (A0.x - WALL) * ts, by0 = (A0.y - WALL) * ts, bx1 = (A0.x + A0.w + WALL) * ts, by1 = (A0.y + A0.h + WALL) * ts;
+                const CORN = RAD ? [[bx0, by0, 1, 1], [bx1, by0, -1, 1], [bx0, by1, 1, -1], [bx1, by1, -1, -1]] : [];
+                const cut = (x, y, m = 0) => CORN.some(([cx, cy, sx, sy]) => (x - cx) * sx < RAD && (y - cy) * sy < RAD && Math.hypot(x - (cx + sx * RAD), y - (cy + sy * RAD)) > RAD + m * ts);
+                const inWall = (x, y, m = 0) => aprons.some((a, i) => x > (a.x - WALL - m) * ts && x < (a.x + a.w + WALL + m) * ts && y > (a.y - WALL - m) * ts && y < (a.y + a.h + WALL + m) * ts && !(i === 0 && RAD && cut(x, y, m)));
                 const ROW = 0.5 * ts, AISLE = 7 * ts, midX = CFG.cols * ts / 2;
                 const endBand = y => y > -SIDE * ts && y < (CFG.rows + SIDE) * ts;   // (beside the pitch: the end stands, rows running down; above and below, corners included: rows across)
                 const aisle = (x, y) => !endBand(y) ? Math.abs(((x - midX) % AISLE + AISLE) % AISLE - AISLE / 2) < 0.3 * ts : Math.abs(((y - CFG.rows * ts / 2) % AISLE + AISLE) % AISLE - AISLE / 2) < 0.3 * ts;
                 const fam = [famOf(0), famOf(1)];
                 const DULL = ['#57534e', '#44403c', '#3f3f46', '#52525b', '#78350f', '#713f12', '#3f6212', '#1e3a8a', '#7f1d1d', '#a8a29e', '#0f766e'];
                 const fans = [];
+                const swamps = th.swamp ? plagueSwamps() : null;
                 const mk = (x, y) => {
                     if (inWall(x, y, 0.15) || aisle(x, y) || r() < 0.05) return;
+                    if (swamps && inSwamp(x, y)) return;   // (the Nurgle ground's ponds: no fans there)
                     const t0 = Math.max(0.06, Math.min(0.94, 0.5 - (x - midX) / (8 * ts)));   // (chance this fan supports team 0: high at its end)
                     const team = r() < 0.86 ? (r() < t0 ? 0 : 1) : -1, k = team >= 0 ? K[team] : null;
                     const u = r(), f = { seed: (r() * 1e9) | 0, fam: team < 0 ? pickOf(FAMS, r) : u < 0.72 ? fam[team] : u < 0.86 ? fam[1 - team] : pickOf(FAMS, r) };
@@ -22762,11 +23475,13 @@ ol.ci-steps li::marker { content: none; }
                     const fz = 6 * ts, ed = (x, y) => Math.min(1, Math.max(0, 1 - Math.min(x - X0, X1 - x) / fz, 1 - Math.min(y - Y0, Y1 - y) / fz));
                     for (let y = Y0; y < Y1; y += ts / 4) for (let x = X0; x < X1; x += ts / 4) { const k = ed(x + ts / 8, y + ts / 8); if (k > 0) { g.fillStyle = `rgba(5,7,10,${(0.45 * k).toFixed(3)})`; g.fillRect(x, y, ts / 4, ts / 4); } }
                     // the advertising boards round the apron, then the apron's grass (darker than the pitch, mown in stripes)
+                    if (RAD) { g.save(); g.beginPath(); g.rect(X0, Y0, W, H); CORN.forEach(([cx, cy, sx, sy]) => { g.moveTo(cx, cy); g.lineTo(cx + sx * RAD, cy); g.arc(cx + sx * RAD, cy + sy * RAD, RAD, sy > 0 ? -Math.PI / 2 : Math.PI / 2, sx > 0 ? Math.PI : 0, (sx > 0) === (sy > 0)); g.closePath(); }); g.clip('evenodd'); }   // (rounded corners: nothing drawn beyond the curves)
                     aprons.forEach(a => { const x = (a.x - WALL) * ts, y = (a.y - WALL) * ts, w = (a.w + 2 * WALL) * ts, h = (a.h + 2 * WALL) * ts; if (th.wall) { th.wall(g, x, y, w, WALL * ts); th.wall(g, x, y + h - WALL * ts, w, WALL * ts); th.wall(g, x, y, WALL * ts, h); th.wall(g, x + w - WALL * ts, y, WALL * ts, h); } else { g.fillStyle = '#111317'; g.fillRect(x, y, w, h); } });
                     aprons.forEach(a => {
                         const gr = g.createLinearGradient(0, a.y * ts, 0, (a.y + a.h) * ts); gr.addColorStop(0, th.apron[0]); gr.addColorStop(1, th.apron[1]);
                         g.fillStyle = gr; g.fillRect(a.x * ts, a.y * ts, a.w * ts, a.h * ts);
                         if (th.stripe) for (let x = Math.ceil(a.x); x < a.x + a.w; x += 2) { g.fillStyle = th.stripe; g.fillRect(x * ts, a.y * ts, ts, a.h * ts); }
+                        if (th.deck) { const dr = pitchRng(97 + Math.round(a.x * 7)); for (let yy = a.y * ts; yy < (a.y + a.h) * ts; yy += ts * 0.32) { g.fillStyle = dr() < 0.5 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.12)'; g.fillRect(a.x * ts, yy, a.w * ts, ts * 0.3); g.fillStyle = 'rgba(0,0,0,0.3)'; g.fillRect(a.x * ts, yy + ts * 0.3, a.w * ts, ts * 0.02); for (let xx = a.x * ts + dr() * ts * 3; xx < (a.x + a.w) * ts; xx += ts * (2 + dr() * 3)) g.fillRect(xx, yy, 1.5, ts * 0.3); } }   // (ship's deck planking)
                         if (th.paving) {   // (flagstones: slabs of varying tone, mortar between; moss in the jungle)
                             const pr = pitchRng(91 + Math.round(a.x * 7 + a.y * 13)), sl = ts * 0.9;
                             g.save(); g.beginPath(); g.rect(a.x * ts, a.y * ts, a.w * ts, a.h * ts); g.clip();
@@ -22775,6 +23490,7 @@ ol.ci-steps li::marker { content: none; }
                                 g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 1.5; for (let i = 0; i < a.w * a.h * 0.5; i++) { let cx = (a.x + pr() * a.w) * ts, cy = (a.y + pr() * a.h) * ts; g.beginPath(); g.moveTo(cx, cy); for (let k = 0; k < 4; k++) { cx += (pr() - 0.5) * ts * 0.8; cy += (pr() - 0.5) * ts * 0.8; g.lineTo(cx, cy); } g.stroke(); }
                                 for (let i = 0; i < a.w * a.h * 0.06; i++) { const cx = (a.x + pr() * a.w) * ts, cy = (a.y + pr() * a.h) * ts, rr = ts * (0.3 + pr() * 0.7); g.fillStyle = 'rgba(10,14,18,0.55)'; g.beginPath(); g.ellipse(cx, cy, rr, rr * 0.55, pr() * 3, 0, 7); g.fill(); g.fillStyle = 'rgba(140,160,180,0.12)'; g.beginPath(); g.ellipse(cx - rr * 0.2, cy - rr * 0.1, rr * 0.4, rr * 0.15, 0, 0, 7); g.fill(); }
                             }
+                            if (th.lava) for (let i = 0; i < a.w * a.h * 0.25; i++) lavaCrack(g, (a.x + pr() * a.w) * ts, (a.y + pr() * a.h) * ts, ts * (0.5 + pr() * 0.6), pr);   // (lava in the cracks)
                             if (th.moss) for (let i = 0; i < a.w * a.h * 1.2; i++) { g.fillStyle = `rgba(${(50 + pr() * 30) | 0},${(100 + pr() * 40) | 0},${(40 + pr() * 20) | 0},${(0.25 + pr() * 0.3).toFixed(2)})`; g.beginPath(); g.ellipse((a.x + pr() * a.w) * ts, (a.y + pr() * a.h) * ts, ts * (0.15 + pr() * 0.4), ts * (0.1 + pr() * 0.25), pr() * 3, 0, 7); g.fill(); }
                             g.restore();
                         }
@@ -22783,6 +23499,7 @@ ol.ci-steps li::marker { content: none; }
                         if (th.blade) for (let i = 0; i < a.w * a.h * (th.paving ? 8 : 36); i++) {
                             const x = (a.x + gr2() * a.w) * ts, y = (a.y + gr2() * a.h) * ts; if (x > 0 && x < CFG.cols * ts && y > 0 && y < CFG.rows * ts) continue;
                             if (th.mud && gr2() < 0.55) continue;   // (sparse tufts on the orcs' mud)
+                            if (th.flowers && gr2() < 0.03) { g.fillStyle = ['#f1f5f9', '#fde047', '#f472b6', '#c4b5fd'][(gr2() * 4) | 0]; g.beginPath(); g.arc(x, y, 1.8, 0, 7); g.fill(); continue; }   // (flowers in the glade)
                             g.fillStyle = gr2() < 0.5 ? th.blade[0] : th.blade[1]; g.fillRect(x, y, 1.6, 3 + gr2() * 3);
                         }
                     });
@@ -22800,6 +23517,11 @@ ol.ci-steps li::marker { content: none; }
                         for (let x = (a.x - WALL) * ts; x < (a.x + a.w + WALL) * ts - 1; x += L) { const w = Math.min(L, (a.x + a.w + WALL) * ts - x); if (w > ts) { board(x, (a.y - WALL) * ts, w, wl); board(x, (a.y + a.h) * ts, w, wl); } }
                         for (let y = a.y * ts; y < (a.y + a.h) * ts - 1; y += L) { const h = Math.min(L, (a.y + a.h) * ts - y); if (h > ts) { board((a.x - WALL) * ts, y, wl, h, true); board((a.x + a.w) * ts, y, wl, h, true); } }
                     });
+                    if (RAD) {   // the boards curving round the rounded corners
+                        g.restore(); g.strokeStyle = th.wallCol || '#3a3022'; g.lineWidth = WALL * ts;
+                        CORN.forEach(([cx, cy, sx, sy]) => { g.beginPath(); g.arc(cx + sx * RAD, cy + sy * RAD, RAD - WALL * ts / 2, sy > 0 ? -Math.PI / 2 : Math.PI / 2, sx > 0 ? Math.PI : 0, (sx > 0) === (sy > 0)); g.stroke(); });
+                        if (th.wallTrim) { g.strokeStyle = th.wallTrim; g.lineWidth = Math.max(1.5, ts * 0.06); CORN.forEach(([cx, cy, sx, sy]) => { g.beginPath(); g.arc(cx + sx * RAD, cy + sy * RAD, RAD - WALL * ts * 0.5, sy > 0 ? -Math.PI / 2 : Math.PI / 2, sx > 0 ? Math.PI : 0, (sx > 0) === (sy > 0)); g.stroke(); }); }
+                    }
                     if (th.extras) th.extras(g, { ts, K, r: pitchRng(4242), X0, Y0, X1, Y1 });   // (the pitch's own towers, idols...)
                     if (th.roof) th.roof(g, { ts, K, r: pitchRng(919), X0, Y0, X1, Y1, R: RD * ts });   // (the roof round the outside, over the top rows)
                     const gl = g.createRadialGradient(midX, CFG.rows * ts / 2, CFG.rows * ts * 0.6, midX, CFG.rows * ts / 2, CFG.cols * ts * 0.85);   // floodlight glow on the near rows
@@ -22833,6 +23555,7 @@ ol.ci-steps li::marker { content: none; }
                 for (let i = 0; i < W * H / 60; i++) { g.fillStyle = r() < 0.5 ? D.speck[0] : D.speck[1]; g.fillRect(r() * W, r() * H, 1.5, 1.5); }
                 if (D.floorTiles) { g.fillStyle = 'rgba(0,0,0,0.18)'; for (let y = ts * 0.08; y < H; y += ts * 0.6) g.fillRect(0, y, W, 1.5); for (let y = ts * 0.08, n = 0; y < H; y += ts * 0.6, n++) for (let x = (n % 2) * ts * 0.45; x < W; x += ts * 0.9) g.fillRect(x, y, 1.5, ts * 0.6); }   // (stone slabs)
                 if (D.leaves) for (let i = 0; i < W * H / (ts * ts) * 6; i++) { g.fillStyle = ['rgba(60,110,50,0.55)', 'rgba(120,140,60,0.5)', 'rgba(150,110,50,0.45)'][(r() * 3) | 0]; g.beginPath(); g.ellipse(r() * W, r() * H, ts * 0.08, ts * 0.04, r() * 3, 0, 7); g.fill(); }   // (fallen leaves on the packed earth)
+                if (D.lavaFloor) for (let i = 0; i < 7; i++) lavaCrack(g, r() * W, r() * H, ts * (0.5 + r() * 0.5), r);   // (lava glowing in the floor's cracks)
                 if (D.cracked) { g.strokeStyle = 'rgba(0,0,0,0.45)'; g.lineWidth = 1.2; for (let i = 0; i < 12; i++) { let x = r() * W, y = r() * H; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 4; k++) { x += (r() - 0.5) * ts * 0.7; y += (r() - 0.5) * ts * 0.5; g.lineTo(x, y); } g.stroke(); } }   // (cracks)
                 if (D.veins) { g.strokeStyle = 'rgba(130,136,146,0.28)'; g.lineWidth = 1; for (let i = 0; i < 14; i++) { let x = r() * W, y = r() * H; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (r() - 0.3) * ts * 0.6; y += (r() - 0.5) * ts * 0.3; g.lineTo(x, y); } g.stroke(); } }   // (marble veins)
                 if (D.mat) {   // a woven reed mat along the bench
@@ -22888,6 +23611,30 @@ ol.ci-steps li::marker { content: none; }
                     g.fillStyle = 'rgba(120,100,70,0.18)'; g.fillRect(0, awY, W, aw);   // (weathered)
                     if (D.awning === 'ragged') { for (let x = 0; x < W; x += ts * 0.25) { g.fillStyle = shade(K.fill, -0.3); g.beginPath(); g.moveTo(x, ey); g.lineTo(x + ts * 0.12, ey + out * ts * (0.05 + r() * 0.3)); g.lineTo(x + ts * 0.25, ey); g.fill(); } g.fillStyle = 'rgba(0,0,0,0.35)'; for (let i = 0; i < 4; i++) { g.beginPath(); g.ellipse(r() * W, awY + r() * aw, ts * 0.12, ts * 0.07, 0, 0, 7); g.fill(); } }   // (and holes)
                     else { g.fillStyle = '#d8c8a0'; g.fillRect(0, ey - (d.flip ? 0 : 2), W, 2); for (let x = ts * 0.3; x < W; x += ts * 1.2) { g.fillStyle = '#8b6a3a'; g.beginPath(); g.arc(x, ey + out * ts * 0.06, ts * 0.05, 0, 7); g.fill(); } }
+                } else if (D.awning === 'shroud') {   // a tattered shroud: dark cloth in the team's colour, hanging in torn strips
+                    g.fillStyle = shade(K.fill, -0.55); g.fillRect(0, awY, W, aw); g.fillStyle = 'rgba(255,255,255,0.05)'; for (let x = ts * 0.2; x < W; x += ts * 0.45) g.fillRect(x, awY, ts * 0.12, aw);
+                    for (let x = 0; x < W; x += ts * 0.18) { g.fillStyle = shade(K.fill, -0.6 + r() * 0.15); const L = ts * (0.1 + r() * 0.45); g.fillRect(x, d.flip ? ey - L : ey, ts * 0.14, L); }
+                    g.fillStyle = 'rgba(0,0,0,0.35)'; for (let i = 0; i < 6; i++) { g.beginPath(); g.ellipse(r() * W, awY + r() * aw, ts * 0.1, ts * 0.06, 0, 0, 7); g.fill(); }
+                } else if (D.awning === 'brass') {   // plates of brass and black iron, riveted, a row of spikes along the edge
+                    for (let x = 0, i = 0; x < W; x += ts * 0.8, i++) { g.fillStyle = i % 2 ? '#2a2422' : shade(K.fill, -0.25); g.fillRect(x, awY, ts * 0.8, aw); g.fillStyle = '#b07830'; g.fillRect(x, awY, 2, aw); g.fillStyle = '#d9a44a'; [0.25, 0.75].forEach(f => { g.beginPath(); g.arc(x + ts * 0.4, awY + aw * f, 1.6, 0, 7); g.fill(); }); }
+                    g.fillStyle = '#b07830'; g.fillRect(0, ey - (d.flip ? 0 : 3), W, 3);
+                    for (let x = ts * 0.1; x < W; x += ts * 0.3) { g.fillStyle = '#c99040'; g.beginPath(); g.moveTo(x - ts * 0.06, ey); g.lineTo(x, ey + out * ts * 0.22); g.lineTo(x + ts * 0.06, ey); g.fill(); }
+                } else if (D.awning === 'leafy') {   // a canopy of leaves woven over branches, a band of the team's colour, leaves trailing at the edge
+                    g.fillStyle = '#2d5a2e'; g.fillRect(0, awY, W, aw);
+                    for (let i = 0; i < W * aw / (ts * ts) * 18; i++) { g.fillStyle = ['#356a33', '#24502a', '#3e7a38', '#4a8a3e'][(r() * 4) | 0]; g.beginPath(); g.ellipse(r() * W, awY + r() * aw, ts * 0.12, ts * 0.06, r() * 3, 0, 7); g.fill(); }
+                    g.fillStyle = K.fill; g.fillRect(0, awY + aw * (d.flip ? 0.12 : 0.73), W, aw * 0.15);
+                    for (let x = 0; x < W; x += ts * 0.16) { g.fillStyle = r() < 0.5 ? '#3e7a38' : '#2d5a2e'; g.beginPath(); g.ellipse(x, ey + out * ts * 0.1, ts * 0.09, ts * 0.13, r() - 0.5, 0, 7); g.fill(); }
+                } else if (D.awning === 'blades') {   // black silk in the team's colour's darkest shade, its edge cut into long blade points, silver trim
+                    g.fillStyle = shade(K.fill, -0.6); g.fillRect(0, awY, W, aw); g.fillStyle = 'rgba(255,255,255,0.05)'; for (let x = ts * 0.3; x < W; x += ts * 0.6) g.fillRect(x, awY, 1, aw);
+                    for (let x = 0; x < W; x += ts * 0.4) { g.fillStyle = shade(K.fill, -0.45); g.beginPath(); g.moveTo(x, ey); g.lineTo(x + ts * 0.2, ey + out * ts * 0.42); g.lineTo(x + ts * 0.4, ey); g.fill(); }
+                    g.fillStyle = '#8a8fa0'; g.fillRect(0, ey - (d.flip ? 0 : 2), W, 2);
+                } else if (D.awning === 'banner') {   // heavy cloth banners in the team's colour hanging from a carved beam, each with a gold rune
+                    g.fillStyle = '#5a4e44'; g.fillRect(0, d.flip ? awY + aw - ts * 0.2 : awY, W, ts * 0.2); g.fillStyle = '#c99a3a'; g.fillRect(0, d.flip ? awY + aw - ts * 0.2 : awY + ts * 0.17, W, ts * 0.03);
+                    for (let x = ts * 0.1, i = 0; x < W - ts * 0.5; x += ts * 1.1, i++) { const bx = x, bw2 = ts * 0.9, y0 = d.flip ? awY - ts * 0.15 : awY + ts * 0.2, y1 = d.flip ? awY + aw - ts * 0.2 : awY + aw + ts * 0.15; g.fillStyle = i % 2 ? shade(K.fill, -0.15) : K.fill; g.beginPath(); g.moveTo(bx, d.flip ? y1 : y0); g.lineTo(bx + bw2, d.flip ? y1 : y0); g.lineTo(bx + bw2, d.flip ? y0 + ts * 0.12 : y1 - ts * 0.12); g.lineTo(bx + bw2 / 2, d.flip ? y0 : y1); g.lineTo(bx, d.flip ? y0 + ts * 0.12 : y1 - ts * 0.12); g.closePath(); g.fill(); goldHammer(g, bx + bw2 / 2, (y0 + y1) / 2 + ts * 0.04, ts * 0.5); }
+                } else if (D.awning === 'hide') {   // stitched animal hides on poles, a stripe of the team's colour daubed across
+                    for (let x = 0, i = 0; x < W; x += ts * 1.3, i++) { g.fillStyle = ['#c8a878', '#b89868', '#d4b484'][i % 3]; g.fillRect(x, awY, ts * 1.3 + 1, aw); g.strokeStyle = 'rgba(70,40,20,0.6)'; g.lineWidth = 1; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(x, awY); g.lineTo(x, awY + aw); g.stroke(); g.setLineDash([]); }
+                    g.fillStyle = K.fill; g.globalAlpha = 0.75; g.fillRect(0, awY + aw * 0.4, W, aw * 0.2); g.globalAlpha = 1;
+                    for (let x = 0; x < W; x += ts * 0.25) { g.fillStyle = '#a8865a'; g.beginPath(); g.moveTo(x, ey); g.quadraticCurveTo(x + ts * 0.12, ey + out * ts * (0.08 + r() * 0.1), x + ts * 0.25, ey); g.fill(); }
                 } else if (D.awning === 'thatch') {   // palm thatch: layers of fronds with a fringe, a band in the team's colour
                     g.fillStyle = '#7a6a38'; g.fillRect(0, awY, W, aw);
                     for (let y = awY, n = 0; y < awY + aw; y += ts * 0.18, n++) for (let x = (n % 2) * ts * 0.1; x < W; x += ts * 0.2) { g.strokeStyle = ['#8f7d44', '#6b5c30', '#a08c4e'][(r() * 3) | 0]; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, y); g.lineTo(x + ts * 0.04, y + ts * 0.2); g.stroke(); }
@@ -23001,7 +23748,7 @@ ol.ci-steps li::marker { content: none; }
             // to their dugout by two of their team's medics (their race's lineman in white, with a red cross); one pushed into the crowd is first set on by a few of the other side's
             // fans (running out of the stands, laying into them in a cloud of dust) while rubbish rains in from the stands.
             // Timed on the game clock (performance.now, like the fade), so it keeps pace when play is sped up ----
-            const MEDIC = 2500, CROWD = 450, anims = [];   // (the medics' part takes MEDIC ms; a crowd scene starts CROWD ms before they set off)
+            const MEDIC = 2500, MEDIC_C = 1400, F_IN = 420, F_BEAT = 1000, F_OUT = 1400, F_LATE = 600, F_MED = F_BEAT + F_LATE, anims = [];   // (MEDIC_C: the medics' part after a crowd scene, so the whole thing is about 3 s)   // (F_LATE: one last fan runs in as the rest leave, jumps on the player and runs off; the medics set off at F_MED)   // (the medics take MEDIC ms; in a crowd scene the fans run in until F_IN, lay in until F_BEAT, are back in the stands by F_OUT, and the medics set off at F_BEAT)
             const lerp = (a, b, k) => a + (b - a) * k, ease = k => k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
             function removal(p, title) {
                 if (!active() || !/KNOCKED OUT|CASUALTY|BEATEN UP/.test(title || '')) return;
@@ -23015,14 +23762,15 @@ ol.ci-steps li::marker { content: none; }
                         if (top || bot) { let x = px + (r() - 0.5) * 5 * ts; const dx0 = d.x * ts - 0.6 * ts, dx1 = (d.x + d.w) * ts + 0.6 * ts; if (x > dx0 && x < dx1) x = x - dx0 < dx1 - x ? dx0 : dx1; return [x, top ? -wallOut : H + wallOut]; }
                         return [left ? -endOut : W + endOut, py + (r() - 0.5) * 5 * ts];
                     };
-                    const foe = 1 - p.team, n = 3 + (r() < 0.5 ? 1 : 0);
+                    const foe = 1 - p.team, n = 5 + ((r() * 3) | 0);
                     for (let i = 0; i < n; i++) { const ang = i / n * Math.PI * 2 + r() * 0.5; a.fans.push({ from: spot(), at: [px + Math.cos(ang) * 0.55 * ts, py + Math.sin(ang) * 0.42 * ts], team: foe, fam: famOf(foe), seed: (r() * 1e9) | 0, ph: r() * 6 }); }
-                    for (let i = 0; i < 11; i++) a.junk.push({ from: spot(), to: [px + (r() - 0.5) * 0.8 * ts, py + (r() - 0.5) * 0.6 * ts], t: 100 + r() * 900, kind: (r() * 4) | 0, spin: r() * 6 });
-                    for (let i = 0; i < 10; i++) a.dust.push({ t: 480 + r() * 450, x: px + (r() - 0.5) * 1.1 * ts, y: py + (r() - 0.3) * 0.6 * ts, s: 0.25 + r() * 0.3 });
+                    a.late = { from: spot(), team: foe, fam: famOf(foe), seed: (r() * 1e9) | 0 };   // (the last one in: a jump on the player, like a foul's stomp)
+                    for (let i = 0; i < 16; i++) a.junk.push({ from: spot(), to: [px + (r() - 0.5) * 0.8 * ts, py + (r() - 0.5) * 0.6 * ts], t: 60 + r() * (F_BEAT - 250), kind: (r() * 4) | 0, spin: r() * 6 });
+                    for (let i = 0; i < 18; i++) a.dust.push({ t: F_IN - 60 + r() * (F_BEAT - F_IN - 300), x: px + (r() - 0.5) * 1.1 * ts, y: py + (r() - 0.3) * 0.6 * ts, s: 0.25 + r() * 0.3 });
                     cheer(1 - p.team);
                 }
                 a.medics = [0, 1].map(() => medicFor(p.team));   // (the team's own medics: their race)
-                a.dur = (crowd ? CROWD : 0) + MEDIC;
+                a.dur = crowd ? F_MED + MEDIC_C : MEDIC;
                 p.fadeDuration = a.dur; anims.push(a);   // (the player's fade lasts as long: they appear in the dugout as the medics arrive)
             }
             const carried = id => anims.some(a => a.id === id);
@@ -23087,9 +23835,9 @@ ol.ci-steps li::marker { content: none; }
                 for (let i = anims.length - 1; i >= 0; i--) {
                     const a = anims[i], t = now - a.t0;
                     if (t > a.dur || t < 0) { anims.splice(i, 1); continue; }
-                    const tRef = a.crowd ? CROWD : 0, arrive = tRef + MEDIC * 0.36, lift = arrive + MEDIC * 0.07;   // (medics: set off, reach the player, lift, then carry)
+                    const tRef = a.crowd ? F_MED : 0, mdur = a.dur - tRef, arrive = tRef + mdur * 0.36, lift = arrive + mdur * 0.07;   // (medics: set off, reach the player, lift, then carry)
                     // the player: on the ground (shaken while the fans lay in), then on the stretcher
-                    const beat = a.crowd && t > 500 && t < 950, shake = beat ? Math.sin(t / 25) * ts * 0.06 : 0;
+                    const beat = a.crowd && ((t > F_IN && t < F_BEAT) || (t > F_BEAT + F_LATE * 0.6 && t < F_BEAT + F_LATE * 0.85)), shake = beat ? Math.sin(t / 25) * ts * 0.06 : 0;
                     if (t < lift) lying(c, a.p, a.px, a.py, 0.85, shake);
                     // dust and rubbish
                     a.dust.forEach(q => { const k = (t - q.t) / 500; if (k < 0 || k > 1) return; c.fillStyle = `rgba(190,170,130,${(0.55 * (1 - k)).toFixed(3)})`; c.beginPath(); c.arc(q.x, q.y - k * ts * 0.3, ts * q.s * (0.6 + k), 0, 7); c.fill(); });
@@ -23106,14 +23854,28 @@ ol.ci-steps li::marker { content: none; }
                     });
                     // the fans: run in, lay into the player (lunging and jolting), run back to the stands
                     a.fans.forEach((f, j) => {
-                        let x, y; const kIn = Math.min(1, t / 500), kOut = Math.max(0, (t - 950) / 450);
-                        if (t < 500) { x = lerp(f.from[0], f.at[0], ease(kIn)); y = lerp(f.from[1], f.at[1], ease(kIn)); }
-                        else if (t < 950) { const lunge = Math.max(0, Math.sin(t / 55 + f.ph)) * 0.28; x = lerp(f.at[0], a.px, lunge); y = lerp(f.at[1], a.py, lunge); }
+                        let x, y; const kIn = Math.min(1, t / F_IN), kOut = Math.max(0, (t - F_BEAT) / (F_OUT - F_BEAT));
+                        if (t < F_IN) { x = lerp(f.from[0], f.at[0], ease(kIn)); y = lerp(f.from[1], f.at[1], ease(kIn)); }
+                        else if (t < F_BEAT) { const lunge = Math.max(0, Math.sin(t / 55 + f.ph)) * 0.28; x = lerp(f.at[0], a.px, lunge); y = lerp(f.at[1], a.py, lunge); }
                         else { if (kOut >= 1) return; x = lerp(f.at[0], f.from[0], ease(kOut)); y = lerp(f.at[1], f.from[1], ease(kOut)); }
                         c.save(); if (kOut > 0.6) c.globalAlpha = (1 - kOut) / 0.4;
                         runner(c, x, y, ts * 0.85, t + j * 40, kits()[f.team].fill, false, Object.assign({ r: pitchRng(f.seed) }, f, { fam: f.fam === 'underworld' ? 'goblin' : f.fam }));
                         c.restore();
                     });
+                    // the last fan: dashes in as the others leave, leaps onto the player (a stomp, with a thump of dust), then runs off
+                    if (a.late) {
+                        const L = a.late, u = t - F_BEAT;
+                        if (u >= 0 && u < F_LATE) {
+                            const RUN = F_LATE * 0.36, JUMP = F_LATE * 0.32, near = [a.px + (L.from[0] < a.px ? -0.5 : 0.5) * ts, a.py + (L.from[1] < a.py ? -0.4 : 0.4) * ts];
+                            let x, y, hop = 0, alpha = 1;
+                            if (u < RUN) { const k = ease(u / RUN); x = lerp(L.from[0], near[0], k); y = lerp(L.from[1], near[1], k); }
+                            else if (u < RUN + JUMP) { const k = (u - RUN) / JUMP; x = lerp(near[0], a.px, Math.min(1, k * 1.6)); y = lerp(near[1], a.py, Math.min(1, k * 1.6)); hop = Math.sin(Math.min(1, k * 1.25) * Math.PI) * ts * 0.75; }
+                            else { const k = ease((u - RUN - JUMP) / (F_LATE - RUN - JUMP)); x = lerp(a.px, L.from[0], k); y = lerp(a.py, L.from[1], k); if (k > 0.6) alpha = (1 - k) / 0.4; }
+                            const landed = u > RUN + JUMP * 0.8 && u < RUN + JUMP + 180;
+                            if (landed) { const k = (u - RUN - JUMP * 0.8) / 250; c.fillStyle = `rgba(190,170,130,${(0.6 * (1 - k)).toFixed(3)})`; for (let q = 0; q < 5; q++) { const an = q * 1.26; c.beginPath(); c.arc(a.px + Math.cos(an) * ts * (0.25 + k * 0.4), a.py + Math.sin(an) * ts * (0.18 + k * 0.25), ts * (0.18 + k * 0.15), 0, 7); c.fill(); } }
+                            c.save(); c.globalAlpha = alpha; runner(c, x, y - hop, ts * 0.85, t, kits()[L.team].fill, false, { r: pitchRng(L.seed), fam: L.fam === 'underworld' ? 'goblin' : L.fam, seed: L.seed }); c.restore();
+                        }
+                    }
                     // the medics and their stretcher: out of the dugout's door to the player, then carrying them to the bay
                     if (t >= tRef) {
                         let x, y, ang;
@@ -23501,7 +24263,7 @@ ol.ci-steps li::marker { content: none; }
                     let dim = p.hasActed;
                     if (![MODES.KICKOFF_TARGET, MODES.TOUCHBACK_CHOICE, MODES.SETUP, MODES.KICKOFF_SELECT, MODES.KICKOFF_MOVE].includes(state.mode) && p.team !== state.activeTeam) dim = true;
                     const rings = [];
-                    if (state.selectedId === p.id) rings.push(['#facc15', 3, ts * 0.06]);
+                    if (state.selectedId === p.id || CHEAT.repoPicked() === p.id) rings.push(['#facc15', 3, ts * 0.06]);
                     if (p.actionTaken === 'blitz') rings.push(['#f59e0b', 2, ts * 0.11]);
                     if (p.actionTaken === 'foul') rings.push(['#a8a29e', 2, ts * 0.11]);
                     drawSpriteToken(p, ts, { dim: dim && !p.isFading, rings, glow: markGlow(p) });

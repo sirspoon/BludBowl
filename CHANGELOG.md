@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.68 (23 Nov 2026)
+- Stadium & dugouts (test): eleven more pitches get their own stadiums (only Fjord, Moot, Khemri and Chaos Wastes left); a snappier ~3 s crowd beat-up with one last fan jumping in; injury notices wait for the dice; no armour/injury dice in the computer's turn; Reposition opposition highlights the picked player.
+
 ## v5.67 (22 Nov 2026)
 - Stadium & dugouts (test): the Worn, Flagstone (a goblin lair underground) and Jungle pitches get their own stadiums; the medics take their time; more room to scroll left and right. New secret option: Reposition opposition.
 

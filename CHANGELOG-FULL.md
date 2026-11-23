@@ -2,6 +2,35 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.68 (23 Nov 2026)
+- Stadium & dugouts (test, still off by default: Settings or `?stadium=<pitch>`), eleven more themed stadiums:
+  - **Graveyard** (Undead etc.): crumbling stone, wrought-iron fence, epitaph boards, gravestones and dead trees among the crowd,
+    crypts, green lanterns, crows and mist, tattered-shroud awnings, a gothic slate roof with spires.
+  - **Brimstone** (Khorne etc.): basalt with lava in the cracks, black iron and brass boards in blood red, riveted brass awnings,
+    basalt crags with skull pyramids and braziers, lava pools, embers.
+  - **Woodland** (Wood Elves, Gnomes): a glade with a hedge, carved wooden boards, leafy awnings, oaks (a few turning) with
+    treehouses, gnome toadstool houses, lanterns, sunbeams.
+  - **Warpstone** (Skaven): a ramshackle under-city, glowing warpstone, a holed plank roof leaking warp light, crooked bell towers,
+    the Horned Rat's sigil.
+  - **Black Ark** (Dark Elves): now a ship - prow and stern at the ends with the sea round them, decks with bolt throwers, masts
+    with furled sails and crow's nests, rigging over the crowd, blade-point silk awnings.
+  - **Dwarfhold**: after its close-up - a great hall with carved gold-banded pillars, red banners with gold hammers, the rune gate
+    at each end, ale stalls, stone kings resting on hammers, banner awnings.
+  - **Wastes** (Ogres): an ogre camp - palisades of sharpened logs (double round the top, stockades through the stands), hide
+    tents, cookfires, eastern banners, the Great Maw, hide awnings.
+  - **Plague** (Nurgle): a rotting swamp - stagnant ponds (cleared out of the crowd) with scum, lily pads, reeds and drowned trees,
+    sickly toadstools, flies and fog, a mossy rotten roof; rounded corners on the roof and the pitch strip.
+  - **Bretonnia**: a castle on tourney day - heraldic boards, striped pavilions, tilt barriers, fleur-de-lis shields, bunting,
+    blue-roofed turrets and the royal box.
+  - **Ziggurat** (Chaos Dwarfs): blue glaze and gold, lava, furnace chimneys, winged bulls of Hashut, stepped tiers with fires.
+  - **Altdorf** (Humans, Imperial): the city stadium - black-and-gold boards, food carts, Empire comet crests, a red-tiled roof
+    with timber-framed houses, Temple of Sigmar spires, griffon banners.
+- The crowd scene is about 3 seconds all in: five to seven fans and their rubbish, then one last fan runs in and jumps on the
+  player (like a foul) as the rest leave, then the medics (who take ~2.5 s for an ordinary KO or casualty).
+- The red injury notice (CASUALTY, KNOCKED OUT...) now waits until the armour/injury dice have been shown, instead of covering them.
+- No armour/injury dice strip during the computer's turn (play had moved on before it landed).
+- Reposition opposition: the picked computer player gets the yellow ring and a pulsing base glow until placed.
+
 ## v5.67 (22 Nov 2026)
 - Stadium & dugouts (test, still off by default: Settings or `?stadium`), three more pitches with their own stadiums:
   - **Worn** (muddy grass, most teams' ground, `?stadium=worn`): a rustic home ground - weathered timber terraces, hand-painted

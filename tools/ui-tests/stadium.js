@@ -40,6 +40,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     const bx = STADIUM.boxes().find(x => x.id === a); return { x: state.camera.x + (bx.x + bx.w / 2) * z, y: state.camera.y + (bx.y + bx.h / 2) * z }; }, ids.a);
   await page.mouse.click(pt.x, pt.y);
   await page.waitForTimeout(300);
+  let glowSeen = false;
   // (a dice result still showing takes the first tap to put it away, as in play)
   if (!/In the dugout/.test(await page.evaluate(() => document.getElementById('stats-panel').textContent))) { await page.waitForTimeout(500); await page.mouse.click(pt.x, pt.y); await page.waitForTimeout(300); }
   const panel = await page.evaluate(() => ({ t: document.getElementById('stats-panel').textContent.replace(/\s+/g, ' '), tb: document.getElementById('action-toolbar').classList.contains('hidden') }));
@@ -87,14 +88,26 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
     const at = q => ({ x: state.camera.x + (q.x + 0.5) * ts * z, y: state.camera.y + (q.y + 0.5) * ts * z });
     return { id: foe.id, a: at(foe), b: at(free), free };
   });
-  await page.waitForTimeout(600);
+  // (the computer's last move may still be finishing: wait until that player has stood still for a second)
+  for (let i = 0, last = '', same = 0; i < 40 && same < 4; i++) { await page.waitForTimeout(250); const now = await page.evaluate(id => { const p = getPlayerById(id); return p.x + ',' + p.y + (isWalking() ? 'w' : ''); }, pick.id); same = now === last && !now.endsWith('w') ? same + 1 : 0; last = now; }
+  await page.evaluate(id => { const p = getPlayerById(id); state.ball.carrierId = id; state.ball.x = p.x; state.ball.y = p.y; }, pick.id);
   const btn = await page.evaluate(() => { const b = document.getElementById('secret-repo'); return b && b.style.display !== 'none'; });
   check(btn, 'Reposition opposition: the button shows in the person\'s turn');
-  await page.waitForTimeout(2500);   // (let any dice result clear: it takes the first tap)
-  await page.click('#secret-repo'); await page.waitForTimeout(100);
-  await page.mouse.click(pick.a.x, pick.a.y); await page.waitForTimeout(150);
-  await page.mouse.click(pick.b.x, pick.b.y); await page.waitForTimeout(150);
+  // (a dice result still showing takes the first tap to put it away, as in play: try the three taps again if nothing moved)
+  for (let tries = 0; tries < 3; tries++) {
+    await page.waitForTimeout(tries ? 1500 : 2500);
+    // (the tap positions from the camera as it is now, in case it has shifted)
+    const at = await page.evaluate(([id, f]) => { const p = getPlayerById(id), ts = CFG.tileSize, z = state.camera.zoom, r = canvas.getBoundingClientRect(), sc = q => ({ x: r.left + state.camera.x + (q.x + 0.5) * ts * z, y: r.top + state.camera.y + (q.y + 0.5) * ts * z }); return { a: sc(p), b: sc(f) }; }, [pick.id, pick.free]);
+    await page.click('#secret-repo'); await page.waitForTimeout(100);
+    await page.mouse.click(at.a.x, at.a.y); await page.waitForTimeout(150);
+    if (!tries) { glowSeen = await page.evaluate(id => { const p = getPlayerById(id), g = markGlow(p); return !!(g && CHEAT.repoPicked() === id); }, pick.id); await page.screenshot({ path: OUT + '/stadium-reposition-picked.png' }); }
+    await page.mouse.click(at.b.x, at.b.y); await page.waitForTimeout(150);
+    if (process.env.DBG) console.log(JSON.stringify(await page.evaluate(() => [document.getElementById('secret-repo').textContent, state.camera, state.mode])), JSON.stringify(at));
+    if (await page.evaluate(([id, f]) => { const p = getPlayerById(id); return p.x === f.x && p.y === f.y; }, [pick.id, pick.free])) break;
+    await page.evaluate(() => { const b = document.getElementById('secret-repo'); if (b && !/Reposition$/.test(b.textContent)) b.click(); });   // (cancel a half-done pick)
+  }
   const moved = await page.evaluate(([id, f]) => { const p = getPlayerById(id); return { x: p.x, y: p.y, ball: state.ball.carrierId === id && state.ball.x === f.x && state.ball.y === f.y }; }, [pick.id, pick.free]);
+  check(glowSeen, 'Reposition opposition: the picked computer player\'s base glows (pulsing yellow) until placed');
   check(moved.x === pick.free.x && moved.y === pick.free.y && moved.ball, 'Reposition opposition: the computer player (and the ball they carry) moves to the tapped square', moved);
   await page.screenshot({ path: OUT + '/stadium-reposition.png' });
   await page.evaluate(() => localStorage.removeItem('bb-secret'));
@@ -103,7 +116,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(st.v === '1' && st.off === '0', 'Settings switch saves bb-stadium', st);
   check(!errors.length, 'no page errors', errors.slice(0, 3));
   // the other themed pitches have their own stadiums (?stadium=elven / =shanty / =worn / =flagstone / =jungle): on, drawn without errors, with their own line colour
-  for (const [st, race] of [['elven', 'highelf'], ['shanty', 'orc'], ['worn', 'human'], ['flagstone', 'goblin'], ['jungle', 'lizardmen']]) {
+  for (const [st, race] of [['elven', 'highelf'], ['shanty', 'orc'], ['worn', 'human'], ['flagstone', 'goblin'], ['jungle', 'lizardmen'], ['graveyard', 'undead'], ['brimstone', 'khorne'], ['woodland', 'woodelf'], ['warpstone', 'skaven'], ['blackark', 'darkelf'], ['dwarfhold', 'dwarf'], ['wastes', 'ogre'], ['plague', 'nurgle'], ['bretonnia', 'bretonnian'], ['ziggurat', 'chaosdwarf'], ['altdorf', 'human']]) {
     const s3 = await openGame(browser, { query: '?stadium=' + st });
     const r3 = await s3.page.evaluate(([race]) => { localStorage.setItem('bb-replays', '0'); AI.set(0, true); AI.set(1, true); window.launchMatch(race, 'human', { replaceOk: true }); return true; }, [race]);
     await s3.page.waitForTimeout(2500);

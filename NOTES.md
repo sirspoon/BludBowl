@@ -283,6 +283,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.68 (job session, 23 Nov): Stadium & dugouts, fourth round (local, pushed as one). `TH` now covers 17 pitches (`TH_KEYS`);
+  left: fjord, moot, khemri, chaos. New theme fields: `swamp` (`plagueSwamps()` / `inSwamp`: fan-free ponds), `roundApron` (tiles;
+  rounded strip corners: `cut`, `CORN`, the stands canvas clipped evenodd), `wallCol` / `wallTrim`, apron `deck` / `lava` /
+  `flowers`, dug `lavaFloor`; awnings 'shroud' | 'brass' | 'leafy' | 'blades' | 'banner' | 'hide'. Crowd timing `F_IN/F_BEAT/F_OUT/
+  F_LATE/F_MED`, `MEDIC_C` (~3 s total; `a.late` = the jumping fan). `DICEFX.whenIdle(fn)`: `showRemovalNotice` waits for the
+  dice strip; `DICEFX.toast` skips the computer's turn. `CHEAT.repoPicked()` -> `markGlow` + ring. Screenshots: not re-run per
+  push (slow); `tools/stadium-test/shots.js` when wanted. Dice test now counts 13 in-match settings (Stadium & dugouts added).
 - v5.67 (job session, 22 Nov): Stadium & dugouts, third round (made locally, pushed as one version). `TH` gains worn, flagstone
   (reworked as an underground goblin lair: `caveExtras`, `roofCave`, `torch`, `glowShrooms`, `toadstool`, `pitchTint`) and jungle
   (`jungleExtras` with `glyphBlock`, `bush`, `fern`, `palm`, `temple`; `roofCanopy`); worn: `wornExtras`, `roofShakes`, `woodTower`.

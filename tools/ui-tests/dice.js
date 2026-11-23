@@ -248,7 +248,7 @@ const { chromium, OUT, check, done, openGame } = require('./lib');
   check(snd.muted && snd.music && snd.label && snd.barHidden, "Sound and Music switch from the sheet (their top-bar buttons are gone)", snd);
   await page.tap('#gs-close'); await page.waitForTimeout(150);
   const gs3 = await page.evaluate(() => ({ open: GAME_SETTINGS.isOpen(), back: document.getElementById('settings-panel').contains(document.getElementById('st-dice-block')), rows: document.querySelectorAll('#settings-panel .st-row').length }));
-  check(gs.open && gs.rows === 12 && gs.fits, 'in-match Settings: the ⚙ button opens a sheet with the 12 settings that can change mid-match, fitting a phone', gs);
+  check(gs.open && gs.rows === 13 && gs.fits, 'in-match Settings: the ⚙ button opens a sheet with the 13 settings that can change mid-match (incl. Stadium & dugouts), fitting a phone', gs);
   check(gs2.dice !== gs.dice && gs2.stored === (gs2.dice === 'On' ? '1' : '0'), 'a switch in the sheet changes the setting', [gs, gs2]);
   check(!gs3.open && gs3.back, "Done closes it and the rows go back to the title screen's Settings", gs3);
 
