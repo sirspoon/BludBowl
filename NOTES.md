@@ -303,6 +303,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   the sideline). study_fu: our follow-ups by its carrier 3% -> 74%, its carrier marked after our turn 46% -> 52%, but we hit its
   guards only ~1.2 a game (it hits ours ~3) and its drives still scored 41% (39%); .421. `k_seq` (`k_fu1`): NO GAIN after 500 (.385),
   WORSE after 875 (.361) - the follower is left in among its players. Both marking-war ideas (spMk, fuCar) failed.
+  After the ball changes hands (23 Nov, `nn/look/dbg/turnover_spell.py`, 720 games): scored within the next 2 turns us 12% v drefsante
+  19%; ball 7-12 out 24% v 35% (secured that turn 37% v 58%), 13-18 10% v 17%, 19+ 9% v 14%. A ready runner (unmarked, within Move + 2)
+  at the moment: us 8% v 28%, players behind all of theirs 0.08 v 0.34; drefsante scores 32% with 2+ ready, 11% with none (its rule:
+  receivers forward to squares we can't reach while defending). `olN` 1 (not kept; patch in `nn/look/dbg/patch_outlet.py`): while
+  they hold the ball 10+ from scoring, our quickest free player steps (sure move) to within his Move + 2 of their end zone, fewest of
+  theirs able to reach him, before the formation. study_ol: ready runner at our defensive turn starts 26%, but our counters scored
+  10% (9%), its receiving drives 39% -> 49%, .304 - one defender fewer costs far more. No full test.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
