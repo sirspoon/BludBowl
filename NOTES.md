@@ -299,6 +299,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   0 next to him 30%/47% v 23%/56%; 2: 55%/71% v 44%/75%; 4+: 76%/93% v 43%/99%. `spMk` (not kept): spRisk + the chance he's marked
   next turn (a sure walk-in, or a 2-dice block moving a guard): 0.2 marked 72% (no change), .404; 0.6 69%, .338, its drives 48%.
   Shielding the guards costs more than it saves. Next idea: do it to drefsante - follow up next to its carrier (its drives 39%).
+  `fuCar` (not kept, the owner asked to try it): `followUp` steps into a vacated square next to their standing carrier (unless onto
+  the sideline). study_fu: our follow-ups by its carrier 3% -> 74%, its carrier marked after our turn 46% -> 52%, but we hit its
+  guards only ~1.2 a game (it hits ours ~3) and its drives still scored 41% (39%); .421. `k_seq` (`k_fu1`): NO GAIN after 500 (.385),
+  WORSE after 875 (.361) - the follower is left in among its players. Both marking-war ideas (spMk, fuCar) failed.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
