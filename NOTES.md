@@ -333,6 +333,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   "elsewhere" (2.9 v 0.8; 55% its last action of the turn), near a loose ball (0.64 v 0.10) and players ahead of its own carrier (0.92 v
   0.38, no Blitz, half its last action). It re-rolls ~20% of every kind (even "elsewhere"), falls 18% (us 12%). Ours are about the
   carrier: 0.73 a game, 90% Blitz, re-rolled 53% (its 1.00, 68% Blitz, 36%). Plain end-of-turn volume was tried twice (lateTurn, bk1): worse/level.
+  `tg1` (not kept; `nn/look/dbg/tg1.diff`): end-of-turn 1-die blocks allowed (looser lateWorth bars, counted double) on a target by a loose
+  ball or in front of our carrier: in-front 0.38 -> 1.25 a game, loose ball 0.10 -> 0.25 (rare at our turn's end); study .413 (.412),
+  k_seq .364 after 250 games: no gain. Third end-of-turn 1-die block idea to fail - leave that area alone.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
