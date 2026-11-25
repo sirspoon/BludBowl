@@ -367,6 +367,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   bridge calls `choose()` per decision, so hooks in the game's turn loop (`turnKey` driver) never run there - put them in choose().
   slDown worked (stood-up-then-pushed 13 -> 7 in 120 games) but crowd pushes didn't fall (0.31 v5.73 study, 0.37-0.50 the tries)
   and the studies were level to worse (.410, .376 v .405). Small stakes (~0.3 players a game for one drive): leave it.
+  Team play within a turn (25 Nov, the owner asked: does drefsante play to a shared plan?). `nn/look/drefstudy.py --acts` now keeps the
+  board before and after every player action; `nn/look/dbg/team_plan.py` links each action to an earlier team-mate's this turn (assist:
+  a block helped by someone who moved next to the defender first; freed: marked at the turn start, free after a block on the marker;
+  lane: ends free on a square a block cleared; ball: hand-off/pass chains; escort: follows the carrier; gang: second block on a
+  defender). 120 games v5.73 (study_acts): linked 30% of drefsante's actions, 28% of ours - no overall gap. The gap is in defence:
+  drefsante's turns without the ball 28% linked v ours 21%; it moves a player in and then blocks with his help 10.1 a game v our
+  7.1 (1.5 v 1.1 a turn), blocks 2.8 a turn there v 2.2; and it frees a player with a block and then Blitzes with him 2.9 a game v 1.3.
+  With the ball we're level (36% v 32%; we clear lanes more, 2.0 v 1.1, it escorts the carrier more, 1.6 v 0.7).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
