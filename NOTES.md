@@ -324,6 +324,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Secure the Ball: used when it beats a pick-up (rarely, with the Sure Hands Thrower); pick-ups fail ~44% of attempts (it ~40%).
   `recOn` (recovery player, not kept; patch `nn/look/dbg/patch_recover.py`): carrier exposed (spRisk >= 0.35, < 2 team-mates within 2)
   -> a free player 2 from him covering the bounce squares. study_rec .392 (.388); its scoring after taking the ball 19% (15%). No gain.
+  New baseline (25 Nov): v5.70 = `k_th1` + `k_b570` (3,000 games, ~.386; k_b570 alone 1,875 games .382) - pass `--base k_th1 k_b570`.
+  Re-rolls (`nn/look/dbg/rr_use.py`): we use 4.6 of 6 a game, 2.5 on block dice; drefsante 5.7, 4.3. Blocks: 36.8 v 44.5 a game, the
+  extra mostly 1-die blocks (6.3 v 2.9). `rrKd` (not kept; `nn/look/dbg/rrkd.diff`): re-roll a no-knock-down block near the ball (or
+  next to our carrier) when re-rolls are spare (rr - 1 > turns left / rrKdD). rrKdD 2: barely fires (4.62 -> 4.69). rrKdD 6, radius 4:
+  5.25 a game, 3.2 on blocks, study .388 (.412), k_seq .372 after 375 games: no gain. More re-rolls on blocks isn't the lever.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
