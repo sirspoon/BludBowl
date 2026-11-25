@@ -353,6 +353,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   its free receivers 0.97 -> 0.63, its turn before ours 0.50 -> 0.23. `ld1` (not kept, `nn/look/dbg/ld1.diff`): the turn before their
   last, dp1's sure threat-cutting moves unlimited (ldN 8, ldMin 0.03, ldGain 0.02) and their carrier allowed 3 squares' move before
   the throw. Free receivers left unchanged (0.60); study .460 (luck: conceded 156 -> 128), k_seq .350 after 250: no gain, maybe worse.
+  `lm1` (not kept, `nn/look/dbg/lm1.diff`): def2's marking (lmN 3, any distance) + cd1's lane-closing (lmCd 2) only on our turn before
+  their last. It works on the board - its free receivers after our turn 0.60 -> 0.31, none at its last-turn start 46% -> 76%, its
+  scoring there 26% -> 18% (study_lm, .405 level) - but k_seq: no gain (.372/500), notworse TOO CLOSE after 1,500 (.362, -1.8 SE, likely
+  worse). lmOwn (only when ours is our last turn too) study .365 (100-174). Covering receivers keeps failing to win games (def2, cd1, lm1).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
