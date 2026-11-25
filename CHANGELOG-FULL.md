@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.77 (25 Nov 2026)
+- Full time: a window over the match summary (`#ms-ask`, opened by `MATCH.open` for a person's match with a match to keep)
+  asks "Save this match?" with a name box (the score line to start with) and Save / Not now; Save keeps it for good under that
+  name (`REC.save(title)`), Not now leaves it as one of the last three recent matches (or not kept, with that setting off).
+- The local AI server's coach: while an answer is on its way the AI loop looks again on the next tick instead of starting its
+  pause again (`after`, `DR.busy`), so each of its decisions (pushes, follow-ups, moves, set-ups, kicks) waits one pause, not two.
+  Measured at normal speed: its pushes 2.2 s -> 1.2 s, follow-ups 2.0 s -> 1.1 s.
+- Brain x, the owner's sideline gang-up (`gs1`, `gsPlan`, switch `gsOn`, OFF - being tested): on our first turn after receiving the
+  kick-off, a 2-dice Blitz on one of their players in a wide zone near the line, a free player first stepping next to him for the
+  assist if it takes one.
+- Tools: `tools/bridge-server.js` writes brain x's counters (`AIX.st`) to the file in `BRIDGE_COUNTS` when it closes.
+
 ## v5.76 (25 Nov 2026)
 - My matches keeps every finished match automatically (`REC.autoKeep`, at full time, as `auto-<time>` records with `auto: true`,
   shown with a "recent" tag); only the newest three recent ones stay. "📌 Keep" makes one permanent, "✎ Rename" names any saved

@@ -177,6 +177,17 @@
         #sim-ticker { position: fixed; left: 50%; top: 64px; transform: translateX(-50%); max-width: calc(100vw - 16px); overflow: hidden; text-overflow: ellipsis; z-index: 60; background: rgba(15,23,42,.92); border: 1px solid #a16207; color: #fbbf24; font: 700 12px 'Inter', system-ui, sans-serif; padding: 5px 12px; border-radius: 999px; pointer-events: none; white-space: nowrap; }
         #sim-ticker.hidden { display: none; }
         /* match summary (every match): same look as the post-match report */
+        /* (v5.77) full time: a window over the summary asking whether to keep the match, with a name for it */
+        #ms-ask { position: fixed; inset: 0; z-index: 170;   /* (above the summary, 158) */ display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(2,6,23,.72); }
+        #ms-ask.hidden { display: none; }
+        #ms-ask .box { width: min(380px, 100%); background: #121a2b; border: 1px solid #fbbf24; border-radius: 12px; padding: 18px 18px 16px; color: #e2e8f0; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+        #ms-ask h3 { margin: 0 0 6px; font-size: 18px; color: #fbbf24; }
+        #ms-ask p { margin: 0 0 12px; font-size: 13px; color: #94a3b8; line-height: 1.4; }
+        #ms-ask label { display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 4px; }
+        #ms-ask input { width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 8px; border: 1px solid #263247; background: #0b1220; color: #f1f5f9; font-size: 15px; margin-bottom: 14px; }
+        #ms-ask .row { display: flex; gap: 10px; }
+        #ms-ask button { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 14px; border: 1px solid #263247; background: #1e293b; color: #e2e8f0; cursor: pointer; }
+        #ms-ask button.go { background: #b45309; border-color: #f59e0b; color: #fff; }
         #match-summary { --ms-card: #121a2b; --ms-edge: #263247; --ms-dim: #94a3b8; --ms-amber: #fbbf24;
             position: fixed; inset: 0; z-index: 158; background: radial-gradient(ellipse at top, #16213a 0%, #0b0f1a 60%); color: #e2e8f0; overflow-y: auto; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; }
         #match-summary.hidden { display: none; }
@@ -1300,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.76</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.77</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -9120,6 +9131,27 @@ ol.ci-steps li::marker { content: none; }
                         try { await REC.save(); k.textContent = '✓ Saved to My matches'; sfx('selectPlayer'); }
                         catch (e) { console.error(e); k.disabled = false; k.textContent = "Couldn't save - try again"; }
                     };
+                    // (v5.77) and a window asking straight away, so keeping it is a choice made at full time rather than a button to spot
+                    if (REC.has() && AIX.person) {
+                        let w = document.getElementById('ms-ask');
+                        if (!w) {
+                            w = document.createElement('div'); w.id = 'ms-ask'; w.className = 'hidden'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true');
+                            w.innerHTML = '<div class="box"><h3>Save this match?</h3><p id="ms-ask-note"></p><label for="ms-ask-name">Name</label><input id="ms-ask-name" type="text" maxlength="80" autocomplete="off"><div class="row"><button type="button" id="ms-ask-no">Not now</button><button type="button" class="go" id="ms-ask-yes">💾 Save</button></div></div>';
+                            document.body.appendChild(w);
+                        }
+                        const inp = document.getElementById('ms-ask-name'), yes = document.getElementById('ms-ask-yes');
+                        inp.value = REC.title() || 'Match';
+                        document.getElementById('ms-ask-note').textContent = 'Keep a replay to watch again in I Like to Watch > My matches (on this device). ' +
+                            (REC.autoOn() ? 'If not, it stays there for now as one of your last three matches, then goes.' : "If not, it won't be kept.");
+                        yes.disabled = false; yes.textContent = '💾 Save';
+                        document.getElementById('ms-ask-no').onclick = () => w.classList.add('hidden');
+                        yes.onclick = async () => {
+                            yes.disabled = true; yes.textContent = 'Saving…';
+                            try { await REC.save(inp.value.trim()); sfx('selectPlayer'); w.classList.add('hidden'); k.disabled = true; k.textContent = '✓ Saved to My matches'; }
+                            catch (e) { console.error(e); yes.disabled = false; yes.textContent = "Couldn't save - try again"; }
+                        };
+                        w.classList.remove('hidden');
+                    }
                 }
                 document.getElementById('match-summary').classList.remove('hidden');
                 document.getElementById('match-summary').scrollTop = 0;
@@ -28158,7 +28190,7 @@ ol.ci-steps li::marker { content: none; }
                 await tx('readwrite', s => s.put(rec));
                 return rec;
             }
-            async function save() { if (!done || saved || busy) return false; busy = true; try { if (autoId && await get(autoId)) await pin(autoId); else await keep(done); saved = true; return true; } finally { busy = false; } }   // (the auto-kept copy just becomes permanent)
+            async function save(title) { if (!done || saved || busy) return false; busy = true; try { const r = autoId && await get(autoId) ? await pin(autoId) : await keep(done); if (title && title !== r.title) await pin(r.id, title); saved = true; return true; } finally { busy = false; } }   // (the auto-kept copy just becomes permanent)
             const list = async () => ((await tx('readonly', s => s.getAll())) || []).sort((a, b) => b.at - a.at);
             const get = id => tx('readonly', s => s.get(id));
             const put = rec => tx('readwrite', s => s.put(rec));
@@ -28181,7 +28213,7 @@ ol.ci-steps li::marker { content: none; }
                 setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
                 return 'saved';
             }
-            return { install, save, list, load, share, del, keep, replay, put, pin, autoOn, setAuto, has: () => !!done && !saved, saved: () => saved, debug: () => ({ cur, done, now: () => cur && build(cur) }) };
+            return { install, save, list, load, share, del, keep, replay, put, pin, autoOn, setAuto, title: () => { try { return done ? meta(done).title : ''; } catch (e) { return ''; } }, has: () => !!done && !saved, saved: () => saved, debug: () => ({ cur, done, now: () => cur && build(cur) }) };
         })();
 
         // ---------- Ball & Chain ----------
@@ -29959,7 +29991,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1 },   // (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 0 },   // (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -29989,7 +30021,7 @@ ol.ci-steps li::marker { content: none; }
             function after(key, ms, fn) {
                 const t = now();
                 if (pk !== key) { pk = key; pt = t + ms * speed * (state.training ? 1.6 : 1); return; }   // (training: time to read the coach)
-                if (t >= pt) { pk = null; fn(); }
+                if (t >= pt) { pk = null; fn(); if (DR.busy()) { pk = key; pt = t; } }   // (brain: dref) an answer on its way: look again next tick, without a second pause
             }
 
             // ---- who is making the current decision ----
@@ -31852,6 +31884,70 @@ ol.ci-steps li::marker { content: none; }
                 if (!best || best.s < bar) return null;   // (AIP bzTurn, bzMin, bzDef: dials for tests)
                 return blitzOn(best.p, best.d.id);
             }
+            // (brain x: gs1) the owner's sideline gang-up (25 Nov: it works for them v drefsante, and with High Elves at a tournament):
+            // on our first turn after receiving the kick-off, one of their players standing in a wide zone near the line gets a
+            // 2-dice Blitz (we choose the die) - first, if it takes one, a free player of ours steps next to him with a sure move to
+            // give the assist. Decided afresh from the board each time (no plan carried between actions). drefsante sets up ~3.8 of
+            // its players in the wide zones, almost always in pairs; we blocked 0.02 of them a receiving turn (nn/look/dbg/exploits.py).
+            const gsWide = y => y <= 3 || y >= CFG.rows - 4;
+            function gsReceiving(me) {   // their kick-off has just been taken: none of theirs over halfway yet, ball not theirs, in our half
+                const them = other(me), c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                if (c && c.team === them) return false;
+                const bx = c ? c.x : state.ball.x;
+                if (bx == null || bx < 0 || toGo(bx, me) < CFG.cols / 2) return false;
+                return !state.players.some(q => q.team === them && onPitch(q) && toGo(q.x, me) > CFG.cols / 2 + AIX.p(me, 'gsOver', 0));
+            }
+            function gsBlitzer(me, act, t, skip) {   // the best 2-dice Blitz on t now (or null)
+                let best = null;
+                act.forEach(p => {
+                    if (p.id === skip || p.isStunned || p.id === state.ball.carrierId || cheb(p, t) > (p.ma || 6) + 3) return;
+                    movesFor(p).forEach(m => {
+                        if (Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y)) !== 1) return;
+                        const left = p.remainingMA - m.path.length;
+                        if (m.prob < AIX.p(me, 'gsProb', 90) || left < 1) return;
+                        blitzCtx = true; const e = blockEval(p, t, m.x, m.y); blitzCtx = false;
+                        if (e.chooser !== me || e.n < 2 || e.pTurn > AIX.p(me, 'gsTurn', 0.12)) return;
+                        const v = e.pDown + (hasSk(p, 'Block') ? 0.1 : 0) - m.path.length * 0.01 + m.prob / 1000;
+                        if (!best || v > best.v) best = { p, m, v };
+                    });
+                });
+                return best;
+            }
+            function gsPlan(me, act) {
+                if (!AIX.x(me) || !AIX.p(me, 'gsOn', 0) || state.blitzUsed || state.charge || !gsReceiving(me)) return null;
+                const them = other(me), line = q => toGo(q.x, me) >= CFG.cols / 2 - 2;   // (on or just behind their line)
+                const targets = state.players.filter(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && gsWide(q.y) && line(q));
+                if (!targets.length) return null;
+                const tv = t => (t.y <= 3 ? 3 - t.y : t.y - (CFG.rows - 4)) * 0.05 + (state.players.some(o => o.team === them && o.id !== t.id && onPitch(o) && !o.isDown && cheb(o, t) === 1) ? 0 : 0.2);
+                // 1. the Blitz itself, if one is there
+                let best = null;
+                targets.forEach(t => { const b = gsBlitzer(me, act, t); if (b && (!best || b.v + tv(t) > best.v + tv(best.t))) best = Object.assign(b, { t }); });
+                if (best) { AIX.count(me, 'gs blitz'); return blitzOn(best.p, best.t.id); }
+                // 2. a helper first: a sure move next to the target (marked by nobody else there) that makes a 2-dice Blitz possible
+                let help = null;
+                act.forEach(h => {
+                    if (h.id === state.ball.carrierId || !canReposition(h, me) || (!h.isDown && tzFor(h.x, h.y, me) > 0)) return;
+                    const ms = movesFor(h);
+                    targets.forEach(t => {
+                        if (cheb(h, t) > (h.ma || 6) + 1) return;
+                        ms.forEach(m => {
+                            if (m.prob < 100 || m.isRush || !m.path || !m.path.length || Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y)) !== 1) return;
+                            if (getTackleZones(m.x, m.y, them) > 1) return;
+                            const ox = h.x, oy = h.y, wd = h.isDown;
+                            h.x = m.x; h.y = m.y; h.isDown = false;
+                            let b = null;
+                            try { b = gsBlitzer(me, act, t, h.id); } finally { h.x = ox; h.y = oy; h.isDown = wd; }
+                            if (!b) return;
+                            const v = b.v + tv(t) - m.path.length * 0.02 - (hasSk(h, 'Block') ? 0.05 : 0);   // (keep the Block players for the Blitz)
+                            if (!help || v > help.v) help = { h, m, v };
+                        });
+                    });
+                });
+                if (!help) return null;
+                AIX.count(me, 'gs help');
+                const tx = help.m.x, ty = help.m.y;
+                return { pid: help.h.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
+            }
             function blitzOn(p, tid) {
                 return { pid: p.id, kind: 'blitz', target: tid, pick: (ms, q) => {
                     const t = getPlayerById(tid); let bm = null, bs = -1e9;
@@ -32651,6 +32747,7 @@ ol.ci-steps li::marker { content: none; }
                     });
                     if (up) return { pid: up.p.id, kind: 'move', pick: () => null };
                 }
+                { const gs = gsPlan(me, act); if (gs) return gs; }   // (brain x: gs1) the sideline gang-up, first thing on our receiving turn
                 if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
                 if (lbMove) return lbMove;   // (brain x: lb1)
                 if (cbMove) return cbMove;   // (brain x: cb1)
@@ -34258,7 +34355,7 @@ ol.ci-steps li::marker { content: none; }
                 const at = id => ({ x: id % 26, y: Math.floor(id / 26) });
                 const sqOf = (x, y) => y * 26 + x;
                 const faceName = f => f === FACES.SKULL ? 'skull' : f === FACES.BOTH_DOWN ? 'both' : f === FACES.STUMBLE ? 'stumble' : f === FACES.POW ? 'pow' : 'push';
-                return { ask, take, byName, at, sqOf, nm, faceName, status: () => stat, mark: (k, msg) => { stat = { k, msg: msg || '' }; }, debug: () => ({ n, pend, got, down, stat, url: url() }) };
+                return { ask, take, byName, at, sqOf, nm, faceName, busy: () => pend !== null, status: () => stat, mark: (k, msg) => { stat = { k, msg: msg || '' }; }, debug: () => ({ n, pend, got, down, stat, url: url() }) };
             })();
             // the badge (see #dref-badge): shown in a match where the computer coach is set to drefsante - green while its last
             // decision came from the AI server, amber (and saying why) when the Experimental coach is playing for it

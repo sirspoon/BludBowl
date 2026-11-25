@@ -57,5 +57,7 @@ const { openGame } = require('./headless-match');
   });
   const report = () => { if (!TIMING || !TIMES.n) return; process.stderr.write(`bridge timing: ${TIMES.n} questions; load ${(TIMES.load / TIMES.n).toFixed(1)} ms, answer ${(TIMES.op / TIMES.n).toFixed(1)} ms, send back ${(TIMES.out / TIMES.n).toFixed(1)} ms each; by kind: ` +
     Object.entries(TIMES.by).map(([k, v]) => `${k} ${v[0]} x ${(v[1] / v[0]).toFixed(1)} ms (${Math.round(v[2] / v[0] / 1024)} KB in)`).join(', ') + '\n'); };
-  rl.on('close', () => { report(); process.exit(0); }); process.stdin.on('end', () => { report(); process.exit(0); });
+  // (BRIDGE_COUNTS=file: on closing, append the AI's own counters - brain x's AIX.count tallies, per team - to that file as one JSON line)
+  const counts = () => { const f = process.env.BRIDGE_COUNTS; if (!f) return; try { require('fs').appendFileSync(f, w.eval('JSON.stringify(AIX.st)') + '\n'); } catch (e) { process.stderr.write('bridge counts: ' + e.message + '\n'); } };
+  rl.on('close', () => { report(); counts(); process.exit(0); }); process.stdin.on('end', () => { report(); counts(); process.exit(0); });
 })();

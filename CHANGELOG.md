@@ -2,6 +2,10 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.77 (25 Nov 2026)
+- At full time a window asks whether to save the match, with a name for it you can change.
+- The local-server computer coach no longer pauses twice before each push, follow-up and move.
+
 ## v5.76 (25 Nov 2026)
 - Your last three matches are kept automatically in I Like to Watch > My matches (a fourth replaces the oldest). Press Keep on one to hold on to it, and Rename to give it your own name. Switch it off in Settings > Keep my last matches.
 

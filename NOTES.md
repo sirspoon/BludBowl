@@ -410,6 +410,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 25 Nov, a testing mistake found: `nn/look/drefstudy.py --aip '{"gsOn":1}'` (no "brain") ran the Classic AI, so the new switch never
+  ran. That hit today's `sl1` (study_sl..sl4), `da1` (study_da, da2), the first `gs1` study and study_acts (the team-play and
+  exploits "brain x" figures were Classic). Fixed: drefstudy now plays brain x unless --aip names a brain ('{"brain":"classic"}' for
+  the Classic AI). Earlier studies and all k_seq runs set "brain":"x" and are fine. sl1 and da1 need testing again.
 - v5.76 (25 Nov, the owner asked after forgetting to save a match v drefsante): the last three finished matches are kept
   automatically in My matches (`REC.autoKeep`, `auto: true`, "recent" tag), with Keep / Rename (`REC.pin`); Settings > Keep my
   last matches (`bb-autokeep`). The summary's Save turns the recent copy permanent.
