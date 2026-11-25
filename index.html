@@ -1062,6 +1062,17 @@
 #star-hover .sh-pill.ready { background: #14532d; color: #bbf7d0; border: 1px solid #22c55e; }
 #star-hover .sh-pill.used { background: #3f1d1d; color: #fca5a5; border: 1px solid #b91c1c; }
 #star-hover .sh-text { color: #cbd5e1; margin-top: 4px; }
+/* (brain: dref) which coach is really playing: a small badge in the corner during a match against the local AI server -
+   green and slowly pulsing while its decisions come from drefsante, amber when the Experimental coach is standing in */
+#dref-badge { position: fixed; left: max(8px, env(safe-area-inset-left)); bottom: max(8px, env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: 6px;
+  padding: 3px 9px 3px 7px; border-radius: 999px; background: rgba(12,10,9,.78); border: 1px solid rgba(120,113,108,.6); color: #d6d3d1; font: 600 11px/1.3 system-ui, sans-serif; pointer-events: none; }
+#dref-badge.hidden { display: none; }
+#dref-badge i { width: 8px; height: 8px; border-radius: 50%; background: #a8a29e; flex: none; }
+#dref-badge.ok i { background: #4ade80; box-shadow: 0 0 6px #4ade80; animation: drefPulse 2.4s ease-in-out infinite; }
+#dref-badge.warn { border-color: rgba(245,158,11,.7); color: #fde68a; }
+#dref-badge.warn i { background: #f59e0b; }
+@keyframes drefPulse { 0%, 100% { opacity: .45; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
+@media (prefers-reduced-motion: reduce) { #dref-badge.ok i { animation: none; } }
 /* version number on the title screen: opens the changelog */
 #app-version { order: 99; align-self: flex-end; flex-shrink: 0; margin: 10px max(4px, env(safe-area-inset-right)) max(2px, env(safe-area-inset-bottom)) 0; padding: 3px 9px;   /* (below everything else on the screen, so it never sits on top of the menu) */ border-radius: 999px;
     border: 1px solid #a16207; background: rgba(120,53,15,.35); color: #fbbf24; font: 700 11px/1.2 Inter, system-ui, sans-serif; letter-spacing: .08em; cursor: pointer; transition: background .15s, border-color .15s; }
@@ -1288,7 +1299,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.74</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.75</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1337,7 +1348,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="moot">Mootland Green</option><option value="khemri">Khemri</option><option value="warpstone">Warped Flagstones</option><option value="chaos">Chaos Wastes</option></select></div>
-            <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43. drefsante: the Bot Bowl V winner, run on this computer by tools/drefsante-server.py (desktop only)</small></span><button type="button" class="st-tog" id="st-brain"></button></div>
+            <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43<span id="st-brain-dref" class="hidden">. drefsante: the Bot Bowl V winner, from the AI server running on this computer</span></small></span><button type="button" class="st-tog" id="st-brain"></button></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Animate block dice<small>your dice tumble until you press Roll, then jump and land on the result; the computer's roll at once and land the same way</small></span><button type="button" class="st-tog" id="st-dice-block"></button></div>
@@ -29902,7 +29913,21 @@ ol.ci-steps li::marker { content: none; }
             person: (() => { try { return !navigator.webdriver && !/jsdom/i.test(navigator.userAgent || '') && !/simtest/.test(location.search); } catch (e) { return false; } })(),
             pref: (() => { try { const v = localStorage.getItem('bb-brain'); return v === 'classic' || v === 'dref' ? v : 'x'; } catch (e) { return 'x'; } })(),
             setPref(v) { this.pref = v === 'classic' || v === 'dref' ? v : 'x'; try { localStorage.setItem('bb-brain', this.pref); } catch (e) {} },
-            P(t) { const A = window.AIP && window.AIP[t]; return A ? A : (this.person && this.pref === 'x' ? this.PX : this.person && this.pref === 'dref' ? this.PD : null); }, PX: { brain: 'x' }, PD: { brain: 'dref' },   // (PD: drefsante, see drOn)
+            P(t) { const A = window.AIP && window.AIP[t]; return A ? A : !this.person ? null : this.pref === 'dref' ? (this.drefOK ? this.PD : this.PX) : this.pref === 'x' ? this.PX : null; }, PX: { brain: 'x' }, PD: { brain: 'dref' },   // (PD: drefsante, see drOn)
+            // the local AI server (tools/drefsante-server.py): its setting shows only when it answers, and it's only looked for when
+            // the game runs from this computer or the home network (the server's own page, localhost, 192.168.x.x / 10.x.x.x) or
+            // bb-dref-url is set - never from the public site, so nobody else's browser goes asking
+            drefOK: false, drefAt: 0,
+            drefUrl() { let u = null; try { u = localStorage.getItem('bb-dref-url'); } catch (e) {} return u || (location.port === '8777' ? location.origin : 'http://127.0.0.1:8777'); },
+            drefLocal() { let u = null; try { u = localStorage.getItem('bb-dref-url'); } catch (e) {} return !!u || location.port === '8777' || /^(localhost|127\.|10\.|192\.168\.|\[::1\])/.test(location.hostname); },
+            drefProbe(done) {
+                if (!this.drefLocal() || Date.now() - this.drefAt < 4000) { if (done) done(); return; }
+                this.drefAt = Date.now();
+                const ac = typeof AbortController === 'function' ? new AbortController() : null, tm = setTimeout(() => { if (ac) ac.abort(); }, 1500);
+                fetch(this.drefUrl(), { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: '{"q":"hello"}', signal: ac ? ac.signal : undefined })
+                    .then(r => r.json()).then(r => { this.drefOK = !!(r && r.ok); }).catch(() => { this.drefOK = false; })
+                    .finally(() => { clearTimeout(tm); if (done) done(); });
+            },
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
@@ -34060,6 +34085,7 @@ ol.ci-steps li::marker { content: none; }
             // ---- main loop ----
             let paused = false;
             function tick() {
+                try { drPaint(); } catch (e) {}
                 if (!started || state.isGameOver || paused) return;
                 if (!on[0] && !on[1]) return;
                 if (COACH.holding()) return;   // (training: a coach note or window waiting to be read)
@@ -34159,9 +34185,9 @@ ol.ci-steps li::marker { content: none; }
             // p<id>_home (team 1, which scores at x 0, as BotBowl's home team) or p<id>_away; squares are y * 26 + x.
             const drOn = t => (t === 0 || t === 1) && AIX.p(t, 'brain', '') === 'dref';
             const DR = (() => {
-                let n = 0, pend = null, got = null, down = 0, told = false;
+                let n = 0, pend = null, got = null, down = 0, told = false, stat = { k: null, msg: '' };   // stat: the last answer - 'ok', 'fail' (no answer) or 'fallback' (brain x stood in)
                 const game = 'bb' + Date.now().toString(36);
-                const url = () => { try { return localStorage.getItem('bb-dref-url') || 'http://127.0.0.1:8777'; } catch (e) { return 'http://127.0.0.1:8777'; } };
+                const url = () => AIX.drefUrl();   // (served by tools/drefsante-server.py: the server the page came from - a phone on the Wi-Fi too)
                 const nm = p => p ? `p${p.id}_${p.team === 1 ? 'home' : 'away'}` : '';
                 // (kind 'setup': its players all in the reserves, as BotBowl hands them over - with them on the pitch it sets up nothing;
                 // actp: the player part-way through an action, e.g. the blocker when it picks the dice)
@@ -34188,13 +34214,13 @@ ol.ci-steps li::marker { content: none; }
                     const sig = kind + ':' + n;
                     if (got && got.sig === sig) return got.r;
                     if (pend === sig) return undefined;
-                    if (down && Date.now() - down < 20000) return { error: 'not answering' };   // (asked again after 20 s)
+                    if (down && Date.now() - down < 20000) { stat = { k: 'fail', msg: 'the AI server is not answering' }; return { error: 'not answering' }; }   // (asked again after 20 s)
                     pend = sig; got = null;
                     fetch(url(), { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(Object.assign({ q: kind, game, state: snap(me, kind, actp) }, extra || {})) })
-                        .then(r => r.json()).then(r => { if (pend === sig) { pend = null; got = { sig, r }; down = 0; } })
+                        .then(r => r.json()).then(r => { if (pend === sig) { pend = null; got = { sig, r }; down = 0; stat = r && !r.error ? { k: 'ok', msg: '' } : { k: 'fail', msg: 'the AI server gave an error' }; } })
                         .catch(e => {
                             if (pend !== sig) return;
-                            pend = null; got = { sig, r: { error: String((e && e.message) || e) } }; down = Date.now();
+                            pend = null; got = { sig, r: { error: String((e && e.message) || e) } }; down = Date.now(); stat = { k: 'fail', msg: 'the AI server is not answering' };
                             if (!told) { told = true; log(`drefsante isn't answering at ${url()}: start tools/drefsante-server.py on this computer. The Experimental coach plays for it meanwhile.`, 'text-amber-300 font-bold'); }
                         });
                     return undefined;
@@ -34204,8 +34230,29 @@ ol.ci-steps li::marker { content: none; }
                 const at = id => ({ x: id % 26, y: Math.floor(id / 26) });
                 const sqOf = (x, y) => y * 26 + x;
                 const faceName = f => f === FACES.SKULL ? 'skull' : f === FACES.BOTH_DOWN ? 'both' : f === FACES.STUMBLE ? 'stumble' : f === FACES.POW ? 'pow' : 'push';
-                return { ask, take, byName, at, sqOf, nm, faceName, debug: () => ({ n, pend, got, down, url: url() }) };
+                return { ask, take, byName, at, sqOf, nm, faceName, status: () => stat, mark: (k, msg) => { stat = { k, msg: msg || '' }; }, debug: () => ({ n, pend, got, down, stat, url: url() }) };
             })();
+            // the badge (see #dref-badge): shown in a match where the computer coach is set to drefsante - green while its last
+            // decision came from the AI server, amber (and saying why) when the Experimental coach is playing for it
+            let drEl = null, drShown = '';
+            function drPaint() {
+                const want = [0, 1].some(t => isAI(t) && (drOn(t) || (AIX.person && AIX.pref === 'dref' && !(window.AIP && window.AIP[t]))));
+                const live = started && !state.isGameOver && want;
+                let cls = 'hidden', txt = '';
+                if (live) {
+                    const st = DR.status(), served = [0, 1].some(t => isAI(t) && drOn(t));
+                    if (!served) { cls = 'warn'; txt = 'drefsante: no AI server found - Experimental coach playing'; }
+                    else if (st.k === 'ok') { cls = 'ok'; txt = 'drefsante'; }
+                    else if (st.k === 'fail') { cls = 'warn'; txt = `drefsante: ${st.msg} - Experimental coach playing`; }
+                    else if (st.k === 'fallback') { cls = 'warn'; txt = `drefsante (${st.msg}: Experimental coach)`; }
+                    else { cls = ''; txt = 'drefsante: connecting'; }
+                }
+                const key = cls + '|' + txt;
+                if (key === drShown) return;
+                drShown = key;
+                if (!drEl) { drEl = document.createElement('div'); drEl.id = 'dref-badge'; drEl.setAttribute('role', 'status'); drEl.innerHTML = '<i></i><span></span>'; document.body.appendChild(drEl); }
+                drEl.className = cls; drEl.querySelector('span').textContent = txt;
+            }
             // its turn: the next player action, as a plan runPlan carries out (its route square by square)
             function drChoose() {
                 const me = state.activeTeam;
@@ -34232,7 +34279,7 @@ ol.ci-steps li::marker { content: none; }
                 const bad = !p || p.team !== me || p.hasActed || !onPitch(p) || tried.has(p.id)
                     || ((kind === 'block' || kind === 'blitz' || kind === 'foul') && target == null) || ((kind === 'pass' || kind === 'handoff') && receiver == null)
                     || (kind === 'blitz' && state.blitzUsed) || (kind === 'foul' && state.foulUsed) || (kind === 'pass' && state.passUsed) || (kind === 'handoff' && state.handoffUsed);
-                if (bad) { AIX.count(me, 'dref fallback'); return choose(); }   // (a plan BludBowl can't follow: brain x picks this action instead)
+                if (bad) { AIX.count(me, 'dref fallback'); DR.mark('fallback', 'one move BludBowl could not follow'); return choose(); }   // (a plan BludBowl can't follow: brain x picks this action instead)
                 let px = p.x, py = p.y;
                 const path = sqs.map(s => { const o = { x: s.x, y: s.y, prevX: px, prevY: py }; px = s.x; py = s.y; return o; });
                 AIX.count(me, 'dref ' + kind);
@@ -35024,7 +35071,7 @@ ol.ci-steps li::marker { content: none; }
                 document.getElementById('settings-panel').classList.toggle('hidden', which !== 'settings');
                 tp.classList.toggle('hidden', which !== 'exhibition'); tp.classList.toggle('flex', which === 'exhibition');
                 if (which === 'exhibition') { fillPickers(); refreshPick(); aiPaints.forEach(f => f()); }
-                if (which === 'settings') { paintSettings(); BACKUP.paint(); }
+                if (which === 'settings') { paintSettings(); BACKUP.paint(); AIX.drefProbe(() => { if (!document.getElementById('settings-panel').classList.contains('hidden')) paintSettings(); }); }
                 const ss = document.getElementById('start-screen'); if (ss) ss.scrollTop = 0;
                 const ver = document.getElementById('app-version'); if (ver) ver.classList.toggle('hidden', which === 'settings' || which === 'exhibition');
                 const fan = document.getElementById('fan-note'); if (fan) fan.classList.toggle('hidden', which === 'settings' || which === 'exhibition');   // (it would sit on top of the longer screens' buttons)
@@ -35103,7 +35150,8 @@ ol.ci-steps li::marker { content: none; }
                 on('st-replay-kick', REPLAY.kickEnabled(), 'On', 'Off');
                 { const k = document.getElementById('st-replay-kick'); if (k) k.disabled = !REPLAY.enabled(); }
                 on('st-move', twoTapPref, 'Tap twice', 'Tap once');
-                on('st-brain', AIX.pref !== 'classic', AIX.pref === 'dref' ? 'drefsante' : 'Experimental', 'Classic');
+                on('st-brain', AIX.pref !== 'classic', AIX.pref === 'dref' && AIX.drefOK ? 'drefsante' : 'Experimental', 'Classic');
+                { const k = document.getElementById('st-brain-dref'); if (k) k.classList.toggle('hidden', !AIX.drefOK); }
                 on('st-hd', HD.on, HD.size === 64 ? '2x' : '1.5x', 'Off');
                 on('st-stadium', STADIUM.on, 'On', 'Off');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
@@ -35125,7 +35173,8 @@ ol.ci-steps li::marker { content: none; }
             });
             document.getElementById('st-replay').addEventListener('click', () => { REPLAY.setEnabled(!REPLAY.enabled()); paintSettings(); });
             document.getElementById('st-replay-kick').addEventListener('click', () => { REPLAY.setKickEnabled(!REPLAY.kickEnabled()); paintSettings(); });
-            document.getElementById('st-brain').addEventListener('click', () => { AIX.setPref(AIX.pref === 'x' ? 'classic' : AIX.pref === 'classic' ? 'dref' : 'x'); paintSettings(); });
+            document.getElementById('st-brain').addEventListener('click', () => { AIX.setPref(AIX.pref === 'classic' ? (AIX.drefOK ? 'dref' : 'x') : AIX.pref === 'x' ? 'classic' : 'x'); paintSettings(); });
+            AIX.drefProbe();   // (at start-up too, so a match started straight away knows whether the local AI server is there)
             document.getElementById('st-move').addEventListener('click', () => { twoTapPref = !twoTapPref; try { localStorage.setItem('bb-two-tap', twoTapPref ? '1' : '0'); } catch (e) {} state.movePlan = null; paintSettings(); });
             document.getElementById('st-weather').addEventListener('click', () => {
                 wxFX = wxFX === 1 ? 0.55 : wxFX > 0 ? 0 : 1;

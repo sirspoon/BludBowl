@@ -2,8 +2,12 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.75 (25 Nov 2026)
+- The computer coach from a local AI server only shows in Settings when that server is running, and a phone on the same Wi-Fi can play against it too.
+- During a match against it, a small light in the corner shows it is really playing (green, pulsing) or that another coach is standing in (amber, with the reason).
+
 ## v5.74 (25 Nov 2026)
-- Play against drefsante, the Bot Bowl V winner, on a computer that has it: run `tools/drefsante-server.py`, then set Settings > Computer coach to drefsante. Desktop only.
+- A new kind of computer coach: an AI provided by a server running on your own computer. When one is running, Settings > Computer coach offers it. Local play only.
 
 ## v5.73 (25 Nov 2026)
 - The experimental computer coach (brain x) plays the end of each half better: the turn before the last it sends receivers up the pitch, and on the last turn one runs into the end zone for a throw.

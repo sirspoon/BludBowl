@@ -6,7 +6,7 @@ from "In progress" to "Recently done", note anything left open, drop entries tha
 changelogs record every game change, `ai-training/README.md` holds the AI research in detail, and CLAUDE.md the standing rules.
 
 ## In progress
-- **Play against drefsante in BludBowl (v5.74, the owner asked, 25 Nov).** Settings > Computer coach > drefsante, with
+- **Play against drefsante in BludBowl (v5.74; v5.75: the setting shows only when the server answers - looked for only on local pages, never from the public site; `--host 192.168.50.215` lets the owner's phone play at http://192.168.50.215:8777/; the in-game notes don't name the bot, the owner's wish).** Settings > Computer coach > drefsante, with
   `python tools/drefsante-server.py` running on the same computer (it finds `../drefsante` and `../java` next to the repo by
   default; `--dref`, `--java`, `--port 8777`, `--verbose`). The page posts each question to http://127.0.0.1:8777 (localStorage
   `bb-dref-url` to change it): `turn` (FFAIProxy.playTurn: one player action, START_x / MOVE square / BLOCK square / ...),

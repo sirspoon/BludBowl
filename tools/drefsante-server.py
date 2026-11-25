@@ -23,6 +23,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--dref', default=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'drefsante'),
                 help='the drefsante folder (drefsante_bot.cfg, the jar)')
 ap.add_argument('--port', type=int, default=8777)
+ap.add_argument('--host', default='127.0.0.1', help="the address to listen on: this PC's network address (e.g. 192.168.x.y) lets a phone on the same Wi-Fi play too")
 ap.add_argument('--java', default=None, help='JAVA_HOME, if not set already')
 ap.add_argument('--verbose', action='store_true')
 args = ap.parse_args()
@@ -216,8 +217,8 @@ class H(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    srv = HTTPServer(('127.0.0.1', args.port), H)
-    print(f'drefsante for BludBowl: open http://127.0.0.1:{args.port}/ and set Settings > Computer coach to drefsante (jar {os.path.basename(JAR)}; Ctrl+C to stop)', flush=True)
+    srv = HTTPServer((args.host, args.port), H)
+    print(f'drefsante for BludBowl: open http://{args.host}:{args.port}/ and set Settings > Computer coach to drefsante (jar {os.path.basename(JAR)}; Ctrl+C to stop)', flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

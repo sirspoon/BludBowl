@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.75 (25 Nov 2026)
+- The local AI server's coach (`brain: dref`) only appears in Settings > Computer coach when the server answers (`AIX.drefProbe`,
+  a 1.5 s "hello" at start-up and whenever Settings opens). It's only looked for when the game runs locally (the server's own
+  page on port 8777, localhost, 127.x, 10.x, 192.168.x) or `bb-dref-url` is set - never from the public site. With the setting
+  on drefsante and no server, the Experimental coach plays. Served by the server, the page asks the server it came from
+  (`AIX.drefUrl`), so a phone on the same Wi-Fi can play: `tools/drefsante-server.py --host <this PC's address>`.
+- In-game "What's new": v5.74's entry describes a local-server AI rather than naming the bot.
+- A badge in the bottom-left corner during a match against it (`#dref-badge`, `drPaint`, every AI tick): green and slowly pulsing
+  ("drefsante") while its last answer came from the server; amber with the reason when brain x is playing instead - no server
+  found at the start, the server not answering, an error, or one of its moves BludBowl couldn't follow; grey "connecting" until
+  the first answer. No pulse with reduced motion.
+
 ## v5.74 (25 Nov 2026)
 - drefsante as a computer coach (`brain: dref`): Settings > Computer coach now cycles Experimental, Classic, drefsante
   (localStorage `bb-brain` 'dref'). drefsante's own Java brain (Frederic Bair's bot, 0.8) runs on the player's computer in
