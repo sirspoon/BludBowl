@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.73</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.74</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1337,7 +1337,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Text size</span><button type="button" class="st-tog" id="st-text"></button></div>
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="moot">Mootland Green</option><option value="khemri">Khemri</option><option value="warpstone">Warped Flagstones</option><option value="chaos">Chaos Wastes</option></select></div>
-            <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43</small></span><button type="button" class="st-tog" id="st-brain"></button></div>
+            <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43. drefsante: the Bot Bowl V winner, run on this computer by tools/drefsante-server.py (desktop only)</small></span><button type="button" class="st-tog" id="st-brain"></button></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Animate block dice<small>your dice tumble until you press Roll, then jump and land on the result; the computer's roll at once and land the same way</small></span><button type="button" class="st-tog" id="st-dice-block"></button></div>
@@ -29892,7 +29892,7 @@ ol.ci-steps li::marker { content: none; }
         // to compare the new play with the old: rr, blitz, screen, babysit, pass, ttm, touchback, loose, bloodlust, safepos, claim, stick, anchor, rrturn, flank, hitskills, vomit, gaze, skills2
         const AIX = { flags: [null, null], on(t, f) { const F = this.flags[t]; return F == null || F.includes(f); },
             // tuning values a test run can set per team (window.AIP = [{...}, {...}]) to try different tolerances; the default is what's played
-            p(t, k, d) { const P = this.P(t); return P && P[k] != null ? P[k] : (P && P.brain === 'x' && this.X[k] != null ? this.X[k] : d); },
+            p(t, k, d) { const P = this.P(t); return P && P[k] != null ? P[k] : (P && (P.brain === 'x' || P.brain === 'dref') && this.X[k] != null ? this.X[k] : d); },
             // (brain: x) the experimental AI, worked on to beat drefsante (Humans v Humans in BotBowl). A test run asks for it with
             // '{"brain":"x"}' (nn/evaluate.py --aip, tools/ai-match.js --newp); without that, test runs get the Classic AI as before. Since
             // v5.43 a person playing the game faces brain x unless Settings -> Computer coach is set to Classic (localStorage 'bb-brain':
@@ -29900,14 +29900,14 @@ ol.ci-steps li::marker { content: none; }
             // them). Tuned on Humans v Humans; not yet checked in the all-races mirror guard.
             // person: a person's game in a browser (not a test run: no ?simtest, no Playwright, not jsdom - the bridge, headless runs)
             person: (() => { try { return !navigator.webdriver && !/jsdom/i.test(navigator.userAgent || '') && !/simtest/.test(location.search); } catch (e) { return false; } })(),
-            pref: (() => { try { return localStorage.getItem('bb-brain') === 'classic' ? 'classic' : 'x'; } catch (e) { return 'x'; } })(),
-            setPref(v) { this.pref = v === 'classic' ? 'classic' : 'x'; try { localStorage.setItem('bb-brain', this.pref); } catch (e) {} },
-            P(t) { const A = window.AIP && window.AIP[t]; return A ? A : (this.person && this.pref === 'x' ? this.PX : null); }, PX: { brain: 'x' },
+            pref: (() => { try { const v = localStorage.getItem('bb-brain'); return v === 'classic' || v === 'dref' ? v : 'x'; } catch (e) { return 'x'; } })(),
+            setPref(v) { this.pref = v === 'classic' || v === 'dref' ? v : 'x'; try { localStorage.setItem('bb-brain', this.pref); } catch (e) {} },
+            P(t) { const A = window.AIP && window.AIP[t]; return A ? A : (this.person && this.pref === 'x' ? this.PX : this.person && this.pref === 'dref' ? this.PD : null); }, PX: { brain: 'x' }, PD: { brain: 'dref' },   // (PD: drefsante, see drOn)
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
             X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1 },   // (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
-            x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
+            x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
         const AI = (function () {
@@ -34080,7 +34080,7 @@ ol.ci-steps li::marker { content: none; }
                     });
                     return;
                 }
-                if (vis('modal-team-reroll')) { if (isAI(state.activeTeam)) after('trr', 1000, () => click((bbOn(state.activeTeam) ? bbReroll(state.trrCtx) : rrWorth(state.trrCtx)) ? 'btn-trr-yes' : 'btn-trr-no')); return; }
+                if (vis('modal-team-reroll')) { if (isAI(state.activeTeam)) after('trr', drOn(state.activeTeam) ? 300 : 1000, () => { const v = drOn(state.activeTeam) ? drReroll(state.trrCtx) : bbOn(state.activeTeam) ? bbReroll(state.trrCtx) : rrWorth(state.trrCtx); if (v === undefined) return; click(v ? 'btn-trr-yes' : 'btn-trr-no'); }); return; }
                 if (vis('modal-roll')) {
                     const r = state.pendingRoll;
                     if (r && isAI(r.player.team)) after('roll', 700, () => {
@@ -34091,13 +34091,13 @@ ol.ci-steps li::marker { content: none; }
                     });
                     return;
                 }
-                if (vis('modal-dice')) { const c = state.combat; if (c && (c.diceAnim || c.diceWait)) return; if (c && c.dice && !c.aiPicking && bbOn(state.activeTeam) && c.atk && c.atk.team === state.activeTeam && isAI(state.activeTeam)) bbDice(c); else diceChoice(); return; }
+                if (vis('modal-dice')) { const c = state.combat; if (c && (c.diceAnim || c.diceWait)) return; if (c && c.dice && !c.aiPicking && drOn(state.activeTeam) && c.atk && c.atk.team === state.activeTeam && isAI(state.activeTeam)) drDice(c); else if (c && c.dice && !c.aiPicking && bbOn(state.activeTeam) && c.atk && c.atk.team === state.activeTeam && isAI(state.activeTeam)) bbDice(c); else diceChoice(); return; }
                 if (state.ballAnimation.active || state.flightAnimation.active || REPLAY.busy()) return;   // (and a replay playing)
                 const d = decider();
                 switch (state.mode) {
-                    case MODES.SETUP: plan = null; if (isAI(d) && !CHEAT.placesFor(d)) after('setup', 1300, () => (bbOn(d) ? bbSetup(d) : setupTeam(d))); return;
-                    case MODES.KICKOFF_TARGET: if (isAI(d)) after('kick', 1300, bbOn(d) ? bbKick : kickTarget); return;
-                    case MODES.TOUCHBACK_CHOICE: if (isAI(d)) after('touchback', 1200, bbOn(d) ? bbTouchback : touchback); return;
+                    case MODES.SETUP: plan = null; if (isAI(d) && !CHEAT.placesFor(d)) after('setup', 1300, () => (drOn(d) ? drSetup(d) : bbOn(d) ? bbSetup(d) : setupTeam(d))); return;
+                    case MODES.KICKOFF_TARGET: if (isAI(d)) after('kick', drOn(d) ? 400 : 1300, drOn(d) ? drKick : bbOn(d) ? bbKick : kickTarget); return;
+                    case MODES.TOUCHBACK_CHOICE: if (isAI(d)) after('touchback', drOn(d) ? 400 : 1200, drOn(d) ? drTouchback : bbOn(d) ? bbTouchback : touchback); return;
                     case MODES.INTERCEPT_CHOICE: if (isAI(d)) after('intercept', 1000, interception); return;
                     case MODES.KICKOFF_SELECT: if (isAI(d)) after('ksel', 1100, kickoffSelect); return;
                     case MODES.KICKOFF_MOVE: if (isAI(d)) after('kmove', 1100, () => click('btn-event-confirm')); return;
@@ -34111,9 +34111,9 @@ ol.ci-steps li::marker { content: none; }
                         if (f === 4) { click('btn-event-confirm'); return; }
                         grid(p.x + BNC_FACE[f][0], p.y + BNC_FACE[f][1]);   // first tap previews, the next one rolls
                     }); return;
-                    case MODES.PUSH_CHOICE: if (isAI(d)) after('push', 900, () => { const c = state.combat, q = c && (c.pushSquares || [])[0]; if (bbOn(d) && q && !c.sidestep) grid(q.x, q.y); else pushChoice(); }); return;   // (brain: botbowl: the first square offered)
+                    case MODES.PUSH_CHOICE: if (isAI(d)) after('push', 900, () => { const c = state.combat, q = c && (c.pushSquares || [])[0]; if (drOn(d)) drPush(d); else if (bbOn(d) && q && !c.sidestep) grid(q.x, q.y); else pushChoice(); }); return;   // (brain: botbowl: the first square offered)
                     case MODES.BOMB_RETHROW: if (isAI(d)) after('rethrow', 1000, () => { const p = state.bombRe && getPlayerById(state.bombRe.id); if (p) { const t = bombAim(p); grid(t.x, t.y); } }); return;
-                    case MODES.FOLLOWUP_CHOICE: if (isAI(d)) after('follow', 800, () => { const v = state.combat && state.combat.vacatedSquare; if (bbOn(d) && v) grid(v.x, v.y); else followUp(); }); return;   // (brain: botbowl: always follow up)
+                    case MODES.FOLLOWUP_CHOICE: if (isAI(d)) after('follow', 800, () => { const v = state.combat && state.combat.vacatedSquare; if (drOn(d)) drFollow(); else if (bbOn(d) && v) grid(v.x, v.y); else followUp(); }); return;   // (brain: botbowl: always follow up)
                 }
                 if (!isAI(state.activeTeam)) { plan = null; return; }
                 if (vis('turn-banner')) return;
@@ -34125,7 +34125,8 @@ ol.ci-steps li::marker { content: none; }
                 after('choose', 450, () => {
                     const t0c = performance.now();
                     try { starAIPre(state.activeTeam); } catch (e) { console.error(e); }
-                    try { plan = bbOn(state.activeTeam) ? bbChoose() : choose(); } catch (e) { console.error(e); plan = null; }
+                    try { plan = drOn(state.activeTeam) ? drChoose() : bbOn(state.activeTeam) ? bbChoose() : choose(); } catch (e) { console.error(e); plan = null; }
+                    if (plan === undefined) { plan = null; return; }   // (brain: dref) still waiting for drefsante's answer: ask again next tick
                     // (tools/ai-whatif.js) a test can look at this decision, ask what the AI would choose with other switches (again),
                     // and play something else instead (by returning it)
                     if (window.AI_WHATIF && !bbOn(state.activeTeam)) {
@@ -34149,6 +34150,178 @@ ol.ci-steps li::marker { content: none; }
                     if (plan) { plan.step = 0; const p = getPlayerById(plan.pid), t = plan.target != null ? getPlayerById(plan.target) : null; cameraFocus([p, t && cheb(p, t) <= 3 ? t : null]); }
                     else endTurn();
                 });
+            }
+            // ---- (brain: dref) drefsante plays: its own Java brain, run on this computer by tools/drefsante-server.py ----
+            // Settings -> Computer coach -> drefsante. Each of its decisions is asked of the local server (bb-dref-url, by default
+            // http://127.0.0.1:8777): the turn's next player action and route, set-ups, the kick, touchbacks, block dice, block
+            // re-rolls, pushes, follow-ups and other re-rolls. The game waits (the driver polls) until the answer comes; anything
+            // else (interceptions, skills, apothecary...) and any question the server can't answer go to brain x. Players are named
+            // p<id>_home (team 1, which scores at x 0, as BotBowl's home team) or p<id>_away; squares are y * 26 + x.
+            const drOn = t => (t === 0 || t === 1) && AIX.p(t, 'brain', '') === 'dref';
+            const DR = (() => {
+                let n = 0, pend = null, got = null, down = 0, told = false;
+                const game = 'bb' + Date.now().toString(36);
+                const url = () => { try { return localStorage.getItem('bb-dref-url') || 'http://127.0.0.1:8777'; } catch (e) { return 'http://127.0.0.1:8777'; } };
+                const nm = p => p ? `p${p.id}_${p.team === 1 ? 'home' : 'away'}` : '';
+                // (kind 'setup': its players all in the reserves, as BotBowl hands them over - with them on the pitch it sets up nothing;
+                // actp: the player part-way through an action, e.g. the blocker when it picks the dice)
+                function snap(me, kind, actp) {
+                    const setting = kind === 'setup';
+                    const st = p => p.isEjected ? 'out' : p.isCasualty ? 'cas' : p.isKO ? 'ko' : p.isReserve || !onPitch(p) || (setting && p.team === me) ? 'reserve' : p.isStunned ? 'stunned' : p.isDown ? 'prone' : 'up';
+                    const act = actp || (state.selectedId != null && state.activeTeam === me ? getPlayerById(state.selectedId) : null);
+                    const busy = act && act.actionTaken && !act.hasActed;
+                    const there = p => onPitch(p) && !(setting && p.team === me);
+                    const team = t => ({ race: 'Human', name: 'Team' + t, rerolls: (ROSTERS[t] && ROSTERS[t].rerolls) || 3,
+                        rrLeft: state.rr ? state.rr[t] : 0, rrUsed: t === state.activeTeam && !!state.teamRRUsedThisTurn, turn: state.turn ? state.turn[t] : 0,
+                        score: state.score ? state.score[t] : 0, apothecary: false });
+                    return { me, active: state.activeTeam, half: state.half || 1, weather: state.weather && state.weather.key ? state.weather.key : 'nice',
+                        used: { blitz: !!state.blitzUsed, pass: !!state.passUsed, handoff: !!state.handoffUsed, foul: !!state.foulUsed },
+                        activePlayer: busy ? act.id : null, action: busy ? act.actionTaken : null,
+                        ball: { carrier: state.ball.carrierId || null, x: state.ball.x, y: state.ball.y, inAir: false },
+                        teams: [team(0), team(1)],
+                        players: state.players.map(p => ({ id: p.id, team: p.team, role: String(p.type || 'Lineman').replace(/^(Human|Imperial|Old World)\s+/, ''), ma: p.ma, st: p.st, ag: p.ag, pa: p.pa, av: p.av,
+                            skills: p.skills || [], x: there(p) ? p.x : null, y: there(p) ? p.y : null, state: st(p), used: !!p.hasActed, hasBlocked: !!p.hasBlocked,
+                            maLeft: p.remainingMA != null ? p.remainingMA : p.ma, rushesLeft: p.rushes != null ? p.rushes : 2, rooted: !!p.rooted })) };
+                }
+                // one question at a time: undefined while waiting (ask again on the next tick), then the answer (take() moves on)
+                function ask(kind, me, extra, actp) {
+                    const sig = kind + ':' + n;
+                    if (got && got.sig === sig) return got.r;
+                    if (pend === sig) return undefined;
+                    if (down && Date.now() - down < 20000) return { error: 'not answering' };   // (asked again after 20 s)
+                    pend = sig; got = null;
+                    fetch(url(), { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(Object.assign({ q: kind, game, state: snap(me, kind, actp) }, extra || {})) })
+                        .then(r => r.json()).then(r => { if (pend === sig) { pend = null; got = { sig, r }; down = 0; } })
+                        .catch(e => {
+                            if (pend !== sig) return;
+                            pend = null; got = { sig, r: { error: String((e && e.message) || e) } }; down = Date.now();
+                            if (!told) { told = true; log(`drefsante isn't answering at ${url()}: start tools/drefsante-server.py on this computer. The Experimental coach plays for it meanwhile.`, 'text-amber-300 font-bold'); }
+                        });
+                    return undefined;
+                }
+                const take = () => { n++; got = null; };
+                const byName = s => { const m = /^p(\d+)_/.exec(s || ''); return m ? getPlayerById(+m[1]) : null; };
+                const at = id => ({ x: id % 26, y: Math.floor(id / 26) });
+                const sqOf = (x, y) => y * 26 + x;
+                const faceName = f => f === FACES.SKULL ? 'skull' : f === FACES.BOTH_DOWN ? 'both' : f === FACES.STUMBLE ? 'stumble' : f === FACES.POW ? 'pow' : 'push';
+                return { ask, take, byName, at, sqOf, nm, faceName, debug: () => ({ n, pend, got, down, url: url() }) };
+            })();
+            // its turn: the next player action, as a plan runPlan carries out (its route square by square)
+            function drChoose() {
+                const me = state.activeTeam;
+                if (state.charge) return choose();
+                const r = DR.ask('turn', me, { active: '' });
+                if (r === undefined) return undefined;
+                DR.take();
+                if (r.error || typeof r.plan !== 'string') return choose();
+                const L = r.plan.split('\n').map(s => s.trim().split(';')).filter(k => k[0]);
+                if (!L.length || L[0][0] === 'END_TURN') return null;
+                const KIND = { START_MOVE: 'move', START_BLITZ: 'blitz', START_BLOCK: 'block', START_PASS: 'pass', START_HANDOFF: 'handoff', START_FOUL: 'foul' };
+                let kind = 'move', p = null, target = null, receiver = null, done = false;
+                const sqs = [];
+                for (const k of L) {
+                    const c = k[0];
+                    if (done) break;
+                    if (KIND[c]) { kind = KIND[c]; p = DR.byName(k[1]); }
+                    else if (c === 'STAND_UP') p = p || DR.byName(k[1]);
+                    else if (c === 'MOVE') { p = p || DR.byName(k[2]); sqs.push(DR.at(+k[1])); }
+                    else if (c === 'BLOCK' || c === 'FOUL') { p = p || DR.byName(k[2]); const s = DR.at(+k[1]), t = getPlayer(s.x, s.y); target = t ? t.id : null; done = true; }
+                    else if (c === 'PASS' || c === 'HANDOFF') { p = p || DR.byName(k[2]); const s = DR.at(+k[1]), t = getPlayer(s.x, s.y); receiver = t ? t.id : null; done = true; }
+                    else if (c === 'END_PLAYER_TURN' || c === 'END_TURN') done = true;
+                }
+                const bad = !p || p.team !== me || p.hasActed || !onPitch(p) || tried.has(p.id)
+                    || ((kind === 'block' || kind === 'blitz' || kind === 'foul') && target == null) || ((kind === 'pass' || kind === 'handoff') && receiver == null)
+                    || (kind === 'blitz' && state.blitzUsed) || (kind === 'foul' && state.foulUsed) || (kind === 'pass' && state.passUsed) || (kind === 'handoff' && state.handoffUsed);
+                if (bad) { AIX.count(me, 'dref fallback'); return choose(); }   // (a plan BludBowl can't follow: brain x picks this action instead)
+                let px = p.x, py = p.y;
+                const path = sqs.map(s => { const o = { x: s.x, y: s.y, prevX: px, prevY: py }; px = s.x; py = s.y; return o; });
+                AIX.count(me, 'dref ' + kind);
+                const plan = { pid: p.id, kind, dref: true };
+                if (target != null) plan.target = target;
+                if (receiver != null) plan.receiver = receiver;
+                if (!path.length && (kind === 'pass' || kind === 'handoff')) plan.stay = true;
+                plan.pick = () => (path.length ? { x: px, y: py, path, prob: 100 } : null);
+                return plan;
+            }
+            function drSetup(team) {
+                if (GEO.sev || state.setup.eventSetup || state.setup.restrictIds) { setupTeam(team); return; }
+                const r = DR.ask('setup', team, { receiving: !!(state.kickoff && state.kickoff.receivingTeam === team), reorganize: false });
+                if (r === undefined) return;
+                DR.take();
+                if (r.error || !r.placed) { setupTeam(team); return; }
+                const ps = state.players.filter(p => p.team === team && !p.isCasualty && !p.isEjected && !p.isKO);
+                const keep = ps.map(p => [p.x, p.y, p.isReserve]);
+                ps.forEach(p => { p.x = -9; p.y = -9; p.isReserve = true; });
+                r.placed.split('\n').forEach(l => {
+                    const k = l.split(';'), p = DR.byName(k[0]);
+                    if (!p || p.team !== team || k.length < 2) return;
+                    const s = DR.at(+k[1]);
+                    if (getPlayer(s.x, s.y)) return;
+                    p.x = s.x; p.y = s.y; p.isReserve = false;
+                });
+                state.selectedId = null; updateSetupHUD(); render();
+                if (validateSetup(team).valid) click('btn-confirm-setup');
+                else { ps.forEach((p, i) => { p.x = keep[i][0]; p.y = keep[i][1]; p.isReserve = keep[i][2]; }); setupTeam(team); }
+            }
+            function drKick() {
+                const r = DR.ask('kick', other(state.kickoff.receivingTeam));
+                if (r === undefined) return;
+                DR.take();
+                if (r.error || r.square == null || r.square < 0) { kickTarget(); return; }
+                const s = DR.at(r.square);
+                if (!GEO.inHalf(state.kickoff.receivingTeam, s.x)) { kickTarget(); return; }
+                grid(s.x, s.y);
+            }
+            function drTouchback() {
+                const r = DR.ask('touchback', state.kickoff.receivingTeam);
+                if (r === undefined) return;
+                DR.take();
+                const p = r.error ? null : DR.byName(r.player);
+                if (p && onPitch(p) && !p.isDown) grid(p.x, p.y); else touchback();
+            }
+            // block dice for its own blocks: a team re-roll first (askRerollForBlock), then the die (askWhichDice)
+            function drDice(c) {
+                const me = c.atk.team, btns = [...document.querySelectorAll('#dice-container button')], trr = document.getElementById('btn-combat-trr');
+                const faces = c.dice.map(DR.faceName), mine = c.chooser === me;
+                if (trr && !trr.classList.contains('hidden') && !c.drAsked && !c.aiRerolled) {
+                    const r = DR.ask('blockReroll', me, { faces, atk: DR.nm(c.atk), def: DR.nm(c.def), ours: mine }, c.atk);
+                    if (r === undefined) return;
+                    DR.take(); c.drAsked = true;
+                    if (!r.error && r.reroll) { c.aiRerolled = true; act(() => click('btn-combat-trr')); return; }
+                }
+                if (!mine) { diceChoice(); return; }
+                const r = DR.ask('dice', me, { faces, atk: DR.nm(c.atk), def: DR.nm(c.def), blitz: c.atk.actionTaken === 'blitz' }, c.atk);
+                if (r === undefined) return;
+                DR.take();
+                if (r.error || r.index == null || !btns[r.index]) { diceChoice(); return; }
+                const b = btns[r.index];
+                c.aiPicking = true; b.classList.add('ai-pick');
+                setTimeout(() => { c.aiPicking = false; if (vis('modal-dice')) act(() => b.click()); }, 600 * speed);
+            }
+            function drPush(d) {
+                const c = state.combat, qs = (c && c.pushSquares) || [];
+                if (!qs.length || c.sidestep) { pushChoice(); return; }
+                const r = DR.ask('push', d, { pusher: DR.nm(c.atk), pushed: DR.nm(c.currentPushed || c.def), squares: qs.map(q => DR.sqOf(q.x, q.y)), first: !c.chainPush }, c.atk);
+                if (r === undefined) return;
+                DR.take();
+                const q = !r.error && r.index != null ? qs[r.index] : null;
+                if (q) grid(q.x, q.y); else pushChoice();
+            }
+            function drFollow() {
+                const c = state.combat, v = c && c.vacatedSquare;
+                if (!v) { followUp(); return; }
+                const r = DR.ask('follow', c.atk.team, { atk: DR.nm(c.atk), def: DR.nm(c.def), oldDef: DR.sqOf(v.x, v.y) }, c.atk);
+                if (r === undefined) return;
+                DR.take();
+                if (r.error) { followUp(); return; }
+                if (r.follow) grid(v.x, v.y); else click('btn-stay-put');
+            }
+            function drReroll(ctx) {   // undefined while waiting
+                if (!ctx || !ctx.player) return rrWorth(ctx);
+                const r = DR.ask('reroll', ctx.player.team, { player: DR.nm(ctx.player) }, ctx.player);
+                if (r === undefined) return undefined;
+                DR.take();
+                return r.error ? rrWorth(ctx) : !!r.reroll;
             }
             // ---- the bridge: this AI's decisions for a position described from outside (tools/bridge-server.js, which BotBowl's Python bot
             // talks to: ai-training/botbowl-bridge.md). load() sets the game to that position; each ask runs the AI's own code on it and
@@ -34930,7 +35103,7 @@ ol.ci-steps li::marker { content: none; }
                 on('st-replay-kick', REPLAY.kickEnabled(), 'On', 'Off');
                 { const k = document.getElementById('st-replay-kick'); if (k) k.disabled = !REPLAY.enabled(); }
                 on('st-move', twoTapPref, 'Tap twice', 'Tap once');
-                on('st-brain', AIX.pref === 'x', 'Experimental', 'Classic');
+                on('st-brain', AIX.pref !== 'classic', AIX.pref === 'dref' ? 'drefsante' : 'Experimental', 'Classic');
                 on('st-hd', HD.on, HD.size === 64 ? '2x' : '1.5x', 'Off');
                 on('st-stadium', STADIUM.on, 'On', 'Off');
                 on('st-weather', wxFX > 0, wxFX === 1 ? 'Full' : 'Light', 'Off');
@@ -34952,7 +35125,7 @@ ol.ci-steps li::marker { content: none; }
             });
             document.getElementById('st-replay').addEventListener('click', () => { REPLAY.setEnabled(!REPLAY.enabled()); paintSettings(); });
             document.getElementById('st-replay-kick').addEventListener('click', () => { REPLAY.setKickEnabled(!REPLAY.kickEnabled()); paintSettings(); });
-            document.getElementById('st-brain').addEventListener('click', () => { AIX.setPref(AIX.pref === 'x' ? 'classic' : 'x'); paintSettings(); });
+            document.getElementById('st-brain').addEventListener('click', () => { AIX.setPref(AIX.pref === 'x' ? 'classic' : AIX.pref === 'classic' ? 'dref' : 'x'); paintSettings(); });
             document.getElementById('st-move').addEventListener('click', () => { twoTapPref = !twoTapPref; try { localStorage.setItem('bb-two-tap', twoTapPref ? '1' : '0'); } catch (e) {} state.movePlan = null; paintSettings(); });
             document.getElementById('st-weather').addEventListener('click', () => {
                 wxFX = wxFX === 1 ? 0.55 : wxFX > 0 ? 0 : 1;

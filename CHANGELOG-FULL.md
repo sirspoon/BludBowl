@@ -2,6 +2,18 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.74 (25 Nov 2026)
+- drefsante as a computer coach (`brain: dref`): Settings > Computer coach now cycles Experimental, Classic, drefsante
+  (localStorage `bb-brain` 'dref'). drefsante's own Java brain (Frederic Bair's bot, 0.8) runs on the player's computer in
+  `tools/drefsante-server.py` (a small local web server, port 8777; needs Java, pyjnius, botbowl for the skill numbers, and
+  the drefsante folder with its jar and drefsante_bot.cfg). The page asks it, as drefsante's BotBowl bot does through its Java
+  `FFAIProxy`, for each turn's next player action and route, set-ups, the kick, touchbacks, block dice and block re-rolls,
+  pushes, follow-ups and other re-rolls (`drChoose`, `drSetup`, `drKick`, `drTouchback`, `drDice`, `drPush`, `drFollow`,
+  `drReroll`; the AI's polling loop waits for each answer). BludBowl's rules, dice and screens play everything out; whatever
+  drefsante isn't asked (interceptions, skills, apothecary...) and any answer that doesn't fit go to brain x. If the server
+  isn't running, the match log says so and brain x plays. The server's address can be changed with localStorage
+  `bb-dref-url`. drefsante was written for Humans and the older (LRB6) rules and skills.
+
 ## v5.73 (25 Nov 2026)
 - Brain x (the experimental AI), the last turns of a half (`lr1`): on the turn before the last, holding the ball 9+ squares out,
   up to two quick receivers step (sure moves) to squares from which they can reach the end zone next turn, whatever threatens the

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.74 (25 Nov 2026)
+- Play against drefsante, the Bot Bowl V winner, on a computer that has it: run `tools/drefsante-server.py`, then set Settings > Computer coach to drefsante. Desktop only.
+
 ## v5.73 (25 Nov 2026)
 - The experimental computer coach (brain x) plays the end of each half better: the turn before the last it sends receivers up the pitch, and on the last turn one runs into the end zone for a throw.
 
