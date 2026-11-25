@@ -347,6 +347,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   step plays as on the last turn from turn T (low run/throw/chain bars, no holding back, egclear, lr1's run-in; lr1's receivers the
   turn before). Studies (120 games, v5.73 .405, TDs 106-156): goFrom 6 .412 (107-153); goFrom 1 .374 (104-174 - no more scored,
   ~18 more conceded: failed tries hand dref the ball). k_seq goFrom 6: .377 after 500, no gain (lr1 alone was .382 at 500).
+  Defending their last turn (`nn/look/dbg/last_def.py`, 960 games): what decides drefsante's last turn with the ball too far is a free
+  receiver (standing, unmarked, within Move + 2 of the end zone): it starts with none 46% of the time (scores 11%), with one 47% (34%).
+  drefsante leaves us none 79% of the time (we score 5%; with one 41%) and marks our carrier 74% (we its 50%); our turn before cuts
+  its free receivers 0.97 -> 0.63, its turn before ours 0.50 -> 0.23. `ld1` (not kept, `nn/look/dbg/ld1.diff`): the turn before their
+  last, dp1's sure threat-cutting moves unlimited (ldN 8, ldMin 0.03, ldGain 0.02) and their carrier allowed 3 squares' move before
+  the throw. Free receivers left unchanged (0.60); study .460 (luck: conceded 156 -> 128), k_seq .350 after 250: no gain, maybe worse.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
