@@ -336,6 +336,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   `tg1` (not kept; `nn/look/dbg/tg1.diff`): end-of-turn 1-die blocks allowed (looser lateWorth bars, counted double) on a target by a loose
   ball or in front of our carrier: in-front 0.38 -> 1.25 a game, loose ball 0.10 -> 0.25 (rare at our turn's end); study .413 (.412),
   k_seq .364 after 250 games: no gain. Third end-of-turn 1-die block idea to fail - leave that area alone.
+  Last turns of a half (`nn/look/dbg/last_turns.py`, `last_how.py`, 720 games): in its last turn with the ball but no walk-in (a quarter
+  of half-ends) drefsante scored 26%, we 12%; from 14+ out it threw in 71% of them (24% scored), we 17% (8%). Our throws only went to
+  team-mates who could already run in. v5.73 `lr1` (ON): the turn before the last, up to 2 (`lrN`) quick receivers go where they can
+  reach the end zone next turn (deep1, looser: any carrier threat, any distance from him); the last turn, `lastRunPlan` sends one into
+  the end zone and the carrier throws to him (lrMove 50, lrBar 0.08). Last-turn too-far scoring 12% -> 18% (study_lr2), turn 7 too-far
+  scored by half time 25% -> 32%; k_seq gain: no gain (.382/500), notworse: NOT WORSE .385 over 750 (k_lr1). The first try, the
+  last-turn run alone, did nothing: no receiver could reach the end zone (counters in a jsdom debug copy).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,

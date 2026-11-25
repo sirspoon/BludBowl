@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.73 (25 Nov 2026)
+- Brain x (the experimental AI), the last turns of a half (`lr1`): on the turn before the last, holding the ball 9+ squares out,
+  up to two quick receivers step (sure moves) to squares from which they can reach the end zone next turn, whatever threatens the
+  carrier; on the last turn, when the carrier can't run or throw it in, a receiver runs into the end zone first and the carrier
+  throws to him (`lastRunPlan`). v drefsante: in last turns with the ball too far to walk in it scored 18% (was 12%); over 750
+  games score share .385 against v5.70's .386 (not worse).
+
 ## v5.72 (23 Nov 2026)
 - The computer's block: its animated block dice land in 55% of the roll length (at least 0.45 s; 0.55 s at the default 1.0 s),
   and it picks its die sooner (a 0.45 s pause then 0.8 s with the die highlighted, was 0.9 s + 1.3 s; its block re-roll after

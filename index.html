@@ -1288,7 +1288,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.72</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.73</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -29906,7 +29906,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1 },   // (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1 },   // (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && P.brain === 'x'); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -30477,6 +30477,30 @@ ol.ci-steps li::marker { content: none; }
                         });
                     });
                 });
+                return best;
+            }
+            // (brain x: lr1) the last turn, too far to run or throw it in: a receiver runs into the end zone first, then the carrier throws to
+            // him (a catch there scores). throwToScore only throws to team-mates who can still run in from where they stand. In the last turn
+            // with the ball but no walk-in, 14+ squares out, drefsante threw in 71% and scored 24%; we threw in 17% and scored 8%
+            // (nn/look/dbg/last_how.py, 720 study games). Value: the receiver's move x the best throw (the carrier's move to it counted).
+            function lastRunPlan(me, c, act) {
+                if (!AIX.x(me) || !AIX.p(me, 'lr1', 0) || state.passUsed || c.pa == null || hasSk(c, 'My Ball') || !act.includes(c)) return null;
+                const minMove = AIX.p(me, 'passMove', AIX.on(me, 'endgame') ? 40 : 100), rMin = AIX.p(me, 'lrMove', 50);
+                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= minMove)].map(sp => ({ sp, p: sp.path.length ? pPlan(c, sp, true) / 100 : 1 }));
+                let best = null;
+                act.forEach(r => {
+                    if (r.id === c.id || r.isDown || r.isStunned || r.isDistracted || hasSk(r, 'No Ball') || hasSk(r, 'No Hands') || r.x === endX(me)) return;
+                    movesFor(r).forEach(m => {
+                        if (m.x !== endX(me) || m.prob < rMin) return;
+                        const ox = r.x, oy = r.y; r.x = m.x; r.y = m.y;
+                        let t = 0;
+                        try { spots.forEach(o => { if (o.sp.x === m.x && o.sp.y === m.y) return; const v = o.p * passOdds(c, o.sp.x, o.sp.y, r) * 0.97; if (v > t) t = v; }); }
+                        finally { r.x = ox; r.y = oy; }
+                        const v = t * pPlan(r, m, true) / 100;
+                        if (!best || v > best.v) best = { v, r, m };
+                    });
+                });
+                if (!best || best.v < AIX.p(me, 'lrBar', 0.08)) return null;
                 return best;
             }
             // (ho2) three players, one ball: drefsante, Bot Bowl V's winner, weighs before each move a run, a hand-off then a run, a pass
@@ -32413,6 +32437,15 @@ ol.ci-steps li::marker { content: none; }
                         const rid = via.r.id, sx = via.s.x, sy = via.s.y;
                         return { pid: carrier.id, kind: via.kind, receiver: rid, pick: ms => (sx === carrier.x && sy === carrier.y) ? null : (ms.find(m => m.x === sx && m.y === sy) || null), stay: sx === carrier.x && sy === carrier.y };
                     }
+                    // 2c. (brain x: lr1) the last turn: a receiver runs into the end zone first, the throw follows
+                    if (lastTurn && !state.aiStalling) {
+                        const lr = lastRunPlan(me, carrier, act);
+                        if (lr && lr.v > Math.max(direct, via ? via.v : 0) + 0.02) {
+                            AIX.count(me, 'lr1');
+                            const tx = lr.m.x, ty = lr.m.y;
+                            return { pid: lr.r.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty) || null };
+                        }
+                    }
                 }
                 // 1b. (pus1) a loose ball: pick it up and hand off or pass to a team-mate who then runs it in
                 if (AIX.on(me, 'pus1') && !carrier && state.ball.x >= 0 && !state.isResolvingKickoff) {
@@ -32581,15 +32614,18 @@ ol.ci-steps li::marker { content: none; }
                 // fuller form, two receivers incl. Blitzers: v drefsante 65-65-170, v the AI without it 96-81-111.)
                 // (deepSafe: only with the carrier safe - at most that many of theirs with a free way to him; deepNoBlock: players with
                 // Block - the Blitzers - stay for the blocks and the Blitz)
+                // (brain x: lr1) the turn before the last: up to lrN receivers go where they can reach the end zone next turn, wherever the
+                // carrier is and whatever threatens him - the last turn's throw (lastRunPlan) needs someone to run in and throw to
+                const lrPre = AIX.x(me) && AIX.p(me, 'lr1', 0) && state.turn[me] === TURNS - 1;
                 if (AIX.on(me, 'deep1') && carrier && carrier.team === me && onPitch(carrier) && !carrier.isDown && !state.charge && !lastTurn
                     && toGo(carrier.x, me) >= AIX.p(me, 'deepFrom', 9) && AIX.p(me, 'deepN', 1) > 0
-                    && (AIX.p(me, 'deepSafe', 0) >= 99 || carrierThreat(me, carrier) <= AIX.p(me, 'deepSafe', 0))) {
+                    && (lrPre || AIX.p(me, 'deepSafe', 0) >= 99 || carrierThreat(me, carrier) <= AIX.p(me, 'deepSafe', 0))) {
                     // in reach: a hand-off after a sure move (the carrier's move + 1), or a short pass (6 squares) if the carrier can really
                     // throw - from a Blitzer or a Lineman the passes it lined up were 4-40% shots (look/dbg/deep1_throw.js)
                     const passer = (carrier.pa != null && carrier.pa <= AIX.p(me, 'deepPa', 3)) || hasSk(carrier, 'Pass');
-                    const inReach = (x, y) => Math.max(Math.abs(x - carrier.x), Math.abs(y - carrier.y)) <= (carrier.ma || 6) + 1 || (passer && Math.hypot(x - carrier.x, y - carrier.y) <= 6);
+                    const inReach = (x, y) => lrPre || Math.max(Math.abs(x - carrier.x), Math.abs(y - carrier.y)) <= (carrier.ma || 6) + 1 || (passer && Math.hypot(x - carrier.x, y - carrier.y) <= 6);
                     const readyAt = (q, x, y) => toGo(x, me) <= q.ma + 2 && tzFor(x, y, me) === 0 && inReach(x, y);
-                    const want = AIX.p(me, 'deepN', 1);
+                    const want = lrPre ? AIX.p(me, 'lrN', 2) : AIX.p(me, 'deepN', 1);
                     const readyNow = state.players.filter(q => q.team === me && q.id !== carrier.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && readyAt(q, q.x, q.y));
                     if (readyNow.length < want) {
                         let best = null;
@@ -32603,7 +32639,7 @@ ol.ci-steps li::marker { content: none; }
                                 if (!best || s > best.s) best = { p, m, s };
                             });
                         });
-                        if (best) { const tx = best.m.x, ty = best.m.y; return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
+                        if (best) { if (lrPre) AIX.count(me, 'lrPre'); const tx = best.m.x, ty = best.m.y; return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null }; }
                     }
                 }
                 // 3. blocks with almost no risk come first

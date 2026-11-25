@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.73 (25 Nov 2026)
+- The experimental computer coach (brain x) plays the end of each half better: the turn before the last it sends receivers up the pitch, and on the last turn one runs into the end zone for a throw.
+
 ## v5.72 (23 Nov 2026)
 - The computer's blocks are quicker: its block dice land faster and it picks its die sooner.
 - Armour and injury dice no longer pop up at the top by default (they could lag behind the pitch); switch them back on in Settings > Armour and injury dice.
