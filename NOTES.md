@@ -14,9 +14,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   `follow`, `reroll`. The server writes the two team files the Java side reads (the format of drefsante_bot.py's convertTeam /
   convertPlayer), calls updateModel, then the question. Names p<id>_home (BludBowl team 1, scores at x 0) / p<id>_away;
   squares y*26+x. Tested in the browser (simtest, brain x v drefsante both ways round): set-ups, routes, blocks, Blitzes,
-  passes, dice, re-rolls, pushes and follow-ups all from drefsante, no fallbacks; the server answers in ~0.1 s. Not yet tried
-  from the live (https) site - Chrome may ask to allow the site to reach this computer's local network. Desktop only (a phone
-  can't reach the PC's 127.0.0.1). Not done: interceptions, skill choices, apothecary, kick-off events (brain x decides).
+  passes, dice, re-rolls, pushes and follow-ups all from drefsante, no fallbacks (two full matches: brain x won 2-0 v it as
+  home, it won 1-0 as away); the server answers in ~0.1 s. The server also serves this repo's files, so http://127.0.0.1:8777/
+  is the sure way to play (own saved teams/settings, apart from the live site's). From the live https site: the in-app browser
+  pane blocks it (ERR_BLOCKED_BY_CLIENT); real Chrome should ask to allow the site to reach this computer - untested. Desktop
+  only (a phone can't reach the PC's 127.0.0.1). Not done: interceptions, skill choices, apothecary, kick-off events (brain x).
 - **Brain x (v5.18, the owner's plan, 18 Nov): make the AI a real challenge for drefsante, Humans v Humans.** Work goes into the
   experimental brain (`'{"brain":"x"}'`; code behind `AIX.x(team)`, its own tuning values in `AIX.X`), not the game's AI, so it may
   test worse for a while. Measure each step v drefsante (`nn/evaluate.py --model bludbowl --opponent drefsante --rules season3

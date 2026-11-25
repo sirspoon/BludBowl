@@ -3,8 +3,10 @@ Bowl V winner) for BludBowl's game in your browser.
 
     python tools/drefsante-server.py --dref E:/python/projects/BloodbowlAI_312/drefsante     (port 8777 by default)
 
-Then in BludBowl: Settings -> Computer coach -> drefsante, and start a match against the computer. The page asks this server
-for each of drefsante's decisions (http://127.0.0.1:8777); BludBowl's own rules, dice and screens play them out.
+Then open http://127.0.0.1:8777/ (this server serves the game too), set Settings -> Computer coach -> drefsante and start a
+match against the computer. The live site (https://sirspoon.github.io/BludBowl/) can use it as well if the browser lets it
+reach this computer (Chrome asks), but its saved teams and settings are kept apart from the local copy's. The page asks this
+server for each of drefsante's decisions; BludBowl's own rules, dice and screens play them out.
 
 Needs what drefsante's BotBowl bot needs (see its README): Java (JAVA_HOME, or --java), pyjnius, botbowl (only for the skill
 numbers), and the drefsante folder with drefsante_bot.cfg (jarPathName, temporaryFolder). drefsante's brain plays the LRB6
@@ -26,6 +28,7 @@ ap.add_argument('--verbose', action='store_true')
 args = ap.parse_args()
 
 DREF = os.path.abspath(args.dref)
+REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))   # (BludBowl, served on GET)
 if args.java: os.environ['JAVA_HOME'] = args.java
 if not os.environ.get('JAVA_HOME'):
     jdk = os.path.join(os.path.dirname(DREF), 'java')
@@ -184,8 +187,17 @@ class H(BaseHTTPRequestHandler):
         self.send_response(204); self.cors(); self.end_headers()
 
     def do_GET(self):
-        self.send_response(200); self.cors(); self.send_header('Content-Type', 'application/json'); self.end_headers()
-        self.wfile.write(json.dumps({'ok': True, 'drefsante': True}).encode())
+        # the game itself too (this repo's files), so http://127.0.0.1:PORT/ plays against drefsante with nothing in between
+        # (the live https site needs the browser to allow it to reach this computer; this way it doesn't)
+        rel = self.path.split('?')[0].split('#')[0].lstrip('/') or 'index.html'
+        f = os.path.normpath(os.path.join(REPO, rel))
+        if not f.startswith(REPO) or not os.path.isfile(f):
+            self.send_response(404); self.cors(); self.end_headers(); return
+        ctype = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.md': 'text/markdown; charset=utf-8',
+                 '.png': 'image/png', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.webp': 'image/webp', '.ico': 'image/x-icon'}.get(os.path.splitext(f)[1].lower(), 'application/octet-stream')
+        with open(f, 'rb') as fh: body = fh.read()
+        self.send_response(200); self.cors(); self.send_header('Content-Type', ctype); self.send_header('Content-Length', str(len(body))); self.end_headers()
+        self.wfile.write(body)
 
     def do_POST(self):
         try:
@@ -205,7 +217,7 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     srv = HTTPServer(('127.0.0.1', args.port), H)
-    print(f'drefsante for BludBowl: http://127.0.0.1:{args.port}  (jar {os.path.basename(JAR)}; Ctrl+C to stop)', flush=True)
+    print(f'drefsante for BludBowl: open http://127.0.0.1:{args.port}/ and set Settings > Computer coach to drefsante (jar {os.path.basename(JAR)}; Ctrl+C to stop)', flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
