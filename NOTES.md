@@ -375,6 +375,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   drefsante's turns without the ball 28% linked v ours 21%; it moves a player in and then blocks with his help 10.1 a game v our
   7.1 (1.5 v 1.1 a turn), blocks 2.8 a turn there v 2.2; and it frees a player with a block and then Blitzes with him 2.9 a game v 1.3.
   With the ball we're level (36% v 32%; we clear lanes more, 2.0 v 1.1, it escorts the carrier more, 1.6 v 0.7).
+  `da1` (not kept, `nn/look/dbg/da1.diff`): defending, a free player makes a sure move next to an opponent one of ours already marks
+  when that gives us the block dice (gain in knock-down chance >= daGain, x3 their carrier, x1.5 within 2 of him), the block straight
+  after (daNext), daN 2 a turn. jsdom: ~3 a match at daGain 0.08 (0.2: almost never - most helps add ~0.1). BotBowl studies (--acts):
+  set-up blocks on defence unchanged (7.1 -> 7.0 a game: the follow-up block mostly doesn't happen through the bridge - not traced),
+  score .365 (daGain 0.2) and .333 (0.08) v .419 on the same seeds. Dropped.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
