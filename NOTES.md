@@ -343,6 +343,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   the end zone and the carrier throws to him (lrMove 50, lrBar 0.08). Last-turn too-far scoring 12% -> 18% (study_lr2), turn 7 too-far
   scored by half time 25% -> 32%; k_seq gain: no gain (.382/500), notworse: NOT WORSE .385 over 750 (k_lr1). The first try, the
   last-turn run alone, did nothing: no receiver could reach the end zone (counters in a jsdom debug copy).
+  Going for it earlier (owner: score as many as possible, don't stall; not kept, `nn/look/dbg/gofrom.diff`): `goFrom` T = the scoring
+  step plays as on the last turn from turn T (low run/throw/chain bars, no holding back, egclear, lr1's run-in; lr1's receivers the
+  turn before). Studies (120 games, v5.73 .405, TDs 106-156): goFrom 6 .412 (107-153); goFrom 1 .374 (104-174 - no more scored,
+  ~18 more conceded: failed tries hand dref the ball). k_seq goFrom 6: .377 after 500, no gain (lr1 alone was .382 at 500).
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
