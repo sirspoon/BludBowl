@@ -329,6 +329,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   extra mostly 1-die blocks (6.3 v 2.9). `rrKd` (not kept; `nn/look/dbg/rrkd.diff`): re-roll a no-knock-down block near the ball (or
   next to our carrier) when re-rolls are spare (rr - 1 > turns left / rrKdD). rrKdD 2: barely fires (4.62 -> 4.69). rrKdD 6, radius 4:
   5.25 a game, 3.2 on blocks, study .388 (.412), k_seq .372 after 375 games: no gain. More re-rolls on blocks isn't the lever.
+  1-die block targets (`nn/look/dbg/block_targets.py`, 600 games; the owner asked): drefsante 6.8 a game v our 2.7. Its extra is mostly
+  "elsewhere" (2.9 v 0.8; 55% its last action of the turn), near a loose ball (0.64 v 0.10) and players ahead of its own carrier (0.92 v
+  0.38, no Blitz, half its last action). It re-rolls ~20% of every kind (even "elsewhere"), falls 18% (us 12%). Ours are about the
+  carrier: 0.73 a game, 90% Blitz, re-rolled 53% (its 1.00, 68% Blitz, 36%). Plain end-of-turn volume was tried twice (lateTurn, bk1): worse/level.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
