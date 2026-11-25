@@ -316,6 +316,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Where the ball slows (360 games): 14-18 out is 47% of our turns with it (drefsante 34%), marked there 72%; free there we gain 2.9 v
   4.0; free 9-13 out 4% of our turns v 16%. `bpProg` 0.2 (study_pg2, v5.50's risk model): gain 3.0 -> 3.3, drives scored 28% (26%),
   marked still 72%, .367 (v5.70 .388). Not kept. Speed-ups tried so far (escort, bpProg, spW 1) all fail to turn into wins.
+  Ideas from CLAW Blood Bowl's articles (clawbloodbowl.uk, 25 Nov; the owner found it): based cage corners - ours as often as
+  drefsante's (31% v 33% of end-of-turn positions; it reaches our guards by Blitz 739 v Block 339). Gates (`nn/look/dbg/gates.py`):
+  our screens leave more (one unmodified dodge gives its free carrier 0.41-0.46 extra squares, 3+ in 5-8% of turns; its screens give
+  ours 0.17-0.27, 1-2%) but drefsante doesn't take them (only 99%-sure moves). Deeper kicks (`kick_deep.py`): our aim is already 6
+  from its end line, the limit - one square deeper triples touchbacks (2.5% -> 8.6%), and it keeps its Thrower and a Lineman there.
+  Secure the Ball: used when it beats a pick-up (rarely, with the Sure Hands Thrower); pick-ups fail ~44% of attempts (it ~40%).
+  `recOn` (recovery player, not kept; patch `nn/look/dbg/patch_recover.py`): carrier exposed (spRisk >= 0.35, < 2 team-mates within 2)
+  -> a free player 2 from him covering the bounce squares. study_rec .392 (.388); its scoring after taking the ball 19% (15%). No gain.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
