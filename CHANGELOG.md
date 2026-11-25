@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.76 (25 Nov 2026)
+- Your last three matches are kept automatically in I Like to Watch > My matches (a fourth replaces the oldest). Press Keep on one to hold on to it, and Rename to give it your own name. Switch it off in Settings > Keep my last matches.
+
 ## v5.75 (25 Nov 2026)
 - The computer coach from a local AI server only shows in Settings when that server is running, and a phone on the same Wi-Fi can play against it too.
 - During a match against it, a small light in the corner shows it is really playing (green, pulsing) or that another coach is standing in (amber, with the reason).

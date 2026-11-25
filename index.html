@@ -762,6 +762,7 @@
         #frep-list .fr-acts button, #frep-list .fr-add { padding: 5px 10px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; font-weight: 700; font-size: 12.5px; cursor: pointer; }
         #frep-list .fr-acts .fr-go { background: #065f46; border-color: #10b981; }
         #frep-list .fr-acts .fr-del.arm { background: #7f1d1d; border-color: #ef4444; }
+        #frep-list .fr-auto { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: #1e3a5f; color: #bfdbfe; font-size: 11px; font-weight: 600; vertical-align: middle; }
         #frep-list .fr-add { display: block; text-align: center; border-style: dashed; }
         /* a coach's decision in a FUMBBL replay: the game's question card, answered by itself (nothing to tap) */
         body.frep-on #modal-roll, body.frep-on #modal-team-reroll, body.frep-on #modal-choice, body.frep-on #modal-dice { pointer-events: none !important; }
@@ -1299,7 +1300,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.75</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.76</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -1349,6 +1350,7 @@ ol.ci-steps li::marker { content: none; }
             <div class="st-row"><span>Pitch</span><select id="st-pitch" class="st-sel">
                 <option value="home">Home Team</option><option value="random">Random</option><option value="blades">Grass</option><option value="worn">Muddy Grass</option><option value="flagstone">Mossy Flagstones</option><option value="jungle">Jungle Temple</option><option value="graveyard">Graveyard</option><option value="elven">High Elven</option><option value="brimstone">Brimstone</option><option value="woodland">Woodland</option><option value="blackark">Black Ark</option><option value="shanty">Orc Shantytown</option><option value="dwarfhold">Dwarf Hold</option><option value="wastes">Ogre Wastes</option><option value="plague">Plague Garden</option><option value="bretonnia">Bretonnian Castle</option><option value="ziggurat">Ziggurat</option><option value="altdorf">Altdorf</option><option value="fjord">Frozen Fjord</option><option value="moot">Mootland Green</option><option value="khemri">Khemri</option><option value="warpstone">Warped Flagstones</option><option value="chaos">Chaos Wastes</option></select></div>
             <div class="st-row"><span>Computer coach<small>Experimental: the newest AI, still being tuned (on Humans v Humans so far). Classic: the AI as it was before v5.43<span id="st-brain-dref" class="hidden">. drefsante: the Bot Bowl V winner, from the AI server running on this computer</span></small></span><button type="button" class="st-tog" id="st-brain"></button></div>
+            <div class="st-row"><span>Keep my last matches<small>Every finished match is kept in I Like to Watch &gt; My matches; the newest three stay (a fourth replaces the oldest) unless you press Keep on one</small></span><button type="button" class="st-tog" id="st-autokeep"></button></div>
             <div class="st-row"><span>Moving<small>Tap twice: the first tap shows the route (drag its dots to change it), the second moves</small></span><button type="button" class="st-tog" id="st-move"></button></div>
             <div class="st-row"><span>Animations<small>walking, block clashes and foul stomps</small></span><button type="button" class="st-tog" id="st-anim"></button></div>
             <div class="st-row"><span>Animate block dice<small>your dice tumble until you press Roll, then jump and land on the result; the computer's roll at once and land the same way</small></span><button type="button" class="st-tog" id="st-dice-block"></button></div>
@@ -27749,16 +27751,23 @@ ol.ci-steps li::marker { content: none; }
                     add.appendChild(inp); box.appendChild(add);
                 }
                 const list = featRace ? items.filter(it => (it.races || []).includes(featRace)) : items;
-                if (!list.length) { note(items.length ? 'None of your saved matches has that team.' : 'No saved matches yet. At the end of a match, "💾 Save this match" on the match summary keeps it here (on this device only, until you share it).'); return; }
+                if (!list.length) { note(items.length ? 'None of your saved matches has that team.' : 'No saved matches yet. Finished matches are kept here automatically (the newest three, unless you Keep one; see Settings), and "💾 Save this match" on the match summary keeps one for good. On this device only, until you share it.'); return; }
                 list.forEach(it => {
                     const row = document.createElement('div'); row.className = 'fr-row fr-mine'; row.setAttribute('role', 'listitem');
                     const t = document.createElement('div'); t.className = 'fr-t'; t.textContent = it.title || 'Match';
+                    if (it.auto) { const g = document.createElement('span'); g.className = 'fr-auto'; g.textContent = 'recent'; g.title = 'Kept automatically: only the newest three recent matches stay. Keep it to hold on to it.'; t.appendChild(g); }
                     const sub = document.createElement('div'); sub.className = 'fr-s';
                     sub.textContent = [it.comp, it.date, it.partial ? 'from part-way through' : '', it.size ? Math.max(1, Math.round(it.size / 1024)) + ' KB' : ''].filter(Boolean).join(' · ');
                     const acts = document.createElement('div'); acts.className = 'fr-acts';
                     const mk = (txt, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; if (cls) b.className = cls; b.addEventListener('click', fn); acts.appendChild(b); return b; };
                     mk('▶ Watch', 'fr-go', async () => { try { say('Starting…'); const d = await REC.load(it.id); $('frep-ask').classList.add('hidden'); start(d); } catch (e) { console.error(e); say(e && e.message ? e.message : "Couldn't open it."); } });
                     mk('↗ Share / export', '', async () => { try { const how = await REC.share(it.id); if (how === 'saved') say('Saved as a file: send it to anyone with BludBowl, who can open it with "Open a file…".'); } catch (e) { console.error(e); say("Couldn't export it."); } });
+                    if (it.auto) mk('📌 Keep', '', async () => { try { await REC.pin(it.id); say('Kept: it stays in My matches until you delete it.'); paintFeat(); } catch (e) { console.error(e); say(e && e.message ? e.message : "Couldn't keep it."); } });
+                    mk('✎ Rename', '', async () => {
+                        const v = window.prompt('A name for this match:', it.title || '');
+                        if (v == null || !v.trim()) return;
+                        try { await REC.pin(it.id, v.trim()); paintFeat(); } catch (e) { console.error(e); say(e && e.message ? e.message : "Couldn't rename it."); }
+                    });
                     const del = mk('🗑 Delete', 'fr-del', async () => {
                         if (!del.classList.contains('arm')) { del.classList.add('arm'); del.textContent = 'Tap again to delete'; setTimeout(() => { del.classList.remove('arm'); del.textContent = '🗑 Delete'; }, 3500); return; }
                         try { await REC.del(it.id); paintFeat(); } catch (e) { console.error(e); }
@@ -27840,7 +27849,7 @@ ol.ci-steps li::marker { content: none; }
             function begin() {
                 cur = { players: state.players, cmds: [], prev: null, seen: new Map(), lastRoll: null, inj: [], kick: false, act: null, carrier: null,
                     partial: (state.turn[0] || 0) + (state.turn[1] || 0) > 1 || state.score[0] + state.score[1] > 0 || state.half > 1, at: Date.now() };
-                done = null; saved = false;
+                done = null; saved = false; autoId = null;
             }
             // what has changed since the last look, as FUMBBL's model changes
             function sample(reports, extra) {
@@ -28038,6 +28047,25 @@ ol.ci-steps li::marker { content: none; }
                 const out = []; settleInj(true, out);
                 if (out.length) C.cmds.push({ modelChangeList: { modelChangeArray: [] }, reportList: { reports: out } });
                 try { done = build(C); } catch (e) { console.error('REC', e); done = null; }
+                if (done && autoOn()) autoKeep(done).catch(e => console.error('REC auto', e));
+            }
+            // (v5.76) every finished match is kept as a "recent" one (auto: true); only the newest AUTO_N of those stay. Keep (or
+            // "Save this match" on the summary) makes one permanent; Settings > Keep my last matches switches it off (bb-autokeep)
+            const AUTO_N = 3;
+            let autoId = null;
+            const autoOn = () => { try { return localStorage.getItem('bb-autokeep') !== 'off'; } catch (e) { return true; } };
+            const setAuto = v => { try { localStorage.setItem('bb-autokeep', v ? 'on' : 'off'); } catch (e) {} };
+            async function autoKeep(d) {
+                const rec = await keep(d, 'auto-' + Date.now(), { auto: true });
+                autoId = rec.id;
+                const old = (await list()).filter(r => r.auto).slice(AUTO_N);
+                for (const r of old) await del(r.id);
+            }
+            async function pin(id, title) {   // make a recent one permanent, or rename one
+                const r = await get(id); if (!r) throw new Error('That match is no longer saved.');
+                if (title != null) r.title = String(title).slice(0, 80);
+                else r.auto = false;
+                await put(r); return r;
             }
             // ---- the file: FUMBBL's replay shape, with BludBowl's own extras (the races, format, pitch and kits) alongside ----
             function build(C) {
@@ -28124,13 +28152,13 @@ ol.ci-steps li::marker { content: none; }
                 const races = Array.isArray(b.races) ? b.races.map(String) : [g.teamHome, g.teamAway].map(t => { try { return FREP.raceOf(t.roster && t.roster.rosterName || t.race) || ''; } catch (e) { return ''; } });
                 return { title: `${nm(0)} ${+sc[0] || 0}–${+sc[1] || 0} ${nm(1)}`, comp: String(b.comp || (b.v ? '' : 'FUMBBL')).slice(0, 90), races, date: String(g.finished || g.started || '').slice(0, 10), partial: !!b.partial };
             };
-            async function keep(d, id) {
+            async function keep(d, id, extra) {
                 const blob = await gz(JSON.stringify(d));
-                const rec = Object.assign({ id: id || d.game.gameId || ('bb-' + Date.now()), at: Date.now(), size: blob.size, blob }, meta(d));
+                const rec = Object.assign({ id: id || d.game.gameId || ('bb-' + Date.now()), at: Date.now(), size: blob.size, blob }, meta(d), extra || {});
                 await tx('readwrite', s => s.put(rec));
                 return rec;
             }
-            async function save() { if (!done || saved || busy) return false; busy = true; try { await keep(done); saved = true; return true; } finally { busy = false; } }
+            async function save() { if (!done || saved || busy) return false; busy = true; try { if (autoId && await get(autoId)) await pin(autoId); else await keep(done); saved = true; return true; } finally { busy = false; } }   // (the auto-kept copy just becomes permanent)
             const list = async () => ((await tx('readonly', s => s.getAll())) || []).sort((a, b) => b.at - a.at);
             const get = id => tx('readonly', s => s.get(id));
             const put = rec => tx('readwrite', s => s.put(rec));
@@ -28153,7 +28181,7 @@ ol.ci-steps li::marker { content: none; }
                 setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
                 return 'saved';
             }
-            return { install, save, list, load, share, del, keep, replay, put, has: () => !!done && !saved, saved: () => saved, debug: () => ({ cur, done, now: () => cur && build(cur) }) };
+            return { install, save, list, load, share, del, keep, replay, put, pin, autoOn, setAuto, has: () => !!done && !saved, saved: () => saved, debug: () => ({ cur, done, now: () => cur && build(cur) }) };
         })();
 
         // ---------- Ball & Chain ----------
@@ -35150,6 +35178,7 @@ ol.ci-steps li::marker { content: none; }
                 on('st-replay-kick', REPLAY.kickEnabled(), 'On', 'Off');
                 { const k = document.getElementById('st-replay-kick'); if (k) k.disabled = !REPLAY.enabled(); }
                 on('st-move', twoTapPref, 'Tap twice', 'Tap once');
+                on('st-autokeep', REC.autoOn(), 'On', 'Off');
                 on('st-brain', AIX.pref !== 'classic', AIX.pref === 'dref' && AIX.drefOK ? 'drefsante' : 'Experimental', 'Classic');
                 { const k = document.getElementById('st-brain-dref'); if (k) k.classList.toggle('hidden', !AIX.drefOK); }
                 on('st-hd', HD.on, HD.size === 64 ? '2x' : '1.5x', 'Off');
@@ -35174,6 +35203,7 @@ ol.ci-steps li::marker { content: none; }
             document.getElementById('st-replay').addEventListener('click', () => { REPLAY.setEnabled(!REPLAY.enabled()); paintSettings(); });
             document.getElementById('st-replay-kick').addEventListener('click', () => { REPLAY.setKickEnabled(!REPLAY.kickEnabled()); paintSettings(); });
             document.getElementById('st-brain').addEventListener('click', () => { AIX.setPref(AIX.pref === 'classic' ? (AIX.drefOK ? 'dref' : 'x') : AIX.pref === 'x' ? 'classic' : 'x'); paintSettings(); });
+            document.getElementById('st-autokeep').addEventListener('click', () => { REC.setAuto(!REC.autoOn()); paintSettings(); });
             AIX.drefProbe();   // (at start-up too, so a match started straight away knows whether the local AI server is there)
             document.getElementById('st-move').addEventListener('click', () => { twoTapPref = !twoTapPref; try { localStorage.setItem('bb-two-tap', twoTapPref ? '1' : '0'); } catch (e) {} state.movePlan = null; paintSettings(); });
             document.getElementById('st-weather').addEventListener('click', () => {

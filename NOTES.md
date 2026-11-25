@@ -410,6 +410,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.76 (25 Nov, the owner asked after forgetting to save a match v drefsante): the last three finished matches are kept
+  automatically in My matches (`REC.autoKeep`, `auto: true`, "recent" tag), with Keep / Rename (`REC.pin`); Settings > Keep my
+  last matches (`bb-autokeep`). The summary's Save turns the recent copy permanent.
 - v5.72 (job session, 23 Nov, owner's ask): computer's block quicker (`T.fast` on its trays in `startBlock`: settle in 0.55x the roll
   length, min 450 ms; `bbDice`/`diceChoice` pick waits 900+1300 -> 450+800 ms, block re-roll 1100 -> 700). Armour/injury toasts
   off by default (`DICEFX.S.arm()`, `bb-dice-anim-arm`, Settings row `st-dice-arm`) - they lagged behind the pitch. Possible later:

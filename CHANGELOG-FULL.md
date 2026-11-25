@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.76 (25 Nov 2026)
+- My matches keeps every finished match automatically (`REC.autoKeep`, at full time, as `auto-<time>` records with `auto: true`,
+  shown with a "recent" tag); only the newest three recent ones stay. "📌 Keep" makes one permanent, "✎ Rename" names any saved
+  match (`REC.pin`), and "💾 Save this match" on the match summary now turns the match's recent copy permanent instead of saving
+  a second copy. Settings > Keep my last matches (On by default, localStorage `bb-autokeep`). Tested in headless Chrome: four
+  matches in a row kept the newest three; Save, Keep and Rename as described.
+
 ## v5.75 (25 Nov 2026)
 - The local AI server's coach (`brain: dref`) only appears in Settings > Computer coach when the server answers (`AIX.drefProbe`,
   a 1.5 s "hello" at start-up and whenever Settings opens). It's only looked for when the game runs locally (the server's own
