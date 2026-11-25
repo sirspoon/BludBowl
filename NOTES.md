@@ -357,6 +357,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   their last. It works on the board - its free receivers after our turn 0.60 -> 0.31, none at its last-turn start 46% -> 76%, its
   scoring there 26% -> 18% (study_lm, .405 level) - but k_seq: no gain (.372/500), notworse TOO CLOSE after 1,500 (.362, -1.8 SE, likely
   worse). lmOwn (only when ours is our last turn too) study .365 (100-174). Covering receivers keeps failing to win games (def2, cd1, lm1).
+  Crowd pushes (25 Nov, the owner asked; `nn/look/dbg/crowd.py`): ours go into the crowd 0.38 a game, drefsante's 0.05. Not because
+  we stand on the edge more (ours on the sideline rows at its turn start 0.13 a turn, its at ours 0.10) but because it goes for them:
+  it blocks 0.93 of ours there a game, 40% go in; we block 0.22 of its. The victims: 124 of 137 already on the edge when its turn
+  starts, nearly all marked there (free ones 0.006 a game) - and 105 of 134 already marked on the edge at the START of our turn
+  (65 standing, 40 down - we stood them up in place). `sl1` (not kept, `nn/look/dbg/sl1.diff`): slDown (a marked player down on
+  the sideline stays down: can't be blocked), slBlk (a marked one standing there blocks his marker at the end of the turn if we
+  choose the dice, pTurn <= .12), slFree (free ones step off; off by default - they hardly ever get pushed). Note: in BotBowl the
+  bridge calls `choose()` per decision, so hooks in the game's turn loop (`turnKey` driver) never run there - put them in choose().
+  slDown worked (stood-up-then-pushed 13 -> 7 in 120 games) but crowd pushes didn't fall (0.31 v5.73 study, 0.37-0.50 the tries)
+  and the studies were level to worse (.410, .376 v .405). Small stakes (~0.3 players a game for one drive): leave it.
   Bridge audit (20 Nov, after v5.46; the owner asked after the pick-up bug): the bot's `BB_PLANLOG=file` logs each plan and what BotBowl then
   did with that player; `nn/look/dbg/plan_check.py` compares. 60 games (6,683 plans): every move not stopped by a failed roll ended on the
   planned square (4,196), every block hit its target (1,272), blitzes blocked (769 of 770: one stood up and had too little MA), hand-offs,
