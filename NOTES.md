@@ -410,6 +410,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 26 Nov, "as defensive as possible all game" (owner, out of interest; settings only, v5.78 + defN 2, dsN 1, fwD 0, bpProg 0.02,
+  `study_def.jsonl`): won 24 drew 27 lost 69 (.312 v .396), touchdowns 0.68-1.40 a game v 0.88-1.25 - fewer scored AND more
+  conceded; spells with the ball no longer (1.8 turns), lost as often. FUMBBL coaches (nn/data/drives.md): spells ~2.8 turns, ball
+  lost 33% of them, against ~60% for both bots here.
 - 26 Nov, the second touchdown / winning the ball back (owner's follow-up to the lead figures). We hold the ball while one up only
   0.3-0.4 turns a game (we score, then kick off), scoring 21% of them (level 15%) - nothing to tune (`nn/look/dbg/oneup.py`). Spells
   with the ball by score (`drives_lead.py`, study_gs3 + acts2): with us ahead, drefsante's spells score 21-26% and we win the ball back
