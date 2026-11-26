@@ -410,6 +410,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 26 Nov, what "defending" means for each bot (`nn/look/dbg/defmeans.py`, `mark_why.py`, `mark_how.py`, on study_gs3): at the
+  attacker's turn start with the ball, both keep ~6.3 players goal-side and ~2 deep, but drefsante has its carrier marked 72% (1.40
+  players) v our 44% (0.68), his no-dodge running room 28 squares v 48, a team-mate free to walk in 21% v 43%. Both hit the carrier in
+  43% of defending turns and win the ball ~a third; the gap is the turns he isn't hit: it leaves ours marked 74%, we its 41%. Both start
+  those turns with ~0.75 players able to walk next to him and ~4.5 a dodge away. `mc1` (not kept, `mc1.diff`): free players' sure moves
+  next to him (mcN 2) - marked 44 -> 50%, 2.2 a game; study .471 (luck), k_seq NO GAIN after 500 (.375). `mc2` (not kept, `mc2.diff`):
+  plus, last in the turn, one more by a dodge or Rush (mcProb 50; marked ones may dodge off) - unhit-turn marking 41 -> 51% (0.92
+  markers), running room 38; study .454, k_seq NO GAIN after 625 (.377). Tighter marking of the carrier, as far as we got it, doesn't
+  win games either.
 - 26 Nov, "as defensive as possible all game" (owner, out of interest; settings only, v5.78 + defN 2, dsN 1, fwD 0, bpProg 0.02,
   `study_def.jsonl`): won 24 drew 27 lost 69 (.312 v .396), touchdowns 0.68-1.40 a game v 0.88-1.25 - fewer scored AND more
   conceded; spells with the ball no longer (1.8 turns), lost as often. FUMBBL coaches (nn/data/drives.md): spells ~2.8 turns, ball
