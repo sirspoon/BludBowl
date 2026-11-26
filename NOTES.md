@@ -424,6 +424,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   (b) default v ending the turn at once, 600 positions: correlation +.60, but it rates idling +1.7 points riskier where it is +5.0,
   and its pick concedes +1.5 +- 0.8 points a decision MORE than always acting (it takes idle 30% of the time). So it ranks choices
   only roughly, under-rates the danger of leaving the board as it is, and is no basis for a look-ahead as it stands.
+  Play-outs as the judge instead (`nn/look/pairsplit.py`, same data: pick by m play-outs a choice, scored on the other 8-m): default v
+  defensive, value = we score this turn - they score in their reply: always-defensive +0.009 a decision over default, picking by 4
+  play-outs +0.003 +- 0.007 over always-defensive (by 1: -0.003); default v idling: picking never beats always acting. And the reply
+  window is myopic: it rates the defensive settings better, yet played all game they lose (k_seq). Playing on to full time
+  (`--to game`) would fix that, but one decision moves the final score ~0.01-0.05 against a spread of ~1.5 touchdowns: thousands
+  of play-outs a choice. So no look-ahead by play-outs either, with brain x as the stand-in opponent.
 - 26 Nov, what "defending" means for each bot (`nn/look/dbg/defmeans.py`, `mark_why.py`, `mark_how.py`, on study_gs3): at the
   attacker's turn start with the ball, both keep ~6.3 players goal-side and ~2 deep, but drefsante has its carrier marked 72% (1.40
   players) v our 44% (0.68), his no-dodge running room 28 squares v 48, a team-mate free to walk in 21% v 43%. Both hit the carrier in
