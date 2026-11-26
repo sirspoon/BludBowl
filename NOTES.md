@@ -410,6 +410,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 26 Nov, the second touchdown / winning the ball back (owner's follow-up to the lead figures). We hold the ball while one up only
+  0.3-0.4 turns a game (we score, then kick off), scoring 21% of them (level 15%) - nothing to tune (`nn/look/dbg/oneup.py`). Spells
+  with the ball by score (`drives_lead.py`, study_gs3 + acts2): with us ahead, drefsante's spells score 21-26% and we win the ball back
+  60-68% (level: it scores 37-40%); our spells while ahead score 34-37% but lose it 44-55%. Hits on the carrier (`carrier_hits.py`
+  on study_gs3): we hit its carrier in our half on 1 die 71% of turns (it ours 63%), the ball comes loose about half the time either
+  way. `kp1` (not kept, `kp1.diff`): ahead in the 2nd half our carrier values ground at kpProg 0.02 instead of bpProg 0.1 - our
+  spells while ahead still lost it 44%, study .354 v .396. Dropped. Leads don't seem to slip for one fixable reason: the ball
+  changes hands every ~1.7 turns whatever the score.
 - 26 Nov, `pz3` (not kept, `nn/look/dbg/pz3.diff`): the same trigger as `pz1`, but pressure instead of a shape - each player of
   theirs who could take a hand-off or pass and walk in (free, within move + 2 of our end zone) gets a marker on his goal side before
   the screen (pzN 4; ~7 a game). Study .438 v .396 on the same seeds, but in the targeted turns it still scored 26% (v 24%), free
