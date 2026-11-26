@@ -410,6 +410,17 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 26 Nov, protecting a lead / seeing out a half (the owner's idea; `pz1`, not kept, `nn/look/dbg/pz1.diff`). Leads (study_gs3 +
+  acts2, 240 games): we led in 92, won 57 drew 28 lost 7 (38% not won; drefsante 22%); every lead lost was one touchdown, 16 of 35
+  equalised in turns 1-5 of the 2nd half, a 2+ lead always won. In the turns that matter (drefsante has the ball with 2 or fewer turns
+  left in the half, or the 2nd half while we lead) it scores 24-29%; its carrier can run in himself in only 15-24% of them, but a
+  team-mate is free to walk in (no dodge) in ~50% - the threat is the hand-off, not the run (`pzpath.py`, `pzhow.py` logic: 35 of 61
+  scores a run by the carrier, 21 hand-offs, half after a Blitz, a quarter from a loose ball). Tried, same trigger, formation only:
+  (a) two staggered lines two rows apart across the carrier's reach + free players ahead of him marked + one deep, no outlets: scored
+  27% (v 24%), study .325 v .396; (b) a full-width wall (rows 1,3,..13) 4 out from our end zone + a second line + everyone past it
+  marked: free walk-ins 50% -> 42% but it dodged through (18 dodges in 80 scores v 9 in 61), scored 28%, leads not won 55%, study .338.
+  Both dropped before k_seq. Pulling players back to a set shape lets it walk up and Blitz a hole; what holds leads is likely pressure
+  on the carrier / ball (or scoring the second touchdown), not a deeper shape.
 - 26 Nov, `sl1` and `da1` retested properly (brain x playing, on top of v5.78; diffs as before in `nn/look/dbg/`), both dropped:
   `sl1` (slOn 1): slDown fired 6.5 a game (slBlk never), drefsante's blocks on our sideline players 0.78 -> 0.65 a game, into the
   crowd 49% -> 38%; study .396 (v5.78 .412); k_seq NO GAIN after 125 (.320). `da1` (daN 2, daGain 0.08): 1.6 a game, the block
