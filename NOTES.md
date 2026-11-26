@@ -410,6 +410,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 26 Nov, `sl1` and `da1` retested properly (brain x playing, on top of v5.78; diffs as before in `nn/look/dbg/`), both dropped:
+  `sl1` (slOn 1): slDown fired 6.5 a game (slBlk never), drefsante's blocks on our sideline players 0.78 -> 0.65 a game, into the
+  crowd 49% -> 38%; study .396 (v5.78 .412); k_seq NO GAIN after 125 (.320). `da1` (daN 2, daGain 0.08): 1.6 a game, the block
+  followed 65%, our set-up blocks on defence 6.1 -> 6.6 (drefsante 9.9); study .413; k_seq NO GAIN after 125 (.308). The same
+  125 games with both off: .356 (v5.78 .368), so the merged code wasn't the cause. Keeping marked players down and moving helpers in
+  on defence both cost games against drefsante.
 - v5.78 (26 Nov): `gs1` on in brain x - the owner's sideline gang-up on our receiving turn (see CHANGELOG-FULL). First version found
   no targets (drefsante's wide pairs stand 2 behind its line; looked only 1 back) and its helper moves mostly weren't followed by the
   Blitz (the check reused the Blitzer's routes from before the helper took his square). k_seq: no gain (.373/500), NOT WORSE
