@@ -410,6 +410,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 26 Nov, `pz3` (not kept, `nn/look/dbg/pz3.diff`): the same trigger as `pz1`, but pressure instead of a shape - each player of
+  theirs who could take a hand-off or pass and walk in (free, within move + 2 of our end zone) gets a marker on his goal side before
+  the screen (pzN 4; ~7 a game). Study .438 v .396 on the same seeds, but in the targeted turns it still scored 26% (v 24%), free
+  walk-ins 50% -> 46%; it just ran in with the carrier more. k_seq NO GAIN after 500 (.379 v .386). Three ways of defending these
+  turns (two shapes, marking receivers) have changed nothing: drefsante's scoring then looks like it comes from turns earlier
+  (where the ball already is) rather than from our last-turn positions.
 - 26 Nov, protecting a lead / seeing out a half (the owner's idea; `pz1`, not kept, `nn/look/dbg/pz1.diff`). Leads (study_gs3 +
   acts2, 240 games): we led in 92, won 57 drew 28 lost 7 (38% not won; drefsante 22%); every lead lost was one touchdown, 16 of 35
   equalised in turns 1-5 of the 2nd half, a 2+ lead always won. In the turns that matter (drefsante has the ball with 2 or fewer turns
