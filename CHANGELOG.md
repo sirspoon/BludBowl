@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.78 (26 Nov 2026)
+- The experimental computer coach (brain x) has a new kick-off trick: when receiving, it gangs up on a player standing out by the sideline, with one player stepping in to help and another Blitzing him.
+
 ## v5.77 (25 Nov 2026)
 - At full time a window asks whether to save the match, with a name for it you can change.
 - The local-server computer coach no longer pauses twice before each push, follow-up and move.

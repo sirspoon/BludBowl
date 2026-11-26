@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.78 (26 Nov 2026)
+- Brain x: the owner's sideline gang-up is on (`gs1`, `gsOn` 1, see `gsPlan`). On our first turn after receiving the kick-off
+  (none of theirs over halfway, the ball not theirs and in our half), one of their players standing in a wide zone on their line or
+  up to `gsDepth` (4) squares behind it gets a Blitz with 2 dice that we choose from (`gsProb` 90+ to get there, `gsTurn` 0.12 risk at
+  most); first, if it takes one, a free player of ours makes a sure move next to him to give the assist (checked with that square
+  taken, as the Blitzer's route can't then pass through it). drefsante keeps its wide players in pairs two squares behind its line.
+  v drefsante (BotBowl, Humans, k_seq): no gain after 500 games (.373), NOT WORSE after 875 (.381 v .386); blocks on their wide
+  players on our receiving turns 0.00 -> 0.19.
+
 ## v5.77 (25 Nov 2026)
 - Full time: a window over the match summary (`#ms-ask`, opened by `MATCH.open` for a person's match with a match to keep)
   asks "Save this match?" with a name box (the score line to start with) and Save / Not now; Save keeps it for good under that

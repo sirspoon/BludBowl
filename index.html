@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.77</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.78</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -29991,7 +29991,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 0 },   // (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1 },   // (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -31897,7 +31897,7 @@ ol.ci-steps li::marker { content: none; }
                 if (bx == null || bx < 0 || toGo(bx, me) < CFG.cols / 2) return false;
                 return !state.players.some(q => q.team === them && onPitch(q) && toGo(q.x, me) > CFG.cols / 2 + AIX.p(me, 'gsOver', 0));
             }
-            function gsBlitzer(me, act, t, skip) {   // the best 2-dice Blitz on t now (or null)
+            function gsBlitzer(me, act, t, skip, occ) {   // the best 2-dice Blitz on t now (or null); occ: a square a helper is about to take (the routes were worked out without him there)
                 let best = null;
                 act.forEach(p => {
                     if (p.id === skip || p.isStunned || p.id === state.ball.carrierId || cheb(p, t) > (p.ma || 6) + 3) return;
@@ -31905,6 +31905,7 @@ ol.ci-steps li::marker { content: none; }
                         if (Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y)) !== 1) return;
                         const left = p.remainingMA - m.path.length;
                         if (m.prob < AIX.p(me, 'gsProb', 90) || left < 1) return;
+                        if (occ && (m.path || []).some(q => q.x === occ.x && q.y === occ.y)) return;
                         blitzCtx = true; const e = blockEval(p, t, m.x, m.y); blitzCtx = false;
                         if (e.chooser !== me || e.n < 2 || e.pTurn > AIX.p(me, 'gsTurn', 0.12)) return;
                         const v = e.pDown + (hasSk(p, 'Block') ? 0.1 : 0) - m.path.length * 0.01 + m.prob / 1000;
@@ -31915,7 +31916,7 @@ ol.ci-steps li::marker { content: none; }
             }
             function gsPlan(me, act) {
                 if (!AIX.x(me) || !AIX.p(me, 'gsOn', 0) || state.blitzUsed || state.charge || !gsReceiving(me)) return null;
-                const them = other(me), line = q => toGo(q.x, me) >= CFG.cols / 2 - 2;   // (on or just behind their line)
+                const them = other(me), line = q => toGo(q.x, me) >= CFG.cols / 2 - AIX.p(me, 'gsDepth', 4);   // (on their line or up to gsDepth behind it: drefsante's wide pairs stand 2 back)
                 const targets = state.players.filter(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && gsWide(q.y) && line(q));
                 if (!targets.length) return null;
                 const tv = t => (t.y <= 3 ? 3 - t.y : t.y - (CFG.rows - 4)) * 0.05 + (state.players.some(o => o.team === them && o.id !== t.id && onPitch(o) && !o.isDown && cheb(o, t) === 1) ? 0 : 0.2);
@@ -31936,7 +31937,7 @@ ol.ci-steps li::marker { content: none; }
                             const ox = h.x, oy = h.y, wd = h.isDown;
                             h.x = m.x; h.y = m.y; h.isDown = false;
                             let b = null;
-                            try { b = gsBlitzer(me, act, t, h.id); } finally { h.x = ox; h.y = oy; h.isDown = wd; }
+                            try { b = gsBlitzer(me, act, t, h.id, m); } finally { h.x = ox; h.y = oy; h.isDown = wd; }
                             if (!b) return;
                             const v = b.v + tv(t) - m.path.length * 0.02 - (hasSk(h, 'Block') ? 0.05 : 0);   // (keep the Block players for the Blitz)
                             if (!help || v > help.v) help = { h, m, v };

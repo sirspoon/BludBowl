@@ -410,6 +410,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.78 (26 Nov): `gs1` on in brain x - the owner's sideline gang-up on our receiving turn (see CHANGELOG-FULL). First version found
+  no targets (drefsante's wide pairs stand 2 behind its line; looked only 1 back) and its helper moves mostly weren't followed by the
+  Blitz (the check reused the Blitzer's routes from before the helper took his square). k_seq: no gain (.373/500), NOT WORSE
+  (.381/875). Diagnostics: `BRIDGE_COUNTS` + a debug copy (`nn/look/dbg/frozen_gs_dbg.html`).
 - 25 Nov, a testing mistake found: `nn/look/drefstudy.py --aip '{"gsOn":1}'` (no "brain") ran the Classic AI, so the new switch never
   ran. That hit today's `sl1` (study_sl..sl4), `da1` (study_da, da2), the first `gs1` study and study_acts (the team-play and
   exploits "brain x" figures were Classic). Fixed: drefstudy now plays brain x unless --aip names a brain ('{"brain":"classic"}' for
