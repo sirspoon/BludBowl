@@ -416,8 +416,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   simple-facts model): we score this turn - log loss 0.053 simple v 0.046 ev1 (0.045 blended), what the simple facts miss of its
   prediction tracks what they miss of the real outcome at +0.38 (result head +0.15); they score in their reply - 0.091 v 0.086
   (0.085), +0.26; our turn ends in a Turnover - ev1 worse than simple (0.555 v 0.541), +0.06. So the scoring heads do see the
-  position, the Turnover head doesn't. Not yet shown: that they rank two choices in the same position (the next check: paired
-  play-outs), nor that they hold v drefsante (trained on 30-race AI-v-AI games).
+  position, the Turnover head doesn't. Paired check (`tools/ai-whatif.js play --to reply`, `nn/look/pairjudge.py`, Humans v Humans
+  brain x, positions where two settings choose differently, each choice played 8 times to the other side's reply): ev1's "they
+  score in their reply" head, read on the board as the other side starts its turn. (a) default v defensive settings (defN 2, dsN 1,
+  fwD 0, bpProg .02), 578 positions: play-out AUC .94 but it says 7.5% where 10.7% happen; per-position B-A differences correlate
+  +.17 (+.24 allowing for play-out noise); playing its pick v always-defensive -0.003 +- 0.005 conceded a decision - nothing.
+  (b) default v ending the turn at once, 600 positions: correlation +.60, but it rates idling +1.7 points riskier where it is +5.0,
+  and its pick concedes +1.5 +- 0.8 points a decision MORE than always acting (it takes idle 30% of the time). So it ranks choices
+  only roughly, under-rates the danger of leaving the board as it is, and is no basis for a look-ahead as it stands.
 - 26 Nov, what "defending" means for each bot (`nn/look/dbg/defmeans.py`, `mark_why.py`, `mark_how.py`, on study_gs3): at the
   attacker's turn start with the ball, both keep ~6.3 players goal-side and ~2 deep, but drefsante has its carrier marked 72% (1.40
   players) v our 44% (0.68), his no-dodge running room 28 squares v 48, a team-mate free to walk in 21% v 43%. Both hit the carrier in

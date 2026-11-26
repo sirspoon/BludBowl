@@ -16,6 +16,10 @@
 //    the end of the half the decision was in, each with its margin (95%).
 //      node tools/ai-whatif.js report --in roll.jsonl      (the same summary again, from a finished play-out)
 //
+// --to reply: also keep the position at the other side's first decision after the deciding side's turn (as the network sees it,
+//    from that side: endObs) and the scores then (endAt), then play on to the deciding side's next turn as --to next: for judging
+//    end-of-turn positions by what the other side does with them (nn/look/pairjudge.py).
+// --basep: tuning values (window.AIP) for both sides' usual play, e.g. '{"brain":"x"}' (else the Classic AI in test runs).
 // --a / --b / --base: AIX switches as in ai-match.js ('all', 'none' or a list), or 'end' (end the turn there) for --a / --b;
 // --ap / --bp: tuning values (window.AIP) for that option. Each match collected, and each position's play-outs, run in a
 // fresh Node process.
@@ -33,6 +37,7 @@ async function collectOne(job) {
   w.eval(`(() => { const J = JSON.parse(window.__job);
     try { localStorage.setItem('bb-replays', '0'); localStorage.setItem('bb-ex-ind', 'off'); } catch (e) {}
     AIX.flags[0] = J.base; AIX.flags[1] = J.base; AI.set(0, true); AI.set(1, true);
+    if (J.basep) window.AIP = [J.basep, J.basep];
     window.WI = [];
     window.AI_WHATIF = ({ plan, me, again, desc }) => {
       if (state.charge || state.half > 2 || state.isGameOver || WI.length >= J.per || Math.random() > J.rate) return;
@@ -51,7 +56,7 @@ async function collectOne(job) {
   }
   const out = JSON.parse(w.eval('JSON.stringify(window.WI)'));
   try { w.close(); } catch (e) {}
-  return out.map((p, k) => ({ id: `${job.run}-${job.a}-${job.b}-${job.i}-${k}`, a: job.a, b: job.b, ...p, A: job.A, B: job.B, ap: job.ap, bp: job.bp, base: job.base }));
+  return out.map((p, k) => ({ id: `${job.run}-${job.a}-${job.b}-${job.i}-${k}`, a: job.a, b: job.b, ...p, A: job.A, B: job.B, ap: job.ap, bp: job.bp, base: job.base, basep: job.basep }));
 }
 
 // one position's play-outs (job.items: [{ opt, rep, to }]) in one page: the game's own resume needs no reload. The page tells
@@ -70,6 +75,10 @@ async function playMany(job) {
       if (C.desc != null) {
         if (C.half == null && state.half !== P.half) C.half = [state.score[0], state.score[1]];
         if (C.to === 'next' && me === P.me && (state.half !== P.half || state.turn[me] !== P.turn)) { C.obs = AI.bridge.nnNow(me); finish(); return; }
+        if (C.to === 'reply') {
+          if (!C.endObs && me !== P.me) { C.endObs = AI.bridge.nnNow(me); C.endAt = [state.score[0], state.score[1]]; C.endHalf = state.half; }
+          if (me === P.me && (state.half !== P.half || state.turn[me] !== P.turn)) { C.nextHalf = state.half; finish(); return; }
+        }
         // (--turn) the rest of that turn with the option's settings too, for changes that are a plan over several actions
         if (C.turn && C.opt !== 'end' && me === P.me && state.half === P.half && state.turn[me] === P.turn) return again(C.opt, C.op);
         return;
@@ -89,14 +98,14 @@ async function playMany(job) {
     w.__cur = JSON.stringify(it);
     const done = new Promise(res => { w.__done = res; setTimeout(res, LIMIT); });
     w.eval(`(() => { const P = JSON.parse(window.__pos), I = JSON.parse(window.__cur);
-      AIX.flags[0] = P.base; AIX.flags[1] = P.base;
-      window.WI_CUR = { opt: I.opt === 'A' ? P.A : P.B, op: I.opt === 'A' ? P.ap : P.bp, to: I.to, turn: I.turn, desc: null, obs: null, at: null, half: null, done: false, over: false };
+      AIX.flags[0] = P.base; AIX.flags[1] = P.base; window.AIP = P.basep ? [P.basep, P.basep] : [];
+      window.WI_CUR = { opt: I.opt === 'A' ? P.A : P.B, op: I.opt === 'A' ? P.ap : P.bp, to: I.to, turn: I.turn, desc: null, obs: null, endObs: null, endAt: null, at: null, half: null, done: false, over: false };
       SAVE.resume(P.snap);
       AI.setPaused(false); AI.set(0, true); AI.set(1, true); })()`);
     await done;
     const C = JSON.parse(w.eval('JSON.stringify(window.WI_CUR)'));
     const me = job.pos.me, s = C.at || [0, 0], h = C.half || s;
-    out.push({ id: job.pos.id, opt: it.opt, rep: it.rep, over: C.over, done: C.done, obs: C.obs, me, forced: C.desc, meant: it.opt === 'A' ? job.pos.da : job.pos.db,
+    out.push({ id: job.pos.id, opt: it.opt, rep: it.rep, over: C.over, done: C.done, obs: C.obs, endObs: C.endObs, endAt: C.endAt, endHalf: C.endHalf, nextHalf: C.nextHalf, at: C.at, start: job.pos.score, half0: job.pos.half, me, forced: C.desc, meant: it.opt === 'A' ? job.pos.da : job.pos.db,
       td: s[me] - s[1 - me], tdHalf: h[me] - h[1 - me], pts: s[me] > s[1 - me] ? 1 : s[me] === s[1 - me] ? 0.5 : 0,
       secs: +((Date.now() - t0) / 1000).toFixed(1), errs: errors.slice(0, 2) });
   }
@@ -137,7 +146,7 @@ if (process.argv.includes('--child')) {
     const races = arg('races', '') ? arg('races').split(',') : [];
     const RUN = Math.random().toString(36).slice(2, 7);   // (so positions from different collections never share an id)
     const job = (a, b, i) => ({ kind: 'collect', run: RUN, a, b, i, base: flags(arg('base', 'all')), A: flags(arg('a', 'all')), B: flags(arg('b', 'end')),
-      ap: arg('ap') ? JSON.parse(arg('ap')) : undefined, bp: arg('bp') ? JSON.parse(arg('bp')) : undefined, per: +arg('per', 6), rate: +arg('rate', 1) });
+      ap: arg('ap') ? JSON.parse(arg('ap')) : undefined, bp: arg('bp') ? JSON.parse(arg('bp')) : undefined, per: +arg('per', 6), rate: +arg('rate', 1), basep: arg('basep') ? JSON.parse(arg('basep')) : undefined });
     races.forEach(r => { for (let i = 0; i < N; i++) jobs.push(job(r, r, i)); });
     (arg('pairs', '') ? arg('pairs').split(',') : []).forEach(pr => { const [a, b] = pr.split(':'); for (let i = 0; i < N; i++) jobs.push(job(a, b, i)); });
     if (!jobs.length || !OUT) { console.error('Give --races or --pairs, and --out (see the top of this file).'); process.exit(1); }
@@ -172,7 +181,7 @@ if (process.argv.includes('--child')) {
 
   // per position: the mean of B's play-outs minus the mean of A's; then the mean and its margin over positions
   function report(rs) {
-    if (rs.some(r => r.obs)) { console.log('\nPlay-outs stopped at the next turn: score them with the outcome predictor (nn/whatif_value.py --in <this file>).'); return; }
+    if (rs.some(r => r.obs || r.endObs)) { console.log('\nPlay-outs stopped at the next turn: score them with the outcome predictor (nn/whatif_value.py --in <this file>).'); return; }
     const ok = rs.filter(r => r.over && r.id != null && r.done !== false);
     const bad = rs.length - ok.length, mism = ok.filter(r => r.forced !== r.meant).length;
     const by = new Map();
