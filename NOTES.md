@@ -410,6 +410,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 26 Nov, look-ahead revisited (owner's priority: the AI). The win predictor (bb_v3c) and ev1's result head add little beyond simple
+  facts (17 Nov, ai-training/README "What the outcome predictor goes by", "ev1"), so the check was ev1's SHORT-TERM heads
+  (`nn/look/evalshort.py`, same split as evalcheck.py, 18,648 held-out turn starts of AI-v-AI matches, v a gradient-boosting
+  simple-facts model): we score this turn - log loss 0.053 simple v 0.046 ev1 (0.045 blended), what the simple facts miss of its
+  prediction tracks what they miss of the real outcome at +0.38 (result head +0.15); they score in their reply - 0.091 v 0.086
+  (0.085), +0.26; our turn ends in a Turnover - ev1 worse than simple (0.555 v 0.541), +0.06. So the scoring heads do see the
+  position, the Turnover head doesn't. Not yet shown: that they rank two choices in the same position (the next check: paired
+  play-outs), nor that they hold v drefsante (trained on 30-race AI-v-AI games).
 - 26 Nov, what "defending" means for each bot (`nn/look/dbg/defmeans.py`, `mark_why.py`, `mark_how.py`, on study_gs3): at the
   attacker's turn start with the ball, both keep ~6.3 players goal-side and ~2 deep, but drefsante has its carrier marked 72% (1.40
   players) v our 44% (0.68), his no-dodge running room 28 squares v 48, a team-mate free to walk in 21% v 43%. Both hit the carrier in
