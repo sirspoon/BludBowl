@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.82 (27 Nov 2026)
+- The Experimental computer coach (brain x) pushes players into the crowd on purpose: it fills the squares a player on the edge could be pushed into, then blocks or Blitzes him off the pitch, and pins players against the sideline for next turn.
+
 ## v5.81 (27 Nov 2026)
 - Humans have a built-in "Default (classic)" team in the team menu: BotBowl's competition line-up (2 Blitzers, a Thrower, 2 Catchers, 7 Linemen, no Ogre or Halfling, 3 re-rolls), the team drefsante plays best against.
 

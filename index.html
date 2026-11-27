@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.81</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.82</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -30002,7 +30002,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1 },   // (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1 },   // (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -30153,7 +30153,8 @@ ol.ci-steps li::marker { content: none; }
                     const pushSq = (x, y) => dx && dy ? [[x + dx, y + dy], [x + dx, y], [x, y + dy]] : dx ? [[x + dx, y], [x + dx, y - 1], [x + dx, y + 1]] : [[x, y + dy], [x - 1, y + dy], [x + 1, y + dy]];
                     const off = (x, y) => pushSq(x, y).some(([px, py]) => !inPitch(px, py));
                     const pm = moved / total;
-                    if (off(def.x, def.y)) surf = pm * 5;
+                    const csOk = (x, y) => !(AIX.x(atk.team) && AIX.p(atk.team, 'csOn', 0) > 0) || !pushSq(x, y).some(([px, py]) => inPitch(px, py) && !getPlayer(px, py));   // (cs1) a free square on the pitch takes the push
+                    if (off(def.x, def.y) && csOk(def.x, def.y)) surf = pm * 5;
                     else if (hasSk(atk, 'Frenzy') && off(def.x + dx, def.y + dy)) surf = pm * pm * 4;
                 }
                 return { ev: ev / total + surf, pTurn: bad / total, n, chooser, pDown: down / total, pMove: moved / total };
@@ -31925,6 +31926,91 @@ ol.ci-steps li::marker { content: none; }
                 });
                 return best;
             }
+            // (brain x: cs1, the owner's idea) into the crowd: a player of theirs on the edge of the pitch, pushed from a square where every
+            // push square still on the pitch is taken - both engines push into a free square on the pitch if there is one (BotBowl then
+            // has to use the crowd; the game lets the blocker pick it) - so first our free players fill those squares with sure moves (up
+            // to csFill, giving assists as they do), then the block from there, or a Blitz to that square. The Blitz isn't used when it's
+            // wanted on their carrier. In live play v drefsante it pushes ours into the crowd 0.47 times a game, we push theirs 0.07.
+            // Decided afresh from the board each time. Off unless csOn > 0.
+            let csDone = { key: '', n: 0 };
+            const csPushSq = (ax, ay, tx, ty) => { const dx = Math.sign(tx - ax), dy = Math.sign(ty - ay); return dx && dy ? [[tx + dx, ty + dy], [tx + dx, ty], [tx, ty + dy]] : dx ? [[tx + dx, ty], [tx + dx, ty - 1], [tx + dx, ty + 1]] : [[tx, ty + dy], [tx - 1, ty + dy], [tx + 1, ty + dy]]; };
+            function csPlan(me, act, carrier) {
+                if (!AIX.x(me) || !(AIX.p(me, 'csOn', 0) > 0) || state.charge) return null;
+                const them = other(me), W = AIX.p(me, 'csW', 5), K = AIX.p(me, 'csTurn', 3), minV = AIX.p(me, 'csMin', 1.5), maxFill = AIX.p(me, 'csFill', 2);
+                const targets = state.players.filter(q => q.team === them && onPitch(q) && !q.isDown && !q.isStunned && !q.rooted && !hasSk(q, 'Stand Firm') && !hasSk(q, 'Sidestep')
+                    && (q.y === 0 || q.y === CFG.rows - 1 || q.x === 0 || q.x === CFG.cols - 1));
+                if (!targets.length) return null;
+                const ck = state.half + ':' + me + ':' + state.turn[me];
+                if (csDone.key !== ck) csDone = { key: ck, n: 0 };
+                const theirC = carrier && carrier.team === them && onPitch(carrier) && !carrier.isDown ? carrier : null;
+                const blitzFree = !state.blitzUsed && !(theirC && carrierBlitz(me, act, theirC));
+                const ourC = state.ball.carrierId;
+                let best = null;
+                targets.forEach(t => {
+                    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+                        if (!dx && !dy) continue;
+                        const sx = t.x + dx, sy = t.y + dy;
+                        if (!inPitch(sx, sy)) continue;
+                        const ps = csPushSq(sx, sy, t.x, t.y);
+                        if (!ps.some(([x, y]) => !inPitch(x, y))) continue;
+                        const empty = ps.filter(([x, y]) => inPitch(x, y) && !getPlayer(x, y));
+                        if (empty.length > maxFill || (empty.length && csDone.n >= maxFill)) continue;
+                        // who hits him from (sx, sy)
+                        const occ = getPlayer(sx, sy);
+                        let atk = null, kind = null, pr = 1;
+                        if (occ) {
+                            if (occ.team !== me || occ.isDown || occ.isStunned || occ.hasActed || !act.includes(occ) || occ.id === ourC) continue;
+                            atk = occ; kind = 'block';
+                        } else if (blitzFree) {
+                            act.forEach(p => {
+                                if (p.id === ourC || p.isStunned || cheb(p, t) > (p.ma || 6) + 3) return;
+                                const m = movesFor(p).find(o => o.x === sx && o.y === sy);
+                                if (!m) return;
+                                const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
+                                const q = pPlan(p, m, true) / 100 * (left >= 1 ? 1 : 5 / 6);
+                                if (q < AIX.p(me, 'csProb', 0.8)) return;
+                                if (empty.some(([x, y]) => (m.path || []).some(st => st.x === x && st.y === y))) return;
+                                if (!atk || q > pr) { atk = p; pr = q; }
+                            });
+                            if (atk) kind = 'blitz';
+                        }
+                        if (!atk) continue;
+                        // the fill: a different free player for each empty push square, with a sure move
+                        const fills = [], used = new Set([atk.id]);
+                        let ok = true;
+                        for (const [ex, ey] of empty) {
+                            let f = null;
+                            act.forEach(q => {
+                                if (used.has(q.id) || q.id === ourC || q.isStunned || !canReposition(q, me)) return;
+                                const m = movesFor(q).find(o => o.x === ex && o.y === ey && o.prob >= 100 && !o.isRush);
+                                if (m && (!f || m.path.length < f.m.path.length)) f = { q, m };
+                            });
+                            if (!f) { ok = false; break; }
+                            used.add(f.q.id); fills.push(f);
+                        }
+                        if (!ok) continue;
+                        // the hit, as it will be (the fillers in place)
+                        const keep = fills.map(f => [f.q, f.q.x, f.q.y, f.q.isDown]);
+                        let e;
+                        try {
+                            fills.forEach(f => { f.q.x = f.m.x; f.q.y = f.m.y; f.q.isDown = false; });
+                            blitzCtx = kind === 'blitz'; e = blockEval(atk, t, sx, sy);
+                        } finally { blitzCtx = false; keep.forEach(([q, x, y, d]) => { q.x = x; q.y = y; q.isDown = d; }); }
+                        const v = pr * (e.pMove * W) - e.pTurn * K - (1 - pr) * K - fills.length * 0.1;
+                        if (v >= minV && (!best || v > best.v)) best = { v, t, atk, kind, sx, sy, fills };
+                    }
+                });
+                if (!best) return null;
+                if (best.fills.length) {
+                    const f = best.fills[0], tx = f.m.x, ty = f.m.y;
+                    csDone.n++; AIX.count(me, 'cs fill');
+                    return { pid: f.q.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
+                }
+                AIX.count(me, 'cs ' + best.kind);
+                if (best.kind === 'block') return { pid: best.atk.id, kind: 'block', target: best.t.id };
+                const sx = best.sx, sy = best.sy;
+                return { pid: best.atk.id, kind: 'blitz', target: best.t.id, pick: ms => ms.find(m => m.x === sx && m.y === sy) || null };
+            }
             function gsPlan(me, act) {
                 if (!AIX.x(me) || !AIX.p(me, 'gsOn', 0) || state.blitzUsed || state.charge || !gsReceiving(me)) return null;
                 const them = other(me), line = q => toGo(q.x, me) >= CFG.cols / 2 - AIX.p(me, 'gsDepth', 4);   // (on their line or up to gsDepth behind it: drefsante's wide pairs stand 2 back)
@@ -31966,7 +32052,11 @@ ol.ci-steps li::marker { content: none; }
                     ms.forEach(m => {
                         if (Math.max(Math.abs(m.x - t.x), Math.abs(m.y - t.y)) !== 1) return;
                         const left = q.remainingMA - m.path.length, pr = m.prob / 100 * (left >= 1 ? 1 : 5 / 6);
-                        blitzCtx = true; const e = blockEval(q, t, m.x, m.y); blitzCtx = false; const s = pr * e.ev - (1 - pr) * 8;
+                        blitzCtx = true; const e = blockEval(q, t, m.x, m.y); blitzCtx = false; let s = pr * e.ev - (1 - pr) * 8;
+                        if (AIX.x(q.team) && AIX.p(q.team, 'csOn', 0) > 0 && !hasSk(t, 'Stand Firm') && !hasSk(t, 'Sidestep')) {   // (cs1) set up the pin
+                            const sx = t.x + Math.sign(t.x - m.x), sy = t.y + Math.sign(t.y - m.y);
+                            if (inPitch(sx, sy) && !getPlayer(sx, sy) && csPushSq(t.x, t.y, sx, sy).every(([x, y]) => !inPitch(x, y))) s += pr * e.pMove * AIX.p(q.team, 'csPin', 0.6);
+                        }
                         if (s > bs) { bs = s; bm = m; }
                     });
                     return bm;
@@ -32760,6 +32850,7 @@ ol.ci-steps li::marker { content: none; }
                     if (up) return { pid: up.p.id, kind: 'move', pick: () => null };
                 }
                 { const gs = gsPlan(me, act); if (gs) return gs; }   // (brain x: gs1) the sideline gang-up, first thing on our receiving turn
+                { const cs = csPlan(me, act, carrier); if (cs) return cs; }   // (brain x: cs1) into the crowd
                 if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
                 if (lbMove) return lbMove;   // (brain x: lb1)
                 if (cbMove) return cbMove;   // (brain x: cb1)
@@ -34081,6 +34172,11 @@ ol.ci-steps li::marker { content: none; }
                         } else if (theirs) v += Math.min(4, d(sq, theirs)) * 0.6;   // pull a helper away from their carrier
                         if (loose) v += Math.min(4, d(sq, loose)) * 1;              // and away from a loose ball
                         if (sq.y <= 0 || sq.y >= CFG.rows - 1) v += 0.5;            // pinned on the sideline
+                        // (brain x: cs1) onto the edge, where a team-mate still to act (or the Blitz) can put him in the crowd next
+                        if (AIX.x(me) && AIX.p(me, 'csOn', 0) > 0 && (sq.y === 0 || sq.y === CFG.rows - 1 || sq.x === 0 || sq.x === CFG.cols - 1)
+                            && !hasSk(pushed, 'Stand Firm') && !hasSk(pushed, 'Sidestep')
+                            && (!state.blitzUsed || state.players.some(o => o.team === me && o.id !== c.atk.id && onPitch(o) && !o.isDown && !o.hasActed && Math.max(Math.abs(o.x - sq.x), Math.abs(o.y - sq.y)) === 1)))
+                            v += AIX.p(me, 'csEdge', 2) + (csPushSq(pushed.x, pushed.y, sq.x, sq.y).every(([x, y]) => !inPitch(x, y)) ? AIX.p(me, 'csPinPush', 1) : 0);
                     } else {
                         v -= allyAdj(sq.x, sq.y, other(me), -1) * 0.8;             // our own player: keep them out of trouble
                     }
@@ -34114,6 +34210,9 @@ ol.ci-steps li::marker { content: none; }
                     if (gone - stay >= lim && !edgeWorse) go = true;
                     else if (stay - gone >= lim) go = false;
                 }
+                // (brain x: cs1) pin him on the edge: from the square he left, all his push squares are off the pitch
+                if (AIX.x(a.team) && AIX.p(a.team, 'csOn', 0) > 0 && !carrierA && c.def && c.def.team !== a.team && onPitch(c.def) && !getPlayer(v.x, v.y)
+                    && !hasSk(c.def, 'Stand Firm') && !hasSk(c.def, 'Sidestep') && csPushSq(v.x, v.y, c.def.x, c.def.y).every(([x, y]) => !inPitch(x, y))) { AIX.count(a.team, 'cs pin'); go = true; }
                 if (go) grid(v.x, v.y); else click('btn-stay-put');
             }
             function interception() {

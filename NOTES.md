@@ -410,6 +410,34 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- **27 Nov, the k_seq tests were biased - now paired (`--pair k_p581`).** Every test played seeds 910000+ in the same order against a
+  baseline from other seeds (913000+). A seed's result carries over between versions (game for game r 0.1-0.45, about 0.3), so all tests
+  rode the same luck: over 29 tests the average after 125 / 250 / 375 / 500 games was .385 / .391 / .384 / .378 - the "good start, then
+  fades" the owner kept seeing - and v5.81 itself scores .378 on 910000+ v .388 on 913000+ (`nn/look/dbg/blockcheck.py`). Fix: `k_p581`
+  (v5.81, `frozen_581.html`, seeds 910000-911499, 1,500 games) and `k_seq.py ... --pair k_p581`, which judges each game against v5.81 on
+  the same seed (`--judge` re-judges games already played). It removes the bias; it doesn't make tests much more precise. **Tests on
+  v5.82 code need a v5.82 paired run first** (`k_seq.py p582 '{"brain":"x"}' --fixed 1500 --seed 910000 --html <frozen v5.82>`).
+  Re-judged (paired): `do1` +0.012 +- 0.019 (625), `ab2` +0.010 +- 0.022 (625), `ab1` 0.000 +- 0.024 (500) - no verdict, not ruled out;
+  `wb1` -0.004 +- 0.021, no gain.
+- v5.82 (27 Nov): `cs1` on in brain x, into the crowd on purpose (the owner's idea; see CHANGELOG-FULL). Paired k_seq 1,000 games +0.007 +-
+  0.015: no gain shown, NOT WORSE (kept on the owner's rule). Per game v drefsante: 0.47 pins, 0.21 fills, ~0.6 Blitzes / 0.15 blocks set
+  up for the crowd (counts include the turn planner's repeat asks). Study (36 games, seeds 760000): theirs into the crowd 0.17 a game
+  (live 0.11) - drefsante rarely gives the chance; mirror matches 7 to 1.
+- 27 Nov, how drefsante puts ours in the crowd (`nn/look/dbg/surfed.py`, 720 games, 0.44 a game): 90% were standing on the sideline row
+  when its turn began, 79% hit from straight infield (no push square on the pitch), 72% plain Blocks; Linemen 41%, Catchers 34%. Ours on
+  that row at its turn start: pinned (one of theirs straight infield) 0.55 a game, 46% go in; marked 0.74, 15%; nobody near 0.97, 3%.
+  Of those lost: 35% our turn had ended in a Turnover, 51% had stood there since our turn began (usually blocking from there). In
+  progress: `se1` (`nn/look/dbg/se1.diff`, `frozen_se1.html`, on v5.81): early in our turn a pinned or marked player on the edge is kept
+  out of the blocks and dodges off the edge after them (seProbPin 34% pinned, seProb 50% marked; a fall leaves him safe from the crowd),
+  and a follow-up that leaves him less exposed is taken. Study `study_se1` (72 games) and paired k_seq queued.
+- 27 Nov, the ball won back and the Blitz (all not kept so far; diffs in `nn/look/dbg/`): live, we win the ball in our own turn 1.1 times a
+  game and still hold it at our next turn 56% - 48% with no team-mate next to the carrier at drefsante's turn start, 62% with two, 70% with
+  three (`wonback.py`). `wb1` (wbOn: 3 more bp1 moves, marked players dodge to protect the carrier at turn end; 0.43 dodges a game): no gain.
+  The Blitzer's action always ended after the block (game and BotBowl bot): `ab1` (abOn: he picks up a loose ball he can reach if no
+  team-mate is likelier, or carries it on - `afterBlitz`, bridge op `afterBlitz`, bot patch `ab1_bot.diff`; 0.66 pick-ups a game) and `ab2`
+  (+ abMove: otherwise his movement left goes where the team would send him - dp1/plug/screen, bp1/cage, support; 4.7 a game). `do1`
+  (dodge-out on defence: marked players dodge to shut the carrier's run once their blocks are in - `threatOf` is ~0 against a cage; 2.7
+  a game). Paired verdicts above.
 - 27 Nov, dodge-out on defence (`do1`, the owner's idea from the same-start pictures; not kept, `nn/look/dbg/do1.diff`, frozen_do1.html):
   found that brain x never moves a marked player on defence unless he's nimble (`canReposition`), and the screen steps use sure moves
   only, so players stuck in bad block layouts just stand. do1: at the end of a defending turn (after blk1), up to doN marked players

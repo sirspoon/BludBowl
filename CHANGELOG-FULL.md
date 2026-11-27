@@ -2,6 +2,17 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.82 (27 Nov 2026)
+- Brain x: `cs1` on (`csOn` 1; the owner's idea) - into the crowd on purpose. Both engines push into a free square on the pitch if there is
+  one (BotBowl then has to use the crowd, the game lets the blocker pick it), so `csPlan` looks for one of their players on an edge of the
+  pitch and a square to hit him from, moves free players into the empty push squares first with sure moves (up to `csFill` 2, giving
+  assists as they do), then blocks from there or Blitzes to that exact square (not when the Blitz is wanted on their carrier). The pin:
+  after a push onto the edge the blocker follows up when that leaves him straight infield of the man (every push square off the pitch
+  next turn), the push prefers that square, and a Blitz on a player one in from the edge prefers attacking from straight infield. The
+  block value's crowd bonus now counts only when no push square on the pitch is free. v drefsante (BotBowl, Humans): drefsante puts ours
+  in the crowd 0.44 times a game, we put its players there 0.07 (0.17 with this, 36 games); paired k_seq over 1,000 games +0.007 +- 0.015
+  score share - no gain shown, not worse (NOTES, 27 Nov). Mirror matches: 7 crowd pushes to 1.
+
 ## v5.81 (27 Nov 2026)
 - New match screen: under Humans, the second menu offers "Default (classic)" next to the default team (`CLASSIC`, key
   `classic:human`): BotBowl's competition Human team (its data/teams/11/human.json) - 2 Blitzers, a Thrower, 2 Catchers and 7 Linemen
