@@ -410,6 +410,13 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, lane closure by forward room (`cd2` reworked, the owner's idea; not kept, `nn/look/dbg/cd3.diff`): `laneRoom` = their
+  players' no-dodge progress towards our end zone this turn (within cdBand 3 rows of the carrier or in hand-off reach; carrier x1.5),
+  a sure move in the band, at most cdDepth 6 behind the carrier, when it cuts that by cdMin 2; cdN 5 a turn. cdTeam 1 also tries the
+  12 best moves in pairs (two players shutting a lane together) and makes the pair's better half first. Studies (seeds 760000 v gs3
+  .396, 105-150): single 7.7 moves a game, .417, 108-156; team 4.2 + 3.8 paired, .367, 101-157. Both left their free walk-ins up
+  37 -> 48% (players drawn into the band leave wide receivers free); the carrier's own no-dodge room unchanged (2.1). k_seq single:
+  NO GAIN after 375 (.363 v .386), touchdowns 0.87 scored / 1.37 conceded a game v the baseline's 0.86 / 1.27 - conceded MORE.
 - 27 Nov, rolling lane closure (`cd2`, the owner's idea; not kept, `nn/look/dbg/cdb.diff`): cd1, but only their free receivers
   within cdBand 3 rows of the carrier (or in hand-off reach) count, and our closers stay in the band, at most cdDepth 6 behind him.
   Fired 0.85 a game; free walk-ins 37 -> 36%; study_cdb .404 (113-152 v gs3 105-150). k_seq NO GAIN after 250: .362 v .386,
