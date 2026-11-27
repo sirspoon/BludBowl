@@ -2,6 +2,15 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.79 (27 Nov 2026)
+- drefsante (Settings -> Computer coach -> drefsante, `tools/drefsante-server.py`): the game now asks it again part-way through a
+  player's action, as its own BotBowl bot does (`drMore`, `drOn2`): when its plan stops without ending the action (after a Blitz's
+  block, or a pass or hand-off whose catcher it names once the thrower is there), it is asked what that player does next, naming him
+  as the active player. A plan that ends the action is no longer followed by the Experimental coach's own carry-on move with the ball
+  (`carryOn`), which had moved drefsante's carrier on after nearly every pick-up. Pass and hand-off plans that move first no longer
+  hand the action to the Experimental coach. Checked in 12 computer matches v brain x (Humans): no stand-ins (before: 5 in 8), 0-8
+  follow-on moves and 0-2 follow-on throws a match from drefsante.
+
 ## v5.78 (26 Nov 2026)
 - Brain x: the owner's sideline gang-up is on (`gs1`, `gsOn` 1, see `gsPlan`). On our first turn after receiving the kick-off
   (none of theirs over halfway, the ball not theirs and in our half), one of their players standing in a wide zone on their line or

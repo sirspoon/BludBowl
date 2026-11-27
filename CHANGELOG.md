@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.79 (27 Nov 2026)
+- Playing drefsante (the local-server computer coach): it now carries on with a player when its plan says so (moving on after a Blitz, naming the catcher after running to throw), and its ball carrier no longer gets walked on by the Experimental coach after a pick-up.
+
 ## v5.78 (26 Nov 2026)
 - The experimental computer coach (brain x) has a new kick-off trick: when receiving, it gangs up on a player standing out by the sideline, with one player stepping in to help and another Blitzing him.
 

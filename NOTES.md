@@ -410,6 +410,18 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, playing drefsante in BludBowl checked (the owner's 2-0 win v it, `nn/look/mine/`; scripts `nn/look/dbg/replay_text.py` -
+  a match export as text, `dref_turns.py` / `dref_actions.py` - each of its turn starts / actions rebuilt and asked again,
+  `nn/look/standin/run.js` - brain x v drefsante in the browser, counting stand-ins). Its decisions are reproduced from the rebuilt
+  positions (first action of all 16 turns), so BludBowl hands it the game faithfully. Brain x stood in for ~1 decision in 250 (passes
+  and hand-offs that moved first, a set-up BludBowl refused); kick-off events and interceptions are always brain x's. The Ogre and
+  Halfling (not in BotBowl's Human team) changed nothing (8 matches each: 7-12 v 7-11). BludBowl sends BB2025 stats (AG and AV as
+  target numbers, an Ogre's 4+ reads to it as AG 4), as BotBowl Season 3 does for its Humans; converting them changed 11 of 110 of its
+  actions and didn't stop its Ogre carrying, so left as is. v5.79: asked again mid-action (see CHANGELOG-FULL); its own answer is
+  nearly always "end the player's turn", so the real fix was stopping brain x's carry-on after its pick-ups. Open: in the browser
+  drefsante does worse v brain x (24 matches before v5.79: 14-23 touchdowns; 12 after: 13-16) than in BotBowl (~3-2 the other way)
+  though it makes the same decisions - so the difference is the platform (BotBowl's rules engine, or brain x through the bridge),
+  which matters for reading the k_seq results.
 - 26 Nov, look-ahead revisited (owner's priority: the AI). The win predictor (bb_v3c) and ev1's result head add little beyond simple
   facts (17 Nov, ai-training/README "What the outcome predictor goes by", "ev1"), so the check was ev1's SHORT-TERM heads
   (`nn/look/evalshort.py`, same split as evalcheck.py, 18,648 held-out turn starts of AI-v-AI matches, v a gradient-boosting

@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.78</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.79</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -33690,6 +33690,14 @@ ol.ci-steps li::marker { content: none; }
                     const t = plan.target != null ? getPlayerById(plan.target) : null;
                     if (plan.kind === 'blitz' && t && onPitch(t) && !t.isDown && cheb(p, t) === 1 && !p.hasBlocked) { doBlock(p); return; }
                     if (plan.kind === 'foul' && t && onPitch(t) && cheb(p, t) === 1) { doFoul(p); return; }
+                    if (plan.dref) {   // (brain: dref) the route is walked: drefsante says what the player does next (drMore)
+                        if ((plan.kind === 'pass' || plan.kind === 'handoff') && plan.receiver != null && state.ball.carrierId === p.id) { doThrow(p); return; }
+                        if (!plan.open) { endAction(p); return; }   // (its plan ended the action here: no carrying on with brain x's choice)
+                        const r = drMore(p);
+                        if (r === undefined) return;   // (its answer is on the way: runPlan runs again next tick)
+                        if (!drOn2(p, r)) endAction(p);
+                        return;
+                    }
                     if (plan.kind === 'pass' || plan.kind === 'handoff') {
                         // (pus1) picked the ball up on the way: carry on to where the hand-off or throw is made from
                         if (plan.leg2 && !plan.leg2done && state.ball.carrierId === p.id && (p.x !== plan.leg2.x || p.y !== plan.leg2.y)) {
@@ -33709,6 +33717,12 @@ ol.ci-steps li::marker { content: none; }
                     return;
                 }
                 if (plan.step === 3) {   // block, foul or throw done
+                    if (plan.dref && plan.open && state.mode === MODES.ACTION_BLITZ && !p.hasActed) {
+                        const r = drMore(p);
+                        if (r === undefined) return;
+                        if (!drOn2(p, r)) endAction(p);
+                        return;
+                    }
                     if ([MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_TTM].includes(state.mode) && !p.hasActed) { if (feedMove(p)) return; endAction(p); return; }
                     plan = null;
                 }
@@ -34390,7 +34404,7 @@ ol.ci-steps li::marker { content: none; }
                 const L = r.plan.split('\n').map(s => s.trim().split(';')).filter(k => k[0]);
                 if (!L.length || L[0][0] === 'END_TURN') return null;
                 const KIND = { START_MOVE: 'move', START_BLITZ: 'blitz', START_BLOCK: 'block', START_PASS: 'pass', START_HANDOFF: 'handoff', START_FOUL: 'foul' };
-                let kind = 'move', p = null, target = null, receiver = null, done = false;
+                let kind = 'move', p = null, target = null, receiver = null, done = false, closed = false;   // closed: it said where the action ends
                 const sqs = [];
                 for (const k of L) {
                     const c = k[0];
@@ -34399,22 +34413,64 @@ ol.ci-steps li::marker { content: none; }
                     else if (c === 'STAND_UP') p = p || DR.byName(k[1]);
                     else if (c === 'MOVE') { p = p || DR.byName(k[2]); sqs.push(DR.at(+k[1])); }
                     else if (c === 'BLOCK' || c === 'FOUL') { p = p || DR.byName(k[2]); const s = DR.at(+k[1]), t = getPlayer(s.x, s.y); target = t ? t.id : null; done = true; }
-                    else if (c === 'PASS' || c === 'HANDOFF') { p = p || DR.byName(k[2]); const s = DR.at(+k[1]), t = getPlayer(s.x, s.y); receiver = t ? t.id : null; done = true; }
-                    else if (c === 'END_PLAYER_TURN' || c === 'END_TURN') done = true;
+                    else if (c === 'PASS' || c === 'HANDOFF') { p = p || DR.byName(k[2]); const s = DR.at(+k[1]), t = getPlayer(s.x, s.y); receiver = t ? t.id : null; done = closed = true; }
+                    else if (c === 'END_PLAYER_TURN' || c === 'END_TURN') done = closed = true;
                 }
                 const bad = !p || p.team !== me || p.hasActed || !onPitch(p) || tried.has(p.id)
-                    || ((kind === 'block' || kind === 'blitz' || kind === 'foul') && target == null) || ((kind === 'pass' || kind === 'handoff') && receiver == null)
+                    || ((kind === 'block' || kind === 'blitz' || kind === 'foul') && target == null) || ((kind === 'pass' || kind === 'handoff') && receiver == null && !sqs.length)
                     || (kind === 'blitz' && state.blitzUsed) || (kind === 'foul' && state.foulUsed) || (kind === 'pass' && state.passUsed) || (kind === 'handoff' && state.handoffUsed);
                 if (bad) { AIX.count(me, 'dref fallback'); DR.mark('fallback', 'one move BludBowl could not follow'); return choose(); }   // (a plan BludBowl can't follow: brain x picks this action instead)
                 let px = p.x, py = p.y;
                 const path = sqs.map(s => { const o = { x: s.x, y: s.y, prevX: px, prevY: py }; px = s.x; py = s.y; return o; });
                 AIX.count(me, 'dref ' + kind);
-                const plan = { pid: p.id, kind, dref: true };
+                const plan = { pid: p.id, kind, dref: true, open: !closed };   // (open: drMore asks what next once it's carried out)
                 if (target != null) plan.target = target;
                 if (receiver != null) plan.receiver = receiver;
                 if (!path.length && (kind === 'pass' || kind === 'handoff')) plan.stay = true;
                 plan.pick = () => (path.length ? { x: px, y: py, path, prob: 100 } : null);
                 return plan;
+            }
+            // (v5.79) the player can still act: ask drefsante what it does next with him, as its own BotBowl bot does (drefsante_bot.py
+            // asks again, naming the active player, whenever its plan runs out part-way through an action). Its plans often stop on a
+            // loose ball (to carry it on once picked up), after a Blitz's block (to move on) or before a pass or hand-off (to name the
+            // catcher once there); before v5.79 the player stopped there, or brain x carried the ball on. Undefined while waiting;
+            // null when it ends the player's action; else { sqs, target, receiver } for this player.
+            function drMore(p) {
+                const r = DR.ask('turn', p.team, { active: DR.nm(p) }, p);
+                if (r === undefined) return undefined;
+                DR.take();
+                if (r.error || typeof r.plan !== 'string') { AIX.count(p.team, 'dref more error'); return null; }
+                const out = { sqs: [], target: null, receiver: null };
+                for (const k of r.plan.split('\n').map(s => s.trim().split(';')).filter(k => k[0])) {
+                    const c = k[0], who = DR.byName(c === 'MOVE' || c === 'BLOCK' || c === 'PASS' || c === 'HANDOFF' || c === 'FOUL' ? k[2] : k[1]);
+                    if (who && who.id !== p.id) break;   // (another player's action: this one is done)
+                    if (c === 'MOVE') out.sqs.push(DR.at(+k[1]));
+                    else if (c === 'BLOCK') { const s = DR.at(+k[1]), t = getPlayer(s.x, s.y); out.target = t ? t.id : null; break; }
+                    else if (c === 'PASS' || c === 'HANDOFF') { const s = DR.at(+k[1]), t = getPlayer(s.x, s.y); out.receiver = t ? t.id : null; break; }
+                    else if (c === 'END_PLAYER_TURN' || c === 'END_TURN') { out.closed = true; break; }
+                    else if (c.startsWith('START_') || c === 'FOUL') break;
+                }
+                AIX.count(p.team, out.sqs.length ? 'dref more move' : out.target != null ? 'dref more block' : out.receiver != null ? 'dref more throw' : 'dref more end');
+                return out;
+            }
+            // carry out drMore's answer; false: nothing more to do (end the action)
+            function drOn2(p, r) {
+                if (!r || (plan.more = (plan.more || 0) + 1) > 6) return false;
+                plan.open = !r.closed;
+                if (r.target != null && plan.kind === 'blitz' && !p.hasBlocked) plan.target = r.target;
+                if (r.receiver != null && (plan.kind === 'pass' || plan.kind === 'handoff')) plan.receiver = r.receiver;
+                if (r.sqs.length) {
+                    const path = []; let px = p.x, py = p.y;
+                    for (const s of r.sqs.slice(0, Math.max(0, (p.remainingMA || 0) + (p.rushes || 0)))) {
+                        if (Math.max(Math.abs(s.x - px), Math.abs(s.y - py)) !== 1 || getPlayer(s.x, s.y)) break;   // (a step BludBowl can't take: stop there)
+                        path.push({ x: s.x, y: s.y, prevX: px, prevY: py }); px = s.x; py = s.y;
+                    }
+                    if (path.length) { plan.step = 2; act(() => startPath(p, path)); return true; }
+                }
+                const t = plan.target != null ? getPlayerById(plan.target) : null;
+                if (plan.kind === 'blitz' && !p.hasBlocked && t && onPitch(t) && !t.isDown && cheb(p, t) === 1) { doBlock(p); return true; }
+                if ((plan.kind === 'pass' || plan.kind === 'handoff') && plan.receiver != null && state.ball.carrierId === p.id) { doThrow(p); return true; }
+                return false;
             }
             function drSetup(team) {
                 if (GEO.sev || state.setup.eventSetup || state.setup.restrictIds) { setupTeam(team); return; }
