@@ -344,6 +344,7 @@ class BludBowlBot(ProcBot):
                 return Action(ActionType.END_TURN)
             acts = self.plan_actions(game, plan)
             self.carry_pid = plan.get('player') if plan.get('kind') == 'pickup' else None   # (see player_action)
+            self.blitz_pid = plan.get('player') if plan.get('kind') == 'blitz' else None   # (brain x ab1: asked where to go on after the block)
             if plan.get('player'):
                 self.tried.add(plan['player'])
             if acts and self.allowed(game, acts[0]):
@@ -410,6 +411,23 @@ class BludBowlBot(ProcBot):
                 if self.allowed(game, a):
                     return a
                 self.fallbacks['step not allowed: ' + a.action_type.name] += 1
+            # (brain x ab1) a Blitz's block done, movement left: BludBowl may carry the ball on, or go for it if it's loose (afterBlitz);
+            # it answers with no route when that's off (and an older game copy without the question is the same)
+            bpid, self.blitz_pid = getattr(self, 'blitz_pid', None), None
+            bp = game.get_player(bpid) if bpid else None
+            if bp is not None and game.state.active_player is bp and bp.state.up:
+                try:
+                    ab = self.ask('afterBlitz', self.describe(game), {'player': bpid}) or {}
+                except RuntimeError:
+                    ab = {}
+                prev = bp.position
+                for q in ab.get('route') or []:
+                    s = self.sq(q)
+                    self.queue.append(Action(ActionType.JUMP if game.is_season3 and prev.distance(s) == 2 else ActionType.MOVE, position=s))
+                    prev = s
+                if self.queue:
+                    self.carry_pid = bpid if ab.get('pickup') else None   # (picked up there: carried on as below)
+                    continue
             # picked the ball up on the move: carry it on, as the game does (BludBowl's runPlan; before 19 Nov the picker stopped there)
             pid, self.carry_pid = getattr(self, 'carry_pid', None), None
             p = game.get_player(pid) if pid else None
