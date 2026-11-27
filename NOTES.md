@@ -418,10 +418,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   Halfling (not in BotBowl's Human team) changed nothing (8 matches each: 7-12 v 7-11). BludBowl sends BB2025 stats (AG and AV as
   target numbers, an Ogre's 4+ reads to it as AG 4), as BotBowl Season 3 does for its Humans; converting them changed 11 of 110 of its
   actions and didn't stop its Ogre carrying, so left as is. v5.79: asked again mid-action (see CHANGELOG-FULL); its own answer is
-  nearly always "end the player's turn", so the real fix was stopping brain x's carry-on after its pick-ups. Open: in the browser
-  drefsante does worse v brain x (24 matches before v5.79: 14-23 touchdowns; 12 after: 13-16) than in BotBowl (~3-2 the other way)
-  though it makes the same decisions - so the difference is the platform (BotBowl's rules engine, or brain x through the bridge),
-  which matters for reading the k_seq results.
+  nearly always "end the player's turn", so the real fix was stopping brain x's carry-on after its pick-ups. Strength by platform
+  (brain x v drefsante, Humans): BotBowl 60 games, drefsante 31-13-16, touchdowns 84-55 (.60). In the browser before v5.79 it lost
+  (24 matches: 14-23); v5.79 with BotBowl's Human team (no Ogre or Halfling) 48 matches 25-13-10, 60-35 (.63) - the same as BotBowl;
+  with the BB2025 Human team 36 matches 36-46 (.44); v5.80's agility on its scale 26-23 in 24 (unclear). Brain x is as strong in
+  BotBowl as in the browser (v the scripted bot, 120 each: BotBowl 88-26-6, 170-30; browser v the port 79-27-14, 166-44), so the
+  k_seq results stand. For games v drefsante: a Human team without the Ogre and Halfling plays it at its BotBowl strength.
 - 26 Nov, look-ahead revisited (owner's priority: the AI). The win predictor (bb_v3c) and ev1's result head add little beyond simple
   facts (17 Nov, ai-training/README "What the outcome predictor goes by", "ev1"), so the check was ev1's SHORT-TERM heads
   (`nn/look/evalshort.py`, same split as evalcheck.py, 18,648 held-out turn starts of AI-v-AI matches, v a gradient-boosting

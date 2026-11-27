@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.80 (27 Nov 2026)
+- Playing drefsante: it's told each player's agility on its own rules' scale, so it no longer thinks an Ogre is more agile than a Catcher.
+
 ## v5.79 (27 Nov 2026)
 - Playing drefsante (the local-server computer coach): it now carries on with a player when its plan says so (moving on after a Blitz, naming the catcher after running to throw), and its ball carrier no longer gets walked on by the Experimental coach after a pick-up.
 

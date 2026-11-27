@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.79</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.80</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -34345,7 +34345,8 @@ ol.ci-steps li::marker { content: none; }
                         activePlayer: busy ? act.id : null, action: busy ? act.actionTaken : null,
                         ball: { carrier: state.ball.carrierId || null, x: state.ball.x, y: state.ball.y, inAir: false },
                         teams: [team(0), team(1)],
-                        players: state.players.map(p => ({ id: p.id, team: p.team, role: String(p.type || 'Lineman').replace(/^(Human|Imperial|Old World)\s+/, ''), ma: p.ma, st: p.st, ag: p.ag, pa: p.pa, av: p.av,
+                        players: state.players.map(p => ({ id: p.id, team: p.team, role: String(p.type || 'Lineman').replace(/^(Human|Imperial|Old World)\s+/, ''), ma: p.ma, st: p.st, ag: Math.max(1, Math.min(6, 6 - p.ag)),   // (v5.80) its rules' scale: 3+ -> 3, an Ogre's 4+ -> 2, an elf's 2+ -> 4
+                            pa: p.pa, av: p.av,
                             skills: p.skills || [], x: there(p) ? p.x : null, y: there(p) ? p.y : null, state: st(p), used: !!p.hasActed, hasBlocked: !!p.hasBlocked,
                             maLeft: p.remainingMA != null ? p.remainingMA : p.ma, rushesLeft: p.rushes != null ? p.rushes : 2, rooted: !!p.rooted })) };
                 }

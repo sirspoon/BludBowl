@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.80 (27 Nov 2026)
+- drefsante (`DR` snap): agility is sent on the scale of the older rules its brain plays (AG = 6 - the BB2025 target: 3+ -> 3, 4+ -> 2,
+  2+ -> 4). Before, the target number went as it was, so an Ogre (4+) read to it as AG 4, better than a Catcher. Humans' other players
+  are 3+ either way, as BotBowl Season 3 sends them. In 24 computer matches v brain x with the BB2025 Human team (Ogre, Halfling):
+  drefsante's touchdowns 26-23 (before 23-30; too few matches to call). Armour still goes as the target number (one point high on its
+  scale), as BotBowl sends it.
+
 ## v5.79 (27 Nov 2026)
 - drefsante (Settings -> Computer coach -> drefsante, `tools/drefsante-server.py`): the game now asks it again part-way through a
   player's action, as its own BotBowl bot does (`drMore`, `drOn2`): when its plan stops without ending the action (after a Blitz's
