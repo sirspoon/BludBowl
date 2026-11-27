@@ -410,6 +410,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.83 (27 Nov): `se1` on in brain x, pinned players only (see CHANGELOG-FULL). Paired k_seq (`k_se2`, `frozen_se2.html` = v5.82 +
+  se1) BETTER after 625: +0.043 +- 0.018 v `k_p582`; but v the other run of v5.82's code on those seeds (`k_cs1`) only +0.002, v
+  v5.81 (`k_p581`) +0.035 - the v5.82 run came out low (.367 v .378 for v5.81; same code run twice on 1,000 seeds differs by 0.009).
+  Best guess: ~+0.02. `se1` for every marked player (v5.81, `k_se1`) dodged 1.6 a game: NO GAIN after 375. Study `study_se2` (72
+  games) won 11 drew 18 lost 43 - a bad run, not a bug (its paired test started +0.052). New tests on v5.83 need `k_p583`.
 - **27 Nov, the k_seq tests were biased - now paired (`--pair k_p581`).** Every test played seeds 910000+ in the same order against a
   baseline from other seeds (913000+). A seed's result carries over between versions (game for game r 0.1-0.45, about 0.3), so all tests
   rode the same luck: over 29 tests the average after 125 / 250 / 375 / 500 games was .385 / .391 / .384 / .378 - the "good start, then

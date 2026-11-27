@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.82</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.83</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -30002,7 +30002,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1 },   // (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1, seOn: 1, seMark: 0 },   // (v5.83: se1 seOn 1 + seMark 0, off the sideline when pinned, see sePlan) (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -32011,6 +32011,55 @@ ol.ci-steps li::marker { content: none; }
                 const sx = best.sx, sy = best.sy;
                 return { pid: best.atk.id, kind: 'blitz', target: best.t.id, pick: ms => ms.find(m => m.x === sx && m.y === sy) || null };
             }
+            // (brain x: se1) off the sideline: drefsante pushes our players into the crowd 0.44 times a game, 90% of them standing on the
+            // sideline row when its turn began, 79% hit from straight infield (every push square off the pitch). Of ours left on that row
+            // at its turn start, one with a player of theirs straight infield of him (pinned) went into the crowd 46% of the time, one
+            // only marked 15%, one with nobody next to him 3% (nn/look/dbg/surfed.py, 720 games). So at the end of our turn a player still
+            // to act, standing on an edge of the pitch with one of theirs next to him, dodges to a square off the edge (with a re-roll
+            // if one would go on it, at seProb% or better - seProbPin% when pinned) when the danger he leaves (sePin pinned / seMark marked) is worth more than
+            // the chance of falling (seFail: lying down he can't be pushed into the crowd, and the turn is over anyway). Up to seN a
+            // turn; not the ball carrier. Off unless seOn > 0.
+            let seDone = { key: '', n: 0 };
+            function seDanger(me, x, y) {   // the chance of being pushed into the crowd from (x, y) next turn
+                const them = other(me), edgeY = y === 0 || y === CFG.rows - 1, edgeX = x === 0 || x === CFG.cols - 1;
+                if (!edgeY && !edgeX) return 0;
+                const ix = edgeX ? (x === 0 ? 1 : -1) : 0, iy = edgeY ? (y === 0 ? 1 : -1) : 0;
+                let pinned = false, marked = false;
+                state.players.forEach(q => {
+                    if (q.team !== them || !onPitch(q) || q.isDown || q.isStunned || q.isDistracted || Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) !== 1) return;
+                    marked = true;
+                    if (q.x === x + ix && q.y === y + iy) pinned = true;
+                });
+                return pinned ? AIX.p(me, 'sePin', 0.46) : marked ? AIX.p(me, 'seMark', 0.15) : 0;
+            }
+            function sePlan(me, act) {
+                if (!AIX.x(me) || !(AIX.p(me, 'seOn', 0) > 0) || state.charge) return null;
+                const ck = state.half + ':' + me + ':' + state.turn[me];
+                if (seDone.key !== ck) seDone = { key: ck, n: 0 };
+                if (seDone.n >= AIX.p(me, 'seN', 2)) return null;
+                const fail = AIX.p(me, 'seFail', 0.05);   // (a fall: lying down - safe from the crowd - and the turn over; a push into the crowd counts 1)
+                let best = null;
+                act.forEach(p => {
+                    if (p.isDown || p.isStunned || p.hasActed || p.id === state.ball.carrierId) return;
+                    const d0 = seDanger(me, p.x, p.y);
+                    if (d0 <= 0) return;
+                    const minP = d0 >= AIX.p(me, 'sePin', 0.46) ? AIX.p(me, 'seProbPin', 34) : AIX.p(me, 'seProb', 50);   // pinned: even a 5+ dodge beats staying
+                    const ox = p.x, oy = p.y;
+                    movesFor(p).forEach(m => {
+                        if (m.x === ox && m.y === oy || m.isRush && m.prob < 100) return;
+                        if (m.x === 0 || m.x === CFG.cols - 1 || m.y === 0 || m.y === CFG.rows - 1) return;
+                        if (!state.ball.carrierId && state.ball.x === m.x && state.ball.y === m.y) return;
+                        const pr = pPlan(p, m) / 100;
+                        if (pr * 100 < minP) return;
+                        const v = pr * d0 - (1 - pr) * fail - m.path.length * 0.002 - (tzFor(m.x, m.y, me) > 0 ? 0.02 : 0);
+                        if (v > 0 && (!best || v > best.v)) best = { p, m, v };
+                    });
+                });
+                if (!best) return null;
+                seDone.n++; AIX.count(me, 'se1' + (best.m.prob < 100 ? ' dodge' : ''));
+                const tx = best.m.x, ty = best.m.y;
+                return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty) || null };
+            }
             function gsPlan(me, act) {
                 if (!AIX.x(me) || !AIX.p(me, 'gsOn', 0) || state.blitzUsed || state.charge || !gsReceiving(me)) return null;
                 const them = other(me), line = q => toGo(q.x, me) >= CFG.cols / 2 - AIX.p(me, 'gsDepth', 4);   // (on their line or up to gsDepth behind it: drefsante's wide pairs stand 2 back)
@@ -32851,6 +32900,7 @@ ol.ci-steps li::marker { content: none; }
                 }
                 { const gs = gsPlan(me, act); if (gs) return gs; }   // (brain x: gs1) the sideline gang-up, first thing on our receiving turn
                 { const cs = csPlan(me, act, carrier); if (cs) return cs; }   // (brain x: cs1) into the crowd
+                { const se = sePlan(me, act); if (se) return se; }   // (brain x: se1) off the sideline: asked early so he isn't used for a block from there (the turn planner still does a dodge after the blocks and sure moves)
                 if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
                 if (lbMove) return lbMove;   // (brain x: lb1)
                 if (cbMove) return cbMove;   // (brain x: cb1)
@@ -34213,6 +34263,13 @@ ol.ci-steps li::marker { content: none; }
                 // (brain x: cs1) pin him on the edge: from the square he left, all his push squares are off the pitch
                 if (AIX.x(a.team) && AIX.p(a.team, 'csOn', 0) > 0 && !carrierA && c.def && c.def.team !== a.team && onPitch(c.def) && !getPlayer(v.x, v.y)
                     && !hasSk(c.def, 'Stand Firm') && !hasSk(c.def, 'Sidestep') && csPushSq(v.x, v.y, c.def.x, c.def.y).every(([x, y]) => !inPitch(x, y))) { AIX.count(a.team, 'cs pin'); go = true; }
+                // (brain x: se1) staying on the edge of the pitch beside their players is asking to be pushed into the crowd: follow up when
+                // the square he'd step into is less exposed (no dice, no action - a free way off the sideline)
+                if (AIX.x(a.team) && AIX.p(a.team, 'seOn', 0) > 0 && !go && !carrierA && !getPlayer(v.x, v.y)) {
+                    const edge = (x, y) => x === 0 || x === CFG.cols - 1 || y === 0 || y === CFG.rows - 1;
+                    const risk = (x, y) => seDanger(a.team, x, y) || (edge(x, y) ? 0.03 : 0);
+                    if (risk(a.x, a.y) - risk(v.x, v.y) > AIX.p(a.team, 'seFol', 0.02)) { AIX.count(a.team, 'se follow'); go = true; }
+                }
                 if (go) grid(v.x, v.y); else click('btn-stay-put');
             }
             function interception() {

@@ -2,6 +2,17 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.83 (27 Nov 2026)
+- Brain x: `se1` on, pinned players only (`seOn` 1, `seMark` 0; the owner's idea) - off the sideline. drefsante put ours in the crowd
+  0.44 times a game, 90% of them standing on the sideline row when its turn began; one pinned there (a player of theirs straight
+  infield) went in 46% of the time (`nn/look/dbg/surfed.py`). `sePlan`, asked early in our turn so the pinned player isn't used for a
+  block from there (the turn planner still makes the dodge after the blocks and sure moves): he moves or dodges to a square off the
+  edge at `seProbPin` 34% or better (a fall leaves him lying down, safe from the crowd; a push into the crowd weighs 20x a fall). And
+  a block's follow-up is taken when it leaves him less exposed than staying (no dice, no action). v drefsante: ours into the crowd
+  0.40 a game (0.54 before, same seeds, 72 games); 0.61 dodges and 0.19 follow-ups a game; paired k_seq BETTER after 625 games, +0.043
+  +- 0.018 v the v5.82 run (+0.023 +- 0.016 v the average of both v5.82-code runs). The version for every marked player (`seMark`
+  0.15) cut crowd pushes as much but dodged 1.6 times a game: no gain.
+
 ## v5.82 (27 Nov 2026)
 - Brain x: `cs1` on (`csOn` 1; the owner's idea) - into the crowd on purpose. Both engines push into a free square on the pitch if there is
   one (BotBowl then has to use the crowd, the game lets the blocker pick it), so `csPlan` looks for one of their players on an edge of the

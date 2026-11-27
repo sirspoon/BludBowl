@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.83 (27 Nov 2026)
+- The Experimental computer coach (brain x) gets its players off the sideline: one pinned there by an opponent dodges clear at the end of its blocks, and a block's follow-up is taken when it steps off the edge.
+
 ## v5.82 (27 Nov 2026)
 - The Experimental computer coach (brain x) pushes players into the crowd on purpose: it fills the squares a player on the edge could be pushed into, then blocks or Blitzes him off the pitch, and pins players against the sideline for next turn.
 
