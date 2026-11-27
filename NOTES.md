@@ -410,6 +410,19 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, dodge-out on defence (`do1`, the owner's idea from the same-start pictures; not kept, `nn/look/dbg/do1.diff`, frozen_do1.html):
+  found that brain x never moves a marked player on defence unless he's nimble (`canReposition`), and the screen steps use sure moves
+  only, so players stuck in bad block layouts just stand. do1: at the end of a defending turn (after blk1), up to doN marked players
+  who haven't acted (standing, or lying with MA 4+ to stand and go) dodge (doProb 60+, with a re-roll if one would go on it) to where
+  they shut most of the carrier's run *once their blocks are in* (our players in contact with theirs don't count - the plain
+  `threatOf` is nearly always 0 against a cage, which is likely why plug/cd/dp did so little v drefsante) or a free receiver
+  (doRecv 2), weighed against falling there, plus doEsc 0.4 per opponent left behind (x1.5 lying, x1.5 Catch/Pass). Marked players
+  lying down wait for it and stand where they are otherwise. Fired 2.7 a game (0.08 stand-and-dodge). k_seq doN 3: NO GAIN after
+  625 (.385 v .388; touchdowns 0.87-1.27 a game, the same as without). Not covered: after we win the ball back (the owner's other
+  points - the ball-winning Blitzer left out in front, downed Catcher/Thrower in a crowd): its own step if tried.
+- 27 Nov, new k_seq baseline `k_b581` (v5.81, 2,000 games, seeds 913000+, `frozen_581.html`): .388, won 525 drew 501 lost 974,
+  touchdowns 1728-2514. Now k_seq.py's default `--base`. (v5.70's was .386: the "live about .38" figure came from short runs.)
+  Same-start pictures of a turn under several settings: `nn/look/dbg/endturns.js` (collect / play, VARS for the settings), `draw_ends.py`, `shot.js`, `rank.py`.
 - 27 Nov, lane closure by forward room (`cd2` reworked, the owner's idea; not kept, `nn/look/dbg/cd3.diff`): `laneRoom` = their
   players' no-dodge progress towards our end zone this turn (within cdBand 3 rows of the carrier or in hand-off reach; carrier x1.5),
   a sure move in the band, at most cdDepth 6 behind the carrier, when it cuts that by cdMin 2; cdN 5 a turn. cdTeam 1 also tries the
