@@ -410,6 +410,15 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, the owner's out-of-contact defence (from his 1-0 win v drefsante: its blocks 25 -> 11 a half when he stood off; not kept,
+  `nn/look/dbg/zd1.diff`, `zd2.diff`, frozen_zd1/zd2): `zd1` (zdOn) - screen two squares off their front line, no formation square next
+  to theirs, no hunters, no dp1/plug moves, only 2-dice or carrier blocks; `zd2` + `zdStepBack` (players in contact move or dodge at
+  zdProb 60 to a square next to none of theirs) and no "covered by a neighbour" formation shortcut. Ours in contact at drefsante's turn
+  starts: live 4.3, zd1 3.3, zd2 2.2 (the owner 1.5). drefsante still scored on 48% of its drives (live 44%) and in two-thirds of halves
+  (`nn/look/dbg/zd_drives.py`, study_583p / zd1p / zd2p) - standing off doesn't stop it. Paired k_seq: both NO GAIN after 125, .308 -
+  -0.17 v k_p583 (its first block ran hot, .480), -0.10 v k_p581 / k_p582 on the same seeds: clearly worse always on. The leading-only
+  and near-our-line / end-of-half triggers weren't tested (too rare to measure; the drive numbers give no reason to expect a delay).
+- 27 Nov, v5.83's paired run `k_p583` (`frozen_583.html`, seeds 910000-911499): .400 (v5.81 .378, v5.82 .367 on the same seeds).
 - v5.83 (27 Nov): `se1` on in brain x, pinned players only (see CHANGELOG-FULL). Paired k_seq (`k_se2`, `frozen_se2.html` = v5.82 +
   se1) BETTER after 625: +0.043 +- 0.018 v `k_p582`; but v the other run of v5.82's code on those seeds (`k_cs1`) only +0.002, v
   v5.81 (`k_p581`) +0.035 - the v5.82 run came out low (.367 v .378 for v5.81; same code run twice on 1,000 seeds differs by 0.009).
