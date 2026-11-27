@@ -15,6 +15,12 @@ const { openGame } = require('./headless-match');
   // BRIDGE_AIP='{"deepN":0}': tuning values for the AI on both sides (window.AIP), e.g. to test a feature off (nn/evaluate.py --aip)
   if (process.env.BRIDGE_AIP) { const aip = JSON.parse(process.env.BRIDGE_AIP); w.AIP = [aip, aip]; }
   await new Promise(r => setTimeout(r, 1500));
+  // nobody sees this game: stop the page's repeating chores (its setInterval ids are 'iv1', 'iv2', ...: autosave every 0.7 s, repaints, and the
+  // pitch-texture check, which in jsdom never finds a drawn pitch and rebuilds it every 5 s - ~13% of a BotBowl game's time v drefsante). The
+  // answers don't change: every question is answered synchronously, with Math.random re-seeded from its text first.
+  const lastIv = +String(w.setInterval(() => {}, 1e9)).slice(2);
+  for (let i = 1; i <= lastIv; i++) w.clearInterval('iv' + i);
+  w.pitchTexCheck = () => {};
   const B = w.eval('AI.bridge');
   const out = o => process.stdout.write(JSON.stringify(o) + '\n');
   // the AI's Math.random is seeded from each question (its text without the id), so the same position always gets the same answer and a

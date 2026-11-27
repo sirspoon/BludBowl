@@ -410,6 +410,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, test speed v drefsante (BotBowl): a game takes ~18 s on one worker - our AI's bridge ~50% (brain x's turn planning ~58 ms a
+  question, ~130 a game), drefsante ~36% (half of it its own `updateModel`, which hands the whole position to its Java side through team
+  files at every decision - its author's comment calls it the bottleneck), BotBowl's engine only ~5%. In the bridge's Node, the game's
+  repeating chores ran for nothing (pitch-texture rebuilds every 5 s, as jsdom never shows a drawn pitch, plus autosave and repaints):
+  `tools/bridge-server.js` now stops them. Same answers to 545 recorded questions; 56 games on 14 workers 150 s -> ~122 s (twice each), so
+  ~20% faster (1,000 games ~27 -> ~22 min). Left: drefsante's `updateModel` (needs its Java side changed) and brain x's own thinking -
+  not worth it for now (the owner: ideas, not run time, are the bottleneck). Also found: **a seed doesn't repeat a game v drefsante** -
+  its Java setup puts its players on the same squares in a different order from run to run, so two runs of one seed part at the first
+  kick-off (not Python's hashing; k_seq compares with stored runs, so it doesn't rely on pairing). Profiler: scratch only (evaluate.worker
+  in one process with timers round each bot's act, the bridge's ask and drefsante's updateModel; NODE_OPTIONS=--cpu-prof for Node).
 - 27 Nov, playing drefsante in BludBowl checked (the owner's 2-0 win v it, `nn/look/mine/`; scripts `nn/look/dbg/replay_text.py` -
   a match export as text, `dref_turns.py` / `dref_actions.py` - each of its turn starts / actions rebuilt and asked again,
   `nn/look/standin/run.js` - brain x v drefsante in the browser, counting stand-ins). Its decisions are reproduced from the rebuilt
