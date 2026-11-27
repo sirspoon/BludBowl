@@ -410,6 +410,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, lane-closing alone today (cd1, cdN 2; only acts when they have the ball; study_cd2, seeds 760000 v study_gs3; the owner
+  asked what it does to touchdowns): won 29 drew 21 lost 70 (.329 v .396), touchdowns 89-157 v 105-150 - 0.74 v 0.88 scored, 1.31 v
+  1.25 conceded a game. drefsante scored in fewer of its turns with the ball (ordinary 18 -> 15%) but had the ball in more of them.
+  Our spells won back start further out (16.2 v 15.3 squares) and score 23% v 26%; after kick-offs 23% v 31% (cd1 can't touch those:
+  partly luck - `nn/look/dbg/spells_cmp.py`). Same story as its 1,000-game test at v5.20 (scored 582 v 655, conceded 1,387 v 1,393).
 - 27 Nov, a combined defence (owner's go; not kept): drefsante marks the carrier AND leaves few walk-ins, so both at once. dm1 =
   `mc2.diff` (mcN 2, mcProb 50) + dp1 with more moves (dpN 6, dpGain 0.02): study_dm1 (seeds 760000, v study_gs3) carrier marked
   45 -> 56%, 1.0 next to him (0.69), walk-ins 37 -> 42% (not cut), .396 level; k_seq NO GAIN after 250 (.348 v .386, -0.038 +- 0.028,
