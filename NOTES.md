@@ -410,6 +410,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, does either bot defend differently when it matters? (`nn/look/dbg/closeout.py`, study_gs3 + acts2, 240 games; close-out =
+  the defender leads in the 2nd half or 2 or fewer turns are left in the half; at the attacker's turn start with the ball.) Neither
+  changes its shape: brain x ordinary / close-out - carrier marked 46/47%, next to him 0.72/0.74, deep 2.3/2.6, and a team-mate free to
+  walk in with no dodge 36% -> 50%, scored 18% -> 27%; drefsante 69/71%, 1.38/1.44, 1.7/1.9, walk-ins 15% -> 22%, scored 13% -> 18%
+  (both concede more late: the attacker goes all in). A free walk-in decides it: scored 37-58% with one, 5-14% without. Tackle-zone
+  cover between the ball and the end zone is the same for both (1+ zone 17-19% of the squares, 2+ 5-7%: neither overlaps much). The
+  defensive settings (study_def) cut our walk-ins 36 -> 22% / 50 -> 34% but scoring didn't fall (close-out 29%): the carrier got
+  freer (marked 41%, runs in 11%) and it scored without a walk-in 14% (v 10%). drefsante does both jobs at once - its carrier marked
+  ~70% AND few walk-ins - with fewer players deep (1.9 v 2.3-2.6); each of our rules does one (cd1/lm1 receivers, mc1/mc2 the carrier,
+  each no gain alone).
 - 27 Nov, test speed v drefsante (BotBowl): a game takes ~18 s on one worker - our AI's bridge ~50% (brain x's turn planning ~58 ms a
   question, ~130 a game), drefsante ~36% (half of it its own `updateModel`, which hands the whole position to its Java side through team
   files at every decision - its author's comment calls it the bottleneck), BotBowl's engine only ~5%. In the bridge's Node, the game's
