@@ -410,6 +410,9 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.81 (27 Nov): a built-in "Default (classic)" Human team in the new-match team menu (`CLASSIC`, key `classic:human`; `raceFor`):
+  BotBowl's competition team (2 Blitzers, Thrower, 2 Catchers, 7 Linemen, 3 re-rolls, no apothecary) - the one to use against drefsante.
+  Blood Bowl only, not in Sevens or the two-device lobby. More races can be added to `CLASSIC`.
 - 27 Nov, does either bot defend differently when it matters? (`nn/look/dbg/closeout.py`, study_gs3 + acts2, 240 games; close-out =
   the defender leads in the 2nd half or 2 or fewer turns are left in the half; at the attacker's turn start with the ball.) Neither
   changes its shape: brain x ordinary / close-out - carrier marked 46/47%, next to him 0.72/0.74, deep 2.3/2.6, and a team-mate free to

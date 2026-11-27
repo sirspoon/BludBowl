@@ -2,6 +2,13 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.81 (27 Nov 2026)
+- New match screen: under Humans, the second menu offers "Default (classic)" next to the default team (`CLASSIC`, key
+  `classic:human`): BotBowl's competition Human team (its data/teams/11/human.json) - 2 Blitzers, a Thrower, 2 Catchers and 7 Linemen
+  (11 on the pitch, a Lineman on the bench), no Ogre or Halfling, 3 re-rolls, no apothecary, 3 fans, a coach, 2 cheerleaders (TV
+  925k). For games against drefsante, which was written for this team: with the BB2025 default (Ogre, Halfling) it played well
+  below its BotBowl strength (NOTES, 27 Nov). Blood Bowl only (Sevens keeps its own squads); not in the two-device lobby.
+
 ## v5.80 (27 Nov 2026)
 - drefsante (`DR` snap): agility is sent on the scale of the older rules its brain plays (AG = 6 - the BB2025 target: 3+ -> 3, 4+ -> 2,
   2+ -> 4). Before, the target number went as it was, so an Ogre (4+) read to it as AG 4, better than a Catcher. Humans' other players

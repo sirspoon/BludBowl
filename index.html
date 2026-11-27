@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.80</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.81</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -7621,7 +7621,18 @@ ol.ci-steps li::marker { content: none; }
             r.ovr = { lineup: r.lineup.map((pos, i) => i === vi ? { ma: ty.ma - 1, skills: ty.skills.concat(['Veteran']), veteran: true, lvl: 'Veteran', label: 'V' } : undefined), bench: r.bench.map(() => undefined) };
             return r;
         }
+        // (v5.81) built-in "Default (classic)" teams, picked under a race's own default: for Humans, BotBowl's competition team (its
+        // data/teams/11/human.json) - 2 Blitzers, a Thrower, 2 Catchers and 7 Linemen, no Ogre or Halfling, 3 re-rolls, no apothecary. drefsante
+        // was written for it, and plays well below its best against the BB2025 default with the Ogre and Halfling (NOTES, 27 Nov).
+        const CLASSIC = {
+            human: () => Object.assign(JSON.parse(JSON.stringify(RACES.human)), {
+                key: 'classic:human', race: 'human', name: 'Humans (classic)',
+                lineup: ['Lineman', 'Lineman', 'Lineman', 'Blitzer', 'Blitzer', 'Lineman', 'Catcher', 'Catcher', 'Lineman', 'Lineman', 'Thrower'], bench: ['Lineman'],
+                rerolls: 3, apothecary: 0, fans: 3, assistantCoaches: 1, cheerleaders: 2, tv: '925k', treasury: '65,000 gp'   // 745k players + 150k re-rolls + coach 10k + 2 cheerleaders 20k
+            })
+        };
         function raceFor(key) {
+            if (String(key).startsWith('classic:') && CLASSIC[key.slice(8)]) return CLASSIC[key.slice(8)]();
             if (String(key).startsWith('custom:')) return TB.toRace(key.slice(7)) || RACES.human;
             if (String(key).startsWith('net:')) return NET.race(key) || RACES.human;   // the other device's team
             return RACES[key] || RACES.human;
@@ -35079,6 +35090,7 @@ ol.ci-steps li::marker { content: none; }
                 sq.innerHTML = '';
                 sq.appendChild(new Option('Default team', ''));
                 const sev = typeof sevensOn === 'function' && sevensOn();   // Sevens lists the saved Sevens teams; Blood Bowl the 11-a-side ones
+                if (!sev && CLASSIC[race]) sq.appendChild(new Option('Default (classic)', 'classic:' + race));   // (v5.81) e.g. BotBowl's Human team
                 TB.list().filter(t => t.race === race && !t.cpu && !!TB.isSev(t) === sev).sort((a, b) => a.name.localeCompare(b.name)).forEach(t => sq.appendChild(new Option(t.name + (TB.isMP(t) ? ' (Matched Play)' : ''), 'custom:' + t.id)));
                 sq.value = keep && [...sq.options].some(o => o.value === keep) ? keep : '';
                 sq.disabled = sq.options.length < 2;
