@@ -410,6 +410,12 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, a combined defence (owner's go; not kept): drefsante marks the carrier AND leaves few walk-ins, so both at once. dm1 =
+  `mc2.diff` (mcN 2, mcProb 50) + dp1 with more moves (dpN 6, dpGain 0.02): study_dm1 (seeds 760000, v study_gs3) carrier marked
+  45 -> 56%, 1.0 next to him (0.69), walk-ins 37 -> 42% (not cut), .396 level; k_seq NO GAIN after 250 (.348 v .386, -0.038 +- 0.028,
+  likely worse). dm2 = mc2 + cd1 (cdN 2): walk-ins 37 -> 35%, conceded 145 v 150 but scored 91 v 105, study .358 - dropped. dp1's
+  extra moves don't go after walk-ins (it weighs routes by its own odds); cd1 does, and costs the attack as before. Marking the
+  carrier has now failed three ways (mc1, mc2, dm1).
 - v5.81 (27 Nov): a built-in "Default (classic)" Human team in the new-match team menu (`CLASSIC`, key `classic:human`; `raceFor`):
   BotBowl's competition team (2 Blitzers, Thrower, 2 Catchers, 7 Linemen, 3 re-rolls, no apothecary) - the one to use against drefsante.
   Blood Bowl only, not in Sevens or the two-device lobby. More races can be added to `CLASSIC`.
