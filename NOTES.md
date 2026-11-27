@@ -410,6 +410,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 27 Nov, rolling lane closure (`cd2`, the owner's idea; not kept, `nn/look/dbg/cdb.diff`): cd1, but only their free receivers
+  within cdBand 3 rows of the carrier (or in hand-off reach) count, and our closers stay in the band, at most cdDepth 6 behind him.
+  Fired 0.85 a game; free walk-ins 37 -> 36%; study_cdb .404 (113-152 v gs3 105-150). k_seq NO GAIN after 250: .362 v .386,
+  touchdowns 0.92 scored / 1.32 conceded a game v the baseline's 0.86 / 1.27 - not fewer conceded, so not doing its job.
 - 27 Nov, lane-closing alone today (cd1, cdN 2; only acts when they have the ball; study_cd2, seeds 760000 v study_gs3; the owner
   asked what it does to touchdowns): won 29 drew 21 lost 70 (.329 v .396), touchdowns 89-157 v 105-150 - 0.74 v 0.88 scored, 1.31 v
   1.25 conceded a game. drefsante scored in fewer of its turns with the ball (ordinary 18 -> 15%) but had the ball in more of them.
