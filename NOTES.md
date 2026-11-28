@@ -414,6 +414,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   v5.84 paired v `k_p584` + `k_p584b`: cbz2 +0.013 +- 0.024 over 250, ajb1 +0.001 +- 0.017 over 875 (both not worse). Not tested together:
   the v5.85 baselines (`k_p585`, `k_p585b`) judged against v5.84's runs are that check - if worse, take ajb1 out first (it fires ~4.5
   times a game and takes the Blitz from other uses).
+  Checked: `k_p585` .393, `k_p585b` .412 (avg ~.402, 28.0% won v v5.84's 25.6%); paired v v5.84's two runs +0.004 and +0.023 +- 0.013
+  - together about +0.013, the best so far but not proven. Judge new ideas with `--pair k_p585 k_p585b`. After an ajb1 Blitz (12
+  logged mirror matches, `nn/look/dbg/ajb_audit.js` + `ajb_sum.js` + `mirror_ajb.js`): 93 of 96 ended free, ~85 went on to the
+  job planned (pick-up 7/8, plug 16/16, escort / cage / dp mostly), 3 drifted (support), 4 stood; 6 of 102 Blitzes ended the action.
 - 28 Nov, v5.84 run twice on the test seeds (`k_p584` .389, `k_p584b` .388 - the two runs agree this time): paired v v5.83's two runs
   +0.004 +- 0.013, about level (25.6% won, 26.5% drawn). Live line so far: v5.81 .378, v5.82 .367, v5.83 ~.385, v5.84 ~.388. Judge new
   ideas with `--pair k_p584 k_p584b`. Not kept: `cbz1` (the owner's idea: our marked carrier Blitzes a player next to him, follows up
