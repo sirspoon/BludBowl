@@ -410,6 +410,11 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- 28 Nov, v5.84 run twice on the test seeds (`k_p584` .389, `k_p584b` .388 - the two runs agree this time): paired v v5.83's two runs
+  +0.004 +- 0.013, about level (25.6% won, 26.5% drawn). Live line so far: v5.81 .378, v5.82 .367, v5.83 ~.385, v5.84 ~.388. Judge new
+  ideas with `--pair k_p584 k_p584b`. Not kept: `cbz1` (the owner's idea: our marked carrier Blitzes a player next to him, follows up
+  and carries on, `cbz_edit.js` in the scratchpad / `look/dbg/cbz1.diff`): fired 0.7 a game v drefsante, -0.096 +- 0.038 after 125 -
+  a failed Blitz leaves the ball loose among their players early in our turn.
 - v5.84 (28 Nov): ab1/ab2 (`abOn`, `abMove`), `pupLeg` + `pupMove`/`passMove` 80, `pkMin` 45 on in brain x (see CHANGELOG-FULL); each tested
   alone on v5.83 (`frozen_fix583.html`, paired v `k_p583` + `k_p583b` averaged): ab3 +0.018 +- 0.013 over 1,500 (TOO CLOSE, not worse), pp1
   -0.003 over 500, pk45 -0.004 over 875 (both not worse). Audit tools: scratchpad `audit_edit.js` / `audit2_edit.js` (debug copy logging
