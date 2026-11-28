@@ -410,6 +410,14 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.86 (28 Nov): ho3 (last turn) + long ball (`lbOn`) + clearing block (`ho4Clr`) + fuller deep receivers on in brain x (scratchpad
+  `ho3_edit.js` then `ho4_edit.js`; `nn/look/dbg/ho3.diff`, `ho4_on_ho3.diff`). Paired v `k_p585` + `k_p585b`:
+  - ho3 with chains before the last turn (`chainBar` 0.5): -0.024 +- 0.010 over 1500 - not kept (230 chains, 121 early).
+  - deep receivers alone (`deepN` 2, `deepSafe` 99, `deepNoBlock` 0): -0.021 +- 0.011 over 1500 - too close.
+  - all four together (`frozen_ho4d.html`): -0.008 +- 0.014 over 1250 - not worse; released. 66 long balls (48 second links, 20 walks),
+    99 last-turn chains, 21 clearing blocks over 1250 games.
+  The v5.86 baselines (`k_p586`, `k_p586b`) judged against v5.85's runs are the check - if worse, put the deep receivers back first
+  (`deepN` 1, `deepSafe` 0, `deepNoBlock` 1); the long ball rarely fires without them.
 - v5.85 (28 Nov): `cbz2` + `ajb1` on in brain x (see CHANGELOG-FULL; scratchpad `ajb_edit.js`, `nn/look/dbg/ajb1.diff`), each tested alone on
   v5.84 paired v `k_p584` + `k_p584b`: cbz2 +0.013 +- 0.024 over 250, ajb1 +0.001 +- 0.017 over 875 (both not worse). Not tested together:
   the v5.85 baselines (`k_p585`, `k_p585b`) judged against v5.84's runs are that check - if worse, take ajb1 out first (it fires ~4.5

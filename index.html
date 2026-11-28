@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.85</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.86</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -30002,7 +30002,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1, seOn: 1, seMark: 0, abOn: 1, abMove: 1, pupLeg: 1, pupMove: 80, passMove: 80, pkMin: 45, cbzOn: 1, ajbOn: 1 },   // (v5.85: cbzOn, the marked carrier's Blitz on a player next to him, 2 dice only (cbzDice), an assist stepped in first (cbzAst); ajbOn, a marked player needed elsewhere Blitzes his way free - see ajbPlan) (v5.84: ab1/ab2 abOn + abMove, the Blitzer's move after his block, see afterBlitz; pupLeg + pupMove 80 and passMove 80, a nearer throwing square, a Rush allowed; pkMin 45, the least odds for a pick-up) (v5.83: se1 seOn 1 + seMark 0, off the sideline when pinned, see sePlan) (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1, seOn: 1, seMark: 0, abOn: 1, abMove: 1, pupLeg: 1, pupMove: 80, passMove: 80, pkMin: 45, cbzOn: 1, ajbOn: 1, ho3: 1, lbOn: 1, ho4Clr: 1, deepN: 2, deepSafe: 99, deepNoBlock: 0 },   // (v5.86: ho3, a team re-roll counted on a two-throw chain, last turn only (chainBar left off); lbOn, the long ball that sets up next turn's touchdown, see longBall; ho4Clr, a block or Blitz first on a player whose tackle zone is in the chain's way, see ho4Clear; deepN 2 + deepSafe 99 + deepNoBlock 0, two receivers sent up the pitch whatever the danger, Blitzers too) (v5.85: cbzOn, the marked carrier's Blitz on a player next to him, 2 dice only (cbzDice), an assist stepped in first (cbzAst); ajbOn, a marked player needed elsewhere Blitzes his way free - see ajbPlan) (v5.84: ab1/ab2 abOn + abMove, the Blitzer's move after his block, see afterBlitz; pupLeg + pupMove 80 and passMove 80, a nearer throwing square, a Rush allowed; pkMin 45, the least odds for a pick-up) (v5.83: se1 seOn 1 + seMark 0, off the sideline when pinned, see sePlan) (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -30663,6 +30663,154 @@ ol.ci-steps li::marker { content: none; }
             // match) and no gain showed: all races 288 matches at 0.45 won 92 drew 92 lost 104 (touchdowns 246-246), at 0.6 84-99-105
             // (233-274); agile teams 192 at 0.45 65-50-77, at 0.6 76-45-71. Two fixes on the way: the middle player's moves as
             // throwToScore allows them, and a chain is played at once (the turn planner put blocks first, using up its players).
+            // (brain x: ho3) a team re-roll still to use rescues the first throw or catch that fails: odds v with links qs -> v x (1 + sum (1 - q))
+            function ho3Boost(me, v, qs) {
+                if (!(AIX.x(me) && AIX.p(me, 'ho3', 0) > 0) || !(state.rr[me] > 0) || state.teamRRUsedThisTurn || me !== state.activeTeam) return v;
+                let prod = 1, miss = 0; qs.forEach(q => { prod *= q; miss += 1 - q; });
+                return prod > 0 ? Math.min(v / prod, v * (1 + miss), 1) : v;
+            }
+            // (brain x: ho4) next turn's touchdown: the best square r can walk to (sure moves) after getting the ball - one no opponent can
+            // reach next turn (threatAt; one or two of theirs count for less), from where his move (1) or his move and two Rushes (0.8) take him in next turn
+            // (the owner's points) team-mates still to act can come and stand by him or screen further out: each opponent who could get to
+            // him next turn counts lbScr instead of 1 when a team-mate of ours (one per opponent, nearest opponents first) can walk (sure
+            // moves) to a square in his way - no more than lbScrR from the carrier's square and on a shortest-but-one route from the
+            // opponent to it (a square next to the carrier on that side counts too)
+            let ho4Sup = null;   // [{ id, sq }]: team-mates still to act and the squares they can walk to, while a long ball is weighed
+            function ho4SupBuild(me, skipIds) {
+                return state.players.filter(q => q.team === me && !skipIds.has(q.id) && onPitch(q) && !q.hasActed && !q.isStunned && !q.isDistracted && !hasSk(q, 'Ball & Chain'))
+                    .map(q => ({ id: q.id, sq: [...(q.isDown ? [] : [{ x: q.x, y: q.y }]), ...movesFor(q).filter(m => m.prob >= 100 && !m.isRush)] }));
+            }
+            function ho4Threat(rid, me, x, y) {
+                const at = { x, y }, opps = state.players.filter(q => q.team !== me && onPitch(q) && !q.isStunned && cheb(q, at) <= (q.isDown ? q.ma - 2 : q.ma + 1));
+                if (!ho4Sup || !opps.length) return opps.length;
+                const used = new Set(), R = AIX.p(me, 'lbScrR', 3), w = AIX.p(me, 'lbScr', 0.5);
+                let t = 0;
+                opps.sort((a, b) => cheb(a, at) - cheb(b, at)).forEach(q => {
+                    const dq = cheb(q, at);
+                    const o = ho4Sup.find(o => o.id !== rid && !used.has(o.id) && o.sq.some(s => (s.x !== x || s.y !== y) && cheb(s, at) <= R && cheb(q, s) + cheb(s, at) <= dq + 1));
+                    if (o) { used.add(o.id); t += w; } else t += 1;
+                });
+                return t;
+            }
+            function ho4Spot(r, me, x, y) {   // (safer the fewer of theirs could get to him: none 1, one lbT1, two lbT2, three or more 0, in between pro rata)
+                const t = ho4Threat(r.id, me, x, y);
+                const f = [1, AIX.p(me, 'lbT1', 0.6), AIX.p(me, 'lbT2', 0.3), 0], i = Math.min(3, Math.floor(t)), safe = i >= 3 ? 0 : f[i] + (f[i + 1] - f[i]) * (t - i);
+                if (!(safe > 0)) return 0; const g = toGo(x, me); return safe * (g <= r.ma ? 1 : g <= r.ma + 2 ? AIX.p(me, 'lbRush', 0.8) : 0);
+            }
+            function ho4EndVal(r, me) {
+                if (r.hasActed || r.isDown || r.isStunned || r.isDistracted || hasSk(r, 'No Ball') || hasSk(r, 'No Hands')) return 0;
+                let best = ho4Spot(r, me, r.x, r.y);
+                movesFor(r).forEach(m => { if (m.prob >= 100 && !m.isRush && m.x !== endX(me)) best = Math.max(best, ho4Spot(r, me, m.x, m.y)); });
+                return best;
+            }
+            // every chain c -> B -> C (hand-off then pass, pass then hand-off), C worth valOf(C) once he has the ball; ev = P x worth less
+            // (1 - P) x opt.fail. opt: cMove / bMove the least likely moves (%) for c and B, skip: ids left out
+            function ho4Chains(c, me, valOf, opt = {}) {
+                if (state.handoffUsed || state.passUsed || hasSk(c, 'My Ball')) return null;
+                const skip = opt.skip || new Set(), fail = opt.fail || 0;
+                const mates = state.players.filter(r => r.team === me && r.id !== c.id && !skip.has(r.id) && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !r.hasActed && !hasSk(r, 'No Ball') && !hasSk(r, 'No Hands'));
+                if (mates.length < 2) return null;
+                const val = new Map(mates.map(r => [r.id, valOf(r)]));
+                const ends = mates.filter(r => val.get(r.id) > 0);
+                if (!ends.length) return null;
+                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= opt.cMove)];
+                const sp = s => (s.x === c.x && s.y === c.y ? 1 : pPlan(c, s, true) / 100);
+                let best = null;
+                mates.forEach(B => {
+                    const bspots = [{ x: B.x, y: B.y, prob: 100, path: [] }, ...movesFor(B).filter(m => m.prob >= opt.bMove)];
+                    const bp = s => (s.x === B.x && s.y === B.y ? 1 : pPlan(B, s, true) / 100);
+                    if (B.pa != null) {   // hand-off to B, B (moves and) passes to C
+                        let s1 = null, p1 = 0;
+                        spots.forEach(s => { if (cheb(s, B) === 1) { const v = sp(s); if (v > p1) { p1 = v; s1 = s; } } });
+                        if (s1) {
+                            const q1 = catchProb(B); p1 *= q1;
+                            if (p1 >= 0.2) ends.forEach(C => {
+                                if (C.id === B.id) return; const w = val.get(C.id);
+                                bspots.forEach(ts => {
+                                    if (ts.x === C.x && ts.y === C.y) return;
+                                    const q2 = passOdds(B, ts.x, ts.y, C), P = ho3Boost(me, p1 * bp(ts) * q2, [q1, q2]), ev = P * w - (1 - P) * fail;
+                                    if (!best || ev > best.ev) best = { ev, P, w, kind: 'handoff', B, s1, kind2: 'pass', C, ts };
+                                });
+                            });
+                        }
+                    }
+                    if (c.pa != null) {   // pass to B, B (moves next to C and) hands off
+                        let s1 = null, p1 = 0, q1 = 0;
+                        spots.forEach(s => { if (s.x === B.x && s.y === B.y) return; const q = passOdds(c, s.x, s.y, B), v = sp(s) * q; if (v > p1) { p1 = v; s1 = s; q1 = q; } });
+                        if (s1 && p1 >= 0.2) ends.forEach(C => {
+                            if (C.id === B.id) return; const w = val.get(C.id), q2 = catchProb(C);
+                            bspots.forEach(ts => {
+                                if (cheb(ts, C) !== 1) return;
+                                const P = ho3Boost(me, p1 * bp(ts) * q2, [q1, q2]), ev = P * w - (1 - P) * fail;
+                                if (!best || ev > best.ev) best = { ev, P, w, kind: 'pass', B, s1, kind2: 'handoff', C, ts };
+                            });
+                        });
+                    }
+                });
+                return best;
+            }
+            // the long ball: the chain's value (next turn's touchdown, a failure costing lbFail) against the carrier's own best walk or a
+            // single hand-off / pass to the same kind of square
+            function ho4Opt(me, skip) { const m = AIX.p(me, 'lbMove', 80); return { cMove: m, bMove: m, fail: AIX.p(me, 'lbFail', 0.4), skip }; }
+            function longBall(c, me, skip) {
+                if (!(AIX.x(me) && AIX.p(me, 'lbOn', 0) > 0) || state.turn[me] >= TURNS || state.aiStalling || state.charge || state.handoffUsed || state.passUsed) return null;
+                ho4Sup = ho4SupBuild(me, new Set([c.id]));   // (the chain's middle player counts as a screen too - one too many at most)
+                try { return longBall0(c, me, skip); } finally { ho4Sup = null; }
+            }
+            function longBall0(c, me, skip) {
+                const valOf = r => ho4EndVal(r, me), opt = ho4Opt(me, skip);
+                const own = valOf(c);
+                if (own >= 1) return null;
+                const ch = ho4Chains(c, me, valOf, opt);
+                if (!ch || ch.w <= own) return null;
+                let single = own;
+                const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= opt.cMove)];
+                state.players.forEach(r => {
+                    if (r.team !== me || r.id === c.id || !onPitch(r) || r.isDown || r.isStunned || r.hasActed) return;
+                    const w = valOf(r); if (w <= own) return;
+                    spots.forEach(s => {
+                        const sp = s.x === c.x && s.y === c.y ? 1 : pPlan(c, s, true) / 100;
+                        const qs = [];
+                        if (cheb(s, r) === 1) qs.push(catchProb(r));
+                        if (c.pa != null && (s.x !== r.x || s.y !== r.y)) qs.push(passOdds(c, s.x, s.y, r));
+                        qs.forEach(q => { const P = ho3Boost(me, sp * q, [q]), ev = P * w - (1 - P) * opt.fail; if (ev > single) single = ev; });
+                    });
+                });
+                if (ch.ev < AIX.p(me, 'lbBar', 0.4) || ch.ev < single + AIX.p(me, 'lbGain', 0.1)) return null;
+                return ch;
+            }
+            // a block or Blitz first (not by the chain's players) on an opponent within two of its players or squares, when knocking him
+            // over raises the chain's value: (1 - Turnover) x (down x value then + not x value now) > value now + clrGain. evalFn(skip)
+            // works the chain out again with those ids left out (the would-be blockers, conservatively)
+            function ho4Clear(me, act, c, ch, evalFn) {
+                if (!(AIX.x(me) && AIX.p(me, 'ho4Clr', 0) > 0)) return null;
+                const used = new Set([c.id, ch.B.id, ch.C.id]), pts = [c, ch.B, ch.C, ch.s1, ch.ts];
+                let bestB = null;
+                state.players.forEach(q => {
+                    if (q.team === me || !onPitch(q) || q.isDown || q.isStunned || q.isDistracted || !pts.some(k => cheb(q, k) <= 2)) return;
+                    const blockers = act.filter(b => !b.isDown && !used.has(b.id) && cheb(b, q) === 1);
+                    const blitzers = state.blitzUsed ? [] : act.filter(b => !b.isDown && !used.has(b.id) && cheb(b, q) > 1 && movesFor(b).some(m => m.prob >= 100 && cheb(m, q) === 1));
+                    if (!blockers.length && !blitzers.length) return;
+                    const skip = new Set([...blockers, ...blitzers].map(b => b.id));
+                    let v0 = 0, v1 = 0;
+                    try { const r0 = evalFn(skip); v0 = r0 ? Math.max(0, r0.ev) : 0; } catch (e) {}
+                    const was = q.isDown; q.isDown = true; moveMemo = new Map();
+                    try { const r1 = evalFn(skip); v1 = r1 ? Math.max(0, r1.ev) : 0; } catch (e) {} finally { q.isDown = was; moveMemo = new Map(); }
+                    if (v1 <= v0 + 0.03) return;
+                    const gain = AIX.p(me, 'clrGain', 0.05);
+                    blockers.forEach(b => { const e = blockEval(b, q); const ev = (1 - e.pTurn) * (e.pDown * v1 + (1 - e.pDown) * v0); if (ev > v0 + gain && (!bestB || ev - v0 > bestB.g)) bestB = { b, q, g: ev - v0, blitz: false }; });
+                    blitzers.forEach(b => movesFor(b).forEach(m => {
+                        if (m.prob < 100 || cheb(m, q) !== 1) return;
+                        blitzCtx = true; const e = blockEval(b, q, m.x, m.y); blitzCtx = false;
+                        const ev = (1 - e.pTurn) * (e.pDown * v1 + (1 - e.pDown) * v0);
+                        if (ev > v0 + gain && (!bestB || ev - v0 > bestB.g)) bestB = { b, q, g: ev - v0, blitz: true };
+                    }));
+                });
+                if (!bestB) return null;
+                AIX.count(me, 'ho4 clear' + (bestB.blitz ? ' blitz' : ''));
+                return bestB.blitz ? blitzOn(bestB.b, bestB.q.id) : { pid: bestB.b.id, kind: 'block', target: bestB.q.id };
+            }
+            let ho4Next = null, ho4End = null;   // { key, b, c, kind, at } the long ball's second link; { key, c } its last walk
             function throwToScore2(c, me, lastTurn) {
                 if (state.handoffUsed || state.passUsed || hasSk(c, 'My Ball')) return null;
                 const mates = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !r.hasActed
@@ -30672,11 +30820,12 @@ ol.ci-steps li::marker { content: none; }
                 const scorers = mates.filter(r => runIn.get(r.id) > 0);
                 if (!scorers.length) return null;
                 const minMove = AIX.p(me, 'chainMove', 50);
-                const bMove = AIX.p(me, 'passMove', lastTurn && AIX.on(me, 'endgame') ? 40 : 100);
+                const ho3 = AIX.x(me) && AIX.p(me, 'ho3', 0) > 0;
+                const bMove = ho3 && lastTurn && AIX.on(me, 'endgame') ? Math.min(40, AIX.p(me, 'passMove', 40)) : AIX.p(me, 'passMove', lastTurn && AIX.on(me, 'endgame') ? 40 : 100);
                 const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= minMove)];
                 const sp = new Map(spots.map((s, i) => [s.x + ',' + s.y, i === 0 ? 1 : pPlan(c, s, true) / 100]));
                 let best = null;
-                const take = (v, kind, B, s) => { if (!best || v > best.v) best = { v, kind, r: B, s, chain: true }; };
+                const take = (v, kind, B, s, p2) => { if (!best || v > best.v) best = { v, kind, r: B, s, chain: true, p2 }; };
                 mates.forEach(B => {
                     // B's moves as throwToScore will allow them once B has the ball (sure ones, except on the last turn), or the second
                     // throw it promises doesn't get played: a Wood Elf chain handed off to a Lineman whose throw needed a dodge, and stopped
@@ -30689,10 +30838,10 @@ ol.ci-steps li::marker { content: none; }
                         if (s1) {
                             p1 *= catchProb(B);
                             if (p1 >= 0.2) {
-                                let p2 = 0;
+                                let p2 = 0, q2 = 1;
                                 scorers.forEach(C => { if (C.id === B.id) return; const ri = runIn.get(C.id);
-                                    bspots.forEach(ts => { const v = bp(ts) * passOdds(B, ts.x, ts.y, C) * ri; if (v > p2) p2 = v; }); });
-                                take(p1 * p2, 'handoff', B, s1);
+                                    bspots.forEach(ts => { const q = passOdds(B, ts.x, ts.y, C), v = bp(ts) * q * ri; if (v > p2) { p2 = v; q2 = q; } }); });
+                                take(ho3Boost(me, p1 * p2, [catchProb(B), q2]), 'handoff', B, s1, p2);
                             }
                         }
                     }
@@ -30701,14 +30850,15 @@ ol.ci-steps li::marker { content: none; }
                         let s1 = null, p1 = 0;
                         spots.forEach(s => { const v = sp.get(s.x + ',' + s.y) * passOdds(c, s.x, s.y, B); if (v > p1) { p1 = v; s1 = s; } });
                         if (s1 && p1 >= 0.2) {
-                            let p2 = 0;
+                            let p2 = 0, q2 = 1;
                             scorers.forEach(C => { if (C.id === B.id) return; const ri = runIn.get(C.id);
-                                bspots.forEach(ts => { if (Math.max(Math.abs(ts.x - C.x), Math.abs(ts.y - C.y)) === 1) { const v = bp(ts) * catchProb(C) * ri; if (v > p2) p2 = v; } }); });
-                            take(p1 * p2, 'pass', B, s1);
+                                bspots.forEach(ts => { if (Math.max(Math.abs(ts.x - C.x), Math.abs(ts.y - C.y)) === 1) { const q = catchProb(C), v = bp(ts) * q * ri; if (v > p2) { p2 = v; q2 = q; } } }); });
+                            take(ho3Boost(me, p1 * p2, [passOdds(c, s1.x, s1.y, B), q2]), 'pass', B, s1, p2);
                         }
                     }
                 });
                 if (!best) return null;
+                if (ho3 && !lastTurn && best.p2 < (best.kind === 'handoff' ? 0.4 : 0.45)) return null;   // (ho3) B's throw has to clear throwToScore's bar, or he won't make it
                 return best.v >= (lastTurn ? 0.05 : AIX.p(me, 'chainBar', 9)) ? best : null;
             }
             function throwToScore(c, me, lastTurn) {
@@ -32849,6 +32999,35 @@ ol.ci-steps li::marker { content: none; }
                 const lastTurn = state.turn[me] >= TURNS;
                 let standing = act.filter(p => !p.isDown);
 
+                // (brain x: ho4) the long ball under way: B throws on to C at once, then C walks to his square
+                if (ho4Next || ho4End) {
+                    const key = state.half + ':' + state.turn[me];
+                    if (ho4Next && ho4Next.key === key) {
+                        const B = getPlayerById(ho4Next.b), C = getPlayerById(ho4Next.c), nx = ho4Next;
+                        ho4Next = null;
+                        if (B && carrier && carrier.id === B.id && !B.hasActed && act.includes(B) && C && !C.hasActed && !C.isDown && onPitch(C)
+                            && !(nx.kind === 'handoff' ? state.handoffUsed : state.passUsed)) {
+                            const ax = nx.at.x, ay = nx.at.y, stay = ax === B.x && ay === B.y;
+                            if (stay || movesFor(B).some(m => m.x === ax && m.y === ay)) {
+                                AIX.count(me, 'lb link2');
+                                ho4End = { key, c: C.id };
+                                return { pid: B.id, kind: nx.kind, receiver: C.id, chain: true, stay, pick: ms => stay ? null : (ms.find(m => m.x === ax && m.y === ay) || null) };
+                            }
+                        }
+                    } else ho4Next = null;
+                    if (ho4End && ho4End.key === key && carrier && carrier.id === ho4End.c && act.includes(carrier) && !carrier.hasActed) {
+                        ho4End = null;
+                        if (!movesFor(carrier).some(m => m.x === endX(me) && m.prob >= 55)) {
+                            let bm = null, bv = 0;
+                            ho4Sup = ho4SupBuild(me, new Set([carrier.id]));
+                            try {
+                                bv = ho4Spot(carrier, me, carrier.x, carrier.y);
+                                movesFor(carrier).forEach(m => { if (m.prob < 100 || m.isRush) return; const v = ho4Spot(carrier, me, m.x, m.y) - toGo(m.x, me) * 0.001; if (v > bv) { bv = v; bm = m; } });
+                            } finally { ho4Sup = null; }
+                            if (bm) { AIX.count(me, 'lb end'); const tx = bm.x, ty = bm.y; return { pid: carrier.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty) || null }; }
+                        }
+                    } else if (ho4End && ho4End.key !== key) ho4End = null;
+                }
                 // 1. score a touchdown if we can
                 if (carrier && carrier.team === me && act.includes(carrier)) {
                     const td = movesFor(carrier).filter(m => m.x === endX(me)).sort((a, b) => pPlan(carrier, b, true) - pPlan(carrier, a, true))[0];
@@ -32887,8 +33066,14 @@ ol.ci-steps li::marker { content: none; }
                     // 2b. (ho2) or a three-player chain: hand-off then pass, or pass then hand-off, and a run in - all this turn
                     if (AIX.on(me, 'ho2') && !state.aiStalling) {
                         const via2 = throwToScore2(carrier, me, lastTurn);
-                        if (via2 && via2.v > Math.max(direct, via ? via.v : 0) + 0.02) {
+                        const viaV = via ? ho3Boost(me, via.v, [via.kind === 'handoff' ? catchProb(via.r) : passOdds(carrier, via.s.x, via.s.y, via.r)]) : 0;   // (ho3)
+                        if (via2 && via2.v > Math.max(direct, viaV) + 0.02) {
+                            if (AIX.x(me) && AIX.p(me, 'ho3', 0) > 0) AIX.count(me, 'ho3 ' + via2.kind + (lastTurn ? ' last' : ''));
                             const rid = via2.r.id, sx = via2.s.x, sy = via2.s.y;
+                            if (AIX.x(me) && AIX.p(me, 'ho4Clr', 0) > 0) {   // (brain x: ho4) clear the way first
+                                const evf = skip => ho4Chains(carrier, me, r => runInProb(r), { cMove: AIX.p(me, 'chainMove', 50), bMove: lastTurn ? Math.min(40, AIX.p(me, 'passMove', 40)) : AIX.p(me, 'passMove', 100), skip });
+                                const ch = evf(new Set()); if (ch) { const cl = ho4Clear(me, act, carrier, ch, evf); if (cl) return cl; }
+                            }
                             if (window.AI_HO2) window.AI_HO2.push({ v: via2.v, kind: via2.kind, c: carrier.type, t: via2.r.type, togo: toGo(carrier.x, me), turn: state.turn[me] });
                             return { pid: carrier.id, kind: via2.kind, receiver: rid, chain: true, pick: ms => (sx === carrier.x && sy === carrier.y) ? null : (ms.find(m => m.x === sx && m.y === sy) || null), stay: sx === carrier.x && sy === carrier.y };
                         }
@@ -32897,6 +33082,19 @@ ol.ci-steps li::marker { content: none; }
                     if (via && via.v > direct && !state.aiStalling) {
                         const rid = via.r.id, sx = via.s.x, sy = via.s.y;
                         return { pid: carrier.id, kind: via.kind, receiver: rid, pick: ms => (sx === carrier.x && sy === carrier.y) ? null : (ms.find(m => m.x === sx && m.y === sy) || null), stay: sx === carrier.x && sy === carrier.y };
+                    }
+                    // (brain x: ho4) the long ball: a chain that sets up next turn's touchdown out of their reach
+                    if (!lastTurn && !state.aiStalling && !(td && direct >= 0.55)) {
+                        let lb = null; try { lb = longBall(carrier, me); } catch (e) { console.error('longBall', e); }
+                        if (lb) {
+                            const cl = ho4Clear(me, act, carrier, lb, skip => longBall(carrier, me, skip));
+                            if (cl) return cl;
+                            AIX.count(me, 'lb ' + lb.kind);
+                            const key = state.half + ':' + state.turn[me];
+                            ho4Next = { key, b: lb.B.id, c: lb.C.id, kind: lb.kind2, at: { x: lb.ts.x, y: lb.ts.y } };
+                            const sx = lb.s1.x, sy = lb.s1.y, stay = sx === carrier.x && sy === carrier.y;
+                            return { pid: carrier.id, kind: lb.kind, receiver: lb.B.id, chain: true, stay, pick: ms => stay ? null : (ms.find(m => m.x === sx && m.y === sy) || null) };
+                        }
                     }
                     // 2c. (brain x: lr1) the last turn: a receiver runs into the end zone first, the throw follows
                     if (lastTurn && !state.aiStalling) {

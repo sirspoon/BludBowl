@@ -2,6 +2,22 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.86 (28 Nov 2026)
+- Brain x, the owner's ideas after drefsante's pass then hand-off: the two-throw chain, and the long ball that sets up next turn.
+  - `ho3` 1 (`ho3Boost`): a team re-roll still to use counts on the chain's throws and catches (one re-roll rescues the first link that
+    fails), and on the single throw it's compared with; on the last turn the middle player may move as far as throwToScore allows.
+    Chains before the last turn stay off (`chainBar` unset): tested on, -0.024 +- 0.010 over 1500 (a failed early chain loses the turn's blocks).
+  - `lbOn` 1 (`longBall`): not to score this turn but next - a hand-off then pass, or pass then hand-off, leaving the ball with a player
+    who walks (sure moves) to a square near enough to score from next turn (his move, or 0.8 with two Rushes) and out of their reach
+    (`ho4Spot`: no opponent in reach 1, one 0.6, two 0.3). Opponents count half (`lbScr` 0.5) where a team-mate still to act can walk
+    into their way, within 3 of the carrier (`lbScrR`). Played when worth at least 0.4 and 0.1 more than a single throw (`lbBar`, `lbGain`),
+    never on the last turn or while stalling. The second link and the walk are then played straight away.
+  - `ho4Clr` 1 (`ho4Clear`): before a chain (scoring or long ball), a block or Blitz by a player not in it on an opponent within 2 of
+    its squares, when knocking him over raises the chain's value by more than the block risks (`clrGain` 0.05).
+  - Deep receivers (thDeep, since v5.14 one, only with the carrier safe, never a Block player): `deepN` 2, `deepSafe` 99, `deepNoBlock` 0.
+  - v drefsante per game: ~0.05 long balls, ~0.08 last-turn chains, ~0.02 clearing blocks. Paired k_seq -0.008 +- 0.014 after 1250 (not
+    worse). The deep receivers alone: -0.021 +- 0.011 after 1500 (too close, not released on their own).
+
 ## v5.85 (28 Nov 2026)
 - Brain x, two of the owner's ideas: a Blitz on a player already next to ours, to get ours free.
   - `cbz2` (`cbzOn` 1, `cbzPlan`): our marked carrier, with no 90% dodge to a free square, Blitzes a player next to him from where he

@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.86 (28 Nov 2026)
+- The Experimental computer coach (brain x) throws the long ball: a hand-off and a pass (either order) that moves the ball far up the pitch to a player who then walks out of the opponents' reach, ready to score next turn - with a team-mate first blocking anyone whose tackle zone is in the way, and team-mates moving up to screen him. Two receivers now wait up the pitch for it.
+
 ## v5.85 (28 Nov 2026)
 - The Experimental computer coach (brain x) Blitzes its way out of trouble: a marked ball carrier on a 2-dice block (a team-mate steps in to assist first if that makes it 2 dice), and a marked player who's needed elsewhere (the loose ball, the gap, the cage) on a 2-dice block, then moves on.
 
