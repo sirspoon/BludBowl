@@ -410,6 +410,10 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.85 (28 Nov): `cbz2` + `ajb1` on in brain x (see CHANGELOG-FULL; scratchpad `ajb_edit.js`, `nn/look/dbg/ajb1.diff`), each tested alone on
+  v5.84 paired v `k_p584` + `k_p584b`: cbz2 +0.013 +- 0.024 over 250, ajb1 +0.001 +- 0.017 over 875 (both not worse). Not tested together:
+  the v5.85 baselines (`k_p585`, `k_p585b`) judged against v5.84's runs are that check - if worse, take ajb1 out first (it fires ~4.5
+  times a game and takes the Blitz from other uses).
 - 28 Nov, v5.84 run twice on the test seeds (`k_p584` .389, `k_p584b` .388 - the two runs agree this time): paired v v5.83's two runs
   +0.004 +- 0.013, about level (25.6% won, 26.5% drawn). Live line so far: v5.81 .378, v5.82 .367, v5.83 ~.385, v5.84 ~.388. Judge new
   ideas with `--pair k_p584 k_p584b`. Not kept: `cbz1` (the owner's idea: our marked carrier Blitzes a player next to him, follows up

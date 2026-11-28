@@ -2,6 +2,20 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.85 (28 Nov 2026)
+- Brain x, two of the owner's ideas: a Blitz on a player already next to ours, to get ours free.
+  - `cbz2` (`cbzOn` 1, `cbzPlan`): our marked carrier, with no 90% dodge to a free square, Blitzes a player next to him from where he
+    stands - only on 2 dice of our choosing (`cbzDice` 2), the Turnover chance below his best escape's, the square he'd follow into
+    less marked than his own. A 1-die block: a team-mate steps (no dice) next to the target first when that gives the assist for 2
+    dice (`cbzAst`). Then he carries on (afterBlitz). v drefsante 0.5 a game, 0.18 assists; paired k_seq +0.013 +- 0.024 after 250
+    (not worse). The v5.84 test of any-dice Blitzes (cbz1) was -0.096: a failed Blitz drops the ball among their players.
+  - `ajb1` (`ajbOn` 1, `ajbPlan`): a marked player (not the carrier) who'd be needed somewhere - the loose ball (a better pick-up than
+    any team-mate's), the gap in their carrier's run or marking him (dp1, plug), our carrier's protection or cage - Blitzes a player
+    next to him on 2 dice (Turnover 12% at most), when he's at least 50% to end up out of tackle zones (knocked down: he stands where
+    it's freer; pushed: he stays), and goes there with the move left (afterBlitz). Never when their carrier could be Blitzed instead.
+    v drefsante ~4.5 a game; paired k_seq +0.001 +- 0.017 after 875 (not worse).
+  - followUp: after either Blitz he steps or stays, whichever square is in fewer tackle zones.
+
 ## v5.84 (28 Nov 2026)
 - Brain x, three fixes from an audit of its decisions (a debug copy logging every move, pass, follow-up and Blitz in mirror matches):
   - `ab1` + `ab2` on (`abOn` 1, `abMove` 1; `afterBlitz`, `abMovePick`): the Blitzer's action used to end at his block (in the game and in

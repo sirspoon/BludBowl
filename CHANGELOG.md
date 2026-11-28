@@ -2,6 +2,9 @@
 
 The highlights, newest first. Every change in full: [the full patch log](https://github.com/sirspoon/BludBowl/blob/main/CHANGELOG-FULL.md).
 
+## v5.85 (28 Nov 2026)
+- The Experimental computer coach (brain x) Blitzes its way out of trouble: a marked ball carrier on a 2-dice block (a team-mate steps in to assist first if that makes it 2 dice), and a marked player who's needed elsewhere (the loose ball, the gap, the cage) on a 2-dice block, then moves on.
+
 ## v5.84 (28 Nov 2026)
 - The Experimental computer coach (brain x) makes use of a Blitzer's movement after his block (picking up a loose ball, carrying the ball on, or moving where he's needed), passes from closer in (a Rush allowed), and no longer tries pick-ups below 45%.
 

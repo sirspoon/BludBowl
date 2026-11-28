@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.84</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.85</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -30002,7 +30002,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1, seOn: 1, seMark: 0, abOn: 1, abMove: 1, pupLeg: 1, pupMove: 80, passMove: 80, pkMin: 45 },   // (v5.84: ab1/ab2 abOn + abMove, the Blitzer's move after his block, see afterBlitz; pupLeg + pupMove 80 and passMove 80, a nearer throwing square, a Rush allowed; pkMin 45, the least odds for a pick-up) (v5.83: se1 seOn 1 + seMark 0, off the sideline when pinned, see sePlan) (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1, seOn: 1, seMark: 0, abOn: 1, abMove: 1, pupLeg: 1, pupMove: 80, passMove: 80, pkMin: 45, cbzOn: 1, ajbOn: 1 },   // (v5.85: cbzOn, the marked carrier's Blitz on a player next to him, 2 dice only (cbzDice), an assist stepped in first (cbzAst); ajbOn, a marked player needed elsewhere Blitzes his way free - see ajbPlan) (v5.84: ab1/ab2 abOn + abMove, the Blitzer's move after his block, see afterBlitz; pupLeg + pupMove 80 and passMove 80, a nearer throwing square, a Rush allowed; pkMin 45, the least odds for a pick-up) (v5.83: se1 seOn 1 + seMark 0, off the sideline when pinned, see sePlan) (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -32110,6 +32110,117 @@ ol.ci-steps li::marker { content: none; }
                 const tx = best.m.x, ty = best.m.y;
                 return { pid: best.p.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty) || null };
             }
+            // (brain x: cbz2 / ajb1) a Blitz from where he stands to get a marked player of ours free: the chance he ends up out of every
+            // tackle zone - knocked down, the defender lies in a push square and he stands where it's freer (his square or the one the
+            // defender left); pushed, the defender stands two away and he stays put - so only the other markers count
+            let ajbLast = null;   // { id, key }: the player whose Blitz is meant to free him (followUp steps where he's freer)
+            function ajbFree(p, d) {
+                const me = p.team;
+                const mk = (x, y) => state.players.filter(q => q.team !== me && q.id !== d.id && onPitch(q) && !q.isDown && !q.isStunned && !q.isDistracted && Math.max(Math.abs(q.x - x), Math.abs(q.y - y)) === 1).length;
+                const here = mk(p.x, p.y), there = mk(d.x, d.y);
+                blitzCtx = true; const e = blockEval(p, d); blitzCtx = false;
+                const pFree = e.pDown * (here === 0 || there === 0 ? 1 : 0) + (e.pMove - e.pDown) * (here === 0 ? 1 : 0);
+                return { e, pFree, follow: here > 0 && there === 0, here, there };
+            }
+            // a team-mate (sure move, marked by nobody but the defender there) stepping next to d makes p's block on d 2 dice of ours
+            function ajbAssist(me, act, p, d, test) {
+                const them = other(me);
+                let best = null;
+                act.forEach(a => {
+                    if (a.id === p.id || a.isDown || !canReposition(a, me) || state.ball.carrierId === a.id) return;
+                    movesFor(a).forEach(m => {
+                        if (m.prob < 100 || !m.path || !m.path.length || Math.max(Math.abs(m.x - d.x), Math.abs(m.y - d.y)) !== 1 || getTackleZones(m.x, m.y, them) > 1) return;
+                        const ox = a.x, oy = a.y; a.x = m.x; a.y = m.y;
+                        let ok = false;
+                        try { blitzCtx = true; const e = blockEval(p, d); blitzCtx = false; ok = e.chooser === me && e.n >= 2 && test(e); } finally { a.x = ox; a.y = oy; blitzCtx = false; }
+                        const v = -m.path.length * 0.05 - edgeRisk(m.x, m.y, me, a.id);
+                        if (ok && (!best || v > best.v)) best = { a, m, v };
+                    });
+                });
+                if (!best) return null;
+                const tx = best.m.x, ty = best.m.y;
+                return { pid: best.a.id, kind: 'move', pick: ms => ms.find(m => m.x === tx && m.y === ty && m.prob >= 100) || null };
+            }
+            function cbzPlan(me, act, carrier) {
+                if (!(AIX.x(me) && AIX.p(me, 'cbzOn', 0) > 0) || state.blitzUsed || state.charge || !carrier || carrier.team !== me || !onPitch(carrier) || carrier.isDown || carrier.hasActed || tzFor(carrier.x, carrier.y, me) === 0 || !act.includes(carrier)) return null;
+                if (movesFor(carrier).some(m => m.prob >= AIX.p(me, 'cbzDodge', 90) && tzFor(m.x, m.y, me) === 0)) return null;
+                const here = tzFor(carrier.x, carrier.y, me);
+                // (the risk to beat: his best way out without the Blitz - the move to a free square most likely to work)
+                let escape = 0; movesFor(carrier).forEach(m => { if (tzFor(m.x, m.y, me) === 0) escape = Math.max(escape, pPlan(carrier, m, true)); });
+                const maxTurn = Math.min(AIX.p(me, 'cbzTurn', 0.34), (100 - escape) / 100 * AIX.p(me, 'cbzRel', 0.8));
+                const dice = AIX.p(me, 'cbzDice', 2);
+                const good = e => e.pTurn <= maxTurn && e.pMove >= AIX.p(me, 'cbzMove', 0.6);
+                let bz = null, need = null;
+                adjacentTargets(carrier).forEach(d => {
+                    if (d.isDown || hasSk(d, 'Stand Firm')) return;
+                    const f = ajbFree(carrier, d);
+                    if (f.there >= here) return;
+                    if (f.e.chooser !== me || f.e.n < dice || !good(f.e)) { if (!need) need = d; return; }
+                    const v = f.e.pMove * (here - f.there) + f.e.pDown - f.e.pTurn * 10;
+                    if (!bz || v > bz.v) bz = { d, v };
+                });
+                if (bz) { AIX.count(me, 'cbz2'); ajbLast = { id: carrier.id, key: state.half + ':' + state.turn[me] }; return { pid: carrier.id, kind: 'blitz', target: bz.d.id, pick: () => null }; }
+                if (need && AIX.p(me, 'cbzAst', 1) > 0) {
+                    const am = ajbAssist(me, act, carrier, need, good);
+                    if (am) { AIX.count(me, 'cbz2 assist'); return am; }
+                }
+                return null;
+            }
+            // what a freed player of ours would go and do this turn that matters (scored), with the board as it stands
+            function ajbJob(p, otherPick) {
+                const me = p.team, them = other(me), c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                const sure = pl => { if (!pl || pl.pid !== p.id || !pl.pick) return false; let m = null; try { m = pl.pick(movesFor(p), p); } catch (e) {} return !!(m && m.prob >= 100 && !m.isRush && (m.x !== p.x || m.y !== p.y)); };
+                const tryW = (f, w) => { let pl = null; try { pl = f(); } catch (e) {} return sure(pl) ? w : 0; };
+                if (!c && state.ball.x >= 0 && !hasSk(p, 'No Hands') && !hasSk(p, 'No Ball')) {
+                    const m = movesFor(p).find(q => q.x === state.ball.x && q.y === state.ball.y);
+                    const pr = m ? pPlan(p, m, true) : 0;
+                    return pr >= AIX.p(me, 'abMin', 50) && pr >= otherPick + AIX.p(me, 'ajbBallGap', 15) ? AIX.p(me, 'ajbWBall', 3) : 0;
+                }
+                if (c && c.team === them && onPitch(c) && !c.isDown)
+                    return Math.max(tryW(() => AIX.p(me, 'dpN', 0) > 0 ? dpMovePlan(me, [p], c) : null, AIX.p(me, 'ajbWDef', 2)), tryW(() => plugPlan(me, [p], c), AIX.p(me, 'ajbWDef', 2)));
+                if (c && c.team === me && onPitch(c))
+                    return Math.max(tryW(() => AIX.p(me, 'bpN', 0) > 0 ? bpMovePlan(me, [p], c) : null, AIX.p(me, 'ajbWOurs', 2)), tryW(() => formationPlan(me, [p], true, false, true), AIX.p(me, 'ajbWCage', 1.5)));
+                return 0;
+            }
+            function ajbPlan(me, act, carrier) {
+                if (!(AIX.x(me) && AIX.p(me, 'ajbOn', 0) > 0) || state.blitzUsed || state.charge) return null;
+                if (carrier && carrier.team !== me && carrierBlitz(me, act, carrier)) return null;   // the Blitz is for their carrier
+                // the loose ball: the best pick-up chance of a team-mate as things stand
+                let otherPick = 0;
+                if (!state.ball.carrierId && state.ball.x >= 0) act.forEach(q => { if (q.isDown || hasSk(q, 'No Hands') || hasSk(q, 'No Ball')) return; const m = movesFor(q).find(o => o.x === state.ball.x && o.y === state.ball.y); if (m) otherPick = Math.max(otherPick, pPlan(q, m, true)); });
+                const dice = AIX.p(me, 'ajbDice', 2);
+                let best = null;
+                act.forEach(p => {
+                    if (p.isDown || (carrier && carrier.id === p.id) || p.remainingMA < AIX.p(me, 'ajbMA', 3) || tzFor(p.x, p.y, me) === 0 || hasSk(p, 'Ball & Chain')) return;
+                    adjacentTargets(p).forEach(d => {
+                        if (d.isStunned || hasSk(d, 'Stand Firm')) return;
+                        const f = ajbFree(p, d);
+                        if (f.e.chooser !== me || f.e.n < dice || f.e.pTurn > AIX.p(me, 'ajbTurn', 0.12) || f.pFree < AIX.p(me, 'ajbFreeMin', 0.5)) return;
+                        // the board after a knock-down: the defender lying in a push square (or off the pitch), ours where he's free
+                        const sv = { px: p.x, py: p.y, ma: p.remainingMA, dx: d.x, dy: d.y, dd: d.isDown };
+                        let w = 0;
+                        try {
+                            if (f.follow) {
+                                const ax = p.x, ay = p.y, sx = Math.sign(d.x - ax), sy = Math.sign(d.y - ay);
+                                const ps = sx && sy ? [[d.x + sx, d.y + sy], [d.x + sx, d.y], [d.x, d.y + sy]] : sx ? [[d.x + sx, d.y], [d.x + sx, d.y - 1], [d.x + sx, d.y + 1]] : [[d.x, d.y + sy], [d.x - 1, d.y + sy], [d.x + 1, d.y + sy]];
+                                const sq = ps.find(([x, y]) => inPitch(x, y) && !getPlayer(x, y));
+                                p.x = d.x; p.y = d.y;
+                                if (sq) { d.x = sq[0]; d.y = sq[1]; } else { d.x = -9; d.y = -9; }
+                            }
+                            d.isDown = true; p.remainingMA = Math.max(0, p.remainingMA - 1);
+                            moveMemo = new Map();
+                            w = ajbJob(p, otherPick);
+                        } finally { p.x = sv.px; p.y = sv.py; p.remainingMA = sv.ma; d.x = sv.dx; d.y = sv.dy; d.isDown = sv.dd; moveMemo = new Map(); }
+                        if (!w) return;
+                        const v = f.pFree * w + f.e.pDown * AIX.p(me, 'ajbDownW', 0.5) - f.e.pTurn * AIX.p(me, 'ajbRisk', 4);
+                        if (v >= AIX.p(me, 'ajbMin', 0.8) && (!best || v > best.v)) best = { p, d, v };
+                    });
+                });
+                if (!best) return null;
+                AIX.count(me, 'ajb1');
+                ajbLast = { id: best.p.id, key: state.half + ':' + state.turn[me] };
+                return { pid: best.p.id, kind: 'blitz', target: best.d.id, pick: () => null };
+            }
             function gsPlan(me, act) {
                 if (!AIX.x(me) || !AIX.p(me, 'gsOn', 0) || state.blitzUsed || state.charge || !gsReceiving(me)) return null;
                 const them = other(me), line = q => toGo(q.x, me) >= CFG.cols / 2 - AIX.p(me, 'gsDepth', 4);   // (on their line or up to gsDepth behind it: drefsante's wide pairs stand 2 back)
@@ -32948,9 +33059,11 @@ ol.ci-steps li::marker { content: none; }
                     });
                     if (up) return { pid: up.p.id, kind: 'move', pick: () => null };
                 }
+                { const cz = cbzPlan(me, act, carrier); if (cz) return cz; }   // (brain x: cbz2) our marked carrier Blitzes his way out on 2 dice, first (the Blitz is gone by his usual turn)
                 { const gs = gsPlan(me, act); if (gs) return gs; }   // (brain x: gs1) the sideline gang-up, first thing on our receiving turn
                 { const cs = csPlan(me, act, carrier); if (cs) return cs; }   // (brain x: cs1) into the crowd
                 { const se = sePlan(me, act); if (se) return se; }   // (brain x: se1) off the sideline: asked early so he isn't used for a block from there (the turn planner still does a dodge after the blocks and sure moves)
+                { const aj = ajbPlan(me, act, carrier); if (aj) return aj; }   // (brain x: ajb1) a marked player needed elsewhere Blitzes his way free
                 if (tpMove) return tpMove;   // (brain x: tp1) the finishers go first: sure moves, before any dice
                 if (lbMove) return lbMove;   // (brain x: lb1)
                 if (cbMove) return cbMove;   // (brain x: cb1)
@@ -34332,6 +34445,11 @@ ol.ci-steps li::marker { content: none; }
                     const edge = (x, y) => x === 0 || x === CFG.cols - 1 || y === 0 || y === CFG.rows - 1;
                     const risk = (x, y) => seDanger(a.team, x, y) || (edge(x, y) ? 0.03 : 0);
                     if (risk(a.x, a.y) - risk(v.x, v.y) > AIX.p(a.team, 'seFol', 0.02)) { AIX.count(a.team, 'se follow'); go = true; }
+                }
+                if (ajbLast && ajbLast.id === a.id && ajbLast.key === state.half + ':' + state.turn[a.team] && !getPlayer(v.x, v.y)) {   // (brain x: cbz2 / ajb1)
+                    const h = tzFor(a.x, a.y, a.team), t = tzFor(v.x, v.y, a.team);
+                    if (t < h) go = true; else if (h < t) go = false;
+                    AIX.count(a.team, 'ajb follow ' + (go ? 1 : 0));
                 }
                 if (go) grid(v.x, v.y); else click('btn-stay-put');
             }
