@@ -410,6 +410,16 @@ changelogs record every game change, `ai-training/README.md` holds the AI resear
   skills (Stab, Gaze, Breathe Fire) for other races.
 
 ## Recently done (newest first)
+- v5.84 (28 Nov): ab1/ab2 (`abOn`, `abMove`), `pupLeg` + `pupMove`/`passMove` 80, `pkMin` 45 on in brain x (see CHANGELOG-FULL); each tested
+  alone on v5.83 (`frozen_fix583.html`, paired v `k_p583` + `k_p583b` averaged): ab3 +0.018 +- 0.013 over 1,500 (TOO CLOSE, not worse), pp1
+  -0.003 over 500, pk45 -0.004 over 875 (both not worse). Audit tools: scratchpad `audit_edit.js` / `audit2_edit.js` (debug copy logging
+  decisions into window.__audit), `mirror_audit.js`, `audit_sum.js` - worth copying into nn/look/dbg if used again. Audit also found: no
+  Blitz ever from a player already next to his target; no hand-off + pass in one turn; follow-ups, jumps and scoring runs fine.
+- 27 Nov, v5.83 run twice on the test seeds: `k_p583` .400, `k_p583b` .369 - the same code 0.031 apart over 1,500 games each. v5.83 is
+  about .385, near v5.81's .378: the cs1/se1 releases are about level, not the +0.02 estimated. k_seq.py's `--pair` now averages runs.
+  Not kept (27 Nov): `pc1` pass cover before their last turn (its last-turn scoring 25/64 v 24/62), `pcHit` receivers first for hits
+  (-0.025 over 375), `zd3` / `zd4` / `zd5` (late-half, gap-filling, keep-blocks versions of the out-of-contact line: -0.06 to -0.17).
+  Summary page of every experiment: https://claude.ai/artifact/NmGDSKw45BHKdWPf8pTEmd (private to the owner).
 - 27 Nov, the owner's out-of-contact defence (from his 1-0 win v drefsante: its blocks 25 -> 11 a half when he stood off; not kept,
   `nn/look/dbg/zd1.diff`, `zd2.diff`, frozen_zd1/zd2): `zd1` (zdOn) - screen two squares off their front line, no formation square next
   to theirs, no hunters, no dp1/plug moves, only 2-dice or carrier blocks; `zd2` + `zdStepBack` (players in contact move or dodge at

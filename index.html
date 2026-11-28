@@ -1311,7 +1311,7 @@ ol.ci-steps li::marker { content: none; }
         <h1 class="doom-title mb-2 mt-[-8vh]">BludBowl</h1>
         <button type="button" class="fsc-btn fsc-corner" data-fs title="Full screen" aria-label="Full screen">⛶</button>
         <p id="by-sirspoon" class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] select-none" style="-webkit-tap-highlight-color:transparent;position:relative;z-index:5">By SirSpoon<span id="secret-tag" style="display:none;color:rgba(251,191,36,.8)" title="Secret options are on"> ✦</span></p>
-        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.83</button>
+        <button type="button" id="app-version" title="What's new" aria-haspopup="dialog">v5.84</button>
         <p id="fan-note">Unofficial fan project, free and non-commercial. Blood Bowl is a trademark of Games Workshop Limited; BludBowl is not affiliated with or endorsed by Games Workshop.</p>
         <button id="btn-play" class="fantasy-font text-2xl md:text-3xl text-slate-200 hover:text-white bg-red-900/60 hover:bg-red-800 border-2 border-red-700 hover:border-red-500 px-8 md:px-10 py-2 rounded-xl shadow-[0_0_25px_rgba(220,38,38,0.5)] transition-all uppercase tracking-widest animate-pulse">
             Play Game
@@ -30002,7 +30002,7 @@ ol.ci-steps li::marker { content: none; }
             // (tried and left at 0: v5.19 fr1, Blitzing their free receivers (frW); v5.20 cd1, closing their free receivers down
             // (cdN), and tg1, Catchers and MA 8+ players worth more to knock down (tgW); v5.21 qb1, the Thrower as quarterback (qbN);
             // v5.22 ds1, a deep safety on defence (dsN))
-            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1, seOn: 1, seMark: 0 },   // (v5.83: se1 seOn 1 + seMark 0, off the sideline when pinned, see sePlan) (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
+            X: { tpN: 1, tpRoute: 0, dpN: 3, bpN: 4, caAt: 1, caGain: 0.04, caN: 3, bpProg: 0.1, bpEdge: 0.15, cbN: 4, btOn: 1, beAt: 1, cbThreat: 0.4, bpDodge: 1, bpBlk: 1, imW: 0, imBall: 1, imMin: 1, imDef: 0, fwD: 2, kkOn: 1, losHit: 1, sp1: 1, spW: 2, thDeep: 1, pupKick: 1, lr1: 1, gsOn: 1, csOn: 1, seOn: 1, seMark: 0, abOn: 1, abMove: 1, pupLeg: 1, pupMove: 80, passMove: 80, pkMin: 45 },   // (v5.84: ab1/ab2 abOn + abMove, the Blitzer's move after his block, see afterBlitz; pupLeg + pupMove 80 and passMove 80, a nearer throwing square, a Rush allowed; pkMin 45, the least odds for a pick-up) (v5.83: se1 seOn 1 + seMark 0, off the sideline when pinned, see sePlan) (v5.82: cs1 csOn 1, into the crowd, see csPlan) (v5.78: gs1 gsOn 1, the sideline gang-up, see gsPlan) (v5.73: lr1, the last turns, see lastRunPlan) (v5.70: th1 thDeep 1 + pupKick 1, see thDeep) (v5.50: sp2 sp1 1 + spW 2, see spRisk) (v5.49: kk1 kkOn 1, see kickPick; lh1 losHit 1, see losHit) (v5.48: fwD 2, see formationTargets; im1 imW 0, see imTimes) (v5.47: bpBlk 1, see bpEnd) (v5.46: bpDodge 1, see bpEnd) (v5.45: cbThreat 0.4, see cbMovePlan) (v5.44: bt1 + be1, the targeted Blitz mid-turn, see btWorth) (v5.42: cb1 cbN 4, see cbDone) (v5.40: bpEdge 0.15, see bpEnd) (v5.38: bpProg 0.1, see bpEnd) (v5.37 ca1: assists first, then the hit on their carrier, see caPlan) (the plan: v5.23 tp1 in attack, see turnPlan; v5.24 dp1 in defence, see dpThreat; v5.25 bp1 protecting the ball, see bpEnd)
             x(t) { const P = this.P(t); return !!(P && (P.brain === 'x' || P.brain === 'dref')); },
             // counts of how often an experiment acted, per team (tests read AIX.st: e.g. brain x's cd1 moves)
             st: [{}, {}], count(t, k) { if (t === 0 || t === 1) this.st[t][k] = (this.st[t][k] || 0) + 1; } };
@@ -30473,6 +30473,56 @@ ol.ci-steps li::marker { content: none; }
             }
             // after a pick-up on the move: where the picker carries the ball on to (runPlan in the game, carry() in the bridge for BotBowl)
             function carryOn(p, moves, after) { return after ? after(moves, p) : carrierPick(moves, p); }
+            // (brain x: ab1) after the block of a Blitz, with movement left (the action used to end there, in the game and in BotBowl):
+            // holding the ball now, the Blitzer carries it on to where it's safest (carrierPick, as after a pick-up on the move); the ball
+            // loose and in his reach, he goes for it - when his chance (route and pick-up, a re-roll counted if one would go on it) is at
+            // least abMin% and no worse than the best team-mate still to act - and carries it on from there. Off unless abOn > 0.
+            // Returns { m, pickup } or null.
+            function afterBlitz(p, moves) {
+                const me = p.team;
+                if (!AIX.x(me) || !(AIX.p(me, 'abOn', 0) > 0) || p.isDown || state.charge) return null;
+                moves = moves || movesFor(p);
+                if (state.ball.carrierId === p.id) { const m = carrierPick(moves, p); if (m) AIX.count(me, 'ab carry'); return m ? { m, pickup: false } : null; }
+                const rest = () => { const m2 = AIX.p(me, 'abMove', 0) > 0 ? abMovePick(p) : null; return m2 ? { m: m2, pickup: false } : null; };   // (ab2)
+                if (state.ball.carrierId || state.ball.x < 0 || hasSk(p, 'No Hands') || hasSk(p, 'No Ball')) return rest();
+                const bx = state.ball.x, by = state.ball.y, m = moves.find(q => q.x === bx && q.y === by);
+                if (!m) return rest();
+                const pr = pPlan(p, m, true);
+                if (pr < AIX.p(me, 'abMin', 50)) return rest();
+                let other = 0;
+                state.players.forEach(q => {
+                    if (q.team !== me || q.id === p.id || !onPitch(q) || q.hasActed || q.isStunned || q.isDistracted || hasSk(q, 'No Hands') || hasSk(q, 'No Ball')) return;
+                    const mq = movesFor(q).find(o => o.x === bx && o.y === by);
+                    if (mq) other = Math.max(other, pPlan(q, mq, true));
+                });
+                if (pr + AIX.p(me, 'abMargin', 0) < other) return rest();
+                AIX.count(me, 'ab pickup');
+                return { m, pickup: true };
+            }
+            // (brain x: ab2, abMove 1) no ball to pick up or carry: the Blitzer's movement left goes where the rest of the team would send
+            // him - their ball: the moves that most cut their chance of scoring (dp1), the gap in their carrier's run, the screen; ours: the
+            // carrier's protection (bp1), the cage, the formation; loose: the formation - and failing all that, towards the action
+            // (supportPick). Sure moves only (no dodge or Rush: a Turnover now would cost the rest of the team's turn).
+            function abMovePick(p) {
+                const me = p.team, them = other(me), c = state.ball.carrierId ? getPlayerById(state.ball.carrierId) : null;
+                moveMemo = new Map();   // (the block has moved players since the last decision)
+                const sure = m => m && m.prob >= 100 && !m.isRush && (m.x !== p.x || m.y !== p.y) ? m : null;
+                const tries = [];
+                if (c && c.team === them && onPitch(c) && !c.isDown)
+                    tries.push(() => AIX.p(me, 'dpN', 0) > 0 ? dpMovePlan(me, [p], c) : null, () => plugPlan(me, [p], c), () => formationPlan(me, [p], false, true, true) || formationPlan(me, [p], false, true));
+                else if (c && c.team === me && onPitch(c))
+                    tries.push(() => AIX.p(me, 'bpN', 0) > 0 ? bpMovePlan(me, [p], c) : null, () => formationPlan(me, [p], true, false, true) || formationPlan(me, [p], true), () => formationPlan(me, [p], false, false, true) || formationPlan(me, [p], false));
+                else tries.push(() => formationPlan(me, [p], false, false, true) || formationPlan(me, [p], false));
+                for (let i = 0; i < tries.length; i++) {
+                    let pl = null; try { pl = tries[i](); } catch (e) { console.error('abMovePick', e); }
+                    if (!pl || pl.pid !== p.id || !pl.pick) continue;
+                    let m = null; try { m = sure(pl.pick(movesFor(p), p)); } catch (e) {}
+                    if (m) { AIX.count(me, 'ab move ' + (c ? (c.team === me ? 'ours' : 'theirs') : 'loose') + i); return m; }
+                }
+                let m = null; try { m = sure(supportPick(movesFor(p), p)); } catch (e) {}
+                if (m) AIX.count(me, 'ab move support');
+                return m;
+            }
             function carrierPick(moves, p) {
                 supCtx = null;
                 if (state.aiStalling && state.turn[p.team] < TURNS) return stallPick(moves, p);
@@ -30666,7 +30716,7 @@ ol.ci-steps li::marker { content: none; }
                 const receivers = state.players.filter(r => r.team === me && r.id !== c.id && onPitch(r) && !r.isDown && !r.isStunned && !r.isDistracted && !hasSk(r, 'No Ball'));
                 const runIn = new Map(receivers.map(r => [r.id, runInProb(r)]));
                 // (endgame) the last turn: the carrier may dodge or Rush to get to the team-mate (the odds count it against the throw)
-                const minMove = AIX.p(me, 'passMove', lastTurn && AIX.on(me, 'endgame') ? 40 : 100), bar = AIX.p(me, 'scoreBar', null);   // (tuning) the carrier's move to the throw; the odds needed
+                const minMove = lastTurn && AIX.on(me, 'endgame') ? Math.min(40, AIX.p(me, 'passMove', 40)) : AIX.p(me, 'passMove', 100), bar = AIX.p(me, 'scoreBar', null);   // (tuning) the carrier's move to the throw; the odds needed
                 const spots = [{ x: c.x, y: c.y, prob: 100, path: [] }, ...movesFor(c).filter(m => m.prob >= minMove)];
                 let best = null;
                 receivers.forEach(r => {
@@ -32563,7 +32613,7 @@ ol.ci-steps li::marker { content: none; }
                         const left = (p.isDown ? Math.max(0, p.remainingMA - 3) : p.remainingMA) - m.path.length;
                         const pr = pPlan(p, m, true) / 100 * (left >= 1 ? 1 : 5 / 6);   // (rrp1)
                         blitzCtx = true; const e = blockEval(p, carrier, m.x, m.y); blitzCtx = false;
-                        const s = pr * (e.ev + bonus) - (1 - pr) * miss - e.pTurn * riskW;
+                        const s = pr * (e.ev + bonus + (AIX.x(me) && AIX.p(me, 'abOn', 0) > 0 ? Math.min(3, Math.max(0, left)) * AIX.p(me, 'abLeft', 0.15) : 0)) - (1 - pr) * miss - e.pTurn * riskW;   // (ab1) movement left to go on with the ball
                         if (!best || s > best.s) best = { p, s };
                     });
                 });
@@ -33108,21 +33158,28 @@ ol.ci-steps li::marker { content: none; }
                     // halfway - when 38% of those turns ended in a Turnover: he picks it up and goes on, and throws later if he chooses to
                     const kickTurn = AIX.x(me) && AIX.p(me, 'pupKick', 0) && toGo(bx, me) >= CFG.cols / 2
                         && state.players.filter(q => q.team !== me && onPitch(q) && toGo(q.x, me) >= CFG.cols / 2).length <= 1;
-                    if (AIX.on(me, 'pup1') && !kickTurn && best && best.kind === 'pickup' && (best.pr >= 30 || lastTurn) && !state.passUsed && best.p.pa != null && (best.p.pa <= 3 || hasSk(best.p, 'Pass')) && !hasSk(best.p, 'My Ball') && !lastTurn) {
+                    const pkMin = AIX.p(me, 'pkMin', 30);   // (brain x audit: the least odds for a pick-up, the dodges to it counted)
+                    if (AIX.on(me, 'pup1') && !kickTurn && best && best.kind === 'pickup' && (best.pr >= pkMin || lastTurn) && !state.passUsed && best.p.pa != null && (best.p.pa <= 3 || hasSk(best.p, 'Pass')) && !hasSk(best.p, 'My Ball') && !lastTurn) {
                         const pk = best.p, here = ballSpotValue(me, bx, by), gap = AIX.p(me, 'pupGap', 3), drop = AIX.p(me, 'pupDrop', 4);
                         const rrOk = state.rr[me] > 0 && !state.teamRRUsedThisTurn;
                         let thr = null;
                         state.players.forEach(r => {
                             if (r.team !== me || r.id === pk.id || !onPitch(r) || r.isDown || r.isStunned || r.isDistracted || hasSk(r, 'No Hands') || hasSk(r, 'No Ball')) return;
                             if (state.players.some(q => q.team !== me && onPitch(q) && !q.isDown && !q.isStunned && cheb(q, r) <= gap)) return;
-                            const q0 = passOdds(pk, bx, by, r), q = rrOk && AIX.on(me, 'rrp1') ? 1 - Math.pow(1 - q0, 2) * 0.9 : q0;
+                            let q0 = passOdds(pk, bx, by, r), at = null;
+                            if (AIX.x(me) && AIX.p(me, 'pupLeg', 0) > 0) {   // (brain x audit: pupLeg) carry on to a nearer throwing square first (a Rush at pupMove% or better)
+                                const m0 = movesFor(pk).find(m => m.x === bx && m.y === by);
+                                let legs = []; try { legs = m0 ? getValidMoves(pk, { from: { x: bx, y: by }, dist0: m0.path.length }) : []; } catch (e) {}
+                                legs.forEach(L => { if (L.prob < AIX.p(me, 'pupMove', 100) || cheb(L, r) <= 0) return; const v = passOdds(pk, L.x, L.y, r) * L.prob / 100; if (v > q0 + 0.02) { q0 = v; at = { x: L.x, y: L.y }; } });
+                            }
+                            const q = rrOk && AIX.on(me, 'rrp1') ? 1 - Math.pow(1 - q0, 2) * 0.9 : q0;
                             if (q < AIX.p(me, 'pupOdds', 0.65) || q0 < AIX.p(me, 'pupRaw', 0.5)) return;
                             const rv = bestSpotFor(r), ev = q * rv + (1 - q) * (here - drop);
-                            if (ev > here + AIX.p(me, 'pupGain', 1) && (!thr || ev > thr.ev)) thr = { r, ev };
+                            if (ev > here + AIX.p(me, 'pupGain', 1) && (!thr || ev > thr.ev)) thr = { r, ev, at };
                         });
-                        if (thr) return { pid: pk.id, kind: 'pass', receiver: thr.r.id, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
+                        if (thr) { if (thr.at) AIX.count(me, 'pupLeg'); return Object.assign({ pid: pk.id, kind: 'pass', receiver: thr.r.id, pick: ms => ms.find(m => m.x === bx && m.y === by) || null }, thr.at ? { leg2: thr.at } : {}); }
                     }
-                    if (best && (best.pr >= 30 || lastTurn)) return { pid: best.p.id, kind: best.kind, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
+                    if (best && (best.pr >= pkMin || lastTurn)) return { pid: best.p.id, kind: best.kind, pick: ms => ms.find(m => m.x === bx && m.y === by) || null };
                 }
 
                 // 5. blitz the opposing ball carrier
@@ -33874,6 +33931,12 @@ ol.ci-steps li::marker { content: none; }
                         if (r === undefined) return;
                         if (!drOn2(p, r)) endAction(p);
                         return;
+                    }
+                    // (brain x: ab1) the Blitz's block done: carry the ball on, or go for it if it's loose (afterBlitz)
+                    if (plan.kind === 'blitz' && state.mode === MODES.ACTION_BLITZ && !p.hasActed && !plan.abDone && p.remainingMA + (p.rushes || 0) > 0) {
+                        plan.abDone = true;
+                        let ab = null; try { ab = afterBlitz(p, state.moves || []); } catch (e) { console.error('afterBlitz', e); }
+                        if (ab) { plan.step = 2; plan.advanced = ab.pickup ? false : true; act(() => startPath(p, ab.m.path)); return; }
                     }
                     if ([MODES.ACTION_BLITZ, MODES.ACTION_FOUL, MODES.ACTION_PASS, MODES.ACTION_HANDOFF, MODES.ACTION_TTM].includes(state.mode) && !p.hasActed) { if (feedMove(p)) return; endAction(p); return; }
                     plan = null;
@@ -34829,6 +34892,13 @@ ol.ci-steps li::marker { content: none; }
                     try { m = carryOn(p, movesFor(p)); } catch (e) { console.error('bridge carry', e); }
                     return m && m.path ? m.path.map(q => ({ x: q.x, y: q.y })) : [];
                 }
+                // (brain x: ab1) after the block of a Blitz: where the Blitzer goes on to (see afterBlitz). { player } -> { route, pickup }
+                function afterBlitzB(o) {
+                    const p = P(o && o.player); if (!p) return { route: [], pickup: false };
+                    let ab = null;
+                    try { ab = afterBlitz(p, movesFor(p)); } catch (e) { console.error('bridge afterBlitz', e); }
+                    return ab && ab.m.path ? { route: ab.m.path.map(q => ({ x: q.x, y: q.y })), pickup: ab.pickup } : { route: [], pickup: false };
+                }
                 // a failed roll: use a team re-roll? ctx: { type: DODGE|RUSH|PICKUP|CATCH|PASS|..., player, target }
                 function reroll(ctx) {
                     const p = P(ctx.player); if (!p) return false;
@@ -35158,7 +35228,7 @@ ol.ci-steps li::marker { content: none; }
                     const stats = { outside: {} };
                     return { layout, record, obs, decode, label, stats, VERSION };
                 })();
-                return { load, turn, carry, reroll, dice, push, follow, setup, kick, touchback: touchbackTo, apothecary, intercept,
+                return { load, turn, carry, afterBlitz: afterBlitzB, reroll, dice, push, follow, setup, kick, touchback: touchbackTo, apothecary, intercept,
                     nnLayout: () => nn.layout(), nnRecord: (op, arg) => nn.record(op, arg, a => (op === 'touchback' ? touchbackTo : { turn, reroll, dice, push, follow, setup, kick, apothecary, intercept }[op])(a)),
                     nnObs: (o) => nn.obs(o.op, o.arg), nnNow: t => { lastMe = t; return nn.obs('turn', {}); },   // (the game as it is, from team t's side)
                     nnDecode: (o) => nn.decode(o.op, o.arg, o.index, o.route), nnLabel: (o) => nn.label(o.op, o.arg), nnStats: () => nn.stats };

@@ -2,6 +2,20 @@
 
 Every change to BludBowl in full, newest first. The game's "What's new" (tap the version number on the title screen) shows a shorter summary: CHANGELOG.md.
 
+## v5.84 (28 Nov 2026)
+- Brain x, three fixes from an audit of its decisions (a debug copy logging every move, pass, follow-up and Blitz in mirror matches):
+  - `ab1` + `ab2` on (`abOn` 1, `abMove` 1; `afterBlitz`, `abMovePick`): the Blitzer's action used to end at his block (in the game and in
+    BotBowl) though 76% had movement left. Now holding the ball he carries it on (`carrierPick`); with it loose and in reach he picks it up if
+    no team-mate still to act is likelier (then carries on); otherwise he goes where the team would send him - their ball: dp1, the gap in
+    the carrier's run, the screen; ours: bp1, the cage, the formation; else towards the action - sure moves only. The BotBowl bot asks the
+    bridge's `afterBlitz` after the block. v drefsante: ~6 such moves and 0.7 pick-ups a game; paired k_seq over 1,500 games +0.018 +- 0.013
+    (too close to call a gain, not worse). `carrierBlitz` gives a little extra for movement left after the block (`abLeft`).
+  - `pupLeg` 1 (+ `pupMove` 80, `passMove` 80): pick-up-and-pass carries on after the pick-up to the throwing square with the best odds
+    (the pass's `leg2`), and a scoring pass may be lined up with one Rush; the last turn keeps its 40% bar. 5 of 14 audited passes had been
+    thrown from a longer range band than a sure move allowed. Paired k_seq: not worse (-0.003 over 500).
+  - `pkMin` 45: pick-ups (the dodges to the ball counted) only at 45% or better, as before none on the last turn (was 30%; the audit
+    found 19-37% attempts). Paired k_seq: not worse (-0.004 over 875).
+
 ## v5.83 (27 Nov 2026)
 - Brain x: `se1` on, pinned players only (`seOn` 1, `seMark` 0; the owner's idea) - off the sideline. drefsante put ours in the crowd
   0.44 times a game, 90% of them standing on the sideline row when its turn began; one pinned there (a player of theirs straight
